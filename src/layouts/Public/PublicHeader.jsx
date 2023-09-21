@@ -11,6 +11,9 @@ import {
 import { auth } from "../../firebase";
 import { Link } from "react-router-dom";
 
+import Logo from "../../assets/images/logo.png";
+import PropTypes from "prop-types";
+
 const Header = ({ openLogin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -45,7 +48,7 @@ const Header = ({ openLogin }) => {
         <a href="/">Contact Us</a>
       </div>
       <div className="header-center">
-        <img src="/path/to/your/logo.png" alt="Logo" />
+        <img src={Logo} alt="Logo" />
       </div>
       <div className="header-right">
         {user ? ( // Check if user is logged in
@@ -85,6 +88,10 @@ const Header = ({ openLogin }) => {
       )}
     </header>
   );
+};
+
+Header.propTypes = {
+  openLogin: PropTypes.func.isRequired,
 };
 
 export default Header;

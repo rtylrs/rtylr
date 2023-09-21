@@ -3,15 +3,14 @@ import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider } from "firebase/auth";
 import ShowAlert from "../utils/showAlert";
-import useWindowDimensions from "../utils/useWindowDimensions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Modal, Typography, TextField, Button } from "@mui/material";
+import PropTypes from "prop-types";
 
 function Login({ open, close, openRegister }) {
   const navigate = useNavigate();
-  const { width } = useWindowDimensions();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -206,5 +205,11 @@ function Login({ open, close, openRegister }) {
     </Modal>
   );
 }
+
+Login.propTypes = {
+  open: PropTypes.bool.isRequired,
+  close: PropTypes.func.isRequired,
+  openRegister: PropTypes.func.isRequired,
+};
 
 export default Login;

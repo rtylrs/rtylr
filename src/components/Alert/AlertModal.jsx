@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { closeAlert } from "../../Redux/reducers/alertSlice";
+import { closeAlert } from "../../redux/reducers/alertSlice";
 import "./AlertModal.css";
 
 import { motion } from "framer-motion";

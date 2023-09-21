@@ -6,11 +6,13 @@ import {
   faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
 
+import Logo from "../../assets/images/logo.png";
+
 const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-top">
-        <img src="/path/to/your/logo.png" alt="Logo" className="footer-logo" />
+        <img src={Logo} alt="Logo" className="footer-logo" />
       </div>
       <div className="footer-sections">
         <div className="footer-section">

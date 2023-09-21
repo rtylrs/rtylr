@@ -32,7 +32,7 @@ function Public({ children }) {
         />
         <div
           style={{
-            marginTop: "75px",
+            marginTop: "90px",
           }}
         >
           {React.Children.map(children, (child) => {
