@@ -37,6 +37,29 @@ function Home() {
     },
   ];
 
+  const blogPosts = [
+    {
+      id: 1,
+      title: "Lorem Ipsum Blog Post 1",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "September 1, 2023",
+    },
+    {
+      id: 2,
+      title: "Lorem Ipsum Blog Post 2",
+      content:
+        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      date: "September 5, 2023",
+    },
+    {
+      id: 3,
+      title: "Lorem Ipsum Blog Post 3",
+      content:
+        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+      date: "September 10, 2023",
+    },
+  ];
+
   return (
     <div>
       <div className="Hero">
@@ -90,6 +113,27 @@ function Home() {
               <div className="item-content">
                 <p>{category.title}</p>
               </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="blog-section">
+        <h2 className="section-title">Latest Blog Posts</h2>
+        <div className="blog-grid">
+          {blogPosts.map((post, index) => (
+            <Link className="blog-post" key={index} to={`/blog/${post.id}`}>
+              <h3 className="post-title">
+                {post.title.length > 50
+                  ? post.title.substring(0, 50) + "..."
+                  : post.title}
+              </h3>
+              <p className="post-content">
+                {post.content.length > 250
+                  ? post.content.substring(0, 250) + "..."
+                  : post.content}
+              </p>
+              <p className="post-date">{post.date}</p>
             </Link>
           ))}
         </div>
