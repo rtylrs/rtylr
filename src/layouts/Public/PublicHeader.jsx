@@ -82,7 +82,7 @@ const Header = ({ openLogin }) => {
 
         {user && (
           <>
-            <Link to="/wishlist">
+            <Link to="/admin">
               <FontAwesomeIcon icon={faHeart} />
             </Link>
           </>
@@ -97,9 +97,11 @@ const Header = ({ openLogin }) => {
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/">Mobile Link 1</Link>
-          <Link to="/">Mobile Link 2</Link>
-          <Link to="/">Mobile Link 3</Link>
+          <Link to="/">Shop</Link>
+          <Link to="/">Account</Link>
+          <Link to="/">Wishlist</Link>
+          <Link to="/">About</Link>
+          <Link to="/">Contact Us</Link>
         </div>
       )}
     </header>
