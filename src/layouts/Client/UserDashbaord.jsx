@@ -1,4 +1,7 @@
 import PropTypes from "prop-types";
+import { auth } from "../../firebase";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
 function DashboardLayout({ children }) {
   return (
@@ -6,23 +9,23 @@ function DashboardLayout({ children }) {
       <nav className="sidebar">
         <ul>
           <li>
-            <a href="#">Profile</a>
+            <Link to="#">Profile</Link>
           </li>
           <li>
-            <a href="#">Favorites</a>
+            <Link to="#">Favorites</Link>
           </li>
           <li>
-            <a href="#">Previous Orders</a>
+            <Link to="#">Previous Orders</Link>
           </li>
           <li>
-            <a href="#">Become a Business</a>
+            <Link to="#">Become a Business</Link>
           </li>
         </ul>
       </nav>
 
       <main className="main-content">
         <header className="top-bar">
-          <img src="user-image.jpg" alt="User Image" />
+          <p>{auth.currentUser.displayName}</p>
           <button className="logout-button">Logout</button>
         </header>
 
