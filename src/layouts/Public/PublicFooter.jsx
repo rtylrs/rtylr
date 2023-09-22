@@ -1,9 +1,8 @@
 // Footer.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFacebook,
-  faTwitter,
   faInstagram,
+  faWhatsappSquare,
 } from "@fortawesome/free-brands-svg-icons";
 import Logo from "../../assets/logo.png";
 
@@ -73,13 +72,11 @@ const Footer = () => {
       <div className="footer-social">
         <h3>Follow Us</h3>
         <div className="social-icons">
-          <a href="https://www.facebook.com">
-            <FontAwesomeIcon icon={faFacebook} />
+          <a href="https://api.whatsapp.com/send?phone=96598895586">
+            <FontAwesomeIcon icon={faWhatsappSquare} />
           </a>
-          <a href="https://www.twitter.com">
-            <FontAwesomeIcon icon={faTwitter} />
-          </a>
-          <a href="https://www.instagram.com">
+
+          <a href="https://www.instagram.com/TheSanityStore">
             <FontAwesomeIcon icon={faInstagram} />
           </a>
         </div>
