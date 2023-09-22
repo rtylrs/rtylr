@@ -9,7 +9,7 @@
   align-items: center;
   padding: 20px 30px;
   background-color: #f2ebe5;
-  color: #4b4038;
+  color: #3a322c;
   height: 50px;
   z-index: 1000; /* Add a z-index to layer it above other content */
 
@@ -18,7 +18,7 @@
     gap: 40px;
     a {
       text-decoration: none;
-      color: #4b4038;
+      color: #3a322c;
       font-weight: bold;
     }
     a:hover {
@@ -51,7 +51,7 @@
 
     a {
       text-decoration: none;
-      color: #4b4038;
+      color: #3a322c;
 
       @media only screen and (max-width: 768px){
         display: none;
@@ -85,7 +85,7 @@
     left: 0;
     right: 0;
     background-color: #f2ebe5;
-    color: #4b4038;
+    color: #3a322c;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -97,7 +97,7 @@
 
     a {
       text-decoration: none;
-      color: #4b4038;
+      color: #3a322c;
       margin-bottom: 25px;
       font-size: 20px;
     }
