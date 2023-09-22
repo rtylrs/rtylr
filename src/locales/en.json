@@ -1,0 +1,12 @@
+{
+  "Hero": {
+    "welcome": "Welcome to Sanity!",
+    "discover": "Discover what you're seeking or explore the endless possibilities! Your ultimate destination for unforgettable experiences.",
+    "searchPlaceholder": "Search for products..."
+  },
+  "ProductSection": {
+    "title": "Browse Products",
+    "buyNow": "Buy Now",
+    "viewMore": "View More"
+  }
+}
