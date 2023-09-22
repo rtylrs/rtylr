@@ -1,7 +1,14 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClose,
+  faHome,
+  faUser,
+  faBuilding,
+  faUserSecret,
+  faBlog,
+} from "@fortawesome/free-solid-svg-icons";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   return (
@@ -19,35 +26,41 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
       </div>
       <div className="sidebar__menu">
         <div className="sidebar__link ">
-          <i className="fa fa-home"></i>
+          <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/admin" id="link">
             My Dashboard
           </Link>
         </div>
         <h2>Management</h2>
         <div className="sidebar__link">
-          <i className="fa fa-user"></i>
+          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
           <Link to="/admin/users" id="link">
             Users
           </Link>
         </div>
         <div className="sidebar__link">
-          <i className="fa-solid fa-building"></i>
+          <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
           <Link to="/admin/vendors" id="link">
             Suppliers
           </Link>
         </div>
         <div className="sidebar__link">
-          <i className="fa fa-user-secret"></i>
+          <FontAwesomeIcon icon={faUserSecret} className="sidebar__icon" />
           <Link to="/admin/managment" id="link">
             Add/Remove Admins
           </Link>
         </div>
 
         <div className="sidebar__link">
-          <i className="fa-solid fa-heart"></i>
+          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
           <Link to="/admin/reviews" id="link">
             Feedback
+          </Link>
+        </div>
+        <div className="sidebar__link">
+          <FontAwesomeIcon icon={faBlog} className="sidebar__icon" />
+          <Link to="/admin/reviews" id="link">
+            Blog
           </Link>
         </div>
         <h2>Configuration</h2>
