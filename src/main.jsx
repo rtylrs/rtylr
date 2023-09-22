@@ -8,6 +8,7 @@ import store from "./redux/store.js";
 import { Provider } from "react-redux";
 import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
+import ScrollToTop from "./components/ScrollToTop.js";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Provider store={store}>
         <Suspense fallback={<Loader />}>
           <BrowserRouter>
+            <ScrollToTop />
             <App />
           </BrowserRouter>
         </Suspense>

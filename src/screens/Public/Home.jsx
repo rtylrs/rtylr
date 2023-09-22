@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Categories } from "../../data/categories";
 
 function Home() {
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ function Home() {
       businessName: "Business B",
       imageUrl: "https://via.placeholder.com/150", // Use another placeholder image
     },
-    // Add more product items here
   ];
 
   return (
@@ -55,14 +55,15 @@ function Home() {
       <section className="product-section">
         <h2 className="section-title">Browse Products</h2>
         <div className="product-grid">
-          {products.map((product) => (
-            <div key={product.id} className="product-item">
-              <img src={product.imageUrl} alt={`Product ${product.id}`} />
-              <h3>{product.businessName}</h3>
-              <p>{product.price}</p>
-              <button>Buy Now</button>
-            </div>
-          ))}
+          {products &&
+            products.slice(0, 4).map((product) => (
+              <div key={product.id} className="product-item">
+                <img src={product.imageUrl} alt={`Product ${product.id}`} />
+                <h3>{product.businessName}</h3>
+                <p>{product.price}</p>
+                <button>Buy Now</button>
+              </div>
+            ))}
         </div>
         <button
           className="view-more-button"
@@ -72,6 +73,26 @@ function Home() {
         >
           View More
         </button>
+      </section>
+
+      <section className="home-section">
+        <h2 className="section-title">Our Menu</h2>
+        <div className="grid-container">
+          {Categories.map((category, index) => (
+            <Link
+              key={index}
+              className="grid-item"
+              style={{
+                backgroundImage: `url(${category.imageUrl})`,
+              }}
+              to={`/shop/${category.title.toLowerCase()}`}
+            >
+              <div className="item-content">
+                <p>{category.title}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
     </div>
   );

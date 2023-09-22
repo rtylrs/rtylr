@@ -1,8 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { closeAlert } from "../../redux/reducers/alertSlice";
-import "./AlertModal.css";
 
 import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes, faBell } from "@fortawesome/free-solid-svg-icons";
 
 function AlertModal() {
   const dispatch = useDispatch();
@@ -13,15 +14,15 @@ function AlertModal() {
   const animations = {
     initial: {
       opacity: 0,
-      x: -100,
+      y: -1000,
     },
     animate: {
       opacity: 1,
-      x: 0,
+      y: 0,
     },
     exit: {
       opacity: 0,
-      x: -100,
+      y: -100,
     },
   };
 
@@ -36,11 +37,11 @@ function AlertModal() {
         display: open ? "flex" : "none",
         flexDirection: "column",
         position: "fixed",
-        top: "10%",
+        top: "5%",
         right: "0.6%",
         width: 350,
         height: 90,
-        backgroundColor: type === "success" ? "#a1ccd8fa" : "#E8745D",
+        backgroundColor: type === "success" ? "#ac9888" : "#D80032",
         justifyContent: "center",
         alignItems: "center",
         zIndex: "100000",
@@ -50,7 +51,13 @@ function AlertModal() {
     >
       <div className="alert-modal">
         <span>
-          <i className="fa-solid fa-bell"></i>
+          <FontAwesomeIcon
+            icon={faBell}
+            style={{
+              color: "white",
+              fontSize: 30,
+            }}
+          />
         </span>
         <p>{message}</p>
         <span
@@ -58,7 +65,14 @@ function AlertModal() {
             dispatch(closeAlert());
           }}
         >
-          <i className="fa-solid fa-times" style={{ cursor: "pointer" }}></i>
+          <FontAwesomeIcon
+            icon={faTimes}
+            style={{
+              color: "white",
+              fontSize: 20,
+              cursor: "pointer",
+            }}
+          />
         </span>
       </div>
     </motion.div>

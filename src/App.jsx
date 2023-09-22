@@ -7,6 +7,7 @@ import { auth } from "./firebase";
 
 // eslint-disable-next-line
 import i18next from "./services/i18next";
+import AlertModal from "./components/Alert/AlertModal";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -30,31 +31,34 @@ const App = () => {
   }, []);
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      {PublicRoutes.map((route, index) => (
-        <Route
-          key={index}
-          path={route.path}
-          exact={route.exact}
-          element={route.element}
-        />
-      ))}
+    <>
+      <AlertModal />
+      <Routes>
+        {/* Public Routes */}
+        {PublicRoutes.map((route, index) => (
+          <Route
+            key={index}
+            path={route.path}
+            exact={route.exact}
+            element={route.element}
+          />
+        ))}
 
-      {/* Conditional rendering for user routes */}
-      {user && (
-        <>
-          {UserRoutes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              exact={route.exact}
-              element={route.element}
-            />
-          ))}
-        </>
-      )}
-    </Routes>
+        {/* Conditional rendering for user routes */}
+        {user && (
+          <>
+            {UserRoutes.map((route, index) => (
+              <Route
+                key={index}
+                path={route.path}
+                exact={route.exact}
+                element={route.element}
+              />
+            ))}
+          </>
+        )}
+      </Routes>
+    </>
   );
 };
 
