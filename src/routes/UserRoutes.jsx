@@ -5,7 +5,7 @@ import Profile from "../screens/Client/Profile";
 
 const UserRoutes = [
   {
-    path: "/profile",
+    path: "/account",
     element: (
       <DashboardLayout>
         <Profile />
