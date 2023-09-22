@@ -17,6 +17,7 @@ function Register({ open, close }) {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [name, setName] = React.useState("");
+  const [refered, setRefered] = React.useState("");
   const provider = new GoogleAuthProvider();
 
   const handleRegister = (e) => {
@@ -49,6 +50,7 @@ function Register({ open, close }) {
                 },
                 verified: false,
                 tier: 0,
+                refered: refered,
               },
               { merge: true }
             )
@@ -103,6 +105,7 @@ function Register({ open, close }) {
                 },
                 verified: false,
                 tier: 0,
+                refered: refered,
               })
               .then(() => {
                 auth.currentUser
@@ -185,16 +188,14 @@ function Register({ open, close }) {
             required
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <p
-            style={{
-              fontSize: "12px",
-              color: "#E8745D",
-              marginTop: "5px",
-              marginBottom: "5px",
-            }}
-          >
-            Note: Username cannot be changed later.
-          </p>
+          <input
+            className="RegisterModal-input"
+            type="text"
+            id="conPass"
+            placeholder="Refered By (Optional)"
+            required
+            onChange={(e) => setRefered(e.target.value)}
+          />
           <button
             className="RegisterModal-button"
             onClick={() => {

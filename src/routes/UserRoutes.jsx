@@ -1,7 +1,8 @@
 import DashboardLayout from "../layouts/Client/UserDashbaord";
+import React from "react";
 
 // Routes
-import Profile from "../screens/Client/Profile";
+const Profile = React.lazy(() => import("../screens/Client/Profile"));
 
 const UserRoutes = [
   {

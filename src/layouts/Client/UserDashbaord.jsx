@@ -1,9 +1,13 @@
 import PropTypes from "prop-types";
 import { auth } from "../../firebase";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../../redux/reducers/userSlice";
 
 function DashboardLayout({ children }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   return (
     <div className="dashboard-layout">
       <nav className="sidebar">
@@ -26,7 +30,17 @@ function DashboardLayout({ children }) {
       <main className="main-content">
         <header className="top-bar">
           <p>{auth.currentUser.displayName}</p>
-          <button className="logout-button">Logout</button>
+          <button
+            className="logout-button"
+            onClick={() => {
+              auth.signOut().then(() => {
+                dispatch(logout());
+                navigate("/");
+              });
+            }}
+          >
+            Logout
+          </button>
         </header>
 
         {children}

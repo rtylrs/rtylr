@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { auth } from '../../firebase';
 
 const initialState = {
     user: null,
@@ -15,15 +14,8 @@ const userSlice = createSlice({
             state.isAuthenticated = true;
         },
         logout: (state) => {
-            auth
-                .signOut()
-                .then(() => {
-                    state.user = null;
-                    state.isAuthenticated = false;
-                })
-                .catch((error) => {
-                    console.error('Error signing out:', error);
-                });
+            state.user = null;
+            state.isAuthenticated = false;
         },
     },
 });

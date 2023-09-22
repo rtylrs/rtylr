@@ -4,6 +4,7 @@ import UserRoutes from "./routes/UserRoutes";
 import { useState, useEffect } from "react";
 
 import { auth } from "./firebase";
+import Loader from "./layouts/loader/Loader";
 
 const App = () => {
   const [user, setUser] = useState(null);

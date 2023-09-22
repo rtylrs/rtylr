@@ -1,3 +1,6 @@
+//Fonts 
+@import "./fonts.scss";
+
 // SCSS imports Public
 @import './scss/Public/Header.scss';
 @import './scss/Public/Footer.scss';
@@ -29,8 +32,10 @@ a {
 body {
   margin: 0;
   padding: 0;
-  background-color: #f2ebe5;
+  background-color: #fbf6f2;
   height: 100vh;
+  font-family: "Butler";
+  color: #4b4038;
 }
 
 
