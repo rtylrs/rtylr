@@ -1,3 +1,4 @@
+import AnimatedRoutes from "../components/AnimatedRoutes";
 import Public from "../layouts/Public/public";
 import React from "react";
 
@@ -13,7 +14,9 @@ const PublicRoutes = [
     path: "/",
     element: (
       <Public>
-        <Home />
+        <AnimatedRoutes>
+          <Home />
+        </AnimatedRoutes>
       </Public>
     ),
     exact: true,
@@ -22,7 +25,9 @@ const PublicRoutes = [
     path: "/about",
     element: (
       <Public>
-        <About />
+        <AnimatedRoutes>
+          <About />
+        </AnimatedRoutes>
       </Public>
     ),
     exact: true,
@@ -31,7 +36,9 @@ const PublicRoutes = [
     path: "/pricing",
     element: (
       <Public>
-        <Pricing />
+        <AnimatedRoutes>
+          <Pricing />
+        </AnimatedRoutes>
       </Public>
     ),
     exact: true,
@@ -40,7 +47,9 @@ const PublicRoutes = [
     path: "/contact",
     element: (
       <Public>
-        <Contact />
+        <AnimatedRoutes>
+          <Contact />
+        </AnimatedRoutes>
       </Public>
     ),
     exact: true,
@@ -49,7 +58,9 @@ const PublicRoutes = [
     path: "/feedback",
     element: (
       <Public>
-        <Feedback />
+        <AnimatedRoutes>
+          <Feedback />
+        </AnimatedRoutes>
       </Public>
     ),
     exact: true,

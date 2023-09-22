@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import PublicRoutes from "./routes/PublicRoutes";
 import UserRoutes from "./routes/UserRoutes";
 import { useState, useEffect } from "react";
@@ -11,6 +11,7 @@ import AlertModal from "./components/Alert/AlertModal";
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const location = useLocation();
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -33,7 +34,7 @@ const App = () => {
   return (
     <>
       <AlertModal />
-      <Routes>
+      <Routes key={location.pathname} location={location}>
         {/* Public Routes */}
         {PublicRoutes.map((route, index) => (
           <Route
