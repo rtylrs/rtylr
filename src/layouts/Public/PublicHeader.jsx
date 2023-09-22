@@ -43,6 +43,7 @@ const Header = ({ openLogin }) => {
     <header className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <div className="header-left">
         <Link to="/shop">Shop</Link>
+        <Link to="/pricing">Pricing</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
       </div>
@@ -50,7 +51,7 @@ const Header = ({ openLogin }) => {
         className="header-center"
         style={{
           cursor: "pointer",
-          transform: user ? "translateX(-80px)" : "translateX(-100px)",
+          transform: user ? "translateX(-8.7%)" : "translateX(-9.7%)",
         }}
       >
         <img src={Logo} alt="Logo" />

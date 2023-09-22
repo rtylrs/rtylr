@@ -26,6 +26,9 @@ const Footer = () => {
             <li>
               <a href="/Privacy">Privacy</a>
             </li>
+            <li>
+              <a href="/feedback">Feedback</a>
+            </li>
           </ul>
         </div>
         <div className="footer-section">
