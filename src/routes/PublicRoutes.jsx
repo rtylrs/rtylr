@@ -1,7 +1,8 @@
 import Public from "../layouts/Public/public";
+import React from "react";
 
 // Routes
-import Home from "../screens/Public/Home";
+const Home = React.lazy(() => import("../screens/Public/Home"));
 
 const PublicRoutes = [
   {

@@ -5,8 +5,7 @@ import {
   faTwitter,
   faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
-
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/logo.png";
 
 const Footer = () => {
   return (
@@ -24,19 +23,25 @@ const Footer = () => {
             <li>
               <a href="/support">Support</a>
             </li>
+            <li>
+              <a href="/Privacy">Privacy</a>
+            </li>
           </ul>
         </div>
         <div className="footer-section">
           <h3>Screens</h3>
           <ul>
             <li>
-              <a href="/home">Home</a>
+              <a href="/">Home</a>
             </li>
             <li>
-              <a href="/products">Products</a>
+              <a href="/shop">Products</a>
             </li>
             <li>
               <a href="/about">About</a>
+            </li>{" "}
+            <li>
+              <a href="/contact">Contact Us</a>
             </li>
             {/* Add more screen links as needed */}
           </ul>
@@ -44,7 +49,20 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Contact</h3>
           <ul>
-            <li>Email: contact@example.com</li>
+            <li>
+              Email:{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  window.open("mailto:hello@sanitykuwait.com");
+                }}
+              >
+                hello@sanitykuwait.com
+              </span>
+            </li>
             <li>Phone: +1234567890</li>
           </ul>
         </div>

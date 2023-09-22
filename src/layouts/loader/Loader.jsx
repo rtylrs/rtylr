@@ -1,5 +1,5 @@
-import "./loader.scss";
 import { Spinner } from "reactstrap";
+import "./loader.scss";
 
 const Loader = () => (
   <div className="fallback-spinner">

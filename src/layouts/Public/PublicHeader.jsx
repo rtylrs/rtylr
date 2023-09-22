@@ -9,8 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { auth } from "../../firebase";
 import { Link } from "react-router-dom";
+import Logo from "../../assets/logo.png";
 
-import Logo from "../../assets/images/logo.png";
 import PropTypes from "prop-types";
 
 const Header = ({ openLogin }) => {
@@ -46,7 +46,13 @@ const Header = ({ openLogin }) => {
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
       </div>
-      <div className="header-center">
+      <div
+        className="header-center"
+        style={{
+          cursor: "pointer",
+          transform: user ? "translateX(-80px)" : "translateX(-100px)",
+        }}
+      >
         <img src={Logo} alt="Logo" />
       </div>
       <div className="header-right">
