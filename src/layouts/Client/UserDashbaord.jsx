@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../../redux/reducers/userSlice";
 
+import Logo from "../../assets/logo.png";
+
 function DashboardLayout({ children }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -11,6 +13,11 @@ function DashboardLayout({ children }) {
   return (
     <div className="dashboard-layout">
       <nav className="sidebar">
+        <div className="logo">
+          <Link to="/">
+            <img src={Logo} alt="logo" />
+          </Link>
+        </div>
         <ul>
           <li>
             <Link to="#">Profile</Link>
@@ -29,7 +36,7 @@ function DashboardLayout({ children }) {
 
       <main className="main-content">
         <header className="top-bar">
-          <p>{auth.currentUser.displayName}</p>
+          <p>Hello {auth.currentUser.displayName}!</p>
           <button
             className="logout-button"
             onClick={() => {

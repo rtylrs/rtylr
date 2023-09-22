@@ -93,7 +93,7 @@ const Contact = () => {
           ></textarea>
           <button
             type="submit"
-            className="main__btn"
+            className="Contact-button"
             disabled={submitted}
             style={{
               display: "flex",
