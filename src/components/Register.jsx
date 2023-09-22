@@ -117,7 +117,7 @@ function Register({ open, close }) {
                     db.collection("mail").add({
                       to: auth.currentUser.email,
                       message: {
-                        subject: "Hello from Munasabti!",
+                        subject: "Hello from Sanity!",
                         text: "Thanks for signing up!",
                         html: `<p>Thanks for signing up!</p>`,
                       },

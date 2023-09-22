@@ -9,53 +9,42 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Modal } from "@mui/material";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { login } from "../redux/reducers/userSlice";
 
 function Login({ open, close, openRegister }) {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const dispatch = useDispatch();
 
   const provider = new GoogleAuthProvider();
 
   const handleSubmit = () => {
-    db.collection("Users")
-      .where("username", "==", email)
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.docs.length > 0) {
-          auth
-            .signInWithEmailAndPassword(
-              querySnapshot.docs[0].data().email,
-              password
-            )
-            .then((user) => {
-              db.collection("Users")
-                .doc(user.user.uid)
-                .get()
-                .then(() => {
-                  close(true);
-                  ShowAlert("Logged In Successfully", "success");
-                });
-            })
-            .catch((e) => {
-              alert(e.message);
-            });
-        } else {
-          auth
-            .signInWithEmailAndPassword(email, password)
-            .then((user) => {
-              db.collection("Users")
-                .doc(user.user.uid)
-                .get()
-                .then(() => {
-                  close(true);
-                  ShowAlert("Logged In Successfully", "success");
-                });
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        if (user) {
+          db.collection("Users")
+            .doc(user.uid)
+            .get()
+            .then((doc) => {
+              const user = Object.assign({}, doc.data(), {
+                uid: doc.id,
+              });
+              dispatch(login(user));
+              close(true);
+
+              ShowAlert("Logged In Successfully", "success");
             })
             .catch((e) => {
               alert(e.message);
             });
         }
+      })
+      .catch((e) => {
+        alert(e.message);
       });
   };
 
@@ -140,7 +129,7 @@ function Login({ open, close, openRegister }) {
           </p>
           <input
             type="text"
-            placeholder="Username or Email"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="LoginModal-input"

@@ -5,7 +5,6 @@ import {
   faHeart,
   faBars,
   faTimes,
-  faBasketShopping,
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { auth } from "../../firebase";
@@ -70,9 +69,6 @@ const Header = ({ openLogin }) => {
           <>
             <Link to="/wishlist">
               <FontAwesomeIcon icon={faHeart} />
-            </Link>
-            <Link to="/cart">
-              <FontAwesomeIcon icon={faBasketShopping} />
             </Link>
           </>
         )}
