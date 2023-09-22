@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import Loader from "../../layouts/loader/Loader";
 
 function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const products = [
     {
@@ -40,15 +41,12 @@ function Home() {
     <div>
       <div className="Hero">
         <div className="hero-text">
-          <h1>Welcome to Sanity!</h1>
-          <h2>
-            Discover what you're seeking or explore the endless possibilities!
-            Your ultimate destination for unforgettable experiences.
-          </h2>
+          <h1>{t("Hero.welcome")}</h1>
+          <h2>{t("Hero.discover")}</h2>
           <div className="searchBarHome">
             <input
               type="text"
-              placeholder="Search for products..."
+              placeholder={t("Hero.searchPlaceholder")}
               className="searchBar"
             />
           </div>

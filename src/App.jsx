@@ -4,7 +4,9 @@ import UserRoutes from "./routes/UserRoutes";
 import { useState, useEffect } from "react";
 
 import { auth } from "./firebase";
-import Loader from "./layouts/loader/Loader";
+
+// eslint-disable-next-line
+import i18next from "./services/i18next";
 
 const App = () => {
   const [user, setUser] = useState(null);
