@@ -1,6 +1,9 @@
 import { Route, Routes, useLocation } from "react-router-dom";
+
 import PublicRoutes from "./routes/PublicRoutes";
 import UserRoutes from "./routes/UserRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
+
 import { useState, useEffect } from "react";
 
 import { auth } from "./firebase";
@@ -8,6 +11,7 @@ import { auth } from "./firebase";
 // eslint-disable-next-line
 import i18next from "./services/i18next";
 import AlertModal from "./components/Alert/AlertModal";
+import { AdminRoute } from "./utils/AdminRoute";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -58,6 +62,24 @@ const App = () => {
             ))}
           </>
         )}
+
+        <Route exact path="/admin" element={<AdminRoute />}>
+          {
+            // Admin routes
+            user && (
+              <>
+                {AdminRoutes.map((route, index) => (
+                  <Route
+                    key={index}
+                    path={route.path}
+                    exact={route.exact}
+                    element={route.element}
+                  />
+                ))}
+              </>
+            )
+          }
+        </Route>
       </Routes>
     </>
   );

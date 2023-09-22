@@ -40,7 +40,7 @@ function Register({ open, close }) {
                 Location: "",
                 About: "",
                 image:
-                  "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
+                  "https://firebasestorage.googleapis.com/v0/b/mkunasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
                 Socials: {
                   Instagram: "",
                   Website: "",

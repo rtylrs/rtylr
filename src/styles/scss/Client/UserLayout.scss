@@ -21,7 +21,7 @@
   }
   
   // Sidebar Styles
-  .sidebar {
+  .sidebarUser {
     width: 250px;
     background-color: #ac9888;
     color: #fff;
@@ -39,6 +39,7 @@
     a {
       color: #fff;
       text-decoration: none;
+      font-size: 20px;
     }
   }
   
@@ -55,6 +56,22 @@
       background-color: #eee;
       padding: 10px 20px;
       
+      a {
+        background-color: #4b4038;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 4px;
+        margin-right: 10px;
+        &:hover {
+          background-color: #b89077;
+          color: #fff;
+          transition: 0.3s;
+        }
+      }
+
      
       
       .logout-button {
@@ -65,7 +82,12 @@
         cursor: pointer;
         font-size: 16px;
         border-radius: 4px;
+
+        &:hover {
+          background-color: #b89077;
+          color: #fff;
+          transition: 0.3s;
+        }
       }
     }
-  }
-  
+  } 

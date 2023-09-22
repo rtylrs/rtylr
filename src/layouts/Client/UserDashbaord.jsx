@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../../redux/reducers/userSlice";
 
 import Logo from "../../assets/logo.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHome } from "@fortawesome/free-solid-svg-icons";
 
 function DashboardLayout({ children }) {
   const dispatch = useDispatch();
@@ -12,7 +14,7 @@ function DashboardLayout({ children }) {
 
   return (
     <div className="dashboard-layout">
-      <nav className="sidebar">
+      <nav className="sidebarUser">
         <div className="logo">
           <Link to="/">
             <img src={Logo} alt="logo" />
@@ -37,17 +39,23 @@ function DashboardLayout({ children }) {
       <main className="main-content">
         <header className="top-bar">
           <p>Hello {auth.currentUser.displayName}!</p>
-          <button
-            className="logout-button"
-            onClick={() => {
-              auth.signOut().then(() => {
-                dispatch(logout());
-                navigate("/");
-              });
-            }}
-          >
-            Logout
-          </button>
+          <div>
+            <Link to="/">
+              <FontAwesomeIcon icon={faHome} />
+            </Link>
+
+            <button
+              className="logout-button"
+              onClick={() => {
+                auth.signOut().then(() => {
+                  dispatch(logout());
+                  navigate("/");
+                });
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         {children}

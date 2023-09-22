@@ -28,17 +28,28 @@ const Footer = () => {
           </ul>
         </div>
         <div className="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li>
+              <a href="/petition">Petition</a>
+            </li>
+            <li>
+              <a href="/donate">Donate</a>
+            </li>
+          </ul>
+        </div>
+        <div className="footer-section">
           <h3>Navigate</h3>
           <ul>
             <li>
               <a href="/">Home</a>
             </li>
             <li>
-              <a href="/shop">Products</a>
+              <a href="/shop">Shop</a>
             </li>
             <li>
               <a href="/about">About</a>
-            </li>{" "}
+            </li>
             <li>
               <a href="/contact">Contact Us</a>
             </li>

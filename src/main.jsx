@@ -8,7 +8,7 @@ import store from "./redux/store.js";
 import { Provider } from "react-redux";
 import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
-import ScrollToTop from "./components/ScrollToTop.js";
+import ScrollToTop from "./components/ScrollToTop";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

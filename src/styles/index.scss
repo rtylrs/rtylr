@@ -17,6 +17,12 @@
 @import './scss/Client/UserLayout.scss';
 @import './scss/Client/Profile.scss';
 
+
+//Admin Imports 
+@import './scss/Admin/Admin.scss';
+@import './scss/Admin/Navbar.scss';
+@import './scss/Admin/Sidebar.scss';
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
