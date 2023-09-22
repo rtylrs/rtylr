@@ -6,8 +6,9 @@ import ShowAlert from "../utils/showAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import { Modal, Typography, TextField, Button } from "@mui/material";
+import { Modal } from "@mui/material";
 import PropTypes from "prop-types";
+import { motion } from "framer-motion";
 
 function Login({ open, close, openRegister }) {
   const navigate = useNavigate();
@@ -116,92 +117,84 @@ function Login({ open, close, openRegister }) {
         close(true);
       }}
     >
-      <div className="LoginModal-container">
-        <FontAwesomeIcon
-          icon={faClose}
-          className="LoginModal-close-icon"
-          onClick={() => {
-            close(true);
-          }}
-          size={20}
-        />
-        <Typography variant="h5" className="LoginModal-title">
-          Welcome Back
-        </Typography>
-        <Typography variant="body1" className="LoginModal-description">
-          Sign in to your existing account to continue.
-        </Typography>
-        <TextField
-          label="Username or Email"
-          variant="outlined"
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            marginTop: "10px",
-          }}
-        />
-        <TextField
-          label="Password"
-          variant="outlined"
-          type="password"
-          fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            marginTop: "10px",
-          }}
-        />
-        <Button
-          style={{
-            marginTop: "20px",
-          }}
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            handleSubmit();
-          }}
-          fullWidth
-        >
-          Login
-        </Button>
-        <div className="LoginModal-social-media">
-          <Button
-            variant="contained"
-            color="primary"
+      <motion.div
+        className={`LoginModal-container ${open ? "show" : ""}`}
+        onClick={() => {
+          close(true);
+        }}
+        initial={{ y: -1000 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="LoginModal" onClick={(e) => e.stopPropagation()}>
+          <FontAwesomeIcon
+            icon={faClose}
+            className="LoginModal-close-icon"
             onClick={() => {
-              handleRegisterWithGoogle();
+              close(true);
             }}
-            fullWidth
+          />
+          <h2 className="LoginModal-title">Welcome Back</h2>
+          <p className="LoginModal-description">
+            Sign in to your existing account to continue.
+          </p>
+          <input
+            type="text"
+            placeholder="Username or Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="LoginModal-input"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="LoginModal-input"
+          />
+          <button
+            className="LoginModal-button"
+            onClick={() => {
+              handleSubmit();
+            }}
           >
-            <FontAwesomeIcon icon={faGoogle} size="lg" />
-            Sign in with Google
-          </Button>
-        </div>
-        <div className="LoginModal-footer">
-          <Typography variant="body2">
-            Don’t have an account?{" "}
-            <span
-              className="LoginModal-link"
+            Login
+          </button>
+          <div className="LoginModal-social-media">
+            <button
+              className="LoginModal-google-button"
               onClick={() => {
-                openRegister();
-                close(true);
+                handleRegisterWithGoogle();
               }}
             >
-              Sign Up Now.
-            </span>
-          </Typography>
-          <Typography
-            variant="body2"
-            className="LoginModal-link"
-            onClick={() => {
-              navigate("/auth/password-reset");
-            }}
-          >
-            Forgot Password?
-          </Typography>
+              <FontAwesomeIcon icon={faGoogle} size="lg" />
+              Sign in with Google
+            </button>
+          </div>
+          <div className="LoginModal-footer">
+            <p>
+              Don’t have an account?{" "}
+              <span
+                className="LoginModal-link"
+                onClick={() => {
+                  openRegister();
+                  close(true);
+                }}
+              >
+                Sign Up Now.
+              </span>
+            </p>
+            <p
+              className="LoginModal-link"
+              onClick={() => {
+                navigate("/auth/password-reset");
+              }}
+            >
+              Forgot Password?
+            </p>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </Modal>
   );
 }

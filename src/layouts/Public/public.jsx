@@ -5,6 +5,7 @@ import Footer from "./PublicFooter";
 import PropTypes from "prop-types";
 import Loader from "../loader/Loader";
 import Login from "../../components/Login";
+import Register from "../../components/Register";
 
 function Public({ children }) {
   const [loading, setLoading] = React.useState(false);
@@ -29,6 +30,13 @@ function Public({ children }) {
             setLogin(false);
           }}
           openRegister={() => setRegister(true)}
+        />
+        <Register
+          open={register}
+          close={() => {
+            setRegister(false);
+          }}
+          openLogin={() => setLogin(true)}
         />
         <div
           style={{

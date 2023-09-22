@@ -43,9 +43,9 @@ const Header = ({ openLogin }) => {
   return (
     <header className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <div className="header-left">
-        <a href="/">Shop</a>
-        <a href="/">About</a>
-        <a href="/">Contact Us</a>
+        <Link to="/shop">Shop</Link>
+        <Link to="/about">About</Link>
+        <Link to="/contact">Contact Us</Link>
       </div>
       <div className="header-center">
         <img src={Logo} alt="Logo" />
@@ -65,12 +65,17 @@ const Header = ({ openLogin }) => {
             <FontAwesomeIcon icon={faRightToBracket} />
           </div>
         )}
-        <Link to="/wishlist">
-          <FontAwesomeIcon icon={faHeart} />
-        </Link>
-        <Link to="/cart">
-          <FontAwesomeIcon icon={faBasketShopping} />
-        </Link>
+
+        {user && (
+          <>
+            <Link to="/wishlist">
+              <FontAwesomeIcon icon={faHeart} />
+            </Link>
+            <Link to="/cart">
+              <FontAwesomeIcon icon={faBasketShopping} />
+            </Link>
+          </>
+        )}
         <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? (
             <FontAwesomeIcon icon={faTimes} />
@@ -81,9 +86,9 @@ const Header = ({ openLogin }) => {
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <a href="/">Mobile Link 1</a>
-          <a href="/">Mobile Link 2</a>
-          <a href="/">Mobile Link 3</a>
+          <Link to="/">Mobile Link 1</Link>
+          <Link to="/">Mobile Link 2</Link>
+          <Link to="/">Mobile Link 3</Link>
         </div>
       )}
     </header>

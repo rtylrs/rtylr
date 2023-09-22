@@ -1,8 +1,11 @@
-// SCSS imports 
-
+// SCSS imports Public
 @import './scss/Public/Header.scss';
 @import './scss/Public/Footer.scss';
-@import './scss/Public/Login.scss';
+@import './scss/Public/Auth.scss';
+@import './scss/Public/Home.scss';
+
+// Scss imports Components
+@import './scss/Components/Alert.scss';
 
 
 
@@ -30,25 +33,3 @@ body {
 }
 
 
-// Alert 
-.alert-modal {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 90%;
-  user-select: none;
-}
-
-.alert-modal span i {
-  font-size: 1.2rem;
-  color: #fff;
-  cursor: default;
-}
-
-.alert-modal p {
-  font-size: 1rem;
-  color: #fff;
-  margin: 0;
-  font-family: "montserrat", sans-serif;
-}

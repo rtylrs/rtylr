@@ -1,0 +1,56 @@
+/* Base styles for Hero section */
+.Hero {
+    text-align: center;
+    margin-top: 20px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.33), rgba(0, 0, 0, 0.4)),
+      url("/public/images/HeroBg.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: white;
+    font-family: "butler", sans-serif;
+  }
+  
+  .hero-text {
+    max-width: 850px;
+    margin: 20px;
+  }
+  
+  .hero-text h1 {
+    font-size: 2.5em;
+    font-weight: 500;
+    padding: 10px;
+  }
+  
+  .hero-text h2 {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  
+  /* Search bar styles */
+  .searchBarHome {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .searchBar {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .searchBar::placeholder {
+    color: #333;
+  }
+  

@@ -22,7 +22,7 @@
       font-weight: bold;
     }
     a:hover {
-      color: #846552;
+      color: #b89077;
       transition: 0.3s;
     }
 
@@ -54,8 +54,14 @@
       color: #4b4038;
     }
     a:hover {
-      color: #846552;
+      color: #b89077;
       transition: 0.3s;
+    }
+
+    div:hover {
+      color: #b89077;
+      transition: 0.3s;
+      cursor: pointer;
     }
   }
 
