@@ -8,7 +8,7 @@ import {
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { auth } from "../../firebase";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
 import PropTypes from "prop-types";
@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 const Header = ({ openLogin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-
+  const navigate = useNavigate();
   // Use useEffect to set up an authentication listener
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -51,10 +51,18 @@ const Header = ({ openLogin }) => {
         className="header-center"
         style={{
           cursor: "pointer",
-          transform: user ? "translateX(-8.7%)" : "translateX(-9.7%)",
+        }}
+        onClick={() => {
+          navigate("/");
         }}
       >
-        <img src={Logo} alt="Logo" />
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{
+            transform: user ? "translateX(-125px)" : "translateX(-145px)",
+          }}
+        />
       </div>
       <div className="header-right">
         {user ? ( // Check if user is logged in

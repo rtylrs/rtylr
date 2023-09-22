@@ -145,3 +145,55 @@
   }
 }
 
+// Catgeories Section
+.home-section {
+  padding: 2rem;
+  text-align: center;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 0;
+  max-width: 1300px;
+  margin: 0 auto;
+
+  @media only screen and (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.grid-item {
+  position: relative;
+  overflow: hidden;
+  // background-image: url('https://via.placeholder.com/800x600');
+  background-size: cover;
+  background-position: center;
+  height: 250px; /* Adjust the height as needed */
+  cursor: pointer;
+
+  &:hover {
+    scale: 1.1;
+    z-index: 1000;
+    transition: 0.7s;
+  }
+}
+
+.item-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Add a semi-transparent background for better text readability */
+  color: #fff; /* Text color */
+}
+
+.item-content p {
+  margin: 1rem 0;
+  font-weight: bolder;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+

@@ -17,21 +17,18 @@ const Footer = () => {
           <h3>Help</h3>
           <ul>
             <li>
-              <a href="/faq">FAQ</a>
-            </li>
-            <li>
-              <a href="/support">Support</a>
-            </li>
-            <li>
               <a href="/Privacy">Privacy</a>
             </li>
             <li>
               <a href="/feedback">Feedback</a>
             </li>
+            <li>
+              <a href="/pricing">Pricing</a>
+            </li>
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Screens</h3>
+          <h3>Navigate</h3>
           <ul>
             <li>
               <a href="/">Home</a>
@@ -70,7 +67,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="footer-social">
-        <h3>Follow Us</h3>
+        <h3>Follow or Contact Us</h3>
         <div className="social-icons">
           <a href="https://api.whatsapp.com/send?phone=96598895586">
             <FontAwesomeIcon icon={faWhatsappSquare} />
@@ -82,7 +79,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} Your Company Name</p>
+        <p>&copy; {new Date().getFullYear()} Sanity</p>
       </div>
     </footer>
   );

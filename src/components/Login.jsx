@@ -36,7 +36,7 @@ function Login({ open, close, openRegister }) {
               dispatch(login(user));
               close(true);
 
-              ShowAlert("Logged In Successfully", "success");
+              ShowAlert(`Welcome Back!`, "success");
             })
             .catch((e) => {
               alert(e.message);
@@ -90,7 +90,7 @@ function Login({ open, close, openRegister }) {
               });
           }
 
-          ShowAlert("Logged In Successfully", "success");
+          ShowAlert(`Welcome Back!`, "success");
           close();
         })
         .catch((e) => {
