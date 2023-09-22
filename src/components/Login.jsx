@@ -7,10 +7,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Modal } from "@mui/material";
-import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/reducers/userSlice";
+
+import PropTypes from "prop-types";
 
 function Login({ open, close, openRegister }) {
   const navigate = useNavigate();

@@ -12,15 +12,15 @@ import ScrollToTop from "./components/ScrollToTop";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <I18nextProvider i18n={i18next}>
-      <Provider store={store}>
-        <Suspense fallback={<Loader />}>
+    <Suspense fallback={<Loader />}>
+      <I18nextProvider i18n={i18next}>
+        <Provider store={store}>
           <BrowserRouter>
             <ScrollToTop />
             <App />
           </BrowserRouter>
-        </Suspense>
-      </Provider>
-    </I18nextProvider>
+        </Provider>
+      </I18nextProvider>
+    </Suspense>
   </React.StrictMode>
 );

@@ -53,7 +53,6 @@ const Footer = () => {
             <li>
               <a href="/contact">Contact Us</a>
             </li>
-            {/* Add more screen links as needed */}
           </ul>
         </div>
         <div className="footer-section">
