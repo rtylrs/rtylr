@@ -10,7 +10,7 @@
     text-align: center;
     border: #dcccba;
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-    color: #4b4038;
+    color: #3a322c;
     border-radius: 8px;
     outline: none;
 
@@ -37,7 +37,7 @@
   .LoginModal-title {
     font-size: 26px;
     margin-bottom: 10px;
-    color: #4b4038;
+    color: #3a322c;
   }
   
   .LoginModal-description {
@@ -47,14 +47,14 @@
   
   /* Input Styles */
   .LoginModal-input {
-    width: 100%;
+    width: 94%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     outline: none;
     border-radius: 4px;
     font-size: 16px;
-    color: #4b4038;
+    color: #3a322c;
     background-color: #f2ebe5;
 
     &:focus {
@@ -141,7 +141,7 @@
   text-align: center;
   border: #dcccba;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-  color: #4b4038;
+  color: #3a322c;
   border-radius: 8px;
   outline: none;
 
@@ -173,7 +173,7 @@
 .Register-title {
   font-size: 26px;
   margin-bottom: 20px;
-  color: #4b4038;
+  color: #3a322c;
 }
 
 .LoginModal-description {
@@ -183,14 +183,14 @@
 
 /* Input Styles */
 .RegisterModal-input {
-  width: 100%;
+  width: 94%;
   padding: 10px;
   margin-bottom: 20px;
   border: 1px solid #ccc;
   outline: none;
   border-radius: 4px;
   font-size: 16px;
-  color: #4b4038;
+  color: #3a322c;
   background-color: #f2ebe5;
 
   &:focus {
