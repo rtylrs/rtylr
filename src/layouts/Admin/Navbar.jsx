@@ -1,7 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faHome, faExplosion } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faHome,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 
 const Navbar = ({ openSidebar }) => {
@@ -27,7 +31,7 @@ const Navbar = ({ openSidebar }) => {
             });
           }}
         >
-          <FontAwesomeIcon icon={faExplosion} size="xl" />
+          <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
         </div>
       </div>
     </div>

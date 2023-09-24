@@ -5,6 +5,7 @@ import {
   faWhatsappSquare,
 } from "@fortawesome/free-brands-svg-icons";
 import Logo from "../../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -17,13 +18,13 @@ const Footer = () => {
           <h3>Help</h3>
           <ul>
             <li>
-              <a href="/Privacy">Privacy</a>
+              <Link to="/Privacy">Privacy</Link>
             </li>
             <li>
-              <a href="/feedback">Feedback</a>
+              <Link to="/feedback">Feedback</Link>
             </li>
             <li>
-              <a href="/pricing">Pricing</a>
+              <Link to="/pricing">Pricing</Link>
             </li>
           </ul>
         </div>
@@ -31,10 +32,13 @@ const Footer = () => {
           <h3>Support</h3>
           <ul>
             <li>
-              <a href="/petition">Petition</a>
+              <Link to="/petition">Petition</Link>
             </li>
             <li>
-              <a href="/donate">Donate</a>
+              <Link to="/donate">Donate</Link>
+            </li>
+            <li>
+              <Link to="/blog/public/add ">Publish Link Blog</Link>
             </li>
           </ul>
         </div>
@@ -42,16 +46,16 @@ const Footer = () => {
           <h3>Navigate</h3>
           <ul>
             <li>
-              <a href="/">Home</a>
+              <Link to="/">Home</Link>
             </li>
             <li>
-              <a href="/shop">Shop</a>
+              <Link to="/shop">Shop</Link>
             </li>
             <li>
-              <a href="/about">About</a>
+              <Link to="/about">About</Link>
             </li>
             <li>
-              <a href="/contact">Contact Us</a>
+              <Link to="/contact">Contact Us</Link>
             </li>
           </ul>
         </div>

@@ -53,13 +53,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
 
         <div className="sidebar__link">
           <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
-          <Link to="/admin/reviews" id="link">
+          <Link to="/admin/feedback" id="link">
             Feedback
           </Link>
         </div>
         <div className="sidebar__link">
           <FontAwesomeIcon icon={faBlog} className="sidebar__icon" />
-          <Link to="/admin/reviews" id="link">
+          <Link to="/admin/blog" id="link">
             Blog
           </Link>
         </div>

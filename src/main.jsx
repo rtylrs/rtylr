@@ -10,6 +10,8 @@ import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
 import ScrollToTop from "./components/ScrollToTop";
 
+import "react-lazy-load-image-component/src/effects/blur.css";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Suspense fallback={<Loader />}>

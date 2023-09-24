@@ -1,10 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Categories } from "../../data/categories";
+import { useEffect, useState } from "react";
+import { db } from "../../firebase";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [blogs, setBlogs] = useState([]);
 
   const products = [
     {
@@ -37,28 +41,18 @@ function Home() {
     },
   ];
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Lorem Ipsum Blog Post 1",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "September 1, 2023",
-    },
-    {
-      id: 2,
-      title: "Lorem Ipsum Blog Post 2",
-      content:
-        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      date: "September 5, 2023",
-    },
-    {
-      id: 3,
-      title: "Lorem Ipsum Blog Post 3",
-      content:
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-      date: "September 10, 2023",
-    },
-  ];
+  useEffect(() => {
+    db.collection("Blogs")
+      .limit(3)
+      .get()
+      .then((querySnapshot) => {
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBlogs(data);
+      });
+  }, []);
 
   return (
     <div>
@@ -81,7 +75,13 @@ function Home() {
           {products &&
             products.slice(0, 4).map((product) => (
               <div key={product.id} className="product-item">
-                <img src={product.imageUrl} alt={`Product ${product.id}`} />
+                <LazyLoadImage
+                  src={product.imageUrl}
+                  alt={`Product ${product.id}`}
+                  effect="blur"
+                  width="100%"
+                  height="230px"
+                />
                 <h3>{product.businessName}</h3>
                 <p>{product.price}</p>
                 <button>Buy Now</button>
@@ -121,21 +121,24 @@ function Home() {
       <section className="blog-section">
         <h2 className="section-title">Latest Blog Posts</h2>
         <div className="blog-grid">
-          {blogPosts.map((post, index) => (
-            <Link className="blog-post" key={index} to={`/blog/${post.id}`}>
-              <h3 className="post-title">
-                {post.title.length > 50
-                  ? post.title.substring(0, 50) + "..."
-                  : post.title}
-              </h3>
-              <p className="post-content">
-                {post.content.length > 250
-                  ? post.content.substring(0, 250) + "..."
-                  : post.content}
-              </p>
-              <p className="post-date">{post.date}</p>
-            </Link>
-          ))}
+          {blogs &&
+            blogs.map((post, index) => (
+              <Link className="blog-post" key={index} to={`/blog/${post.id}`}>
+                <h3 className="post-title">
+                  {post.title.length > 50
+                    ? post.title.substring(0, 50) + "..."
+                    : post.title}
+                </h3>
+                <p className="post-content">
+                  {post.content.length > 250
+                    ? post.content.substring(0, 250) + "..."
+                    : post.content}
+                </p>
+                <p className="post-date">
+                  {post.timestamp.toDate().toDateString()}
+                </p>
+              </Link>
+            ))}
         </div>
       </section>
     </div>

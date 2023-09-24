@@ -63,7 +63,7 @@ const App = () => {
           </>
         )}
 
-        <Route exact path="/admin" element={<AdminRoute />}>
+        <Route exact path="/manage" element={<AdminRoute />}>
           {
             // Admin routes
             user && (
