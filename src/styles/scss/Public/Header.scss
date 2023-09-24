@@ -9,7 +9,7 @@
   align-items: center;
   padding: 20px 30px;
   background-color: #f2ebe5;
-  color: #3a322c;
+  color: #231f1b;
   height: 50px;
   z-index: 1000; /* Add a z-index to layer it above other content */
 
@@ -18,7 +18,7 @@
     gap: 40px;
     a {
       text-decoration: none;
-      color: #3a322c;
+      color: #231f1b;
       font-weight: bold;
     }
     a:hover {
@@ -51,7 +51,7 @@
 
     a {
       text-decoration: none;
-      color: #3a322c;
+      color: #231f1b;
 
       @media only screen and (max-width: 768px){
         display: none;
@@ -76,6 +76,7 @@
     cursor: pointer;
     background-color: #f2ebe5;
     border: none;
+    color: #231f1b;
   }
   
   .mobile-menu {
@@ -85,7 +86,7 @@
     left: 0;
     right: 0;
     background-color: #f2ebe5;
-    color: #3a322c;
+    color: #231f1b;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -97,7 +98,7 @@
 
     a {
       text-decoration: none;
-      color: #3a322c;
+      color: #231f1b;
       margin-bottom: 25px;
       font-size: 20px;
     }

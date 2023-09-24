@@ -17,11 +17,11 @@
 @import './scss/Client/UserLayout.scss';
 @import './scss/Client/Profile.scss';
 
-
 //Admin Imports 
 @import './scss/Admin/Admin.scss';
 @import './scss/Admin/Navbar.scss';
 @import './scss/Admin/Sidebar.scss';
+@import './scss/Admin/Common.scss';
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -35,7 +35,7 @@
 a {
   font-weight: 500;
   text-decoration: none;
-  color: #3a322c;
+  color: #231f1b;
   cursor: pointer;
 }
 
@@ -45,7 +45,7 @@ body {
   background-color: #fbf6f2;
   height: 100vh;
   font-family: "Butler";
-  color: #3a322c;
+  color: #231f1b;
 }
 
 

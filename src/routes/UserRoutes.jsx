@@ -3,6 +3,7 @@ import React from "react";
 
 // Routes
 const Profile = React.lazy(() => import("../screens/Client/Profile"));
+const Join = React.lazy(() => import("../screens/Client/Join"));
 
 const UserRoutes = [
   {
@@ -10,6 +11,15 @@ const UserRoutes = [
     element: (
       <DashboardLayout>
         <Profile />
+      </DashboardLayout>
+    ),
+    exact: true,
+  },
+  {
+    path: "/join",
+    element: (
+      <DashboardLayout>
+        <Join />
       </DashboardLayout>
     ),
     exact: true,

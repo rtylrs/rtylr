@@ -31,7 +31,7 @@ function DashboardLayout({ children }) {
             <Link to="#">Previous Orders</Link>
           </li>
           <li>
-            <Link to="#">Become a Business</Link>
+            <Link to="/join">Become a Business</Link>
           </li>
         </ul>
       </nav>

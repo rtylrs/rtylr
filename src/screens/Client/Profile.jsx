@@ -160,6 +160,16 @@ const ProfilePage = () => {
           </button>
         </div>
       )}
+
+      <div>
+        <button
+          onClick={() => {
+            auth.sendPasswordResetEmail(formData.email).then(() => {});
+          }}
+        >
+          Forgot Password
+        </button>
+      </div>
     </div>
   );
 };

@@ -87,7 +87,7 @@
 
       img {
         width: 100%; // Set the width to 100% for full width
-        height: 65%; // Set the height to 50% of the product item's height
+        // height: 65%; // Set the height to 50% of the product item's height
         border-radius: 4px;
         object-fit: cover; // Maintain aspect ratio and cover the entire space
       }
@@ -174,7 +174,7 @@
 
   &:hover {
     scale: 1.1;
-    z-index: 1000;
+    z-index: 10;
     transition: 0.7s;
   }
 }
