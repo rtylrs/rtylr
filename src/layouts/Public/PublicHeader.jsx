@@ -12,11 +12,14 @@ import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
 import PropTypes from "prop-types";
+import useWindowDimensions from "../../utils/useWindowDimensions";
 
 const Header = ({ openLogin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { width } = useWindowDimensions();
+
   // Use useEffect to set up an authentication listener
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -40,7 +43,13 @@ const Header = ({ openLogin }) => {
   };
 
   return (
-    <header className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}>
+    <header
+      className={
+        document.location.pathname === "/"
+          ? `header ${isMobileMenuOpen ? "mobile-menu-open" : ""}`
+          : `header-pages ${isMobileMenuOpen ? "mobile-menu-open" : ""} `
+      }
+    >
       <div className="header-left">
         <Link to="/shop">Shop</Link>
         <Link to="/pricing">Pricing</Link>
@@ -60,7 +69,12 @@ const Header = ({ openLogin }) => {
           src={Logo}
           alt="Logo"
           style={{
-            transform: user ? "translateX(-125px)" : "translateX(-145px)",
+            transform:
+              width > 768
+                ? user
+                  ? "translateX(-150px)"
+                  : "translateX(-165px)"
+                : "translateX(-130px)",
           }}
         />
       </div>
@@ -75,6 +89,7 @@ const Header = ({ openLogin }) => {
             onClick={() => {
               openLogin();
             }}
+            className="LoginButton"
           >
             <FontAwesomeIcon icon={faRightToBracket} />
           </div>
