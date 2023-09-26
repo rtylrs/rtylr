@@ -1,5 +1,144 @@
 /* Header Styles */
 .header {
+  position: absolute; /* Fix the header to the top */
+  top: 0; /* Place it at the top of the viewport */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding:5px 90px;
+  background-color: transparent;
+  color: #f2ebe5;
+  z-index: 1000; /* Add a z-index to layer it above other content */
+
+  @media only screen and (max-width: 768px){
+    padding: 5px 20px;
+    // width: 70%;
+  }
+
+  .header-left {
+    display: flex;
+    gap: 40px;
+    a {
+      text-decoration: none;
+      color: #f2ebe5;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    a:hover {
+      color: #b89077;
+      transition: 0.3s;
+    }
+
+    @media only screen and (max-width: 768px){
+      visibility: hidden;
+    }
+  }
+
+  .header-center {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex: 1; 
+  }
+
+  .header-center img {
+    max-width: 130px; 
+    height: auto;
+    filter: invert(1);
+  }
+
+  .header-right {
+    display: flex;
+    gap: 20px;
+    font-size: 27px;
+
+    a {
+      text-decoration: none;
+      color: #f2ebe5;
+
+      @media only screen and (max-width: 768px){
+        display: none;
+      }
+    }
+    a:hover {
+      color: #b89077;
+      transition: 0.3s;
+    }
+
+    div:hover {
+      color: #b89077;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+  }
+
+  .mobile-menu-toggle {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    color: #f2ebe5;
+    margin-right: 20px;
+  }
+  
+  .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 70%;
+    left: 0;
+    right: 0;
+    background-color: #f2ebe5;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-100%); /* Initial state, off-screen */
+    transition: transform 0.3s ease-in-out; /* Smooth transition for transform property */
+    padding-top: 30px;
+
+    a {
+      text-decoration: none;
+      color: #231f1b;
+      margin-bottom: 25px;
+      font-size: 20px;
+    }
+
+    animation: slideFromTheTop 0.5s ease-in-out;
+  }
+  
+  @media (max-width: 768px) {
+    .header-left {
+      flex-direction: column;
+    }
+  
+    .mobile-menu-toggle {
+      display: block;
+    }
+  
+    &.mobile-menu-open .mobile-menu {
+      display: flex;
+      transform: translateY(0); /* Final state, on-screen */
+      transition: 0.5s;
+    }
+  }
+}
+
+
+@keyframes slideFromTheTop {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.header-pages {
   position: fixed; /* Fix the header to the top */
   top: 0; /* Place it at the top of the viewport */
   left: 0;
@@ -120,15 +259,5 @@
       transform: translateY(0); /* Final state, on-screen */
       transition: 0.5s;
     }
-  }
-}
-
-
-@keyframes slideFromTheTop {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(0);
   }
 }

@@ -40,7 +40,7 @@ function Public({ children }) {
         />
         <div
           style={{
-            marginTop: "90px",
+            marginTop: document.location.pathname === "/" ? "0px" : "90px",
           }}
         >
           {React.Children.map(children, (child) => {

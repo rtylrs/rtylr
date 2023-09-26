@@ -1,8 +1,7 @@
 /* Base styles for Hero section */
 .Hero {
     text-align: center;
-    margin-top: 20px;
-    height: 80vh;
+    height:90vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -13,7 +12,6 @@
     background-repeat: no-repeat;
     background-size: cover;
     color: white;
-  }
   
   .hero-text {
     max-width: 850px;
@@ -57,6 +55,24 @@
   .searchBar:focus {
     border: 1px solid #f2ebe5;
   }
+
+  @media only screen and (max-width: 768px){
+    .hero-text h1 {
+      font-size: 2em;
+    }
+    .hero-text h2 {
+      font-size: 1.5em;
+    }
+
+    .searchBar {
+      width: 80%;
+      margin-top: 30%;
+    }
+
+  }
+
+}
+
   
 //Products section 
 
@@ -237,6 +253,7 @@
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
+      width: 90%;
     }
   }
 }
