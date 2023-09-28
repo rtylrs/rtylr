@@ -18,12 +18,13 @@
     height: 100%;
     object-fit: contain;
     transform: translate(-10px);
+    filter: invert(1);
   }
   
   // Sidebar Styles
   .sidebarUser {
     width: 250px;
-    background-color: #ac9888;
+    background-color: #191919;
     color: #fff;
     padding: 20px;
     

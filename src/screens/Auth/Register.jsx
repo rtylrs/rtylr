@@ -1,18 +1,17 @@
 import React from "react";
 
-import { auth, db } from "../firebase";
+import { auth, db } from "../../firebase";
 import { GoogleAuthProvider } from "firebase/auth";
-import { Modal } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 // Phone input
 import PropTypes from "prop-types";
-import ShowAlert from "../utils/showAlert";
-import { motion } from "framer-motion";
+import ShowAlert from "../../utils/showAlert";
+import { useNavigate } from "react-router-dom";
 
-function Register({ open, close }) {
+function Register() {
+  const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -66,7 +65,7 @@ function Register({ open, close }) {
             })
             .then(() => {
               ShowAlert("Registered Successfully", "success");
-              close();
+              navigate("/");
             });
         })
         .catch((e) => {
@@ -84,7 +83,8 @@ function Register({ open, close }) {
         .get()
         .then((doc) => {
           if (doc.exists) {
-            close();
+            navigate("/");
+            ShowAlert(`Welcome Back!`, "success");
           } else {
             db.collection("Users")
               .doc(result.user.uid)
@@ -125,7 +125,7 @@ function Register({ open, close }) {
                         html: `<p>Thanks for signing up!</p>`,
                       },
                     });
-                    close();
+                    navigate("/");
                   });
               })
               .catch((e) => {
@@ -140,24 +140,12 @@ function Register({ open, close }) {
   };
 
   return (
-    <Modal open={open} onClose={close}>
-      <motion.div
-        className="Register-modal-container"
-        initial={{ y: -1000 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <FontAwesomeIcon
-          icon={faClose}
-          className="LoginModal-close-icon"
-          onClick={() => {
-            close(true);
-          }}
-        />
-        <h2 className="Register-title">Sign Up</h2>
+    <div className="RegisterScreen-container">
+      <div className="RegisterScreen">
+        <h2 className="RegisterScreen-title">Sign Up</h2>
         <form onSubmit={handleRegister}>
           <input
-            className="RegisterModal-input"
+            className="RegisterScreen-input"
             type="text"
             placeholder="Full Name"
             id="Fname"
@@ -165,7 +153,7 @@ function Register({ open, close }) {
             onChange={(e) => setName(e.target.value)}
           />
           <input
-            className="RegisterModal-input"
+            className="RegisterScreen-input"
             type="email"
             placeholder="Email"
             id="email"
@@ -173,7 +161,7 @@ function Register({ open, close }) {
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
-            className="RegisterModal-input"
+            className="RegisterScreen-input"
             placeholder="Password"
             type="password"
             id="pass"
@@ -181,7 +169,7 @@ function Register({ open, close }) {
             onChange={(e) => setPassword(e.target.value)}
           />
           <input
-            className="RegisterModal-input"
+            className="RegisterScreen-input"
             type="password"
             id="conPass"
             placeholder="Confirm Password"
@@ -189,7 +177,7 @@ function Register({ open, close }) {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <input
-            className="RegisterModal-input"
+            className="RegisterScreen-input"
             type="text"
             id="conPass"
             placeholder="Refered By (Optional)"
@@ -197,16 +185,16 @@ function Register({ open, close }) {
             onChange={(e) => setRefered(e.target.value)}
           />
           <button
-            className="RegisterModal-button"
+            className="RegisterScreen-button"
             onClick={() => {
               handleRegister();
             }}
           >
-            {"Sign Up"}
+            Sign Up
           </button>
-          <div className="LoginModal-social-media">
+          <div className="RegisterScreen-social-media">
             <button
-              className="LoginModal-google-button"
+              className="RegisterScreen-google-button"
               onClick={() => {
                 handleRegisterWithGoogle();
               }}
@@ -216,8 +204,20 @@ function Register({ open, close }) {
             </button>
           </div>
         </form>
-      </motion.div>
-    </Modal>
+
+        <div className="LoginScreen-footer">
+          <p>
+            Already have an account?{" "}
+            <span className="LoginScreen-link" onClick={() => {}}>
+              Login Now.
+            </span>
+          </p>
+          <p className="LoginScreen-link" onClick={() => {}}>
+            Forgot Password?
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

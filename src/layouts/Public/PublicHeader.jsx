@@ -14,7 +14,7 @@ import Logo from "../../assets/logo.png";
 import PropTypes from "prop-types";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 
-const Header = ({ openLogin }) => {
+const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const Header = ({ openLogin }) => {
     >
       <div className="header-left">
         <Link to="/shop">Shop</Link>
-        <Link to="/pricing">Pricing</Link>
+        <Link to="/petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
       </div>
@@ -87,7 +87,7 @@ const Header = ({ openLogin }) => {
           // Display login icon if not logged in
           <div
             onClick={() => {
-              openLogin();
+              navigate("/login");
             }}
             className="LoginButton"
           >
@@ -97,7 +97,7 @@ const Header = ({ openLogin }) => {
 
         {user && (
           <>
-            <Link to="/admin">
+            <Link to="/manage">
               <FontAwesomeIcon icon={faHeart} />
             </Link>
           </>
