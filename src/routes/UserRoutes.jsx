@@ -3,7 +3,9 @@ import React from "react";
 
 // Routes
 const Profile = React.lazy(() => import("../screens/Client/Profile"));
-const Join = React.lazy(() => import("../screens/Client/Join"));
+const BecomeBusiness = React.lazy(() =>
+  import("../screens/Client/BecomeBusiness")
+);
 
 const UserRoutes = [
   {
@@ -19,7 +21,7 @@ const UserRoutes = [
     path: "/join",
     element: (
       <DashboardLayout>
-        <Join />
+        <BecomeBusiness />
       </DashboardLayout>
     ),
     exact: true,

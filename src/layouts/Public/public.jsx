@@ -4,13 +4,9 @@ import Footer from "./PublicFooter";
 
 import PropTypes from "prop-types";
 import Loader from "../loader/Loader";
-import Login from "../../components/Login";
-import Register from "../../components/Register";
 
 function Public({ children }) {
   const [loading, setLoading] = React.useState(false);
-  const [login, setLogin] = React.useState(false);
-  const [register, setRegister] = React.useState(false);
 
   return (
     <div>
@@ -20,11 +16,8 @@ function Public({ children }) {
           display: loading ? "none" : "",
         }}
       >
-        <Header
-          openLogin={() => setLogin(true)}
-          openRegister={() => setRegister(true)}
-        />
-        <Login
+        <Header />
+        {/* <Login
           open={login}
           close={() => {
             setLogin(false);
@@ -37,7 +30,7 @@ function Public({ children }) {
             setRegister(false);
           }}
           openLogin={() => setLogin(true)}
-        />
+        /> */}
         <div
           style={{
             marginTop: document.location.pathname === "/" ? "0px" : "90px",
@@ -45,7 +38,6 @@ function Public({ children }) {
         >
           {React.Children.map(children, (child) => {
             return React.cloneElement(child, {
-              openLogin: () => setLogin(true),
               startLoading: () => setLoading(true),
               endLoading: () => setLoading(false),
             });

@@ -16,6 +16,7 @@
 // Scss imports Client
 @import './scss/Client/UserLayout.scss';
 @import './scss/Client/Profile.scss';
+@import './scss/Client/Join.scss';
 
 //Admin Imports 
 @import './scss/Admin/Admin.scss';
@@ -44,7 +45,7 @@ body {
   padding: 0;
   background-color: #fbf6f2;
   height: 100vh;
-  font-family: "Butler";
+  font-family: "Lucky Typewriter";
   color: #231f1b;
 }
 
