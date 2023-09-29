@@ -9,9 +9,12 @@
 @import './scss/Public/About.scss';
 @import './scss/Public/Pricing.scss';
 @import './scss/Public/Contact.scss';
+@import './scss/Public/Collection.scss';
 
 // Scss imports Components
 @import './scss/Components/Alert.scss';
+@import './scss/Components/ProductCard.scss';
+@import './scss/Components/ProductsGrid.scss';
 
 // Scss imports Client
 @import './scss/Client/UserLayout.scss';
