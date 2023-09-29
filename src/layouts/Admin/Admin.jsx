@@ -18,7 +18,6 @@ function Admin(props) {
   };
 
   React.useEffect(() => {
-    document.title = "Sanity | Admin";
     // if not user redirect to login
     auth.onAuthStateChanged((user) => {
       if (!user) {
