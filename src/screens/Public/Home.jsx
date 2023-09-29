@@ -108,7 +108,7 @@ function Home() {
               style={{
                 backgroundImage: `url(${category.imageUrl})`,
               }}
-              to={`/shop/${category.title.toLowerCase()}`}
+              to={`/collection/${category.title.toLowerCase()}`}
             >
               <div className="item-content">
                 <p>{category.title}</p>

@@ -1,6 +1,7 @@
 import AnimatedRoutes from "../components/AnimatedRoutes";
 import Public from "../layouts/Public/public";
 import React from "react";
+import Collection from "../screens/Public/Collection";
 
 // Routes
 const Home = React.lazy(() => import("../screens/Public/Home"));
@@ -60,6 +61,17 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Feedback />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/collection/:collectionName",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <Collection />
         </AnimatedRoutes>
       </Public>
     ),
