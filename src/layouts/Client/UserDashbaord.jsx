@@ -32,7 +32,7 @@ function UserDashboard(props) {
     // <AnimatedRoutes>
     <div className="Admincontainer">
       <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
-      <div className="InnerContainerUser">{props.children}</div>
+      <div className="InnerContainer">{props.children}</div>
       <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
     </div>
     // </AnimatedRoutes>
