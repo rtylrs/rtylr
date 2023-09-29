@@ -21,6 +21,12 @@ const App = () => {
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
+    // get language from local storage
+    const language = localStorage.getItem("language");
+    if (language) {
+      i18next.changeLanguage(language);
+    }
+
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         // User is logged in

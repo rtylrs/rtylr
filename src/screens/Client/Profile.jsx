@@ -28,10 +28,21 @@ const ProfilePage = () => {
         paymentInfo: "",
       });
     }
+
+    const language = localStorage.getItem("language");
+    if (language) {
+      setFormData({
+        ...formData,
+        language,
+      });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectLanguage = (language) => {
     i18next.changeLanguage(language);
+    localStorage.setItem("language", language);
   };
 
   const handleEditClick = (field) => {
@@ -123,6 +134,10 @@ const ProfilePage = () => {
           value={formData.language}
           onChange={(e) => {
             selectLanguage(e.target.value);
+            setFormData({
+              ...formData,
+              language: e.target.value,
+            });
           }}
         >
           <option value="en">English</option>
