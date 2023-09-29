@@ -1,71 +1,46 @@
-import PropTypes from "prop-types";
+import React from "react";
+import Navbar from "./UserNavbar";
+import SideBar from "./UserSidebar";
 import { auth } from "../../firebase";
-import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../../redux/reducers/userSlice";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-import Logo from "../../assets/logo.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
-
-function DashboardLayout({ children }) {
-  const dispatch = useDispatch();
+function UserDashboard(props) {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  React.useEffect(() => {
+    // if not user redirect to login
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        navigate("/");
+      }
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="dashboard-layout">
-      <nav className="sidebarUser">
-        <div className="logo">
-          <Link to="/">
-            <img src={Logo} alt="logo" />
-          </Link>
-        </div>
-        <ul>
-          <li>
-            <Link to="#">Profile</Link>
-          </li>
-          <li>
-            <Link to="#">Favorites</Link>
-          </li>
-          <li>
-            <Link to="#">Previous Orders</Link>
-          </li>
-          <li>
-            <Link to="/join">Become a Business</Link>
-          </li>
-        </ul>
-      </nav>
-
-      <main className="main-content">
-        <header className="top-bar">
-          <p>Hello {auth.currentUser.displayName}!</p>
-          <div>
-            <Link to="/">
-              <FontAwesomeIcon icon={faHome} />
-            </Link>
-
-            <button
-              className="logout-button"
-              onClick={() => {
-                auth.signOut().then(() => {
-                  dispatch(logout());
-                  navigate("/");
-                });
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        </header>
-
-        {children}
-      </main>
+    // <AnimatedRoutes>
+    <div className="Admincontainer">
+      <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
+      <div className="InnerContainerUser">{props.children}</div>
+      <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
     </div>
+    // </AnimatedRoutes>
   );
 }
 
-DashboardLayout.propTypes = {
+UserDashboard.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export default DashboardLayout;
+export default UserDashboard;
