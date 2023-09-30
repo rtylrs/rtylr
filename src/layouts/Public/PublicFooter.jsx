@@ -33,7 +33,7 @@ const Footer = () => {
           <h3>Support</h3>
           <ul>
             <li>
-              <Link to="/petition">Petition</Link>
+              <Link to="/petition">Petitions</Link>
             </li>
             <li>
               <Link to="/donate">Donate</Link>
@@ -50,7 +50,7 @@ const Footer = () => {
               <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="/shop">Shop</Link>
+              <Link to="https://www.thesanitystore.com">Shop</Link>
             </li>
             <li>
               <Link to="/about">About</Link>
