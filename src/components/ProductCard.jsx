@@ -8,6 +8,7 @@ function ProductCard({ product }) {
         <img src={product?.images[0]} alt="Product image" />
         <h3 className="name">Product 1</h3>
         <p className="creator">{product?.creator}</p>
+        <p className="price">{product?.price} KD</p>
         <div className="ctaContainer">
           <button className="addBtn">
             <span>+</span>

@@ -27,7 +27,16 @@
 
   p {
     font-size: 14px;
-    color: #666;
+
+    &.creator {
+      color: #666;
+    }
+
+    &.price {
+      color: black;
+      text-align: right;
+      font-weight: bold;
+    }
   }
 
   .ctaContainer {
