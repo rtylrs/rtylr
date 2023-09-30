@@ -22,7 +22,7 @@ const Footer = () => {
               <Link to="/Privacy">Privacy</Link>
             </li>
             <li>
-              <Link to="/feedback">Feedback</Link>
+              <Link to="https://www.thesanitystore.com/contact">Feedback</Link>
             </li>
             <li>
               <Link to="/pricing">Pricing</Link>
@@ -71,13 +71,13 @@ const Footer = () => {
                   cursor: "pointer",
                 }}
                 onClick={() => {
-                  window.open("mailto:hello@sanitykuwait.com");
+                  window.open("mailto:TheSanityStore@gmail.com");
                 }}
               >
                 hello@sanitykuwait.com
               </span>
             </li>
-            <li>Phone: +1234567890</li>
+            <li>Phone: +96598895586</li>
           </ul>
         </div>
       </div>
@@ -91,16 +91,16 @@ const Footer = () => {
           <a href="https://www.instagram.com/TheSanityStore">
             <FontAwesomeIcon icon={faInstagram} />
           </a>
-          <a
-            href="mailto:
-              hello@sanitykuwait.com"
-          >
+          <a href="mailto:TheSanityStore@gmail.com">
             <FontAwesomeIcon icon={faEnvelope} />
           </a>
         </div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} Sanity</p>
+        <p>
+          &copy; {new Date().getFullYear() - 1} - {new Date().getFullYear()},
+          Sanity All rights reserved.
+        </p>
       </div>
     </footer>
   );

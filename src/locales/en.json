@@ -2,7 +2,8 @@
   "Hero": {
     "welcome": "Welcome to Sanity!",
     "discover": "Embark on the journey to a zero-waste lifestyle! Discover your path or explore limitless sustainable opportunities. Your ultimate destination for eco-conscious living.",
-    "searchPlaceholder": "Search for products..."
+    "searchPlaceholder": "Search for products...",
+    "shop": "Browse Our Products"
   },
   "ProductSection": {
     "title": "Browse Products",

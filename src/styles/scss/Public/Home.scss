@@ -1,12 +1,12 @@
 /* Base styles for Hero section */
 .Hero {
     text-align: center;
-    height:87vh;
+    height:91vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)),
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
       url("/images/HeroBg.webp");
     background-position: center;
     background-repeat: no-repeat;
@@ -19,7 +19,7 @@
   }
   
   .hero-text h1 {
-    font-size: 2.7em;
+    font-size: 2.9em;
     font-weight: 500;
     padding: 10px;
   color: #f2ebe5;    
@@ -31,6 +31,25 @@
     margin-bottom: 20px;
     color: #f2ebe5;
   }
+
+  .hero-button {
+    background-color: #846552;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 8%;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #b89077;
+      transition: 0.6s;
+      scale: 1.1;
+    }
+  }
   
   /* Search bar styles */
   .searchBarHome {
@@ -40,23 +59,7 @@
     align-items: center;
   }
   
-  .searchBar {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.8);
-    outline: none;
-  }
-  
-  .searchBar::placeholder {
-    color: #333;
-  }
 
-  .searchBar:focus {
-    border: 1px solid #f2ebe5;
-  }
 
   @media only screen and (max-width: 768px){
     .hero-text h1 {
@@ -66,11 +69,7 @@
       font-size: 1.5em;
     }
 
-    .searchBar {
-      width: 80%;
-      margin-top: 30%;
-    }
-
+  
   }
 
 }
@@ -79,6 +78,7 @@
 //Products section 
 
 .product-section {
+  display: none;
   padding: 40px;
   text-align: center;
 
@@ -165,8 +165,9 @@
 
 // Catgeories Section
 .home-section {
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+  margin-top:15px;
 }
 
 .grid-container {
@@ -178,6 +179,7 @@
 
   @media only screen and (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
+    max-width: none;
   }
 }
 
@@ -215,6 +217,63 @@
   text-transform: uppercase;
 }
 
+.home-goals {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+    url("/images/HomeBg.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 150px 150px; // Reduced padding for smaller screens
+  color: #fff;
+  margin-top: 5%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;  
+
+  .home-goals-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Initially, display 3 items per row
+    gap: 20px;
+    max-width: 1600px;
+
+    .goal {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        transform: translateY(-5px);
+        transition: 0.3s;
+      }
+
+      svg {
+        font-size: 36px;
+        margin-bottom: 20px;
+      }
+
+      p {
+        font-size: 18px;
+        margin: 0;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .home-goals {
+      padding: 50px 0px; // Adjusted padding for smaller screens
+    }
+    .home-goals-content {
+      grid-template-columns: repeat(2, 1fr); // On mobile, display 2 items per row
+      max-width: none;
+    }
+  }
+}
+
+
+  
+
 //Blog Section
 .blog-section {
   padding: 40px 0;
@@ -234,7 +293,7 @@
 
     .blog-post {
       background-color: #f6ede6;
-      border-radius: 8px;
+      border-radius: 5px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s;
       padding: 15px;
@@ -272,7 +331,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-top: 20px;
+  margin-top: 40px;
 
   &:hover {
     background-color: #b89077;

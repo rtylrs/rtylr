@@ -5,13 +5,21 @@ import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import PetitionModal from "../../components/PetitionModal";
-import useWindowDimensions from "../../utils/useWindowDimensions";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faRecycle,
+  faLeaf,
+  faTint,
+  faShoppingCart,
+  faHandHoldingHeart,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [blogs, setBlogs] = useState([]);
-  const { width } = useWindowDimensions();
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
   // const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState(null);
@@ -90,15 +98,14 @@ function Home() {
         <div className="hero-text">
           <h1>{t("Hero.welcome")}</h1>
           <h2>{t("Hero.discover")}</h2>
-          {width > 768 && (
-            <div className="searchBarHome">
-              <input
-                type="text"
-                placeholder={t("Hero.searchPlaceholder")}
-                className="searchBar"
-              />
-            </div>
-          )}
+          <button
+            className="hero-button"
+            onClick={() =>
+              window.open("https://www.thesanitystore.com/", "_self")
+            }
+          >
+            {t("Hero.shop")}
+          </button>
         </div>
       </div>
       <section className="product-section">
@@ -131,7 +138,7 @@ function Home() {
       </section>
 
       <section className="home-section">
-        <h2 className="section-title">Our Menu</h2>
+        <h2 className="section-title">Our Green Selection</h2>
         <div className="grid-container">
           {Categories.map((category, index) => (
             <Link
@@ -140,13 +147,42 @@ function Home() {
               style={{
                 backgroundImage: `url(${category.imageUrl})`,
               }}
-              to={`/collection/${category.title.toLowerCase()}`}
+              to={`${category.url}`}
             >
               <div className="item-content">
                 <p>{category.title}</p>
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="home-goals">
+        <div className="home-goals-content">
+          <div className="goal">
+            <FontAwesomeIcon icon={faRecycle} />
+            <p>Promote Waste Reduction</p>
+          </div>
+          <div className="goal">
+            <FontAwesomeIcon icon={faLeaf} />
+            <p>Advance Sustainable Living</p>
+          </div>
+          <div className="goal">
+            <FontAwesomeIcon icon={faTint} />
+            <p>Eliminate Single-Use Plastics</p>
+          </div>
+          <div className="goal">
+            <FontAwesomeIcon icon={faShoppingCart} />
+            <p>Introduce Waste-Free Shopping Culture</p>
+          </div>
+          <div className="goal">
+            <FontAwesomeIcon icon={faHandHoldingHeart} />
+            <p>Support the Community</p>
+          </div>
+          <div className="goal">
+            <FontAwesomeIcon icon={faUsers} />
+            <p>Inspire Sustainable Awareness</p>
+          </div>
         </div>
       </section>
 
@@ -183,7 +219,7 @@ function Home() {
       </section>
 
       <section className="petition-section">
-        <h2>Newest Petitions</h2>
+        <h2>Latest Petitions</h2>
         <div className="petition-list">
           {petitions.map((petition, index) => (
             <div className="petition-item" key={index}>

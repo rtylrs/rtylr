@@ -117,7 +117,8 @@ function AdminBlog() {
                 <td>{blog.content}</td>
                 <td>
                   <Button
-                    className="edit-button"
+                    variant="contained"
+                    color="primary"
                     onClick={() => handleOpenEditModal(blog)}
                   >
                     Edit

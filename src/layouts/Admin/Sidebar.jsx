@@ -33,33 +33,14 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <h2>Management</h2>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
-          <Link to="/admin/users" id="link">
-            Users
-          </Link>
-        </div>
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
-          <Link to="/admin/vendors" id="link">
-            Suppliers
-          </Link>
-        </div>
-        <div className="sidebar__link">
           <FontAwesomeIcon icon={faUserSecret} className="sidebar__icon" />
-          <Link to="/admin/managment" id="link">
+          <Link to="/manage/managment" id="link">
             Add/Remove Admins
-          </Link>
-        </div>
-
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
-          <Link to="/admin/feedback" id="link">
-            Feedback
           </Link>
         </div>
         <div className="sidebar__link">
           <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
-          <Link to="/admin/blog" id="link">
+          <Link to="/manage/blog" id="link">
             Blog
           </Link>
         </div>
