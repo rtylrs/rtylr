@@ -19,6 +19,7 @@ import { Badge } from "@mui/material";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { width } = useWindowDimensions();
   const [notificationsCount, setNotificationsCount] = useState(0);
@@ -33,6 +34,18 @@ const Header = () => {
         // User is not logged in
         setUser(null);
       }
+
+      db.collection("Users")
+        .doc(authUser?.uid)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            const user = Object.assign({}, doc.data(), {
+              uid: doc.id,
+            });
+            setUserData(user);
+          }
+        });
 
       db.collection("notifications")
         .where("uid", "==", authUser?.uid)
@@ -90,7 +103,7 @@ const Header = () => {
       </div>
       <div className="header-right">
         {user ? ( // Check if user is logged in
-          <Link to="/account">
+          <Link to={userData?.isVendor ? "/business" : "/account"}>
             <FontAwesomeIcon icon={faUser} />
           </Link>
         ) : (
@@ -110,21 +123,21 @@ const Header = () => {
             <Link to="/manage">
               <FontAwesomeIcon icon={faHeart} />
             </Link>
+            <Link to="/notifications">
+              <Badge
+                badgeContent={notificationsCount}
+                color="error"
+                style={{ marginRight: "10px" }}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <FontAwesomeIcon icon={faEnvelope} />
+              </Badge>
+            </Link>
           </>
         )}
-        <Link to="/notifications">
-          <Badge
-            badgeContent={notificationsCount}
-            color="error"
-            style={{ marginRight: "10px" }}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <FontAwesomeIcon icon={faEnvelope} />
-          </Badge>
-        </Link>
 
         <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? (

@@ -4,6 +4,7 @@ import PublicRoutes from "./routes/PublicRoutes";
 import UserRoutes from "./routes/UserRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
+import VendorRoutes from "./routes/VendorRoutes";
 
 import { useState, useEffect } from "react";
 
@@ -14,6 +15,7 @@ import i18next from "./services/i18next";
 
 import AlertModal from "./components/Alert/AlertModal";
 import { AdminRoute } from "./utils/AdminRoute";
+import { BusinessRoute } from "./utils/BusinessRoute";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -87,6 +89,24 @@ const App = () => {
             user && (
               <>
                 {AdminRoutes.map((route, index) => (
+                  <Route
+                    key={index}
+                    path={route.path}
+                    exact={route.exact}
+                    element={route.element}
+                  />
+                ))}
+              </>
+            )
+          }
+        </Route>
+
+        <Route exact path="/business" element={<BusinessRoute />}>
+          {
+            // Vendor routes
+            user && (
+              <>
+                {VendorRoutes.map((route, index) => (
                   <Route
                     key={index}
                     path={route.path}
