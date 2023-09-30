@@ -7,6 +7,7 @@ import {
   faTimes,
   faRightToBracket,
   faEnvelope,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
@@ -93,34 +94,54 @@ const Header = () => {
             transform:
               width > 768
                 ? user
-                  ? "translateX(-150px)"
-                  : "translateX(-165px)"
-                : "translateX(-130px)",
+                  ? document.location.pathname === "/"
+                    ? "translateX(-135px)"
+                    : "translateX(-120px)"
+                  : document.location.pathname === "/"
+                  ? "translateX(-183px)"
+                  : "translateX(-150px)"
+                : "translateX(-90%)",
+            filter:
+              width > 768
+                ? document.location.pathname === "/"
+                  ? "invert(1)"
+                  : "none"
+                : isMobileMenuOpen
+                ? "none"
+                : document.location.pathname === "/"
+                ? "invert(1)"
+                : "none",
           }}
         />
       </div>
       <div className="header-right">
-        {user ? ( // Check if user is logged in
-          <Link to={userData?.isVendor ? "/business" : "/account"}>
-            <FontAwesomeIcon icon={faUser} />
-          </Link>
-        ) : (
-          // Display login icon if not logged in
-          <div
-            onClick={() => {
-              navigate("/login");
-            }}
-            className="LoginButton"
-          >
-            <FontAwesomeIcon icon={faRightToBracket} />
-          </div>
+        {width > 768 && (
+          <>
+            {user ? ( // Check if user is logged in
+              <Link to={userData?.isVendor ? "/business" : "/account"}>
+                <FontAwesomeIcon icon={faUser} title="My Account" />
+              </Link>
+            ) : (
+              // Display login icon if not logged in
+              <div
+                onClick={() => {
+                  navigate("/login");
+                }}
+                className="LoginButton"
+              >
+                <FontAwesomeIcon icon={faRightToBracket} title="Login" />
+              </div>
+            )}
+          </>
         )}
 
         {user && (
           <>
-            <Link to="/manage">
-              <FontAwesomeIcon icon={faHeart} />
-            </Link>
+            {!userData?.isVendor && (
+              <Link to="/manage">
+                <FontAwesomeIcon icon={faHeart} title="favorites" />
+              </Link>
+            )}
             <Link to="/notifications">
               <Badge
                 badgeContent={notificationsCount}
@@ -137,7 +158,18 @@ const Header = () => {
           </>
         )}
 
-        <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+        <button
+          className="mobile-menu-toggle"
+          onClick={toggleMobileMenu}
+          style={{
+            color:
+              document.location.pathname === "/"
+                ? isMobileMenuOpen
+                  ? "#231f1b"
+                  : "#f2ebe5"
+                : "#231f1b",
+          }}
+        >
           {isMobileMenuOpen ? (
             <FontAwesomeIcon icon={faTimes} />
           ) : (
@@ -147,11 +179,45 @@ const Header = () => {
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/">Shop</Link>
-          <Link to="/">Account</Link>
-          <Link to="/">Wishlist</Link>
-          <Link to="/">About</Link>
-          <Link to="/">Contact Us</Link>
+          <Link to="/shop">Shop</Link>
+          <Link to="/petitions">Petitions</Link>
+          {user && !userData?.isVendor && (
+            <Link to="/favorites">Favorites</Link>
+          )}
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact Us</Link>
+
+          <div>
+            <input type="text" placeholder="Search" />
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              id="search-icon-menu"
+              onClick={() => {
+                navigate("/search");
+              }}
+            />
+          </div>
+          {user ? (
+            <button
+              onClick={() => {
+                if (userData?.isVendor) {
+                  navigate("/business");
+                }
+
+                navigate("/account");
+              }}
+            >
+              My Account
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                navigate("/login");
+              }}
+            >
+              Login
+            </button>
+          )}
         </div>
       )}
     </header>
