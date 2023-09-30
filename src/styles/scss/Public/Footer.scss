@@ -2,7 +2,7 @@
 .footer {
     background-color: #f2ebe5;
     color: #231f1b;
-    padding: 20px;
+
   
     .footer-top {
       text-align: center;
@@ -13,6 +13,8 @@
     }
   
     .footer-sections {
+      padding-left: 20px;
+      padding-right: 20px;
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
@@ -54,7 +56,7 @@
   
       .social-icons {
         a {
-          font-size: 24px;
+          font-size: 22px;
           margin: 0 10px;
           color: #231f1b;
           text-decoration: none;
@@ -67,9 +69,17 @@
     }
   
     .footer-bottom {
+      // width: 100%;
+      background-color: #d5c9bf;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
       text-align: center;
       margin-top: 20px;
       font-size: 14px;
+      font-weight: bold;
   
       p {
         margin: 0;

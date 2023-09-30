@@ -73,7 +73,12 @@ const Header = () => {
       }
     >
       <div className="header-left">
-        <Link to="/shop">Shop</Link>
+        <Link
+          to="https://www.thesanitystore.com/
+        "
+        >
+          Shop
+        </Link>
         <Link to="/petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
@@ -93,13 +98,9 @@ const Header = () => {
           style={{
             transform:
               width > 768
-                ? user
-                  ? document.location.pathname === "/"
-                    ? "translateX(-135px)"
-                    : "translateX(-120px)"
-                  : document.location.pathname === "/"
-                  ? "translateX(-183px)"
-                  : "translateX(-150px)"
+                ? document.location.pathname === "/"
+                  ? "translateX(-110px)"
+                  : "translateX(-75px)"
                 : "translateX(-90%)",
             filter:
               width > 768
@@ -115,7 +116,7 @@ const Header = () => {
         />
       </div>
       <div className="header-right">
-        {width > 768 && (
+        {/* {width > 768 && (
           <>
             {user ? ( // Check if user is logged in
               <Link to={userData?.isVendor ? "/business" : "/account"}>
@@ -156,7 +157,7 @@ const Header = () => {
               </Badge>
             </Link>
           </>
-        )}
+        )} */}
 
         <button
           className="mobile-menu-toggle"
@@ -176,48 +177,31 @@ const Header = () => {
             <FontAwesomeIcon icon={faBars} />
           )}
         </button>
+
+        {width > 768 && (
+          <button
+            onClick={() => {
+              window.open("https://www.thesanitystore.com/", "_self");
+            }}
+            className="browse-products"
+          >
+            Browse Products
+          </button>
+        )}
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/shop">Shop</Link>
+          <Link to="https://www.thesanitystore.com/">Shop</Link>
           <Link to="/petitions">Petitions</Link>
-          {user && !userData?.isVendor && (
-            <Link to="/favorites">Favorites</Link>
-          )}
           <Link to="/about">About</Link>
           <Link to="/contact">Contact Us</Link>
-
-          <div>
-            <input type="text" placeholder="Search" />
-            <FontAwesomeIcon
-              icon={faMagnifyingGlass}
-              id="search-icon-menu"
-              onClick={() => {
-                navigate("/search");
-              }}
-            />
-          </div>
-          {user ? (
-            <button
-              onClick={() => {
-                if (userData?.isVendor) {
-                  navigate("/business");
-                }
-
-                navigate("/account");
-              }}
-            >
-              My Account
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                navigate("/login");
-              }}
-            >
-              Login
-            </button>
-          )}
+          <button
+            onClick={() => {
+              window.open("https://www.thesanitystore.com/", "_self");
+            }}
+          >
+            Browse Products
+          </button>
         </div>
       )}
     </header>

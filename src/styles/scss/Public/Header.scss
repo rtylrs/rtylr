@@ -364,3 +364,22 @@
     }
   }
 }
+
+
+.browse-products {
+    background-color: #846552;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #b89077;
+      transition: 0.6s;
+      scale: 1.1;
+    }
+}
