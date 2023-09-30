@@ -12,7 +12,6 @@ import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
-import PropTypes from "prop-types";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { Badge } from "@mui/material";
 
@@ -30,30 +29,29 @@ const Header = () => {
       if (authUser) {
         // User is logged in
         setUser(authUser);
+        db.collection("Users")
+          .doc(authUser?.uid)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const user = Object.assign({}, doc.data(), {
+                uid: doc.id,
+              });
+              setUserData(user);
+            }
+          });
+
+        db.collection("notifications")
+          .where("uid", "==", authUser?.uid)
+          .where("read", "==", false)
+          .get()
+          .then((snapshot) => {
+            setNotificationsCount(snapshot.size);
+          });
       } else {
         // User is not logged in
         setUser(null);
       }
-
-      db.collection("Users")
-        .doc(authUser?.uid)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            const user = Object.assign({}, doc.data(), {
-              uid: doc.id,
-            });
-            setUserData(user);
-          }
-        });
-
-      db.collection("notifications")
-        .where("uid", "==", authUser?.uid)
-        .where("read", "==", false)
-        .get()
-        .then((snapshot) => {
-          setNotificationsCount(snapshot.size);
-        });
     });
 
     return () => {
@@ -158,10 +156,6 @@ const Header = () => {
       )}
     </header>
   );
-};
-
-Header.propTypes = {
-  openLogin: PropTypes.func.isRequired,
 };
 
 export default Header;
