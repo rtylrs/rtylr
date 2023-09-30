@@ -9,6 +9,7 @@
   align-items: center;
   padding:5px 90px;
   background-color: transparent;
+  height: 140px;
   color: #f2ebe5;
   z-index: 1000; /* Add a z-index to layer it above other content */
 
@@ -46,7 +47,8 @@
   .header-center img {
     max-width: 130px; 
     height: auto;
-    filter: invert(1);
+    z-index: 2000;
+    transition: 0.6s;
   }
 
   .header-right {
@@ -81,14 +83,14 @@
     cursor: pointer;
     background-color: transparent;
     border: none;
-    color: #f2ebe5;
     margin-right: 20px;
+    z-index: 3000;
   }
   
   .mobile-menu {
     display: none;
     position: absolute;
-    top: 70%;
+    top: 0%;
     left: 0;
     right: 0;
     background-color: #f2ebe5;
@@ -99,7 +101,57 @@
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
     transform: translateY(-100%); /* Initial state, off-screen */
     transition: transform 0.3s ease-in-out; /* Smooth transition for transform property */
-    padding-top: 30px;
+    padding-top: 130px;
+
+    div {
+      width: 95%;
+      height: 40px;
+      border: none;
+      border-radius: 5px;
+      padding: 0 10px;
+      margin-bottom: 0px;
+      font-size: 16px;  
+      background-color: #231f1b;
+      margin-top: 20px;
+
+      input {
+        width: 92%;
+        height: 100%;
+        border: none;
+        background-color: transparent;
+        color: #f2ebe5;
+        font-size: 16px;
+        justify-self: flex-start;
+      }
+      
+      input:focus {
+        outline: none;
+      }
+
+      #search-icon-menu {
+        width: 8%;
+        background-color: transparent;
+        border: none;
+        color: #f2ebe5;
+        font-size: 16px;
+        justify-self: flex-end;
+        cursor: pointer;
+      }
+    } 
+
+      button {
+        width: 100%;
+        height: 40px;
+        border: none;
+        border-radius: 5px;
+        padding: 0 10px;
+        margin-bottom: 10px;
+        font-size: 16px;  
+        background-color: #231f1b;
+        margin-top: 15px;
+        color: #f2ebe5;
+        cursor: pointer;
+      }
 
     a {
       text-decoration: none;
@@ -146,10 +198,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 30px;
+  padding: 20px 90px;
   background-color: #f2ebe5;
   color: #231f1b;
-  height: 90px;
+  height: 50px;
   z-index: 1000; /* Add a z-index to layer it above other content */
 
   .header-left {
@@ -234,6 +286,57 @@
     transform: translateY(-100%); /* Initial state, off-screen */
     transition: transform 0.3s ease-in-out; /* Smooth transition for transform property */
     padding-top: 30px;
+
+    div {
+      width: 100%;
+      height: 40px;
+      border: none;
+      border-radius: 5px;
+      padding: 0 10px;
+      margin-bottom: 0px;
+      font-size: 16px;  
+      background-color: #231f1b;
+      margin-top: 20px;
+
+      input {
+        width: 92%;
+        height: 100%;
+        border: none;
+        background-color: transparent;
+        color: #f2ebe5;
+        font-size: 16px;
+        justify-self: flex-start;
+      }
+      
+      input:focus {
+        outline: none;
+      }
+
+      #search-icon-menu {
+        width: 8%;
+        background-color: transparent;
+        border: none;
+        color: #f2ebe5;
+        font-size: 16px;
+        justify-self: flex-end;
+        cursor: pointer;
+      }
+    } 
+
+
+    button {
+      width: 100%;
+      height: 40px;
+      border: none;
+      border-radius: 5px;
+      padding: 0 10px;
+      margin-bottom: 10px;
+      font-size: 16px;  
+      background-color: #231f1b;
+      margin-top: 15px;
+      color: #f2ebe5;
+      cursor: pointer;
+    }
 
     a {
       text-decoration: none;

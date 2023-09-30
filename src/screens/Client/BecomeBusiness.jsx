@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "../../firebase";
+import { useNavigate } from "react-router-dom";
 
 function BecomeBusiness() {
   // Define state variables to store form data
+  const navigate = useNavigate();
   const [requestStatus, setRequestStatus] = useState("pending"); // Can be "pending", "approved", or "denied"
   const [businessName, setBusinessName] = useState("");
   const [businessNameArabic, setBusinessNameArabic] = useState("");
@@ -41,11 +43,11 @@ function BecomeBusiness() {
           userId: auth.currentUser?.uid,
           email: auth.currentUser?.email,
           status: "pending",
+          paid: false,
           country, // Include the selected country in the request
         })
         .then(() => {
-          // Submission successful, update state
-          setRequestStatus("pending");
+          navigate("/join/payment");
         })
         .catch((error) => {
           // Handle submission error
@@ -118,7 +120,7 @@ function BecomeBusiness() {
             </select>
           </div>
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Request Pending" : "Submit Application"}
+            Proced to Payment
           </button>
         </form>
       )}

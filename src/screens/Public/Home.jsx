@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import PetitionModal from "../../components/PetitionModal";
+import useWindowDimensions from "../../utils/useWindowDimensions";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [blogs, setBlogs] = useState([]);
-
+  const { width } = useWindowDimensions();
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
   // const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState(null);
@@ -89,13 +90,15 @@ function Home() {
         <div className="hero-text">
           <h1>{t("Hero.welcome")}</h1>
           <h2>{t("Hero.discover")}</h2>
-          <div className="searchBarHome">
-            <input
-              type="text"
-              placeholder={t("Hero.searchPlaceholder")}
-              className="searchBar"
-            />
-          </div>
+          {width > 768 && (
+            <div className="searchBarHome">
+              <input
+                type="text"
+                placeholder={t("Hero.searchPlaceholder")}
+                className="searchBar"
+              />
+            </div>
+          )}
         </div>
       </div>
       <section className="product-section">

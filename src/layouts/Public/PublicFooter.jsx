@@ -39,7 +39,7 @@ const Footer = () => {
               <Link to="/donate">Donate</Link>
             </li>
             <li>
-              <Link to="/blog/public/add ">Publish Link Blog</Link>
+              <Link to="/blog/public/add ">Publish a Blog</Link>
             </li>
           </ul>
         </div>

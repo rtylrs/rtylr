@@ -14,7 +14,6 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme({
   palette: {
@@ -28,7 +27,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Suspense fallback={<Loader />}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
         <I18nextProvider i18n={i18next}>
           <Provider store={store}>
             <BrowserRouter>

@@ -57,7 +57,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div className="sidebar__link">
           <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
-          <Link to="/blog/submit" id="link">
+          <Link to="/blog/public/add" id="link">
             Submit a Blog
           </Link>
         </div>
