@@ -5,9 +5,11 @@ import {
   faClose,
   faHome,
   faUser,
-  faBuilding,
-  faUserSecret,
-  faBlog,
+  faHeart,
+  faCog,
+  faClockRotateLeft,
+  faFeatherPointed,
+  faCube,
 } from "@fortawesome/free-solid-svg-icons";
 import Logo from "../../assets/logo.png";
 
@@ -42,26 +44,32 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faHeart} className="sidebar__icon" />
           <Link to="/favorites" id="link">
             Favorites
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faClockRotateLeft} className="sidebar__icon" />
           <Link to="/my-history" id="link">
             Previous Orders
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUserSecret} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+          <Link to="/blog/submit" id="link">
+            Submit a Blog
+          </Link>
+        </div>
+        <div className="sidebar__link">
+          <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/settings" id="link">
             Settings
           </Link>
         </div>
 
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faBlog} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faFeatherPointed} className="sidebar__icon" />
           <Link to="/join" id="link">
             Become a business
           </Link>

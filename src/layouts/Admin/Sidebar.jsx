@@ -7,7 +7,7 @@ import {
   faUser,
   faBuilding,
   faUserSecret,
-  faBlog,
+  faCube,
 } from "@fortawesome/free-solid-svg-icons";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
@@ -58,7 +58,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faBlog} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
           <Link to="/admin/blog" id="link">
             Blog
           </Link>

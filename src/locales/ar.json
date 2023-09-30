@@ -9,6 +9,16 @@
     "buyNow": "اشتر الآن",
     "viewMore": "عرض المزيد"
   },
+  "Settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "notifications": "الإشعارات",
+    "on": "تمكين",
+    "off": "تعطيل",
+    "exportData": "تصدير بياناتي",
+    "deleteAccount": "حذف حسابي",
+    "confirmDeleteAccount": "هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء."
+  },
   "Profile": {
     "title": "الملف الشخصي",
     "name": "الاسم",

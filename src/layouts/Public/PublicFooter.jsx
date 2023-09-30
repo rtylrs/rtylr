@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import Logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 
 const Footer = () => {
   return (
@@ -89,6 +90,12 @@ const Footer = () => {
 
           <a href="https://www.instagram.com/TheSanityStore">
             <FontAwesomeIcon icon={faInstagram} />
+          </a>
+          <a
+            href="mailto:
+              hello@sanitykuwait.com"
+          >
+            <FontAwesomeIcon icon={faEnvelope} />
           </a>
         </div>
       </div>

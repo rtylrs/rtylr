@@ -9,6 +9,16 @@
     "buyNow": "Buy Now",
     "viewMore": "View More"
   },
+  "Settings": {
+    "title": "Settings",
+    "language": "Language",
+    "notifications": "Notifications",
+    "on": "On",
+    "off": "Off",
+    "exportData": "Export My Data",
+    "deleteAccount": "Delete My Account",
+    "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone."
+  },
   "Profile": {
     "title": "Profile",
     "name": "Name",

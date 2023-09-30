@@ -1,5 +1,6 @@
 import DashboardLayout from "../layouts/Client/UserDashbaord";
 import React from "react";
+import SettingsPage from "../screens/Client/Settings";
 
 // Routes
 const Profile = React.lazy(() => import("../screens/Client/Profile"));
@@ -22,6 +23,15 @@ const UserRoutes = [
     element: (
       <DashboardLayout>
         <BecomeBusiness />
+      </DashboardLayout>
+    ),
+    exact: true,
+  },
+  {
+    path: "/settings",
+    element: (
+      <DashboardLayout>
+        <SettingsPage />
       </DashboardLayout>
     ),
     exact: true,

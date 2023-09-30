@@ -10,7 +10,6 @@ const ProfilePage = () => {
     name: "",
     email: "",
     notifications: true,
-    language: "en",
     address: "",
     paymentInfo: "",
   });
@@ -23,27 +22,13 @@ const ProfilePage = () => {
         name: user.displayName || "",
         email: user.email || "",
         notifications: true,
-        language: "en",
         address: "",
         paymentInfo: "",
       });
     }
 
-    const language = localStorage.getItem("language");
-    if (language) {
-      setFormData({
-        ...formData,
-        language,
-      });
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const selectLanguage = (language) => {
-    i18next.changeLanguage(language);
-    localStorage.setItem("language", language);
-  };
 
   const handleEditClick = (field) => {
     setEditing(field);
@@ -128,24 +113,6 @@ const ProfilePage = () => {
         <p>{formData.notifications ? "Enabled" : "Disabled"}</p>
       </div>
       <div>
-        <p>{t("Profile.language")}:</p>
-        <select
-          name="language"
-          value={formData.language}
-          onChange={(e) => {
-            selectLanguage(e.target.value);
-            setFormData({
-              ...formData,
-              language: e.target.value,
-            });
-          }}
-        >
-          <option value="en">English</option>
-          <option value="ar">Arabic</option>
-        </select>
-        <p>{formData.language}</p>
-      </div>
-      <div>
         <p>{t("Profile.address")}:</p>
         {editing === "address" ? (
           <textarea
@@ -175,16 +142,6 @@ const ProfilePage = () => {
           </button>
         </div>
       )}
-
-      <div>
-        <button
-          onClick={() => {
-            auth.sendPasswordResetEmail(formData.email).then(() => {});
-          }}
-        >
-          Forgot Password
-        </button>
-      </div>
     </div>
   );
 };
