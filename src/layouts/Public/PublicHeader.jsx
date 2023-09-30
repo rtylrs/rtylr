@@ -6,19 +6,22 @@ import {
   faBars,
   faTimes,
   faRightToBracket,
+  faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
 import PropTypes from "prop-types";
 import useWindowDimensions from "../../utils/useWindowDimensions";
+import { Badge } from "@mui/material";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { width } = useWindowDimensions();
+  const [notificationsCount, setNotificationsCount] = useState(0);
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -30,10 +33,17 @@ const Header = () => {
         // User is not logged in
         setUser(null);
       }
+
+      db.collection("notifications")
+        .where("uid", "==", authUser?.uid)
+        .where("read", "==", false)
+        .get()
+        .then((snapshot) => {
+          setNotificationsCount(snapshot.size);
+        });
     });
 
     return () => {
-      // Unsubscribe from the listener when the component unmounts
       unsubscribe();
     };
   }, []);
@@ -102,6 +112,20 @@ const Header = () => {
             </Link>
           </>
         )}
+        <Link to="/notifications">
+          <Badge
+            badgeContent={notificationsCount}
+            color="error"
+            style={{ marginRight: "10px" }}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <FontAwesomeIcon icon={faEnvelope} />
+          </Badge>
+        </Link>
+
         <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? (
             <FontAwesomeIcon icon={faTimes} />

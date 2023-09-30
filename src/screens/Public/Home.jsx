@@ -4,11 +4,16 @@ import { Categories } from "../../data/categories";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import PetitionModal from "../../components/PetitionModal";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [blogs, setBlogs] = useState([]);
+
+  const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
+  // const [petitions, setPetitions] = useState([]);
+  const [petitonId, setPetitionId] = useState(null);
 
   const products = [
     {
@@ -41,6 +46,24 @@ function Home() {
     },
   ];
 
+  const petitions = [
+    {
+      title: "Petition for Clean Energy",
+      signatures: 6000, // Number of people who signed this petition
+      goal: 6000, // Goal amount to be reached
+    },
+    {
+      title: "Save Our National Parks",
+      signatures: 2800,
+      goal: 5000,
+    },
+    {
+      title: "Support Education Equality",
+      signatures: 2200,
+      goal: 7500,
+    },
+  ];
+
   useEffect(() => {
     db.collection("Blogs")
       .limit(3)
@@ -56,6 +79,12 @@ function Home() {
 
   return (
     <div>
+      <PetitionModal
+        isOpen={isPetitionModalOpen}
+        onClose={() => {
+          setIsPetitionModalOpen(false);
+        }}
+      />
       <div className="Hero">
         <div className="hero-text">
           <h1>{t("Hero.welcome")}</h1>
@@ -70,7 +99,7 @@ function Home() {
         </div>
       </div>
       <section className="product-section">
-        <h2 className="section-title">Browse Products</h2>
+        <h2 className="section-title">Latest Products</h2>
         <div className="product-grid">
           {products &&
             products.slice(0, 4).map((product) => (
@@ -140,6 +169,66 @@ function Home() {
               </Link>
             ))}
         </div>
+        <button
+          className="view-more-blogs-button"
+          onClick={() => {
+            navigate("/blogs");
+          }}
+        >
+          View More
+        </button>
+      </section>
+
+      <section className="petition-section">
+        <h2>Newest Petitions</h2>
+        <div className="petition-list">
+          {petitions.map((petition, index) => (
+            <div className="petition-item" key={index}>
+              <h3>{petition.title}</h3>
+              <div className="progress-container">
+                <div className="progress-section-one">
+                  <div className="signature-progress">
+                    {petition.signatures} / {petition.goal}
+                  </div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress"
+                      style={{
+                        width: `${
+                          petition.signatures >= petition.goal
+                            ? "100%"
+                            : `${Math.min(
+                                (petition.signatures / petition.goal) * 100,
+                                100
+                              )}%`
+                        }`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="progress-section-two">
+                  <button
+                    className="sign-button"
+                    onClick={() => {
+                      setPetitionId(petition.id);
+                      setIsPetitionModalOpen(true);
+                    }}
+                  >
+                    Sign Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          className="view-more-blogs-button"
+          onClick={() => {
+            navigate("/blogs");
+          }}
+        >
+          View All
+        </button>
       </section>
     </div>
   );

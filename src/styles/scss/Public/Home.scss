@@ -148,7 +148,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 20px;
+    margin-top: 80px;
 
     &:hover {
       background-color: #b89077;
@@ -218,7 +218,6 @@
 //Blog Section
 .blog-section {
   padding: 40px 0;
-  background-color: #f7f7f7;
   text-align: center;
 
   .section-title {
@@ -245,6 +244,8 @@
       &:hover {
         transform: translateY(-5px);
       }
+
+
     }
 
     .post-date {
@@ -253,9 +254,148 @@
       margin-bottom: 10px;
     }
 
+ 
+
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       width: 90%;
     }
   }
 }
+
+.view-more-blogs-button {
+  background-color: #846552;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+
+  &:hover {
+    background-color: #b89077;
+    transition: 0.3s;
+  }
+}
+.petition-section {
+  padding: 40px 20px;
+  text-align: center;
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .petition-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .petition-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column; /* Change to 'column' to stack title and progress */
+    align-items: center; // Center items vertically
+    width: 60%;
+
+    @media only screen and (max-width: 768px) {
+      width: 90%;
+    }
+
+
+    h3 {
+      font-size: 20px;
+      margin-bottom: 10px; // Space between title and progress container
+    }
+
+    .progress-container {
+      display: flex;
+      flex-direction: row; /* Change to 'row' to align progress and button horizontally */
+      align-items: center;
+      justify-content: space-between;
+      width: 100%; /* Adjusted to occupy full width */
+
+      @media only screen and (max-width: 768px) {
+        flex-direction: column;
+      }
+
+      .progress-section-one {
+        width: 87%;
+        display: flex;
+        flex-direction: column;
+
+        .signature-progress   {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          font-size: 18px;
+          color: #231f1b;
+        }
+
+        @media only screen and (max-width: 768px) {
+          .signature-progress {
+            flex-direction: column;
+          }
+        }
+      }
+
+      .progress-section-two {
+        width: 10%;
+
+        @media only screen and (max-width: 768px) {
+          margin-top: 10px;
+          width: 100%;
+        }
+      }
+    }
+
+    .progress-bar {
+      background-color: #d8d4d4;
+      height: 20px;
+      border-radius: 5px;
+      flex-grow: 1; /* Allow the progress bar to expand to fill available space */
+
+      .progress {
+        background-color: #b89077;
+        height: 100%;
+        border-radius: 5px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; // Right-align the text within the progress bar
+        padding: 0 10px;
+        font-weight: bold;
+        transition: width 0.5s ease-in-out;
+        max-width: 98%;
+      }
+
+  
+    }
+
+    .sign-button {
+      /* Adjust button styles as needed */
+      background-color: #846552;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #b89077;
+      }
+    }
+  }
+}
+

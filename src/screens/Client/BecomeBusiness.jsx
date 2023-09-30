@@ -4,7 +4,9 @@ import { Categories } from "../../data/categories"; // Import the categories dat
 function BecomeBusiness() {
   // Define state variables to store form data
   const [businessName, setBusinessName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(""); // New state for selected category
+  const [businessNameArabic, setbusinessNameArabic] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState(""); // New state for selected category
+  const [note, setNote] = useState("");
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -14,7 +16,8 @@ function BecomeBusiness() {
 
     // Reset the form fields
     setBusinessName("");
-    setSelectedCategory("");
+    // setSelectedCategory("");
+    setNote("");
   };
 
   return (
@@ -22,7 +25,7 @@ function BecomeBusiness() {
       <h2>Become a Business</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="businessName">Business Name:</label>
+          <label htmlFor="businessName">English Name:</label>
           <input
             type="text"
             id="businessName"
@@ -32,19 +35,35 @@ function BecomeBusiness() {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="category">Category:</label>
-          <select
-            id="category"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+          <label htmlFor="businessName">Arabic Name:</label>
+          <input
+            type="text"
+            id="businessName"
+            value={businessNameArabic}
+            onChange={(e) => setbusinessNameArabic(e.target.value)}
             required
-          >
-            <option value="">Select a category</option>
-            {Categories.map((category) => (
-              <option key={category.title} value={category.title}>
-                {category.title}
-              </option>
-            ))}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="businessName">Additional Note:</label>
+          <textarea
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            required
+            rows={6}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="category">Country:</label>
+          <select id="category" required>
+            <option value="">Select a Country</option>
+            <option value="Bahrain">Bahrain</option>
+            <option value="Kuwait">Kuwait</option>
+            <option value="Oman">Oman</option>
+            <option value="Qatar">Qatar</option>
+            <option value="Saudi Arabia">Saudi Arabia</option>
+            <option value="United Arab Emirates">United Arab Emirates</option>
           </select>
         </div>
         <button type="submit">Submit Application</button>
