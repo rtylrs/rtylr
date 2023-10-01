@@ -16,6 +16,7 @@ import i18next from "./services/i18next";
 import AlertModal from "./components/Alert/AlertModal";
 import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
+import NoMatch from "./screens/Public/NoMatch";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -118,6 +119,8 @@ const App = () => {
             )
           }
         </Route>
+
+        <Route path="*" element={<NoMatch />} />
       </Routes>
     </>
   );

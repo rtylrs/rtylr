@@ -25,7 +25,7 @@
 }
 
 .sidebar__title {
-  font-size: 1.5em;
+  font-size: 1.7em;
   margin-left: 10px;
   color: #f2ebe5;
   border-bottom: 1px solid #7a7c81;
@@ -50,7 +50,6 @@
   margin-top: 15px;
   margin-bottom: 5px;
   margin-left: 10px;
-  font-weight: 600;
   padding-bottom: 5px;
   border-bottom: #7a7c81 1px solid;
   width: fit-content;
@@ -67,7 +66,6 @@
   text-decoration: none;
   font-size: 1em;
   color: #f2ebe5;
-  font-weight: 600;
 }
 
 .sidebar__link:hover {
@@ -148,22 +146,26 @@
 
 .sidebar__section {
   h2 {
-    color: #EADBC8;
+    color: #f3f4f6;
     font-size: 1.2em;
     margin-top: 15px;
     margin-bottom: 5px;
     margin-left: 10px;
-    font-weight: 600;
     padding-bottom: 5px;
     border-bottom: #7a7c81 1px solid;
     width: fit-content;
     min-width: 80%;
     display: flex;
     justify-content: space-between;
+    padding-bottom: 10px;
 
     svg {
       cursor: pointer;
       font-size: 16px;
-        }
+    }
   }
+}
+
+.admin__link {
+  margin-left: 20px;
 }
