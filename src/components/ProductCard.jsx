@@ -6,8 +6,10 @@ function ProductCard({ product }) {
     <Link to={`/product/${product?.id}`}>
       <div className="productCard">
         <img src={product?.images[0]} alt="Product image" />
-        {/* <h3 className="name">{product?.name}</h3> */}
-        <p className="creator">{product?.creator}</p>
+        <h4 className="name">{product?.name}</h4>
+        <p className="creator">
+          Created By <strong>{product?.creator}</strong> with &#9829;
+        </p>
         <p className="price">{product?.price} KD</p>
         <div className="ctaContainer">
           {/* <button className="addBtn">

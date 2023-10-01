@@ -80,6 +80,8 @@
 .product-section {
   padding: 40px;
   text-align: center;
+  max-width: 1300px;
+  margin: 0 auto;
 
   .section-title {
     font-size: 24px;
@@ -340,6 +342,8 @@ align-items: center;
 .petition-section {
   padding: 40px 20px;
   text-align: center;
+  max-width: 1270px;
+  margin: 0 auto;
 
   h2 {
     font-size: 24px;
@@ -361,7 +365,7 @@ align-items: center;
     display: flex;
     flex-direction: column; /* Change to 'column' to stack title and progress */
     align-items: center; // Center items vertically
-    width: 75%;
+    width: 90%;
 
     @media only screen and (max-width: 768px) {
       width: 90%;
