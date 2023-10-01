@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,6 +13,7 @@ import {
   faChevronUp,
   faShoppingBag,
   faCog,
+  faArrowUpRightFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -231,6 +231,15 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">
             Settings
+          </Link>
+        </div>
+        <div className="sidebar__link">
+          <FontAwesomeIcon
+            icon={faArrowUpRightFromSquare}
+            className="sidebar__icon"
+          />
+          <Link to="/" id="link" target="_blank">
+            Open Website
           </Link>
         </div>
       </div>

@@ -12,52 +12,46 @@ import {
   Input,
 } from "reactstrap"; // Import Reactstrap components
 import { Categories } from "../../data/categories";
+import { db, storage } from "../../firebase";
+import ShowAlert from "../../utils/showAlert";
 
 // Sample product data (replace with actual data from Firebase)
-const initialProducts = [
-  {
-    id: "1",
-    category: "Tote Bags",
-    collection: "bags",
-    creator: "Kodra",
-    description: ["test 1", "test 2"],
-    images: [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg",
-    ],
-    name: "Test Product 1",
-    price: 25,
-  },
-  {
-    id: "2",
-    category: "Backpacks",
-    collection: "bags",
-    creator: "John Doe",
-    description: ["Description 1"],
-    images: ["https://example.com/image3.jpg"],
-    name: "Test Product 2",
-    price: 30,
-  },
-];
 
 function AdminProducts() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productName, setProductName] = useState("");
-  const [productPrice, setProductPrice] = useState("");
+  const [productPrice, setProductPrice] = useState(0);
   const [productCategory, setProductCategory] = useState("");
   const [productImages, setProductImages] = useState([]);
+  const [productQuantity, setProductQuantity] = useState(0);
   const [imagePreview, setImagePreview] = useState([]);
+  const [updatingProduct, setUpdatingProduct] = useState(false);
+
+  useEffect(() => {
+    db.collection("Products")
+      .limit(8)
+      .get()
+      .then((querySnapshot) => {
+        const products = [];
+        querySnapshot.forEach((doc) => {
+          const product = Object.assign({ id: doc.id }, doc.data());
+          products.push(product);
+        });
+        setProducts(products);
+      });
+  }, []);
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
     setSelectedProduct(null); // Reset selected product when the modal is closed
     setProductName("");
-    setProductPrice("");
+    setProductPrice(0);
     setProductCategory("");
     setProductImages([]);
     setImagePreview([]);
+    setProductQuantity(0);
   };
 
   const openEditModal = (product) => {
@@ -68,6 +62,24 @@ function AdminProducts() {
     setProductCategory(product.category);
     setProductImages(product.images);
     setImagePreview(product.images);
+    setProductQuantity(product.quantity);
+  };
+
+  const uploadImagesToStorage = async () => {
+    const imageUrls = [];
+
+    try {
+      for (const image of productImages) {
+        const imageRef = storage.ref().child(`productImages/${image.name}`);
+        await imageRef.put(image);
+        const imageUrl = await imageRef.getDownloadURL();
+        imageUrls.push(imageUrl);
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    }
+
+    return imageUrls;
   };
 
   const handleImageChange = (e) => {
@@ -80,30 +92,57 @@ function AdminProducts() {
     // Store selected images
     setProductImages(selectedFiles);
   };
-  const saveProduct = () => {
-    // Create a new product object with updated data
-    const updatedProduct = {
-      id: selectedProduct ? selectedProduct.id : Date.now().toString(),
-      name: productName,
-      price: productPrice,
-      category: productCategory,
-      images: productImages,
-    };
+  const saveProduct = async () => {
+    try {
+      console.log("Saving product...");
 
-    // Implement saving or updating product to Firebase here
-    // After saving, update the products state
-    // For now, just log the data to the console
-    console.log("Saved Product:", updatedProduct);
+      let imageUrls = [];
 
-    // Close the modal
-    toggleModal();
+      // Upload images and get image URLs
+      if (!updatingProduct) {
+        imageUrls = await uploadImagesToStorage();
+      } else {
+        imageUrls = productImages;
+      }
+
+      // Create a new product object with updated data, including image URLs
+      const updatedProduct = {
+        name: productName,
+        price: productPrice,
+        collection: productCategory,
+        quantity: productQuantity,
+        images: imageUrls, // Use the uploaded image URLs
+      };
+
+      if (updatingProduct) {
+        // Update the product in the database
+        await db
+          .collection("Products")
+          .doc(selectedProduct.id)
+          .update(updatedProduct);
+      } else {
+        // Add the product to the database
+        await db.collection("Products").doc().set(updatedProduct);
+      }
+
+      // Close the modal
+      setUpdatingProduct(false);
+      toggleModal();
+    } catch (error) {
+      console.error("Error saving product:", error);
+    }
   };
 
   const deleteProduct = (productId) => {
-    // Implement product deletion logic here
-    // After deleting, update the products state
-    // For now, just log the product ID to the console
-    console.log("Deleted Product ID:", productId);
+    db.collection("Products")
+      .doc(productId)
+      .delete()
+      .then(() => {
+        ShowAlert("Product deleted successfully", "success");
+      })
+      .catch((error) => {
+        console.error("Error deleting product:", error);
+      });
   };
 
   return (
@@ -127,8 +166,8 @@ function AdminProducts() {
           <tr>
             <th>Image</th>
             <th>Name</th>
-            <th>Category</th>
             <th>Collection</th>
+            <th>Quantity</th>
             <th>Price</th>
             <th>Actions</th>
           </tr>
@@ -147,13 +186,16 @@ function AdminProducts() {
               </td>
               <td>{product.name}</td>
               <td>{product.category}</td>
-              <td>{product.collection}</td>
+              <td>{product?.quantity}</td>
               <td>${product.price.toFixed(2)}</td>
               <td>
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => openEditModal(product)}
+                  onClick={() => {
+                    openEditModal(product);
+                    setUpdatingProduct(true);
+                  }}
                 >
                   Edit
                 </Button>{" "}
@@ -194,7 +236,21 @@ function AdminProducts() {
                 name="productPrice"
                 id="productPrice"
                 value={productPrice}
-                onChange={(e) => setProductPrice(e.target.value)}
+                onChange={(e) => {
+                  setProductPrice(+e.target.value);
+                }}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="quantity">Quatity</Label>
+              <Input
+                type="number"
+                name="quantity"
+                id="productQuantity"
+                value={productQuantity}
+                onChange={(e) => {
+                  setProductQuantity(+e.target.value);
+                }}
               />
             </FormGroup>
             <FormGroup>
@@ -206,7 +262,7 @@ function AdminProducts() {
                 value={productCategory}
                 onChange={(e) => setProductCategory(e.target.value)}
               >
-                <option value="">Select a category</option>
+                <option value="">Select a Collection</option>
                 {Categories.map((category) => (
                   <option key={category.title} value={category.title}>
                     {category.title}
@@ -216,12 +272,30 @@ function AdminProducts() {
             </FormGroup>
             <FormGroup>
               <Label for="productImages">Images</Label>
+              <br />
+              {
+                // Only show the "Add Images" button if the user is adding a new product
+                !updatingProduct && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      document.getElementById("productImages").click();
+                    }}
+                  >
+                    Add Images
+                  </Button>
+                )
+              }
               <Input
                 type="file"
                 name="productImages"
                 id="productImages"
                 multiple
                 onChange={handleImageChange}
+                style={{
+                  display: "none",
+                }}
               />
               {imagePreview.map((preview, index) => (
                 <img

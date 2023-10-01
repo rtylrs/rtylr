@@ -2,9 +2,10 @@
 .shop {
     display: flex;
     flex-direction: row;
-    max-width: 1570px;
+    max-width: 1370px;
     margin: 0 auto;
-    padding: 20px;
+  padding-left: 5%;
+  padding-right: 5%;
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -34,7 +35,7 @@
   
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
   
       @media (max-width: 768px) {
@@ -81,3 +82,78 @@
   }
   
 
+// Shop item product 
+.item-page {
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .item-images {
+    margin-bottom: 20px;
+    .slick-slider {
+      max-width: 300px;
+      margin: 0 auto;
+
+      .slick-arrow {
+        color: transparent; /* Change the arrow color to your desired color */
+        border: none; /* Remove the arrow border */
+        outline: none; /* Remove the arrow outline */
+        background-color: #846552;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+
+      .slick-dots {
+        position: absolute;
+        bottom: 10px;
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        transform: translateY(30px);
+
+        li {
+          margin: 0 5px;
+          button {
+            width: 20px;
+            height: 20px;
+            background-color: #846552;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s;
+
+            &:hover {
+              background-color: #b89077;
+            }
+          }
+        }
+      }
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 400px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  }
+
+  .item-info {
+    margin-top: 30px;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  // Add more styles as needed
+}

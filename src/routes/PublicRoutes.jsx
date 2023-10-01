@@ -5,7 +5,10 @@ import Collection from "../screens/Public/Collection";
 
 // Routes
 const Home = React.lazy(() => import("../screens/Public/Home"));
-const Shop = React.lazy(() => import("../screens/Public/Shop"));
+const Shop = React.lazy(() => import("../screens/Public/Shop/Shop"));
+const ShopItemPage = React.lazy(() =>
+  import("../screens/Public/Shop/ShopItemPage")
+);
 const About = React.lazy(() => import("../screens/Public/About"));
 const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
 const Contact = React.lazy(() => import("../screens/Public/Contact"));
@@ -29,6 +32,17 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Shop />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/shop/:itemId",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <ShopItemPage />
         </AnimatedRoutes>
       </Public>
     ),

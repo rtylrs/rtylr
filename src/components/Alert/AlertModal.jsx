@@ -72,7 +72,6 @@ function AlertModal() {
             color: "white",
             fontSize: 20,
             cursor: "pointer",
-            zIndex: "100000",
           }}
         />
       </span>

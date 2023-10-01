@@ -106,7 +106,7 @@ function Home() {
         </div>
       </div>
       <section className="product-section">
-        <h2 className="section-title">Latest Products</h2>
+        <h2 className="section-title">Journey to a Zero Waste lifestyle</h2>
         <div className="product-grid">
           {products &&
             products
@@ -135,7 +135,7 @@ function Home() {
               style={{
                 backgroundImage: `url(${category.imageUrl})`,
               }}
-              to={`${category.url}`}
+              to={`/collection/${category.title.toLowerCase()}`}
             >
               <div className="item-content">
                 <p>{category.title}</p>
