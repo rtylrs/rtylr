@@ -132,7 +132,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   className="sidebar__icon"
                 />
                 <Link to="/manage/managment" id="link">
-                  Add/Remove Admins
+                  Permissions
                 </Link>
               </div>
               <div className="sidebar__link  admin__link">
