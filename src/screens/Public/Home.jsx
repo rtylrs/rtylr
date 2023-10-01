@@ -15,6 +15,7 @@ import {
   faHandHoldingHeart,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import ProductCard from "../../components/ProductCard";
 
 function Home() {
   const navigate = useNavigate();
@@ -23,37 +24,7 @@ function Home() {
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
   const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState(null);
-
-  const products = [
-    {
-      id: 1,
-      name: "Product 1",
-      price: "$10",
-      businessName: "Business A",
-      imageUrl: "https://via.placeholder.com/150", // Use a placeholder image from via.placeholder.com
-    },
-    {
-      id: 2,
-      name: "Product 2",
-      price: "$15",
-      businessName: "Business B",
-      imageUrl: "https://via.placeholder.com/150", // Use another placeholder image
-    },
-    {
-      id: 3,
-      name: "Product 3",
-      price: "$15",
-      businessName: "Business B",
-      imageUrl: "https://via.placeholder.com/150", // Use another placeholder image
-    },
-    {
-      id: 4,
-      name: "Product 4",
-      price: "$15",
-      businessName: "Business B",
-      imageUrl: "https://via.placeholder.com/150", // Use another placeholder image
-    },
-  ];
+  const [products, setProducts] = useState([]);
 
   // const petitions = [
   //   {
@@ -74,6 +45,18 @@ function Home() {
   // ];
 
   useEffect(() => {
+    db.collection("Products")
+      .limit(4)
+      .get()
+      .then((querySnapshot) => {
+        const products = [];
+        querySnapshot.forEach((doc) => {
+          const product = Object.assign({ id: doc.id }, doc.data());
+          products.push(product);
+        });
+        setProducts(products);
+      });
+
     const petitionsUnsubscribe = db
       .collection("petitions")
       .limit(3)
@@ -117,12 +100,7 @@ function Home() {
         <div className="hero-text">
           <h1>{t("Hero.welcome")}</h1>
           <h2>{t("Hero.discover")}</h2>
-          <button
-            className="hero-button"
-            onClick={() =>
-              window.open("https://www.thesanitystore.com/", "_self")
-            }
-          >
+          <button className="hero-button" onClick={() => navigate("/shop")}>
             {t("Hero.shop")}
           </button>
         </div>
@@ -131,20 +109,11 @@ function Home() {
         <h2 className="section-title">Latest Products</h2>
         <div className="product-grid">
           {products &&
-            products.slice(0, 4).map((product) => (
-              <div key={product.id} className="product-item">
-                <LazyLoadImage
-                  src={product.imageUrl}
-                  alt={`Product ${product.id}`}
-                  effect="blur"
-                  width="100%"
-                  height="230px"
-                />
-                <h3>{product.businessName}</h3>
-                <p>{product.price}</p>
-                <button>Buy Now</button>
-              </div>
-            ))}
+            products
+              .slice(0, 4)
+              .map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
         </div>
         <button
           className="view-more-button"
