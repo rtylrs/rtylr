@@ -17,12 +17,12 @@ const Navbar = ({ openSidebar }) => {
 
   useEffect(() => {
     if (auth.currentUser) {
-      db.collection("notifications")
-        .where("uid", "==", auth.currentUser?.uid)
-        .where("read", "==", false)
+      db.collection("contacts")
+        .orderBy("createdAt", "desc")
         .get()
         .then((snapshot) => {
           setNotificationsCount(snapshot.size);
+          console.log(snapshot.size);
         });
     }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import CategorySlider from "../../components/CategorySlider";
-import ProductCard from "../../components/ProductCard";
-import { db } from "../../firebase";
+import CategorySlider from "../../../components/CategorySlider";
+import ProductCard from "../../../components/ProductCard";
+import { db } from "../../../firebase";
 
 function Shop() {
   const [products, setProducts] = useState([]);

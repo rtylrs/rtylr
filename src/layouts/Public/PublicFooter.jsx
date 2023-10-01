@@ -22,7 +22,7 @@ const Footer = () => {
               <Link to="/Privacy">Privacy</Link>
             </li>
             <li>
-              <Link to="https://www.thesanitystore.com/contact">Feedback</Link>
+              <Link to="/feedback">Feedback</Link>
             </li>
             <li>
               <Link to="/pricing">Pricing</Link>
@@ -50,7 +50,10 @@ const Footer = () => {
               <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="https://www.thesanitystore.com">Shop</Link>
+              <Link to="/shop">Shop</Link>
+            </li>
+            <li>
+              <Link to="/suppliers">Suppliers</Link>
             </li>
             <li>
               <Link to="/about">About</Link>

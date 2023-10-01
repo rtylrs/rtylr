@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { db } from "../../firebase";
+import { db, firebase } from "../../firebase";
 
 const Contact = () => {
   const [name, setName] = useState("");
@@ -37,6 +37,8 @@ const Contact = () => {
         email,
         phone,
         message,
+        read: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
       setSubmitted(true);
