@@ -74,28 +74,34 @@ function Home() {
   // ];
 
   useEffect(() => {
-    db.collection("petitions")
+    const petitionsUnsubscribe = db
+      .collection("petitions")
       .limit(3)
-      .get()
-      .then((querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => ({
+      .onSnapshot((petitionsSnapshot) => {
+        const petitionsData = petitionsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setPetitions(data);
+        setPetitions(petitionsData);
       });
-  
 
     db.collection("Blogs")
       .limit(3)
       .get()
-      .then((querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => ({
+      .then((blogsSnapshot) => {
+        const blogsData = blogsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setBlogs(data);
+        setBlogs(blogsData);
+      })
+      .catch((error) => {
+        console.error("Error fetching blogs data:", error);
       });
+
+    return () => {
+      petitionsUnsubscribe();
+    };
   }, []);
 
   return (
