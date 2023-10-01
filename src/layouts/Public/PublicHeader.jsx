@@ -1,20 +1,11 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faHeart,
-  faBars,
-  faTimes,
-  faRightToBracket,
-  faEnvelope,
-  faMagnifyingGlass,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
 import useWindowDimensions from "../../utils/useWindowDimensions";
-import { Badge } from "@mui/material";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -22,7 +13,6 @@ const Header = () => {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { width } = useWindowDimensions();
-  const [notificationsCount, setNotificationsCount] = useState(0);
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -40,14 +30,6 @@ const Header = () => {
               });
               setUserData(user);
             }
-          });
-
-        db.collection("notifications")
-          .where("uid", "==", authUser?.uid)
-          .where("read", "==", false)
-          .get()
-          .then((snapshot) => {
-            setNotificationsCount(snapshot.size);
           });
       } else {
         // User is not logged in
@@ -106,6 +88,7 @@ const Header = () => {
       </div>
       <div className="header-left">
         <Link to="/shop">Shop</Link>
+        <Link to="/suppliers">Suppliers</Link>
         <Link to="/petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>

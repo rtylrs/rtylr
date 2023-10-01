@@ -33,6 +33,7 @@ function Register() {
                 email: email,
                 name: name,
                 isAdmin: false,
+                isVendor: false,
                 Description: "",
                 Location: "",
                 About: "",
@@ -90,6 +91,7 @@ function Register() {
                 email: result.user.email,
                 name: result.user.displayName,
                 isAdmin: false,
+                isVendor: false,
                 Description: "",
                 Location: "",
                 image:
