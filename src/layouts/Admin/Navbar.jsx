@@ -1,15 +1,34 @@
 import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
+  faEnvelope,
   faHome,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
+import { Badge } from "@mui/material";
+import { useState, useEffect } from "react";
 
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
+  const [notificationsCount, setNotificationsCount] = useState(0);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      db.collection("notifications")
+        .where("uid", "==", auth.currentUser?.uid)
+        .where("read", "==", false)
+        .get()
+        .then((snapshot) => {
+          setNotificationsCount(snapshot.size);
+        });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="navbar">
       <div className="nav_icon" onClick={() => openSidebar("navbar")}>
@@ -22,6 +41,18 @@ const Navbar = ({ openSidebar }) => {
       <div className="navbar__right">
         <Link to="/">
           <FontAwesomeIcon icon={faHome} size="xl" />
+        </Link>
+        <Link to="/manage/notifications">
+          <Badge
+            badgeContent={notificationsCount}
+            color="error"
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <FontAwesomeIcon icon={faEnvelope} size="xl" />
+          </Badge>
         </Link>
         <div
           to="/auth/profile"
