@@ -5,10 +5,11 @@ import AnimatedRoutes from "../components/AnimatedRoutes";
 // Routes
 const Login = React.lazy(() => import("../screens/Auth/Login"));
 const Register = React.lazy(() => import("../screens/Auth/Register"));
+const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
 
 const AuthRoutes = [
   {
-    path: "/login",
+    path: "/auth/login",
     element: (
       <Public>
         <AnimatedRoutes>
@@ -19,11 +20,22 @@ const AuthRoutes = [
     exact: true,
   },
   {
-    path: "/register",
+    path: "/auth/register",
     element: (
       <Public>
         <AnimatedRoutes>
           <Register />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/auth/password-reset",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <ForgotPassword />
         </AnimatedRoutes>
       </Public>
     ),

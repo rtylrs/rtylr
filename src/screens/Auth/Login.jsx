@@ -153,7 +153,7 @@ function Login() {
             <span
               className="LoginScreen-link"
               onClick={() => {
-                navigate("/register");
+                navigate("/auth/register");
               }}
             >
               Sign Up Now.
