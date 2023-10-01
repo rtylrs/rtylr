@@ -197,7 +197,19 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {petitionsVisible && <>{/* Add petition links here */}</>}
+          {petitionsVisible && (
+            <>
+              <div className="sidebar__link">
+                <FontAwesomeIcon
+                  icon={faPlusCircle}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/petitions" id="link">
+                  Add Petition
+                </Link>
+              </div>
+            </>
+          )}
         </div>
         <div
           className="sidebar__section"
