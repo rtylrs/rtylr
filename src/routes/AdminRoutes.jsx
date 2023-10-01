@@ -1,6 +1,5 @@
 import React from "react";
 import Admin from "../layouts/Admin/Admin";
-import AdminPetitions from "../screens/Admin/AdminPetitions";
 
 // Routes
 const Dashboard = React.lazy(() => import("../screens/Admin/Dashboard"));
@@ -11,6 +10,10 @@ const AdminFeedback = React.lazy(() =>
 const AdminProducts = React.lazy(() =>
   import("../screens/Admin/AdminProducts")
 );
+const AdminPetitions = React.lazy(() =>
+  import("../screens/Admin/AdminPetitions")
+);
+const Users = React.lazy(() => import("../screens/Admin/AdminUsers"));
 
 const AdminRoutes = [
   {
@@ -54,6 +57,15 @@ const AdminRoutes = [
     element: (
       <Admin>
         <AdminPetitions />
+      </Admin>
+    ),
+    exact: true,
+  },
+  {
+    path: "/manage/users",
+    element: (
+      <Admin>
+        <Users />
       </Admin>
     ),
     exact: true,

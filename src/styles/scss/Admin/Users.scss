@@ -1,0 +1,71 @@
+.AdminUsersManagement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  
+    .AdminUsersManagementInner {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+  
+      h3 {
+        margin-bottom: 20px;
+      }
+  
+      #vendorManAdmin {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+  
+        input[type="text"] {
+          width: 100%;
+          padding: 10px;
+        }
+  
+        .exportBtnVen {
+          a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #846552;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+  
+            &:hover {
+              background-color: #b89077;
+            }
+          }
+        }
+      }
+  
+      .ResponsiveTable {
+        overflow-x: auto;
+        border-radius: 4px;
+        margin-bottom: 20px;
+  
+        .UsersTable {
+          width: 100%;
+          max-width: none;
+          background-color: #fff;
+  
+          th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+          }
+  
+          td,
+          th {
+            padding: 8px;
+            text-align: center;
+          }  
+          button {
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+  

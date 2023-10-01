@@ -1,5 +1,5 @@
 .sidebar {
-  background: #191919;
+  background: #040303;
   grid-area: sidebar;
   overflow-y: auto;
   -webkit-transition: all 0.5s;
@@ -7,6 +7,9 @@
   padding-left: 10px;
   padding-right: 10px;
   user-select: none;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  font-family: "Poppins", sans-serif;
 }
 
 .sidebar__nav {
@@ -64,6 +67,7 @@
   text-decoration: none;
   font-size: 1em;
   color: #f2ebe5;
+  font-weight: 600;
 }
 
 .sidebar__link:hover {
@@ -144,7 +148,7 @@
 
 .sidebar__section {
   h2 {
-    color: #83a6b0;
+    color: #EADBC8;
     font-size: 1.2em;
     margin-top: 15px;
     margin-bottom: 5px;
