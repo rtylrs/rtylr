@@ -13,6 +13,7 @@ import {
   faChevronDown,
   faChevronUp,
   faShoppingBag,
+  faCog,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -227,7 +228,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
 
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faPlusCircle} className="sidebar__icon" />
+          <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">
             Settings
           </Link>
