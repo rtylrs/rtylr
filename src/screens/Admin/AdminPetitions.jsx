@@ -10,12 +10,14 @@ function AdminPetitions() {
   const [goal , setGoal] = React.useState(0);
   const [petitions, setPetitions] = React.useState([]);
 
+
   const addPetition = (e) => {
     e.preventDefault();
     db.collection("petitions").add({
       title: e.target.petitionTitle.value,
       goal: e.target.petitionGoal.value,
       signatures: 0,
+      users: [],
     }).then(() => {
       setGoal(0);
       setPetition("");
@@ -30,6 +32,7 @@ function AdminPetitions() {
         title: doc.data().title,
         goal: doc.data().goal,
         signatures: doc.data().signatures,
+        users: doc.data().users,
       })))
     })
     setLoading(false);
@@ -62,6 +65,11 @@ function AdminPetitions() {
             <p>Signatures: {petition.signatures}</p>
             <p>Goal: {petition.goal}</p>
             <button onClick={() => handleDelete(petition.id)}>Delete</button>
+
+              <h4>Users:</h4>
+              {petition.users.map((user) => (
+                <p>{user.fullName}</p>
+              ))}
           </div>
         ))}
       </div>

@@ -1,17 +1,46 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
+import { db } from "../firebase";
 
-const PetitionModal = ({ isOpen, onClose }) => {
+const PetitionModal = ({ isOpen, onClose, petitionId }) => {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
+  const [petition, setPetition] = useState([]);
 
-  const handleSubmit = () => {
-    console.log("Email:", email);
-    console.log("Full Name:", fullName);
+
+  
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    db.collection("petitions")
+      .doc(petitionId)
+      .get()
+      .then((doc) => {
+        setPetition(doc.data());
+      }
+    );
+    
+    db.collection("petitions")
+      .doc(petitionId)
+      .update({
+        signatures: petition.signatures + 1,
+        users: [...petition.users, { email, fullName }]
+      });
+
+    console.log("im here");
+    
+
+    // db.collection("petitions")
+    //   .doc(petitionId)
+    //   .update({
+    //     signatures: db.FieldValue.increment(1),
+    //     users: db.FieldValue.arrayUnion({ email, fullName }),
+    //   });
+
     onClose();
   };
 

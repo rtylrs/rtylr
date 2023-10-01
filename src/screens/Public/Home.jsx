@@ -21,7 +21,7 @@ function Home() {
   const { t } = useTranslation();
   const [blogs, setBlogs] = useState([]);
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
-  // const [petitions, setPetitions] = useState([]);
+  const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState(null);
 
   const products = [
@@ -55,25 +55,37 @@ function Home() {
     },
   ];
 
-  const petitions = [
-    {
-      title: "Petition for Clean Energy",
-      signatures: 6000, // Number of people who signed this petition
-      goal: 6000, // Goal amount to be reached
-    },
-    {
-      title: "Save Our National Parks",
-      signatures: 2800,
-      goal: 5000,
-    },
-    {
-      title: "Support Education Equality",
-      signatures: 2200,
-      goal: 7500,
-    },
-  ];
+  // const petitions = [
+  //   {
+  //     title: "Petition for Clean Energy",
+  //     signatures: 6000, // Number of people who signed this petition
+  //     goal: 6000, // Goal amount to be reached
+  //   },
+  //   {
+  //     title: "Save Our National Parks",
+  //     signatures: 2800,
+  //     goal: 5000,
+  //   },
+  //   {
+  //     title: "Support Education Equality",
+  //     signatures: 2200,
+  //     goal: 7500,
+  //   },
+  // ];
 
   useEffect(() => {
+    db.collection("petitions")
+      .limit(3)
+      .get()
+      .then((querySnapshot) => {
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPetitions(data);
+      });
+  
+
     db.collection("Blogs")
       .limit(3)
       .get()
@@ -93,6 +105,7 @@ function Home() {
         onClose={() => {
           setIsPetitionModalOpen(false);
         }}
+        petitionId={petitonId}
       />
       <div className="Hero">
         <div className="hero-text">
