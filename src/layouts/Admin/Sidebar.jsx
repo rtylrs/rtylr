@@ -14,6 +14,14 @@ import {
   faShoppingBag,
   faCog,
   faArrowUpRightFromSquare,
+  faCommentAlt,
+  faBarsProgress,
+  faCheckDouble,
+  faSquare,
+  faNewspaper,
+  faRuler,
+  faCrosshairs,
+  faHandHoldingDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -45,7 +53,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         />
       </div>
       <div className="sidebar__menu">
-        <div className="sidebar__link ">
+        <div className="sidebar__link">
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/manage" id="link">
             My Dashboard
@@ -62,7 +70,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("customers")}
         >
           <h2>
-            Customers
+            <div>
+              <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+              Customers
+            </div>
             {customersVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -71,13 +82,22 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {customersVisible && (
             <>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
                 <Link to="/manage/users" id="link">
                   Users
                 </Link>
               </div>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
+                <FontAwesomeIcon
+                  icon={faCommentAlt}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/vendors" id="link">
+                  Feedback
+                </Link>
+              </div>
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
                 <Link to="/manage/vendors" id="link">
                   Suppliers
@@ -91,7 +111,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("management")}
         >
           <h2>
-            Management
+            <div>
+              <FontAwesomeIcon
+                icon={faBarsProgress}
+                className="sidebar__icon"
+              />
+              Management
+            </div>
             {managementVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -100,7 +126,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {managementVisible && (
             <>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon
                   icon={faUserSecret}
                   className="sidebar__icon"
@@ -109,13 +135,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   Add/Remove Admins
                 </Link>
               </div>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
                 <Link to="/manage/feedback" id="link">
                   Feedback
                 </Link>
               </div>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
                 <Link to="/manage/blog" id="link">
                   Blog
@@ -129,7 +155,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("configuration")}
         >
           <h2>
-            Configuration
+            <div>
+              <FontAwesomeIcon icon={faCheckDouble} className="sidebar__icon" />
+              Configuration
+            </div>
             {configurationVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -140,7 +169,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div className="sidebar__section" onClick={() => toggleSection("blog")}>
           <h2>
-            Blog
+            <div>
+              <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+              Blog
+            </div>
             {blogVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -149,8 +181,8 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {blogVisible && (
             <>
-              <div className="sidebar__link">
-                <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+              <div className="sidebar__link  admin__link">
+                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
                 <Link to="/manage/blog" id="link">
                   Blog Section
                 </Link>
@@ -163,7 +195,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("reports")}
         >
           <h2>
-            Reports
+            <div>
+              <FontAwesomeIcon icon={faNewspaper} className="sidebar__icon" />
+              Reports
+            </div>
             {reportsVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -177,7 +212,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("orders")}
         >
           <h2>
-            Orders
+            <div>
+              <FontAwesomeIcon icon={faRuler} className="sidebar__icon" />
+              Orders
+            </div>
             {ordersVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -191,7 +229,10 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("petitions")}
         >
           <h2>
-            Petitions
+            <div>
+              <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
+              Petitions
+            </div>
             {petitionsVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
@@ -200,7 +241,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {petitionsVisible && (
             <>
-              <div className="sidebar__link">
+              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon
                   icon={faPlusCircle}
                   className="sidebar__icon"
@@ -217,7 +258,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => toggleSection("donations")}
         >
           <h2>
-            Donations
+            <div>
+              <FontAwesomeIcon
+                icon={faHandHoldingDollar}
+                className="sidebar__icon"
+              />
+              Donations
+            </div>
             {donationsVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (

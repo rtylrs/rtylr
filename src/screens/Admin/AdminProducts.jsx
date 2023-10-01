@@ -1,16 +1,17 @@
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Modal } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
-  Table,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  FormGroup,
-  Label,
-  Input,
-} from "reactstrap"; // Import Reactstrap components
+  Modal,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+
+import { Table } from "reactstrap"; // Import Reactstrap components
 import { Categories } from "../../data/categories";
 import { db, storage } from "../../firebase";
 import ShowAlert from "../../utils/showAlert";
@@ -25,7 +26,7 @@ function AdminProducts() {
   const [productPrice, setProductPrice] = useState(0);
   const [productCategory, setProductCategory] = useState("");
   const [productImages, setProductImages] = useState([]);
-  const [productQuantity, setProductQuantity] = useState(0);
+  const [productQuantity, setProductQuantity] = useState();
   const [imagePreview, setImagePreview] = useState([]);
   const [updatingProduct, setUpdatingProduct] = useState(false);
 
@@ -120,9 +121,18 @@ function AdminProducts() {
           .collection("Products")
           .doc(selectedProduct.id)
           .update(updatedProduct);
+
+        const index = products.findIndex(
+          (product) => product.id === selectedProduct.id
+        );
+        const updatedProducts = [...products];
+        updatedProducts[index] = updatedProduct;
+        setProducts(updatedProducts);
       } else {
         // Add the product to the database
         await db.collection("Products").doc().set(updatedProduct);
+        // Add the product to the products state
+        setProducts((prevProducts) => [...prevProducts, updatedProduct]);
       }
 
       // Close the modal
@@ -143,6 +153,12 @@ function AdminProducts() {
       .catch((error) => {
         console.error("Error deleting product:", error);
       });
+
+    // Remove the product from the products state
+    const updatedProducts = products.filter(
+      (product) => product.id !== productId
+    );
+    setProducts(updatedProducts);
   };
 
   return (
@@ -215,79 +231,65 @@ function AdminProducts() {
       {/* Add/Edit Product Modal */}
       <Modal open={modalOpen} onClose={toggleModal}>
         <div className="modal-content">
-          <ModalHeader toggle={toggleModal}>
-            {selectedProduct ? "Edit Product" : "Add Product"}
-          </ModalHeader>
-          <ModalBody>
-            <FormGroup>
-              <Label for="productName">Product Name</Label>
-              <Input
-                type="text"
-                name="productName"
-                id="productName"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="productPrice">Price</Label>
-              <Input
-                type="number"
-                name="productPrice"
-                id="productPrice"
-                value={productPrice}
-                onChange={(e) => {
-                  setProductPrice(+e.target.value);
-                }}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="quantity">Quatity</Label>
-              <Input
-                type="number"
-                name="quantity"
-                id="productQuantity"
-                value={productQuantity}
-                onChange={(e) => {
-                  setProductQuantity(+e.target.value);
-                }}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="productCategory">Category</Label>
-              <Input
-                type="select"
-                name="productCategory"
-                id="productCategory"
+          <h1>{selectedProduct ? "Edit Product" : "Add Product"}</h1>
+          <div>
+            <TextField
+              label="Product Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+            />
+            <TextField
+              label="Price"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={productPrice === 0 ? "" : productPrice}
+              onChange={(e) => setProductPrice(+e.target.value)}
+            />
+            <TextField
+              label="Quantity"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={productQuantity === 0 ? "" : productQuantity}
+              onChange={(e) => setProductQuantity(+e.target.value)}
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Category</InputLabel>
+              <Select
                 value={productCategory}
                 onChange={(e) => setProductCategory(e.target.value)}
               >
-                <option value="">Select a Collection</option>
+                <MenuItem value="">
+                  <em>Select a Collection</em>
+                </MenuItem>
                 {Categories.map((category) => (
-                  <option key={category.title} value={category.title}>
+                  <MenuItem key={category.title} value={category.title}>
                     {category.title}
-                  </option>
+                  </MenuItem>
                 ))}
-              </Input>
-            </FormGroup>
-            <FormGroup>
-              <Label for="productImages">Images</Label>
+              </Select>
+            </FormControl>
+            <div>
+              <label htmlFor="productImages">Images</label>
               <br />
-              {
-                // Only show the "Add Images" button if the user is adding a new product
-                !updatingProduct && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      document.getElementById("productImages").click();
-                    }}
-                  >
-                    Add Images
-                  </Button>
-                )
-              }
-              <Input
+              {!updatingProduct && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    document.getElementById("productImages").click();
+                  }}
+                >
+                  Add Images
+                </Button>
+              )}
+              <input
                 type="file"
                 name="productImages"
                 id="productImages"
@@ -307,16 +309,23 @@ function AdminProducts() {
                   height={50}
                 />
               ))}
-            </FormGroup>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={saveProduct}>
+            </div>
+          </div>
+          <div>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={async () => {
+                await saveProduct(uploadImagesToStorage);
+                toggleModal();
+              }}
+            >
               Save
             </Button>{" "}
-            <Button color="secondary" onClick={toggleModal}>
+            <Button variant="contained" color="secondary" onClick={toggleModal}>
               Cancel
             </Button>
-          </ModalFooter>
+          </div>
         </div>
       </Modal>
     </div>
