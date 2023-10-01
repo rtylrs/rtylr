@@ -4,44 +4,25 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
-import { db } from "../firebase";
+import { db, firebase } from "../firebase";
 
 const PetitionModal = ({ isOpen, onClose, petitionId }) => {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [petition, setPetition] = useState([]);
 
-
-  
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    db.collection("petitions")
-      .doc(petitionId)
-      .get()
-      .then((doc) => {
-        setPetition(doc.data());
-      }
-    );
-    
+  const handleSubmit = () => {
     db.collection("petitions")
       .doc(petitionId)
       .update({
-        signatures: petition.signatures + 1,
-        users: [...petition.users, { email, fullName }]
+        signatures: firebase.firestore.FieldValue.increment(1),
+        users: firebase.firestore.FieldValue.arrayUnion({ email, fullName }),
+      })
+      .then(() => {
+        setEmail("");
+        setFullName("");
+
+        onClose();
       });
-
-    console.log("im here");
-    
-
-    // db.collection("petitions")
-    //   .doc(petitionId)
-    //   .update({
-    //     signatures: db.FieldValue.increment(1),
-    //     users: db.FieldValue.arrayUnion({ email, fullName }),
-    //   });
-
-    onClose();
   };
 
   return (
@@ -53,7 +34,7 @@ const PetitionModal = ({ isOpen, onClose, petitionId }) => {
     >
       <Box className="modal-content">
         <h2 id="modal-title">Sign the Petition</h2>
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className="form-group">
             <TextField
               label="Email"
@@ -76,10 +57,21 @@ const PetitionModal = ({ isOpen, onClose, petitionId }) => {
             />
           </div>
           <div className="button-group">
-            <Button variant="contained" color="primary" type="submit">
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              style={{
+                marginRight: "1rem",
+              }}
+              onClick={() => {
+                console.log("clicked");
+                handleSubmit();
+              }}
+            >
               Submit
             </Button>
-            <Button variant="outlined" color="secondary" onClick={onClose}>
+            <Button variant="outlined" color="error" onClick={onClose}>
               Close
             </Button>
           </div>
@@ -92,6 +84,7 @@ const PetitionModal = ({ isOpen, onClose, petitionId }) => {
 PetitionModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  petitionId: PropTypes.string.isRequired,
 };
 
 export default PetitionModal;

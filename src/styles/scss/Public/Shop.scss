@@ -2,13 +2,30 @@
 .shop {
     display: flex;
     flex-direction: row;
-  
+    max-width: 1570px;
+    margin: 0 auto;
+    padding: 20px;
+
     @media (max-width: 768px) {
       flex-direction: column;
     }
   
     .filter-sidebar {
       /* Styles for the filter sidebar */
+      margin-right:5%;
+      background-color: #f2ebe5;
+      width: 15%;
+      padding: 20px;
+      border-radius: 15px;
+
+      .filter-section {
+        margin-bottom: 20px;
+        h4 {
+          font-size: 18px;
+          margin-bottom: 10px;
+          border-bottom: 1px solid #b89077;
+        }
+      }
   
       @media (max-width: 768px) {
         /* Adjust styles for smaller screens */
@@ -17,7 +34,7 @@
   
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 20px;
   
       @media (max-width: 768px) {
@@ -33,12 +50,34 @@
       }
     }
   
-    .view-more-button {
-      /* Styles for the "View More" button */
+
+  }
+
+  .shopFooter {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    
+
+    .view-more-button-shop {
+      background-color: #846552;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
   
-      @media (max-width: 768px) {
-        /* Adjust styles for smaller screens */
+      
+      &:hover {
+        background-color: #b89077;
+        transition: 0.3s;
       }
     }
   }
   
+

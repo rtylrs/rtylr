@@ -6,14 +6,14 @@ function ProductCard({ product }) {
     <Link to={`/product/${product?.id}`}>
       <div className="productCard">
         <img src={product?.images[0]} alt="Product image" />
-        <h3 className="name">Product 1</h3>
+        {/* <h3 className="name">{product?.name}</h3> */}
         <p className="creator">{product?.creator}</p>
         <p className="price">{product?.price} KD</p>
         <div className="ctaContainer">
-          <button className="addBtn">
+          {/* <button className="addBtn">
             <span>+</span>
             <span>Add</span>
-          </button>
+          </button> */}
           <button className="buyBtn">Buy Now</button>
         </div>
       </div>
