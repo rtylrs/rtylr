@@ -41,7 +41,10 @@
     display: flex;
     justify-content: center; 
     align-items: center;
-    flex: 1; 
+    width: 5%;
+    @media only screen and (max-width: 768px){
+      margin-left: 15%;
+    }
   }
 
   .header-center img {
@@ -226,7 +229,7 @@
     display: flex;
     justify-content: center; 
     align-items: center;
-    flex: 1; 
+    width: 5%;
   }
 
   .header-center img {
@@ -268,6 +271,7 @@
     background-color: #f2ebe5;
     border: none;
     color: #231f1b;
+    transform: translateX(100%);
   }
   
   .mobile-menu {
@@ -381,5 +385,9 @@
       background-color: #b89077;
       transition: 0.6s;
       scale: 1.1;
+    }
+
+    @media only screen and (max-width: 768px){
+      display: none;
     }
 }

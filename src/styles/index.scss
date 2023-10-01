@@ -10,11 +10,13 @@
 @import './scss/Public/Pricing.scss';
 @import './scss/Public/Contact.scss';
 @import './scss/Public/Collection.scss';
+@import './scss/Public/Shop.scss';
 
 // Scss imports Components
 @import './scss/Components/Alert.scss';
 @import './scss/Components/ProductCard.scss';
 @import './scss/Components/ProductsGrid.scss';
+@import './scss/Components/Slider.scss';
 
 // Scss imports Client
 @import './scss/Client/UserLayout.scss';
@@ -44,7 +46,7 @@ a {
   cursor: pointer;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background-color: #fbf6f2;

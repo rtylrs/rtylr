@@ -14,6 +14,7 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
+import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
 
 const theme = createTheme({
   palette: {
@@ -30,8 +31,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <I18nextProvider i18n={i18next}>
           <Provider store={store}>
             <BrowserRouter>
-              <ScrollToTop />
-              <App />
+              <SidebarProvider>
+                <ScrollToTop />
+                <App />
+              </SidebarProvider>
             </BrowserRouter>
           </Provider>
         </I18nextProvider>

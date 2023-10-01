@@ -139,3 +139,20 @@
     font-size: 27px;
   }
 }
+
+.sidebar__section {
+  h2 {
+    color: #83a6b0;
+    font-size: 1.2em;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    font-weight: 600;
+    padding-bottom: 5px;
+    border-bottom: #7a7c81 1px solid;
+    width: fit-content;
+    min-width: 80%;
+    display: flex;
+    justify-content: space-between;
+  }
+}

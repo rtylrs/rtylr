@@ -72,17 +72,6 @@ const Header = () => {
           : `header-pages ${isMobileMenuOpen ? "mobile-menu-open" : ""} `
       }
     >
-      <div className="header-left">
-        <Link
-          to="https://www.thesanitystore.com/
-        "
-        >
-          Shop
-        </Link>
-        <Link to="/petitions">Petitions</Link>
-        <Link to="/about">About</Link>
-        <Link to="/contact">Contact Us</Link>
-      </div>
       <div
         className="header-center"
         style={{
@@ -96,12 +85,12 @@ const Header = () => {
           src={Logo}
           alt="Logo"
           style={{
-            transform:
-              width > 768
-                ? document.location.pathname === "/"
-                  ? "translateX(-110px)"
-                  : "translateX(-75px)"
-                : "translateX(-90%)",
+            // transform:
+            //   width > 768
+            //     ? document.location.pathname === "/"
+            //       ? "translateX(-110px)"
+            //       : "translateX(-75px)"
+            //     : "translateX(-90%)",
             filter:
               width > 768
                 ? document.location.pathname === "/"
@@ -115,6 +104,13 @@ const Header = () => {
           }}
         />
       </div>
+      <div className="header-left">
+        <Link to="/shop">Shop</Link>
+        <Link to="/petitions">Petitions</Link>
+        <Link to="/about">About</Link>
+        <Link to="/contact">Contact Us</Link>
+      </div>
+
       <div className="header-right">
         {/* {width > 768 && (
           <>
@@ -178,16 +174,22 @@ const Header = () => {
           )}
         </button>
 
-        {width > 768 && (
-          <button
-            onClick={() => {
-              window.open("https://www.thesanitystore.com/", "_self");
-            }}
-            className="browse-products"
-          >
-            Browse Products
-          </button>
-        )}
+        <button
+          onClick={() => {
+            if (user) {
+              if (userData?.isAdmin) {
+                navigate("/manage");
+                return;
+              }
+              navigate(userData?.isVendor ? "/business" : "/account");
+            } else {
+              navigate("/login");
+            }
+          }}
+          className="browse-products"
+        >
+          {user ? "My Account" : "Join Us"}
+        </button>
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">

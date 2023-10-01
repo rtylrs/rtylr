@@ -19,9 +19,7 @@ function Register() {
   const [refered, setRefered] = React.useState("");
   const provider = new GoogleAuthProvider();
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-
+  const handleRegister = () => {
     if (password === confirmPassword) {
       auth
         .createUserWithEmailAndPassword(email, password)
