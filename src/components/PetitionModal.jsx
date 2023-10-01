@@ -20,9 +20,8 @@ const PetitionModal = ({ isOpen, onClose, petitionId }) => {
       .then(() => {
         setEmail("");
         setFullName("");
-
-        onClose();
       });
+    onClose();
   };
 
   return (
