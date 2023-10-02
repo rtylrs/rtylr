@@ -2,6 +2,8 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
+import "firebase/compat/analytics";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyC_8k06RmjcWuQh3wm-N-02rEVnXjunlAs",
@@ -10,6 +12,7 @@ const firebaseConfig = {
   storageBucket: "sanity-3d4e1.appspot.com",
   messagingSenderId: "512207225703",
   appId: "1:512207225703:web:6736e7c03a24d10879e5c2",
+  measurementId: "G-634EPZKC8Y"
 };
 
 let app;
@@ -23,6 +26,9 @@ if (firebase.apps.length === 0) {
 const auth = app.auth(); // for authentication
 const db = app.firestore(); // for firestore
 const storage = app.storage(); // for storage
+const analytics = app.analytics(); // for analytics
 db.settings({ merge: true }); // for firestore offline support
 
-export { auth, db, storage, firebase };
+export {
+  auth, db, storage, firebase, analytics
+};

@@ -14,7 +14,6 @@ import {
   faShoppingBag,
   faCog,
   faArrowUpRightFromSquare,
-  faCommentAlt,
   faBarsProgress,
   faCheckDouble,
   faSquare,
@@ -22,6 +21,7 @@ import {
   faRuler,
   faCrosshairs,
   faHandHoldingDollar,
+  faRss,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -89,10 +89,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 </Link>
               </div>
               <div className="sidebar__link  admin__link">
-                <FontAwesomeIcon
-                  icon={faCommentAlt}
-                  className="sidebar__icon"
-                />
+                <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
                 <Link to="/manage/vendors" id="link">
                   Feedback
                 </Link>
@@ -141,12 +138,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   Feedback
                 </Link>
               </div>
-              <div className="sidebar__link  admin__link">
-                <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
-                <Link to="/manage/blog" id="link">
-                  Blog
-                </Link>
-              </div>
             </>
           )}
         </div>
@@ -184,7 +175,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
                 <Link to="/manage/blog" id="link">
-                  Blog Section
+                  Blog Posts
                 </Link>
               </div>
             </>

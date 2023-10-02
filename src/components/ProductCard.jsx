@@ -1,13 +1,15 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
 
 function ProductCard({ product }) {
+  const navigate = useNavigate();
   return (
-    <Link to={`/shop/${product?.id}`}>
+    <div>
       <div className="productCard">
-        <div className="imageContainer">
+        <Link className="imageContainer" to={`/shop/${product?.id}`}>
           <img src={product?.images[0]} alt="Product image" />
-        </div>
+        </Link>
         <h4 className="name">{product?.name}</h4>
         <p className="creator">
           By <strong>{product?.creator}</strong> with &#9829;
@@ -18,10 +20,21 @@ function ProductCard({ product }) {
             <span>+</span>
             <span>Add</span>
           </button>
-          <button className="buyBtn">Buy Now</button>
+          <button
+            className="buyBtn"
+            onClick={() => {
+              if (auth.currentUser) {
+                console.log("user is signed in");
+              } else {
+                navigate("/auth/login");
+              }
+            }}
+          >
+            Buy Now
+          </button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 

@@ -61,11 +61,11 @@
         a {
           font-size: 22px;
           margin: 0 10px;
-          color: #231f1b;
           text-decoration: none;
   
           &:hover {
-            color: #007bff;
+            color: #b89077;
+            transition: 0.3s ease-in-out;
           }
         }
       }
