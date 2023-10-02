@@ -23,7 +23,7 @@ function Home() {
   const [blogs, setBlogs] = useState([]);
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
   const [petitions, setPetitions] = useState([]);
-  const [petitonId, setPetitionId] = useState(null);
+  const [petitonId, setPetitionId] = useState("");
   const [products, setProducts] = useState([]);
 
   // const petitions = [

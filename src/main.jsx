@@ -26,8 +26,8 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Suspense fallback={<Loader />}>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <Suspense fallback={<Loader />}>
         <I18nextProvider i18n={i18next}>
           <Provider store={store}>
             <BrowserRouter>
@@ -38,7 +38,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             </BrowserRouter>
           </Provider>
         </I18nextProvider>
-      </ThemeProvider>
-    </Suspense>
+      </Suspense>
+    </ThemeProvider>
   </React.StrictMode>
 );
