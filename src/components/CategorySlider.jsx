@@ -52,7 +52,13 @@ function CategorySlider() {
                 backgroundPosition: "center",
               }}
             >
-              <Link to={`/collection/${category.title.toLowerCase()}`}>
+              <Link
+                to={
+                  category.title.toLowerCase() === "brands"
+                    ? `/brands`
+                    : `/collection/${category.title.toLowerCase()}`
+                }
+              >
                 <p>{category.title}</p>
               </Link>
             </div>

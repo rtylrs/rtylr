@@ -13,6 +13,8 @@
     }
   
     .footer-sections {
+      max-width: 1400px;
+      margin: 0 auto;
       padding-left: 20px;
       padding-right: 20px;
       display: flex;
@@ -44,6 +46,7 @@
           }
         }
       }
+
     }
   
     .footer-social {
@@ -90,6 +93,7 @@
       .footer-sections {
         flex-direction: column;
         align-items: center;
+        max-width: 100%;
   
         .footer-section {
           text-align: center;

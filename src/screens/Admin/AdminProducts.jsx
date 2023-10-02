@@ -13,7 +13,7 @@ import {
 
 import { Table } from "reactstrap"; // Import Reactstrap components
 import { Categories } from "../../data/categories";
-import { db, storage } from "../../firebase";
+import { auth, db, storage } from "../../firebase";
 import ShowAlert from "../../utils/showAlert";
 
 // Sample product data (replace with actual data from Firebase)
@@ -113,6 +113,8 @@ function AdminProducts() {
         collection: productCategory,
         quantity: productQuantity,
         images: imageUrls, // Use the uploaded image URLs
+        owner: auth.currentUser.displayName,
+        businessName: "TODO - Replace with dynamic business name",
       };
 
       if (updatingProduct) {

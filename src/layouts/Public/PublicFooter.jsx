@@ -44,22 +44,27 @@ const Footer = () => {
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Navigate</h3>
+          <h3>Links</h3>
           <ul>
             <li>
               <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/shop">Shop</Link>
-            </li>
-            <li>
-              <Link to="/suppliers">Suppliers</Link>
             </li>
             <li>
               <Link to="/about">About</Link>
             </li>
             <li>
               <Link to="/contact">Contact Us</Link>
+            </li>
+          </ul>
+        </div>
+        <div className="footer-section">
+          <h3>Shop</h3>
+          <ul>
+            <li>
+              <Link to="/shop">Shop</Link>
+            </li>
+            <li>
+              <Link to="/brands">Brands</Link>
             </li>
           </ul>
         </div>

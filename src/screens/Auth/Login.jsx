@@ -65,6 +65,7 @@ function Login() {
                   name: result.user.displayName,
                   isAdmin: false,
                   isVendor: false,
+                  isContributor: false,
                   Description: "",
                   Location: "",
                   Phone: "",

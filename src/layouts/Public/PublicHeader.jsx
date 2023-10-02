@@ -88,7 +88,7 @@ const Header = () => {
       </div>
       <div className="header-left">
         <Link to="/shop">Shop</Link>
-        <Link to="/suppliers">Suppliers</Link>
+        <Link to="/brands">Brands</Link>
         <Link to="/petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
@@ -171,12 +171,17 @@ const Header = () => {
           }}
           className="browse-products"
         >
-          {user ? "My Account" : "Join Us"}
+          {user
+            ? userData?.isAdmin
+              ? "Admin Panel"
+              : "My Account"
+            : "Join Us"}
         </button>
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="https://www.thesanitystore.com/">Shop</Link>
+          <Link to="/">Shop</Link>
+          <Link to="/brands">Brands</Link>
           <Link to="/petitions">Petitions</Link>
           <Link to="/about">About</Link>
           <Link to="/contact">Contact Us</Link>

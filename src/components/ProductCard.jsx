@@ -5,7 +5,9 @@ function ProductCard({ product }) {
   return (
     <Link to={`/shop/${product?.id}`}>
       <div className="productCard">
-        <img src={product?.images[0]} alt="Product image" />
+        <div className="imageContainer">
+          <img src={product?.images[0]} alt="Product image" />
+        </div>
         <h4 className="name">{product?.name}</h4>
         <p className="creator">
           By <strong>{product?.creator}</strong> with &#9829;
