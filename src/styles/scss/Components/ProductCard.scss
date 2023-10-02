@@ -73,24 +73,30 @@
       background-color: transparent;
       border: 1px solid rgb(121, 85, 72);
       color: black;
+
+      &:hover {
+        background-color: rgb(121, 85, 72);
+        color: #fff;
+        transition: 0.6s ease-in-out;
+      }
     }
 
     &.buyBtn {
-      background-color: #846552;
+      background-color: #2ecc71;
       color: #fff;
       font-weight: 600;
       border: none;
       margin: 0 auto;
       height: 30px;
       cursor: pointer;
+
+      &:hover {
+        background-color: #29ac00;
+        transition: 0.6s ease-in-out;
+      }
     }
   }
 
-  button:hover {
-    background-color: #b89077;
-    transition: 0.6s;
-    color: #fff;
-  }
 
   @media only screen and (max-width: 768px) {
     height: 100%;

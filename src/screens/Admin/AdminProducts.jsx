@@ -113,8 +113,7 @@ function AdminProducts() {
         collection: productCategory,
         quantity: productQuantity,
         images: imageUrls, // Use the uploaded image URLs
-        owner: auth.currentUser.displayName,
-        businessName: "TODO - Replace with dynamic business name",
+        creator: auth.currentUser.displayName,
       };
 
       if (updatingProduct) {
