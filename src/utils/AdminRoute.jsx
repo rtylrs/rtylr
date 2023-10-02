@@ -1,6 +1,7 @@
 import { auth, db } from "../firebase";
 import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
+import Loader from "../layouts/loader/Loader";
 
 function AdminRoute() {
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,7 @@ function AdminRoute() {
     return admin ? <Outlet /> : <Navigate to="/" />;
   } else {
     // Optionally, you can render a loading indicator here while checking the admin status
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 }
 

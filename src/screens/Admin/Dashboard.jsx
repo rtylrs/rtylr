@@ -71,7 +71,7 @@ function Dashboard() {
           <div className="card">
             <i className="fa-solid fa-building"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Vendors</p>
+              <p className="text-primary-p">Orders</p>
               <span className="font-bold text-title">{vendors}</span>
             </div>
           </div>
@@ -79,7 +79,7 @@ function Dashboard() {
           <div className="card">
             <i className="fa-solid fa-calendar-days"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Events</p>
+              <p className="text-primary-p">Pending Orders</p>
               <span className="font-bold text-title">{events}</span>
             </div>
           </div>
@@ -87,7 +87,7 @@ function Dashboard() {
           <div className="card">
             <i className="fa-solid fa-heart"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Reviews</p>
+              <p className="text-primary-p">Feedback</p>
               <span className="font-bold text-title">{reviews}</span>
             </div>
           </div>

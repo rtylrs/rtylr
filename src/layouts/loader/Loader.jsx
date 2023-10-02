@@ -1,10 +1,10 @@
-import { Spinner } from "reactstrap";
 import "./loader.scss";
+import { CircularProgress } from "@mui/material";
 
 const Loader = () => (
   <div className="fallback-spinner">
     <div className="loading">
-      <Spinner color="primary" />
+      <CircularProgress size={60} color="primary" />
     </div>
   </div>
 );
