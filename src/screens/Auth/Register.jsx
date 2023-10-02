@@ -34,6 +34,7 @@ function Register() {
                 name: name,
                 isAdmin: false,
                 isVendor: false,
+                isContributor: false,
                 Description: "",
                 Location: "",
                 About: "",
@@ -92,6 +93,7 @@ function Register() {
                 name: result.user.displayName,
                 isAdmin: false,
                 isVendor: false,
+                isContributor: false,
                 Description: "",
                 Location: "",
                 image:

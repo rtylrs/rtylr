@@ -100,7 +100,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
                 <Link to="/manage/vendors" id="link">
-                  Suppliers
+                  Brands
                 </Link>
               </div>
             </>

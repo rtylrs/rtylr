@@ -49,7 +49,7 @@ function ItemPage() {
         </Slider>
       </div>
       <div className="item-info">
-        <p>{item.creator}</p>
+        <p>By {item.creator}</p>
         <p>{item.price} KD</p>
       </div>
     </div>

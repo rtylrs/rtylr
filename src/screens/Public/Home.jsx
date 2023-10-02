@@ -135,7 +135,11 @@ function Home() {
               style={{
                 backgroundImage: `url(${category.imageUrl})`,
               }}
-              to={`/collection/${category.title.toLowerCase()}`}
+              to={
+                category.title.toLowerCase() === "brands"
+                  ? `/brands`
+                  : `/collection/${category.title.toLowerCase()}`
+              }
             >
               <div className="item-content">
                 <p>{category.title}</p>
@@ -190,6 +194,7 @@ function Home() {
                     ? post.content.substring(0, 250) + "..."
                     : post.content}
                 </p>
+                <p className="post-author">By {post?.ownerName}</p>
                 <p className="post-date">
                   {post.timestamp.toDate().toDateString()}
                 </p>

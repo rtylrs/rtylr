@@ -92,52 +92,6 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-
-    .product-item {
-      background-color: #f6ede6;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-      height: 370px; // Set a fixed height for product items
-
-      &:hover {
-        transform: translateY(-5px);
-      }
-
-      img {
-        width: 100%; // Set the width to 100% for full width
-        // height: 65%; // Set the height to 50% of the product item's height
-        border-radius: 4px;
-        object-fit: cover; // Maintain aspect ratio and cover the entire space
-      }
-
-      h3 {
-        font-size: 18px;
-        margin: 6px 0;
-      }
-
-      p {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-      }
-
-      button {
-        background-color: #846552;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        font-size: 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: #b89077;
-          transition: 0.3s;
-        }
-      }
-    }
   }
 
   .view-more-button {
@@ -149,7 +103,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 80px;
+    margin-top:5%;
 
     &:hover {
       background-color: #b89077;
@@ -306,6 +260,12 @@ align-items: center;
       }
 
 
+    }
+    .post-author {
+      font-size: 14px;
+      color: #846552;
+      margin-bottom: 0px;
+      padding: 0;
     }
 
     .post-date {
