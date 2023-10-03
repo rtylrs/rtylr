@@ -13,6 +13,7 @@ const About = React.lazy(() => import("../screens/Public/About"));
 const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
 const Contact = React.lazy(() => import("../screens/Public/Contact"));
 const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
+const AllPetitions = React.lazy(() => import("../screens/Public/AllPetitions"));
 
 const PublicRoutes = [
   {
@@ -98,6 +99,17 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Collection />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/all-petitions",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <AllPetitions />
         </AnimatedRoutes>
       </Public>
     ),
