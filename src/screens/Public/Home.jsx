@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Categories } from "../../data/categories";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
-import { LazyLoadImage } from "react-lazy-load-image-component";
 import PetitionModal from "../../components/PetitionModal";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -25,24 +24,6 @@ function Home() {
   const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState("");
   const [products, setProducts] = useState([]);
-
-  // const petitions = [
-  //   {
-  //     title: "Petition for Clean Energy",
-  //     signatures: 6000, // Number of people who signed this petition
-  //     goal: 6000, // Goal amount to be reached
-  //   },
-  //   {
-  //     title: "Save Our National Parks",
-  //     signatures: 2800,
-  //     goal: 5000,
-  //   },
-  //   {
-  //     title: "Support Education Equality",
-  //     signatures: 2200,
-  //     goal: 7500,
-  //   },
-  // ];
 
   useEffect(() => {
     db.collection("Products")
