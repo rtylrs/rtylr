@@ -14,6 +14,7 @@ const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
 const Contact = React.lazy(() => import("../screens/Public/Contact"));
 const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
 const AllPetitions = React.lazy(() => import("../screens/Public/AllPetitions"));
+const AllBlogs = React.lazy(() => import("../screens/Public/AllBlogs"));
 
 const PublicRoutes = [
   {
@@ -110,6 +111,17 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <AllPetitions />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/all-blogs",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <AllBlogs />
         </AnimatedRoutes>
       </Public>
     ),

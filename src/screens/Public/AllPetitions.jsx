@@ -35,7 +35,7 @@ function AllPetitions() {
       />
 
       <section className="petition-section">
-        <h2>Latest Petitions</h2>
+        <h2>All Petitions</h2>
         <div className="petition-list">
           {petitions.map((petition, index) => (
             <div className="petition-item" key={index}>
