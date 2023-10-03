@@ -185,7 +185,7 @@ function Home() {
         <button
           className="view-more-blogs-button"
           onClick={() => {
-            navigate("/blogs");
+            navigate("/all-blogs");
           }}
         >
           View More
