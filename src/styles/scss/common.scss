@@ -79,6 +79,12 @@
     background: #b89077;
     transition: all 0.6s ease-in-out;
   }
+
+  .notfound span:not(:hover) {
+    color: #fbf6f2;
+    background: #846552;
+    transition: all 0.6s ease-in-out;
+  }
   
   @media only screen and (max-width: 767px) {
     .notfound .notfound-404 h1 {
