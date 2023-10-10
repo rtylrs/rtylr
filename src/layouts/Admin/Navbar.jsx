@@ -50,6 +50,7 @@ const Navbar = ({ openSidebar }) => {
               vertical: "top",
               horizontal: "right",
             }}
+            className="badgeAdmin"
           >
             <FontAwesomeIcon icon={faEnvelope} size="xl" />
           </Badge>

@@ -67,13 +67,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             Settings
           </Link>
         </div>
-
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faFeatherPointed} className="sidebar__icon" />
-          <Link to="/join" id="link">
-            Become a business
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -1,80 +1,158 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { auth, db } from "../../firebase";
 
-//styles
-import "../../styles/scss/Admin/petition.scss";
-
 function AdminPetitions() {
-  const [petition, setPetition] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-  const [goal , setGoal] = React.useState(0);
-  const [petitions, setPetitions] = React.useState([]);
-
+  const [petitionTitle, setPetitionTitle] = useState("");
+  const [petitionGoal, setPetitionGoal] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [petitions, setPetitions] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
 
   const addPetition = (e) => {
     e.preventDefault();
-    db.collection("petitions").add({
-      title: e.target.petitionTitle.value,
-      goal: e.target.petitionGoal.value,
-      signatures: 0,
-      users: [],
-    }).then(() => {
-      setGoal(0);
-      setPetition("");
-    })
-  }
+    db.collection("petitions")
+      .add({
+        title: petitionTitle,
+        goal: petitionGoal,
+        signatures: 0,
+        users: [],
+      })
+      .then(() => {
+        setPetitionTitle("");
+        setPetitionGoal("");
+      });
+  };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     db.collection("petitions").onSnapshot((snapshot) => {
-      setPetitions(snapshot.docs.map((doc) => ({
-        id: doc.id,
-        title: doc.data().title,
-        goal: doc.data().goal,
-        signatures: doc.data().signatures,
-        users: doc.data().users,
-      })))
-    })
+      setPetitions(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title,
+          goal: doc.data().goal,
+          signatures: doc.data().signatures,
+          users: doc.data().users,
+        }))
+      );
+    });
     setLoading(false);
-  }
-  , [])
-
+  }, []);
 
   const handleDelete = (id) => {
     db.collection("petitions").doc(id).delete();
-  }
+  };
 
-  
+  const handleViewUsers = (users) => {
+    setSelectedUsers(users);
+    setOpenModal(true);
+  };
 
-  return(
-    <div className="petitionsContainer">
-      <form className="petitionsForm"
-        onSubmit={addPetition}
-      >
-        <label for="petitionTitle">Petition Title</label>
-        <input type="text" id="petitionTitle" name="petitionTitle" placeholder="Petition Title"/>
-        <label for="petitionGoal">Petition Goal</label>
-        <input type="number" id="petitionGoal" name="petitionGoal" placeholder="Petition Goal"/>
-        <input type="submit" value="Submit" className="petitionSubmit"/>
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  return (
+    <Container>
+      <form className="petitionsForm" onSubmit={addPetition}>
+        <TextField
+          label="Petition Title"
+          variant="outlined"
+          fullWidth
+          value={petitionTitle}
+          onChange={(e) => setPetitionTitle(e.target.value)}
+        />
+        <TextField
+          label="Petition Goal"
+          variant="outlined"
+          fullWidth
+          type="number"
+          value={petitionGoal}
+          onChange={(e) => setPetitionGoal(e.target.value)}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          className="petitionSubmit"
+        >
+          Submit
+        </Button>
       </form>
-      <h1>Current Petitions</h1>
-      <div className="petitionsList">
-        {petitions.map((petition) => (
-          <div className="petitionCard">
-            <h3>{petition.title}</h3>
-            <p>Signatures: {petition.signatures}</p>
-            <p>Goal: {petition.goal}</p>
-            <button onClick={() => handleDelete(petition.id)}>Delete</button>
-
-              <h4>Users:</h4>
-              {petition.users.map((user) => (
-                <p>{user.fullName}</p>
-              ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+      <Typography variant="h4">Current Petitions</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Title</TableCell>
+              <TableCell>Signatures</TableCell>
+              <TableCell>Goal</TableCell>
+              <TableCell>Actions</TableCell>
+              <TableCell>Signed By</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {petitions.map((petition) => (
+              <TableRow key={petition.id}>
+                <TableCell>{petition.title}</TableCell>
+                <TableCell>{petition.signatures}</TableCell>
+                <TableCell>{petition.goal}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => handleDelete(petition.id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleViewUsers(petition.users)}
+                  >
+                    View Users
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Users</DialogTitle>
+        <DialogContent>
+          {selectedUsers.map((user) => (
+            <Typography key={user.fullName}>{user.fullName}</Typography>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
 }
 
 export default AdminPetitions;

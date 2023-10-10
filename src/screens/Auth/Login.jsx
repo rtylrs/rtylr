@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { auth, db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider } from "firebase/auth";
-import ShowAlert from "../../utils/showAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { useDispatch } from "react-redux";
@@ -32,7 +31,6 @@ function Login() {
               });
               dispatch(login(user));
               navigate("/");
-              ShowAlert(`Welcome Back!`, "success");
             })
             .catch((e) => {
               setError(e.message);
@@ -99,7 +97,6 @@ function Login() {
               });
           }
 
-          ShowAlert(`Welcome Back!`, "success");
         })
         .catch((e) => {
           setError(e.message);
