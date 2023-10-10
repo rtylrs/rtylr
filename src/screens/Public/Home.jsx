@@ -15,6 +15,7 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import ProductCard from "../../components/ProductCard";
+import { useSelector } from "react-redux";
 
 function Home() {
   const navigate = useNavigate();
@@ -23,21 +24,9 @@ function Home() {
   const [isPetitionModalOpen, setIsPetitionModalOpen] = useState(false);
   const [petitions, setPetitions] = useState([]);
   const [petitonId, setPetitionId] = useState("");
-  const [products, setProducts] = useState([]);
+  const products = useSelector((state) => state.products.products);
 
   useEffect(() => {
-    db.collection("Products")
-      .limit(4)
-      .get()
-      .then((querySnapshot) => {
-        const products = [];
-        querySnapshot.forEach((doc) => {
-          const product = Object.assign({ id: doc.id }, doc.data());
-          products.push(product);
-        });
-        setProducts(products);
-      });
-
     const petitionsUnsubscribe = db
       .collection("petitions")
       .limit(3)

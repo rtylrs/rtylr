@@ -36,7 +36,7 @@ function CategorySlider() {
         <div
           className="slider-content"
           style={{
-            width: `calc(100% / 4 * ${Categories.length})`,
+            width: `calc(100% / 5 * ${Categories.length})`,
             transform: `translateX(-${
               currentIndex * (100 / Categories.length)
             }%)`,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Container,
@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { auth, db } from "../../firebase";
+import { db } from "../../firebase";
 
 function AdminPetitions() {
   const [petitionTitle, setPetitionTitle] = useState("");

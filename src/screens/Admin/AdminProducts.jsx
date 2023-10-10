@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Container,
   Table,
   TableBody,
   TableCell,
@@ -17,7 +16,7 @@ import {
   Paper,
 } from "@mui/material";
 import { Categories } from "../../data/categories";
-import { auth, db, storage } from "../../firebase";
+import { db, storage } from "../../firebase";
 import ShowAlert from "../../utils/showAlert";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -118,7 +117,7 @@ function AdminProducts() {
         category: productCategory,
         quantity: productQuantity,
         images: imageUrls, // Use the uploaded image URLs
-        creator: auth.currentUser.displayName,
+        creator: "Sanity",
       };
 
       if (updatingProduct) {
