@@ -42,7 +42,7 @@ const Navbar = ({ openSidebar }) => {
         <Link to="/">
           <FontAwesomeIcon icon={faHome} size="xl" />
         </Link>
-        <Link to="/manage/notifications">
+        <Link to="/manage/contacts">
           <Badge
             badgeContent={notificationsCount}
             color="error"

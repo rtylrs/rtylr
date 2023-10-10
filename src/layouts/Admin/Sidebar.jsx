@@ -22,6 +22,8 @@ import {
   faCrosshairs,
   faHandHoldingDollar,
   faRss,
+  faWarehouse,
+  faShop,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -60,9 +62,21 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </Link>
         </div>
         <div className="sidebar__link">
+          <FontAwesomeIcon icon={faWarehouse} className="sidebar__icon" />
+          <Link to="/manage/products" id="link">
+            POS
+          </Link>
+        </div>
+        <div className="sidebar__link">
           <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
           <Link to="/manage/products" id="link">
             Sanity Products
+          </Link>
+        </div>
+        <div className="sidebar__link">
+          <FontAwesomeIcon icon={faShop} className="sidebar__icon" />
+          <Link to="/manage/branches" id="link">
+            Branches
           </Link>
         </div>
         <div

@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -8,7 +9,11 @@ function ProductCard({ product }) {
     <div>
       <div className="productCard">
         <Link className="imageContainer" to={`/shop/${product?.id}`}>
-          <img src={product?.images[0]} alt="Product image" />
+          <LazyLoadImage
+            src={product?.images[0]}
+            alt="Product image"
+            effect="blur"
+          />
         </Link>
         <h4 className="name">{product?.name}</h4>
         <p className="creator">
@@ -51,7 +56,7 @@ ProductCard.propTypes = {
     price: PropTypes.number.isRequired,
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
     creator: PropTypes.string.isRequired,
-    collection: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
   }).isRequired,
 };
 

@@ -17,13 +17,18 @@ import AlertModal from "./components/Alert/AlertModal";
 import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
 import NoMatch from "./screens/Public/NoMatch";
+import { useDispatch } from "react-redux";
+import { getAllProducts } from "./redux/reducers/productsSlice";
 
 const App = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const dispatch = useDispatch();
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
+    // get all products
+    dispatch(getAllProducts());
     // get language from local storage
     const language = localStorage.getItem("language");
     if (language) {
@@ -44,6 +49,8 @@ const App = () => {
       // Unsubscribe from the listener when the component unmounts
       unsubscribe();
     };
+
+    //eslint-disable-next-line
   }, []);
 
   return (

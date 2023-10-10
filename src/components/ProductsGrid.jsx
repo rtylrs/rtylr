@@ -20,8 +20,6 @@ ProductsGrid.propTypes = {
       images: PropTypes.arrayOf(PropTypes.string).isRequired,
       creator: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
-      collection: PropTypes.string.isRequired,
-      description: PropTypes.arrayOf(PropTypes.string).isRequired,
     })
   ).isRequired,
 };
