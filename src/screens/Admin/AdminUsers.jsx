@@ -68,6 +68,7 @@ function Users() {
             <Table className="UsersTable">
               <TableHead>
                 <TableRow>
+                  <TableCell>ID</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Number of Purchased Items</TableCell>
@@ -78,6 +79,7 @@ function Users() {
               <TableBody>
                 {filteredItems.map((item, index) => (
                   <TableRow key={index}>
+                    <TableCell>{item.id}</TableCell>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.email}</TableCell>
                     <TableCell>
