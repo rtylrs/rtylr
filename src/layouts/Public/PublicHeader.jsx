@@ -89,7 +89,7 @@ const Header = () => {
       <div className="header-left">
         <Link to="/shop">Shop</Link>
         <Link to="/brands">Brands</Link>
-        <Link to="/petitions">Petitions</Link>
+        <Link to="/all-petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
       </div>
