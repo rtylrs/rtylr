@@ -40,32 +40,6 @@
           }
         }
       }
-  
-      .ResponsiveTable {
-        overflow-x: auto;
-        border-radius: 4px;
-        margin-bottom: 20px;
-  
-        .UsersTable {
-          width: 100%;
-          max-width: none;
-          background-color: #fff;
-  
-          th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-          }
-  
-          td,
-          th {
-            padding: 8px;
-            text-align: center;
-          }  
-          button {
-            cursor: pointer;
-          }
-        }
-      }
     }
   }
   

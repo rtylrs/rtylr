@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import { CSVLink } from "react-csv";
-import { LazyLoadImage } from "react-lazy-load-image-component";
-import "react-lazy-load-image-component/src/effects/blur.css";
-import Button from "@mui/material/Button";
-import { Table } from "reactstrap";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Button,
+  Paper,
+} from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faTrash, faX } from "@fortawesome/free-solid-svg-icons";
 
 function Users() {
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
 
   useEffect(() => {
     db.collection("Users")
@@ -22,28 +31,30 @@ function Users() {
             item.push(data);
           });
           setItems(item);
+          setFilteredItems(item);
         }
       });
   }, []);
 
+  const handleSearch = (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    setFilteredItems(
+      items.filter((item) => item.name.toLowerCase().includes(searchValue))
+    );
+  };
+
   return (
     <div className="AdminUsersManagement">
       <div className="AdminUsersManagementInner">
-        <h3>Users</h3>
+        <Typography variant="h3">Users</Typography>
         <div id="vendorManAdmin">
           <div>
-            <input
+            <TextField
               type="text"
               name="search"
               id="search"
               placeholder="Search by name"
-              onChange={(e) => {
-                setItems(
-                  items.filter((item) =>
-                    item.name.toLowerCase().includes(e.target.value)
-                  )
-                );
-              }}
+              onChange={handleSearch}
             />
           </div>
           <div className="exportBtnVen">
@@ -53,40 +64,56 @@ function Users() {
           </div>
         </div>
         <div className="ResponsiveTable">
-          <Table className="UsersTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Number Of Logins</th>
-                <th>Number of Purchased Items</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.email}</td>
-                    <td>{item.NumberOfLogins}</td>
-                    <td>{item.NumberOfEvents ? item.NumberOfEvents : 0}</td>
-                    <td>
+          <TableContainer component={Paper}>
+            <Table className="UsersTable">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Number of Purchased Items</TableCell>
+                  <TableCell>Flagged</TableCell>
+                  <TableCell>Delete</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredItems.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.email}</TableCell>
+                    <TableCell>
+                      {item.NumberOfEvents ? item.NumberOfEvents : 0}
+                    </TableCell>
+                    <TableCell>
                       <Button
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                          // do something
+                          // Handle delete action
+                        }}
+                      >
+                        {item.flagged ? (
+                          <FontAwesomeIcon icon={faCheck} size="lg" />
+                        ) : (
+                          <FontAwesomeIcon icon={faX} size="lg" />
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          // Handle delete action
                         }}
                       >
                         <FontAwesomeIcon icon={faTrash} size="lg" />
                       </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </div>
       </div>
     </div>

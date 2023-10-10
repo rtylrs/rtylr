@@ -89,12 +89,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 </Link>
               </div>
               <div className="sidebar__link  admin__link">
-                <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
-                <Link to="/manage/vendors" id="link">
-                  Feedback
-                </Link>
-              </div>
-              <div className="sidebar__link  admin__link">
                 <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
                 <Link to="/manage/vendors" id="link">
                   Brands
@@ -133,7 +127,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 </Link>
               </div>
               <div className="sidebar__link  admin__link">
-                <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+                <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
                 <Link to="/manage/feedback" id="link">
                   Feedback
                 </Link>

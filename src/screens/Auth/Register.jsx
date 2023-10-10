@@ -64,7 +64,6 @@ function Register() {
                 "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
             })
             .then(() => {
-              ShowAlert("Registered Successfully", "success");
               navigate("/");
             });
         })
@@ -84,7 +83,6 @@ function Register() {
         .then((doc) => {
           if (doc.exists) {
             navigate("/");
-            ShowAlert(`Welcome Back!`, "success");
           } else {
             db.collection("Users")
               .doc(result.user.uid)
@@ -117,8 +115,6 @@ function Register() {
                       "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
                   })
                   .then(() => {
-                    ShowAlert("Registered Successfully", "success");
-
                     db.collection("mail").add({
                       to: auth.currentUser.email,
                       message: {
