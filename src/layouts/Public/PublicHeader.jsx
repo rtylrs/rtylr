@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faCartFlatbed,
+  faCartShopping,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
@@ -158,6 +163,15 @@ const Header = () => {
         </button>
 
         <button
+          className="browse-products"
+          onClick={() => {
+            navigate("/account/cart");
+          }}
+        >
+          <FontAwesomeIcon icon={faCartShopping} />
+        </button>
+
+        <button
           onClick={() => {
             if (user) {
               if (userData?.isAdmin) {
@@ -187,7 +201,7 @@ const Header = () => {
           <Link to="/contact">Contact Us</Link>
           <button
             onClick={() => {
-              window.open("https://www.thesanitystore.com/", "_self");
+              navigate("/shop");
             }}
           >
             Browse Products

@@ -39,7 +39,7 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
   color-scheme: light dark;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility; 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -63,3 +63,22 @@ html, body {
 .MuiInputBase-root {
   background-color: white;
 }
+
+::-webkit-scrollbar {
+  width: 0.8rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #231f1b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b362f;
+  transition: 0.3s;
+}
+
+

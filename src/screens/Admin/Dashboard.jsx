@@ -32,7 +32,7 @@ function Dashboard() {
         .get();
       setVendors(vendors.size);
 
-      const reviews = await db.collection("Reviews").get();
+      const reviews = await db.collection("feedback").get();
       setReviewsData(reviews.docs.map((doc) => doc.data()));
       setReviews(reviews.size);
 
@@ -96,14 +96,14 @@ function Dashboard() {
         <div className="charts">
           <div className="charts__left">
             <div className="charts__left__title">
-              <div className="InnerContainerAdminCharts">
-                <h1>Latest Reviews</h1>
+              <div>
+                <h1>Latest Feedback</h1>
                 {reviewsData.map((review, index) => (
                   <div key={index}>
                     <h3>
-                      {review.customerName}-{review.review}
+                      By {review.name} - {review.rating}/5 Stars
                     </h3>
-                    <p>Vendor: {review.vendorName}</p>
+                    <p>{review.email}</p>
                   </div>
                 ))}
               </div>
@@ -113,7 +113,7 @@ function Dashboard() {
           <div className="charts__right">
             <div className="charts__right__title">
               <div>
-                <h1>Stats Reports</h1>
+                <h1>Highlights</h1>
               </div>
             </div>
 
