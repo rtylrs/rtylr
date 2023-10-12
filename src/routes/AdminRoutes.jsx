@@ -17,6 +17,9 @@ const Users = React.lazy(() => import("../screens/Admin/AdminUsers"));
 const AdminContacts = React.lazy(() =>
   import("../screens/Admin/AdminContacts")
 );
+const AdminSettings = React.lazy(() =>
+  import("../screens/Admin/AdminSettings")
+);
 
 const AdminRoutes = [
   {
@@ -78,6 +81,15 @@ const AdminRoutes = [
     element: (
       <Admin>
         <AdminContacts />
+      </Admin>
+    ),
+    exact: true,
+  },
+  {
+    path: "/manage/settings",
+    element: (
+      <Admin>
+        <AdminSettings />
       </Admin>
     ),
     exact: true,

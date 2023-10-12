@@ -22,7 +22,6 @@ const Navbar = ({ openSidebar }) => {
         .get()
         .then((snapshot) => {
           setNotificationsCount(snapshot.size);
-          console.log(snapshot.size);
         });
     }
 

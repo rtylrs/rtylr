@@ -2,6 +2,8 @@ import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -22,8 +24,10 @@ function ProductCard({ product }) {
         <p className="price">{product?.price} KD</p>
         <div className="ctaContainer">
           <button className="addBtn">
-            <span>+</span>
-            <span>Add</span>
+            <span>
+              <FontAwesomeIcon icon={faShoppingCart } />
+            </span>
+            <span>{product?.inCart ? "Remove" : "Add"}</span>
           </button>
           <button
             className="buyBtn"
@@ -57,6 +61,7 @@ ProductCard.propTypes = {
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
     creator: PropTypes.string.isRequired,
     category: PropTypes.string.isRequired,
+    inCart: PropTypes.number,
   }).isRequired,
 };
 

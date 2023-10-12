@@ -106,8 +106,8 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>
-          &copy; {new Date().getFullYear() - 1} - {new Date().getFullYear()},
-          Sanity All rights reserved.
+          &copy; {new Date().getFullYear() - 1} - {new Date().getFullYear()},{" "}
+          {window.location.hostname} All rights reserved.
         </p>
       </div>
     </footer>
