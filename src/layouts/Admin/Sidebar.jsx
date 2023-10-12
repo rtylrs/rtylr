@@ -23,8 +23,12 @@ import {
   faRss,
   faWarehouse,
   faShop,
+  faQrcode,
+  faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
+
+import QRCode from "qrcode";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   // Define state to track the visibility of each section
@@ -39,11 +43,53 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
     toggleSection,
   } = useSidebar(); // Access the context using the hook
 
+  const downloadQRCode = async () => {
+    const link = window.location.origin;
+
+    // Generate the QR code
+    const canvas = await QRCode.toCanvas(link, {
+      errorCorrectionLevel: "H",
+      width: 256,
+      margin: 1,
+    });
+
+    // Convert the QR code canvas to a blob (PNG format)
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+
+        // Create a download link and trigger the download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Qr Code.png";
+        a.click();
+
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
+
   return (
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
         <div className="sidebar__title__container">
           <p className="sidebar__title">Sanity Admin</p>
+          <div>
+            <FontAwesomeIcon
+              icon={faQrcode}
+              title="Download Website QR Code"
+              onClick={() => {
+                downloadQRCode();
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faHeadset}
+              title="Contact Support"
+              onClick={() => {
+                window.open("https://voxire.tech", "_blank");
+              }}
+            />
+          </div>
         </div>
         <FontAwesomeIcon
           className="close__icon"
@@ -53,25 +99,41 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         />
       </div>
       <div className="sidebar__menu">
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/manage" id="link">
             My Dashboard
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/pos" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faWarehouse} className="sidebar__icon" />
-          <Link to="/manage/products" id="link">
+          <Link to="/manage/pos" id="link">
             POS
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/products" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
           <Link to="/manage/products" id="link">
             Sanity Products
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/branches" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faShop} className="sidebar__icon" />
           <Link to="/manage/branches" id="link">
             Branches
@@ -94,13 +156,21 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {customersVisible && (
             <>
-              <div className="sidebar__link  admin__link">
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/users" ? "active" : ""
+                }`}
+              >
                 <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
                 <Link to="/manage/users" id="link">
                   Users
                 </Link>
               </div>
-              <div className="sidebar__link  admin__link">
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/vendors" ? "active" : ""
+                }`}
+              >
                 <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
                 <Link to="/manage/vendors" id="link">
                   Brands
@@ -129,7 +199,11 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {managementVisible && (
             <>
-              <div className="sidebar__link  admin__link">
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/managment" ? "active" : ""
+                }`}
+              >
                 <FontAwesomeIcon
                   icon={faUserSecret}
                   className="sidebar__icon"
@@ -138,7 +212,11 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   Permissions
                 </Link>
               </div>
-              <div className="sidebar__link  admin__link">
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/feedback" ? "active" : ""
+                }`}
+              >
                 <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
                 <Link to="/manage/feedback" id="link">
                   Feedback
@@ -178,7 +256,11 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {blogVisible && (
             <>
-              <div className="sidebar__link  admin__link">
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/blog" ? "active" : ""
+                }`}
+              >
                 <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
                 <Link to="/manage/blog" id="link">
                   Blog Posts
@@ -241,19 +323,27 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {donationsVisible && <>{/* Add donation links here */}</>}
         </div>
-        <div className="sidebar__link ">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/petitions" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
           <Link to="/manage/petitions" id="link">
             Petitions
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/settings" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">
             Settings
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div className={`sidebar__link`}>
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
             className="sidebar__icon"

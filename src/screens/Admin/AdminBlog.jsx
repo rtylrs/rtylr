@@ -1,6 +1,18 @@
-import { Modal, Button, TextField } from "@mui/material";
+import React from "react";
+import {
+  Modal,
+  Button,
+  TextField,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+} from "@mui/material";
 import { useState, useEffect } from "react";
-import { Container, Table } from "reactstrap";
+import { Container } from "reactstrap";
 import { auth, db, firebase } from "../../firebase";
 
 function AdminBlog() {
@@ -101,33 +113,35 @@ function AdminBlog() {
   return (
     <Container>
       <h1>Blogs</h1>
-      <Table className="adminTable">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Content</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {blogs &&
-            blogs.map((blog) => (
-              <tr key={blog.id}>
-                <td>{blog.title}</td>
-                <td>{blog.content}</td>
-                <td>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleOpenEditModal(blog)}
-                  >
-                    Edit
-                  </Button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+      <TableContainer component={Paper}>
+        <Table className="adminTable">
+          <TableHead>
+            <TableRow>
+              <TableCell>Title</TableCell>
+              <TableCell>Content</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {blogs &&
+              blogs.map((blog) => (
+                <TableRow key={blog.id}>
+                  <TableCell>{blog.title}</TableCell>
+                  <TableCell>{blog.content}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleOpenEditModal(blog)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <Button variant="contained" color="primary" onClick={handleOpenModal}>
         Add New Blog
       </Button>

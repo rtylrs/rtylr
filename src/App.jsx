@@ -8,7 +8,7 @@ import VendorRoutes from "./routes/VendorRoutes";
 
 import { useState, useEffect } from "react";
 
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 
 // eslint-disable-next-line
 import i18next from "./services/i18next";
@@ -19,14 +19,26 @@ import { BusinessRoute } from "./utils/BusinessRoute";
 import NoMatch from "./screens/Public/NoMatch";
 import { useDispatch } from "react-redux";
 import { getAllProducts } from "./redux/reducers/productsSlice";
+import { Helmet } from "react-helmet";
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const [config, setConfig] = useState({});
   const location = useLocation();
   const dispatch = useDispatch();
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
+    // get config
+    db.collection("config")
+      .doc("websiteData")
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          setConfig(doc.data());
+        }
+      });
+
     // get all products
     dispatch(getAllProducts());
     // get language from local storage
@@ -55,6 +67,19 @@ const App = () => {
 
   return (
     <>
+      <Helmet>
+        <title>
+          {config?.title
+            ? `${config.title}${config.slogan ? ` | ${config.slogan}` : ""}`
+            : "Powered by Voxire Technologies"}
+        </title>
+        {/* <meta
+          name="description"
+          content="Sanity: Journey to a Zero Waste lifestyle"
+        /> */}
+        <link rel="icon" href={config?.favicon} />
+      </Helmet>
+
       <AlertModal />
       <Routes key={location.pathname} location={location}>
         {/* Auth Routes */}

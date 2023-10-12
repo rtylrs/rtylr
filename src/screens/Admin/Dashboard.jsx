@@ -56,7 +56,7 @@ function Dashboard() {
                 auth.currentUser.displayName.split(" ")[0]}
               ,
             </h1>
-            <p>Welcome to the admin dashboard</p>
+            <p>Welcome to your admin dashboard</p>
           </div>
         </div>
         <div className="main__cards">
