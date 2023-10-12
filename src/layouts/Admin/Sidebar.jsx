@@ -8,7 +8,6 @@ import {
   faBuilding,
   faUserSecret,
   faCube,
-  faPlusCircle,
   faChevronDown,
   faChevronUp,
   faShoppingBag,
@@ -36,7 +35,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
     blogVisible,
     reportsVisible,
     ordersVisible,
-    petitionsVisible,
     donationsVisible,
     toggleSection,
   } = useSidebar(); // Access the context using the hook
@@ -225,35 +223,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className="sidebar__section"
-          onClick={() => toggleSection("petitions")}
-        >
-          <h2>
-            <div>
-              <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
-              Petitions
-            </div>
-            {petitionsVisible ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
-            ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
-            )}
-          </h2>
-          {petitionsVisible && (
-            <>
-              <div className="sidebar__link  admin__link">
-                <FontAwesomeIcon
-                  icon={faPlusCircle}
-                  className="sidebar__icon"
-                />
-                <Link to="/manage/petitions" id="link">
-                  Add Petition
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
-        <div
-          className="sidebar__section"
           onClick={() => toggleSection("donations")}
         >
           <h2>
@@ -272,7 +241,12 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {donationsVisible && <>{/* Add donation links here */}</>}
         </div>
-
+        <div className="sidebar__link ">
+          <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
+          <Link to="/manage/petitions" id="link">
+            Petitions
+          </Link>
+        </div>
         <div className="sidebar__link">
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">

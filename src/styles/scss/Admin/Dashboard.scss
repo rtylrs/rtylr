@@ -1,11 +1,11 @@
   .main__container {
     padding: 20px 35px;
+    font-family: "Poppins", sans-serif;
   }
     
   .main__title {
     display: flex;
     align-items: center;
-    font-family: "montserrat", sans-serif;
   }
     
   .main__title > img {
@@ -16,9 +16,8 @@
     
   .main__greeting > h1 {
     font-size: 25px;
-    color: #0C3651;
+    color: #231f1b;
     text-transform: capitalize;
-    font-family: "montserrat", sans-serif;
     /* margin-bottom: 3px; */
   }
     
@@ -26,7 +25,6 @@
     font-size: 14px;
     font-weight: 600;
     color: #747b7e;
-    font-family: "montserrat", sans-serif;
   }
     
   .main__cards {
@@ -45,6 +43,12 @@
     border-radius: 5px;
     background: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-primary-p {
+    color: #231f1b;
+    font-size: 16px;
+    font-weight: 600;
   }
   
   .card_inner {
@@ -92,36 +96,37 @@
     align-items: center;
     justify-content: space-between;
   }
-  
+
+  .charts__left__title > div {
+    width: 100%;
+  }
+
   .charts__left__title > div > h1 {
     font-size: 22px;
-    color: #0C3651;
+    color: #231f1b;
     margin-bottom: 5px;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__left__title > div > div > h3 {
     font-size: 14px;
-    color: #0C3651;
+    color: #231f1b;
     margin-bottom: 5px;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__left__title > div > div > p {
     font-size: 14px;
     color: #a5aaad;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__left__title > div > div  {
     border-bottom: 1px solid #a5aaad;
+    width: 100%
   }
   
   .charts__left__title > div > p {
     font-size: 14px;
     font-weight: 700;
     color: #a5aaad;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__left__title > i {
@@ -150,16 +155,14 @@
   
   .charts__right__title > div > h1 {
     font-size: 22px;
-    color: #0C3651;
+    color: #231f1b;
     margin-bottom: 5px;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__right__title > div > p {
     font-size: 14px;
     font-weight: 700;
     color: #a5aaad;
-    font-family: "montserrat", sans-serif;
   }
   
   .charts__right__title > i {
@@ -191,12 +194,10 @@
   .card1 > h1 {
     font-size: 20px;
     font-weight: 700;
-    font-family: "montserrat", sans-serif;
   }
   .card1 > p {
     font-size: 15px;
     font-weight: 500;
-    font-family: "montserrat", sans-serif;
   }
   .card2 {
     background: #c7e1da;
@@ -209,12 +210,10 @@
   .card2 > h1 {
     font-size: 20px;
     font-weight: 700;
-    font-family: "montserrat", sans-serif;
   }
   .card2 > p {
     font-size: 15px;
     font-weight: 500;
-    font-family: "montserrat", sans-serif;
   }
   
   .card3 {
@@ -224,23 +223,19 @@
     padding: 25px;
     border-radius: 5px;
     font-size: 14px;
-    font-family: "montserrat", sans-serif;
   }
   .card3 > h1 {
     font-size: 20px;
     font-weight: 700;
-    font-family: "montserrat", sans-serif;
   }
   .card3 > p {
     font-size: 15px;
     font-weight: 500;
-    font-family: "montserrat", sans-serif;
   }
   
   .card4 {
     background: #a4cdca;
     color: #1e3b39;
-    font-family: "montserrat", sans-serif;
     text-align: center;
     padding: 25px;
     border-radius: 5px;
@@ -248,12 +243,10 @@
   }
   .card4 > h1 {
     font-size: 20px;
-    font-family: "montserrat", sans-serif;
     font-weight: 700;
   }
   .card4 > p {
     font-size: 15px;
-    font-family: "montserrat", sans-serif;
     font-weight: 500;
   }
   
