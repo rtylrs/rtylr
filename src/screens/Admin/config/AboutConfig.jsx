@@ -28,7 +28,7 @@ function AboutConfig() {
   return (
     <div className="about-config">
       <div className="InsuficientPackage">
-        <p>Your current package does not include this feature.</p>
+        <p>Your current package does not support this feature.</p>
       </div>
       <span>
         <div className="overlay-about" style={{ display: "block" }}></div>

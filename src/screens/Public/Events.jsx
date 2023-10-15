@@ -3,7 +3,7 @@ import { Scheduler } from "@aldabil/react-scheduler";
 const events = [
   {
     id: 1,
-    title: "Meeting",
+    title: "Gardening",
     start: new Date("2023-10-15T10:00:00"),
     end: new Date("2023-10-15T11:00:00"),
   },
