@@ -7,9 +7,10 @@ const AdminAddons = () => {
       <FontAwesomeIcon icon={faHeartBroken} />
       <h1>Apologies</h1>
       <p>
-        We apologize, but addons are currently not available in the starter
-        package. If you would like to upgrade your package and access premium
-        addons and other features, please contact support for more information.
+        We apologize, but Add-Ons are currently not available in the{" "}
+        <strong>starter</strong> package. If you would like to upgrade your
+        package and access premium Add-Ons and other features, please contact
+        support for more information.
       </p>
     </div>
   );
