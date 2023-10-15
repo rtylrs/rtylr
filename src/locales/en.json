@@ -3,10 +3,10 @@
     "welcome": "Welcome to Sanity!",
     "discover": "Embark on the journey to a zero-waste lifestyle! Discover your path or explore limitless sustainable opportunities. Your ultimate destination for eco-conscious living.",
     "searchPlaceholder": "Search for products...",
-    "shop": "Browse Our Products"
+    "shop": "Explore Our Products"
   },
   "ProductSection": {
-    "title": "Browse Products",
+    "title": "Explore Products",
     "buyNow": "Buy Now",
     "viewMore": "View More"
   },
@@ -19,7 +19,8 @@
     "exportData": "Export My Data",
     "deleteAccount": "Delete My Account",
     "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
-    "favicon": "Select a favicon"
+    "favicon": "Select a favicon",
+    "icon": "Select a Logo"
   },
   "Profile": {
     "title": "Profile",

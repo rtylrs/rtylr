@@ -12,6 +12,7 @@ const AdminSettings = () => {
   });
   const [config, setConfig] = useState({});
   const faviconRef = useRef(null);
+  const iconRef = useRef(null);
 
   useEffect(() => {
     const language = localStorage.getItem("language");
@@ -51,25 +52,28 @@ const AdminSettings = () => {
     // });
   };
 
-  const handleFaviconChange = (e) => {
+  const handleImageChange = (e, type) => {
     const file = e.target.files[0];
     const storageRef = storage.ref();
     const fileRef = storageRef.child(`config/${file.name}`);
     fileRef.put(file).then(() => {
       fileRef.getDownloadURL().then((url) => {
+        const updateField = type === "favicon" ? "favicon" : "icon";
+        const updatedConfig = {
+          ...config,
+          [updateField]: url,
+        };
+
         db.collection("config")
           .doc("websiteData")
           .set(
             {
-              favicon: url,
+              [updateField]: url,
             },
             { merge: true }
           )
           .then(() => {
-            setConfig({
-              ...config,
-              favicon: url,
-            });
+            setConfig(updatedConfig);
           });
       });
     });
@@ -80,6 +84,7 @@ const AdminSettings = () => {
       <h2>{t("Settings.title")}</h2>
 
       <div>
+        <p>{t("Settings.favicon")}</p>
         <img
           src={
             config.favicon ? config.favicon : "https://picsum.photos/150/150"
@@ -98,9 +103,33 @@ const AdminSettings = () => {
             display: "none",
           }}
           ref={faviconRef}
-          onChange={handleFaviconChange}
+          onChange={(e) => {
+            handleImageChange(e, "favicon");
+          }}
         />
-        <p>{t("Settings.favicon")}</p>
+      </div>
+      <div>
+        <p>{t("Settings.icon")}</p>
+        <img
+          src={config.icon ? config.icon : "https://picsum.photos/150/150"}
+          alt="Icon"
+          height={80}
+          width={80}
+          onClick={() => {
+            iconRef.current.click();
+          }}
+        />
+        <input
+          type="file"
+          accept="image/*"
+          style={{
+            display: "none",
+          }}
+          ref={iconRef}
+          onChange={(e) => {
+            handleImageChange(e, "icon");
+          }}
+        />
       </div>
 
       <div>

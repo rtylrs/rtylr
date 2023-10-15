@@ -73,7 +73,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
         <div className="sidebar__title__container">
-          <p className="sidebar__title">Sanity Admin</p>
+          <p className="sidebar__title">Admin Panel</p>
           <div>
             <FontAwesomeIcon
               icon={faQrcode}

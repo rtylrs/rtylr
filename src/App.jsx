@@ -17,28 +17,21 @@ import AlertModal from "./components/Alert/AlertModal";
 import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
 import NoMatch from "./screens/Public/NoMatch";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getAllProducts } from "./redux/reducers/productsSlice";
 import { Helmet } from "react-helmet";
+import { fetchConfigData } from "./redux/reducers/configSlice";
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const [config, setConfig] = useState({});
   const location = useLocation();
   const dispatch = useDispatch();
+  const config = useSelector((state) => state.config.configData);
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
-    // get config
-    db.collection("config")
-      .doc("websiteData")
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          setConfig(doc.data());
-        }
-      });
-
+    // get config data
+    dispatch(fetchConfigData());
     // get all products
     dispatch(getAllProducts());
     // get language from local storage
@@ -67,18 +60,22 @@ const App = () => {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {config?.title
-            ? `${config.title}${config.slogan ? ` | ${config.slogan}` : ""}`
-            : "Powered by Voxire Technologies"}
-        </title>
-        {/* <meta
+      {config && (
+        <Helmet>
+          <title>
+            {config[0]?.title
+              ? `${config[0].title}${
+                  config[0].slogan ? ` | ${config[0].slogan}` : ""
+                }`
+              : "Powered by Voxire Technologies"}
+          </title>
+          {/* <meta
           name="description"
           content="Sanity: Journey to a Zero Waste lifestyle"
         /> */}
-        <link rel="icon" href={config?.favicon} />
-      </Helmet>
+          <link rel="icon" href={config[0]?.favicon} />
+        </Helmet>
+      )}
 
       <AlertModal />
       <Routes key={location.pathname} location={location}>
