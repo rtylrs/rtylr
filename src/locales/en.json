@@ -20,7 +20,9 @@
     "deleteAccount": "Delete My Account",
     "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
     "favicon": "Select a favicon",
-    "icon": "Select a Logo"
+    "icon": "Select a Logo",
+    "name": "Name",
+    "slogan": "Slogan"
   },
   "Profile": {
     "title": "Profile",

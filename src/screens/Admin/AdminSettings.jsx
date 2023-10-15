@@ -84,6 +84,40 @@ const AdminSettings = () => {
       <div className="InnerSettings">
         <section>
           <h3>Business Info</h3>
+
+          <div className="NameAndSlogan">
+            <lable>{t("Settings.name")}</lable>
+            <input
+              type="text"
+              value={config.title}
+              onChange={(e) => {
+                setConfig({
+                  ...config,
+                  title: e.target.value,
+                });
+              }}
+            />
+            <lable>{t("Settings.slogan")}</lable>
+            <input
+              type="text"
+              value={config.slogan}
+              onChange={(e) => {
+                setConfig({
+                  ...config,
+                  slogan: e.target.value,
+                });
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                db.collection("config").doc("websiteData").set(config);
+              }}
+            >
+              Update
+            </Button>
+          </div>
           <div>
             <p>{t("Settings.favicon")}</p>
             <img
