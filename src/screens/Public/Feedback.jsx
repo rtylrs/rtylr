@@ -2,6 +2,7 @@ import { useState } from "react";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import ShowAlert from "../../utils/showAlert";
+import { Button } from "@mui/material";
 
 function Feedback() {
   const [name, setName] = useState("");
@@ -39,7 +40,7 @@ function Feedback() {
   };
 
   return (
-    <div>
+    <div className="FeedContainer">
       <h2>Feedback</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -75,7 +76,9 @@ function Feedback() {
             <option value={5}>5 stars</option>
           </select>
         </div>
-        <button type="submit">Submit Feedback</button>
+        <Button type="submit" color="primary" variant="contained">
+          Submit Feedback
+        </Button>
       </form>
     </div>
   );

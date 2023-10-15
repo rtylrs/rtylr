@@ -7,6 +7,7 @@ const Profile = React.lazy(() => import("../screens/Client/Profile"));
 const BecomeBusiness = React.lazy(() =>
   import("../screens/Client/BecomeBusiness")
 );
+const Cart = React.lazy(() => import("../screens/Client/Cart"));
 
 const UserRoutes = [
   {
@@ -32,6 +33,15 @@ const UserRoutes = [
     element: (
       <DashboardLayout>
         <SettingsPage />
+      </DashboardLayout>
+    ),
+    exact: true,
+  },
+  {
+    path: "/account/cart",
+    element: (
+      <DashboardLayout>
+        <Cart />
       </DashboardLayout>
     ),
     exact: true,

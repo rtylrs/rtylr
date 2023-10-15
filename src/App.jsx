@@ -21,12 +21,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllProducts } from "./redux/reducers/productsSlice";
 import { Helmet } from "react-helmet";
 import { fetchConfigData } from "./redux/reducers/configSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const App = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
   const dispatch = useDispatch();
   const config = useSelector((state) => state.config.websiteData);
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 400) {
+        // 400 is the height of the button
+        setShowTopBtn(true); // Show the button
+      } else {
+        setShowTopBtn(false); // Hide the button
+      }
+    });
+  }, []);
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -73,6 +87,20 @@ const App = () => {
         /> */}
           <link rel="icon" href={config?.favicon} />
         </Helmet>
+      )}
+
+      {showTopBtn && (
+        <div
+          className="ScrollToTop"
+          onClick={() => {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <FontAwesomeIcon icon={faChevronUp} />
+        </div>
       )}
 
       <AlertModal />
