@@ -6,6 +6,18 @@
       flex-direction: row;
       flex-wrap: wrap;
       gap: 20px;
+      
+    }
+
+    .NameAndSlogan {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      button {
+        width: 20%;
+        margin: 0 auto;
+      }
     }
 
 
