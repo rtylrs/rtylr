@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProductsGrid from "../../components/ProductsGrid";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import Loader from "../../layouts/loader/Loader";
 
 function Collection() {
   const { collectionName } = useParams();
@@ -36,20 +37,7 @@ function Collection() {
   };
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          width: "100%",
-          fontSize: "2rem",
-        }}
-      >
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

@@ -1,12 +1,17 @@
 import React from "react";
 import { auth, db } from "../../firebase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCartFlatbedSuitcase,
+  faShoppingBag,
+  faStarHalfStroke,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 
 function Dashboard() {
-  // eslint-disable-next-line no-unused-vars
-  //const [allUsers, setAllUsers] = React.useState([]); //TODO: add the users to the dashboard
   const [allEvents, setAllEvents] = React.useState([]);
   const [users, setUsers] = React.useState(0);
-  const [vendors, setVendors] = React.useState(0);
+  const [orders, setOrders] = React.useState(0);
   const [reviews, setReviews] = React.useState(0);
   const [events, setEvents] = React.useState(0);
   const [clicks, setClicks] = React.useState(0);
@@ -20,21 +25,17 @@ function Dashboard() {
         .get();
       setUsers(users.size);
 
-      // const Allusers = await db
-      //   .collection("Users")
-      //   .where("isVendor", "==", false)
-      //   .get();
-      // setAllUsers(Allusers.docs.map((doc) => doc.data()));
-
-      const vendors = await db
-        .collection("Users")
-        .where("isVendor", "==", true)
-        .get();
-      setVendors(vendors.size);
+      const orders = await db.collection("Orders").get();
+      setOrders(orders.size);
 
       const reviews = await db.collection("feedback").get();
       setReviewsData(reviews.docs.map((doc) => doc.data()));
-      setReviews(reviews.size);
+      setReviews(
+        (
+          reviews.docs.reduce((acc, doc) => acc + doc.data().rating, 0) /
+          reviews.docs.length
+        ).toFixed(2)
+      );
 
       const events = await db.collection("Events").get();
       setEvents(events.size);
@@ -63,7 +64,10 @@ function Dashboard() {
           <div className="card">
             <i className="fa fa-user"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Users</p>
+              <div>
+                <FontAwesomeIcon icon={faUser} />
+                <p className="text-primary-p">Customers</p>
+              </div>
               <span className="font-bold text-title">{users}</span>
             </div>
           </div>
@@ -71,15 +75,22 @@ function Dashboard() {
           <div className="card">
             <i className="fa-solid fa-building"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Orders</p>
-              <span className="font-bold text-title">{vendors}</span>
+              <div>
+                <FontAwesomeIcon icon={faShoppingBag} />
+                <p className="text-primary-p">Total Orders</p>
+              </div>
+
+              <span className="font-bold text-title">{orders}</span>
             </div>
           </div>
 
           <div className="card">
             <i className="fa-solid fa-calendar-days"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Pending Orders</p>
+              <div>
+                <FontAwesomeIcon icon={faCartFlatbedSuitcase} />
+                <p className="text-primary-p">Pending Orders</p>
+              </div>
               <span className="font-bold text-title">{events}</span>
             </div>
           </div>
@@ -87,7 +98,10 @@ function Dashboard() {
           <div className="card">
             <i className="fa-solid fa-heart"></i>
             <div className="card_inner">
-              <p className="text-primary-p">Feedback</p>
+              <div>
+                <FontAwesomeIcon icon={faStarHalfStroke} />
+                <p className="text-primary-p">Avg Rating</p>
+              </div>
               <span className="font-bold text-title">{reviews}</span>
             </div>
           </div>
@@ -97,7 +111,7 @@ function Dashboard() {
           <div className="charts__left">
             <div className="charts__left__title">
               <div>
-                <h1>Latest Feedback</h1>
+                <h1>Latest</h1>
                 {reviewsData.map((review, index) => (
                   <div key={index}>
                     <h3>
@@ -119,7 +133,15 @@ function Dashboard() {
 
             <div className="charts__right__cards">
               <div className="card1">
-                <h1>Website Clicks</h1>
+                <h1>Warnings</h1>
+                <p>{clicks}</p>
+              </div>
+              <div className="card2">
+                <h1>Order's today</h1>
+                <p>{clicks}</p>
+              </div>
+              <div className="card3">
+                <h1>Petitions</h1>
                 <p>{clicks}</p>
               </div>
 

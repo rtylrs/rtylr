@@ -26,7 +26,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
   const dispatch = useDispatch();
-  const config = useSelector((state) => state.config.configData);
+  const config = useSelector((state) => state.config.websiteData);
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -63,17 +63,15 @@ const App = () => {
       {config && (
         <Helmet>
           <title>
-            {config[0]?.title
-              ? `${config[0].title}${
-                  config[0].slogan ? ` | ${config[0].slogan}` : ""
-                }`
+            {config?.title
+              ? `${config.title}${config.slogan ? ` | ${config.slogan}` : ""}`
               : "Powered by Voxire Technologies"}
           </title>
           {/* <meta
           name="description"
           content="Sanity: Journey to a Zero Waste lifestyle"
         /> */}
-          <link rel="icon" href={config[0]?.favicon} />
+          <link rel="icon" href={config?.favicon} />
         </Helmet>
       )}
 

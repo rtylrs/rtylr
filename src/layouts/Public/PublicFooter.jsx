@@ -4,15 +4,17 @@ import {
   faInstagram,
   faWhatsappSquare,
 } from "@fortawesome/free-brands-svg-icons";
-import Logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 const Footer = () => {
+  const config = useSelector((state) => state.config.websiteData);
+
   return (
     <footer className="footer">
       <div className="footer-top">
-        <img src={Logo} alt="Logo" className="footer-logo" />
+        {config && <img src={config.icon} alt="Logo" className="footer-logo" />}
       </div>
       <div className="footer-sections">
         <div className="footer-section">

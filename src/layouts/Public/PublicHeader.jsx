@@ -14,7 +14,7 @@ import useWindowDimensions from "../../utils/useWindowDimensions";
 import { useSelector } from "react-redux";
 
 const Header = () => {
-  const config = useSelector((state) => state.config.configData);
+  const config = useSelector((state) => state.config.websiteData);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -72,7 +72,7 @@ const Header = () => {
       >
         {config && (
           <img
-            src={config[0].icon}
+            src={config.icon}
             alt="Logo"
             style={{
               // transform:

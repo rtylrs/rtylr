@@ -4,7 +4,8 @@ import { db } from '../../firebase';
 
 // Define the initial state of the slice
 const initialState = {
-    configData: null,
+    websiteData: null,
+    aboutContent: null,
     status: 'idle',
     error: null
 };
@@ -14,25 +15,43 @@ const configSlice = createSlice({
     name: 'config',
     initialState,
     reducers: {
-        setConfig: (state, action) => {
-            state.configData = action.payload;
+        setWebsiteData: (state, action) => {
+            state.websiteData = action.payload;
+        },
+        setAboutContent: (state, action) => {
+            state.aboutContent = action.payload;
         },
     },
 });
 
 // Export actions
-export const { setConfig } = configSlice.actions;
+export const {
+    setWebsiteData
+    , setAboutContent
+} = configSlice.actions;
 
 // Export the reducer
 export default configSlice.reducer;
 
 export const fetchConfigData = () => (dispatch) => {
     db.collection('config').get().then((snapshot) => {
-        const configData = [];
         snapshot.forEach((doc) => {
             const config = Object.assign({ id: doc.id }, doc.data());
-            configData.push(config);
+
+            if (config.id === 'websiteData') {
+                dispatch(setWebsiteData(config));
+            }
+
+            if (config.id === 'about') {
+                dispatch(setAboutContent(config));
+            }
         });
-        dispatch(setConfig(configData));
+    });
+};
+
+
+export const UpdateAboutContent = (data) => (dispatch) => {
+    db.collection('config').doc('about').update(data).then(() => {
+        dispatch(setAboutContent(data));
     });
 };
