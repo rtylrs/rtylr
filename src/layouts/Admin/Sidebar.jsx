@@ -14,7 +14,6 @@ import {
   faCog,
   faArrowUpRightFromSquare,
   faBarsProgress,
-  faCheckDouble,
   faSquare,
   faNewspaper,
   faRuler,
@@ -25,6 +24,9 @@ import {
   faShop,
   faQrcode,
   faHeadset,
+  faPuzzlePiece,
+  faPenRuler,
+  faInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -86,7 +88,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               icon={faHeadset}
               title="Contact Support"
               onClick={() => {
-                window.open("https://voxire.tech", "_blank");
+                window.open("https://wa.me/message/D5ZSC3DH3NI6P1", "_blank");
               }}
             />
           </div>
@@ -114,7 +116,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             location.pathname === "/manage/pos" ? "active" : ""
           }`}
         >
-          <FontAwesomeIcon icon={faWarehouse} className="sidebar__icon" />
+          <FontAwesomeIcon
+            icon={faWarehouse}
+            className="sidebar__icon"
+            style={{
+              fontSize: "14px",
+            }}
+          />
           <Link to="/manage/pos" id="link">
             POS
           </Link>
@@ -231,8 +239,8 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon icon={faCheckDouble} className="sidebar__icon" />
-              Configuration
+              <FontAwesomeIcon icon={faPenRuler} className="sidebar__icon" />
+              Sections
             </div>
             {configurationVisible ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
@@ -240,7 +248,20 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {configurationVisible && <>{/* Add configuration links here */}</>}
+          {configurationVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/config/about" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faInfo} className="sidebar__icon" />
+                <Link to="/manage/config/about" id="link">
+                  About Us
+                </Link>
+              </div>
+            </>
+          )}
         </div>
         <div className="sidebar__section" onClick={() => toggleSection("blog")}>
           <h2>
@@ -341,6 +362,16 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">
             Settings
+          </Link>
+        </div>
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/addons" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faPuzzlePiece} className="sidebar__icon" />
+          <Link to="/manage/addons" id="link">
+            Add-Ons
           </Link>
         </div>
         <div className={`sidebar__link`}>

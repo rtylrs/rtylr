@@ -98,9 +98,7 @@ const PublicRoutes = [
     path: "/collection/:collectionName",
     element: (
       <Public>
-        <AnimatedRoutes>
-          <Collection />
-        </AnimatedRoutes>
+        <Collection />
       </Public>
     ),
     exact: true,
