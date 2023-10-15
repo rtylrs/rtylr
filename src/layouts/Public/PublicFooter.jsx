@@ -57,6 +57,9 @@ const Footer = () => {
             <li>
               <Link to="/contact">Contact Us</Link>
             </li>
+            <li>
+              <Link to="/events">Events</Link>
+            </li>
           </ul>
         </div>
         <div className="footer-section">

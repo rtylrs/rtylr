@@ -6,7 +6,6 @@ import {
   faHome,
   faUser,
   faBuilding,
-  faUserSecret,
   faCube,
   faChevronDown,
   faChevronUp,
@@ -26,11 +25,17 @@ import {
   faHeadset,
   faPuzzlePiece,
   faPenRuler,
-  faInfo,
+  faCalendarAlt,
+  faCirclePause,
+  faSquareCheck,
+  faSquarePollVertical,
+  faUserLock,
+  faCircleInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
 import QRCode from "qrcode";
+import { faFirstdraft } from "@fortawesome/free-brands-svg-icons";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   // Define state to track the visibility of each section
@@ -97,6 +102,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           className="close__icon"
           onClick={() => closeSidebar()}
           icon={faClose}
+          r
           size="lg"
         />
       </div>
@@ -184,6 +190,19 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   Brands
                 </Link>
               </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/vendors" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faSquarePollVertical}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/vendors" id="link">
+                  Survey
+                </Link>
+              </div>
             </>
           )}
         </div>
@@ -212,10 +231,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                   location.pathname === "/manage/managment" ? "active" : ""
                 }`}
               >
-                <FontAwesomeIcon
-                  icon={faUserSecret}
-                  className="sidebar__icon"
-                />
+                <FontAwesomeIcon icon={faUserLock} className="sidebar__icon" />
                 <Link to="/manage/managment" id="link">
                   Permissions
                 </Link>
@@ -252,10 +268,26 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             <>
               <div
                 className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/config/home" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faFirstdraft}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/config/home" id="link">
+                  Home
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
                   location.pathname === "/manage/config/about" ? "active" : ""
                 }`}
               >
-                <FontAwesomeIcon icon={faInfo} className="sidebar__icon" />
+                <FontAwesomeIcon
+                  icon={faCircleInfo}
+                  className="sidebar__icon"
+                />
                 <Link to="/manage/config/about" id="link">
                   About Us
                 </Link>
@@ -285,6 +317,16 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
                 <Link to="/manage/blog" id="link">
                   Blog Posts
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/blog" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
+                <Link to="/manage/blog" id="link">
+                  Submited Posts
                 </Link>
               </div>
             </>
@@ -322,7 +364,38 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {ordersVisible && <>{/* Add order links here */}</>}
+          {ordersVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/orders/pending" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faCirclePause}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/orders/pending" id="link">
+                  Pending
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/orders/completed"
+                    ? "active"
+                    : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faSquareCheck}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/orders/completed" id="link">
+                  Completed
+                </Link>
+              </div>
+            </>
+          )}
         </div>
         <div
           className="sidebar__section"
@@ -352,6 +425,16 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
           <Link to="/manage/petitions" id="link">
             Petitions
+          </Link>
+        </div>
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/events" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faCalendarAlt} className="sidebar__icon" />
+          <Link to="/manage/events" id="link">
+            Events
           </Link>
         </div>
         <div
