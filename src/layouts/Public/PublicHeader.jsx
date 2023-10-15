@@ -11,8 +11,10 @@ import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 
 import useWindowDimensions from "../../utils/useWindowDimensions";
+import { useSelector } from "react-redux";
 
 const Header = () => {
+  const config = useSelector((state) => state.config.configData);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -68,32 +70,39 @@ const Header = () => {
           navigate("/");
         }}
       >
-        <img
-          src={Logo}
-          alt="Logo"
-          style={{
-            // transform:
-            //   width > 768
-            //     ? document.location.pathname === "/"
-            //       ? "translateX(-110px)"
-            //       : "translateX(-75px)"
-            //     : "translateX(-90%)",
-            filter:
-              width > 768
-                ? document.location.pathname === "/"
+        {config && (
+          <img
+            src={config[0].icon}
+            alt="Logo"
+            style={{
+              // transform:
+              //   width > 768
+              //     ? document.location.pathname === "/"
+              //       ? "translateX(-110px)"
+              //       : "translateX(-75px)"
+              //     : "translateX(-90%)",
+              filter:
+                width > 768
+                  ? document.location.pathname === "/"
+                    ? "invert(1)"
+                    : "none"
+                  : isMobileMenuOpen
+                  ? "none"
+                  : document.location.pathname === "/"
                   ? "invert(1)"
-                  : "none"
-                : isMobileMenuOpen
-                ? "none"
-                : document.location.pathname === "/"
-                ? "invert(1)"
-                : "none",
-          }}
-        />
+                  : "none",
+            }}
+          />
+        )}
       </div>
-      <div className="header-left">
+      <div
+        className="header-left"
+        style={{
+          transform: auth.currentUser ? "translateX(13%)" : "translateX(0px)",
+        }}
+      >
         <Link to="/shop">Shop</Link>
-        <Link to="/brands">Brands</Link>
+        <Link to="/Events">Events</Link>
         <Link to="/all-petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
@@ -196,6 +205,7 @@ const Header = () => {
         <div className="mobile-menu">
           <Link to="/">Shop</Link>
           <Link to="/brands">Brands</Link>
+          <Link to="/events">Events</Link>
           <Link to="/petitions">Petitions</Link>
           <Link to="/about">About</Link>
           <Link to="/contact">Contact Us</Link>
@@ -204,7 +214,7 @@ const Header = () => {
               navigate("/shop");
             }}
           >
-            Browse Products
+            Explore Products
           </button>
         </div>
       )}
