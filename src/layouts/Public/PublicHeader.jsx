@@ -102,7 +102,7 @@ const Header = () => {
         }}
       >
         <Link to="/shop">Shop</Link>
-        <Link to="/Events">Events</Link>
+        <Link to="/events">Events</Link>
         <Link to="/all-petitions">Petitions</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
