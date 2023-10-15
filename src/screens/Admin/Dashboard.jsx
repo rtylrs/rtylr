@@ -111,7 +111,14 @@ function Dashboard() {
           <div className="charts__left">
             <div className="charts__left__title">
               <div>
-                <h1>Latest</h1>
+                <h1>
+                  Latest
+                  <FontAwesomeIcon
+                    icon={faStarHalfStroke}
+                    style={{ marginLeft: "10px" }}
+                    size="xs"
+                  />
+                </h1>
                 {reviewsData.map((review, index) => (
                   <div key={index}>
                     <h3>

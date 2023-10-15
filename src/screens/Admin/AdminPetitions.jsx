@@ -17,6 +17,8 @@ import {
   Typography,
 } from "@mui/material";
 import { db } from "../../firebase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function AdminPetitions() {
   const [petitionTitle, setPetitionTitle] = useState("");
@@ -105,8 +107,8 @@ function AdminPetitions() {
               <TableCell>Title</TableCell>
               <TableCell>Signatures</TableCell>
               <TableCell>Goal</TableCell>
-              <TableCell>Actions</TableCell>
               <TableCell>Signed By</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -118,19 +120,19 @@ function AdminPetitions() {
                 <TableCell>
                   <Button
                     variant="contained"
-                    color="secondary"
-                    onClick={() => handleDelete(petition.id)}
+                    color="primary"
+                    onClick={() => handleViewUsers(petition.users)}
                   >
-                    Delete
+                    View Users
                   </Button>
                 </TableCell>
                 <TableCell>
                   <Button
                     variant="contained"
-                    color="primary"
-                    onClick={() => handleViewUsers(petition.users)}
+                    color="error"
+                    onClick={() => handleDelete(petition.id)}
                   >
-                    View Users
+                    <FontAwesomeIcon icon={faTrash} />
                   </Button>
                 </TableCell>
               </TableRow>
