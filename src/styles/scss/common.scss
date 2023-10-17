@@ -1,3 +1,5 @@
+@import "../variables";
+
 #notfound {
     height: 100vh;
   }
@@ -65,7 +67,7 @@
     outline: none;
     border: none;
     padding: 10px 22px;
-    background: #846552;
+    background: $primary-color;
     font-size: 18px;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
