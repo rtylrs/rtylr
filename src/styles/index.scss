@@ -35,6 +35,9 @@
 @import './scss/Admin/Users.scss';
 @import './scss/Admin/Dashboard.scss';
 
+
+@import "variables";
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
@@ -46,7 +49,7 @@
 a {
   font-weight: 500;
   text-decoration: none;
-  color: #231f1b;
+  color: $secondary-color;
   cursor: pointer;
 }
 
@@ -56,7 +59,7 @@ html, body {
   background-color: #fbf6f2;
   height: 100vh;
   font-family: "Lucky Typewriter";
-  color: #231f1b;
+  color: $secondary-color;
   scroll-behavior: smooth;
 }
 

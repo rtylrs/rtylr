@@ -74,24 +74,26 @@ const Header = () => {
           <img
             src={config.icon}
             alt="Logo"
-            style={{
-              // transform:
-              //   width > 768
-              //     ? document.location.pathname === "/"
-              //       ? "translateX(-110px)"
-              //       : "translateX(-75px)"
-              //     : "translateX(-90%)",
-              filter:
-                width > 768
-                  ? document.location.pathname === "/"
-                    ? "invert(1)"
-                    : "none"
-                  : isMobileMenuOpen
-                  ? "none"
-                  : document.location.pathname === "/"
-                  ? "invert(1)"
-                  : "none",
-            }}
+            style={
+              {
+                // transform:
+                //   width > 768
+                //     ? document.location.pathname === "/"
+                //       ? "translateX(-110px)"
+                //       : "translateX(-75px)"
+                //     : "translateX(-90%)",
+                // filter:
+                //   width > 768
+                //     ? document.location.pathname === "/"
+                //       ? "invert(1)"
+                //       : "none"
+                //     : isMobileMenuOpen
+                //     ? "none"
+                //     : document.location.pathname === "/"
+                //     ? "invert(1)"
+                //     : "none",
+              }
+            }
           />
         )}
       </div>

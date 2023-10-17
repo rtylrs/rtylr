@@ -140,7 +140,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
           <Link to="/manage/products" id="link">
-            Sanity Products
+            Products
           </Link>
         </div>
         <div
