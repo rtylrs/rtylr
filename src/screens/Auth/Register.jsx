@@ -118,7 +118,7 @@ function Register() {
                     db.collection("mail").add({
                       to: auth.currentUser.email,
                       message: {
-                        subject: "Hello from Sanity!",
+                        subject: "Hello from Voxify!",
                         text: "Thanks for signing up!",
                         html: `<p>Thanks for signing up!</p>`,
                       },

@@ -117,7 +117,7 @@ function AdminProducts() {
         category: productCategory,
         quantity: productQuantity,
         images: imageUrls, // Use the uploaded image URLs
-        creator: "Sanity",
+        creator: "Unknown",
       };
 
       if (updatingProduct) {
