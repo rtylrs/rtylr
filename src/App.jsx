@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 
 import PublicRoutes from "./routes/PublicRoutes";
 import UserRoutes from "./routes/UserRoutes";
@@ -102,6 +102,7 @@ const App = () => {
           <FontAwesomeIcon icon={faChevronUp} />
         </div>
       )}
+      <div id="demo">This is a demo - Check Out Our Packages</div>
 
       <AlertModal />
       <Routes key={location.pathname} location={location}>

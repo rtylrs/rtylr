@@ -8,19 +8,17 @@ import {
   faHeart,
   faCog,
   faClockRotateLeft,
-  faFeatherPointed,
   faCube,
 } from "@fortawesome/free-solid-svg-icons";
-import Logo from "../../assets/logo.png";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   return (
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
         <div className="logo">
-          <Link to="/">
+          {/* <Link to="/">
             <img src={Logo} alt="logo" className="sidebar__logo" />
-          </Link>
+          </Link> */}
         </div>
         <FontAwesomeIcon
           className="close__icon"

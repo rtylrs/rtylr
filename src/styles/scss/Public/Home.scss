@@ -13,7 +13,7 @@
     background-size: cover;
   
   .hero-text {
-    max-width: 850px;
+    max-width: 900px;
     margin: 20px;
     color: #f2ebe5;
   }
@@ -33,7 +33,7 @@
   }
 
   .hero-button {
-    background-color: #846552;
+    background-color: #9A4444;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -45,7 +45,7 @@
     font-weight: bold;
 
     &:hover {
-      background-color: #b89077;
+      background-color: #B2533E;
       transition: 0.6s;
       scale: 1.1;
     }
@@ -99,7 +99,7 @@
   }
 
   .view-more-button {
-    background-color: #846552;
+    background-color: #9A4444;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -110,7 +110,7 @@
     margin-top:5%;
 
     &:hover {
-      background-color: #b89077;
+      background-color: #B2533E;
       transition: 0.3s;
     }
   }
@@ -270,14 +270,14 @@ align-items: center;
     }
     .post-author {
       font-size: 14px;
-      color: #846552;
+      color: #9A4444;
       margin-bottom: 0px;
       padding: 0;
     }
 
     .post-date {
       font-size: 14px;
-      color: #846552;
+      color: #9A4444;
       margin-bottom: 10px;
     }
 
@@ -291,7 +291,7 @@ align-items: center;
 }
 
 .view-more-blogs-button {
-  background-color: #846552;
+  background-color: #9A4444;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -302,7 +302,7 @@ align-items: center;
   margin-top: 40px;
 
   &:hover {
-    background-color: #b89077;
+    background-color: #B2533E;
     transition: 0.3s;
   }
 }
@@ -394,7 +394,7 @@ align-items: center;
       flex-grow: 1; /* Allow the progress bar to expand to fill available space */
 
       .progress {
-        background-color: #b89077;
+        background-color: #B2533E;
         height: 100%;
         border-radius: 5px;
         color: #fff;
@@ -412,7 +412,7 @@ align-items: center;
 
     .sign-button {
       /* Adjust button styles as needed */
-      background-color: #846552;
+      background-color: #9A4444;
       color: #fff;
       padding: 10px 20px;
       border: none;
@@ -422,7 +422,7 @@ align-items: center;
       transition: background-color 0.3s ease;
 
       &:hover {
-        background-color: #b89077;
+        background-color: #B2533E;
       }
     }
   }

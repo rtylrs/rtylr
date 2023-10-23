@@ -28,7 +28,7 @@
       font-size: 20px;
     }
     a:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.4s ease-in-out;
       transform: scale(1.04);
     }
@@ -54,10 +54,11 @@
   }
 
   .header-center img {
-    max-width: 130px; 
+    max-width: 140px; 
     height: auto;
     z-index: 2000;
     transition: 0.6s;
+    filter: invert(1)
   }
 
   .header-right {
@@ -74,12 +75,12 @@
       }
     }
     a:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.3s;
     }
 
     div:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.3s;
       cursor: pointer;
     }
@@ -222,7 +223,7 @@
       font-size: 17px;
     }
     a:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.3s;
     }
 
@@ -258,12 +259,12 @@
       }
     }
     a:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.3s;
     }
 
     div:hover {
-      color: #b89077;
+      color: #B2533E;
       transition: 0.3s;
       cursor: pointer;
     }
@@ -377,7 +378,7 @@
 
 
 .browse-products {
-    background-color: #846552;
+    background-color: #9A4444;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -388,7 +389,7 @@
     font-weight: bold;
 
     &:hover {
-      background-color: #b89077;
+      background-color: #B2533E;
       transition: 0.6s;
       scale: 1.1;
     }

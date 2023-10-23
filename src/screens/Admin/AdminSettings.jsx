@@ -151,7 +151,7 @@ const AdminSettings = () => {
               src={config.icon ? config.icon : "https://picsum.photos/150/150"}
               alt="Icon"
               height={70}
-              width={70}
+              width={140}
               onClick={() => {
                 iconRef.current.click();
               }}

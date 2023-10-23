@@ -23,7 +23,7 @@
         h4 {
           font-size: 18px;
           margin-bottom: 10px;
-          border-bottom: 1px solid #b89077;
+          border-bottom: 1px solid #B2533E;
         }
       }
   
@@ -63,7 +63,7 @@
     
 
     .view-more-button-shop {
-      background-color: #846552;
+      background-color: #9A4444;
       color: #fff;
       border: none;
       padding: 10px 20px;
@@ -74,7 +74,7 @@
   
       
       &:hover {
-        background-color: #b89077;
+        background-color: #B2533E;
         transition: 0.3s;
       }
     }
@@ -102,7 +102,7 @@
         color: transparent; /* Change the arrow color to your desired color */
         border: none; /* Remove the arrow border */
         outline: none; /* Remove the arrow outline */
-        background-color: #846552;
+        background-color: #9A4444;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -123,7 +123,7 @@
           button {
             width: 20px;
             height: 20px;
-            background-color: #846552;
+            background-color: #9A4444;
             border-radius: 50%;
             cursor: pointer;
             border: none;
@@ -131,7 +131,7 @@
             transition: background-color 0.3s;
 
             &:hover {
-              background-color: #b89077;
+              background-color: #B2533E;
             }
           }
         }

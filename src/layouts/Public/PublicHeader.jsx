@@ -1,16 +1,9 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBars,
-  faCartFlatbed,
-  faCartShopping,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "../../assets/logo.png";
 
-import useWindowDimensions from "../../utils/useWindowDimensions";
 import { useSelector } from "react-redux";
 
 const Header = () => {
@@ -19,7 +12,6 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-  const { width } = useWindowDimensions();
 
   // Use useEffect to set up an authentication listener
   useEffect(() => {
@@ -100,12 +92,12 @@ const Header = () => {
       <div
         className="header-left"
         style={{
-          transform: auth.currentUser ? "translateX(13%)" : "translateX(0px)",
+          transform: "translateX(5%)",
         }}
       >
-        <Link to="/shop">Shop</Link>
-        <Link to="/events">Events</Link>
-        <Link to="/all-petitions">Petitions</Link>
+        <Link to="/menu">Menu</Link>
+        <Link to="/deals">Deals</Link>
+        <Link to="/blog">blog</Link>
         <Link to="/about">About</Link>
         <Link to="/contact">Contact Us</Link>
       </div>
@@ -174,15 +166,6 @@ const Header = () => {
         </button>
 
         <button
-          className="browse-products"
-          onClick={() => {
-            navigate("/account/cart");
-          }}
-        >
-          <FontAwesomeIcon icon={faCartShopping} />
-        </button>
-
-        <button
           onClick={() => {
             if (user) {
               if (userData?.isAdmin) {
@@ -205,10 +188,9 @@ const Header = () => {
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/">Shop</Link>
-          <Link to="/brands">Brands</Link>
-          <Link to="/events">Events</Link>
-          <Link to="/petitions">Petitions</Link>
+          <Link to="/menu">Menu</Link>
+          <Link to="/deals">Deals</Link>
+          <Link to="/blog">blog</Link>
           <Link to="/about">About</Link>
           <Link to="/contact">Contact Us</Link>
           <button

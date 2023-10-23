@@ -15,7 +15,7 @@
     background-color: #f2ebe5;
   
     &:focus {
-      border: 1px solid #846552;
+      border: 1px solid #9A4444;
     }
 
 
@@ -56,7 +56,7 @@
     background-color: #f2ebe5;
   
     &:focus {
-      border: 1px solid #846552;
+      border: 1px solid #9A4444;
     }
   }
 
@@ -72,14 +72,14 @@
     background-color: #f2ebe5;
   
     &:focus {
-      border: 1px solid #846552;
+      border: 1px solid #9A4444;
     }
   }
 
   button[type="submit"] {
     width: 100%;
     padding: 10px;
-    background: #846552;
+    background: #9A4444;
     color: white;
     border: none;
     border-radius: 4px;
@@ -89,7 +89,7 @@
   }
   
   button[type="submit"]:hover {
-    background: #b89077;
+    background: #B2533E;
     transition: 0.3s;
   }
   
