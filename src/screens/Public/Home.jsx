@@ -76,7 +76,7 @@ function Home() {
         </div>
       </div>
       <section className="product-section">
-        <h2 className="section-title">Journey to a Zero Waste lifestyle</h2>
+        <h2 className="section-title">Our Featured Selections</h2>
         <div className="product-grid">
           {products &&
             products

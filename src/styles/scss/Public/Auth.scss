@@ -37,7 +37,7 @@
   background-color: #f2ebe5;
 
   &:focus {
-    border: 1px solid #846552;
+    border: 1px solid #9A4444;
   }
 }
 
@@ -45,7 +45,7 @@
 .LoginScreen-button {
   width: 100%;
   padding: 10px;
-  background: #846552;
+  background: #9A4444;
   color: white;
   border: none;
   border-radius: 4px;
@@ -55,7 +55,7 @@
 }
 
 .LoginScreen-button:hover {
-  background: #b89077;
+  background: #B2533E;
   transition: 0.3s;
 }
 
@@ -65,7 +65,7 @@
 }
 
 .LoginScreen-google-button {
-  background: #846552;
+  background: #9A4444;
   color: white;
   padding: 10px;
   border: none;
@@ -82,7 +82,7 @@
   }
 
   &:hover {
-    background: #b89077;
+    background: #B2533E;
     transition: 0.3s;
   }
 }
@@ -96,7 +96,7 @@
 
   .LoginScreen-link {
     cursor: pointer;
-    color: #846552;
+    color: #9A4444;
 
     &:hover {
       text-decoration: underline;
@@ -137,7 +137,7 @@
   background-color: #f2ebe5;
 
   &:focus {
-    border: 1px solid #846552;
+    border: 1px solid #9A4444;
   }
 
   @media only screen and (max-width: 280px) {
@@ -148,7 +148,7 @@
 .RegisterScreen-button {
   width:60%;
   padding: 10px;
-  background: #846552;
+  background: #9A4444;
   color: white;
   border: none;
   border-radius: 4px;
@@ -158,7 +158,7 @@
 }
 
 .RegisterScreen-button:hover {
-  background: #b89077;
+  background: #B2533E;
   transition: 0.3s;
 }
 
@@ -170,7 +170,7 @@
 }
 
 .RegisterScreen-google-button {
-  background: #846552;
+  background: #9A4444;
   color: white;
   padding: 10px;
   border: none;
@@ -187,7 +187,7 @@
   }
 
   &:hover {
-    background: #b89077;
+    background: #B2533E;
     transition: 0.3s;
   }
 }

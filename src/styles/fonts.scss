@@ -1,20 +1,13 @@
 @font-face {
-  font-family: 'Butler-Bold';
-  src: url('../fonts/Butler/Butler-Bold.otf') format('opentype');
+  font-family: 'Gg-Sans';
+  src: url('../fonts/ggsans-Normal') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gg-Sans-bold';
+  src: url('../fonts/ggsans-Bold') format('opentype');
   font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Butler';
-  src: url('../fonts/Butler/Butler-Regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Lucky Typewriter';
-  src: url('../fonts/LUCKY TYPEWRITER.ttf') format('truetype');
-  font-weight: normal;
   font-style: normal;
 }
