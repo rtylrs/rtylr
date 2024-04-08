@@ -23,7 +23,7 @@ const AnimatedRoutes = ({ children }) => {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.7 }}
+      transition={{ duration: 0.1 }}
     >
       {children}
     </motion.div>
