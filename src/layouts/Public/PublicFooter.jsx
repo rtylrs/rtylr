@@ -112,7 +112,17 @@ const Footer = () => {
       <div className="footer-bottom">
         <p>
           &copy; {new Date().getFullYear() - 1} - {new Date().getFullYear()},{" "}
-          {window.location.hostname} All rights reserved.
+          <a
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            href="https://voxire.com"
+          >
+            Voxire
+          </a>{" "}
+          All rights reserved.
         </p>
       </div>
     </footer>

@@ -11,7 +11,7 @@
   background-color: transparent;
   height: 140px;
   color: #f2ebe5;
-  z-index: 1000; /* Add a z-index to layer it above other content */
+  z-index: 10; /* Add a z-index to layer it above other content */
 
   @media only screen and (max-width: 768px){
     padding: 5px 20px;

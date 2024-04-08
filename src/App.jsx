@@ -77,15 +77,16 @@ const App = () => {
       {config && (
         <Helmet>
           <title>
-            {config?.title
+            {/* {config?.title
               ? `${config.title}${config.slogan ? ` | ${config.slogan}` : ""}`
-              : "Powered by Voxire Technologies"}
+              : "Powered by Voxire Technologies"} */}
+            DEMO | Voxit - Contactless QR Menu
           </title>
           {/* <meta
           name="description"
           content="Sanity: Journey to a Zero Waste lifestyle"
         /> */}
-          <link rel="icon" href={config?.favicon} />
+          {/* <link rel="icon" href={config?.favicon} /> */}
         </Helmet>
       )}
 
@@ -102,7 +103,27 @@ const App = () => {
           <FontAwesomeIcon icon={faChevronUp} />
         </div>
       )}
-      <div id="demo">This is a demo - Check Out Our Packages</div>
+      <div
+        id="demo"
+        style={{
+          zIndex: "1000",
+        }}
+      >
+        This is a demo - Check Out Our
+        <a
+          style={{
+            color: "var(--primary)",
+            textDecoration: "underline",
+            marginLeft: "5px",
+            cursor: "pointer",
+          }}
+          href="https://voxire.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Packages
+        </a>
+      </div>
 
       <AlertModal />
       <Routes key={location.pathname} location={location}>

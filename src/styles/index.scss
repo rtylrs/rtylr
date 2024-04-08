@@ -116,12 +116,13 @@ html, body {
 
 
 #demo {
-  z-index: 100;
-  padding: 8px;
+  z-index: 10;
+  padding: 5px;
   background-color: #9A4444;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-
+  position: fixed;
+  bottom: 0;
 }
