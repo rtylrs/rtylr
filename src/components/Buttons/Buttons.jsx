@@ -4,7 +4,7 @@ import "./buttons.scss";
 import useColors from "../../hooks/useColors";
 
 function VbitezButton({
-  text,
+  children,
   onClick,
   styles,
   variant,
@@ -19,25 +19,39 @@ function VbitezButton({
     backgroundColor: color || primary,
   };
 
+  const secondaryStyles = {
+    ...styles,
+    borderColor: color || primary,
+    backgroundColor: "#ffffff",
+    color: color || primary,
+  };
+
   return (
     <button
       onClick={onClick}
-      style={mergedStyles}
+      style={variant === "secondary" ? secondaryStyles : mergedStyles}
       className={buttonClassName}
-      onMouseEnter={(e) =>
-        (e.target.style.backgroundColor = secondaryColor || secondary)
-      }
-      onMouseLeave={(e) =>
-        (e.target.style.backgroundColor = mergedStyles.backgroundColor)
+      onMouseEnter={(e) => {
+        (e.target.style.backgroundColor = secondaryColor || secondary),
+          variant === "secondary" && (e.target.style.color = "#ffffff");
+      }}
+      onMouseLeave={
+        variant === "secondary"
+          ? (e) => {
+              (e.target.style.backgroundColor = "#ffffff"),
+                (e.target.style.color = color || primary);
+            }
+          : (e) =>
+              (e.target.style.backgroundColor = mergedStyles.backgroundColor)
       }
     >
-      {text}
+      {children}
     </button>
   );
 }
 
 VbitezButton.propTypes = {
-  text: PropTypes.string.isRequired,
+  children: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   styles: PropTypes.object,
   variant: PropTypes.oneOf(["default", "secondary"]).isRequired,

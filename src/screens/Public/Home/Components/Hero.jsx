@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import VbitezButton from "../../../../components/Buttons/Buttons";
 
 function Hero() {
   const { t } = useTranslation();
@@ -10,9 +11,9 @@ function Hero() {
       <div className="hero-text">
         <h1>{t("Hero.welcome")}</h1>
         <h2>{t("Hero.discover")}</h2>
-        <button className="hero-button" onClick={() => navigate("/shop")}>
+        <VbitezButton onClick={() => navigate("/shop")} variant="secondary">
           {t("Hero.shop")}
-        </button>
+        </VbitezButton>
       </div>
     </div>
   );
