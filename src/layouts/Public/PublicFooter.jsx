@@ -14,7 +14,7 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-top">
-        {config && <img src={config.icon} alt="Logo" className="footer-logo" />}
+        <img src={"/logo.png"} alt="Logo" className="footer-logo" />
       </div>
       <div className="footer-sections">
         <div className="footer-section">

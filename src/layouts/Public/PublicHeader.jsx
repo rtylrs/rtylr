@@ -4,12 +4,10 @@ import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../../firebase";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useSelector } from "react-redux";
 import VbitezButton from "../../components/Buttons/Buttons";
 import useColors from "../../hooks/useColors";
 
 const Header = () => {
-  const config = useSelector((state) => state.config.websiteData);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -91,7 +89,7 @@ const Header = () => {
           navigate("/");
         }}
       >
-        {config && <img src={config.icon} alt="Logo" />}
+        <img src={"/logo.png"} alt="Logo" />
       </div>
       <divs
         className="header-left"
@@ -183,11 +181,7 @@ const Header = () => {
           }}
           className="browse-products"
         >
-          {user
-            ? userData?.isAdmin
-              ? "Admin Panel"
-              : "My Account"
-            : "Sign Up Now"}
+          {user ? "My Account" : "Sign Up Now"}
         </VbitezButton>
       </div>
       {isMobileMenuOpen && (
