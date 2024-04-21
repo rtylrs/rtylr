@@ -47,7 +47,7 @@
     font-weight: 200;
     text-transform: uppercase;
     color: #211b19;
-    background: #FAF1E4;
+    background: #ffffff;
     padding: 10px 5px;
     margin: auto;
     display: inline-block;
@@ -61,7 +61,7 @@
   .notfound span {
     display: inline-block;
     text-decoration: none;
-    color: #FAF1E4;
+    color: #ffffff;
     text-decoration: none;
     text-transform: uppercase;
     outline: none;
@@ -75,13 +75,13 @@
   }
   
   .notfound span:hover {
-    color: #FAF1E4;
+    color: #ffffff;
     background: #B2533E;
     transition: all 0.6s ease-in-out;
   }
 
   .notfound span:not(:hover) {
-    color: #FAF1E4;
+    color: #ffffff;
     background: #9A4444;
     transition: all 0.6s ease-in-out;
   }
