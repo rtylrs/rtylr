@@ -1,0 +1,14 @@
+.vbitez-button-default {
+  color: #fff;
+  border: none;
+  padding: 15px 30px;
+  font-size: 17px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  font-weight: bold;
+
+  &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
