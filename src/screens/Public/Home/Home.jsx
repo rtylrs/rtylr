@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { Categories } from "../../data/categories";
+import { Categories } from "../../../data/categories";
 import { useEffect, useState } from "react";
-import { db } from "../../firebase";
-import PetitionModal from "../../components/PetitionModal";
+import { db } from "../../../firebase";
+import PetitionModal from "../../../components/PetitionModal";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,8 +14,9 @@ import {
   faHandHoldingHeart,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
-import ProductCard from "../../components/ProductCard";
+import ProductCard from "../../../components/ProductCard";
 import { useSelector } from "react-redux";
+import Hero from "./Components/Hero";
 
 function Home() {
   const navigate = useNavigate();
@@ -66,15 +67,7 @@ function Home() {
         }}
         petitionId={petitonId}
       />
-      <div className="Hero">
-        <div className="hero-text">
-          <h1>{t("Hero.welcome")}</h1>
-          <h2>{t("Hero.discover")}</h2>
-          <button className="hero-button" onClick={() => navigate("/shop")}>
-            {t("Hero.shop")}
-          </button>
-        </div>
-      </div>
+      <Hero />
       <section className="product-section">
         <h2 className="section-title">Our Special Dishes</h2>
         <div className="product-grid">

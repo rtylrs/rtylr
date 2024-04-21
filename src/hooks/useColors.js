@@ -2,7 +2,7 @@
 export default function useColors() {
   return {
     primary: "#0a102f",
-    secondary: "#13CDBE",
+    secondary: "#121481",
     darkColor: "#016B63",
     background: "#ffffff",
     bgColor: "#ffffff",

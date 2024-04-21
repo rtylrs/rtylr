@@ -4,7 +4,7 @@ import React from "react";
 import Collection from "../screens/Public/Collection";
 
 // Routes
-const Home = React.lazy(() => import("../screens/Public/Home"));
+const Home = React.lazy(() => import("../screens/Public/Home/Home"));
 const Shop = React.lazy(() => import("../screens/Public/Shop/Shop"));
 const ShopItemPage = React.lazy(() =>
   import("../screens/Public/Shop/ShopItemPage")

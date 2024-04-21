@@ -1,13 +1,11 @@
 /* Base styles for Hero section */
 .Hero {
     text-align: center;
-    height:91vh;
+    height:100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)),
-      url("/images/HeroBg.jpg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -15,21 +13,21 @@
   .hero-text {
     max-width: 900px;
     margin: 20px;
-    color: #f2ebe5;
+    color: #000;
   }
   
   .hero-text h1 {
     font-size: 2.9em;
     font-weight: 500;
     padding: 10px;
-  color: #f2ebe5;    
+  color: #000;    
   }
   
   .hero-text h2 {
     font-size: 1.8em;
     font-weight: 500;
     margin-bottom: 20px;
-    color: #f2ebe5;
+    color: #000;
   }
 
   .hero-button {

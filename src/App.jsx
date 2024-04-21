@@ -90,7 +90,7 @@ const App = () => {
         </Helmet>
       )}
 
-      {showTopBtn && (
+      {showTopBtn && !location.pathname.includes("/restaurant/") && (
         <div
           className="ScrollToTop"
           onClick={() => {
