@@ -17,6 +17,7 @@ function VbitezButton({
   const mergedStyles = {
     ...styles,
     backgroundColor: color || primary,
+    borderColor: color || primary,
   };
 
   const secondaryStyles = {

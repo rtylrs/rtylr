@@ -11,9 +11,14 @@ function Hero() {
       <div className="hero-text">
         <h1>{t("Hero.welcome")}</h1>
         <h2>{t("Hero.discover")}</h2>
-        <VbitezButton onClick={() => navigate("/shop")} variant="secondary">
-          {t("Hero.shop")}
-        </VbitezButton>
+        <div className="hero-buttons">
+          <VbitezButton onClick={() => navigate("/shop")}>
+            {t("Hero.Get Started Now")}
+          </VbitezButton>
+          <VbitezButton onClick={() => navigate("/shop")} variant="secondary">
+            {t("Hero.Learn More")}
+          </VbitezButton>
+        </div>
       </div>
     </div>
   );
