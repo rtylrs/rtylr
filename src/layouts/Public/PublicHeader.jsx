@@ -91,34 +91,9 @@ const Header = () => {
           navigate("/");
         }}
       >
-        {config && (
-          <img
-            src={config.icon}
-            alt="Logo"
-            style={
-              {
-                // transform:
-                //   width > 768
-                //     ? document.location.pathname === "/"
-                //       ? "translateX(-110px)"
-                //       : "translateX(-75px)"
-                //     : "translateX(-90%)",
-                // filter:
-                //   width > 768
-                //     ? document.location.pathname === "/"
-                //       ? "invert(1)"
-                //       : "none"
-                //     : isMobileMenuOpen
-                //     ? "none"
-                //     : document.location.pathname === "/"
-                //     ? "invert(1)"
-                //     : "none",
-              }
-            }
-          />
-        )}
+        {config && <img src={config.icon} alt="Logo" />}
       </div>
-      <div
+      <divs
         className="header-left"
         style={{
           transform: "translateX(5%)",
@@ -129,7 +104,7 @@ const Header = () => {
         <LinkWithColor to="/blog">Demo</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
         <LinkWithColor to="/about">About Us</LinkWithColor>
-      </div>
+      </divs>
 
       <div className="header-right">
         {/* {width > 768 && (
@@ -207,14 +182,13 @@ const Header = () => {
             }
           }}
           className="browse-products"
-          text={
-            user
-              ? userData?.isAdmin
-                ? "Admin Panel"
-                : "My Account"
-              : "Sign Up Now"
-          }
-        />
+        >
+          {user
+            ? userData?.isAdmin
+              ? "Admin Panel"
+              : "My Account"
+            : "Sign Up Now"}
+        </VbitezButton>
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
