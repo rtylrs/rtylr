@@ -1,4 +1,3 @@
-// Footer.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faInstagram,
@@ -6,11 +5,8 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
 
 const Footer = () => {
-  const config = useSelector((state) => state.config.websiteData);
-
   return (
     <footer className="footer">
       <div className="footer-top">
@@ -84,13 +80,13 @@ const Footer = () => {
                   cursor: "pointer",
                 }}
                 onClick={() => {
-                  window.open("mailto:TheSanityStore@gmail.com");
+                  window.open("mailto:vbitez@voxire.com");
                 }}
               >
-                hello@sanitykuwait.com
+                vbitez@voxire.com
               </span>
             </li>
-            <li>Phone: +96598895586</li>
+            <li>Phone: +961 71 642 565</li>
           </ul>
         </div>
       </div>

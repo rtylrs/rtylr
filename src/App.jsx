@@ -23,10 +23,12 @@ import { Helmet } from "react-helmet";
 import { fetchConfigData } from "./redux/reducers/configSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import useColors from "./hooks/useColors";
 
 const App = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const { primary } = useColors();
   const dispatch = useDispatch();
   const config = useSelector((state) => state.config.websiteData);
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -76,17 +78,7 @@ const App = () => {
     <>
       {config && (
         <Helmet>
-          <title>
-            {/* {config?.title
-              ? `${config.title}${config.slogan ? ` | ${config.slogan}` : ""}`
-              : "Powered by Voxire Technologies"} */}
-            Vbitez - Contactless QR Menu
-          </title>
-          {/* <meta
-          name="description"
-          content="Sanity: Journey to a Zero Waste lifestyle"
-        /> */}
-          {/* <link rel="icon" href={config?.favicon} /> */}
+          <title>Vbitez - Contactless QR Menu</title>
         </Helmet>
       )}
 
@@ -98,6 +90,9 @@ const App = () => {
               top: 0,
               behavior: "smooth",
             });
+          }}
+          style={{
+            backgroundColor: primary,
           }}
         >
           <FontAwesomeIcon icon={faChevronUp} />
