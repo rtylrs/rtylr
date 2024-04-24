@@ -6,7 +6,7 @@ const VendorMain = React.lazy(() => import("../screens/Vendor/VendorMain"));
 
 const VendorRoutes = [
   {
-    path: "/business",
+    path: "/restaurant/manage/:restaurantId",
     element: (
       <VendorDashboard>
         <VendorMain />
