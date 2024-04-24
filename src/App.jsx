@@ -56,20 +56,7 @@ const App = () => {
       i18next.changeLanguage(language);
     }
 
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      if (authUser) {
-        // User is logged in
-        setUser(authUser);
-      } else {
-        // User is not logged in
-        setUser(null);
-      }
-    });
-
-    return () => {
-      // Unsubscribe from the listener when the component unmounts
-      unsubscribe();
-    };
+    setUser({});
 
     //eslint-disable-next-line
   }, []);
@@ -153,7 +140,7 @@ const App = () => {
           }
         </Route>
 
-        <Route exact path="/business" element={<BusinessRoute />}>
+        <Route exact path="/restaurant" element={<BusinessRoute />}>
           {
             // Vendor routes
             user && (
