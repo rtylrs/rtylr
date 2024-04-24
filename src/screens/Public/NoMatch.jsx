@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import VbitezButton from "../../components/Buttons/Buttons";
 
 export default function NoMatch() {
   const navigate = useNavigate();
@@ -22,13 +23,13 @@ export default function NoMatch() {
             <h1>Oops!</h1>
             <h2>404 - The Page can't be found</h2>
           </div>
-          <span
+          <VbitezButton
             onClick={() => {
               navigate("/");
             }}
           >
             Go Back
-          </span>
+          </VbitezButton>
         </div>
       </div>
     </motion.div>

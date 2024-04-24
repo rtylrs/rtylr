@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import "./buttons.scss";
 import useColors from "../../hooks/useColors";
