@@ -1,8 +1,14 @@
 import axios from "axios";
 import i18next from "i18next";
 
+const mode = "dev"; // can be dev or prod
+
 const api = axios.create({
-  baseURL: "http://localhost:1024/api/v1/app",
+  baseURL:
+    mode === "dev" ?
+      "http://localhost:1024/api/v1/app"
+      :
+      "https://onion-e6t0.onrender.com/api/v1/app",
 });
 
 api.interceptors.request.use(
