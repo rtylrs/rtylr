@@ -19,12 +19,12 @@ function AboutConfig() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // dispatch(
-    //   updateAboutContent({
-    //     aboutContent: text,
-    //   })
-    // );
-    // setIsTextModified(false);
+    dispatch(
+      updateAboutContent({
+        aboutContent: text,
+      })
+    );
+    setIsTextModified(false);
     notify.success("Text updated successfully");
   };
 
