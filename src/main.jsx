@@ -19,7 +19,7 @@ import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#9A4444",
+      main: "#0a102f",
     },
   },
 });

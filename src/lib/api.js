@@ -1,16 +1,14 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { ASYNC_STORAGE_KEYS } from "../constants/async_storage_keys";
 import i18next from "i18next";
 
 const api = axios.create({
-  // baseURL: "http://192.168.1.9:5000/api/v1/app",
+  baseURL: "http://localhost:1024/api/v1/app",
 });
 
 api.interceptors.request.use(
   async (config) => {
     try {
-      const user = await AsyncStorage.getItem(ASYNC_STORAGE_KEYS.AUTH_TOKEN);
+      const user = localStorage.getItem("userToken") || sessionStorage.getItem("userToken");
       if (user) {
         config.headers["authorization"] = `Bearer ${user}`;
       }

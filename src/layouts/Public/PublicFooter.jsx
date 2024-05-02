@@ -1,8 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faInstagram,
-  faWhatsappSquare,
-} from "@fortawesome/free-brands-svg-icons";
+import { faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 
@@ -94,7 +91,7 @@ const Footer = () => {
         <h3>Follow or Contact Us</h3>
         <div className="social-icons">
           <a href="https://api.whatsapp.com/send?phone=96598895586">
-            <FontAwesomeIcon icon={faWhatsappSquare} />
+            <FontAwesomeIcon icon={faWhatsapp} />
           </a>
 
           <a href="https://www.instagram.com/TheSanityStore">
