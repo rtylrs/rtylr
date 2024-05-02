@@ -15,6 +15,7 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
+import { ToastContainer } from "react-toastify";
 
 const theme = createTheme({
   palette: {
@@ -34,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <SidebarProvider>
                 <ScrollToTop />
                 <App />
+                <ToastContainer />
               </SidebarProvider>
             </BrowserRouter>
           </Provider>
