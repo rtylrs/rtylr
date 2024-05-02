@@ -101,7 +101,6 @@ const Header = () => {
       >
         <LinkWithColor to="/restaurant/demo">Demo</LinkWithColor>
         <LinkWithColor to="/pricing">Product</LinkWithColor>
-        <LinkWithColor to="/blog">Demo</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
         <LinkWithColor to="/about">About Us</LinkWithColor>
       </div>
