@@ -1,5 +1,4 @@
 import PropTypes from "prop-types";
-import "./buttons.scss";
 import useColors from "../../hooks/useColors";
 
 function VbitezButton({
@@ -9,6 +8,7 @@ function VbitezButton({
   variant,
   color,
   secondaryColor,
+  hidden,
 }) {
   const buttonClassName = `vbitez-button-${variant}`;
   const { primary, secondary } = useColors();
@@ -17,6 +17,7 @@ function VbitezButton({
     ...styles,
     backgroundColor: color || primary,
     borderColor: color || primary,
+    display: hidden ? "none" : "",
   };
 
   const secondaryStyles = {
@@ -24,6 +25,7 @@ function VbitezButton({
     borderColor: color || primary,
     backgroundColor: "#ffffff",
     color: color || primary,
+    display: hidden ? "none" : "",
   };
 
   return (
@@ -57,10 +59,12 @@ VbitezButton.propTypes = {
   variant: PropTypes.oneOf(["default", "secondary"]).isRequired,
   color: PropTypes.string,
   secondaryColor: PropTypes.string,
+  hidden: PropTypes.bool,
 };
 
 VbitezButton.defaultProps = {
   variant: "default",
+  hidden: false,
 };
 
 export default VbitezButton;

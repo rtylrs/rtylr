@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import VbitezButton from "../../components/Buttons/Buttons";
 import useColors from "../../hooks/useColors";
+import useWindowDimensions from "../../utils/useWindowDimensions";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,6 +14,7 @@ const Header = () => {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { primary } = useColors();
+  const { width } = useWindowDimensions();
 
   const LinkWithColor = (props) => {
     // eslint-disable-next-line react/prop-types
@@ -91,7 +93,7 @@ const Header = () => {
       >
         <img src={"/logo.png"} alt="Logo" />
       </div>
-      <divs
+      <div
         className="header-left"
         style={{
           transform: "translateX(5%)",
@@ -102,52 +104,9 @@ const Header = () => {
         <LinkWithColor to="/blog">Demo</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
         <LinkWithColor to="/about">About Us</LinkWithColor>
-      </divs>
+      </div>
 
       <div className="header-right">
-        {/* {width > 768 && (
-          <>
-            {user ? ( // Check if user is logged in
-              <Link to={userData?.isVendor ? "/business" : "/account"}>
-                <FontAwesomeIcon icon={faUser} title="My Account" />
-              </Link>
-            ) : (
-              // Display login icon if not logged in
-              <div
-                onClick={() => {
-                  navigate("/login");
-                }}
-                className="LoginButton"
-              >
-                <FontAwesomeIcon icon={faRightToBracket} title="Login" />
-              </div>
-            )}
-          </>
-        )}
-
-        {user && (
-          <>
-            {!userData?.isVendor && (
-              <Link to="/manage">
-                <FontAwesomeIcon icon={faHeart} title="favorites" />
-              </Link>
-            )}
-            <Link to="/notifications">
-              <Badge
-                badgeContent={notificationsCount}
-                color="error"
-                style={{ marginRight: "10px" }}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-              >
-                <FontAwesomeIcon icon={faEnvelope} />
-              </Badge>
-            </Link>
-          </>
-        )} */}
-
         <button
           className="mobile-menu-toggle"
           onClick={toggleMobileMenu}
@@ -167,6 +126,18 @@ const Header = () => {
           )}
         </button>
 
+        <button
+          className="login-button"
+          style={{
+            display: user ? "none" : "flex",
+          }}
+          onClick={() => {
+            navigate("/auth/login");
+          }}
+        >
+          <p>Login</p>
+        </button>
+
         <VbitezButton
           onClick={() => {
             if (user) {
@@ -176,10 +147,11 @@ const Header = () => {
               }
               navigate(userData?.isVendor ? "/business" : "/account");
             } else {
-              navigate("/auth/login");
+              navigate("/auth/register");
             }
           }}
           className="browse-products"
+          hidden={width < 768}
         >
           {user ? "My Account" : "Sign Up Now"}
         </VbitezButton>

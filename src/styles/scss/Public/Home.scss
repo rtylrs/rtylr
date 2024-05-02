@@ -1,28 +1,37 @@
 /* Base styles for Hero section */
 .Hero {
     text-align: center;
-    height:100vh;
+    height:95vh;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
+    align-items: center;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    width: 90%;
+    width: 80%;
     
   .hero-text {
     max-width: 50%;
     margin: 20px;
-    color: #000;
+    color: $primary-color;
     text-align: left;
+  }
+
+  .hero-image {
+    max-width: 50%;
+
+    img {
+      width: 100%;
+      height: auto;
+    }
   }
   
   .hero-text h1 {
     font-size: 4em;
     font-weight: 900;
-     color: #000;    
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: $primary-font;
     letter-spacing: -4px;
     line-height: 70px;
     margin: 0;
@@ -32,8 +41,8 @@
   .hero-text h2 {
     font-size: 1.2em;
     font-weight: 500;
-    color: #000;
     margin: 0;
+    font-family: $secondary-font;
   }
 
   .hero-buttons {
@@ -54,16 +63,29 @@
 
 
   @media only screen and (max-width: 768px){
+    flex-direction: column;
+
+    .hero-text {
+      max-width: 100%;
+      margin: 20px;
+      text-align: left;
+      margin-top: 120px;
+    }
+
     .hero-text h1 {
       font-size: 2em;
+      line-height: normal;
+      letter-spacing: normal;
     }
+
     .hero-text h2 {
       font-size: 1.5em;
     }
 
-  
+    .hero-image {
+      max-width: 100%;
+    }
   }
-
 }
 
   
@@ -84,23 +106,6 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-  }
-
-  .view-more-button {
-    background-color: #9A4444;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 18px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top:5%;
-
-    &:hover {
-      background-color: #B2533E;
-      transition: 0.3s;
-    }
   }
 
   @media (max-width: 768px) {
@@ -258,14 +263,14 @@ align-items: center;
     }
     .post-author {
       font-size: 14px;
-      color: #9A4444;
+      color: #0a102f;
       margin-bottom: 0px;
       padding: 0;
     }
 
     .post-date {
       font-size: 14px;
-      color: #9A4444;
+      color: #0a102f;
       margin-bottom: 10px;
     }
 
@@ -279,7 +284,7 @@ align-items: center;
 }
 
 .view-more-blogs-button {
-  background-color: #9A4444;
+  background-color: #0a102f;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -400,7 +405,7 @@ align-items: center;
 
     .sign-button {
       /* Adjust button styles as needed */
-      background-color: #9A4444;
+      background-color: #0a102f;
       color: #fff;
       padding: 10px 20px;
       border: none;

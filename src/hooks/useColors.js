@@ -3,6 +3,7 @@ export default function useColors() {
   return {
     primary: "#0a102f",
     secondary: "#121481",
+    accent: "#03AED2",
     darkColor: "#016B63",
     background: "#ffffff",
     bgColor: "#ffffff",

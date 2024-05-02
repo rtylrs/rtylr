@@ -1,16 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { db } from '../../firebase';
+import api from '../../lib/api';
 
-
-// Define the initial state of the slice
 const initialState = {
     websiteData: null,
     aboutContent: null,
+    maintanance: false,
     status: 'idle',
     error: null
 };
 
-// Create the slice
 const configSlice = createSlice({
     name: 'config',
     initialState,
@@ -21,37 +19,37 @@ const configSlice = createSlice({
         setAboutContent: (state, action) => {
             state.aboutContent = action.payload;
         },
+        setMaintanance: (state, action) => {
+            state.maintanance = action.payload;
+        }
     },
 });
 
-// Export actions
 export const {
-    setWebsiteData
-    , setAboutContent
+    setWebsiteData,
+    setAboutContent,
+    setMaintanance
 } = configSlice.actions;
 
-// Export the reducer
 export default configSlice.reducer;
 
-export const fetchConfigData = () => (dispatch) => {
-    db.collection('config').get().then((snapshot) => {
-        snapshot.forEach((doc) => {
-            const config = Object.assign({ id: doc.id }, doc.data());
-
-            if (config.id === 'websiteData') {
-                dispatch(setWebsiteData(config));
-            }
-
-            if (config.id === 'about') {
-                dispatch(setAboutContent(config));
-            }
-        });
-    });
+export const fetchConfigData = () => async (dispatch) => {
+    console.log('Fetching config data...');
+    try {
+        const response = await api.get('/config');
+        const { maintanance, aboutContent } = response.data;
+        dispatch(setAboutContent(aboutContent));
+        dispatch(setMaintanance(maintanance));
+    } catch (error) {
+        console.error('Error fetching config data:', error);
+    }
 };
 
-
-export const UpdateAboutContent = (data) => (dispatch) => {
-    db.collection('config').doc('about').update(data).then(() => {
-        dispatch(setAboutContent(data));
-    });
+export const updateAboutContent = (data) => async (dispatch) => {
+    try {
+        const response = await api.put('/config/update', data);
+        dispatch(setAboutContent(response.data.aboutContent));
+    } catch (error) {
+        console.error('Error updating about content:', error);
+    }
 };
