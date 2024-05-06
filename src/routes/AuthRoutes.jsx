@@ -4,7 +4,8 @@ import AnimatedRoutes from "../components/AnimatedRoutes";
 
 // Routes
 const Login = React.lazy(() => import("../screens/Auth/Login"));
-const Register = React.lazy(() => import("../screens/Auth/Register"));
+const RegisterUser = React.lazy(() => import("../screens/Auth/RegisterUser"));
+const RegisterRest = React.lazy(() => import("../screens/Auth/RegisterRest"));
 const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
 
 const AuthRoutes = [
@@ -20,11 +21,22 @@ const AuthRoutes = [
     exact: true,
   },
   {
-    path: "/auth/register",
+    path: "/auth/register/user",
     element: (
       <Public>
         <AnimatedRoutes>
-          <Register />
+          <RegisterUser />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/auth/register/restaurant",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <RegisterRest />
         </AnimatedRoutes>
       </Public>
     ),

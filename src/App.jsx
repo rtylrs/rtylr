@@ -69,7 +69,9 @@ const App = () => {
         </Helmet>
       )}
 
-      {config.maintanance && <Maintanance />}
+      {config.maintanance && !location.pathname.includes("/manage/") && (
+        <Maintanance />
+      )}
 
       {!location.pathname.includes("/restaurant/") && (
         <motion.div

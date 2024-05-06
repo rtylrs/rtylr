@@ -88,7 +88,7 @@ function Home() {
         </button>
       </section>
 
-      <section className="home-section">
+      {/* <section className="home-section">
         <h2 className="section-title">Our Green Selection</h2>
         <div className="grid-container">
           {Categories.map((category, index) => (
@@ -110,7 +110,7 @@ function Home() {
             </Link>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <section className="home-goals">
         <div className="home-goals-content">

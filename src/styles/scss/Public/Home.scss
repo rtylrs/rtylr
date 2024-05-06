@@ -1,17 +1,17 @@
 /* Base styles for Hero section */
 .Hero {
-    text-align: center;
-    height:95vh;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 80%;
-    
+  text-align: center;
+  height: 95vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 80%;
+
   .hero-text {
     max-width: 50%;
     margin: 20px;
@@ -27,7 +27,7 @@
       height: auto;
     }
   }
-  
+
   .hero-text h1 {
     font-size: 4.2em;
     font-weight: 900;
@@ -36,7 +36,7 @@
     margin: 0;
     margin-bottom: 20px;
   }
-  
+
   .hero-text h2 {
     font-size: 1.2em;
     font-weight: 500;
@@ -51,18 +51,37 @@
     margin-top: 50px;
   }
 
-
   .searchBarHome {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  
 
+    // smaller pc view
+  @media only screen and (max-width: 1378px) {
+    .Hero {
+      width: 90%;
+    }
 
-  @media only screen and (max-width: 768px){
-    flex-direction: column;
+    .hero-text {  
+      max-width: 60%;
+    }
+
+    .hero-image {
+      max-width: 40%;
+    }
+
+    .hero-text h1 { 
+      font-size: 3.5em;
+    }
+
+  }
+
+  @media only screen and (max-width: 768px) {
+    .Hero {
+      flex-direction: column;
+    }
 
     .hero-text {
       max-width: 100%;

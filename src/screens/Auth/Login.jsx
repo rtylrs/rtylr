@@ -96,7 +96,6 @@ function Login() {
                   });
               });
           }
-
         })
         .catch((e) => {
           setError(e.message);

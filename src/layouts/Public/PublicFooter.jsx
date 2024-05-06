@@ -104,7 +104,7 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>
-          &copy; {new Date().getFullYear() - 1} - {new Date().getFullYear()},{" "}
+          &copy; {new Date().getFullYear()},{" "}
           <a
             style={{
               color: "var(--primary)",
