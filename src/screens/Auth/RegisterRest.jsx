@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import ShowAlert from "../../utils/showAlert";
 import { useNavigate } from "react-router-dom";
 
-function Register() {
+function RegisterUser() {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -219,9 +219,9 @@ function Register() {
   );
 }
 
-Register.propTypes = {
+RegisterUser.propTypes = {
   open: PropTypes.bool.isRequired,
   close: PropTypes.func.isRequired,
 };
 
-export default Register;
+export default RegisterUser;

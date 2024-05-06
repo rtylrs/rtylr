@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Container, Typography, TextField, Button } from "@mui/material";
+import { Container, Typography, TextField } from "@mui/material";
 import { auth } from "../../firebase";
+import VbitezButton from "../../components/Buttons/Buttons";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -44,16 +45,21 @@ function ForgotPassword() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <Button
-        type="button"
-        variant="contained"
-        color="primary"
-        fullWidth
-        onClick={handleResetPassword}
-        disabled={requestSent}
+      <div
+        style={{
+          marginTop: "1rem",
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
       >
-        Reset Password
-      </Button>
+        <VbitezButton
+          fullWidth
+          onClick={handleResetPassword}
+          disabled={requestSent}
+        >
+          Reset Password
+        </VbitezButton>
+      </div>
       {message && (
         <Typography
           variant="body2"
