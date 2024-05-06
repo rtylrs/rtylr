@@ -133,17 +133,6 @@ function Login() {
         >
           Login
         </button>
-        <div className="LoginScreen-social-media">
-          <button
-            className="LoginScreen-google-button"
-            onClick={() => {
-              handleRegisterWithGoogle();
-            }}
-          >
-            <FontAwesomeIcon icon={faGoogle} size="lg" />
-            Sign in with Google
-          </button>
-        </div>
         <div className="LoginScreen-footer">
           <p>
             Don’t have an account?{" "}
