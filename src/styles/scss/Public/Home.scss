@@ -1,7 +1,7 @@
 /* Base styles for Hero section */
 .Hero {
   text-align: center;
-  height: 80vh;
+  height: 75vh;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
@@ -13,7 +13,7 @@
   width: 80%;
 
   .hero-text {
-    max-width: 70%;
+    max-width: 50%;
     margin: 20px;
     color: $primary-color;
     text-align: left;
@@ -33,7 +33,7 @@
   }
 
   .hero-text h1 {
-    font-size: 52px;
+    font-size: 55px;
     font-weight: 900;
     font-family: $primary-font;
     line-height: 70px;
