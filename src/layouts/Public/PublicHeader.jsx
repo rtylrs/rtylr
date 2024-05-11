@@ -146,7 +146,7 @@ const Header = () => {
               }
               navigate(userData?.isVendor ? "/business" : "/account");
             } else {
-              navigate("/auth/register");
+              navigate("/auth/register/restaurant");
             }
           }}
           className="browse-products"

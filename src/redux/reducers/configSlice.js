@@ -5,6 +5,7 @@ const initialState = {
     websiteData: null,
     aboutContent: null,
     maintanance: false,
+    bussinessCount: 0,
     status: 'idle',
     error: null
 };
@@ -21,6 +22,9 @@ const configSlice = createSlice({
         },
         setMaintanance: (state, action) => {
             state.maintanance = action.payload;
+        },
+        setBussinessCount: (state, action) => {
+            state.bussinessCount = action.payload;
         }
     },
 });
@@ -28,18 +32,19 @@ const configSlice = createSlice({
 export const {
     setWebsiteData,
     setAboutContent,
-    setMaintanance
+    setMaintanance,
+    setBussinessCount
 } = configSlice.actions;
 
 export default configSlice.reducer;
 
 export const fetchConfigData = () => async (dispatch) => {
-    console.log('Fetching config data...');
     try {
         const response = await api.get('/config');
-        const { maintanance, aboutContent } = response.data;
+        const { maintanance, aboutContent, count } = response.data;
         dispatch(setAboutContent(aboutContent));
         dispatch(setMaintanance(maintanance));
+        dispatch(setBussinessCount(count));
     } catch (error) {
         console.error('Error fetching config data:', error);
     }
