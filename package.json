@@ -23,7 +23,7 @@
     "@mui/x-date-pickers": "^6.16.2",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.5.1",
-    "date-fns": "2.13.0",
+    "date-fns": "^3.0.0",
     "firebase": "^10.4.0",
     "framer-motion": "^10.16.4",
     "google-maps-react": "^2.0.6",
