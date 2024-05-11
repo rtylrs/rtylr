@@ -1,7 +1,6 @@
-/* Base styles for Hero section */
 .Hero {
   text-align: center;
-  height: 75vh;
+  height: 80vh;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
@@ -270,9 +269,9 @@ align-items: center;
     margin: 0 auto;
 
     .blog-post {
-      background-color: #f6ede6;
+      background-color: white;
       border-radius: 5px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s;
       padding: 15px;
       display: flex;

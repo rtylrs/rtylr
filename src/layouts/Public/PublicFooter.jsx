@@ -11,6 +11,23 @@ const Footer = () => {
       </div>
       <div className="footer-sections">
         <div className="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li>
+              <Link to="/about">About Us</Link>
+            </li>
+            <li>
+              <Link to="/contact">Contact Us</Link>
+            </li>
+            <li>
+              <Link to="/careers">Careers (Jobs)</Link>
+            </li>
+            <li>
+              <Link to="/blog">Blog</Link>
+            </li>
+          </ul>
+        </div>
+        <div className="footer-section">
           <h3>Help</h3>
           <ul>
             <li>
@@ -35,23 +52,6 @@ const Footer = () => {
             </li>
             <li>
               <Link to="/blog/public/add ">Publish a Blog</Link>
-            </li>
-          </ul>
-        </div>
-        <div className="footer-section">
-          <h3>Links</h3>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/about">About</Link>
-            </li>
-            <li>
-              <Link to="/contact">Contact Us</Link>
-            </li>
-            <li>
-              <Link to="/events">Events</Link>
             </li>
           </ul>
         </div>
