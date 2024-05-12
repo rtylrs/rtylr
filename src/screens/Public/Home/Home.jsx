@@ -17,7 +17,7 @@ import {
 import ProductCard from "../../../components/ProductCard";
 import { useSelector } from "react-redux";
 import Hero from "./Components/Hero";
-
+import Features from "./Components/Features";
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -68,6 +68,7 @@ function Home() {
         petitionId={petitonId}
       />
       <Hero />
+      <Features />
       <section className="product-section">
         <h2 className="section-title">Our Special Dishes</h2>
         <div className="product-grid">
