@@ -58,6 +58,12 @@ a {
   }
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -260,10 +266,11 @@ html, body {
   justify-content: center;
 
   p {
+    margin: 15px;
     margin-left: 10px;
     margin-right: 10px;
     color: $light-color;
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: 900;
     font-family: $primary-font;
     text-transform: uppercase;

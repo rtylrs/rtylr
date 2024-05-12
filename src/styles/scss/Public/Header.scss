@@ -9,7 +9,7 @@
   align-items: center;
   padding:20px 200px;
   background-color: transparent;
-  height: 50px;
+  height: 85px;
   color: #f5f5f5;
   z-index: 10; /* Add a z-index to layer it above other content */
 
@@ -208,7 +208,7 @@
   padding: 20px 120px;
   background-color: #f5f5f5;
   color: #231f1b;
-  height: 50px;
+  height: 85px;
   z-index: 1000; 
 
   &.scrolled {

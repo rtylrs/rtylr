@@ -33,8 +33,10 @@
 
   .hero-text h1 {
     font-size: 55px;
-    font-weight: 900;
     font-family: $primary-font;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
     line-height: 70px;
     margin: 0;
     margin-bottom: 15px;
