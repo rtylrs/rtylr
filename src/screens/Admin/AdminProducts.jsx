@@ -15,7 +15,6 @@ import {
   InputLabel,
   Paper,
 } from "@mui/material";
-import { Categories } from "../../data/categories";
 import { db, storage } from "../../firebase";
 import ShowAlert from "../../utils/showAlert";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -276,11 +275,6 @@ function AdminProducts() {
                   <MenuItem value="">
                     <em>Select a Collection</em>
                   </MenuItem>
-                  {Categories.map((category) => (
-                    <MenuItem key={category.title} value={category.title}>
-                      {category.title}
-                    </MenuItem>
-                  ))}
                 </Select>
               </FormControl>
               <div>

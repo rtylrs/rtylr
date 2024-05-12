@@ -1,6 +1,6 @@
 .Hero {
   text-align: center;
-  height: 80vh;
+  height: 650px;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
@@ -12,7 +12,7 @@
   width: 80%;
 
   .hero-text {
-    max-width: 60%;
+    max-width: 55%;
     margin: 20px;
     color: $primary-color;
     text-align: left;
@@ -270,42 +270,38 @@ align-items: center;
 
 .features-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); // Initially, display 3 items per row
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   max-width: 1600px;
 }
 
 .feature {
-
-  background-color: white;
-  color: black;
+    background-color: white;
+    color: black;
       padding: 20px;
       border-radius: 4px;
       text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
       &:hover {
         transform: translateY(-5px);
         transition: 0.3s;
       }
+
       p {
         color: black;
         font-size: 18px;
         margin: 0;
       } 
+      
       .icon {
-        position: absolute;  
-        top: 10px;
+          position: absolute;  
+          top: 10px;
           left: 10px; 
           color: black;
           font-size: 36px;
       }
 }
-
-
-// .feature:hover {
-//   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-// }
-
 
 
 .feature-container {

@@ -1,3 +1,9 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Mohamad Homsi
+*/
+
 .modal-content {
     background-color: white;
     padding: 20px;
@@ -57,44 +63,6 @@
 .modal {
   max-width: 500px;
   margin: 0 auto;
-}
-
-
-// Addons
-.admin-addons {
-  text-align: center;
-  margin: 2rem;
-  padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f8f8f8;
-
-  svg {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-  }
-
-  h1 {
-    font-size: 2rem;
-    color: #333;
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: #555;
-    width: 80%;
-    margin: 0 auto;
-  }
-
-  @media only screen and (max-width: 768px) {
-    h1 {
-      font-size: 1.5rem;
-    }
-
-    p {
-      font-size: 1rem;
-    }
-  }
 }
 
 .about-config {

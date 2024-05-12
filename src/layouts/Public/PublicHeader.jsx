@@ -99,7 +99,7 @@ const Header = () => {
           transform: "translateX(5%)",
         }}
       >
-        <LinkWithColor to="/restaurant/demo">Demo</LinkWithColor>
+        <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
         <LinkWithColor to="/pricing">Product</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
         <LinkWithColor to="/about">About Us</LinkWithColor>

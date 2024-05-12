@@ -447,7 +447,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             Settings
           </Link>
         </div>
-        <div
+        {/* <div
           className={`sidebar__link ${
             location.pathname === "/manage/addons" ? "active" : ""
           }`}
@@ -456,7 +456,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <Link to="/manage/addons" id="link">
             Add-Ons
           </Link>
-        </div>
+        </div> */}
         <div className={`sidebar__link`}>
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}

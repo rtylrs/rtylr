@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { Categories } from "../../../data/categories";
 import { useEffect, useState } from "react";
 import { db } from "../../../firebase";
 import PetitionModal from "../../../components/PetitionModal";
@@ -18,6 +17,8 @@ import ProductCard from "../../../components/ProductCard";
 import { useSelector } from "react-redux";
 import Hero from "./Components/Hero";
 import Features from "./Components/Features";
+import Ticker from "../../../components/Ticker";
+
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -68,6 +69,7 @@ function Home() {
         petitionId={petitonId}
       />
       <Hero />
+      <Ticker />
       <Features />
       <section className="product-section">
         <h2 className="section-title">Our Special Dishes</h2>
@@ -79,39 +81,7 @@ function Home() {
                 <ProductCard key={product.id} product={product} />
               ))}
         </div>
-        <button
-          className="view-more-button"
-          onClick={() => {
-            navigate("/shop");
-          }}
-        >
-          View More
-        </button>
       </section>
-
-      {/* <section className="home-section">
-        <h2 className="section-title">Our Green Selection</h2>
-        <div className="grid-container">
-          {Categories.map((category, index) => (
-            <Link
-              key={index}
-              className="grid-item"
-              style={{
-                backgroundImage: `url(${category.imageUrl})`,
-              }}
-              to={
-                category.title.toLowerCase() === "brands"
-                  ? `/brands`
-                  : `/collection/${category.title.toLowerCase()}`
-              }
-            >
-              <div className="item-content">
-                <p>{category.title}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section> */}
 
       <section className="home-goals">
         <div className="home-goals-content">

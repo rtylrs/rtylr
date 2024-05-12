@@ -5,17 +5,12 @@ import Collection from "../screens/Public/Collection";
 
 // Routes
 const Home = React.lazy(() => import("../screens/Public/Home/Home"));
-const Shop = React.lazy(() => import("../screens/Public/Shop/Shop"));
-const ShopItemPage = React.lazy(() =>
-  import("../screens/Public/Shop/ShopItemPage")
-);
 const About = React.lazy(() => import("../screens/Public/About"));
 const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
 const Contact = React.lazy(() => import("../screens/Public/Contact"));
 const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
 const AllPetitions = React.lazy(() => import("../screens/Public/AllPetitions"));
 const AllBlogs = React.lazy(() => import("../screens/Public/AllBlogs"));
-const Events = React.lazy(() => import("../screens/Public/Events"));
 
 const PublicRoutes = [
   {
@@ -24,28 +19,6 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Home />
-        </AnimatedRoutes>
-      </Public>
-    ),
-    exact: true,
-  },
-  {
-    path: "/shop",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Shop />
-        </AnimatedRoutes>
-      </Public>
-    ),
-    exact: true,
-  },
-  {
-    path: "/shop/:itemId",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <ShopItemPage />
         </AnimatedRoutes>
       </Public>
     ),
@@ -121,17 +94,6 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <AllBlogs />
-        </AnimatedRoutes>
-      </Public>
-    ),
-    exact: true,
-  },
-  {
-    path: "/events",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Events />
         </AnimatedRoutes>
       </Public>
     ),

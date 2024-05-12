@@ -33,11 +33,11 @@ function Hero() {
           }}
         >
           <FontAwesomeIcon icon={faStar} color={accent} /> Rated 4.7/5 - from
-          over {config} reviews
+          over {config === 0 ? 212 : config} reviews
         </h5>
       </div>
       <div className="hero-image">
-        <img src="/images/hero-image.png" alt="hero" />
+        <img src="/images/HeroImage.png" alt="qr code on a paper" />
       </div>
     </div>
   );

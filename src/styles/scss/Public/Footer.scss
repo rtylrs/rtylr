@@ -1,3 +1,9 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Mohamad Homsi
+*/
+
 .footer {
   background-color: #f5f5f5;
   color: #231f1b;
@@ -73,7 +79,7 @@
         text-decoration: none;
 
         &:hover {
-          color: #B2533E;
+          color: inherit;
           transition: 0.3s ease-in-out;
         }
       }

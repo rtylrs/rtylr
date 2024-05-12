@@ -21,8 +21,6 @@ const AdminSettings = React.lazy(() =>
   import("../screens/Admin/AdminSettings")
 );
 
-const AdminAddons = React.lazy(() => import("../screens/Admin/AdminAddons"));
-
 const AboutConfig = React.lazy(() =>
   import("../screens/Admin/config/AboutConfig")
 );
@@ -96,15 +94,6 @@ const AdminRoutes = [
     element: (
       <Admin>
         <AdminSettings />
-      </Admin>
-    ),
-    exact: true,
-  },
-  {
-    path: "/manage/addons",
-    element: (
-      <Admin>
-        <AdminAddons />
       </Admin>
     ),
     exact: true,
