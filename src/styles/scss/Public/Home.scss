@@ -247,8 +247,84 @@ align-items: center;
     }
   }
 }
+// Features Section
+.Features {
+  // padding: 150px 150px; // Reduced padding for smaller screens
+  background-color: #fcfaff;
+  color: #fff;
+  margin-top: 5%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;  
+  border: solid;
+}
+
+ 
+  
+.features-text {
+  margin: 20px;
+  color: $primary-color;
+  text-align: center;
+}
+
+.features-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // Initially, display 3 items per row
+  gap: 20px;
+  max-width: 1600px;
+}
+
+.feature {
+
+  background-color: white;
+  color: black;
+      padding: 20px;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      &:hover {
+        transform: translateY(-5px);
+        transition: 0.3s;
+      }
+      p {
+        color: black;
+        font-size: 18px;
+        margin: 0;
+      } 
+      .icon {
+        position: absolute;  
+        top: 10px;
+          left: 10px; 
+          color: black;
+          font-size: 36px;
+      }
+}
 
 
+// .feature:hover {
+//   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+// }
+
+
+
+.feature-container {
+  padding: 40px 16px 16px 16px; 
+  text-align: center;
+}
+
+.features-text h1 {
+  font-size: 55px;
+  font-weight: 900;
+  font-family: $primary-font;
+  line-height: 70px;
+  margin: 0;
+  margin-bottom: 15px;
+  text-transform: capitalize;
+}
+
+  
+  
   
 
 //Blog Section
@@ -443,3 +519,8 @@ align-items: center;
   }
 }
 
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Abed El-Fattah Amouneh
+*/
