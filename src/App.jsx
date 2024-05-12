@@ -1,3 +1,9 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Mohamad Homsi
+*/
+
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import PublicRoutes from "./routes/PublicRoutes";
@@ -25,6 +31,7 @@ import useColors from "./hooks/useColors";
 import { motion } from "framer-motion";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import Maintanance from "./screens/Public/Maintanance";
+import Cookies from "./components/Cookies";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -56,7 +63,7 @@ const App = () => {
       i18next.changeLanguage(language);
     }
 
-    setUser({});
+    setUser({}); //TODO: fix the user state
 
     //eslint-disable-next-line
   }, []);
@@ -72,6 +79,8 @@ const App = () => {
       {config.maintanance && !location.pathname.includes("/manage/") && (
         <Maintanance />
       )}
+
+      <Cookies />
 
       {!location.pathname.includes("/restaurant/") && (
         <motion.div
@@ -160,7 +169,7 @@ const App = () => {
           ))}
         </Route>
 
-        <Route exact path="/restaurant" element={<BusinessRoute />}>
+        <Route exact path="/manager/restaurant" element={<BusinessRoute />}>
           {VendorRoutes.map((route, index) => (
             <Route
               key={index}

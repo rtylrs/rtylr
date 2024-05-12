@@ -1,27 +1,34 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Unknown
+  Last Edited by: Mohamad Homsi
+*/
+
 @font-face {
   font-family: 'Gg-Sans';
-  src: url('../fonts/ggsans-Normal') format('opentype');
+  src: url('../fonts/ggsans-Normal.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Gg-Sans-bold';
-  src: url('../fonts/ggsans-Bold') format('opentype');
+  src: url('../fonts/ggsans-Bold.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Plus Jakarta Sans';
-  src: url('../fonts/PlusJakartaSans') format('opentype');
+  src: url('../fonts/PlusJakartaSans.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
+
 @font-face {
   font-family: 'Inter';
-  src: url('../fonts/Inter-Regular') format('opentype');
+  src: url('/fonts/Iner-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

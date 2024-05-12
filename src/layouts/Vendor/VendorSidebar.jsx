@@ -5,73 +5,471 @@ import {
   faClose,
   faHome,
   faUser,
-  faHeart,
-  faCog,
-  faClockRotateLeft,
-  faFeatherPointed,
+  faBuilding,
   faCube,
+  faChevronDown,
+  faChevronUp,
+  faShoppingBag,
+  faCog,
+  faArrowUpRightFromSquare,
+  faBarsProgress,
+  faSquare,
+  faNewspaper,
+  faRuler,
+  faCrosshairs,
+  faHandHoldingDollar,
+  faRss,
+  faWarehouse,
+  faShop,
+  faQrcode,
+  faHeadset,
+  faPuzzlePiece,
+  faPenRuler,
+  faCalendarAlt,
+  faCirclePause,
+  faSquareCheck,
+  faSquarePollVertical,
+  faUserLock,
+  faCircleInfo,
 } from "@fortawesome/free-solid-svg-icons";
-import Logo from "../../assets/logo.png";
+import { useSidebar } from "../../HOCs/SidebarProvider";
 
-const SideBar = ({ sidebarOpen, closeSidebar }) => {
+import QRCode from "qrcode";
+import { faFirstdraft } from "@fortawesome/free-brands-svg-icons";
+
+//TODO: FIX THIS TO BE TAILORED TO VENDOR
+const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
+  // Define state to track the visibility of each section
+  const {
+    customersVisible,
+    managementVisible,
+    configurationVisible,
+    blogVisible,
+    reportsVisible,
+    ordersVisible,
+    donationsVisible,
+    toggleSection,
+  } = useSidebar(); // Access the context using the hook
+
+  const downloadQRCode = async () => {
+    const link = window.location.origin;
+
+    // Generate the QR code
+    const canvas = await QRCode.toCanvas(link, {
+      errorCorrectionLevel: "H",
+      width: 256,
+      margin: 1,
+    });
+
+    // Convert the QR code canvas to a blob (PNG format)
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+
+        // Create a download link and trigger the download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Qr Code.png";
+        a.click();
+
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
+
   return (
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
-        <div className="logo">
-          <Link to="/">
-            <img src={Logo} alt="logo" className="sidebar__logo" />
-          </Link>
+        <div className="sidebar__title__container">
+          <p className="sidebar__title">Dashboard</p>
+          <div>
+            <FontAwesomeIcon
+              icon={faQrcode}
+              title="Download Website QR Code"
+              onClick={() => {
+                downloadQRCode();
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faHeadset}
+              title="Contact Support"
+              onClick={() => {
+                window.open("https://wa.me/message/D5ZSC3DH3NI6P1", "_blank");
+              }}
+            />
+          </div>
         </div>
         <FontAwesomeIcon
           className="close__icon"
           onClick={() => closeSidebar()}
           icon={faClose}
+          r
           size="lg"
         />
       </div>
       <div className="sidebar__menu">
-        <div className="sidebar__link ">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage" ? "active" : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
-          <Link to="/account" id="link">
+          <Link to="/manage" id="link">
             My Dashboard
           </Link>
         </div>
-        <h2>Management</h2>
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
-          <Link to="/profile" id="link">
-            Profile
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/pos" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon
+            icon={faWarehouse}
+            className="sidebar__icon"
+            style={{
+              fontSize: "14px",
+            }}
+          />
+          <Link to="/manage/pos" id="link">
+            POS
           </Link>
         </div>
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faHeart} className="sidebar__icon" />
-          <Link to="/favorites" id="link">
-            Favorites
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/products" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
+          <Link to="/manage/products" id="link">
+            Products
           </Link>
         </div>
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faClockRotateLeft} className="sidebar__icon" />
-          <Link to="/my-history" id="link">
-            Previous Orders
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/branches" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faShop} className="sidebar__icon" />
+          <Link to="/manage/branches" id="link">
+            Branches
           </Link>
         </div>
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
-          <Link to="/blog/submit" id="link">
-            Submit a Blog
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("customers")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+              Customers
+            </div>
+            {customersVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {customersVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/users" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+                <Link to="/manage/users" id="link">
+                  Users
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/vendors" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
+                <Link to="/manage/vendors" id="link">
+                  Brands
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/vendors" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faSquarePollVertical}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/vendors" id="link">
+                  Survey
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("management")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon
+                icon={faBarsProgress}
+                className="sidebar__icon"
+              />
+              Management
+            </div>
+            {managementVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {managementVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/managment" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faUserLock} className="sidebar__icon" />
+                <Link to="/manage/managment" id="link">
+                  Permissions
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/feedback" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
+                <Link to="/manage/feedback" id="link">
+                  Feedback
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("configuration")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon icon={faPenRuler} className="sidebar__icon" />
+              Sections
+            </div>
+            {configurationVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {configurationVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/config/home" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faFirstdraft}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/config/home" id="link">
+                  Home
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/config/about" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faCircleInfo}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/config/about" id="link">
+                  About Us
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="sidebar__section" onClick={() => toggleSection("blog")}>
+          <h2>
+            <div>
+              <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+              Blog
+            </div>
+            {blogVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {blogVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/blog" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
+                <Link to="/manage/blog" id="link">
+                  Blog Posts
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/blog" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
+                <Link to="/manage/blog" id="link">
+                  Submited Posts
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("reports")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon icon={faNewspaper} className="sidebar__icon" />
+              Reports
+            </div>
+            {reportsVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {reportsVisible && <>{/* Add report links here */}</>}
+        </div>
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("orders")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon icon={faRuler} className="sidebar__icon" />
+              Orders
+            </div>
+            {ordersVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {ordersVisible && (
+            <>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/orders/pending" ? "active" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faCirclePause}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/orders/pending" id="link">
+                  Pending
+                </Link>
+              </div>
+              <div
+                className={`sidebar__link admin__link ${
+                  location.pathname === "/manage/orders/completed"
+                    ? "active"
+                    : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faSquareCheck}
+                  className="sidebar__icon"
+                />
+                <Link to="/manage/orders/completed" id="link">
+                  Completed
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+        <div
+          className="sidebar__section"
+          onClick={() => toggleSection("donations")}
+        >
+          <h2>
+            <div>
+              <FontAwesomeIcon
+                icon={faHandHoldingDollar}
+                className="sidebar__icon"
+              />
+              Donations
+            </div>
+            {donationsVisible ? (
+              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+            )}
+          </h2>
+          {donationsVisible && <>{/* Add donation links here */}</>}
+        </div>
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/petitions" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
+          <Link to="/manage/petitions" id="link">
+            Petitions
           </Link>
         </div>
-        <div className="sidebar__link">
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manage/events" ? "active" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faCalendarAlt} className="sidebar__icon" />
+          <Link to="/manage/events" id="link">
+            Events
+          </Link>
+        </div>
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manager/restaurant/manage/addons"
+              ? "active"
+              : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faPuzzlePiece} className="sidebar__icon" />
+          <Link to="/owner/restaurant/manage/addons" id="link">
+            Add-Ons
+          </Link>
+        </div>
+        <div
+          className={`sidebar__link ${
+            location.pathname === "/manager/restaurant/manage/settings"
+              ? "active"
+              : ""
+          }`}
+        >
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
-          <Link to="/settings" id="link">
+          <Link to="/manager/restaurant/manage/settings" id="link">
             Settings
           </Link>
         </div>
-
-        <div className="sidebar__link">
-          <FontAwesomeIcon icon={faFeatherPointed} className="sidebar__icon" />
-          <Link to="/join" id="link">
-            Become a business
+        <div className={`sidebar__link`}>
+          <FontAwesomeIcon
+            icon={faArrowUpRightFromSquare}
+            className="sidebar__icon"
+          />
+          {/* TODO: Make it take them to their Menu */}
+          <Link to="/restaurant/69" id="link" target="_blank">
+            Open Menu
           </Link>
         </div>
       </div>
@@ -79,9 +477,9 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
   );
 };
 
-SideBar.propTypes = {
+VendorSidebar.propTypes = {
   sidebarOpen: PropTypes.bool.isRequired,
   closeSidebar: PropTypes.func.isRequired,
 };
 
-export default SideBar;
+export default VendorSidebar;

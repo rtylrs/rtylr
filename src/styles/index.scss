@@ -176,3 +176,107 @@ html, body {
     }
 }
 
+.cookies-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 350px;
+
+  .cookies-content {
+    color: $primary-color;
+
+    .cookies-header {
+      display: flex;
+      align-items: center;
+
+      h2 {
+        margin: 0;
+      }
+
+      .cookie-icon {
+        margin-right: 10px;
+        font-size: 40px;
+      }
+    }
+
+    p {
+      color: $primary-color;
+      margin-bottom: 20px;
+      padding: 0;
+      margin: 10;
+      text-align: left;
+    }
+
+    .cookies-buttons {
+      button {
+        padding: 10px 40px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-weight: bold;
+
+        &:hover {
+          background-color: #ddd;
+        }
+
+        &:first-child {
+          background-color: $primary-color;
+          color: #fff;
+        }
+
+        &:last-child {
+          background-color: $primary-color;
+          color: #fff;
+        }
+      }
+    }
+  }
+}
+
+//Ticker 
+.ticker_wrapper {
+  overflow: hidden;
+  display: flex;
+  background-color: $primary-color;
+  margin-top: 65px;
+}
+
+.ticker_content {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: tickerAnimation 30s linear infinite;
+}
+.ticker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    margin-left: 10px;
+    margin-right: 10px;
+    color: $light-color;
+    font-size: 1.5em;
+    font-weight: 900;
+    font-family: $primary-font;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 42px;
+  }
+}
+
+@keyframes tickerAnimation {
+  0% {
+    transform: translateX(10%); 
+  }
+  100% {
+    transform: translateX(-90%);
+  }
+}

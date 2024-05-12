@@ -2,8 +2,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 const Footer = () => {
+  const config = useSelector((state) => state.config.contactInfo);
+
   return (
     <footer className="footer">
       <div className="footer-top">
@@ -20,24 +23,10 @@ const Footer = () => {
               <Link to="/contact">Contact Us</Link>
             </li>
             <li>
-              <Link to="/careers">Careers (Jobs)</Link>
+              <Link to="https://voxire.com/careers">Careers (Jobs)</Link>
             </li>
             <li>
-              <Link to="/blog">Blog</Link>
-            </li>
-          </ul>
-        </div>
-        <div className="footer-section">
-          <h3>Help</h3>
-          <ul>
-            <li>
-              <Link to="/Privacy">Privacy</Link>
-            </li>
-            <li>
-              <Link to="/feedback">Feedback</Link>
-            </li>
-            <li>
-              <Link to="/pricing">Pricing</Link>
+              <Link to="https://voxire.com/blog">Blog</Link>
             </li>
           </ul>
         </div>
@@ -45,24 +34,39 @@ const Footer = () => {
           <h3>Support</h3>
           <ul>
             <li>
-              <Link to="/petition">Petitions</Link>
+              <Link to="/faq">FAQs</Link>
             </li>
             <li>
-              <Link to="/donate">Donate</Link>
+              <Link to="/pricing">Pricing</Link>
             </li>
             <li>
-              <Link to="/blog/public/add ">Publish a Blog</Link>
+              <Link to="/feedback">Feedback</Link>
+            </li>
+            <li>
+              <Link to="/feedback">Feature Request</Link>
             </li>
           </ul>
         </div>
         <div className="footer-section">
-          <h3>Shop</h3>
+          <h3>Legal</h3>
           <ul>
             <li>
-              <Link to="/shop">Shop</Link>
+              <Link to="/">Privacy Policy</Link>
             </li>
             <li>
-              <Link to="/brands">Brands</Link>
+              <Link to="/">Terms and Conditions</Link>
+            </li>
+            <li>
+              <Link to="/ ">Acceptable Use Policy</Link>
+            </li>
+            <li>
+              <Link to="/ ">End User License Agreement</Link>
+            </li>
+            <li>
+              <Link to="/ ">End User License Agreement</Link>
+            </li>
+            <li>
+              <Link to="/ ">Disclaimer</Link>
             </li>
           </ul>
         </div>
@@ -80,21 +84,24 @@ const Footer = () => {
                   window.open("mailto:vbitez@voxire.com");
                 }}
               >
-                vbitez@voxire.com
+                {config && config.contactEmail}
               </span>
             </li>
-            <li>Phone: +961 71 642 565</li>
+            <li>
+              Phone:
+              {config && config.contactNumber}
+            </li>
           </ul>
         </div>
       </div>
       <div className="footer-social">
         <h3>Follow or Contact Us</h3>
         <div className="social-icons">
-          <a href="https://api.whatsapp.com/send?phone=96598895586">
+          <a href="https://api.whatsapp.com/send?phone=96171642565">
             <FontAwesomeIcon icon={faWhatsapp} />
           </a>
 
-          <a href="https://www.instagram.com/TheSanityStore">
+          <a href="https://www.instagram.com/voxire.tech">
             <FontAwesomeIcon icon={faInstagram} />
           </a>
           <a href="mailto:TheSanityStore@gmail.com">
@@ -104,10 +111,10 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>
-          &copy; {new Date().getFullYear()},{" "}
+          &copy;{new Date().getFullYear()},{" "}
           <a
             style={{
-              color: "var(--primary)",
+              color: "#434297",
               textDecoration: "underline",
               cursor: "pointer",
             }}

@@ -1,3 +1,9 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Mohamad Homsi
+*/
+
 import { auth, db } from "../firebase";
 import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
