@@ -7,6 +7,11 @@ import useColors from "../../../../hooks/useColors";
 
 import { faUser } from "@fortawesome/free-solid-svg-icons"; // Example icon, import your desired icons similarly
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { faUserPen } from "@fortawesome/free-solid-svg-icons";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
+
 function Features() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -15,14 +20,13 @@ function Features() {
   return (
     <div className="Features">
       <div className="features-text">
-        <h1>Elevate Your Experience with Modern Features</h1>
+        <h1>Elevate your experience <br />with modern features</h1>
       </div>
 
       <div className="features-container">
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} />
-          </div>
+          <FontAwesomeIcon icon={faCamera} style={{color: "#655496",}} />          </div>
           <div className="feature-container">
             <h4>
               <b>Visual Menu Showcase</b>
@@ -36,8 +40,7 @@ function Features() {
 
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faUser} />
-          </div>
+          <FontAwesomeIcon icon={faCircleInfo} />          </div>
           <div className="feature-container">
             <h4>
               <b>Intuitive Menu Management</b>
@@ -51,57 +54,53 @@ function Features() {
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} />
+          <FontAwesomeIcon icon={faGlobe} />
           </div>
           <div className="feature-container">
             <h4>
-              <b>Visual Menu Showcase</b>
+              <b>Multiple Language Support</b>
             </h4>
             <p>
-              Showcase your dishes with stunning visuals, enticing customers to
-              explore your offerings.
+            Expand your reach with multilingual menu translations, attracting customers from around the world.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} />
-          </div>
+          <FontAwesomeIcon icon={faUserPen} style={{color: "#000000",}} />          </div>
           <div className="feature-container">
             <h4>
-              <b>Visual Menu Showcase</b>
+              <b>Customizable Orders</b>
             </h4>
             <p>
-              Showcase your dishes with stunning visuals, enticing customers to
-              explore your offerings.
+            Tailor orders to meet your customers' preferences and dietary requirements, ensuring satisfaction with every meal.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} />
+          <FontAwesomeIcon icon={faFilter} />
           </div>
           <div className="feature-container">
             <h4>
-              <b>Visual Menu Showcase</b>
+              <b>Comprehensive Menu Insights</b>
             </h4>
             <p>
-              Showcase your dishes with stunning visuals, enticing customers to
-              explore your offerings.
+            Gain detailed insights into your menu, including ingredients and allergens, to make informed decisions.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} />
-          </div>
+          <FontAwesomeIcon icon={faStar} style={{color: "#FFD43B",}} />          </div>
           <div className="feature-container">
             <h4>
-              <b>Visual Menu Showcase</b>
+              <b>Loyalty Rewards Integration
+
+</b>
             </h4>
             <p>
-              Showcase your dishes with stunning visuals, enticing customers to
-              explore your offerings.
+            Build customer loyalty and drive repeat business with integrated loyalty rewards programs tailored to your restaurant.
             </p>
           </div>
         </div>
