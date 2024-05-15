@@ -13,7 +13,7 @@ function Hero() {
   return (
     <div className="Hero">
       <div className="hero-text">
-        <h1>{t("Hero.welcome")}</h1>
+        <h1 className="vbitez-title">{t("Hero.welcome")}</h1>
         <h2>{t("Hero.discover")}</h2>
         <div className="hero-buttons">
           <VbitezButton onClick={() => navigate("/shop")}>
