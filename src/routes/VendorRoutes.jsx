@@ -8,7 +8,7 @@ const VendorMain = React.lazy(() => import("../screens/Vendor/VendorMain"));
 
 const VendorRoutes = [
   {
-    path: "/manager/restaurant/manage/",
+    path: "/manager/restaurant/",
     element: (
       <VendorDashboard>
         <VendorMain />
@@ -17,7 +17,7 @@ const VendorRoutes = [
     exact: true,
   },
   {
-    path: "/manager/restaurant/manage/addons",
+    path: "/manager/restaurant/addons",
     element: (
       <VendorDashboard>
         <Addons />
@@ -26,7 +26,7 @@ const VendorRoutes = [
     exact: true,
   },
   {
-    path: "/manager/restaurant/manage/settings",
+    path: "/manager/restaurant/settings",
     element: (
       <VendorDashboard>
         <VendorSettings />
