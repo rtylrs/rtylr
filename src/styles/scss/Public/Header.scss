@@ -7,8 +7,8 @@
 
 /* Header Styles */
 .header {
-  position: absolute; /* Fix the header to the top */
-  top: 0; /* Place it at the top of the viewport */
+  position: absolute; 
+  top: 0;
   left: 0;
   right: 0;
   display: flex;
@@ -18,11 +18,15 @@
   background-color: transparent;
   height: 85px;
   color: #f5f5f5;
-  z-index: 10; /* Add a z-index to layer it above other content */
+  z-index: 10; 
+
+  &.scrolled {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: white;
+  }
 
   @media only screen and (max-width: 768px){
     padding: 5px 20px;
-    // width: 70%;
   }
 
   .header-left {
@@ -68,27 +72,6 @@
   .header-right {
     display: flex;
     gap: 20px;
-    font-size: 27px;
-
-
-    a {
-      text-decoration: none;
-      color: #f2ebe5;
-
-      @media only screen and (max-width: 768px){
-        display: none;
-      }
-    }
-    a:hover {
-      color: #B2533E;
-      transition: 0.3s;
-    }
-
-    div:hover {
-      color: #B2533E;
-      transition: 0.3s;
-      cursor: pointer;
-    }
   }
 
   .mobile-menu-toggle {
@@ -113,8 +96,8 @@
     justify-content: center;
     padding: 10px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(-100%); /* Initial state, off-screen */
-    transition: transform 0.3s ease-in-out; /* Smooth transition for transform property */
+    transform: translateY(-100%); 
+    transition: transform 0.3s ease-in-out; 
     padding-top: 130px;
 
     div {
@@ -127,30 +110,6 @@
       font-size: 16px;  
       background-color: #231f1b;
       margin-top: 20px;
-
-      input {
-        width: 92%;
-        height: 100%;
-        border: none;
-        background-color: transparent;
-        color: #f2ebe5;
-        font-size: 16px;
-        justify-self: flex-start;
-      }
-      
-      input:focus {
-        outline: none;
-      }
-
-      #search-icon-menu {
-        width: 8%;
-        background-color: transparent;
-        border: none;
-        color: #f2ebe5;
-        font-size: 16px;
-        justify-self: flex-end;
-        cursor: pointer;
-      }
     } 
 
       button {
@@ -163,7 +122,6 @@
         font-size: 16px;  
         background-color: #231f1b;
         margin-top: 15px;
-        color: #f2ebe5;
         cursor: pointer;
       }
 
@@ -204,190 +162,6 @@
   }
 }
 
-.header-pages {
-  position: fixed;
-  top: 0; 
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 200px;
-  background-color: #f5f5f5;
-  color: #231f1b;
-  height: 85px;
-  z-index: 1000; 
-
-  &.scrolled {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
-
-  .header-left {
-    display: flex;
-    gap: 40px;
-    a {
-      text-decoration: none;
-      color: #231f1b;
-      font-weight: bold;
-      font-size: 16.5px;
-    }
-    a:hover {
-      color: #B2533E;
-      transition: 0.3s;
-    }
-
-    @media only screen and (max-width: 768px){
-      visibility: hidden;
-    }
-  }
-
-  .header-center {
-    display: flex;
-    justify-content: center; 
-    align-items: center;
-    width: 5%;
-  }
-
-  .header-center img {
-    max-width: 160px; 
-    height: auto;
-
-  }
-
-  .header-right {
-    display: flex;
-    gap: 20px;
-    font-size: 24px;
-
-    a {
-      text-decoration: none;
-      color: #231f1b;
-      opacity: 0.8;
-
-      @media only screen and (max-width: 768px){
-        display: none;
-      }
-    }
-    a:hover {
-      color: #B2533E;
-      transition: 0.3s;
-    }
-
-    div:hover {
-      color: #B2533E;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-
-  }
-
-  .mobile-menu-toggle {
-    display: none;
-    font-size: 24px;
-    cursor: pointer;
-    background-color: #f2ebe5;
-    border: none;
-    color: #231f1b;
-    transform: translateX(100%);
-  }
-  
-  .mobile-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: #f2ebe5;
-    color: #231f1b;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(-100%); /* Initial state, off-screen */
-    transition: transform 0.3s ease-in-out; /* Smooth transition for transform property */
-    padding-top: 30px;
-
-    div {
-      width: 100%;
-      height: 40px;
-      border: none;
-      border-radius: 5px;
-      padding: 0 10px;
-      margin-bottom: 0px;
-      font-size: 16px;  
-      background-color: #231f1b;
-      margin-top: 20px;
-
-      input {
-        width: 92%;
-        height: 100%;
-        border: none;
-        background-color: transparent;
-        color: #f2ebe5;
-        font-size: 16px;
-        justify-self: flex-start;
-      }
-      
-      input:focus {
-        outline: none;
-      }
-
-      #search-icon-menu {
-        width: 8%;
-        background-color: transparent;
-        border: none;
-        color: #f2ebe5;
-        font-size: 16px;
-        justify-self: flex-end;
-        cursor: pointer;
-      }
-    } 
-
-
-    button {
-      width: 100%;
-      height: 40px;
-      border: none;
-      border-radius: 5px;
-      padding: 0 10px;
-      margin-bottom: 10px;
-      font-size: 16px;  
-      background-color: #231f1b;
-      margin-top: 15px;
-      color: #f2ebe5;
-      cursor: pointer;
-    }
-
-    a {
-      text-decoration: none;
-      color: #231f1b;
-      margin-bottom: 25px;
-      font-size: 20px;
-    }
-
-    animation: slideFromTheTop 0.5s ease-in-out;
-  }
-  
-  @media (max-width: 768px) {
-    .header-left {
-      flex-direction: column;
-    }
-  
-    .mobile-menu-toggle {
-      display: block;
-    }
-  
-    &.mobile-menu-open .mobile-menu {
-      display: flex;
-      transform: translateY(0); /* Final state, on-screen */
-      transition: 0.5s;
-    }
-  }
-}
-
-
 
 
 .login-button {
@@ -399,7 +173,6 @@
   display: flex;
   align-items: center;
   color: $primary-color;
-
 
   p {
     margin: 0;

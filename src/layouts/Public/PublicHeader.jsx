@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { primary } = useColors();
+  const { primary, secondary } = useColors();
   const { width } = useWindowDimensions();
 
   const user = useSelector((state) => state.user);
@@ -53,12 +53,13 @@ const Header = () => {
 
   return (
     <header
-      className={
-        document.location.pathname === "/"
-          ? `header ${isMobileMenuOpen ? "mobile-menu-open" : ""}`
-          : `header-pages ${isMobileMenuOpen ? "mobile-menu-open" : ""}
-          ${scrolled ? "scrolled" : ""}`
-      }
+      className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}
+          ${scrolled ? "scrolled" : ""}`}
+      style={{
+        backgroundColor:
+          document.location.pathname === "/" ? "#fff" : "#f5f5f5",
+        position: "fixed",
+      }}
     >
       <div
         className="header-center"
@@ -88,12 +89,7 @@ const Header = () => {
           className="mobile-menu-toggle"
           onClick={toggleMobileMenu}
           style={{
-            color:
-              document.location.pathname === "/"
-                ? isMobileMenuOpen
-                  ? "#231f1b"
-                  : "#f2ebe5"
-                : "#231f1b",
+            color: primary,
           }}
         >
           {isMobileMenuOpen ? (
@@ -106,7 +102,7 @@ const Header = () => {
         <button
           className="login-button"
           style={{
-            display: user.token ? "none" : "flex",
+            display: width < 768 ? "none" : user.token ? "none" : "flex",
           }}
           onClick={() => {
             navigate("/auth/login");
@@ -146,13 +142,40 @@ const Header = () => {
           <LinkWithColor to="/blog">blog</LinkWithColor>
           <LinkWithColor to="/about">About</LinkWithColor>
           <LinkWithColor to="/contact">Contact Us</LinkWithColor>
-          <button
+          <VbitezButton
+            styles={{
+              display: user.token ? "none" : "flex",
+              marginBottom: "0px",
+            }}
             onClick={() => {
-              navigate("/shop");
+              navigate("/auth/login");
             }}
           >
-            Explore Products
-          </button>
+            <p>Login</p>
+          </VbitezButton>
+
+          <VbitezButton
+            onClick={() => {
+              if (user) {
+                if (user.role === "admin") {
+                  navigate("/manage");
+                  return;
+                }
+                navigate(
+                  user.role === "business" ? "/manager/restaurant/" : "/user"
+                );
+              } else {
+                navigate("/auth/register/restaurant");
+              }
+            }}
+            className="browse-products"
+          >
+            {user.token
+              ? user.role === "admin"
+                ? "Ya Hussein"
+                : "My Account"
+              : "Register Now"}
+          </VbitezButton>
         </div>
       )}
     </header>
