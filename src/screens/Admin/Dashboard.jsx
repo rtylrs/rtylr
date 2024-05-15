@@ -17,34 +17,7 @@ function Dashboard() {
   const [clicks, setClicks] = React.useState(0);
   const [reviewsData, setReviewsData] = React.useState([]);
 
-  React.useEffect(() => {
-    (async () => {
-      const users = await db
-        .collection("Users")
-        .where("isVendor", "==", false)
-        .get();
-      setUsers(users.size);
-
-      const orders = await db.collection("Orders").get();
-      setOrders(orders.size);
-
-      const reviews = await db.collection("feedback").get();
-      setReviewsData(reviews.docs.map((doc) => doc.data()));
-      setReviews(
-        (
-          reviews.docs.reduce((acc, doc) => acc + doc.data().rating, 0) /
-          reviews.docs.length
-        ).toFixed(2)
-      );
-
-      const events = await db.collection("Events").get();
-      setEvents(events.size);
-      setAllEvents(events.docs.map((doc) => doc.data()));
-
-      const clicks = await db.collection("Config").doc("WebsiteData").get();
-      setClicks(clicks.data().visits);
-    })();
-  }, []);
+  React.useEffect(() => {}, []);
 
   return (
     <div className="AdminDash">

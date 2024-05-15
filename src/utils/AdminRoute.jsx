@@ -4,45 +4,16 @@
   Last Edited by: Mohamad Homsi
 */
 
-import { auth, db } from "../firebase";
-import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
-import Loader from "../layouts/loader/Loader";
+import { selectRole } from "../redux/reducers/userSlice";
+import { useSelector } from "react-redux";
 
 function AdminRoute() {
-  const [loading, setLoading] = useState(true);
-  const [admin, setIsAdmin] = useState(true);
+  const role = useSelector(selectRole);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        db.collection("Users")
-          .doc(auth.currentUser?.uid)
-          .get()
-          .then((doc) => {
-            if (!doc.data().isAdmin) {
-              setIsAdmin(false);
-            }
-            setLoading(false);
-          });
-      } else {
-        // Handle the case when the user is not authenticated
-        setLoading(false);
-      }
-    });
+  console.log(role);
 
-    return () => {
-      // Unsubscribe from the auth state listener when the component unmounts
-      unsubscribe();
-    };
-  }, []);
-
-  if (!loading) {
-    return admin ? <Outlet /> : <Navigate to="/" />;
-  } else {
-    // Optionally, you can render a loading indicator here while checking the admin status
-    return <Loader />;
-  }
+  return role === "admin" ? <Outlet /> : <Navigate to="/" />;
 }
 
 export { AdminRoute };

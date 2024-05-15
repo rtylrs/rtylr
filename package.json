@@ -28,6 +28,7 @@
     "framer-motion": "^10.16.4",
     "google-maps-react": "^2.0.6",
     "i18next": "^23.5.1",
+    "lodash": "^4.17.21",
     "myfatoorah-javascript": "^0.0.2",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
@@ -45,6 +46,7 @@
     "react-slick": "^0.29.0",
     "react-toastify": "^10.0.5",
     "reactstrap": "^9.2.0",
+    "redux-persist": "^6.0.0",
     "sass": "^1.67.0",
     "slick-carousel": "^1.8.1"
   },
