@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import { auth, db } from "../../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -10,21 +9,16 @@ import {
 import PropTypes from "prop-types";
 import { Badge } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/reducers/userSlice";
 
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
   const [notificationsCount, setNotificationsCount] = useState(0);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (auth.currentUser) {
-      db.collection("contacts")
-        .orderBy("createdAt", "desc")
-        .get()
-        .then((snapshot) => {
-          setNotificationsCount(snapshot.size);
-        });
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -35,7 +29,7 @@ const Navbar = ({ openSidebar }) => {
       </div>
 
       <div className="navbar__left">
-        <p className="active_link">{auth.currentUser?.displayName}</p>
+        <p className="active_link">{user?.user?.name}</p>
       </div>
       <div className="navbar__right">
         <Link to="/">
@@ -55,11 +49,9 @@ const Navbar = ({ openSidebar }) => {
           </Badge>
         </Link>
         <div
-          to="/auth/profile"
+          to="/auth/login"
           onClick={() => {
-            auth.signOut().then(() => {
-              navigate("/");
-            });
+            dispatch(logout());
           }}
         >
           <FontAwesomeIcon icon={faRightFromBracket} size="xl" />

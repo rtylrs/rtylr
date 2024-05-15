@@ -4,41 +4,55 @@
   Last Edited by: Mohamad Homsi
 */
 
+//Default imports
+import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Helmet } from "react-helmet";
+import { motion } from "framer-motion";
 
+//Routes
 import PublicRoutes from "./routes/PublicRoutes";
 import UserRoutes from "./routes/UserRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 import VendorRoutes from "./routes/VendorRoutes";
 
-import { useState, useEffect } from "react";
-
 // eslint-disable-next-line
 import i18next from "./services/i18next";
 
-import AlertModal from "./components/Alert/AlertModal";
+//Screens
+import NoMatch from "./screens/Public/Extras/NoMatch";
+import Maintanance from "./screens/Public/Maintanance";
+
+//Components
+import Cookies from "./components/Cookies";
+
+//Hooks
+import useColors from "./hooks/useColors";
+
+// Route Checks
 import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
-import NoMatch from "./screens/Public/NoMatch";
-import { useDispatch, useSelector } from "react-redux";
+
+// Other imports
 import { getAllProducts } from "./redux/reducers/productsSlice";
-import { Helmet } from "react-helmet";
 import { fetchConfigData } from "./redux/reducers/configSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import useColors from "./hooks/useColors";
-import { motion } from "framer-motion";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import Maintanance from "./screens/Public/Maintanance";
-import Cookies from "./components/Cookies";
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  //Hooks
   const location = useLocation();
   const { primary } = useColors();
   const dispatch = useDispatch();
+
+  // Redux
   const config = useSelector((state) => state.config);
+  const user = useSelector((state) => state.user);
+
+  // States
   const [showTopBtn, setShowTopBtn] = useState(false);
 
   useEffect(() => {
@@ -57,13 +71,13 @@ const App = () => {
     // get all products
     dispatch(getAllProducts());
 
+    console.log(user);
+
     // get language from local storage
     const language = localStorage.getItem("language");
     if (language) {
       i18next.changeLanguage(language);
     }
-
-    setUser({}); //TODO: fix the user state
 
     //eslint-disable-next-line
   }, []);
@@ -124,8 +138,6 @@ const App = () => {
           <FontAwesomeIcon icon={faChevronUp} />
         </motion.div>
       )}
-
-      <AlertModal />
 
       <Routes key={location.pathname} location={location}>
         {/* Auth Routes */}

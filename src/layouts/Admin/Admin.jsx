@@ -1,12 +1,14 @@
 import React from "react";
 import Navbar from "./Navbar";
 import SideBar from "./Sidebar";
-import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+import { selectRole } from "../../redux/reducers/userSlice";
 
 function Admin(props) {
   const navigate = useNavigate();
+  const role = useSelector(selectRole);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const openSidebar = () => {
@@ -19,12 +21,15 @@ function Admin(props) {
 
   React.useEffect(() => {
     // if not user redirect to login
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/auth/login");
+    } else {
+      if (role !== "admin") {
         navigate("/");
       }
-    });
-
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

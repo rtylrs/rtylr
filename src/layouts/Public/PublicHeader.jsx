@@ -7,14 +7,16 @@ import { Link, useNavigate } from "react-router-dom";
 import VbitezButton from "../../components/Buttons/Buttons";
 import useColors from "../../hooks/useColors";
 import useWindowDimensions from "../../utils/useWindowDimensions";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
+
+  const user = useSelector((state) => state.user);
 
   const LinkWithColor = (props) => {
     // eslint-disable-next-line react/prop-types
@@ -28,34 +30,6 @@ const Header = () => {
       />
     );
   };
-
-  // Use useEffect to set up an authentication listener
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      if (authUser) {
-        // User is logged in
-        setUser(authUser);
-        db.collection("Users")
-          .doc(authUser?.uid)
-          .get()
-          .then((doc) => {
-            if (doc.exists) {
-              const user = Object.assign({}, doc.data(), {
-                uid: doc.id,
-              });
-              setUserData(user);
-            }
-          });
-      } else {
-        // User is not logged in
-        setUser(null);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -128,7 +102,7 @@ const Header = () => {
         <button
           className="login-button"
           style={{
-            display: user ? "none" : "flex",
+            display: user.token ? "none" : "flex",
           }}
           onClick={() => {
             navigate("/auth/login");
@@ -140,7 +114,7 @@ const Header = () => {
         <VbitezButton
           onClick={() => {
             if (user) {
-              if (userData?.isAdmin) {
+              if (user.role === "admin") {
                 navigate("/manage");
                 return;
               }
@@ -152,7 +126,11 @@ const Header = () => {
           className="browse-products"
           hidden={width < 768}
         >
-          {user ? "My Account" : "Register Now"}
+          {user.token
+            ? user.role === "admin"
+              ? "Admin Dashboard"
+              : "My Account"
+            : "Register Now"}
         </VbitezButton>
       </div>
       {isMobileMenuOpen && (

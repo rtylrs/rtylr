@@ -10,7 +10,7 @@ import App from "./App.jsx";
 import "./styles/index.scss";
 import { BrowserRouter } from "react-router-dom";
 import Loader from "./layouts/loader/Loader.jsx";
-import store from "./redux/store.js";
+import { store, persistor } from "./redux/store.js";
 import { Provider } from "react-redux";
 import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
@@ -23,6 +23,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
 import { ToastContainer } from "react-toastify";
 import { CookiesProvider } from "react-cookie";
+import { PersistGate } from "redux-persist/integration/react";
 
 const theme = createTheme({
   palette: {
@@ -39,13 +40,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Suspense fallback={<Loader />}>
           <I18nextProvider i18n={i18next}>
             <Provider store={store}>
-              <BrowserRouter>
-                <SidebarProvider>
-                  <ScrollToTop />
-                  <App />
-                  <ToastContainer />
-                </SidebarProvider>
-              </BrowserRouter>
+              <PersistGate loading={null} persistor={persistor}>
+                <BrowserRouter>
+                  <SidebarProvider>
+                    <ScrollToTop />
+                    <App />
+                    <ToastContainer />
+                  </SidebarProvider>
+                </BrowserRouter>
+              </PersistGate>
             </Provider>
           </I18nextProvider>
         </Suspense>

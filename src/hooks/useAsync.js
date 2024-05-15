@@ -11,9 +11,9 @@ const errorMessage = (error) => {
 };
 
 export default function useAsync({
-  fn = () => {},
-  onSuccess = () => {},
-  onError = () => {},
+  fn = () => { },
+  onSuccess = () => { },
+  onError = () => { },
   callOnMount = false,
   callOnMountData = null,
   callOnScreenRender = false,
