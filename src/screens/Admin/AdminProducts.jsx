@@ -16,7 +16,6 @@ import {
   Paper,
 } from "@mui/material";
 import { db, storage } from "../../firebase";
-import ShowAlert from "../../utils/showAlert";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -151,9 +150,7 @@ function AdminProducts() {
     db.collection("Products")
       .doc(productId)
       .delete()
-      .then(() => {
-        ShowAlert("Product deleted successfully", "success");
-      })
+      .then(() => {})
       .catch((error) => {
         console.error("Error deleting product:", error);
       });

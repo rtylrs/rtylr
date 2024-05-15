@@ -13,7 +13,6 @@ import {
 import { db } from "../../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import ShowAlert from "../../utils/showAlert";
 
 function AdminContacts() {
   const [contacts, Contacts] = useState([]);
@@ -66,7 +65,6 @@ function AdminContacts() {
                                 (contact) => contact.id !== contacts.id
                               );
                               Contacts(newContacts);
-                              ShowAlert("Message Read successfully", "success");
                             })
                             .catch((error) => {
                               console.error("Error removing document: ", error);

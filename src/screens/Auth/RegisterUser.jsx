@@ -7,7 +7,6 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 // Phone input
 import PropTypes from "prop-types";
-import ShowAlert from "../../utils/showAlert";
 import { useNavigate } from "react-router-dom";
 
 function RegisterUser() {
@@ -71,7 +70,6 @@ function RegisterUser() {
           alert(e.message);
         });
     } else {
-      ShowAlert("Passwords do not match", "error");
     }
   };
 
