@@ -4,14 +4,11 @@ import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";
-import { useSelector } from "react-redux";
 
 function Hero() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { accent } = useColors();
-
-  const config = useSelector((state) => state.config.bussinessCount);
 
   return (
     <div className="Hero">
@@ -33,7 +30,7 @@ function Hero() {
           }}
         >
           <FontAwesomeIcon icon={faStar} color={accent} /> Rated 4.7/5 - from
-          over 1000 reviews
+          over 600 reviews
         </h5>
       </div>
       <div className="hero-image">

@@ -128,7 +128,7 @@ const Header = () => {
         >
           {user.token
             ? user.role === "admin"
-              ? "Admin Dashboard"
+              ? "Always Slaying"
               : "My Account"
             : "Register Now"}
         </VbitezButton>

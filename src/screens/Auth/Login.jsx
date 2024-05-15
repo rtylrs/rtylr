@@ -26,14 +26,8 @@ function Login() {
   };
 
   React.useEffect(() => {
-    //TODO: fix this
-
     if (isAuthenticated) {
-      if (role === "admin") {
-        // navigate("/manage");
-        console.log("navigate to manage");
-      }
-      // navigate("/");
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
@@ -64,8 +58,9 @@ function Login() {
           onClick={() => {
             handleSubmit();
           }}
+          disabled={loading}
         >
-          Login
+          {loading ? "Loading..." : "Login"}
         </button>
         <div className="LoginScreen-footer">
           <p>
