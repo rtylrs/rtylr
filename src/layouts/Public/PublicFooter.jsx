@@ -63,9 +63,6 @@ const Footer = () => {
               <Link to="/ ">End User License Agreement</Link>
             </li>
             <li>
-              <Link to="/ ">End User License Agreement</Link>
-            </li>
-            <li>
               <Link to="/ ">Disclaimer</Link>
             </li>
           </ul>
