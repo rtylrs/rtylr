@@ -20,8 +20,7 @@ function Features() {
   return (
     <div className="Features">
       <h1 className="vbitez-title features-text">
-        Elevate your experience <br />
-        with modern features
+        Discover What Sets Us Apart
       </h1>
 
       <div className="features-container">
