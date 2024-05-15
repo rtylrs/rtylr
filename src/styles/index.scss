@@ -1,5 +1,4 @@
 //Fonts and common styles 
-@import "./fonts.scss";
 @import "./scss/common.scss";
 
 // SCSS imports Public
@@ -37,7 +36,9 @@
 @import './scss/Admin/Dashboard.scss';
 
 
+@import "fonts";
 @import "variables";
+
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

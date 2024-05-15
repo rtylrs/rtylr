@@ -17,20 +17,6 @@ function Public({ children }) {
         }}
       >
         <Header />
-        {/* <Login
-          open={login}
-          close={() => {
-            setLogin(false);
-          }}
-          openRegister={() => setRegister(true)}
-        />
-        <Register
-          open={register}
-          close={() => {
-            setRegister(false);
-          }}
-          openLogin={() => setLogin(true)}
-        /> */}
         <div
           style={{
             marginTop: document.location.pathname === "/" ? "0px" : "90px",
