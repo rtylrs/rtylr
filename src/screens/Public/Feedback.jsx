@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-import ShowAlert from "../../utils/showAlert";
 import { Button } from "@mui/material";
 
 function Feedback() {
@@ -34,7 +33,6 @@ function Feedback() {
         setName("");
         setEmail("");
         setRating(0);
-        ShowAlert("Thank You for your feedback!", "success");
         navigate("/");
       });
   };
