@@ -9,6 +9,7 @@ import { faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
+import PackageJson from "../../../package.json";
 
 const Footer = () => {
   const config = useSelector((state) => state.config.contactInfo);
@@ -126,6 +127,21 @@ const Footer = () => {
             Voxire
           </a>{" "}
           All rights reserved.
+        </p>
+      </div>
+
+      <div className="footer-version">
+        <p
+          onMouseEnter={() => {
+            document.querySelector(".footer-version p").innerHTML =
+              "Version " + PackageJson.version;
+          }}
+          onMouseLeave={() => {
+            document.querySelector(".footer-version p").innerHTML =
+              PackageJson.version;
+          }}
+        >
+          {PackageJson.version}
         </p>
       </div>
     </footer>
