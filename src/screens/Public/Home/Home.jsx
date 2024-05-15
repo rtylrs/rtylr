@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 import Hero from "./Components/Hero";
 import Features from "./Components/Features";
 import Ticker from "../../../components/Ticker";
-
+import WhyUs from "./Components/WhyUs";
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -71,6 +71,7 @@ function Home() {
       <Hero />
       <Ticker />
       <Features />
+      <WhyUs/>
       <section className="product-section">
         <h2 className="section-title">Our Special Dishes</h2>
         <div className="product-grid">
