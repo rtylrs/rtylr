@@ -25,10 +25,16 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Plus Jakarta Sans Extra Bold';
+  src: url('../fonts/PlusJakartaSans-ExtraBold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 @font-face {
   font-family: 'Inter';
-  src: url('/fonts/Iner-Regular.ttf') format('truetype');
+  src: url('/fonts/Inter-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

@@ -11,10 +11,10 @@ function VbitezButton({
   children,
   onClick,
   styles,
-  variant,
+  variant = "default",
   color,
   secondaryColor,
-  hidden,
+  hidden = false,
 }) {
   const buttonClassName = `vbitez-button-${variant}`;
   const { primary, secondary } = useColors();
@@ -66,11 +66,6 @@ VbitezButton.propTypes = {
   color: PropTypes.string,
   secondaryColor: PropTypes.string,
   hidden: PropTypes.bool,
-};
-
-VbitezButton.defaultProps = {
-  variant: "default",
-  hidden: false,
 };
 
 export default VbitezButton;
