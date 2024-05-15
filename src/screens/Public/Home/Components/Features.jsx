@@ -19,14 +19,16 @@ function Features() {
 
   return (
     <div className="Features">
-      <div className="features-text">
-        <h1>Elevate your experience <br />with modern features</h1>
-      </div>
+      <h1 className="vbitez-title features-text">
+        Elevate your experience <br />
+        with modern features
+      </h1>
 
       <div className="features-container">
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faCamera} style={{color: "#655496",}} />          </div>
+            <FontAwesomeIcon icon={faCamera} style={{ color: "#655496" }} />{" "}
+          </div>
           <div className="feature-container">
             <h4>
               <b>Visual Menu Showcase</b>
@@ -40,7 +42,8 @@ function Features() {
 
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faCircleInfo} />          </div>
+            <FontAwesomeIcon icon={faCircleInfo} />{" "}
+          </div>
           <div className="feature-container">
             <h4>
               <b>Intuitive Menu Management</b>
@@ -54,53 +57,57 @@ function Features() {
         </div>
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faGlobe} />
+            <FontAwesomeIcon icon={faGlobe} />
           </div>
           <div className="feature-container">
             <h4>
               <b>Multiple Language Support</b>
             </h4>
             <p>
-            Expand your reach with multilingual menu translations, attracting customers from around the world.
+              Expand your reach with multilingual menu translations, attracting
+              customers from around the world.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faUserPen} style={{color: "#000000",}} />          </div>
+            <FontAwesomeIcon icon={faUserPen} style={{ color: "#000000" }} />{" "}
+          </div>
           <div className="feature-container">
             <h4>
               <b>Customizable Orders</b>
             </h4>
             <p>
-            Tailor orders to meet your customers' preferences and dietary requirements, ensuring satisfaction with every meal.
+              Tailor orders to meet your customers' preferences and dietary
+              requirements, ensuring satisfaction with every meal.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faFilter} />
+            <FontAwesomeIcon icon={faFilter} />
           </div>
           <div className="feature-container">
             <h4>
               <b>Comprehensive Menu Insights</b>
             </h4>
             <p>
-            Gain detailed insights into your menu, including ingredients and allergens, to make informed decisions.
+              Gain detailed insights into your menu, including ingredients and
+              allergens, to make informed decisions.
             </p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-          <FontAwesomeIcon icon={faStar} style={{color: "#FFD43B",}} />          </div>
+            <FontAwesomeIcon icon={faStar} style={{ color: "#FFD43B" }} />
+          </div>
           <div className="feature-container">
             <h4>
-              <b>Loyalty Rewards Integration
-
-</b>
+              <b>Loyalty Rewards Integration</b>
             </h4>
             <p>
-            Build customer loyalty and drive repeat business with integrated loyalty rewards programs tailored to your restaurant.
+              Build customer loyalty and drive repeat business with integrated
+              loyalty rewards programs tailored to your restaurant.
             </p>
           </div>
         </div>

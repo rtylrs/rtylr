@@ -1,3 +1,4 @@
+
 .Hero {
   text-align: center;
   height: 600px;
@@ -32,12 +33,6 @@
   }
 
   .hero-text h1 {
-    font-size: 60px;
-    font-family: $primary-font-bold;
-    font-optical-sizing: auto;
-    font-style: normal;
-    line-height: 70px;
-    margin: 0;
     margin-bottom: 15px;
   }
 
@@ -247,6 +242,7 @@ align-items: center;
   }
 }
 
+
 .Features {
   background-color: #fcfaff;
   color: #fff;
@@ -259,14 +255,6 @@ align-items: center;
   align-items: center;  
   border: solid;
   user-select: none;
-}
-
- 
-  
-.features-text {
-  margin: 20px;
-  color: $primary-color;
-  text-align: center;
 }
 
 .features-container {
@@ -299,10 +287,14 @@ align-items: center;
 
   &:hover {
       transform: translateY(-3px);
-      transition: 0.3s;
+      transition: 0.5s;
       box-shadow: 
           0 20px 20px rgba(0, 0, 0, 1),
           12px 12px 0px  black; /* Adjust the shadow dimensions as needed */
+  }
+
+  &:not(:hover) {
+      transition: 0.5s;
   }
 
   p {
@@ -312,7 +304,11 @@ align-items: center;
   }
 }
 
-
+.features-text {
+  margin: 20px;
+  text-align: center;
+  margin-bottom: 70px;
+}
 
 .feature-container {
   padding: 40px 16px 16px 16px; 
