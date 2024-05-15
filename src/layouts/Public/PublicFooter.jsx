@@ -1,3 +1,9 @@
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Thursday 16 May 2024
+  Last Edited by: Mohamad Homsi
+*/
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
