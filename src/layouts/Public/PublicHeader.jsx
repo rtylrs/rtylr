@@ -11,7 +11,6 @@ import { useSelector } from "react-redux";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
@@ -118,7 +117,9 @@ const Header = () => {
                 navigate("/manage");
                 return;
               }
-              navigate(userData?.isVendor ? "/business" : "/account");
+              navigate(
+                user.role === "business" ? "/manager/restaurant/" : "/user"
+              );
             } else {
               navigate("/auth/register/restaurant");
             }
