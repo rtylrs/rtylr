@@ -5,7 +5,7 @@ import Features from "./Components/Features";
 import Ticker from "../../../components/Ticker";
 import WhyUs from "./Components/WhyUs";
 import Goals from "./Components/Goals";
-
+import Price from "./Components/Price";
 function Home() {
   return (
     <React.Fragment>
@@ -13,6 +13,7 @@ function Home() {
       <Ticker />
       <Features />
       <WhyUs />
+<Price/>
       <Goals />
     </React.Fragment>
   );
