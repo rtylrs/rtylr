@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { db } from "../../firebase";
-import PetitionModal from "../../components/PetitionModal";
 import { Link } from "react-router-dom";
 
 function AllBlogs() {
