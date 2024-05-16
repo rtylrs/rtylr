@@ -52,7 +52,7 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className="LoginScreen-input"
         />
-        {error && <p className="LoginScreen-error">{error}</p>}
+        {/* {error && <p className="LoginScreen-error">{error}</p>} */}
         <button
           className="LoginScreen-button"
           onClick={() => {
