@@ -10,9 +10,7 @@ const AdminFeedback = React.lazy(() =>
 const AdminProducts = React.lazy(() =>
   import("../screens/Admin/AdminProducts")
 );
-const AdminPetitions = React.lazy(() =>
-  import("../screens/Admin/AdminPetitions")
-);
+
 const Users = React.lazy(() => import("../screens/Admin/AdminUsers"));
 const AdminContacts = React.lazy(() =>
   import("../screens/Admin/AdminContacts")
@@ -58,15 +56,6 @@ const AdminRoutes = [
     element: (
       <Admin>
         <AdminProducts />
-      </Admin>
-    ),
-    exact: true,
-  },
-  {
-    path: "/manage/petitions",
-    element: (
-      <Admin>
-        <AdminPetitions />
       </Admin>
     ),
     exact: true,
