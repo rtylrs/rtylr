@@ -5,7 +5,7 @@ import userReducer from './reducers/userSlice';
 import productsReducer from './reducers/productsSlice';
 import cartReducer from './reducers/cartSlice';
 import configReducer from './reducers/configSlice';
-import thunk from 'redux-thunk';
+import { thunk } from 'redux-thunk';
 
 const persistConfig = {
     key: 'vbitez:voxire:root',
