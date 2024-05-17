@@ -11,7 +11,6 @@ const initialState = {
     userId: null,
 };
 
-// Async thunk for logging in
 export const loginAsync = createAsyncThunk(
     'user/loginAsync',
     async ({ email, password }, thunkAPI) => {
