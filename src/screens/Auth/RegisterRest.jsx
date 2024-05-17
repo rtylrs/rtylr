@@ -1,13 +1,13 @@
 import React from "react";
-
-import { auth, db } from "../../firebase";
-import { GoogleAuthProvider } from "firebase/auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-
-// Phone input
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import notify from "../../lib/notify/notify";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  RegisterResaurantAsync,
+  selectIsAuthenticated,
+  selectLoading,
+} from "../../redux/reducers/userSlice";
 
 function RegisterUser() {
   const navigate = useNavigate();
@@ -16,124 +16,23 @@ function RegisterUser() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [refered, setRefered] = React.useState("");
-  const provider = new GoogleAuthProvider();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const loading = useSelector(selectLoading);
 
   const handleRegister = () => {
     if (password === confirmPassword) {
-      auth
-        .createUserWithEmailAndPassword(email, password)
-        .then((auth) => {
-          auth.user.sendEmailVerification();
-
-          db.collection("Users")
-            .doc(auth.user.uid)
-            .set(
-              {
-                email: email,
-                name: name,
-                isAdmin: false,
-                isVendor: false,
-                isContributor: false,
-                Description: "",
-                Location: "",
-                About: "",
-                image:
-                  "https://firebasestorage.googleapis.com/v0/b/mkunasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
-                Socials: {
-                  Instagram: "",
-                  Website: "",
-                  Facebook: "",
-                  LinkedIn: "",
-                  Twitter: "",
-                },
-                verified: false,
-                tier: 0,
-                refered: refered,
-              },
-              { merge: true }
-            )
-            .catch((e) => {
-              alert(e.message);
-            });
-
-          auth.user
-            .updateProfile({
-              displayName: name,
-              photoURL:
-                "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
-            })
-            .then(() => {
-              navigate("/");
-            });
-        })
-        .catch((e) => {
-          alert(e.message);
-        });
+      dispatch(RegisterResaurantAsync({ email, password, name, refered }));
     } else {
+      notify.error("Password does not match");
     }
   };
 
-  const handleRegisterWithGoogle = () => {
-    auth.signInWithPopup(provider).then((result) => {
-      db.collection("Users")
-        .doc(result.user.uid)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            navigate("/");
-          } else {
-            db.collection("Users")
-              .doc(result.user.uid)
-              .set({
-                email: result.user.email,
-                name: result.user.displayName,
-                isAdmin: false,
-                isVendor: false,
-                isContributor: false,
-                Description: "",
-                Location: "",
-                image:
-                  "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
-                Socials: {
-                  Instagram: "",
-                  Website: "",
-                  Facebook: "",
-                  LinkedIn: "",
-                  Twitter: "",
-                },
-                verified: false,
-                tier: 0,
-                refered: refered,
-              })
-              .then(() => {
-                auth.currentUser
-                  .updateProfile({
-                    displayName: result.user.displayName,
-                    photoURL:
-                      "https://firebasestorage.googleapis.com/v0/b/munasabti-32684.appspot.com/o/config%2Fprofile_default.jpg?alt=media&token=63f3178f-1b7a-4c4f-bd36-9f6da5893794",
-                  })
-                  .then(() => {
-                    db.collection("mail").add({
-                      to: auth.currentUser.email,
-                      message: {
-                        subject: "Hello from Voxify!",
-                        text: "Thanks for signing up!",
-                        html: `<p>Thanks for signing up!</p>`,
-                      },
-                    });
-                    navigate("/");
-                  });
-              })
-              .catch((e) => {
-                alert(e.message);
-              });
-          }
-        })
-        .catch((e) => {
-          console.log(e.message);
-        });
-    });
-  };
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="RegisterScreen-container">
@@ -185,20 +84,10 @@ function RegisterUser() {
             onClick={() => {
               handleRegister();
             }}
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Loading..." : "Register"}
           </button>
-          <div className="RegisterScreen-social-media">
-            <button
-              className="RegisterScreen-google-button"
-              onClick={() => {
-                handleRegisterWithGoogle();
-              }}
-            >
-              <FontAwesomeIcon icon={faGoogle} size="lg" />
-              Sign in with Google
-            </button>
-          </div>
         </form>
 
         <div className="LoginScreen-footer">

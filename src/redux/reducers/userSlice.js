@@ -18,7 +18,25 @@ export const loginAsync = createAsyncThunk(
         try {
             const response = await api.post('/auth/login', { email, password });
             const data = response.data;
-            // Save token to localStorage
+            localStorage.setItem('token', data.token);
+            return data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const RegisterResaurantAsync = createAsyncThunk(
+    'user/RegisterResaurantAsync',
+    async ({ email, password, name, refered }, thunkAPI) => {
+        try {
+            const response = await api.post('/auth/create/business', {
+                email,
+                password,
+                name,
+                refered: refered.length !== 10 ? null : refered
+            });
+            const data = response.data;
             localStorage.setItem('token', data.token);
             return data;
         } catch (error) {
@@ -51,13 +69,9 @@ const userSlice = createSlice({
             .addCase(loginAsync.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                console.log('Login pending');
             })
             .addCase(loginAsync.fulfilled, (state, action) => {
-                console.log('Login fulfilled');
-                console.log(action.payload);
                 const { userId, token, user } = action.payload;
-                console.log(userId, token, user);
                 return {
                     ...state,
                     role: user.role,
@@ -69,6 +83,23 @@ const userSlice = createSlice({
                 };
             })
             .addCase(loginAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            }).addCase(RegisterResaurantAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            }).addCase(RegisterResaurantAsync.fulfilled, (state, action) => {
+                const { userId, token, user } = action.payload;
+                return {
+                    ...state,
+                    role: user.role,
+                    userId: userId,
+                    token: token,
+                    user: user,
+                    isAuthenticated: true,
+                    loading: false,
+                };
+            }).addCase(RegisterResaurantAsync.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
