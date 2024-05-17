@@ -119,7 +119,9 @@ const Header = () => {
                 return;
               }
               navigate(
-                user.role === "business" ? "/manager/restaurant/" : "/user"
+                user.role === "business"
+                  ? "/manager/restaurant/"
+                  : "/auth/register/restaurant"
               );
             } else {
               navigate("/auth/register/restaurant");
@@ -130,7 +132,7 @@ const Header = () => {
         >
           {user.token
             ? user.role === "admin"
-              ? "Ya Hussein"
+              ? "Admin Dashboard"
               : "My Account"
             : "Register Now"}
         </VbitezButton>
