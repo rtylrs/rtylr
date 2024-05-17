@@ -1,116 +1,105 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { db, firebase } from "../../firebase";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import VbitezButton from "../../components/Buttons/Buttons"; 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useColors from "../../hooks/useColors";
+import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
+import { faPhone } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 
-const Contact = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { delay: 0.2, duration: 0.8 } },
-    exit: { opacity: 0, transition: { ease: "easeInOut" } },
-  };
 
-  const itemVariants = {
-    hidden: { y: -20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.3, ease: "easeInOut" },
-    },
-  };
+function Contact(){
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { accent } = useColors();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    if (!name || !email || !message) {
-      return;
-    }
 
-    try {
-      await db.collection("contacts").add({
-        name,
-        email,
-        phone,
-        message,
-        read: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
+    return (
+      <div className="ContactUs">
 
-      setSubmitted(true);
-    } catch (error) {
-      console.error("Error adding contact:", error);
-    }
-  };
+      
+      <div className="contactus-container">
 
-  return (
-    <motion.div
-      className="contact-container"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-    >
-      <motion.h2 variants={itemVariants}>Contact Us</motion.h2>
-      <motion.p variants={itemVariants}>
-        Feel free to get in touch with us!
-      </motion.p>
-      <div className="contact-content">
-        <motion.form
-          className="contact-form"
-          variants={itemVariants}
-          onSubmit={handleSubmit}
-        >
-          <input
-            type="text"
-            placeholder="Name"
-            className="input-field"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            className="input-field"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="tel"
-            placeholder="Phone Number (Include Country Code)"
-            className="input-field"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-          <textarea
-            placeholder="Message"
-            rows="4"
-            className="input-field"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          ></textarea>
-          <button
-            type="submit"
-            className="Contact-button"
-            disabled={submitted}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "60%",
-              margin: "0 auto",
-            }}
-          >
-            {submitted ? "Submitted" : "Submit"}
-          </button>
-        </motion.form>
+      <div className="contactus-card">
+        <div className="contactus-icon">
+      <FontAwesomeIcon icon={faRocketchat} />
       </div>
-    </motion.div>
-  );
-};
+            <h2>
+              <b>Chat with us</b>
+            </h2>
+            <p>
+            We're waiting to help you every Monday-Friday from 9 am to 5 pm EST easily.
+                        </p>
+          
+    
+    </div>
+    <div className="contactus-card">
+    <div className="contactus-icon">
+    <FontAwesomeIcon icon={faPhone}  />
+  </div>
+            <h2>
+              <b>Give us a call</b>
+            </h2>
+           
+            <p>
+            Give us a ring at (+961 71 642 565). Every monday-friday from 9 am to 5 pm.
+            </p>
+        
+    </div>
+    <div className="contactus-card">
+    <div className="contactus-icon">
 
+    <FontAwesomeIcon icon={faEnvelope} />
+    </div>
+          <h2>
+            <b>Email Us</b>
+          </h2>
+         
+          <p>
+          Drop us an email at info@voxire.com and you'll receive a reply within 24 hours.
+          </p>
+      
+  </div>
+    </div>
+    <div className="contact-form-container">
+      <div className="contact-form-text">
+        <h1>Fill out this form, We‘ll quickly get back to you</h1>
+        <p>We are here to help you! Tell us how we can help and we’ll get in touch within the next 24hrs with an expert.</p>
+        <div className="testimonial">
+          <div className="stars">
+            <span>★★★★★</span>
+          </div>
+          <p>"Vbitez transformed our restaurant experience with their digital menu system. Our customers love it and we see increased efficiency in our service."</p>
+          <div className="testimonial-author">
+            <img src="/images/Al-Abed_Mohammad2.jpg" alt="Author" />
+            <div className="author-details">
+              <h3>Aalawi Habeeb Galbi</h3>
+              <p>CEO & Co-founder @ Tiktok</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="contact-form">
+        <form>
+          <label>
+            Your name
+            <input type="text" placeholder="Enter your full name" />
+          </label>
+          <label>
+            Email address
+            <input type="email" placeholder="Enter your email" />
+          </label>
+          <label>
+            Write your message
+            <textarea placeholder="Write us your question here..."></textarea>
+          </label>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+    </div>
+        )
+}
 export default Contact;
