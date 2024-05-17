@@ -10,10 +10,13 @@ import {
 import PropTypes from "prop-types";
 import { Badge } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/reducers/userSlice";
 
 const VendorNavbar = ({ openSidebar }) => {
   const navigate = useNavigate();
   const [notificationsCount, setNotificationsCount] = useState(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -41,7 +44,7 @@ const VendorNavbar = ({ openSidebar }) => {
         <Link to="/">
           <FontAwesomeIcon icon={faHome} size="xl" />
         </Link>
-        <Link to="/restaurant/contacts">
+        <Link to="/restaurantp/contacts">
           <Badge
             badgeContent={notificationsCount}
             color="error"
@@ -57,9 +60,7 @@ const VendorNavbar = ({ openSidebar }) => {
         <div
           to="/auth/profile"
           onClick={() => {
-            auth.signOut().then(() => {
-              navigate("/");
-            });
+            dispatch(logout());
           }}
         >
           <FontAwesomeIcon icon={faRightFromBracket} size="xl" />

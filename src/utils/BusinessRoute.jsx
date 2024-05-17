@@ -1,23 +1,17 @@
-//TODO: fix this
+/*
+  File Created By: Mohamad Homsi
+  Last Edited: Sunday 12 May 2024
+  Last Edited by: Mohamad Homsi
+*/
 
-import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
-import Loader from "../layouts/loader/Loader";
+import { selectRole } from "../redux/reducers/userSlice";
+import { useSelector } from "react-redux";
 
 function BusinessRoute() {
-  const [loading, setLoading] = useState(true);
-  const [isBusiness, SetIsBusiness] = useState(true);
+  const role = useSelector(selectRole);
 
-  useEffect(() => {
-    SetIsBusiness(true);
-    setLoading(false);
-  }, []);
-
-  if (!loading) {
-    return isBusiness ? <Outlet /> : <Navigate to="/" />;
-  } else {
-    return <Loader />;
-  }
+  return role === "business" ? <Outlet /> : <Navigate to="/" />;
 }
 
 export { BusinessRoute };
