@@ -6,6 +6,7 @@ import Ticker from "../../../components/Ticker";
 import WhyUs from "./Components/WhyUs";
 import Goals from "./Components/Goals";
 import Price from "./Components/Price";
+import Demo from "./Components/Demo";
 function Home() {
   return (
     <React.Fragment>
@@ -14,7 +15,8 @@ function Home() {
       <Features />
       <WhyUs />
 <Price/>
-      <Goals />
+      {/* <Goals /> */}
+      <Demo/>
     </React.Fragment>
   );
 }

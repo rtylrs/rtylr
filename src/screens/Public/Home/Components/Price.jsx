@@ -134,7 +134,9 @@ function Price() {
               </li>
             </ul>
             <div className="price-button">
-              <VbitezButton>Purchase Now</VbitezButton>
+              <VbitezButton
+              
+              >Purchase Now</VbitezButton>
             </div>
           </div>
         </div>
