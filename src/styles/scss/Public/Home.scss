@@ -506,7 +506,98 @@ margin: 20px;
   margin-top: 40px;
 }
 
-  
+//Demo Section
+.demo-menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+
+  h2 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #666;
+    
+    span {
+      font-weight: bold;
+      color: #333;
+    }
+  }
+
+  .qr-code { 
+    margin-bottom: 20px;
+
+    img {
+      max-width: 40vh;
+      height: auto;
+    }
+  }
+
+  .create-menu-button {
+    background-color: #ff5a5f;
+    color: white;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      margin-right: 10px;
+    }
+
+    &:hover {
+      background-color: #e14e56;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 15px;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+    }
+
+    .create-menu-button {
+      font-size: 0.9rem;
+      padding: 8px 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+
+    .create-menu-button {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+  }
+}
+
 //Blog Section
 .blog-section {
   padding: 40px 0;

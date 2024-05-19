@@ -37,21 +37,21 @@ function VbitezButton({
   return (
     <button
       onClick={onClick}
-      style={variant === "secondary" ? secondaryStyles : mergedStyles}
+      // style={variant === "secondary" ? secondaryStyles : mergedStyles}
       className={buttonClassName}
-      onMouseEnter={(e) => {
-        (e.target.style.backgroundColor = secondaryColor || secondary),
-          variant === "secondary" && (e.target.style.color = "#ffffff");
-      }}
-      onMouseLeave={
-        variant === "secondary"
-          ? (e) => {
-              (e.target.style.backgroundColor = "#ffffff"),
-                (e.target.style.color = color || primary);
-            }
-          : (e) =>
-              (e.target.style.backgroundColor = mergedStyles.backgroundColor)
-      }
+      // onMouseEnter={(e) => {
+      //   (e.target.style.backgroundColor = secondaryColor || secondary),
+      //     variant === "secondary" && (e.target.style.color = "#ffffff");
+      // }}
+      // onMouseLeave={
+      //   variant === "secondary"
+      //     ? (e) => {
+      //         (e.target.style.backgroundColor = "#ffffff"),
+      //           (e.target.style.color = color || primary);
+      //       }
+      //     : (e) =>
+      //         (e.target.style.backgroundColor = mergedStyles.backgroundColor)
+      // }
     >
       {children}
     </button>
