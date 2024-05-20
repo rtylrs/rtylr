@@ -21,11 +21,10 @@ const reducers = combineReducers({
 
 const persistedReducer = persistReducer(persistConfig, reducers);
 
-const middleware = [...getDefaultMiddleware(), thunk];
 
 export const store = configureStore({
     reducer: persistedReducer,
-    middleware,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk)
 });
 
 export const persistor = persistStore(store);
