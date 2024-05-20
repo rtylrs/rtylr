@@ -77,7 +77,7 @@ function Contact() {
                 <p>CEO & Co-founder @ Tiktok</p>
               </div>
             </div>
-          </div>ç
+          </div>
         </div>
         <div className="contact-form">
           <form>
