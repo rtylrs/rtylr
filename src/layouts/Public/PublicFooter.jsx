@@ -10,10 +10,21 @@ import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import PackageJson from "../../../package.json";
-import i18next, { selectLanguage } from "../../services/i18next";
+import { selectLanguage } from "../../services/i18next";
+import { useEffect, useState } from "react";
 
 const Footer = () => {
   const config = useSelector((state) => state.config.contactInfo);
+  const [language, setLanguage] = useState("en");
+
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+
+    if (language) {
+      selectLanguage(language);
+      setLanguage(language);
+    }
+  }, []);
 
   return (
     <footer className="footer">
@@ -150,8 +161,9 @@ const Footer = () => {
         <select
           onChange={(e) => {
             selectLanguage(e.target.value);
+            setLanguage(e.target.value);
           }}
-          value={i18next.language}
+          value={language}
         >
           <option value="en">English</option>
           <option value="fr">French</option>

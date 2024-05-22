@@ -8,7 +8,6 @@
 import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Helmet } from "react-helmet";
 import { motion } from "framer-motion";
 
 //Routes
@@ -27,6 +26,7 @@ import Maintanance from "./screens/Public/Maintanance";
 
 //Components
 import Cookies from "./components/Cookies";
+import HelmetContainer from "./components/HelmetContainer";
 
 //Hooks
 import useColors from "./hooks/useColors";
@@ -50,7 +50,6 @@ const App = () => {
 
   // Redux
   const config = useSelector((state) => state.config);
-  const user = useSelector((state) => state.user);
 
   // States
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -68,12 +67,10 @@ const App = () => {
   useEffect(() => {
     // get config data
     dispatch(fetchConfigData());
+
     // get all products
     dispatch(getAllProducts());
 
-    console.log(user);
-
-    // get language from local storage
     const language = localStorage.getItem("language");
     if (language) {
       i18next.changeLanguage(language);
@@ -84,11 +81,7 @@ const App = () => {
 
   return (
     <>
-      {config && (
-        <Helmet>
-          <title>Vbitez - Contactless QR Menu</title>
-        </Helmet>
-      )}
+      {config && <HelmetContainer title={"Vbitez - Contactless QR Menu"} />}
 
       {config.maintanance && !location.pathname.includes("/manage/") && (
         <Maintanance />
