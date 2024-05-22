@@ -18,7 +18,7 @@ api.interceptors.request.use(
         sessionStorage.getItem("userToken");
       if (user) {
         config.headers["authorization"] = `Bearer ${user}`;
-    }
+      }
       config.headers["accept-language"] = i18next.language;
       return config;
     } catch (error) {

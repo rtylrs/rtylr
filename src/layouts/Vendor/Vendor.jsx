@@ -37,7 +37,7 @@ function Vendor(props) {
 
   return (
     <>
-      <HelmetContainer title={`${user?.user?.name}'s | Dashboard`} />
+      <HelmetContainer title={`${user?.user?.name}'s Dashboard`} />
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>

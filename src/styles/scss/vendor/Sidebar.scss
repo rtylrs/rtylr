@@ -34,27 +34,16 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  width: 95%;
-  margin-bottom: 20px;
-}
-
-.vendor-sidebar__title__container svg {
-  cursor: pointer;
-  font-size: 1.4rem;
-  padding: 5px;
-  color:$primary-color;
-}
-
-.vendor-sidebar__title__container svg:last-child {
-  margin-right: 30px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .vendor-sidebar__title {
   font-size: 1.6rem;
+  width: fit-content;
   margin-left: 10px;
   color: $primary-color;
-  padding-bottom: 10px;
-  width: fit-content;
+  padding-bottom: 15px;
   font-family: $primary-font;
   font-weight: 600;
 }
@@ -71,17 +60,6 @@
   padding: 15px;
 }
 
-.vendor-sidebar__menu > h2 {
-  color: #83a6b0;
-  font-size: 1.2em;
-  margin-top: 15px;
-  margin-bottom: 5px;
-  margin-left: 10px;
-  padding-bottom: 5px;
-  border-bottom: #7a7c81 1px solid;
-  width: fit-content;
-}
-
 .vendor-sidebar__link {
   padding: 10px;
   border-radius: 3px;
@@ -93,7 +71,7 @@
 
   #link {
     text-decoration: none;
-    font-size: 14.5px;
+    font-size: 14px;
     color: $primary-color;
     font-family: $primary-font;
     opacity: 0.9;
@@ -207,7 +185,7 @@
 .vendor-sidebar__section {
   h2 {
     text-decoration: none;
-    font-size: 14.5px;
+    font-size: 14px;
     color: $primary-color;
     font-family: $primary-font;
     opacity: 0.9;

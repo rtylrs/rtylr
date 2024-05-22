@@ -58,15 +58,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
       <div className="vendor-sidebar__nav">
         <div className="vendor-sidebar__title__container">
           <p className="vendor-sidebar__title">Vbitez</p>
-          <div>
-            <FontAwesomeIcon
-              icon={faHeadset}
-              title="Contact Support"
-              onClick={() => {
-                window.open("https://wa.me/message/D5ZSC3DH3NI6P1", "_blank");
-              }}
-            />
-          </div>
         </div>
         <FontAwesomeIcon
           className="vendor-close__icon"

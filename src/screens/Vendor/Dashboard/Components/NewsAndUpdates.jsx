@@ -132,7 +132,9 @@ function NewsAndUpdates() {
           <div className="news-content">
             <h3 className="news-title">{item.title}</h3>
             <p className="news-date">{item.date}</p>
-            <p className="news-description">{item.description}</p>
+            <p className="news-description">
+              {item.description?.slice(0, 40)?.trim()}.....
+            </p>
           </div>
         </div>
       ))}
