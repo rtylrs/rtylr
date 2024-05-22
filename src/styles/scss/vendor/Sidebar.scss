@@ -13,22 +13,9 @@
 }
 
 .vendor-sidebar::-webkit-scrollbar {
-  width: 0.5rem;
+  width: 0rem;
+  display: none;
 }
-
-.vendor-sidebar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.vendor-sidebar::-webkit-scrollbar-thumb {
-  background: #81776d;
-}
-
-.vendor-sidebar::-webkit-scrollbar-thumb:hover {
-  background: #625b52;
-  transition: 0.3s;
-}
-
 
 .vendor-sidebar__nav {
   display: flex;
