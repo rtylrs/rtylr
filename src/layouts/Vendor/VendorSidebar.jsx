@@ -474,19 +474,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/manage/petitions" ? "vendor-active" : ""
-          }`}
-        >
-          <FontAwesomeIcon
-            icon={faCrosshairs}
-            className="vendor-sidebar__icon"
-          />
-          <Link to="/manage/petitions" id="link">
-            Petitions
-          </Link>
-        </div>
-        <div
-          className={`vendor-sidebar__link ${
             location.pathname === "/manage/events" ? "vendor-active" : ""
           }`}
         >

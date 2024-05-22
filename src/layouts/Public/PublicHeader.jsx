@@ -128,6 +128,15 @@ const Header = () => {
           >
             Contact Us
           </h6>
+
+          <h6
+            onClick={() => {
+              setDropdown(false);
+              navigate("/faqs");
+            }}
+          >
+            FAQs
+          </h6>
           <h6
             onClick={() => {
               setDropdown(false);

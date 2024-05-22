@@ -1,7 +1,7 @@
 import axios from "axios";
 import i18next from "i18next";
 
-const mode = "prod"; // can be dev or prod
+const mode = "dev"; // can be dev or prod
 
 const api = axios.create({
   baseURL:
@@ -18,7 +18,7 @@ api.interceptors.request.use(
         sessionStorage.getItem("userToken");
       if (user) {
         config.headers["authorization"] = `Bearer ${user}`;
-      }
+    }
       config.headers["accept-language"] = i18next.language;
       return config;
     } catch (error) {
