@@ -16,7 +16,7 @@ function Hero() {
         <h1 className="vbitez-title">{t("Hero.welcome")}</h1>
         <h2>{t("Hero.discover")}</h2>
         <div className="hero-buttons">
-          <VbitezButton onClick={() => navigate("/shop")}>
+          <VbitezButton onClick={() => navigate("/auth/register/restaurant")}>
             {t("Hero.Create Account")}
           </VbitezButton>
           <VbitezButton onClick={() => navigate("/shop")} variant="secondary">

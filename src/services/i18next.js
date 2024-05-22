@@ -23,4 +23,17 @@ i18next.use(initReactI18next).init({
     },
 });
 
+
+export const selectLanguage = (language) => {
+    if (language) {
+        i18next.changeLanguage(language);
+        localStorage.setItem("language", language);
+    }
+    else {
+        language = 'en';
+        i18next.changeLanguage(language);
+        localStorage.setItem("language", language);
+    }
+};
+
 export default i18next;

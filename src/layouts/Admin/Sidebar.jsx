@@ -23,7 +23,6 @@ import {
   faShop,
   faQrcode,
   faHeadset,
-  faPuzzlePiece,
   faPenRuler,
   faCalendarAlt,
   faCirclePause,

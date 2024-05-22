@@ -42,7 +42,7 @@ function RegisterUser() {
           <input
             className="RegisterScreen-input"
             type="text"
-            placeholder="Full Name"
+            placeholder="Restaurant Name"
             id="Fname"
             required
             onChange={(e) => setName(e.target.value)}

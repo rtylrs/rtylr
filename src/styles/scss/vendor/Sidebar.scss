@@ -1,0 +1,249 @@
+.vendor-sidebar {
+  background: #f3f4f8;
+  grid-area: sidebar;
+  overflow-y: auto;
+  -webkit-transition: all 0.5s;
+  transition: all 0.5s;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  user-select: none;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  font-family: "Poppins", sans-serif;
+}
+
+.vendor-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.vendor-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.vendor-sidebar::-webkit-scrollbar-thumb {
+  background: #81776d;
+}
+
+.vendor-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #625b52;
+  transition: 0.3s;
+}
+
+
+.vendor-sidebar__nav {
+  display: flex;
+  align-items: center;
+  color: $primary-color;
+}
+
+.vendor-sidebar__icon {
+  font-size: 1.1em;
+  margin-right: 10px;
+  color: $primary-color;
+}
+
+.vendor-sidebar__title__container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 95%;
+  margin-bottom: 20px;
+}
+
+.vendor-sidebar__title__container svg {
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 5px;
+  color:$primary-color;
+}
+
+.vendor-sidebar__title__container svg:last-child {
+  margin-right: 30px;
+}
+
+.vendor-sidebar__title {
+  font-size: 1.6rem;
+  margin-left: 10px;
+  color: $primary-color;
+  padding-bottom: 10px;
+  width: fit-content;
+  font-family: $primary-font;
+  font-weight: 600;
+}
+
+.vendor-sidebar__nav > div > h1 {
+  color: $primary-color;
+  display: inline;
+}
+
+.vendor-sidebar__nav > i {
+  font-size: 35px;
+  display: none;
+  margin-right: 15px;
+  padding: 15px;
+}
+
+.vendor-sidebar__menu > h2 {
+  color: #83a6b0;
+  font-size: 1.2em;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  margin-left: 10px;
+  padding-bottom: 5px;
+  border-bottom: #7a7c81 1px solid;
+  width: fit-content;
+}
+
+.vendor-sidebar__link {
+  padding: 10px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+
+  svg {
+      opacity: 0.9;
+  }
+
+  #link {
+    text-decoration: none;
+    font-size: 14.5px;
+    color: $primary-color;
+    font-family: $primary-font;
+    opacity: 0.9;
+    font-weight: 600 ;
+  }
+}
+
+.vendor-active {
+  border: 0px solid $primary-color;
+  border-radius: 10px;
+  background-color: $primary-color;
+  transition: 0.5s;
+  
+  #link {
+    text-decoration: none;
+    font-size: 1em;
+    color: $light-color;
+  }
+
+  svg {
+    color: $light-color;
+  }
+}
+
+.vendor-sidebar__link:hover {
+  border: 0px solid $primary-color;
+  border-radius: 10px;
+  background-color: $primary-color;
+  transition: 0.5s;
+
+  #link {
+    color: $light-color;
+    transition: 0.5s;
+  }
+
+  svg {
+    color: $light-color;
+    transition: 0.5s;
+  }
+}
+
+.vendor-sidebar__link > svg {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.vendor-sidebar-responsive {
+  display: inline !important;
+  z-index: 9999 !important;
+  left: 0 !important;
+  position: absolute;
+  height: 100%;
+}
+
+@media only screen and (max-width: 978px) {
+  .vendor-sidebar {
+    display: none;
+    -webkit-animation: slideIn 0.5s ease-in-out;
+    animation: slideIn 0.5s ease-in-out;
+  }
+
+  .vendor-sidebar__title {
+    margin-right: 38px;
+  }
+  .vendor-sidebar__nav > i {
+    display: inline;
+  }
+
+  .vendor-sidebar__logout {
+    width: auto;
+  }
+}
+
+@-webkit-keyframes slideIn {
+  0% {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+
+.vendor-close__icon {
+  display: none;
+}
+
+@media only screen and (max-width: 978px) {
+  .vendor-close__icon {
+    display: inline;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 27px;
+  }
+}
+
+.vendor-sidebar__section {
+  h2 {
+    text-decoration: none;
+    font-size: 14.5px;
+    color: $primary-color;
+    font-family: $primary-font;
+    opacity: 0.9;
+    font-weight: 600 ;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    padding-bottom: 5px;
+    border-bottom: #7a7c81 0.2px solid;
+    width: fit-content;
+    min-width: 80%;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+
+    svg {
+      cursor: pointer;
+      font-size: 16px;
+    }
+  }
+}
+
+.vendor-admin__link {
+  margin-left: 20px;
+  width: 75%;
+}
