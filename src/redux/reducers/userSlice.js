@@ -71,6 +71,7 @@ const userSlice = createSlice({
             })
             .addCase(loginAsync.fulfilled, (state, action) => {
                 const { userId, token, user } = action.payload;
+                console.log(user);
                 return {
                     ...state,
                     role: user.role,
@@ -82,7 +83,6 @@ const userSlice = createSlice({
                 };
             })
             .addCase(loginAsync.rejected, (state, action) => {
-                console.log("rEJECTED");
                 state.loading = false;
                 state.error = action.payload;
             }).addCase(RegisterResaurantAsync.pending, (state) => {

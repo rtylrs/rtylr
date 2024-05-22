@@ -81,7 +81,12 @@ const App = () => {
 
   return (
     <>
-      {config && <HelmetContainer title={"Vbitez - Contactless QR Menu"} />}
+      {config && (
+        <HelmetContainer
+          title={"Vbitez - Contactless QR Menu"}
+          favicon={"/favicon.ico"}
+        />
+      )}
 
       {config.maintanance && !location.pathname.includes("/manage/") && (
         <Maintanance />
