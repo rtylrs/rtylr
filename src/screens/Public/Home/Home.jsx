@@ -7,7 +7,7 @@ import WhyUs from "./Components/WhyUs";
 import Price from "./Components/Price";
 import Demo from "./Components/Demo";
 import HelmetContainer from "../../../components/HelmetContainer";
-
+import Faq from "../FAQ";
 function Home() {
   return (
     <React.Fragment>
@@ -18,6 +18,7 @@ function Home() {
       <WhyUs />
       <Price />
       <Demo />
+      <Faq/>
     </React.Fragment>
   );
 }
