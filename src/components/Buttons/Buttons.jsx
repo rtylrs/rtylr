@@ -65,7 +65,7 @@ VbitezButton.propTypes = {
   children: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   styles: PropTypes.object,
-  variant: PropTypes.oneOf(["default", "secondary"]).isRequired,
+  variant: PropTypes.string,
   color: PropTypes.string,
   secondaryColor: PropTypes.string,
   hidden: PropTypes.bool,

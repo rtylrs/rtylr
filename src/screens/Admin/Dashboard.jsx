@@ -7,17 +7,40 @@ import {
   faStarHalfStroke,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import adminApi from "../../api/admin";
+import useAsync from "../../hooks/useAsync";
 
 function Dashboard() {
   const [allEvents, setAllEvents] = React.useState([]);
   const [users, setUsers] = React.useState(0);
+  const [bussiness, setBussiness] = React.useState(0);
   const [orders, setOrders] = React.useState(0);
   const [reviews, setReviews] = React.useState(0);
   const [events, setEvents] = React.useState(0);
   const [clicks, setClicks] = React.useState(0);
   const [reviewsData, setReviewsData] = React.useState([]);
 
-  React.useEffect(() => {}, []);
+  const getUsersCount = useAsync({
+    fn: adminApi.UserCount,
+    onSuccess: () => {
+      setUsers(getUsersCount.result?.count);
+    },
+    onError: () => {
+      alert(getUsersCount.error);
+    },
+    callOnMount: true,
+  });
+
+  const getBussinessCount = useAsync({
+    fn: adminApi.BussinessCount,
+    onSuccess: () => {
+      setBussiness(getBussinessCount.result?.count);
+    },
+    onError: () => {
+      alert(getBussinessCount.error);
+    },
+    callOnMount: true,
+  });
 
   return (
     <div className="AdminDash">
@@ -39,7 +62,7 @@ function Dashboard() {
             <div className="card_inner">
               <div>
                 <FontAwesomeIcon icon={faUser} />
-                <p className="text-primary-p">Customers</p>
+                <p className="text-primary-p">Users</p>
               </div>
               <span className="font-bold text-title">{users}</span>
             </div>
@@ -50,10 +73,10 @@ function Dashboard() {
             <div className="card_inner">
               <div>
                 <FontAwesomeIcon icon={faShoppingBag} />
-                <p className="text-primary-p">Total Orders</p>
+                <p className="text-primary-p">Restaurants</p>
               </div>
 
-              <span className="font-bold text-title">{orders}</span>
+              <span className="font-bold text-title">{bussiness}</span>
             </div>
           </div>
 

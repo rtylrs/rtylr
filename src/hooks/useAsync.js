@@ -1,4 +1,3 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { debounce } from "lodash"; // Import debounce from lodash
 
@@ -16,9 +15,7 @@ export default function useAsync({
   onError = () => { },
   callOnMount = false,
   callOnMountData = null,
-  callOnScreenRender = false,
-  callOnScreenData = null,
-  debounceTime = 0, // Debounce time in milliseconds
+  debounceTime = 0,
   dependencies = [],
 }) {
   const [error, setError] = useState(null);
@@ -56,14 +53,6 @@ export default function useAsync({
       debouncedMain(callOnMountData);
     }
   }, [...dependencies]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (callOnScreenRender) {
-        debouncedMain(callOnScreenData);
-      }
-    }, [...dependencies])
-  );
 
   useEffect(() => {
     if (success) {

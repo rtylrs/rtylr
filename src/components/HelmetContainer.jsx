@@ -17,11 +17,13 @@ function HelmetContainer({
   twitterSite,
   twitterCreator,
   customMetaTags,
+  favicon,
 }) {
   return (
     <Helmet>
       <meta charSet="utf-8" />
       <title>{title}</title>
+      {favicon && <link rel="icon" href={favicon} type="image/x-icon" />}
       <meta name="description" content={description} />
       {author && <meta name="author" content={author} />}
       {keywords && <meta name="keywords" content={keywords} />}
@@ -68,4 +70,5 @@ HelmetContainer.propTypes = {
   twitterSite: PropTypes.string,
   twitterCreator: PropTypes.string,
   customMetaTags: PropTypes.arrayOf(PropTypes.object),
+  favicon: PropTypes.string,
 };

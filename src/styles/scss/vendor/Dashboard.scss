@@ -1,6 +1,6 @@
 .vendor-dashboard {
     display: grid;
-    grid-template-columns: 2fr 1fr; 
+    grid-template-columns: 2fr 1.2fr; 
     gap: 20px;
   
     @media screen and (max-width: 768px) {
@@ -49,6 +49,7 @@
     width: 30%;
     max-width: 90px; 
     height: auto;
+    max-height: 90px;
     border-radius: 10px;
     margin-right: 20px;
   }
