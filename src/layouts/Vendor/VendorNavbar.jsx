@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { auth, db } from "../../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -9,41 +9,24 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { Badge } from "@mui/material";
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
 
 const VendorNavbar = ({ openSidebar }) => {
   const navigate = useNavigate();
   const [notificationsCount, setNotificationsCount] = useState(0);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (auth.currentUser) {
-      db.collection("contacts")
-        .orderBy("createdAt", "desc")
-        .get()
-        .then((snapshot) => {
-          setNotificationsCount(snapshot.size);
-        });
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const user = useSelector((state) => state.user);
 
   return (
-    <div className="navbar">
-      <div className="nav_icon" onClick={() => openSidebar("navbar")}>
+    <div className="vendor-navbar">
+      <div className="vendor_nav_icon" onClick={() => openSidebar("navbar")}>
         <FontAwesomeIcon icon={faBars} />
       </div>
-
-      <div className="navbar__left">
-        <p className="active_link">{auth.currentUser?.displayName}</p>
+      <div className="vendor-navbar__left">
+        <p className="active_link">{user?.user?.name}</p>
       </div>
-      <div className="navbar__right">
-        <Link to="/">
-          <FontAwesomeIcon icon={faHome} size="xl" />
-        </Link>
+      <div className="vendor-navbar__right">
         <Link to="/restaurantp/contacts">
           <Badge
             badgeContent={notificationsCount}

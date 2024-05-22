@@ -8,6 +8,7 @@ import {
   selectError,
   selectRole,
 } from "../../redux/reducers/userSlice";
+import VbitezButton from "../../components/Buttons/Buttons";
 
 function Login() {
   const navigate = useNavigate();
@@ -53,15 +54,15 @@ function Login() {
           className="LoginScreen-input"
         />
         {/* {error && <p className="LoginScreen-error">{error}</p>} */}
-        <button
+        <VbitezButton
           className="LoginScreen-button"
           onClick={() => {
             handleSubmit();
           }}
-          // disabled={loading}
+          disabled={loading}
         >
           {loading ? "Loading..." : "Login"}
-        </button>
+        </VbitezButton>
         <div className="LoginScreen-footer">
           <p>
             Don’t have an account?{" "}

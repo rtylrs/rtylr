@@ -1,36 +1,38 @@
 import React from "react";
-import VendorDashboard from "../layouts/Vendor/VendorDashbaord";
 import Addons from "../screens/Vendor/Addons";
 import VendorSettings from "../screens/Vendor/VendorSettings";
+import Vendor from "../layouts/Vendor/Vendor";
 
 // Routes
-const VendorMain = React.lazy(() => import("../screens/Vendor/VendorMain"));
+const VendorDashboard = React.lazy(() =>
+  import("../screens/Vendor/Dashboard/VendorDashboard")
+);
 
 const VendorRoutes = [
   {
     path: "/manager/restaurant/",
     element: (
-      <VendorDashboard>
-        <VendorMain />
-      </VendorDashboard>
+      <Vendor>
+        <VendorDashboard />
+      </Vendor>
     ),
     exact: true,
   },
   {
     path: "/manager/restaurant/addons",
     element: (
-      <VendorDashboard>
+      <Vendor>
         <Addons />
-      </VendorDashboard>
+      </Vendor>
     ),
     exact: true,
   },
   {
     path: "/manager/restaurant/settings",
     element: (
-      <VendorDashboard>
+      <Vendor>
         <VendorSettings />
-      </VendorDashboard>
+      </Vendor>
     ),
     exact: true,
   },

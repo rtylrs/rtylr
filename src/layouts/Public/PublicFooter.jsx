@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import PackageJson from "../../../package.json";
+import i18next, { selectLanguage } from "../../services/i18next";
 
 const Footer = () => {
   const config = useSelector((state) => state.config.contactInfo);
@@ -143,6 +144,18 @@ const Footer = () => {
         >
           {PackageJson.version}
         </p>
+      </div>
+
+      <div className="footer-language">
+        <select
+          onChange={(e) => {
+            selectLanguage(e.target.value);
+          }}
+          value={i18next.language}
+        >
+          <option value="en">English</option>
+          <option value="fr">French</option>
+        </select>
       </div>
     </footer>
   );

@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { auth, db, storage, firebase } from "../../firebase";
 import i18next from "../../services/i18next";
 import { Switch, Button } from "@mui/material";
+import { useSelector } from "react-redux";
 
 const VendorSettings = () => {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ const VendorSettings = () => {
   const [config, setConfig] = useState({});
   const faviconRef = useRef(null);
   const iconRef = useRef(null);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     const language = localStorage.getItem("language");
@@ -92,33 +94,19 @@ const VendorSettings = () => {
           <h3>Business Info</h3>
 
           <div className="NameAndSlogan">
-            <lable>{t("Settings.name")}</lable>
-            <input
-              type="text"
-              value={config.title}
-              onChange={(e) => {
-                setConfig({
-                  ...config,
-                  title: e.target.value,
-                });
-              }}
-            />
+            <lable>{t("Settings.BusinessName")}</lable>
+            <input type="text" value={user?.user?.name} onChange={(e) => {}} />
             <lable>{t("Settings.slogan")}</lable>
             <input
               type="text"
-              value={config.slogan}
-              onChange={(e) => {
-                setConfig({
-                  ...config,
-                  slogan: e.target.value,
-                });
-              }}
+              value={user?.user?.slogan}
+              onChange={(e) => {}}
             />
             <Button
               variant="contained"
               color="primary"
               onClick={() => {
-                db.collection("config").doc("websiteData").set(config);
+                // TODO: fix this
               }}
             >
               Update
@@ -127,14 +115,10 @@ const VendorSettings = () => {
           <div>
             <p>{t("Settings.favicon")}</p>
             <img
-              src={
-                config.favicon
-                  ? config.favicon
-                  : "https://picsum.photos/150/150"
-              }
+              src={user?.user?.favicon ? user?.user?.favicon : "/favicon.ico"}
               alt="favicon"
-              height={70}
-              width={70}
+              height={50}
+              width={50}
               onClick={() => {
                 faviconRef.current.click();
               }}
@@ -152,12 +136,11 @@ const VendorSettings = () => {
             />
           </div>
           <div>
-            <p>{t("Settings.icon")}</p>
+            <p>{t("Settings.logo")}</p>
             <img
-              src={config.icon ? config.icon : "https://picsum.photos/150/150"}
+              src={user?.user?.logo ? user?.user?.logo : "/logo.png"}
               alt="Icon"
-              height={70}
-              width={140}
+              height={100}
               onClick={() => {
                 iconRef.current.click();
               }}

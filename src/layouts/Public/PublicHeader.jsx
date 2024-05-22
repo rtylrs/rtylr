@@ -6,7 +6,12 @@
 
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faChevronDown,
+  faChevronUp,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 
 import VbitezButton from "../../components/Buttons/Buttons";
@@ -19,6 +24,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { primary, secondary } = useColors();
   const { width } = useWindowDimensions();
+  const [dropdown, setDropdown] = useState(false);
 
   const user = useSelector((state) => state.user);
 
@@ -81,7 +87,56 @@ const Header = () => {
         <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
         <LinkWithColor to="/pricing">Product</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
-        <LinkWithColor to="/about">About Us</LinkWithColor>
+        <p
+          style={{
+            color: primary,
+          }}
+          onClick={() => {
+            setDropdown(!dropdown);
+          }}
+        >
+          Company
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            style={{
+              marginLeft: "5px",
+              fontSize: "14px",
+              transform: dropdown ? "rotate(180deg)" : "rotate(0deg)",
+            }}
+          />
+        </p>
+
+        <div
+          className="header-dropdown"
+          style={{
+            display: dropdown ? "block" : "none",
+          }}
+        >
+          <h6
+            onClick={() => {
+              setDropdown(false);
+              navigate("/about");
+            }}
+          >
+            About Us
+          </h6>
+          <h6
+            onClick={() => {
+              setDropdown(false);
+              navigate("/contact");
+            }}
+          >
+            Contact Us
+          </h6>
+          <h6
+            onClick={() => {
+              setDropdown(false);
+              window.open("https://voxire.com/careers", "_blank");
+            }}
+          >
+            Careers (Jobs)
+          </h6>
+        </div>
       </div>
 
       <div className="header-right">

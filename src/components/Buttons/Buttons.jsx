@@ -15,6 +15,7 @@ function VbitezButton({
   color,
   secondaryColor,
   hidden = false,
+  disabled = false,
 }) {
   const buttonClassName = `vbitez-button-${variant}`;
   const { primary, secondary } = useColors();
@@ -36,8 +37,10 @@ function VbitezButton({
 
   return (
     <button
+      disabled={disabled}
       onClick={onClick}
       // style={variant === "secondary" ? secondaryStyles : mergedStyles}
+      style={styles}
       className={buttonClassName}
       // onMouseEnter={(e) => {
       //   (e.target.style.backgroundColor = secondaryColor || secondary),
@@ -66,6 +69,7 @@ VbitezButton.propTypes = {
   color: PropTypes.string,
   secondaryColor: PropTypes.string,
   hidden: PropTypes.bool,
+  disabled: PropTypes.bool,
 };
 
 export default VbitezButton;

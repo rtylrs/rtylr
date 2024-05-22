@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { selectRole } from "../../redux/reducers/userSlice";
+import HelmetContainer from "../../components/HelmetContainer";
 
 function Admin(props) {
   const navigate = useNavigate();
@@ -34,13 +35,14 @@ function Admin(props) {
   }, []);
 
   return (
-    // <AnimatedRoutes>
-    <div className="Admincontainer">
-      <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
-      <div className="InnerContainer">{props.children}</div>
-      <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
-    </div>
-    // </AnimatedRoutes>
+    <>
+      <HelmetContainer title="Vbitez - Admin" />
+      <div className="Admincontainer">
+        <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
+        <div className="InnerContainer">{props.children}</div>
+        <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
+      </div>
+    </>
   );
 }
 
