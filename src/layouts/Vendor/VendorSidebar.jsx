@@ -31,6 +31,7 @@ import {
   faSquarePollVertical,
   faUserLock,
   faCircleInfo,
+  faUtensils,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -96,15 +97,14 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/manage/products" ? "vendor-active" : ""
+            location.pathname === "/manager/restaurant//menu"
+              ? "vendor-active"
+              : ""
           }`}
         >
-          <FontAwesomeIcon
-            icon={faShoppingBag}
-            className="vendor-sidebar__icon"
-          />
-          <Link to="/manage/products" id="link">
-            Products
+          <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
+          <Link to="/manager/restaurant//menu" id="link">
+            Menu
           </Link>
         </div>
         <div
@@ -478,7 +478,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/manager/restaurant/manage/addons"
+            location.pathname === "/manager/restaurant/addons"
               ? "vendor-active"
               : ""
           }`}
@@ -487,7 +487,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             icon={faPuzzlePiece}
             className="vendor-sidebar__icon"
           />
-          <Link to="/owner/restaurant/manage/addons" id="link">
+          <Link to="/manager/restaurant/addons" id="link">
             Add-Ons
           </Link>
         </div>
