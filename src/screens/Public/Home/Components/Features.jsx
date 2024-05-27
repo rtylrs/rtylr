@@ -11,6 +11,7 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { faUserPen } from "@fortawesome/free-solid-svg-icons";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { Title } from "@mui/icons-material";
 
 function Features() {
   const { t } = useTranslation();
@@ -20,7 +21,7 @@ function Features() {
   return (
     <div className="Features">
       <h1 className="vbitez-title features-text">
-        Discover What Sets Us Apart
+        {t("Features.Features-title")}
       </h1>
 
       <div className="features-container">
@@ -30,11 +31,10 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Visual Menu Showcase</b>
+              <b>{t("Features.Feature1-title")}</b>
             </h4>
             <p>
-              Showcase your dishes with stunning visuals, enticing customers to
-              explore your offerings.
+              {t("Features.Feature1-description")}
             </p>
           </div>
         </div>
@@ -45,12 +45,10 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Intuitive Menu Management</b>
+              <b>{t("Features.Feature2-title")}</b>
             </h4>
             <p>
-              Comprehensive information about each menu item, including
-              ingredients and potential allergens, to help customers make
-              informed choices.
+             {t("Features.Feature2-description")}
             </p>
           </div>
         </div>
@@ -60,11 +58,10 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Multiple Language Support</b>
+              <b>{t("Features.Feature3-title")}</b>
             </h4>
             <p>
-              Expand your reach with multilingual menu translations, attracting
-              customers from around the world.
+            {t("Features.Feature3-description")}
             </p>
           </div>
         </div>
@@ -74,12 +71,10 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Customizable Orders</b>
+              <b>{t("Features.Feature4-title")}</b>
             </h4>
             <p>
-              Tailor orders to meet your customers' preferences and dietary
-              requirements, ensuring satisfaction with every meal.
-            </p>
+            {t("Features.Feature4-description")}</p>
           </div>
         </div>
         <div className="feature">

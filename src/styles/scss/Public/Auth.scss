@@ -1,149 +1,121 @@
-.LoginScreen-container {
-  height:80vh;
+.login-container {
+  height: 100vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)),
-    url("/images/LoginBg.jpg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  .login-form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    color: white;
+    backdrop-filter: blur(10px);
 
-.LoginScreen {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  height: 50vh;
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  @media only screen and (max-width: 768px) {
-    width: 90%;
+    .login-form-title {
+      font-size: 15px;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      outline: none;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 15px;
+      margin: 20px 0;
+      color: white;
+      border: none;
+      font-size: 17px;
+      border-radius: 30px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+      transition: background-color 0.3s, box-shadow 0.3s;
+
+      &:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #5a11bb;
+      }
+    }
+
+    .login-forgot-password {
+      margin: 10px 0;
+      color: #ccc;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .login-separator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      color: #888;
+
+      span {
+        margin: 0 10px;
+      }
+
+      &::before,
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #888;
+      }
+    }
+
+    .login-social-button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      border: none;
+      font-size: 17px;
+      border-radius: 30px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background-color 0.3s, box-shadow 0.3s;
+
+      &:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      img {
+        width: 20px;
+        margin-right: 10px;
+      }
+    }
+
+    .login-register {
+      margin: 20px 0;
+      color: #ccc;
+      text-align: center;
+
+      .login-link {
+        color: #fff;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
   }
 }
-
-.LoginScreen-title {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-.LoginScreen-description {
-  margin-bottom: 20px;
-}
-
-.LoginScreen-input {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.LoginScreen-footer {
-  margin-top: 20px;
-}
-
-.LoginScreen-link {
-  color: #007bff;
-  cursor: pointer;
-}
-
-
- /* Register Screen Styles */
-.RegisterScreen-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  padding-top: 4%;
-  padding-bottom: 4%;
-  text-align: center;
-  color: #231f1b;
-  border-radius: 0; 
-}
-
-.RegisterScreen-title {
-  font-size: 26px;
-  margin-bottom: 20px;
-  color: #231f1b;
-}
-
-.RegisterScreen-input {
-  width: 60%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  outline: none;
-  border-radius: 4px;
-  font-size: 16px;
-  color: #231f1b;
-  background-color: #f2ebe5;
-
-  &:focus {
-    border: 1px solid #0a102f;
-  }
-
-  @media only screen and (max-width: 280px) {
-    width: 80%;
-  }
-}
-
-.RegisterScreen-button {
-  width:60%;
-  padding: 10px;
-  background: #0a102f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.RegisterScreen-button:hover {
-  background: #B2533E;
-  transition: 0.3s;
-}
-
-.RegisterScreen-social-media {
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
-  margin-top: 5px;
-}
-
-.RegisterScreen-google-button {
-  background: #0a102f;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60%; 
-
-  svg {
-    margin-right: 10px;
-  }
-
-  &:hover {
-    background: #B2533E;
-    transition: 0.3s;
-  }
-}
-
-
-
-
-
