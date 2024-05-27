@@ -4,7 +4,6 @@ import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";
-
 function Hero() {
   const { t } = useTranslation();
   const navigate = useNavigate();

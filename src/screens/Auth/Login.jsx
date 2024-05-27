@@ -33,57 +33,50 @@ function Login() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="LoginScreen-container">
-      <div className="LoginScreen">
-        <h2 className="LoginScreen-title">Welcome Back</h2>
-        <p className="LoginScreen-description">
-          Sign in to your existing account to continue.
-        </p>
+    <div className="login-container">
+      <div className="login-form">
+        <h3 className="login-form-title">Email address</h3>
         <input
-          type="text"
-          placeholder="Email"
+          type="email"
+          placeholder="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="LoginScreen-input"
+          className="login-input"
         />
+        <h3 className="login-form-title">Password</h3>
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="LoginScreen-input"
+          className="login-input"
         />
-        {/* {error && <p className="LoginScreen-error">{error}</p>} */}
-        <VbitezButton
-          className="LoginScreen-button"
-          onClick={() => {
-            handleSubmit();
-          }}
-          // disabled={loading}
+        {error && <p className="login-error">{error}</p>}
+        <button
+          className="login-button"
+          onClick={handleSubmit}
+          disabled={loading}
         >
-          {loading ? "Loading..." : "Login"}
-        </VbitezButton>
-        <div className="LoginScreen-footer">
-          <p>
-            Don’t have an account?{" "}
-            <span
-              className="LoginScreen-link"
-              onClick={() => {
-                navigate("/auth/register");
-              }}
-            >
-              Sign Up Now.
-            </span>
-          </p>
-          <p
-            className="LoginScreen-link"
-            onClick={() => {
-              navigate("/auth/password-reset");
-            }}
-          >
-            Forgot Password?
-          </p>
+          {loading ? "Loading..." : "Log in"}
+        </button>
+        <p className="login-forgot-password">Forgot your password?</p>
+        <div className="login-separator">
+          <span>or</span>
         </div>
+        <button className="login-social-button">
+          <img src="/images/google-icon.png" alt="Google Icon" />
+          Log in with Google
+        </button>
+      
+        <p className="login-register">
+          Don’t have an account yet?{" "}
+          <span
+            className="login-link"
+            onClick={() => navigate("/auth/register")}
+          >
+            Register
+          </span>
+        </p>
       </div>
     </div>
   );
