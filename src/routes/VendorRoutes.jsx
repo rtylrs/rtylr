@@ -1,12 +1,15 @@
 import React from "react";
-import Addons from "../screens/Vendor/Addons";
-import VendorSettings from "../screens/Vendor/VendorSettings";
 import Vendor from "../layouts/Vendor/Vendor";
 
 // Routes
 const VendorDashboard = React.lazy(() =>
   import("../screens/Vendor/Dashboard/VendorDashboard")
 );
+const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu"));
+const VendorSettings = React.lazy(() =>
+  import("../screens/Vendor/VendorSettings")
+);
+const Addons = React.lazy(() => import("../screens/Vendor/Addons"));
 
 const VendorRoutes = [
   {
@@ -32,6 +35,15 @@ const VendorRoutes = [
     element: (
       <Vendor>
         <VendorSettings />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/manager/restaurant/menu",
+    element: (
+      <Vendor>
+        <Menu />
       </Vendor>
     ),
     exact: true,
