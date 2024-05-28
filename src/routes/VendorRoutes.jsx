@@ -10,10 +10,14 @@ const VendorSettings = React.lazy(() =>
   import("../screens/Vendor/VendorSettings")
 );
 const Addons = React.lazy(() => import("../screens/Vendor/Addons"));
+const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes"));
+const CreateQrCode = React.lazy(() =>
+  import("../screens/Vendor/QrCode/CreateQrCode")
+);
 
 const VendorRoutes = [
   {
-    path: "/manager/restaurant/",
+    path: "/app/restaurant/",
     element: (
       <Vendor>
         <VendorDashboard />
@@ -22,7 +26,7 @@ const VendorRoutes = [
     exact: true,
   },
   {
-    path: "/manager/restaurant/addons",
+    path: "/app/restaurant/addons",
     element: (
       <Vendor>
         <Addons />
@@ -31,7 +35,7 @@ const VendorRoutes = [
     exact: true,
   },
   {
-    path: "/manager/restaurant/settings",
+    path: "/app/restaurant/settings",
     element: (
       <Vendor>
         <VendorSettings />
@@ -40,10 +44,28 @@ const VendorRoutes = [
     exact: true,
   },
   {
-    path: "/manager/restaurant/menu",
+    path: "/app/restaurant/menu",
     element: (
       <Vendor>
         <Menu />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/app/restaurant/qr-codes",
+    element: (
+      <Vendor>
+        <QrCodes />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/app/restaurant/qr-codes/create",
+    element: (
+      <Vendor>
+        <CreateQrCode />
       </Vendor>
     ),
     exact: true,

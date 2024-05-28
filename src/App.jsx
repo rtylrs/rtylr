@@ -179,7 +179,7 @@ const App = () => {
           ))}
         </Route>
 
-        <Route exact path="/manager/restaurant" element={<BusinessRoute />}>
+        <Route exact path="/app/restaurant" element={<BusinessRoute />}>
           {VendorRoutes.map((route, index) => (
             <Route
               key={index}
