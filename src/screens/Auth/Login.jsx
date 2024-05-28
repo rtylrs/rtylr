@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,7 +8,6 @@ import {
   selectError,
   selectRole,
 } from "../../redux/reducers/userSlice";
-import VbitezButton from "../../components/Buttons/Buttons";
 
 function Login() {
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ function Login() {
     dispatch(loginAsync({ email, password }));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       if (role === "admin") {
         navigate("/manage");
@@ -35,36 +34,51 @@ function Login() {
         navigate("/");
       }
     }
-  }, [isAuthenticated, navigate, role]);
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="login-container">
+      <div className="lottie-container">
+        <dotlottie-player
+          src="https://lottie.host/13436e76-0a4b-464c-9e28-bb720ca012cf/JDvAdmkONp.json"
+          background="transparent"
+          speed="1"
+          style={{ width: "700px", height: "700px" }}
+          loop
+          autoplay
+        ></dotlottie-player>
+      </div>
       <div className="login-form">
-        <h3 className="login-form-title">Email address</h3>
+        <img src="/public/logo.png" alt="Logo" className="logo" />
+        <h2>Welcome back!!</h2>
+        <p>Please enter your details.</p>
         <input
           type="email"
-          placeholder="Email address"
+          placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="login-input"
         />
-        <h3 className="login-form-title">Password</h3>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="login-input"
         />
         {error && <p className="login-error">{error}</p>}
-        <button
-          className="login-button"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Log in"}
-        </button>
-        <p className="login-forgot-password">Forgot your password?</p>
+        <div className="login-options">
+          <span className="forgot-password">Forgot password?</span>
+        </div>
+        <div className="login-button-wrapper">
+          <button
+            className="login-button"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Sign In"}
+          </button>
+        </div>
         <div className="login-separator">
           <span>or</span>
         </div>
@@ -72,7 +86,7 @@ function Login() {
           <img src="/images/google-icon.png" alt="Google Icon" />
           Log in with Google
         </button>
-
+      
         <p className="login-register">
           Don’t have an account yet?{" "}
           <span
