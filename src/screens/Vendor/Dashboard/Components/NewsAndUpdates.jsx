@@ -11,7 +11,7 @@ function NewsAndUpdates() {
   const [loading, setLoading] = React.useState(true);
 
   const getNews = useAsync({
-    fn: configApi.GetNews,
+    fn: configApi.getNews,
     onSuccess: () => {
       setLoading(false);
       setNews(getNews?.result || []);
