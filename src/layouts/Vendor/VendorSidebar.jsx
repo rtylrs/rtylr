@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,7 +11,6 @@ import {
   faNewspaper,
   faRss,
   faQrcode,
-  faPuzzlePiece,
   faUserLock,
   faUtensils,
   faMagicWandSparkles,
@@ -19,7 +18,6 @@ import {
   faUserPen,
   faBullhorn,
   faCreditCard,
-  faWallet,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
@@ -27,10 +25,13 @@ import { useSelector } from "react-redux";
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
   const { managementVisible, reportsVisible, toggleSection } = useSidebar();
   const userId = useSelector((state) => state.user.userId);
+  const navigate = useNavigate();
 
   return (
     <div
-      className={`vendor-sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}
+      className={`vendor-sidebar ${
+        sidebarOpen ? "vendor-sidebar-responsive" : ""
+      }`}
     >
       <div className="vendor-sidebar__nav">
         <div className="vendor-sidebar__title__container">
@@ -49,34 +50,31 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           className={`vendor-sidebar__link ${
             location.pathname === "/app/restaurant/" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/app/restaurant/")}
         >
           <FontAwesomeIcon icon={faHome} className="vendor-sidebar__icon" />
-          <Link to="/app/restaurant/" id="link">
-            Home
-          </Link>
+          <p id="link">Home</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/restaurant/menu" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/app/restaurant/menu")}
         >
           <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
-          <Link to="/app/restaurant/menu" id="link">
-            Menu
-          </Link>
+          <p id="link">Menu</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/manage/design" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/manage/design")}
         >
           <FontAwesomeIcon
             icon={faMagicWandSparkles}
             className="vendor-sidebar__icon"
           />
-          <Link to="/manage/design" id="link">
-            Design
-          </Link>
+          <p id="link">Design</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
@@ -84,31 +82,28 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
               ? "vendor-active"
               : ""
           }`}
+          onClick={() => navigate("/app/restaurant/qr-codes")}
         >
           <FontAwesomeIcon icon={faQrcode} className="vendor-sidebar__icon" />
-          <Link to="/app/restaurant/qr-codes" id="link">
-            Qr Codes
-          </Link>
+          <p id="link">Qr Codes</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/manage/design" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/manage/design")}
         >
           <FontAwesomeIcon icon={faStar} className="vendor-sidebar__icon" />
-          <Link to="/manage/design" id="link">
-            Feedback
-          </Link>
+          <p id="link">Feedback</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/manage/design" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/manage/design")}
         >
           <FontAwesomeIcon icon={faUserPen} className="vendor-sidebar__icon" />
-          <Link to="/manage/design" id="link">
-            Restaurant Information
-          </Link>
+          <p id="link">Restaurant Information</p>
         </div>
         <div
           className="vendor-sidebar__section"
@@ -142,14 +137,13 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                     ? "vendor-active"
                     : ""
                 }`}
+                onClick={() => navigate("/manage/managment")}
               >
                 <FontAwesomeIcon
                   icon={faUserLock}
                   className="vendor-sidebar__icon"
                 />
-                <Link to="/manage/managment" id="link">
-                  Permissions
-                </Link>
+                <p id="link">Permissions</p>
               </div>
               <div
                 className={`vendor-sidebar__link admin__link ${
@@ -157,14 +151,13 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                     ? "vendor-active"
                     : ""
                 }`}
+                onClick={() => navigate("/manage/feedback")}
               >
                 <FontAwesomeIcon
                   icon={faRss}
                   className="vendor-sidebar__icon"
                 />
-                <Link to="/manage/feedback" id="link">
-                  Feedback
-                </Link>
+                <p id="link">Feedback</p>
               </div>
             </>
           )}
@@ -224,18 +217,17 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div> */}
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restauran/settings"
+            location.pathname === "/app/restauran/billing"
               ? "vendor-active"
               : ""
           }`}
+          onClick={() => navigate("/app/restaurant/billing")}
         >
           <FontAwesomeIcon
             icon={faCreditCard}
             className="vendor-sidebar__icon"
           />
-          <Link to="/app/restaurant/settings" id="link">
-            Billing
-          </Link>
+          <p id="link">Billing</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
@@ -243,21 +235,22 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
               ? "vendor-active"
               : ""
           }`}
+          onClick={() => navigate("/app/restaurant/settings")}
         >
           <FontAwesomeIcon icon={faCog} className="vendor-sidebar__icon" />
-          <Link to="/app/restaurant/settings" id="link">
-            Settings
-          </Link>
+          <p id="link">Settings</p>
         </div>
-        <div className={`vendor-sidebar__link`}>
+        <div
+          className={`vendor-sidebar__link`}
+          onClick={() => navigate(`/restaurant/${userId}`)}
+        >
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
             className="vendor-sidebar__icon"
           />
-          {/* TODO: Make it take them to their Menu */}
-          <Link to={`/restaurant/${userId}`} id="link" target="_blank">
+          <p id="link" target="_blank">
             View Menu
-          </Link>
+          </p>
         </div>
       </div>
     </div>

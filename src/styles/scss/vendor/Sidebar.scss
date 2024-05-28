@@ -64,6 +64,9 @@
   padding: 10px;
   border-radius: 3px;
   margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
 
   svg {
       opacity: 0.9;
@@ -87,7 +90,7 @@
   
   #link {
     text-decoration: none;
-    font-size: 1em;
+    font-size: 14px;
     color: $light-color;
   }
 
