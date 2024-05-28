@@ -1,16 +1,17 @@
 import React from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import adminApi from "../../../../api/admin";
 import useAsync from "../../../../hooks/useAsync";
 import { formatDate } from "../../../../utils/formatDate";
+import { Link } from "react-router-dom";
+import configApi from "../../../../api/config";
 
 function NewsAndUpdates() {
   const [news, setNews] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
 
   const getNews = useAsync({
-    fn: adminApi.GetNews,
+    fn: configApi.GetNews,
     onSuccess: () => {
       setLoading(false);
       setNews(getNews?.result || []);
@@ -48,7 +49,7 @@ function NewsAndUpdates() {
               </div>
             ))
         : news?.map((item) => (
-            <div key={item.id} className="news-item">
+            <Link key={item._id} className="news-item" to={`/news/${item._id}`}>
               <img
                 src={item?.image}
                 alt={item.title}
@@ -68,7 +69,7 @@ function NewsAndUpdates() {
                     "....."}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
     </div>
   );

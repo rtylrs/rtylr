@@ -16,17 +16,10 @@ const BussinessCount = async () => {
   return res.data;
 };
 
-const GetNews = async () => {
-  const res = await api.get(API_ROUTES.GET.GET_NEWS);
-  return res.data;
-};
-
-
 const adminApi = {
   getAll,
   UserCount,
   BussinessCount,
-  GetNews
 };
 
 export default adminApi;

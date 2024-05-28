@@ -11,6 +11,7 @@ const Contact = React.lazy(() => import("../screens/Public/Contact"));
 const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
 const AllBlogs = React.lazy(() => import("../screens/Public/AllBlogs"));
 const Faq = React.lazy(() => import("../screens/Public/FAQ"));
+const News = React.lazy(() => import("../screens/Public/News"));
 
 const PublicRoutes = [
   {
@@ -94,6 +95,17 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Faq />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/news/:newsId",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <News />
         </AnimatedRoutes>
       </Public>
     ),
