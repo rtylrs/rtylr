@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { QRCode } from "react-qrcode-logo";
 import html2canvas from "html2canvas";
 import { saveAs } from "file-saver";
+import VbitezButton from "../../../components/Buttons/Buttons";
 
 function CreateQrCode() {
   const [qrOptions, setQrOptions] = useState({
@@ -52,7 +53,7 @@ function CreateQrCode() {
   }, [qrOptions.logoImage]);
 
   return (
-    <div>
+    <div className="create-qr-code">
       <h1>QR Code Generator</h1>
       <div>
         <label>Text: </label>
@@ -147,6 +148,7 @@ function CreateQrCode() {
           alignItems: "center",
           margin: "20px",
         }}
+        className="qr-code-container"
       >
         <QRCode
           value={qrOptions.text}
@@ -163,7 +165,7 @@ function CreateQrCode() {
           removeQrCodeBehindLogo
         />
       </div>
-      <button onClick={handleDownload}>Download QR Code</button>
+      <VbitezButton onClick={handleDownload}>Download QR Code</VbitezButton>
     </div>
   );
 }

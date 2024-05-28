@@ -22,15 +22,20 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const handleSubmit = () => {
-    console.log(email, password);
     dispatch(loginAsync({ email, password }));
   };
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      if (role === "admin") {
+        navigate("/manage");
+      } else if (role === "business") {
+        navigate("/app/restaurant");
+      } else {
+        navigate("/");
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, role]);
 
   return (
     <div className="login-container">
@@ -67,7 +72,7 @@ function Login() {
           <img src="/images/google-icon.png" alt="Google Icon" />
           Log in with Google
         </button>
-      
+
         <p className="login-register">
           Don’t have an account yet?{" "}
           <span
