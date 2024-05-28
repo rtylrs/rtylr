@@ -1,14 +1,22 @@
 import api from "../../lib/api";
 import { API_ROUTES } from "./routes";
 
-const GetNews = async () => {
+const getNews = async () => {
     const res = await api.get(API_ROUTES.GET.GET_NEWS);
+    return res.data;
+};
+
+const getSpecificNews = async ({ id }) => {
+    console.log(id);
+    const res = await api.get(API_ROUTES.GET.GET_NEWS_WITH_ID(id));
+    console.log(res.data);
     return res.data;
 };
 
 
 const configApi = {
-    GetNews
+    getNews,
+    getSpecificNews
 };
 
 export default configApi;
