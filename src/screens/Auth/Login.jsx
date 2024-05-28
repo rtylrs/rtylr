@@ -26,15 +26,17 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (role === "admin") {
-        navigate("/manage");
-      } else if (role === "business") {
-        navigate("/app/restaurant");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    // Dynamically load the Lottie player script
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs";
+    script.type = "module";
+    document.body.appendChild(script);
+  }, []);
 
   return (
     <div className="login-container">
@@ -86,15 +88,9 @@ function Login() {
           <img src="/images/google-icon.png" alt="Google Icon" />
           Log in with Google
         </button>
-      
-        <p className="login-register">
-          Don’t have an account yet?{" "}
-          <span
-            className="login-link"
-            onClick={() => navigate("/auth/register")}
-          >
-            Register
-          </span>
+        <p className="signup-link">
+          Don’t have an account?{" "}
+          <span onClick={() => navigate("/auth/register")}>Sign up</span>
         </p>
       </div>
     </div>
