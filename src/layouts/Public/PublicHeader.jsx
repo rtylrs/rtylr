@@ -184,7 +184,7 @@ const Header = () => {
               }
               navigate(
                 user.role === "business"
-                  ? "/manager/restaurant/"
+                  ? "/app/restaurant/"
                   : "/auth/register/restaurant"
               );
             } else {
@@ -228,7 +228,7 @@ const Header = () => {
                   return;
                 }
                 navigate(
-                  user.role === "business" ? "/manager/restaurant/" : "/user"
+                  user.role === "business" ? "/app/restaurant/" : "/user"
                 );
               } else {
                 navigate("/auth/register/restaurant");

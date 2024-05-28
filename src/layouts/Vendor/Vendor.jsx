@@ -32,6 +32,13 @@ function Vendor(props) {
       }
     }
 
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("userId")) {
+      url.searchParams.append("userId", user?.userId);
+      url.searchParams.append("plan", user?.user?.planType);
+      window.history.replaceState({}, "", url.toString());
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
