@@ -29,7 +29,7 @@ function Hero() {
           }}
         >
           <FontAwesomeIcon icon={faStar} color={accent} /> Rated 4.7/5 - from
-          over 600 reviews
+          over 350 reviews
         </h5>
       </div>
       <div className="hero-image">
