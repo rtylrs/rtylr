@@ -3,10 +3,12 @@ import { QRCode } from "react-qrcode-logo";
 import html2canvas from "html2canvas";
 import { saveAs } from "file-saver";
 import VbitezButton from "../../../components/Buttons/Buttons";
+import { useSelector } from "react-redux";
 
 function CreateQrCode() {
+  const userId = useSelector((state) => state.user.userId);
   const [qrOptions, setQrOptions] = useState({
-    text: "https://example.com",
+    text: "https://vbitez.voxire.com/restaurant/" + userId,
     size: 150,
     fgColor: "#000000",
     bgColor: "#ffffff",
@@ -55,15 +57,7 @@ function CreateQrCode() {
   return (
     <div className="create-qr-code">
       <h1>QR Code Generator</h1>
-      <div>
-        <label>Text: </label>
-        <input
-          type="text"
-          name="text"
-          value={qrOptions.text}
-          onChange={handleInputChange}
-        />
-      </div>
+      <p>{qrOptions.text}</p>
       <div>
         <label>Size: </label>
         <input

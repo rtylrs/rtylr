@@ -1,7 +1,7 @@
 import axios from "axios";
 import i18next from "i18next";
 
-const mode = "dev"; // can be dev or prod
+const mode = "prod"; // can be dev or prod
 
 const adminApi = axios.create({
     baseURL:
