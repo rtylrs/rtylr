@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { auth, db, storage, firebase } from "../../firebase";
+import { storage, firebase } from "../../firebase";
 import i18next from "../../services/i18next";
 import { Switch, Button } from "@mui/material";
 import { useSelector } from "react-redux";
@@ -16,7 +16,6 @@ const VendorSettings = () => {
   const [formData, setFormData] = useState({
     notifications: true,
   });
-  const [config, setConfig] = useState({});
   const faviconRef = useRef(null);
   const iconRef = useRef(null);
   const user = useSelector((state) => state.user);
@@ -30,15 +29,6 @@ const VendorSettings = () => {
       });
     }
 
-    db.collection("config")
-      .doc("websiteData")
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          setConfig(doc.data());
-        }
-      });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,17 +37,7 @@ const VendorSettings = () => {
     localStorage.setItem("language", language);
   };
 
-  const handleNotificationsToggle = () => {
-    // Update user's notification preference in a database or other source
-    // and update the state accordingly
-    // Example:
-    // const updatedNotifications = !formData.notifications;
-    // updateNotificationsInDatabase(updatedNotifications); // Replace with actual update
-    // setFormData({
-    //   ...formData,
-    //   notifications: updatedNotifications,
-    // });
-  };
+  const handleNotificationsToggle = () => {};
 
   const handleImageChange = (e, type) => {
     const file = e.target.files[0];
@@ -66,22 +46,8 @@ const VendorSettings = () => {
     fileRef.put(file).then(() => {
       fileRef.getDownloadURL().then((url) => {
         const updateField = type === "favicon" ? "favicon" : "icon";
-        const updatedConfig = {
-          ...config,
-          [updateField]: url,
-        };
 
-        db.collection("config")
-          .doc("websiteData")
-          .set(
-            {
-              [updateField]: url,
-            },
-            { merge: true }
-          )
-          .then(() => {
-            setConfig(updatedConfig);
-          });
+        // TODO: update the image url on the api and then update the state
       });
     });
   };
