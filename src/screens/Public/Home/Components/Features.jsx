@@ -1,22 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
-import useColors from "../../../../hooks/useColors";
-
-import { faUser } from "@fortawesome/free-solid-svg-icons"; // Example icon, import your desired icons similarly
-import { faCamera } from "@fortawesome/free-solid-svg-icons";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { faUserPen } from "@fortawesome/free-solid-svg-icons";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { Title } from "@mui/icons-material";
+import {
+  faBarsProgress,
+  faPenToSquare,
+  faStar,
+  faCamera,
+  faGlobe,
+  faFilter,
+} from "@fortawesome/free-solid-svg-icons";
 
 function Features() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { accent } = useColors();
 
   return (
     <div className="Features">
@@ -33,23 +27,19 @@ function Features() {
             <h4>
               <b>{t("Features.Feature1-title")}</b>
             </h4>
-            <p>
-              {t("Features.Feature1-description")}
-            </p>
+            <p>{t("Features.Feature1-description")}</p>
           </div>
         </div>
 
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCircleInfo} />{" "}
+            <FontAwesomeIcon icon={faBarsProgress} />{" "}
           </div>
           <div className="feature-container">
             <h4>
               <b>{t("Features.Feature2-title")}</b>
             </h4>
-            <p>
-             {t("Features.Feature2-description")}
-            </p>
+            <p>{t("Features.Feature2-description")}</p>
           </div>
         </div>
         <div className="feature">
@@ -60,21 +50,21 @@ function Features() {
             <h4>
               <b>{t("Features.Feature3-title")}</b>
             </h4>
-            <p>
-            {t("Features.Feature3-description")}
-            </p>
+            <p>{t("Features.Feature3-description")}</p>
           </div>
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faUserPen} style={{ color: "#000000" }} />{" "}
+            <FontAwesomeIcon
+              icon={faPenToSquare}
+              style={{ color: "#000000" }}
+            />{" "}
           </div>
           <div className="feature-container">
             <h4>
               <b>{t("Features.Feature4-title")}</b>
             </h4>
-            <p>
-            {t("Features.Feature4-description")}</p>
+            <p>{t("Features.Feature4-description")}</p>
           </div>
         </div>
         <div className="feature">

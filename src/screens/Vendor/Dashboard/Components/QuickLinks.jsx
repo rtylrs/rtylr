@@ -43,11 +43,7 @@ function QuickLinks() {
         to="/app/restaurant/billing"
       />
       <QuickLink icon={faCog} title="Settings" to="/app/restaurant/settings" />
-      <QuickLink
-        icon={faPhoneVolume}
-        title="Support"
-        to="/app/restaurant/settings"
-      />
+      <QuickLink icon={faPhoneVolume} title="Support" to="/contact" />
     </div>
   );
 }
