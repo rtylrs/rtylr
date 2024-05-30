@@ -17,6 +17,7 @@ const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes"));
 const CreateQrCode = React.lazy(() =>
   import("../screens/Vendor/QrCode/CreateQrCode")
 );
+const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
 
 const VendorRoutes = [
   {
@@ -78,6 +79,15 @@ const VendorRoutes = [
     element: (
       <Vendor>
         <CreateQrCode />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/app/restaurant/billing",
+    element: (
+      <Vendor>
+        <Billing />
       </Vendor>
     ),
     exact: true,

@@ -27,10 +27,6 @@ function Vendor(props) {
 
     if (!token) {
       navigate("/auth/login");
-    } else {
-      if (role !== "business") {
-        navigate("/");
-      }
     }
 
     const url = new URL(window.location.href);

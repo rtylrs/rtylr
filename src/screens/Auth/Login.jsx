@@ -75,7 +75,7 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className="login-input"
         />
-        {error && <p className="login-error">{error}</p>}
+        {/* {error && <p className="login-error">{error}</p>} */}
         <div className="login-options">
           <span className="forgot-password">Forgot password?</span>
         </div>
