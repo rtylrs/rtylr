@@ -5,7 +5,6 @@ export const fetchMenu = createAsyncThunk(
     'menu/fetchMenu',
     async (restaurantId) => {
         const response = await api.get(`/menu/${restaurantId}`);
-        console.log(response.data);
         return response.data;
     }
 );
