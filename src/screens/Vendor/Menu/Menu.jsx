@@ -15,8 +15,10 @@ import {
 function Menu() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items: categories, status } = useSelector((state) => state.menu);
   const userId = useSelector((state) => state.user.userId);
+  const { items: categories, status } = useSelector((state) => state.menu);
+  const menuId = useSelector((state) => state.menu.id);
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] =
@@ -25,7 +27,13 @@ function Menu() {
 
   useEffect(() => {
     dispatch(fetchMenu(userId));
-  }, [dispatch]);
+
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("menuId")) {
+      url.searchParams.append("menuId", menuId);
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [dispatch, menuId, userId]);
 
   const handleEditMenuItem = (updatedItem) => {
     dispatch(editMenuItem({ categoryId: selectedCategory, item: updatedItem }));
