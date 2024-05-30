@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import HelmetContainer from "../../components/HelmetContainer";
 import { selectRole } from "../../redux/reducers/userSlice";
+import FreeAccount from "../../components/FreeAccount";
 
 function Vendor(props) {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ function Vendor(props) {
   return (
     <>
       <HelmetContainer title={`${user?.user?.name}'s Dashboard`} />
+      {user?.user?.planType === "free" && <FreeAccount />}
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>

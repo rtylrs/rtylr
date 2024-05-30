@@ -61,6 +61,7 @@ export const renameCategory = createAsyncThunk(
 const menuSlice = createSlice({
     name: 'menu',
     initialState: {
+        id: null,
         items: [],
         status: 'idle',
         error: null,
@@ -74,6 +75,7 @@ const menuSlice = createSlice({
             .addCase(fetchMenu.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.items = action.payload.items;
+                state.id = action.payload._id;
             })
             .addCase(fetchMenu.rejected, (state, action) => {
                 state.status = 'failed';
