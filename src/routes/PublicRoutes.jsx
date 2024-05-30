@@ -12,6 +12,7 @@ const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
 const AllBlogs = React.lazy(() => import("../screens/Public/AllBlogs"));
 const Faq = React.lazy(() => import("../screens/Public/FAQ"));
 const News = React.lazy(() => import("../screens/Public/News"));
+const Menu = React.lazy(() => import("../screens/Public/Menu/Menu"));
 
 const PublicRoutes = [
   {
@@ -108,6 +109,15 @@ const PublicRoutes = [
           <News />
         </AnimatedRoutes>
       </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/restaurant/:id",
+    element: (
+      <AnimatedRoutes>
+        <Menu />
+      </AnimatedRoutes>
     ),
     exact: true,
   },

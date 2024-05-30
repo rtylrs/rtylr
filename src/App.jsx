@@ -36,7 +36,6 @@ import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
 
 // Other imports
-import { getAllProducts } from "./redux/reducers/productsSlice";
 import { fetchConfigData } from "./redux/reducers/configSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
@@ -73,9 +72,6 @@ const App = () => {
   useEffect(() => {
     // get config data
     dispatch(fetchConfigData());
-
-    // get all products
-    dispatch(getAllProducts());
 
     const language = localStorage.getItem("language");
     if (language) {

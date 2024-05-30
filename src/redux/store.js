@@ -1,8 +1,7 @@
-import { combineReducers, configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import userReducer from './reducers/userSlice';
-import productsReducer from './reducers/productsSlice';
 import cartReducer from './reducers/cartSlice';
 import configReducer from './reducers/configSlice';
 import menuReducer from './reducers/menuSlice';
@@ -15,7 +14,6 @@ const persistConfig = {
 
 const reducers = combineReducers({
     user: userReducer,
-    products: productsReducer,
     cart: cartReducer,
     config: configReducer,
     menu: menuReducer
