@@ -24,6 +24,7 @@ import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
 import { ToastContainer } from "react-toastify";
 import { CookiesProvider } from "react-cookie";
 import { PersistGate } from "redux-persist/integration/react";
+import Modal from "react-modal";
 
 const theme = createTheme({
   palette: {
@@ -32,6 +33,8 @@ const theme = createTheme({
     },
   },
 });
+
+Modal.setAppElement("#root");
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
