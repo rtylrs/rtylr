@@ -1,43 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
-import CreateMenuItemModal from "./CreateMenuItemModal";
 import EditMenuItemModal from "./EditMenuItemModal";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryDropdown from "./CategoryDropdown";
+import {
+  fetchMenu,
+  addCategory,
+  deleteCategory,
+  editMenuItem,
+} from "../../../redux/reducers/menuSlice";
 
 function Menu() {
-  const [menuItems, setMenuItems] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { items: categories, status } = useSelector((state) => state.menu);
+  const userId = useSelector((state) => state.user.userId);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] =
     useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
 
-  const addMenuItem = (item) => {
-    setMenuItems([...menuItems, item]);
+  useEffect(() => {
+    dispatch(fetchMenu(userId));
+  }, [dispatch]);
+
+  const handleEditMenuItem = (updatedItem) => {
+    dispatch(editMenuItem({ categoryId: selectedCategory, item: updatedItem }));
+    setEditModalOpen(false);
   };
 
-  const editMenuItem = (updatedItem) => {
-    setMenuItems(
-      menuItems.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
+  const handleAddCategory = (category) => {
+    dispatch(addCategory(category));
+    setCreateCategoryModalOpen(false);
   };
 
-  const addCategory = (category) => {
-    setCategories([...categories, category]);
-  };
-
-  const deleteCategory = (category) => {
-    setCategories(categories.filter((cat) => cat !== category));
-    setMenuItems(
-      menuItems.map((item) => ({
-        ...item,
-        categories: item.categories.filter((cat) => cat !== category),
-      }))
-    );
-    if (selectedCategory === category) setSelectedCategory("");
+  const handleDeleteCategory = (categoryId) => {
+    dispatch(deleteCategory(categoryId));
   };
 
   const openEditModal = (item) => {
@@ -45,52 +46,68 @@ function Menu() {
     setEditModalOpen(true);
   };
 
-  const filteredMenuItems = selectedCategory
-    ? menuItems.filter((item) => item.categories.includes(selectedCategory))
-    : menuItems;
+  const renderCategorySection = (category) => (
+    <div key={category._id} className="category-section">
+      <div className="category-header">
+        <span>{category.name}</span>
+        <button onClick={() => handleDeleteCategory(category._id)}>
+          Delete
+        </button>
+      </div>
+      <div className="category-items">
+        {category &&
+          category.menuItems.map((item) => (
+            <MenuItem
+              key={item._id}
+              item={item}
+              onEdit={() => openEditModal(item)}
+            />
+          ))}
+        <button
+          onClick={() => {
+            navigate("/app/restaurant/create-item", {
+              state: { categoryId: category._id },
+            });
+          }}
+        >
+          Add a product
+        </button>
+      </div>
+    </div>
+  );
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="menu-container">
       <h1>Menu</h1>
-      <CategoryDropdown
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        onCreateCategory={() => setCreateCategoryModalOpen(true)}
-        onDeleteCategory={deleteCategory}
-      />
-      <button
-        className="add-item-button"
-        onClick={() => setCreateModalOpen(true)}
-      >
-        Add Menu Item
-      </button>
-      <div className="menu-items">
-        {filteredMenuItems.map((item) => (
-          <MenuItem
-            key={item.id}
-            item={item}
-            onEdit={() => openEditModal(item)}
-          />
-        ))}
+      <div className="category-controls">
+        {/* <CategoryDropdown
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          onCreateCategory={() => setCreateCategoryModalOpen(true)}
+        /> */}
       </div>
-      <CreateMenuItemModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        categories={categories}
-        onSave={addMenuItem}
-      />
-      <EditMenuItemModal
+      <div className="menu-items">
+        {categories &&
+          categories
+            .filter((item) => item.type === "category")
+            .map(renderCategorySection)}
+      </div>
+      {/* <EditMenuItemModal
         isOpen={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
         item={itemToEdit}
         categories={categories}
-        onSave={editMenuItem}
-      />
+        onSave={handleEditMenuItem}
+      /> */}
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}
-        onSave={addCategory}
+        onSave={handleAddCategory}
       />
     </div>
   );
