@@ -5,6 +5,7 @@ import userReducer from './reducers/userSlice';
 import productsReducer from './reducers/productsSlice';
 import cartReducer from './reducers/cartSlice';
 import configReducer from './reducers/configSlice';
+import menuReducer from './reducers/menuSlice';
 import { thunk } from 'redux-thunk';
 
 const persistConfig = {
@@ -17,6 +18,7 @@ const reducers = combineReducers({
     products: productsReducer,
     cart: cartReducer,
     config: configReducer,
+    menu: menuReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, reducers);

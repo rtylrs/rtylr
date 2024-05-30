@@ -1,16 +1,48 @@
-import React from "react";
+import PropTypes from "prop-types";
 
 function MenuItem({ item, onEdit }) {
   return (
-    <div>
-      <h2>{item.name}</h2>
-      <p>{item.description}</p>
-      <p>{item.price}</p>
-      <p>Categories: {item.categories.join(", ")}</p>
-      <p>Allergens: {item.allergens.join(", ")}</p>
-      <button onClick={onEdit}>Edit</button>
+    <div className="menu-item">
+      <img src={item.image} alt={item.name} />
+      <div className="item-details">
+        <h3>{item.name}</h3>
+        <p>Options: {item.options}</p>
+        <div className="item-controls">
+          <label>
+            <input
+              type="checkbox"
+              checked={item.visible}
+              onChange={() => onEdit({ ...item, visible: !item.visible })}
+            />
+            Visible
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={item.popular}
+              onChange={() => onEdit({ ...item, popular: !item.popular })}
+            />
+            Popular
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={item.inStock}
+              onChange={() => onEdit({ ...item, inStock: !item.inStock })}
+            />
+            In Stock
+          </label>
+          <p>Price: {item.price} €</p>
+          <button onClick={() => onEdit(item)}>Edit</button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default MenuItem;
+
+MenuItem.propTypes = {
+  item: PropTypes.object.isRequired,
+  onEdit: PropTypes.func.isRequired,
+};

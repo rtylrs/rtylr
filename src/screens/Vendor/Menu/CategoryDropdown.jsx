@@ -1,11 +1,8 @@
-import React from "react";
-
 function CategoryDropdown({
   categories,
   selectedCategory,
   onSelectCategory,
   onCreateCategory,
-  onDeleteCategory,
 }) {
   return (
     <div>
@@ -21,12 +18,6 @@ function CategoryDropdown({
         ))}
       </select>
       <button onClick={onCreateCategory}>Create Category</button>
-      <button
-        onClick={() => onDeleteCategory(selectedCategory)}
-        disabled={!selectedCategory}
-      >
-        Delete Category
-      </button>
     </div>
   );
 }

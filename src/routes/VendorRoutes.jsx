@@ -6,6 +6,9 @@ const VendorDashboard = React.lazy(() =>
   import("../screens/Vendor/Dashboard/VendorDashboard")
 );
 const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu"));
+const CreateItem = React.lazy(() =>
+  import("../screens/Vendor/Menu/CreateItem")
+);
 const VendorSettings = React.lazy(() =>
   import("../screens/Vendor/VendorSettings")
 );
@@ -48,6 +51,15 @@ const VendorRoutes = [
     element: (
       <Vendor>
         <Menu />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/app/restaurant/create-item",
+    element: (
+      <Vendor>
+        <CreateItem />
       </Vendor>
     ),
     exact: true,
