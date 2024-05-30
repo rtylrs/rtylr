@@ -84,7 +84,7 @@ const userSlice = createSlice({
             })
             .addCase(loginAsync.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.payload.message;
             }).addCase(RegisterResaurantAsync.pending, (state) => {
                 state.loading = true;
                 state.error = null;

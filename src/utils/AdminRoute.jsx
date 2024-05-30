@@ -11,8 +11,6 @@ import { useSelector } from "react-redux";
 function AdminRoute() {
   const role = useSelector(selectRole);
 
-  console.log(role);
-
   return role === "admin" ? <Outlet /> : <Navigate to="/" />;
 }
 

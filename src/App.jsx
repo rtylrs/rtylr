@@ -100,26 +100,27 @@ const App = () => {
 
       <Cookies />
 
-      {!location.pathname.includes("/restaurant/") && (
-        <motion.div
-          className="whatsappBtn"
-          onClick={() => {
-            window.open(
-              "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
-              "_blank"
-            );
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.8 }}
-          style={{
-            right: showTopBtn ? "65px" : "20px",
-          }}
-        >
-          <FontAwesomeIcon icon={faWhatsapp} />
-        </motion.div>
-      )}
+      {!location.pathname.includes("/restaurant/") &&
+        !location.pathname.includes("/app/") && (
+          <motion.div
+            className="whatsappBtn"
+            onClick={() => {
+              window.open(
+                "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
+                "_blank"
+              );
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.8 }}
+            style={{
+              right: showTopBtn ? "65px" : "20px",
+            }}
+          >
+            <FontAwesomeIcon icon={faWhatsapp} />
+          </motion.div>
+        )}
 
       {showTopBtn && !location.pathname.includes("/restaurant/") && (
         <motion.div
