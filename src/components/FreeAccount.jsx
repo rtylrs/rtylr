@@ -25,7 +25,7 @@ function FreeAccount() {
         }}
       >
         <div className="free-account-content">
-          <p>You are currently on a free account.</p>
+          <p>You are currently using a free tier.</p>
         </div>
         <button
           className="upgrade-button"
