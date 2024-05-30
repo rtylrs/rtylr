@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 function MenuItem({ item, onEdit }) {
   return (
     <div className="menu-item">
-      <img src={item.image} alt={item.name} />
+      <img src={item.coverInmage} alt={item.name} />
       <div className="item-details">
         <h3>{item.name}</h3>
         <p>Options: {item.options}</p>
