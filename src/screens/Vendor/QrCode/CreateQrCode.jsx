@@ -130,6 +130,7 @@ function CreateQrCode() {
         >
           <option value="squares">Squares</option>
           <option value="dots">Dots</option>
+          <option value="fluid">fluid</option>
         </select>
       </div>
       <div
