@@ -40,6 +40,8 @@ import { fetchConfigData } from "./redux/reducers/configSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import { selectRole } from "./redux/reducers/userSlice";
+import ToolBar from "./components/ToolBar";
 
 const App = () => {
   //Hooks
@@ -49,6 +51,7 @@ const App = () => {
 
   // Redux
   const config = useSelector((state) => state.config);
+  const role = useSelector(selectRole);
 
   // States
   const [showTopBtn, setShowTopBtn] = useState(false);
@@ -93,6 +96,8 @@ const App = () => {
       {config.maintanance && !location.pathname.includes("/manage/") && (
         <Maintanance />
       )}
+
+      {role && role === "admin" && <ToolBar />}
 
       <Cookies />
 

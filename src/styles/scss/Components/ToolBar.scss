@@ -1,0 +1,47 @@
+/* ToolBar.css */
+
+.toolbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    padding: 6px;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 0.5px solid gray;
+  }
+  
+  .toolbar-item {
+    position: relative;
+    margin: 0 15px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .toolbar-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 24px;
+    background-color: #555;
+  }
+  
+  .toolbar-item svg {
+    color: white;
+  }
+  
+  .profile-item img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
+  
