@@ -11,7 +11,11 @@ import { useSelector } from "react-redux";
 function BusinessRoute() {
   const role = useSelector(selectRole);
 
-  return role === "business" ? <Outlet /> : <Navigate to="/" />;
+  return role === "business" || role === "admin" ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/" />
+  );
 }
 
 export { BusinessRoute };

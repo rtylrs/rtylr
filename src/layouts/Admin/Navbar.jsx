@@ -32,9 +32,6 @@ const Navbar = ({ openSidebar }) => {
         <p className="active_link">{user?.user?.name}</p>
       </div>
       <div className="navbar__right">
-        <Link to="/">
-          <FontAwesomeIcon icon={faHome} size="xl" />
-        </Link>
         <Link to="/manage/contacts">
           <Badge
             badgeContent={notificationsCount}

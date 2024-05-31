@@ -1,6 +1,7 @@
 import {
   faBars,
   faChartLine,
+  faHome,
   faPaperclip,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,14 +11,31 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const CustomSwitch = styled(Switch)(({ theme }) => ({
-  "& .MuiSwitch-switchBase.Mui-checked": {
-    color: "#fff",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.08)",
+  width: 34,
+  height: 20,
+  padding: 0,
+  "& .MuiSwitch-switchBase": {
+    padding: 2,
+    "&.Mui-checked": {
+      transform: "translateX(14px)",
+      color: "#fff",
+      "& + .MuiSwitch-track": {
+        backgroundColor: "#555",
+        opacity: 1,
+      },
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+      },
     },
   },
-  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-    backgroundColor: "white",
+  "& .MuiSwitch-thumb": {
+    width: 16,
+    height: 16,
+  },
+  "& .MuiSwitch-track": {
+    borderRadius: 10,
+    backgroundColor: "#555",
+    opacity: 1,
   },
 }));
 
@@ -39,6 +57,14 @@ function ToolBar() {
       <div
         className="toolbar-item"
         onClick={() => {
+          navigate("/");
+        }}
+      >
+        <FontAwesomeIcon icon={faHome} />
+      </div>
+      <div
+        className="toolbar-item"
+        onClick={() => {
           navigate("/manage");
         }}
       >
@@ -47,9 +73,11 @@ function ToolBar() {
       <div className="toolbar-item">
         <FontAwesomeIcon icon={faChartLine} />
       </div>
+      <div className="vertical-line"></div>
       <div className="toolbar-item">
         <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
       </div>
+      <div className="vertical-line"></div>
       <div className="toolbar-item profile-item">
         <img
           src={user?.image}
@@ -62,6 +90,7 @@ function ToolBar() {
           }}
         />
       </div>
+      <div className="vertical-line"></div>
       <div
         className="toolbar-item"
         onClick={() => {
