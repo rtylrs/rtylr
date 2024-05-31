@@ -179,9 +179,9 @@ const Header = () => {
           onClick={() => {
             if (user) {
               navigate(
-                user.role === "business"
+                user.role === "business" || user.role === "admin"
                   ? "/app/restaurant/"
-                  : "/auth/register/restaurant"
+                  : "/app/business/"
               );
             } else {
               navigate("/auth/register/restaurant");
