@@ -1,13 +1,15 @@
 import axios from "axios";
 import i18next from "i18next";
 
-const mode = "prod"; // can be dev or prod
+const getBaseUrl = () => {
+  const mode = localStorage.getItem("mode") || "prod";
+  return mode === "dev"
+    ? "http://localhost:1024/api/v1/app"
+    : "https://onion-e6t0.onrender.com/api/v1/app";
+};
 
 const api = axios.create({
-  baseURL:
-    mode === "dev"
-      ? "http://localhost:1024/api/v1/app"
-      : "https://onion-e6t0.onrender.com/api/v1/app",
+  baseURL: getBaseUrl(),
 });
 
 api.interceptors.request.use(

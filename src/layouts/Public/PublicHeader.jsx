@@ -178,10 +178,6 @@ const Header = () => {
         <VbitezButton
           onClick={() => {
             if (user) {
-              if (user.role === "admin") {
-                navigate("/manage");
-                return;
-              }
               navigate(
                 user.role === "business"
                   ? "/app/restaurant/"
@@ -194,11 +190,7 @@ const Header = () => {
           className="browse-products"
           hidden={width < 768}
         >
-          {user.token
-            ? user.role === "admin"
-              ? "Admin Dashboard"
-              : "My Dashboard"
-            : "Register Now"}
+          {user.token ? "My Dashboard" : "Register Now"}
         </VbitezButton>
       </div>
       {isMobileMenuOpen && (
