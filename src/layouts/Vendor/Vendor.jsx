@@ -32,7 +32,9 @@ function Vendor(props) {
     const url = new URL(window.location.href);
     if (!url.searchParams.has("userId")) {
       url.searchParams.append("userId", user?.userId);
-      url.searchParams.append("plan", user?.user?.planType);
+      if (role !== "admin")
+        url.searchParams.append("plan", user?.user?.planType);
+      else url.searchParams.append("plan", "admin");
       window.history.replaceState({}, "", url.toString());
     }
 
