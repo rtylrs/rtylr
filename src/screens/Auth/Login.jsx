@@ -80,11 +80,7 @@ function Login() {
           <span className="forgot-password">Forgot password?</span>
         </div>
         <div className="login-button-wrapper">
-          <button
-            className="login-button"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <button className="login-button" onClick={handleSubmit}>
             {loading ? "Loading..." : "Sign In"}
           </button>
         </div>
