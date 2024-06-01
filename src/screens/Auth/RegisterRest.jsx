@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import notify from "../../lib/notify/notify";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,12 +8,14 @@ import {
   selectLoading,
 } from "../../redux/reducers/userSlice";
 
-function RegisterUser() {
+function RegisterRestaurant() {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [name, setName] = React.useState("");
+  const [address, setAddress] = React.useState("");
+  const [phone, setPhone] = React.useState("");
   const [refered, setRefered] = React.useState("");
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -22,7 +23,7 @@ function RegisterUser() {
 
   const handleRegister = () => {
     if (password === confirmPassword) {
-      dispatch(RegisterResaurantAsync({ email, password, name, refered }));
+      dispatch(RegisterResaurantAsync({ email, password, name, address, phone, refered }));
     } else {
       notify.error("Password does not match");
     }
@@ -35,69 +36,77 @@ function RegisterUser() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="RegisterScreen-container">
-      <div className="RegisterScreen">
-        <h2 className="RegisterScreen-title">Sign Up</h2>
-        <form onSubmit={handleRegister}>
+    <div className="register-container">
+      <div className="image-container">
+        <img src="/images/Al-Abed_Mohammad2.jpg" alt="Restaurant" className="register-image" />
+      </div>
+      <div className="register-form">
+        <h2>Sign Up</h2>
+        <p>Create your account to get started</p>
+        <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
           <input
-            className="RegisterScreen-input"
+            className="register-input"
             type="text"
             placeholder="Restaurant Name"
-            id="Fname"
             required
             onChange={(e) => setName(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
+            className="register-input"
             type="email"
             placeholder="Email"
-            id="email"
             required
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
-            placeholder="Password"
+            className="register-input"
+            type="text"
+            placeholder="Address"
+            required
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <input
+            className="register-input"
+            type="text"
+            placeholder="Phone Number"
+            required
+            onChange={(e) => setPhone(e.target.value)}
+          />
+          <input
+            className="register-input"
             type="password"
-            id="pass"
+            placeholder="Password"
             required
             onChange={(e) => setPassword(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
+            className="register-input"
             type="password"
-            id="conPass"
             placeholder="Confirm Password"
             required
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
+            className="register-input"
             type="text"
-            id="conPass"
-            placeholder="Refered By (Optional)"
-            required
+            placeholder="Referred By (Optional)"
             onChange={(e) => setRefered(e.target.value)}
           />
           <button
-            className="RegisterScreen-button"
-            onClick={() => {
-              handleRegister();
-            }}
+            className="register-button"
             disabled={loading}
           >
             {loading ? "Loading..." : "Register"}
           </button>
         </form>
-
-        <div className="LoginScreen-footer">
+        <div className="register-footer">
           <p>
             Already have an account?{" "}
-            <span className="LoginScreen-link" onClick={() => {}}>
+            <span className="login-link" onClick={() => navigate("/auth/login")}>
               Login Now.
             </span>
           </p>
-          <p className="LoginScreen-link" onClick={() => {}}>
+          <p className="forgot-link" onClick={() => navigate("/auth/forgot-password")}>
             Forgot Password?
           </p>
         </div>
@@ -106,9 +115,4 @@ function RegisterUser() {
   );
 }
 
-RegisterUser.propTypes = {
-  open: PropTypes.bool.isRequired,
-  close: PropTypes.func.isRequired,
-};
-
-export default RegisterUser;
+export default RegisterRestaurant;
