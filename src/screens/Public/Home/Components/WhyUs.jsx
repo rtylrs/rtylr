@@ -1,51 +1,51 @@
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useColors from "../../../../hooks/useColors";
+// src/components/WhyUs.jsx
+import React from 'react';
+import WhyUsCard from './WhyUsCard';
+import { faUsers, faComments, faSearch, faLanguage, faEdit, faMoneyBillWave, faStar, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
+const whyUsFeatures = [
+  {
+    icon: faUsers,
+    title: 'Productized Service',
+    description: 'Ditch developer management hassle. We deliver a tailored solution, covering everything from ideation to maintenance.',
+  },
+  {
+    icon: faComments,
+    title: 'Transparent Communication',
+    description: 'Stay informed every step of the way with clear communication and progress updates.',
+  },
+  
+  {
+    icon: faLanguage,
+    title: '24/7 Support & Unlimited Requests',
+    description: 'Get the help you need, whenever you need it, without worrying about limits.',
+  },
+  {
+    icon: faEdit,
+    title: 'Scalable Solutions',
+    description: 'We adapt to your growing needs, ensuring a seamless team expansion.',
+  },
+];
 
-function WhyUs (){
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const { accent } = useColors();
+const WhyUs = () => {
+  return (
+    <div className="why-us">
+      
+      <h2>Why Choose Us </h2>
+      <h1>What Sets Us Apart?</h1>
 
-return(
-<div className="whyus-container">
-  <section className="whyUs-container-1">
-    <div className="whyUs-text1">
-      <h1>Enhance your promotions <br />and elevate your brand</h1>
-      <h2>Transforming your restaurant's vision into captivating digital solutions since 1998. <br /> We conceptualize, design, and develop data-driven products to overcome your business challenges.</h2>
-      <br />
-      <h2>Experience our comprehensive services designed to guide you seamlessly in crafting digital masterpieces, on budget and on time.</h2>
+      <div className="why-us-cards">
+        {whyUsFeatures.map((feature, index) => (
+          <WhyUsCard
+            key={index}
+            icon={feature.icon}
+            title={feature.title}
+            description={feature.description}
+          />
+        ))}
+      </div>
     </div>
-    <div className="whyUs-image">
-      <img src="/images/test-image.png" alt="" />
-    </div>
-  </section>
-
-  <section className="whyUs-container-2">
-    <div className="whyUs-image2">
-      <img src="/images/test2.png" alt="" />
-    </div>
-    <div className="whyUs-text2">
-      <h1>Stay ahead with innovative digital strategies</h1>
-      <h2>Our team of experts crafts cutting-edge websites infused with modern technologies and forward-thinking design, ensuring your restaurant stands out in the digital landscape.</h2>
-      <br />
-      <h2>Benefit from our holistic services tailored to bring your digital vision to life, every step of the way.</h2>
-    </div>
-  </section>
-</div>
-
-);
-
-
-
-}
+  );
+};
 
 export default WhyUs;
-
-/*
-  File Created By: Abed El-Fattah Amouneh
-  Last Edited: Wednesday 15 May 2024
-  Last Edited by: Abed El-Fattah Amouneh
-*/

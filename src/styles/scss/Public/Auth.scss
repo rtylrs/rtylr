@@ -160,37 +160,301 @@
     }
   }
 }
-.register-selection-container {
+.register-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: #f0f0f0;
+  max-height: 90vh;
+  background: #f5f5f5;
 
-  h2 {
-    margin-bottom: 20px;
-    font-size: 36px;
-    color: #333;
+  .image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f0f0f0;
+    
+    .register-image {
+    width: 100%;
+      height:90vh;
+      object-fit: cover;
+    }
   }
 
-  .register-options {
+  .register-form {
+    flex: 1;
+    padding: 40px 30px;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
-    .register-option-button {
-      padding: 15px 30px;
-      font-size: 20px;
-      color: #fff;
-      background: $primary-color;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s;
+    .logo {
+      width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
 
-      &:hover {
-        background: $secondary-color;
+    h2 {
+      margin-bottom: 10px;
+      font-size: 32px;
+      color: #333;
+      text-align: center;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #666;
+      text-align: center;
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .register-input {
+        width: 90%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+        font-size: 14px;
+
+        &::placeholder {
+          color: #aaa;
+        }
+      }
+
+      .register-button {
+        color: #fff;
+        padding: 12px 70px;  
+        border: 2px solid $primary-color;
+        font-size: 17px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+        font-weight: bold;
+        font-family: $secondary-font;
+        background-color: $primary-color;
+  
+        &:hover {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          background-color: $secondary-color;
+        }
+      }
+    }
+
+    .register-footer {
+      margin-top: 15px;
+      text-align: center;
+      color: #666;
+
+      .login-link, .forgot-link {
+        cursor: pointer;
+        color: #007bff;
+        text-decoration: underline;
+        margin: 5px 0;
+
+        &:hover {
+          color: #0056b3;
+        }
       }
     }
   }
 }
+
+@media (max-width: 768px) {
+  .register-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+
+    .image-container {
+      display: none;
+    }
+
+    .register-form {
+      flex: 1;
+      max-width: 100%;
+      border-radius: 10px;
+      padding: 20px;
+    }
+  }
+}
+
+/* General styles for both registration forms */
+.register-input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  font-size: 14px;
+
+  &::placeholder {
+    color: #aaa;
+  }
+}
+
+.register-button {
+  width: 100%;
+  color: #fff;
+  padding: 12px;
+  margin-top: 20px;
+  border: none;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  font-weight: bold;
+  background-color: #007bff;
+
+  &:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #0056b3;
+  }
+}
+
+/* RegisterUser specific styles */
+.register-user-container {
+  display: flex;
+  height: 90vh;
+  background: #f5f5f5;
+
+  .register-user-image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #e0e0e0;
+
+    .register-user-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .register-user-form {
+    flex: 1;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+
+    .register-user-logo {
+      width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 32px;
+      color: #333;
+      text-align: center;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #666;
+      text-align: center;
+    }
+
+    .register-user-input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      font-size: 14px;
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
+
+    .register-user-button {
+      width: 100%;
+      color: #fff;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      font-weight: bold;
+      background-color: #007bff;
+
+      &:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #0056b3;
+      }
+    }
+
+    .register-user-social-media {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+
+      .register-user-google-button {
+        width: 100%;
+        padding: 12px;
+        color: #fff;
+        background-color: #db4437;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s, box-shadow 0.3s;
+
+        &:hover {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          background-color: #c23321;
+        }
+
+        .fa-google {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .register-user-footer {
+      margin-top: 20px;
+      text-align: center;
+
+      p {
+        margin: 5px 0;
+
+        .register-user-login-link,
+        .register-user-forgot-link {
+          color: #007bff;
+          cursor: pointer;
+          text-decoration: underline;
+
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -1,13 +1,10 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../firebase";
 import { GoogleAuthProvider } from "firebase/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-
-// Phone input
 import PropTypes from "prop-types";
-import { useNavigate } from "react-router-dom";
 
 function RegisterUser() {
   const navigate = useNavigate();
@@ -15,7 +12,6 @@ function RegisterUser() {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [name, setName] = React.useState("");
-  const [refered, setRefered] = React.useState("");
   const provider = new GoogleAuthProvider();
 
   const handleRegister = () => {
@@ -24,7 +20,6 @@ function RegisterUser() {
         .createUserWithEmailAndPassword(email, password)
         .then((auth) => {
           auth.user.sendEmailVerification();
-
           db.collection("Users")
             .doc(auth.user.uid)
             .set(
@@ -48,7 +43,6 @@ function RegisterUser() {
                 },
                 verified: false,
                 tier: 0,
-                refered: refered,
               },
               { merge: true }
             )
@@ -70,6 +64,7 @@ function RegisterUser() {
           alert(e.message);
         });
     } else {
+      alert("Passwords do not match");
     }
   };
 
@@ -103,7 +98,6 @@ function RegisterUser() {
                 },
                 verified: false,
                 tier: 0,
-                refered: refered,
               })
               .then(() => {
                 auth.currentUser
@@ -136,79 +130,61 @@ function RegisterUser() {
   };
 
   return (
-    <div className="RegisterScreen-container">
-      <div className="RegisterScreen">
-        <h2 className="RegisterScreen-title">Sign Up</h2>
-        <form onSubmit={handleRegister}>
+    <div className="register-user-container">
+      <div className="register-user-image-container">
+        <img src="/images/Al-Abed_Mohammad2.jpg" alt="Register" className="register-user-image" />
+      </div>
+      <div className="register-user-form">
+        <img src="/public/logo.png" alt="Logo" className="register-user-logo" />
+        <h2>Sign Up</h2>
+        <p>Create your user account to get started</p>
+        <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
           <input
-            className="RegisterScreen-input"
+            className="register-user-input"
             type="text"
             placeholder="Full Name"
-            id="Fname"
             required
             onChange={(e) => setName(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
+            className="register-user-input"
             type="email"
             placeholder="Email"
-            id="email"
             required
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
-            placeholder="Password"
+            className="register-user-input"
             type="password"
-            id="pass"
+            placeholder="Password"
             required
             onChange={(e) => setPassword(e.target.value)}
           />
           <input
-            className="RegisterScreen-input"
+            className="register-user-input"
             type="password"
-            id="conPass"
             placeholder="Confirm Password"
             required
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <input
-            className="RegisterScreen-input"
-            type="text"
-            id="conPass"
-            placeholder="Refered By (Optional)"
-            required
-            onChange={(e) => setRefered(e.target.value)}
-          />
-          <button
-            className="RegisterScreen-button"
-            onClick={() => {
-              handleRegister();
-            }}
-          >
+          <button className="register-user-button" disabled={false}>
             Sign Up
           </button>
-          <div className="RegisterScreen-social-media">
-            <button
-              className="RegisterScreen-google-button"
-              onClick={() => {
-                handleRegisterWithGoogle();
-              }}
-            >
+          <div className="register-user-social-media">
+            <button className="register-user-google-button" onClick={handleRegisterWithGoogle}>
               <FontAwesomeIcon icon={faGoogle} size="lg" />
               Sign in with Google
             </button>
           </div>
         </form>
-
-        <div className="LoginScreen-footer">
+        <div className="register-user-footer">
           <p>
             Already have an account?{" "}
-            <span className="LoginScreen-link" onClick={() => {}}>
+            <span className="register-user-login-link" onClick={() => navigate("/auth/login")}>
               Login Now.
             </span>
           </p>
-          <p className="LoginScreen-link" onClick={() => {}}>
+          <p className="register-user-forgot-link" onClick={() => navigate("/auth/forgot-password")}>
             Forgot Password?
           </p>
         </div>

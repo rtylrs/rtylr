@@ -332,67 +332,77 @@ margin-top: 20px;
   font-size: medium;
 }
 
-  // Why Us Section
-.whyus-container {
-  margin-top: 20px;
-}
 
-.whyUs-container-1,
-.whyUs-container-2 {
+.why-us {
+  padding: 2rem;
+  background-color: #fff;
+  color: #ffffff;
   text-align: center;
-  height: 650px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  width: 100%;
-}
 
-.whyUs-text1,
-.whyUs-text2 {
-  max-width: 50%;
-  margin: 20px;
+  h2 {
+    margin-bottom: 2rem;
+    padding: 10px 20px;
+    background-color: #fff;
+    color: $primary-color;
+    display: inline-block;
+    border-radius: 30px;
+    border: 2px solid #523ce4;
+  }
+h1{
   color: $primary-color;
-  text-align: left;
-  margin-top: 150px;
+  font-size: 50px;
+  margin: 10px;
+}
+  .why-us-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+  }
 }
 
-.whyUs-text1 h1,
-.whyUs-text2 h1 {
-  font-size: 40px;
-  font-family: $primary-font;
-  font-weight: 900;
-  line-height: 50px;
-  margin: 0;
-  margin-bottom: 15px;
-}
-
-.whyUs-text1 h2,
-.whyUs-text2 h2 {
-  font-size: 1em;
-  font-weight: 500;
-  margin: 0;
-  font-family: $secondary-font;
-}
-
-.whyUs-image,
-.whyUs-image2 {
-  max-width: 50%;
+.why-us-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 70%;
-  margin-top: 50px;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 350px;
+  margin: 1rem;
+  color: $primary-color;
+
+  .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 1rem;
+    border-radius: 50%;
+    margin-right: 1rem;
+
+    svg {
+      color: $dark-color;
+    }
+  }
+
+  .whyus-text-container {
+    h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      color: $primary-color;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: $primary-color;
+    }
+  }
 }
 
-.whyUs-image img,
-.whyUs-image2 img {
-  width: 100%;
-  height: auto;
-}
 
 //Pricing
 .Prices {
