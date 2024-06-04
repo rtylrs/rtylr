@@ -34,7 +34,7 @@ function Menu() {
   const renderCategorySection = (category) => (
     <div key={category._id} className="category-section">
       <div className="category-header">
-        <span>{category.details.name}</span>
+        <span>{category?.details?.name}</span>
       </div>
       <div className="category-items">
         {category &&
