@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addMenuItem } from "../../../redux/reducers/menuSlice";
@@ -7,7 +7,7 @@ function CreateItem() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const categoryId = location.state.categoryId;
+  const categoryId = location.state?.categoryId;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -20,6 +20,13 @@ function CreateItem() {
   const [tags, setTags] = useState([]);
   const [isVeg, setIsVeg] = useState(false);
   const [isHalal, setIsHalal] = useState(false);
+
+  useEffect(() => {
+    console.log(categoryId);
+    if (!categoryId) {
+      navigate(-1);
+    }
+  }, [categoryId, navigate]);
 
   const handleInputChange = (e, setState) => {
     setState(e.target.value.split(",").map((item) => item.trim()));
@@ -87,7 +94,7 @@ function CreateItem() {
         />
         <div>
           <h3>Category</h3>
-          {categoryId}
+          {categoryId && categoryId}
         </div>
         <input
           type="text"
