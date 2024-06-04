@@ -5,9 +5,7 @@ import api from '../../lib/api';
 export const fetchMenu = createAsyncThunk(
     'menu/fetchMenu',
     async (restaurantId) => {
-        console.log("Fetching");
         const response = await api.get(`/menu/${restaurantId}`);
-        console.log(response.data);
         return response.data;
     }
 );

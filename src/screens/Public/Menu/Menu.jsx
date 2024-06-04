@@ -13,8 +13,9 @@ function Menu() {
   const getMenu = useAsync({
     fn: menuApi.getMenu,
     onSuccess: () => {
-      setCategories(getMenu.result.menu.items);
-      setRestaurant(getMenu.result.business);
+      console.log(getMenu.result.details.menu.items);
+      setCategories(getMenu.result.details.menu.items);
+      setRestaurant(getMenu.result.details.business);
       setStatus("succeeded");
     },
     onError: () => {
@@ -33,11 +34,11 @@ function Menu() {
   const renderCategorySection = (category) => (
     <div key={category._id} className="category-section">
       <div className="category-header">
-        <span>{category.name}</span>
+        <span>{category.details.name}</span>
       </div>
       <div className="category-items">
         {category &&
-          category.menuItems.map((item) => (
+          category.details.menuItems.map((item) => (
             <MenuItem key={item._id} item={item} />
           ))}
       </div>
