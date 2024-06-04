@@ -1,30 +1,51 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../lib/api';
 
+// Fetch menu by restaurant ID
 export const fetchMenu = createAsyncThunk(
     'menu/fetchMenu',
     async (restaurantId) => {
+        console.log("Fetching");
         const response = await api.get(`/menu/${restaurantId}`);
+        console.log(response.data);
         return response.data;
     }
 );
 
+// Add a new menu item to a category
 export const addMenuItem = createAsyncThunk(
     'menu/addMenuItem',
     async ({ categoryId, item }) => {
-        const response = await api.post(`/menu/category/${categoryId}/item`, item);
-        return response.data;
+        const formData = new FormData();
+        Object.keys(item).forEach(key => {
+            if (Array.isArray(item[key])) {
+                item[key].forEach((subItem, index) => {
+                    formData.append(`${key}[${index}]`, subItem);
+                });
+            } else {
+                formData.append(key, item[key]);
+            }
+        });
+
+        const response = await api.post(`/menu/category/${categoryId}/item`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return { categoryId, item: response.data };
     }
 );
 
+// Edit a menu item
 export const editMenuItem = createAsyncThunk(
     'menu/editMenuItem',
     async ({ itemId, item }) => {
         const response = await api.put(`/menu/item/${itemId}`, item);
-        return response.data;
+        return { itemId, item: response.data };
     }
 );
 
+// Delete a menu item from a category
 export const deleteMenuItem = createAsyncThunk(
     'menu/deleteMenuItem',
     async ({ categoryId, itemId }) => {
@@ -33,6 +54,7 @@ export const deleteMenuItem = createAsyncThunk(
     }
 );
 
+// Add a new category
 export const addCategory = createAsyncThunk(
     'menu/addCategory',
     async (category) => {
@@ -41,6 +63,7 @@ export const addCategory = createAsyncThunk(
     }
 );
 
+// Delete a category
 export const deleteCategory = createAsyncThunk(
     'menu/deleteCategory',
     async (categoryId) => {
@@ -49,6 +72,7 @@ export const deleteCategory = createAsyncThunk(
     }
 );
 
+// Rename a category
 export const renameCategory = createAsyncThunk(
     'menu/renameCategory',
     async ({ categoryId, newName }) => {
@@ -57,6 +81,7 @@ export const renameCategory = createAsyncThunk(
     }
 );
 
+// Create the menu slice
 const menuSlice = createSlice({
     name: 'menu',
     initialState: {
@@ -78,6 +103,8 @@ const menuSlice = createSlice({
             })
             .addCase(fetchMenu.rejected, (state, action) => {
                 state.status = 'failed';
+                state.items = [];
+                state.id = null;
                 state.error = action.error.message;
             })
             .addCase(addMenuItem.fulfilled, (state, action) => {
@@ -88,10 +115,10 @@ const menuSlice = createSlice({
                 }
             })
             .addCase(editMenuItem.fulfilled, (state, action) => {
-                const { categoryId, item } = action.payload;
-                const category = state.items.find(cat => cat._id === categoryId && cat.type === 'category');
+                const { itemId, item } = action.payload;
+                const category = state.items.find(cat => cat.menuItems.some(menuItem => menuItem._id === itemId) && cat.type === 'category');
                 if (category) {
-                    const index = category.menuItems.findIndex(menuItem => menuItem._id === item._id);
+                    const index = category.menuItems.findIndex(menuItem => menuItem._id === itemId);
                     if (index !== -1) {
                         category.menuItems[index] = item;
                     }

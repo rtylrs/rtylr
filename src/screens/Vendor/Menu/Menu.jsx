@@ -16,7 +16,7 @@ function Menu() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userId = useSelector((state) => state.user.userId);
-  const { items: categories, status } = useSelector((state) => state.menu);
+  const { items, status } = useSelector((state) => state.menu);
   const menuId = useSelector((state) => state.menu.id);
 
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -41,7 +41,7 @@ function Menu() {
   };
 
   const handleAddCategory = (category) => {
-    dispatch(addCategory(category));
+    dispatch(addCategory({ restaurantId: userId, name: category }));
     setCreateCategoryModalOpen(false);
   };
 
@@ -57,14 +57,14 @@ function Menu() {
   const renderCategorySection = (category) => (
     <div key={category._id} className="category-section">
       <div className="category-header">
-        <span>{category.name}</span>
+        <span>{category.details.name}</span>
         <button onClick={() => handleDeleteCategory(category._id)}>
           Delete
         </button>
       </div>
       <div className="category-items">
         {category &&
-          category.menuItems.map((item) => (
+          category?.details?.menuItems.map((item) => (
             <MenuItem
               key={item._id}
               item={item}
@@ -74,7 +74,7 @@ function Menu() {
         <button
           onClick={() => {
             navigate("/app/restaurant/create-item", {
-              state: { categoryId: category._id },
+              state: { categoryId: category.itemId },
             });
           }}
         >
@@ -92,26 +92,19 @@ function Menu() {
     <div className="menu-container">
       <h1>Menu</h1>
       <div className="category-controls">
-        {/* <CategoryDropdown
-          categories={categories}
+        <CategoryDropdown
+          categories={items.filter((item) => item.type === "category")}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onCreateCategory={() => setCreateCategoryModalOpen(true)}
-        /> */}
+        />
       </div>
       <div className="menu-items">
-        {categories &&
-          categories
+        {items &&
+          items
             .filter((item) => item.type === "category")
             .map(renderCategorySection)}
       </div>
-      {/* <EditMenuItemModal
-        isOpen={isEditModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        item={itemToEdit}
-        categories={categories}
-        onSave={handleEditMenuItem}
-      /> */}
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}
