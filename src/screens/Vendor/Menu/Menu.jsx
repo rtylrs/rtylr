@@ -57,7 +57,7 @@ function Menu() {
   const renderCategorySection = (category) => (
     <div key={category._id} className="category-section">
       <div className="category-header">
-        <span>{category.details.name}</span>
+        <span>{category?.details?.name}</span>
         <button onClick={() => handleDeleteCategory(category._id)}>
           Delete
         </button>
