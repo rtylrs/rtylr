@@ -1,13 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
+import { addCategory } from "../../../redux/reducers/menuSlice";
 
-function CreateCategoryModal({ isOpen, onClose, onSave }) {
+function CreateCategoryModal({ isOpen, onClose }) {
   const [category, setCategory] = useState("");
+  const dispatch = useDispatch();
+  const restaurantId = useSelector((state) => state.user.userId);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(category);
-    onClose();
+    if (category.trim()) {
+      dispatch(addCategory({ restaurantId, name: category }));
+      setCategory("");
+      onClose();
+    } else {
+      alert("Category name cannot be empty.");
+    }
   };
 
   return (

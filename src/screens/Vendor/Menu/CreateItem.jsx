@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addMenuItem } from "../../../redux/reducers/menuSlice";
 
-function CreateItem({ onSave }) {
+function CreateItem() {
   const navigate = useNavigate();
-  const categories = useSelector((state) => state.menu.categories);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const categoryId = location.state.categoryId;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
   const [images, setImages] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [isAvailable, setIsAvailable] = useState(true);
   const [availability, setAvailability] = useState("");
@@ -19,28 +21,23 @@ function CreateItem({ onSave }) {
   const [isVeg, setIsVeg] = useState(false);
   const [isHalal, setIsHalal] = useState(false);
 
-  const handleCategoryChange = (category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((cat) => cat !== category)
-        : [...prev, category]
-    );
-  };
-
   const handleInputChange = (e, setState) => {
     setState(e.target.value.split(",").map((item) => item.trim()));
   };
 
+  const handleFileChange = (e, setState) => {
+    setState(e.target.files[0]);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newItem = {
-      id: Date.now(),
+
+    const item = {
       name,
       description,
       price,
       coverImage,
-      images: images.map((url) => ({ url })),
-      categories: selectedCategories,
+      images,
       ingredients,
       isAvailable,
       availability,
@@ -49,7 +46,10 @@ function CreateItem({ onSave }) {
       isVeg,
       isHalal,
     };
-    onSave(newItem);
+
+    dispatch(addMenuItem({ categoryId, item })).then(() => {
+      // navigate(-1);
+    });
   };
 
   return (
@@ -69,16 +69,15 @@ function CreateItem({ onSave }) {
           onChange={(e) => setDescription(e.target.value)}
         />
         <input
-          type="text"
+          type="number"
           placeholder="Price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
         <input
-          type="text"
-          placeholder="Cover Image URL"
-          value={coverImage}
-          onChange={(e) => setCoverImage(e.target.value)}
+          type="file"
+          placeholder="Cover Image"
+          onChange={(e) => handleFileChange(e, setCoverImage)}
         />
         <input
           type="text"
@@ -87,19 +86,8 @@ function CreateItem({ onSave }) {
           onChange={(e) => handleInputChange(e, setImages)}
         />
         <div>
-          <h3>Categories</h3>
-          {categories &&
-            categories?.map((cat) => (
-              <label key={cat}>
-                <input
-                  type="checkbox"
-                  value={cat}
-                  checked={selectedCategories.includes(cat)}
-                  onChange={() => handleCategoryChange(cat)}
-                />
-                {cat}
-              </label>
-            ))}
+          <h3>Category</h3>
+          {categoryId}
         </div>
         <input
           type="text"

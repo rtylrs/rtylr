@@ -11,11 +11,12 @@ function CategoryDropdown({
         onChange={(e) => onSelectCategory(e.target.value)}
       >
         <option value="">All Categories</option>
-        {categories.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
-          </option>
-        ))}
+        {categories &&
+          categories?.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat.name}
+            </option>
+          ))}
       </select>
       <button onClick={onCreateCategory}>Create Category</button>
     </div>
