@@ -23,8 +23,7 @@ function Price() {
               <b>Silver Plan</b>
             </h4>
             <h3>
-              $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>00</span>
-              /month
+              <span style={{ fontSize: "70px", fontWeight: "bold" }}>Free</span>
             </h3>
             <p>No credit card required</p>
             <hr style={{ border: "1px solid grey", margin: "20px 0" }} />
@@ -134,9 +133,7 @@ function Price() {
               </li>
             </ul>
             <div className="price-button">
-              <VbitezButton
-              
-              >Purchase Now</VbitezButton>
+              <VbitezButton>Purchase Now</VbitezButton>
             </div>
           </div>
         </div>
