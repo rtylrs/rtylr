@@ -53,7 +53,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => navigate("/app/restaurant/")}
         >
           <FontAwesomeIcon icon={faHome} className="vendor-sidebar__icon" />
-          <p id="link">Home</p>
+          <p id="link">Dashboard</p>
         </div>
         <div
           className={`vendor-sidebar__link ${

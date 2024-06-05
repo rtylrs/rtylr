@@ -113,7 +113,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/manage" id="link">
-            My Dashboard
+            Dashboard
           </Link>
         </div>
         <div
