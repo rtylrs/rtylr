@@ -89,7 +89,7 @@ function Menu() {
   }
 
   return (
-    <div className="menu-container">
+    <div className="menu-container-vendor">
       <h1>Menu</h1>
       <div className="category-controls">
         <CategoryDropdown

@@ -190,7 +190,7 @@ const Header = () => {
           className="browse-products"
           hidden={width < 768}
         >
-          {user.token ? "My Dashboard" : "Register Now"}
+          {user.token ? "Dashboard" : "Register Now"}
         </VbitezButton>
       </div>
       {isMobileMenuOpen && (

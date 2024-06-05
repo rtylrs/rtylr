@@ -1,7 +1,6 @@
 // Menu + Menu Items
-.menu-container {
+.menu-container-vendor {
     padding: 20px;
-  }
   
   .category-header {
     display: flex;
@@ -41,6 +40,8 @@
   .item-controls input[type="checkbox"] {
     margin-right: 5px;
   }
+}
+
   
   .modal {
     position: absolute;
@@ -108,5 +109,83 @@
   
   .modal form label input[type="checkbox"] {
     margin-right: 10px;
+  }
+  
+
+  .create-menu-item-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+  
+      .form-group {
+        margin-bottom: 20px;
+  
+        label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: bold;
+          color: #333;
+        }
+  
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+          font-size: 16px;
+          color: #333;
+  
+          &:focus {
+            border-color: #007bff;
+            outline: none;
+          }
+        }
+  
+        input[type="checkbox"] {
+          margin-left: 10px;
+        }
+      }
+  
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-right: 10px;
+  
+        &:first-of-type {
+          background-color: #007bff;
+          color: #fff;
+        }
+  
+        &:last-of-type {
+          background-color: #ccc;
+          color: #333;
+        }
+  
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+    }
   }
   

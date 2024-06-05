@@ -31,7 +31,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         <div className="sidebar__link ">
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/account" id="link">
-            My Dashboard
+            Dashboard
           </Link>
         </div>
         <h2>Management</h2>
