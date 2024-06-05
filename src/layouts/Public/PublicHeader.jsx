@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faChevronDown,
-  faChevronUp,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,13 +17,28 @@ import VbitezButton from "../../components/Buttons/Buttons";
 import useColors from "../../hooks/useColors";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { useSelector } from "react-redux";
+import { selectLanguage } from "../../services/i18next";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { primary, secondary } = useColors();
+  const { primary } = useColors();
   const { width } = useWindowDimensions();
   const [dropdown, setDropdown] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [language, setLanguage] = useState("en");
+
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+
+    if (language) {
+      setLanguage(language);
+    }
+  }, []);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
   const user = useSelector((state) => state.user);
 
@@ -57,13 +71,26 @@ const Header = () => {
     });
   }, []);
 
+  const handleClick = () => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      if (user.role === "business" || user.role === "admin") {
+        navigate("/app/restaurant/");
+      } else {
+        navigate("/app/user/");
+      }
+    } else {
+      navigate("/auth/register/restaurant");
+    }
+  };
+
   return (
     <header
       className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}
           ${scrolled ? "scrolled" : ""}`}
       style={{
-        backgroundColor:
-          document.location.pathname === "/" ? "#fff" : "#f5f5f5",
+        backgroundColor: document.location.pathname === "/" ? "" : "#f5f5f5",
         position: "fixed",
       }}
     >
@@ -176,22 +203,45 @@ const Header = () => {
         </button>
 
         <VbitezButton
-          onClick={() => {
-            if (user) {
-              navigate(
-                user.role === "business" || user.role === "admin"
-                  ? "/app/restaurant/"
-                  : "/app/business/"
-              );
-            } else {
-              navigate("/auth/register/restaurant");
-            }
-          }}
+          onClick={handleClick}
           className="browse-products"
           hidden={width < 768}
         >
           {user.token ? "Dashboard" : "Register Now"}
         </VbitezButton>
+        <div className="lang-dropdown-container">
+          <div className="selected-language" onClick={toggleDropdown}>
+            {language}
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              style={{
+                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            />
+          </div>
+          {isOpen && (
+            <div className="languages-dropdown">
+              <span
+                onClick={() => {
+                  selectLanguage("en");
+                  setLanguage("en");
+                  setIsOpen(false);
+                }}
+              >
+                EN
+              </span>
+              <span
+                onClick={() => {
+                  selectLanguage("fr");
+                  setLanguage("fr");
+                  setIsOpen(false);
+                }}
+              >
+                FR
+              </span>
+            </div>
+          )}
+        </div>
       </div>
       {isMobileMenuOpen && (
         <div className="mobile-menu">
@@ -212,22 +262,7 @@ const Header = () => {
             <p>Login</p>
           </VbitezButton>
 
-          <VbitezButton
-            onClick={() => {
-              if (user) {
-                if (user.role === "admin") {
-                  navigate("/manage");
-                  return;
-                }
-                navigate(
-                  user.role === "business" ? "/app/restaurant/" : "/user"
-                );
-              } else {
-                navigate("/auth/register/restaurant");
-              }
-            }}
-            className="browse-products"
-          >
+          <VbitezButton onClick={handleClick} className="browse-products">
             {user.token
               ? user.role === "admin"
                 ? "Ya Hussein"

@@ -20,7 +20,7 @@ function Price() {
         <div className="price-card">
           <div className="prices-container">
             <h4>
-              <b>Silver Plan</b>
+              <b>Starter Plan</b>
             </h4>
             <h3>
               <span style={{ fontSize: "70px", fontWeight: "bold" }}>Free</span>
@@ -52,13 +52,14 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
+              <span>Learn More</span>
             </div>
           </div>
         </div>
-        <div className="price-card">
+        <div className="price-card popular">
           <div className="prices-container">
             <h4>
-              <b>Popular Plan</b>
+              <b>Most Popular</b>
             </h4>
             <h3>
               ${" "}
@@ -93,6 +94,7 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
+              <span>Learn More</span>
             </div>
           </div>
         </div>
@@ -134,11 +136,10 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
+              <span>Learn More</span>
             </div>
           </div>
         </div>
-
-        {/* Add four more similar divs for other features */}
       </div>
     </div>
   );
