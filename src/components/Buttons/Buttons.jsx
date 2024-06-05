@@ -40,7 +40,10 @@ function VbitezButton({
       disabled={disabled}
       onClick={onClick}
       // style={variant === "secondary" ? secondaryStyles : mergedStyles}
-      style={styles}
+      style={{
+        ...styles,
+        display: hidden ? "none" : "",
+      }}
       className={buttonClassName}
       // onMouseEnter={(e) => {
       //   (e.target.style.backgroundColor = secondaryColor || secondary),

@@ -156,7 +156,7 @@ const Footer = () => {
           {PackageJson.version}
         </p>
       </div>
-
+      {/* 
       <div className="footer-language">
         <select
           onChange={(e) => {
@@ -168,7 +168,7 @@ const Footer = () => {
           <option value="en">English</option>
           <option value="fr">French</option>
         </select>
-      </div>
+      </div> */}
     </footer>
   );
 };

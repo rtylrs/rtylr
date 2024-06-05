@@ -7,6 +7,7 @@ import WhyUs from "./Components/WhyUs";
 import Price from "./Components/Price";
 import Demo from "./Components/Demo";
 import HelmetContainer from "../../../components/HelmetContainer";
+import Faq from "./Components/FAQ";
 function Home() {
   return (
     <React.Fragment>
@@ -14,9 +15,10 @@ function Home() {
       <Hero />
       <Ticker />
       <Features />
-      <WhyUs />
+      {/* <WhyUs /> */}
       <Price />
       <Demo />
+      <Faq />
     </React.Fragment>
   );
 }
