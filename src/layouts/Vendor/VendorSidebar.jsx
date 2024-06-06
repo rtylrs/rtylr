@@ -35,7 +35,13 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
     >
       <div className="vendor-sidebar__nav">
         <div className="vendor-sidebar__title__container">
-          <p className="vendor-sidebar__title">Vbitez</p>
+          <img
+            src="/logo.png"
+            alt="logo"
+            className="vendor-sidebar__logo"
+            onClick={() => navigate("/app/restaurant/")}
+            style={{ cursor: "pointer", height: "70px", marginBottom: "10px" }}
+          />
         </div>
         <FontAwesomeIcon
           className="vendor-close__icon"
@@ -53,7 +59,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => navigate("/app/restaurant/")}
         >
           <FontAwesomeIcon icon={faHome} className="vendor-sidebar__icon" />
-          <p id="link">Dashboard</p>
+          <p id="link">Home</p>
         </div>
         <div
           className={`vendor-sidebar__link ${

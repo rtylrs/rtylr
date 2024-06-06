@@ -434,6 +434,8 @@ h1{
   }
 }
 
+
+
 .price-card {
   background-color: white;
   color:  $primary-color;
@@ -475,6 +477,13 @@ h1{
 }
 
 .price-text {
+  text-align: center;
+}
+
+.vbitez-text-price-text {
+  color: $primary-color;
+  font-size: 16px;
+  margin: 0;
   text-align: center;
   margin-bottom: 40px;
 }
