@@ -45,8 +45,9 @@ function Cookies() {
             <h2>Cookie Consent</h2>
           </div>
           <p>
-            This website uses cookies to ensure you get the best experience on
-            our website.
+            We use cookies to make this website better and more functional for
+            you. It's up to you to decide which cookies you want to accept on
+            your device.
           </p>
           <div className="cookies-buttons">
             <VbitezButton onClick={handleAccept}>Accept</VbitezButton>
