@@ -1,21 +1,14 @@
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useColors from "../../../../hooks/useColors";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 
 function Price() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { accent } = useColors();
-
   return (
     <div className="Prices">
-      <h1 className="vbitez-title price-text">
-        Choice the right pricing plan <br />
-        that suits your need
-      </h1>
+      <h1 className="vbitez-title price-text">Plans & Pricing</h1>
+      <p className="vbitez-text-price-text">
+        Discover the ideal plan for you. Start with our complimentary plan.
+      </p>
       <div className="price-container">
         <div className="price-card">
           <div className="prices-container">
