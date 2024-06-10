@@ -132,13 +132,22 @@ function RegisterUser() {
   return (
     <div className="register-user-container">
       <div className="register-user-image-container">
-        <img src="/images/Al-Abed_Mohammad2.jpg" alt="Register" className="register-user-image" />
+        <img
+          src="/images/Al-Abed_Mohammad2.jpg"
+          alt="Register"
+          className="register-user-image"
+        />
       </div>
       <div className="register-user-form">
-        <img src="/public/logo.png" alt="Logo" className="register-user-logo" />
+        <img src="/logo.png" alt="Logo" className="register-user-logo" />
         <h2>Sign Up</h2>
         <p>Create your user account to get started</p>
-        <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleRegister();
+          }}
+        >
           <input
             className="register-user-input"
             type="text"
@@ -171,7 +180,10 @@ function RegisterUser() {
             Sign Up
           </button>
           <div className="register-user-social-media">
-            <button className="register-user-google-button" onClick={handleRegisterWithGoogle}>
+            <button
+              className="register-user-google-button"
+              onClick={handleRegisterWithGoogle}
+            >
               <FontAwesomeIcon icon={faGoogle} size="lg" />
               Sign in with Google
             </button>
@@ -180,11 +192,17 @@ function RegisterUser() {
         <div className="register-user-footer">
           <p>
             Already have an account?{" "}
-            <span className="register-user-login-link" onClick={() => navigate("/auth/login")}>
+            <span
+              className="register-user-login-link"
+              onClick={() => navigate("/auth/login")}
+            >
               Login Now.
             </span>
           </p>
-          <p className="register-user-forgot-link" onClick={() => navigate("/auth/forgot-password")}>
+          <p
+            className="register-user-forgot-link"
+            onClick={() => navigate("/auth/forgot-password")}
+          >
             Forgot Password?
           </p>
         </div>

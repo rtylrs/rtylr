@@ -58,7 +58,7 @@ function Login() {
         ></dotlottie-player>
       </div>
       <div className="login-form">
-        <img src="/public/logo.png" alt="Logo" className="logo" />
+        <img src="/logo.png" alt="Logo" className="logo" />
         <h2>Welcome back!!</h2>
         <p>Please enter your details.</p>
         <input
