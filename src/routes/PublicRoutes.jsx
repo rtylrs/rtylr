@@ -2,6 +2,7 @@ import AnimatedRoutes from "../components/AnimatedRoutes";
 import Public from "../layouts/Public/public";
 import React from "react";
 import Collection from "../screens/Public/Collection";
+import Price from "../screens/Public/Home/Components/Price";
 
 // Routes
 const Home = React.lazy(() => import("../screens/Public/Home/Home"));

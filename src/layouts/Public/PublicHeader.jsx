@@ -112,7 +112,7 @@ const Header = () => {
         }}
       >
         <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
-        <LinkWithColor to="/pricing">Product</LinkWithColor>
+        <LinkWithColor to="/pricing">Pricing</LinkWithColor>
         <LinkWithColor to="/contact">Testimonials</LinkWithColor>
         <p
           style={{
@@ -228,7 +228,16 @@ const Header = () => {
                   setIsOpen(false);
                 }}
               >
-                EN
+                English
+              </span>
+              <span
+                onClick={() => {
+                  selectLanguage("ar");
+                  setLanguage("ar");
+                  setIsOpen(false);
+                }}
+              >
+                Arabic
               </span>
               <span
                 onClick={() => {
@@ -237,7 +246,7 @@ const Header = () => {
                   setIsOpen(false);
                 }}
               >
-                FR
+                French
               </span>
             </div>
           )}
