@@ -1,6 +1,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../lib/api';
 
+
+// Fetch all menus by restaurant ID
+export const fetchAllMenus = createAsyncThunk(
+    'menu/fetchAllMenus',
+    async ({ restaurantId }) => {
+        const response = await api.get(`/menu/menus/${restaurantId}`);
+        console.log(response.data);
+        return response.data;
+    }
+);
+
+// Set active menu ID
+export const setActiveMenuId = createAsyncThunk(
+    'menu/setActiveMenuId',
+    async ({ restaurantId, menuId }) => {
+        const response = await api.post('/menu/set-active-menu', { restaurantId, menuId });
+        return { restaurantId, menuId };
+    }
+);
+
+export const createNewMenu = createAsyncThunk(
+    'menu/createNewMenu',
+    async ({ restaurantId, menuName }) => {
+        console.log(restaurantId, menuName);
+        const response = await api.post('/menu/createNewMenu', { restaurantId, menuName });
+        return response.data;
+    }
+);
+
+// Fetch menu by menu ID
+export const fetchMenuById = createAsyncThunk(
+    'menu/fetchMenuById',
+    async (menuId) => {
+        const response = await api.get(`/menu/${menuId}`);
+        return response.data;
+    }
+);
+
 // Fetch menu by restaurant ID
 export const fetchMenu = createAsyncThunk(
     'menu/fetchMenu',
@@ -79,18 +117,53 @@ export const renameCategory = createAsyncThunk(
     }
 );
 
-// Create the menu slice
 const menuSlice = createSlice({
     name: 'menu',
     initialState: {
         id: null,
         items: [],
+        allMenus: [],
+        activeMenuId: null,
         status: 'idle',
         error: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(fetchAllMenus.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchAllMenus.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.allMenus = action.payload;
+            })
+            .addCase(fetchAllMenus.rejected, (state, action) => {
+                state.status = 'failed';
+                state.allMenus = [];
+                state.error = action.error.message;
+            })
+            .addCase(setActiveMenuId.fulfilled, (state, action) => {
+                state.activeMenuId = action.payload.menuId;
+                state.id = action.payload.menuId;
+                state.items = [];
+            })
+            .addCase(createNewMenu.fulfilled, (state, action) => {
+                state.allMenus.push(action.payload);
+            })
+            .addCase(fetchMenuById.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchMenuById.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.items = action.payload.items;
+                state.id = action.payload._id;
+            })
+            .addCase(fetchMenuById.rejected, (state, action) => {
+                state.status = 'failed';
+                state.items = [];
+                state.id = null;
+                state.error = action.error.message;
+            })
             .addCase(fetchMenu.pending, (state) => {
                 state.status = 'loading';
             })
@@ -144,5 +217,6 @@ const menuSlice = createSlice({
             });
     }
 });
+
 
 export default menuSlice.reducer;

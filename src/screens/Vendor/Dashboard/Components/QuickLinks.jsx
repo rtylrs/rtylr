@@ -4,6 +4,7 @@ import {
   faCoffee,
   faCog,
   faCreditCard,
+  faFolder,
   faMagicWandSparkles,
   faPhoneVolume,
   faPlus,
@@ -17,6 +18,7 @@ function QuickLinks() {
   return (
     <div className="quick-links">
       <QuickLink icon={faUtensils} title="Menu" to="/app/restaurant/menu" />
+      <QuickLink icon={faFolder} title="My Menus" to="/app/restaurant/menus" />
       <QuickLink
         icon={faChartPie}
         title="Reports"

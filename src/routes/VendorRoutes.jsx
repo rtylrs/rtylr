@@ -1,11 +1,13 @@
 import React from "react";
 import Vendor from "../layouts/Vendor/Vendor";
+import MenuWithId from "../screens/Vendor/Menu/MenuWithId";
 
 // Routes
 const VendorDashboard = React.lazy(() =>
   import("../screens/Vendor/Dashboard/VendorDashboard")
 );
 const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu"));
+const Menus = React.lazy(() => import("../screens/Vendor/Menu/Menus"));
 const CreateItem = React.lazy(() =>
   import("../screens/Vendor/Menu/CreateItem")
 );
@@ -48,10 +50,28 @@ const VendorRoutes = [
     exact: true,
   },
   {
+    path: "/app/restaurant/menus",
+    element: (
+      <Vendor>
+        <Menus />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
     path: "/app/restaurant/menu",
     element: (
       <Vendor>
         <Menu />
+      </Vendor>
+    ),
+    exact: true,
+  },
+  {
+    path: "/app/restaurant/menu/:id",
+    element: (
+      <Vendor>
+        <MenuWithId />
       </Vendor>
     ),
     exact: true,
