@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function Faq() {
+  const {t} = useTranslation()
   const [activeIndex, setActiveIndex] = useState(null);
 
   const faqData = [
@@ -37,7 +39,7 @@ function Faq() {
 
   return (
     <div className="faq-section">
-      <h2>Frequently asked questions about our digital agency</h2>
+      <h2>{t("QandA.title")}</h2>
       <div className="faq-container">
         {faqData.map((item, index) => (
           <div key={index} className="faq-item">

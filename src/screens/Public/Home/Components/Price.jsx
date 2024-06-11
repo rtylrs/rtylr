@@ -1,24 +1,26 @@
 import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
-
+import { useTranslation } from "react-i18next";
 function Price() {
+  const { t } = useTranslation();
+
   return (
     <div className="Prices">
-      <h1 className="vbitez-title price-text">Plans & Pricing</h1>
+      <h1 className="vbitez-title price-text">{t("PricingSection.title")}</h1>
       <p className="vbitez-text-price-text">
-        Discover the ideal plan for you. Start with our complimentary plan.
+      {t("PricingSection.description")}
       </p>
       <div className="price-container">
         <div className="price-card">
           <div className="prices-container">
             <h4>
-              <b>Starter Plan</b>
+              <b>{t("PricingSection.Section1_title")}</b>
             </h4>
             <h3>
-              <span style={{ fontSize: "70px", fontWeight: "bold" }}>Free</span>
+              <span style={{ fontSize: "70px", fontWeight: "bold" }}>{t("PricingSection.Section1_Price")}</span>
             </h3>
-            <p>No credit card required</p>
+            <p>{t("PricingSection.Section1_Requirements")}</p>
             <hr style={{ border: "1px solid grey", margin: "20px 0" }} />
             <ul>
               <li>
@@ -26,14 +28,14 @@ function Price() {
                   icon={faStar}
                   style={{ color: "black", marginRight: "8px" }}
                 />
-                Unlimited chats & websites
+                {t("PricingSection.Section1_star1")}
               </li>
               <li>
                 <FontAwesomeIcon
                   icon={faStar}
                   style={{ color: "black", marginRight: "8px" }}
                 />
-                60-day conversations history
+                {t("PricingSection.Section1_star2")}
               </li>
               <li>
                 <FontAwesomeIcon
@@ -141,6 +143,6 @@ function Price() {
 export default Price;
 /*
   File Created By: Abed El-Fattah Amouneh
-  Last Edited: Sunday 12 May 2024
+  Last Edited: Monday 11 July 2024
   Last Edited by: Abed El-Fattah Amouneh
 */

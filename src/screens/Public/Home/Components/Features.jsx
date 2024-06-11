@@ -73,11 +73,10 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Comprehensive Menu Insights</b>
+              <b>{t("Features.Feature5-title")}</b>
             </h4>
             <p>
-              Gain detailed insights into your menu, including ingredients and
-              allergens, to make informed decisions.
+            {t("Features.Feature5-description")}
             </p>
           </div>
         </div>
@@ -87,12 +86,9 @@ function Features() {
           </div>
           <div className="feature-container">
             <h4>
-              <b>Loyalty Rewards Integration</b>
+              <b>{t("Features.Feature6-title")}</b>
             </h4>
-            <p>
-              Build customer loyalty and drive repeat business with integrated
-              loyalty rewards programs tailored to your restaurant.
-            </p>
+            <p>{t("Features.Feature6-description")}</p>
           </div>
         </div>
 
