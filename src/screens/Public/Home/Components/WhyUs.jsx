@@ -1,7 +1,6 @@
-// src/components/WhyUs.jsx
 import React from 'react';
 import WhyUsCard from './WhyUsCard';
-import { faUsers, faComments, faSearch, faLanguage, faEdit, faMoneyBillWave, faStar, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faComments, faLanguage, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 const whyUsFeatures = [
   {
@@ -14,7 +13,6 @@ const whyUsFeatures = [
     title: 'Transparent Communication',
     description: 'Stay informed every step of the way with clear communication and progress updates.',
   },
-  
   {
     icon: faLanguage,
     title: '24/7 Support & Unlimited Requests',
@@ -30,10 +28,8 @@ const whyUsFeatures = [
 const WhyUs = () => {
   return (
     <div className="why-us">
-      
-      <h2>Why Choose Us </h2>
+      <h2>Why Choose Us</h2>
       <h1>What Sets Us Apart?</h1>
-
       <div className="why-us-cards">
         {whyUsFeatures.map((feature, index) => (
           <WhyUsCard
