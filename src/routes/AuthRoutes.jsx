@@ -7,6 +7,9 @@ const Login = React.lazy(() => import("../screens/Auth/Login"));
 const RegisterUser = React.lazy(() => import("../screens/Auth/RegisterUser"));
 const RegisterRest = React.lazy(() => import("../screens/Auth/RegisterRest"));
 const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
+const EmailVerification = React.lazy(() =>
+  import("../screens/Auth/EmailVerification")
+);
 
 const AuthRoutes = [
   {
@@ -48,6 +51,17 @@ const AuthRoutes = [
       <Public>
         <AnimatedRoutes>
           <ForgotPassword />
+        </AnimatedRoutes>
+      </Public>
+    ),
+    exact: true,
+  },
+  {
+    path: "/auth/verify/:token",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <EmailVerification />
         </AnimatedRoutes>
       </Public>
     ),
