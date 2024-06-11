@@ -10,14 +10,14 @@ function Demo(){
   const navigate = useNavigate();
   const { accent } = useColors();
   return(
-
+    
     <div className="demo-menu-container">
-    <h2>See a demo online menu</h2>
-    <p>Just open the camera on your phone and scan the <span>QR code</span> below!</p>
+    <h2>{t("Demo.title")}</h2>
+    <p>{t("Demo.description")}</p>
     <div className="qr-code">
       <img src="/images/VoxireWebsiteQR.png" alt="QR Code" />
     </div>
-    <VbitezButton variant="abed">Create a menu for you, now!</VbitezButton>
+    <VbitezButton variant="abed">{t("Demo.button")}</VbitezButton>
   </div>
 
 
