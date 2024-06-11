@@ -1,9 +1,4 @@
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../components/Buttons/Buttons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useColors from "../../hooks/useColors";
+import { useState } from "react";
 
 function Faq() {
   const [activeIndex, setActiveIndex] = useState(null);

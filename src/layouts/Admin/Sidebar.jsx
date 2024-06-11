@@ -118,22 +118,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`sidebar__link ${
-            location.pathname === "/manage/pos" ? "active" : ""
-          }`}
-        >
-          <FontAwesomeIcon
-            icon={faWarehouse}
-            className="sidebar__icon"
-            style={{
-              fontSize: "14px",
-            }}
-          />
-          <Link to="/manage/pos" id="link">
-            POS
-          </Link>
-        </div>
-        <div
-          className={`sidebar__link ${
             location.pathname === "/manage/products" ? "active" : ""
           }`}
         >

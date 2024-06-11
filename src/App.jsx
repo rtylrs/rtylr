@@ -73,13 +73,13 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // get config data
-    dispatch(fetchConfigData());
-
     const language = localStorage.getItem("language");
     if (language) {
       i18next.changeLanguage(language);
     }
+
+    // get config data
+    dispatch(fetchConfigData());
 
     //eslint-disable-next-line
   }, []);

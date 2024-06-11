@@ -19,7 +19,7 @@ function Public({ children }) {
         <Header />
         <div
           style={{
-            marginTop: document.location.pathname === "/" ? "0px" : "90px",
+            marginTop: document.location.pathname === "/" ? "0px" : "80px",
           }}
         >
           {React.Children.map(children, (child) => {

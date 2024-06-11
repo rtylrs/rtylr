@@ -10,6 +10,7 @@ const initialState = {
         contactEmail: null,
         contactNumber: null,
     },
+    faqs: [],
     status: 'idle',
     error: null,
 };
@@ -32,7 +33,10 @@ const configSlice = createSlice({
         },
         setContactInfo: (state, action) => {
             state.contactInfo = action.payload;
-        }
+        },
+        setFaqs: (state, action) => {
+            state.faqs = action.payload;
+        },
     },
 });
 
@@ -41,7 +45,8 @@ export const {
     setAboutContent,
     setMaintanance,
     setBussinessCount,
-    setContactInfo
+    setContactInfo,
+    setFaqs,
 } = configSlice.actions;
 
 export default configSlice.reducer;
@@ -49,7 +54,7 @@ export default configSlice.reducer;
 export const fetchConfigData = () => async (dispatch) => {
     try {
         const response = await api.get('/config');
-        const { maintanance, aboutContent, count, contactEmail, contactNumber } = response.data;
+        const { maintanance, aboutContent, count, contactEmail, contactNumber, faqs } = response.data;
         dispatch(setAboutContent(aboutContent));
         dispatch(setMaintanance(maintanance));
         dispatch(setBussinessCount(count));
@@ -57,6 +62,7 @@ export const fetchConfigData = () => async (dispatch) => {
             contactEmail,
             contactNumber
         }));
+        dispatch(setFaqs(faqs));
     } catch (error) {
         console.error('Error fetching config data:', error);
     }
@@ -68,5 +74,14 @@ export const updateAboutContent = (data) => async (dispatch) => {
         dispatch(setAboutContent(response.data.aboutContent));
     } catch (error) {
         console.error('Error updating about content:', error);
+    }
+};
+
+export const fetchFaqs = () => async (dispatch) => {
+    try {
+        const response = await api.get('/faqs');
+        dispatch(setFaqs(response.data)); // Dispatch the FAQs to the state
+    } catch (error) {
+        console.error('Error fetching FAQs:', error);
     }
 };
