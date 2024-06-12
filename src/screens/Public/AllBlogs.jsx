@@ -1,23 +1,9 @@
 import { useState, useEffect } from "react";
-import { db } from "../../firebase";
 import { Link } from "react-router-dom";
 
 function AllBlogs() {
   const [blogs, setBlogs] = useState([]);
-  useEffect(() => {
-    db.collection("Blogs")
-      .get()
-      .then((blogsSnapshot) => {
-        const blogsData = blogsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setBlogs(blogsData);
-      })
-      .catch((error) => {
-        console.error("Error fetching blogs data:", error);
-      });
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { db } from "../../firebase";
 import { CSVLink } from "react-csv";
 import {
   Table,
@@ -20,21 +19,7 @@ function Users() {
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
 
-  useEffect(() => {
-    db.collection("Users")
-      .limit(15)
-      .onSnapshot((snapshot) => {
-        if (!snapshot.empty) {
-          let item = [];
-          snapshot.forEach((doc) => {
-            let data = Object.assign({ id: doc.id }, doc.data());
-            item.push(data);
-          });
-          setItems(item);
-          setFilteredItems(item);
-        }
-      });
-  }, []);
+  useEffect(() => {}, []);
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();

@@ -1,7 +1,5 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import "firebase/compat/firestore";
-import "firebase/compat/storage";
 import "firebase/compat/analytics";
 
 
@@ -24,11 +22,8 @@ if (firebase.apps.length === 0) {
 }
 
 const auth = app.auth(); // for authentication
-const db = app.firestore(); // for firestore
-const storage = app.storage(); // for storage
 const analytics = app.analytics(); // for analytics
-db.settings({ merge: true }); // for firestore offline support
 
 export {
-  auth, db, storage, firebase, analytics
+  auth, firebase, analytics
 };

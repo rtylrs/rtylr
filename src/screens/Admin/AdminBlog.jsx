@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Container } from "reactstrap";
-import { auth, db, firebase } from "../../firebase";
 
 function AdminBlog() {
   const [blogs, setBlogs] = useState([]);
@@ -26,17 +25,7 @@ function AdminBlog() {
     content: "",
   });
 
-  useEffect(() => {
-    db.collection("Blogs")
-      .get()
-      .then((querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setBlogs(data);
-      });
-  }, []);
+  useEffect(() => {}, []);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -72,43 +61,9 @@ function AdminBlog() {
     }
   };
 
-  const handleAddBlog = () => {
-    db.collection("Blogs")
-      .add({
-        title: newBlog.title,
-        content: newBlog.content,
-        uid: auth.currentUser.uid,
-        ownerName: auth.currentUser.displayName,
-        email: auth.currentUser.email,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      })
-      .then((doc) => {
-        setBlogs((prevBlogs) => [...prevBlogs, { id: doc.id, ...newBlog }]);
-        setNewBlog({ title: "", content: "" });
-        setIsModalOpen(false);
-      });
-  };
+  const handleAddBlog = () => {};
 
-  const handleUpdateBlog = () => {
-    db.collection("Blogs")
-      .doc(editedBlog.id)
-      .update({
-        title: editedBlog.title,
-        content: editedBlog.content,
-      })
-      .then(() => {
-        setBlogs((prevBlogs) =>
-          prevBlogs.map((blog) => {
-            if (blog.id === editedBlog.id) {
-              return editedBlog;
-            }
-            return blog;
-          })
-        );
-        setIsEditModalOpen(false);
-        setEditedBlog({ id: null, title: "", content: "" });
-      });
-  };
+  const handleUpdateBlog = () => {};
 
   return (
     <Container>

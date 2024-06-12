@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
@@ -25,20 +24,11 @@ function ProductCard({ product }) {
         <div className="ctaContainer">
           <button className="addBtn">
             <span>
-              <FontAwesomeIcon icon={faShoppingCart } />
+              <FontAwesomeIcon icon={faShoppingCart} />
             </span>
             <span>{product?.inCart ? "Remove" : "Add"}</span>
           </button>
-          <button
-            className="buyBtn"
-            onClick={() => {
-              if (auth.currentUser) {
-                console.log("user is signed in");
-              } else {
-                navigate("/auth/login");
-              }
-            }}
-          >
+          <button className="buyBtn" onClick={() => {}}>
             Buy Now
           </button>
         </div>
