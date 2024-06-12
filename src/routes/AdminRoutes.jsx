@@ -23,6 +23,9 @@ const AboutConfig = React.lazy(() =>
   import("../screens/Admin/config/AboutConfig")
 );
 
+const AddFaq = React.lazy(() => import("../screens/Admin/FAQs/AddFaq"));
+const Faqs = React.lazy(() => import("../screens/Admin/FAQs/Faqs"));
+
 const AdminRoutes = [
   {
     path: "/manage",
@@ -92,6 +95,24 @@ const AdminRoutes = [
     element: (
       <Admin>
         <AboutConfig />
+      </Admin>
+    ),
+    exact: true,
+  },
+  {
+    path: "/manage/sections/faqs",
+    element: (
+      <Admin>
+        <Faqs />
+      </Admin>
+    ),
+    exact: true,
+  },
+  {
+    path: "/manage/sections/faqs/add",
+    element: (
+      <Admin>
+        <AddFaq />
       </Admin>
     ),
     exact: true,

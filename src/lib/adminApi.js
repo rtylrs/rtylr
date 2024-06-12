@@ -1,16 +1,18 @@
 import axios from "axios";
 import i18next from "i18next";
 
-const mode = "prod"; // can be dev or prod
+const getBaseUrl = () => {
+    const mode = localStorage.getItem("mode") || "prod";
+    return mode === "dev"
+        ? "http://localhost:1024/api/v1/admin"
+        : "https://onion-e6t0.onrender.com/api/v1/admin";
+};
 
-const adminApi = axios.create({
-    baseURL:
-        mode === "dev"
-            ? "http://localhost:1024/api/v1/admin"
-            : "https://onion-e6t0.onrender.com/api/v1/admin",
+const api = axios.create({
+    baseURL: getBaseUrl(),
 });
 
-adminApi.interceptors.request.use(
+api.interceptors.request.use(
     async (config) => {
         try {
             const user =
@@ -30,7 +32,7 @@ adminApi.interceptors.request.use(
     }
 );
 
-adminApi.interceptors.response.use(
+api.interceptors.response.use(
     (response) => {
         return response;
     },
@@ -39,4 +41,4 @@ adminApi.interceptors.response.use(
     }
 );
 
-export default adminApi;
+export default api;

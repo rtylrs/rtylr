@@ -48,6 +48,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                   <SidebarProvider>
                     <App />
                     <ToastContainer />
+                    <ScrollToTop />
                   </SidebarProvider>
                 </BrowserRouter>
               </PersistGate>

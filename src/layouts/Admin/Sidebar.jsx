@@ -30,6 +30,7 @@ import {
   faSquarePollVertical,
   faUserLock,
   faCircleInfo,
+  faPersonCircleQuestion,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
@@ -80,22 +81,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
       <div className="sidebar__nav">
         <div className="sidebar__title__container">
           <p className="sidebar__title">Admin Panel</p>
-          <div>
-            <FontAwesomeIcon
-              icon={faQrcode}
-              title="Download Website QR Code"
-              onClick={() => {
-                downloadQRCode();
-              }}
-            />
-            <FontAwesomeIcon
-              icon={faHeadset}
-              title="Contact Support"
-              onClick={() => {
-                window.open("https://wa.me/message/D5ZSC3DH3NI6P1", "_blank");
-              }}
-            />
-          </div>
         </div>
         <FontAwesomeIcon
           className="close__icon"
@@ -113,7 +98,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
           <Link to="/manage" id="link">
-            Dashboard
+            Home
           </Link>
         </div>
         <div
@@ -251,15 +236,15 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             <>
               <div
                 className={`sidebar__link admin__link ${
-                  location.pathname === "/manage/config/home" ? "active" : ""
+                  location.pathname === "/manage/sections/faqs" ? "active" : ""
                 }`}
               >
                 <FontAwesomeIcon
-                  icon={faFirstdraft}
+                  icon={faPersonCircleQuestion}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/config/home" id="link">
-                  Home
+                <Link to="/manage/sections/faqs" id="link">
+                  FAQs
                 </Link>
               </div>
               <div

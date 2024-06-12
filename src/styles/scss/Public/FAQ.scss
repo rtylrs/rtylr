@@ -1,16 +1,18 @@
 .faq-section {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px;
   text-align: center;
+  min-height: 50vh;
 
   h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333;
+    margin-bottom: 40px;
   }
 
   .faq-container {
+    max-width: 900px;
+    margin: 0 auto;
+
     .faq-item {
       background: #fff;
       border: 1px solid #ddd;
@@ -19,6 +21,7 @@
       padding: 15px;
       transition: background 0.3s ease;
       text-align: left;
+      user-select: none;
 
       .faq-question {
         display: flex;
@@ -27,11 +30,11 @@
         cursor: pointer;
         font-weight: bold;
         font-size: 1rem;
-        color: #333;
+        color: $primary-color;
 
         .faq-icon {
           font-size: 1.5rem;
-          color: #007bff;
+          color: $primary-color;
         }
       }
 
