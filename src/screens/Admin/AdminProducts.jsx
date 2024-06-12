@@ -15,7 +15,6 @@ import {
   InputLabel,
   Paper,
 } from "@mui/material";
-import { db, storage } from "../../firebase";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -31,19 +30,7 @@ function AdminProducts() {
   const [imagePreview, setImagePreview] = useState([]);
   const [updatingProduct, setUpdatingProduct] = useState(false);
 
-  useEffect(() => {
-    db.collection("Products")
-      .limit(8)
-      .get()
-      .then((querySnapshot) => {
-        const products = [];
-        querySnapshot.forEach((doc) => {
-          const product = Object.assign({ id: doc.id }, doc.data());
-          products.push(product);
-        });
-        setProducts(products);
-      });
-  }, []);
+  useEffect(() => {}, []);
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
@@ -70,17 +57,6 @@ function AdminProducts() {
   const uploadImagesToStorage = async () => {
     const imageUrls = [];
 
-    try {
-      for (const image of productImages) {
-        const imageRef = storage.ref().child(`productImages/${image.name}`);
-        await imageRef.put(image);
-        const imageUrl = await imageRef.getDownloadURL();
-        imageUrls.push(imageUrl);
-      }
-    } catch (error) {
-      console.error("Error uploading images:", error);
-    }
-
     return imageUrls;
   };
 
@@ -95,72 +71,9 @@ function AdminProducts() {
     setProductImages(selectedFiles);
   };
 
-  const saveProduct = async () => {
-    try {
-      console.log("Saving product...");
+  const saveProduct = async () => {};
 
-      let imageUrls = [];
-
-      // Upload images and get image URLs
-      if (!updatingProduct) {
-        imageUrls = await uploadImagesToStorage();
-      } else {
-        imageUrls = productImages;
-      }
-
-      // Create a new product object with updated data, including image URLs
-      const updatedProduct = {
-        name: productName,
-        price: productPrice,
-        category: productCategory,
-        quantity: productQuantity,
-        images: imageUrls, // Use the uploaded image URLs
-        creator: "Unknown",
-      };
-
-      if (updatingProduct) {
-        // Update the product in the database
-        await db
-          .collection("Products")
-          .doc(selectedProduct.id)
-          .update(updatedProduct);
-
-        const index = products.findIndex(
-          (product) => product.id === selectedProduct.id
-        );
-        const updatedProducts = [...products];
-        updatedProducts[index] = updatedProduct;
-        setProducts(updatedProducts);
-      } else {
-        // Add the product to the database
-        await db.collection("Products").doc().set(updatedProduct);
-        // Add the product to the products state
-        setProducts((prevProducts) => [...prevProducts, updatedProduct]);
-      }
-
-      // Close the modal
-      setUpdatingProduct(false);
-      toggleModal();
-    } catch (error) {
-      console.error("Error saving product:", error);
-    }
-  };
-
-  const deleteProduct = (productId) => {
-    db.collection("Products")
-      .doc(productId)
-      .delete()
-      .then(() => {})
-      .catch((error) => {
-        console.error("Error deleting product:", error);
-      });
-
-    // Remove the product from the products state
-    const updatedProducts = products.filter(
-      (product) => product.id !== productId
-    );
-    setProducts(updatedProducts);
-  };
+  const deleteProduct = (productId) => {};
 
   return (
     <div className="AdminUsersManagement">
@@ -180,7 +93,7 @@ function AdminProducts() {
         </div>
 
         <TableContainer component={Paper}>
-          <Table>
+        <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Image</TableCell>

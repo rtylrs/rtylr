@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 
@@ -23,18 +22,6 @@ function Feedback() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    db.collection("feedback")
-      .add({
-        name,
-        email,
-        rating,
-      })
-      .then(() => {
-        setName("");
-        setEmail("");
-        setRating(0);
-        navigate("/");
-      });
   };
 
   return (

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { auth, db } from "../../firebase";
 import i18next from "../../services/i18next";
 import { Switch, Button } from "@mui/material";
 
@@ -98,12 +97,7 @@ const SettingsPage = () => {
         </label>
       </div>
       <div>
-        <Button
-          onClick={() => {
-            auth.sendPasswordResetEmail(formData.email).then(() => {});
-          }}
-          variant="contained"
-        >
+        <Button onClick={() => {}} variant="contained">
           Forgot Password
         </Button>
       </div>

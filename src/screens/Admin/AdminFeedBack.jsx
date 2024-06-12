@@ -9,22 +9,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { db } from "../../firebase";
 
 function AdminFeedBack() {
   const [feedbacks, setFeedbacks] = useState([]);
 
-  useEffect(() => {
-    db.collection("feedback")
-      .get()
-      .then((querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFeedbacks(data);
-      });
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div className="AdminUsersManagement">

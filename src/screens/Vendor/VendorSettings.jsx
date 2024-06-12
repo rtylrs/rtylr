@@ -6,7 +6,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { storage, firebase } from "../../firebase";
 import i18next from "../../services/i18next";
 import { Switch, Button } from "@mui/material";
 import { useSelector } from "react-redux";
@@ -39,18 +38,7 @@ const VendorSettings = () => {
 
   const handleNotificationsToggle = () => {};
 
-  const handleImageChange = (e, type) => {
-    const file = e.target.files[0];
-    const storageRef = storage.ref();
-    const fileRef = storageRef.child(`config/${file.name}`);
-    fileRef.put(file).then(() => {
-      fileRef.getDownloadURL().then((url) => {
-        const updateField = type === "favicon" ? "favicon" : "icon";
-
-        // TODO: update the image url on the api and then update the state
-      });
-    });
-  };
+  const handleImageChange = (e, type) => {};
 
   return (
     <div className="settings-container">

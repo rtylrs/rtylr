@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { auth, db, storage, firebase } from "../../firebase";
 import i18next from "../../services/i18next";
 import { Switch, Button } from "@mui/material";
 
@@ -22,15 +21,6 @@ const AdminSettings = () => {
       });
     }
 
-    db.collection("config")
-      .doc("websiteData")
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          setConfig(doc.data());
-        }
-      });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -51,32 +41,7 @@ const AdminSettings = () => {
     // });
   };
 
-  const handleImageChange = (e, type) => {
-    const file = e.target.files[0];
-    const storageRef = storage.ref();
-    const fileRef = storageRef.child(`config/${file.name}`);
-    fileRef.put(file).then(() => {
-      fileRef.getDownloadURL().then((url) => {
-        const updateField = type === "favicon" ? "favicon" : "icon";
-        const updatedConfig = {
-          ...config,
-          [updateField]: url,
-        };
-
-        db.collection("config")
-          .doc("websiteData")
-          .set(
-            {
-              [updateField]: url,
-            },
-            { merge: true }
-          )
-          .then(() => {
-            setConfig(updatedConfig);
-          });
-      });
-    });
-  };
+  const handleImageChange = (e, type) => {};
 
   return (
     <div className="settings-container">
@@ -108,13 +73,7 @@ const AdminSettings = () => {
                 });
               }}
             />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                db.collection("config").doc("websiteData").set(config);
-              }}
-            >
+            <Button variant="contained" color="primary" onClick={() => {}}>
               Update
             </Button>
           </div>
