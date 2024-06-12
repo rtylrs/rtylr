@@ -4,13 +4,13 @@ import "firebase/compat/analytics";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC_8k06RmjcWuQh3wm-N-02rEVnXjunlAs",
-  authDomain: "sanity-3d4e1.firebaseapp.com",
-  projectId: "sanity-3d4e1",
-  storageBucket: "sanity-3d4e1.appspot.com",
-  messagingSenderId: "512207225703",
-  appId: "1:512207225703:web:6736e7c03a24d10879e5c2",
-  measurementId: "G-634EPZKC8Y"
+  apiKey: "AIzaSyAu1ZafTsGoCio-amq8ziFHw-zy6b7Nd24",
+  authDomain: "vbitez-d12a8.firebaseapp.com",
+  projectId: "vbitez-d12a8",
+  storageBucket: "vbitez-d12a8.appspot.com",
+  messagingSenderId: "46577622358",
+  appId: "1:46577622358:web:8b078611a13a8fcd3b8af7",
+  measurementId: "G-SFJPPQ6RRT"
 };
 
 let app;
