@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import notify from "../../lib/notify/notify";
 import { useDispatch, useSelector } from "react-redux";
+import { GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../../firebase";
 import {
   RegisterResaurantAsync,
   selectIsAuthenticated,
@@ -10,6 +12,7 @@ import {
 
 function RegisterRestaurant() {
   const navigate = useNavigate();
+  const provider = new GoogleAuthProvider();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -23,10 +26,30 @@ function RegisterRestaurant() {
 
   const handleRegister = () => {
     if (password === confirmPassword) {
-      dispatch(RegisterResaurantAsync({ email, password, name, address, phone, refered }));
+      dispatch(
+        RegisterResaurantAsync({
+          email,
+          password,
+          name,
+          address,
+          phone,
+          refered,
+        })
+      );
     } else {
       notify.error("Password does not match");
     }
+  };
+
+  const handleRegisterWithGoogle = () => {
+    auth
+      .signInWithPopup(provider)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((error) => {
+        notify.error(error.message);
+      });
   };
 
   React.useEffect(() => {
@@ -38,12 +61,21 @@ function RegisterRestaurant() {
   return (
     <div className="register-container">
       <div className="image-container">
-        <img src="/images/Al-Abed_Mohammad2.jpg" alt="Restaurant" className="register-image" />
+        <img
+          src="/images/Al-Abed_Mohammad2.jpg"
+          alt="Restaurant"
+          className="register-image"
+        />
       </div>
       <div className="register-form">
         <h2>Sign Up</h2>
         <p>Create your account to get started</p>
-        <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleRegister();
+          }}
+        >
           <input
             className="register-input"
             type="text"
@@ -92,21 +124,30 @@ function RegisterRestaurant() {
             placeholder="Referred By (Optional)"
             onChange={(e) => setRefered(e.target.value)}
           />
-          <button
-            className="register-button"
-            disabled={loading}
-          >
+          <button className="register-button" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </button>
         </form>
+        <button
+          className="google-signin-button"
+          onClick={handleRegisterWithGoogle}
+        >
+          Sign in with Google
+        </button>
         <div className="register-footer">
           <p>
             Already have an account?{" "}
-            <span className="login-link" onClick={() => navigate("/auth/login")}>
+            <span
+              className="login-link"
+              onClick={() => navigate("/auth/login")}
+            >
               Login Now.
             </span>
           </p>
-          <p className="forgot-link" onClick={() => navigate("/auth/forgot-password")}>
+          <p
+            className="forgot-link"
+            onClick={() => navigate("/auth/forgot-password")}
+          >
             Forgot Password?
           </p>
         </div>
