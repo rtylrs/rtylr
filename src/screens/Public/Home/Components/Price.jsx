@@ -9,7 +9,7 @@ function Price() {
     <div className="Prices">
       <h1 className="vbitez-title price-text">{t("PricingSection.title")}</h1>
       <p className="vbitez-text-price-text">
-      {t("PricingSection.description")}
+        {t("PricingSection.description")}
       </p>
       <div className="price-container">
         <div className="price-card">
@@ -18,7 +18,9 @@ function Price() {
               <b>{t("PricingSection.Section1_title")}</b>
             </h4>
             <h3>
-              <span style={{ fontSize: "70px", fontWeight: "bold" }}>{t("PricingSection.Section1_Price")}</span>
+              <span style={{ fontSize: "70px", fontWeight: "bold" }}>
+                {t("PricingSection.Section1_Price")}
+              </span>
             </h3>
             <p>{t("PricingSection.Section1_Requirements")}</p>
             <hr style={{ border: "1px solid grey", margin: "20px 0" }} />
@@ -57,11 +59,10 @@ function Price() {
               <b>Most Popular</b>
             </h4>
             <h3>
-              ${" "}
-              <span style={{ fontSize: "70px", fontWeight: "bold" }}>199</span>
+              $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>49</span>
               /month
             </h3>
-            <p>No credit card required</p>
+            <p>For small restaurant or bar.</p>
 
             <hr style={{ border: "1px solid grey", margin: "20px 0" }} />
             <ul>
@@ -99,11 +100,10 @@ function Price() {
               <b>Standard Plan</b>
             </h4>
             <h3>
-              ${" "}
-              <span style={{ fontSize: "70px", fontWeight: "bold" }}>400</span>
+              $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>59</span>
               /month
             </h3>
-            <p>No credit card required</p>
+            <p>For high-demand restaurants and bars.</p>
 
             <hr style={{ border: "1px solid grey", margin: "20px 0" }} />
             <ul>

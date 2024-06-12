@@ -86,7 +86,7 @@ function ToolBar() {
             width: "30px",
             height: "30px",
             borderRadius: "50%",
-            border: "0.3px solid #fff",
+            border: "0.02px solid #fff",
           }}
         />
       </div>

@@ -713,7 +713,9 @@ h1{
 
 
 .demo-section {
-  background-color: $bg-color;
+  background-color: $light-color;
+  width: 100%;
+  padding: 40px 0;
 }
 
 //Demo Section
@@ -722,31 +724,34 @@ h1{
   flex-direction: column;
   align-items: center;
   background-color: $secondary-color;
-  width: 97%;
+  width: 90%;
   margin: 0 auto;
   padding: 20px;
-  border-radius: 10px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  border-radius: 4px;
   text-align: center;
 
   h2 {
     font-size: 3rem;
     margin-bottom: 10px;
-    color: #333;
+    color: $light-color;
   }
 
   p {
     font-size: 1rem;
     margin-bottom: 20px;
-    color: #666;
+    color: $light-color;
     
     span {
       font-weight: bold;
-      color: #333;
+      color: $primary-color;
     }
   }
 
   .qr-code { 
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    margin-top: 30px;
 
     img {
       max-width: 40vh;
@@ -776,8 +781,6 @@ h1{
   }
 
   @media (max-width: 768px) {
-    padding: 15px;
-
     h2 {
       font-size: 1.5rem;
     }
@@ -793,8 +796,6 @@ h1{
   }
 
   @media (max-width: 480px) {
-    padding: 10px;
-
     h2 {
       font-size: 1.2rem;
     }

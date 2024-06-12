@@ -1,0 +1,49 @@
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import VbitezButton from "../../../components/Buttons/Buttons";
+import { useNavigate } from "react-router-dom";
+
+function Faqs() {
+  const [activeIndex, setActiveIndex] = useState(null);
+  const faqs = useSelector((state) => state.config.faqs);
+  const navigate = useNavigate();
+
+  const toggleAnswer = (index) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
+
+  return (
+    <div className="faq-section">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "20px",
+        }}
+      >
+        <VbitezButton
+          variant="default"
+          onClick={() => {
+            navigate("/manage/sections/faqs/add");
+          }}
+        >
+          Add FAQ
+        </VbitezButton>
+      </div>
+      <div className="faq-container">
+        {faqs &&
+          faqs.slice(0, 8).map((item, index) => (
+            <div key={index} className="faq-item">
+              <div className="faq-question" onClick={() => toggleAnswer(index)}>
+                <span>Q. {item.question}</span>
+              </div>
+              <div className="faq-answer">
+                <p>A. {item.answer}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+}
+export default Faqs;

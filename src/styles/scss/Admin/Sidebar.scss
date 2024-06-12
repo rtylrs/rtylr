@@ -5,7 +5,7 @@
 */
 
 .sidebar {
-  background: #040303;
+  background: #040707;
   grid-area: sidebar;
   overflow-y: auto;
   -webkit-transition: all 0.5s;
@@ -62,7 +62,6 @@
   font-size: 1.4rem;
   color: #fff;
   padding: 5px;
-  color:#f2ebe5;
 }
 
 .sidebar__title__container svg:last-child {
@@ -72,11 +71,11 @@
 .sidebar__title {
   font-size: 1.7em;
   margin-left: 10px;
-  color: #f2ebe5;
+  color: #fff;
   padding-bottom: 10px;
   width: fit-content;
 }
-
+ 
 .sidebar__nav > div > h1 {
   color: #f3f4f6;
   display: inline;

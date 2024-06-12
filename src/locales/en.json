@@ -25,87 +25,78 @@
     "Feature6-title": "Loyalty Rewards Integration",
     "Feature6-description": "Build customer loyalty and drive reoeat business with integrated loyalty rewards programs tailored to your restaurant."
   },
-  "PricingSection":{
-    "title":"Plans & Pricing",
-    "description":"Discover the ideal plan for you. Start with our complimentary plan.",
-    "Section1_title":"Starter Plan",
-    "Section1_Price":"Free",
-    "Section1_Requirements":"No credit card required",
-    "Section1_star1":"Unlimited chats & websites",
-    "Section1_star2":"60-day conversations history",
-    "Section1_star3":"Basic widget customization",
-    "purchase_button":"Purchase Now",
-    "link":"Learn More",
-    
-    "Section2_title":"Most Popular",
-    "Section2_Price":"199/month",
-    "Section2_Requirements":"No credit card required",
-    "Section2_star1":"Unlimited chats & websites",
-    "Section2_star2":"60-day conversations history",
-    "Section2_star3":"Basic widget customization",
- 
-    "Section3_title":"Standard Plan",
-    "Section3_Price":"400/month",
-    "Section3_Requirements":"No credit card required",
-    "Section3_star1":"Unlimited chats & websites",
-    "Section3_star2":"60-day conversations history",
-    "Section3_star3":"Basic widget customization"
- 
- 
+  "PricingSection": {
+    "title": "Plans & Pricing",
+    "description": "Discover the ideal plan for you. Start with our complimentary plan.",
+    "Section1_title": "Starter Plan",
+    "Section1_Price": "Free",
+    "Section1_Requirements": "No credit card required",
+    "Section1_star1": "Unlimited chats & websites",
+    "Section1_star2": "60-day conversations history",
+    "Section1_star3": "Basic widget customization",
+    "purchase_button": "Purchase Now",
+    "link": "Learn More",
+
+    "Section2_title": "Most Popular",
+    "Section2_Price": "199/month",
+    "Section2_Requirements": "No credit card required",
+    "Section2_star1": "Unlimited chats & websites",
+    "Section2_star2": "60-day conversations history",
+    "Section2_star3": "Basic widget customization",
+
+    "Section3_title": "Standard Plan",
+    "Section3_Price": "400/month",
+    "Section3_Requirements": "No credit card required",
+    "Section3_star1": "Unlimited chats & websites",
+    "Section3_star2": "60-day conversations history",
+    "Section3_star3": "Basic widget customization"
   },
 
-  "Demo":{
-    "title":"See a Demo online menu",
-    "description":"Just open the camera on your phone and scan the QR code below!",
-    "button":"Create a menu for you, now!"
-
+  "Demo": {
+    "title": "See a Demo online menu",
+    "description": "Just open the camera on your phone and scan the QR code below!",
+    "button": "Get Started"
   },
 
-  "QandA":{
-
-    "title":"Frequently asked questions about our digital agency",
-    "Q1":"Q.What is VBitez?",
-    "Q2":"Q.What makes VBitez different from Restbits and Omega?",
-    "Q3":"Q.How does VBitez improve customer experience?",
-    "Q4":"Q.Can VBitez handle online ordering and menu management?",
-    "Q5":"Q.What unique features does VBitez offer?",
-    "A1":"VBitez is an innovative digital menu solution for restaurants, combining the best features of restbits and Omega to enhance customer experience and streamline restaurant operations",
-    "A2":"VBitez not only integrates the best features of both Restbits and Omega but also addresses their gaps. We offer advanced customization, seamless POS integration, and unique features designed to improve both user experience and restaurant workflows.",
-    "A3":"VBitez provides a visually appealing digital menu with images and descriptions, easy QR code access, and real-time updates, ensuring customers have the latest information and a delightful ordering experience.",
-    "A4":"Yes, VBitez offers comprehensive online ordering functionality along with easy menu management. Restaurants can quickly update their menus and manage orders efficiently.",
-    "A5":"VBitez introduces features such as detailed descriptions of menu items, including ingredients and allergens, filtering or searching the menu by category (e.g., vegetarian, gluten-free), menu translation into different languages, order customization options, bill splitting, feedback and review options, pre-ordering food, and integration with loyalty programs or rewards systems."
-
+  "QandA": {
+    "title": "Frequently asked questions.",
+    "Q1": "Q.What is VBitez?",
+    "Q2": "Q.What makes VBitez different from Restbits and Omega?",
+    "Q3": "Q.How does VBitez improve customer experience?",
+    "Q4": "Q.Can VBitez handle online ordering and menu management?",
+    "Q5": "Q.What unique features does VBitez offer?",
+    "A1": "VBitez is an innovative digital menu solution for restaurants, combining the best features of restbits and Omega to enhance customer experience and streamline restaurant operations",
+    "A2": "VBitez not only integrates the best features of both Restbits and Omega but also addresses their gaps. We offer advanced customization, seamless POS integration, and unique features designed to improve both user experience and restaurant workflows.",
+    "A3": "VBitez provides a visually appealing digital menu with images and descriptions, easy QR code access, and real-time updates, ensuring customers have the latest information and a delightful ordering experience.",
+    "A4": "Yes, VBitez offers comprehensive online ordering functionality along with easy menu management. Restaurants can quickly update their menus and manage orders efficiently.",
+    "A5": "VBitez introduces features such as detailed descriptions of menu items, including ingredients and allergens, filtering or searching the menu by category (e.g., vegetarian, gluten-free), menu translation into different languages, order customization options, bill splitting, feedback and review options, pre-ordering food, and integration with loyalty programs or rewards systems."
   },
 
-"Footer":{
-  "Company_Title":"Company",
-  "about_us":"About Us",
-  "contact_us":"Contact us",
-  "careers":"Careers (Jobs)",
-  "Blog":"Blog",
+  "Footer": {
+    "Company_Title": "Company",
+    "about_us": "About Us",
+    "contact_us": "Contact us",
+    "careers": "Careers (Jobs)",
+    "Blog": "Blog",
 
-  "Support_Title":"Support",
-  "FAQ":"FAQs",
-  "Pricing":"Pricing",
-  "feedback":"Feedback",
-  "Feature":"Feature Request",
+    "Support_Title": "Support",
+    "FAQ": "FAQs",
+    "Pricing": "Pricing",
+    "feedback": "Feedback",
+    "Feature": "Feature Request",
 
-  "Legal_Title":"Legal",
-  "Privacy":"Privacy Policy",
-  "Terms":"Terms and Conditions",
-  "Acceptable":"Acceptable Use Policy",
-  "License":"End User License Agreement",
-  "Disclamer":"Disclamer",
+    "Legal_Title": "Legal",
+    "Privacy": "Privacy Policy",
+    "Terms": "Terms and Conditions",
+    "Acceptable": "Acceptable Use Policy",
+    "License": "End User License Agreement",
+    "Disclamer": "Disclamer",
 
+    "Contact_Title": "Contact",
+    "Email": "Email: support@vbitez.voxire.com",
+    "Phone": "Phone: +961 71 642 565",
 
-  "Contact_Title":"Contact",
-  "Email":"Email: support@vbitez.voxire.com",
-  "Phone":"Phone: +961 71 642 565",
-
-  "lower_footer":"Follow or Contact Us"
-
-
-
+    "lower_footer": "Follow or Contact Us"
   },
 
   "ProductSection": {
