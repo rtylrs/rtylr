@@ -101,8 +101,10 @@ const App = () => {
 
       <Cookies />
 
-      {!location.pathname.includes("/restaurant/") &&
-        !location.pathname.includes("/app/") && (
+      {!location.pathname.includes("/restaurant") &&
+        !location.pathname.includes("/app") &&
+        !location.pathname.includes("/auth") &&
+        !location.pathname.includes("/manage") && (
           <motion.div
             className="whatsappBtn"
             onClick={() => {
