@@ -52,11 +52,11 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #231f1b;
+  background: $primary-color;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b362f;
+  background: $secondary-color;
   transition: 0.3s;
 }
 

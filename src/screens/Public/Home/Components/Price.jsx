@@ -2,8 +2,10 @@ import VbitezButton from "../../../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 function Price() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <div className="Prices">
@@ -49,7 +51,13 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
-              <span>Learn More</span>
+              <span
+                onClick={() => {
+                  navigate("/pricing");
+                }}
+              >
+                Learn More
+              </span>
             </div>
           </div>
         </div>
@@ -90,7 +98,13 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
-              <span>Learn More</span>
+              <span
+                onClick={() => {
+                  navigate("/pricing");
+                }}
+              >
+                Learn More
+              </span>
             </div>
           </div>
         </div>
@@ -131,7 +145,13 @@ function Price() {
             </ul>
             <div className="price-button">
               <VbitezButton>Purchase Now</VbitezButton>
-              <span>Learn More</span>
+              <span
+                onClick={() => {
+                  navigate("/pricing");
+                }}
+              >
+                Learn More
+              </span>
             </div>
           </div>
         </div>
