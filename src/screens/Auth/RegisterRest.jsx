@@ -62,7 +62,7 @@ function RegisterRestaurant() {
     <div className="register-container">
       <div className="image-container">
         <img
-          src="/images/Al-Abed_Mohammad2.jpg"
+          src="/images/Register.jpg"
           alt="Restaurant"
           className="register-image"
         />
