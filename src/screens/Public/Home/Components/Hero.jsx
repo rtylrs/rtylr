@@ -44,7 +44,7 @@ function Hero() {
         </h5>
       </div>
       <div className="hero-image">
-        <img src="/images/HeroImage.png" alt="qr code on a paper" />
+        <img src="/svg/Hero.svg" alt="qr code on a paper" />
       </div>
     </div>
   );
