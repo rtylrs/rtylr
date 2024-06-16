@@ -123,7 +123,7 @@ const Footer = () => {
           <a href="https://www.instagram.com/voxire.tech">
             <FontAwesomeIcon icon={faInstagram} />
           </a>
-          <a href="mailto:TheSanityStore@gmail.com">
+          <a href="mailto:info@vbitez.voxire.com">
             <FontAwesomeIcon icon={faEnvelope} />
           </a>
         </div>

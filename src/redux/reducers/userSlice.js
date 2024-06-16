@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../lib/api';
+// import notify from '../../lib/notify/notify';
 
 const initialState = {
     user: null,
@@ -18,6 +19,7 @@ export const loginAsync = createAsyncThunk(
             const response = await api.post('/auth/login', { email, password });
             const data = response.data;
             localStorage.setItem('token', data.token);
+            // notify.success('Login Successful');
             return data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data);

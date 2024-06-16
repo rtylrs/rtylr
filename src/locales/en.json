@@ -1,7 +1,7 @@
 {
   "Hero": {
-    "welcome": "Connect with customers via contactless QR Menus.",
-    "discover": "Discover the future of dining and drinking with our digital menu. Indulge in new flavors and engage effortlessly with our sleek interface at our Restaurant or Bar. Welcome to the next level of dining.",
+    "welcome": "Connect with customers using efficient, contactless QR Menus.",
+    "discover": "Explore the future of dining and drinking with our digital menu. Enjoy new flavors and interact easily with our sleek interface at our restaurant or bar. Experience the next level of dining.",
     "searchPlaceholder": "Search for products...",
     "Create Account": "Get Started for free",
     "Learn More": "Learn More",
@@ -28,11 +28,11 @@
   "PricingSection": {
     "title": "Plans & Pricing",
     "description": "Discover the ideal plan for you. Start with our complimentary plan.",
-    "Section1_title": "Starter Plan",
+    "Section1_title": "Starter",
     "Section1_Price": "Free",
     "Section1_Requirements": "No credit card required",
     "Section1_star1": "Unlimited chats & websites",
-    "Section1_star2": "60-day conversations history",
+    "Section1_star2": "60-day conversations hiPstory",
     "Section1_star3": "Basic widget customization",
     "purchase_button": "Purchase Now",
     "link": "Learn More",
@@ -53,11 +53,10 @@
   },
 
   "Demo": {
-    "title": "See a Demo online menu",
-    "description": "Just open the camera on your phone and scan the QR code below!",
+    "title": "View a Demo of Our Online Menu",
+    "description": "Simply open your phone's camera and scan the QR code below to explore our digital menu!",
     "button": "Get Started"
   },
-
   "QandA": {
     "title": "Frequently asked questions.",
     "Q1": "Q.What is VBitez?",

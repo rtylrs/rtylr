@@ -19,10 +19,7 @@ import {
   faCrosshairs,
   faHandHoldingDollar,
   faRss,
-  faWarehouse,
   faShop,
-  faQrcode,
-  faHeadset,
   faPenRuler,
   faCalendarAlt,
   faCirclePause,
@@ -35,7 +32,6 @@ import {
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
 import QRCode from "qrcode";
-import { faFirstdraft } from "@fortawesome/free-brands-svg-icons";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   // Define state to track the visibility of each section

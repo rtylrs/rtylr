@@ -403,36 +403,7 @@
       }
     }
 
-    .register-user-social-media {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
 
-      .register-user-google-button {
-        width: 100%;
-        padding: 12px;
-        color: #fff;
-        background-color: #db4437;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.3s, box-shadow 0.3s;
-
-        &:hover {
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          background-color: #c23321;
-        }
-
-        .fa-google {
-          margin-right: 8px;
-        }
-      }
-    }
 
     .register-user-footer {
       margin-top: 20px;
@@ -456,3 +427,33 @@
   }
 }
 
+
+.register-user-social-media {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+  .register-user-google-button {
+    width: 100%;
+    padding: 12px;
+    color: $primary-color;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .fa-google {
+      margin-right: 8px;
+    }
+  }
+}
