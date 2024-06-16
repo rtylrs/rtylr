@@ -114,7 +114,7 @@ const Header = () => {
       >
         <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
         <LinkWithColor to="/pricing">Pricing</LinkWithColor>
-        <LinkWithColor to="/contact">Use Cases</LinkWithColor>
+        <LinkWithColor to="/uses">Use Cases</LinkWithColor>
         <p
           style={{
             color: primary,
