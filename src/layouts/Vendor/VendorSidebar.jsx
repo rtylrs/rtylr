@@ -21,6 +21,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
+import PackageJson from "../../../package.json";
 
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
   const { managementVisible, reportsVisible, toggleSection } = useSidebar();
@@ -72,9 +73,11 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/manage/design" ? "vendor-active" : ""
+            location.pathname === "/app/restaurant/design"
+              ? "vendor-active"
+              : ""
           }`}
-          onClick={() => navigate("/manage/design")}
+          onClick={() => navigate("/app/restaurant/design")}
         >
           <FontAwesomeIcon
             icon={faMagicWandSparkles}
@@ -111,7 +114,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faUserPen} className="vendor-sidebar__icon" />
           <p id="link">Restaurant Information</p>
         </div>
-        <div
+        {/* <div
           className="vendor-sidebar__section"
           onClick={() => toggleSection("management")}
         >
@@ -167,7 +170,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
               </div>
             </>
           )}
-        </div>
+        </div> */}
         <div
           className="vendor-sidebar__section"
           onClick={() => toggleSection("reports")}
@@ -248,7 +251,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link`}
-          onClick={() => navigate(`/restaurant/${userId}`)}
+          onClick={() => window.open(`/restaurant/${userId}`, "_blank")}
         >
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
@@ -259,6 +262,15 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           </p>
         </div>
       </div>
+
+      {/* <div
+        className="vendor-sidebar__version"
+        onClick={() => {
+          window.open("https://voxire.com", "_blank");
+        }}
+      >
+        <p>Version {PackageJson.version}</p>
+      </div> */}
     </div>
   );
 };

@@ -9,6 +9,8 @@ import {
   selectIsAuthenticated,
   selectLoading,
 } from "../../redux/reducers/userSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 function RegisterRestaurant() {
   const navigate = useNavigate();
@@ -124,16 +126,21 @@ function RegisterRestaurant() {
             placeholder="Referred By (Optional)"
             onChange={(e) => setRefered(e.target.value)}
           />
-          <button className="register-button" disabled={loading}>
-            {loading ? "Loading..." : "Register"}
-          </button>
+          <div>
+            <button className="register-button" disabled={loading}>
+              {loading ? "Loading..." : "Register"}
+            </button>
+            <div className="register-user-social-media">
+              <button
+                className="register-user-google-button"
+                onClick={handleRegisterWithGoogle}
+              >
+                <FontAwesomeIcon icon={faGoogle} size="lg" />
+                Sign in with Google
+              </button>
+            </div>
+          </div>
         </form>
-        <button
-          className="google-signin-button"
-          onClick={handleRegisterWithGoogle}
-        >
-          Sign in with Google
-        </button>
         <div className="register-footer">
           <p>
             Already have an account?{" "}

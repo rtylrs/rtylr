@@ -88,9 +88,10 @@ const Header = () => {
   return (
     <header
       className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}
-          ${scrolled ? "scrolled" : ""}`}
+          ${scrolled ? "scrolled" : ""}
+            ${document.location.pathname !== "/" ? "inner" : ""}
+          `}
       style={{
-        backgroundColor: document.location.pathname === "/" ? "" : "#f5f5f5",
         position: "fixed",
       }}
     >

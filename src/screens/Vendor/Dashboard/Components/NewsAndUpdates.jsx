@@ -49,7 +49,11 @@ function NewsAndUpdates() {
               </div>
             ))
         : news?.map((item) => (
-            <Link key={item._id} className="news-item" to={`/news/${item._id}`}>
+            <Link
+              key={item._id}
+              className="news-item"
+              to={item.isDetailed && `/news/${item._id}`}
+            >
               <img
                 src={item?.image}
                 alt={item.title}

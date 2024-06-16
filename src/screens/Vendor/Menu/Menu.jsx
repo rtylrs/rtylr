@@ -54,35 +54,46 @@ function Menu() {
     setEditModalOpen(true);
   };
 
-  const renderCategorySection = (category) => (
-    <div key={category._id} className="category-section">
-      <div className="category-header">
-        <span>{category?.details?.name}</span>
-        <button onClick={() => handleDeleteCategory(category._id)}>
-          Delete
-        </button>
-      </div>
-      <div className="category-items">
-        {category &&
-          category?.details?.menuItems.map((item) => (
-            <MenuItem
-              key={item._id}
-              item={item}
-              onEdit={() => openEditModal(item)}
-            />
-          ))}
-        <button
-          onClick={() => {
-            navigate("/app/restaurant/create-item", {
-              state: { categoryId: category.itemId },
-            });
-          }}
-        >
-          Add a product
-        </button>
-      </div>
-    </div>
-  );
+  const renderSection = (item) => {
+    if (item.type === "category") {
+      return (
+        <div key={item._id} className="category-section">
+          <div className="category-header">
+            <span>{item?.details?.name}</span>
+            <button onClick={() => handleDeleteCategory(item._id)}>
+              Delete
+            </button>
+          </div>
+          <div className="category-items">
+            {item &&
+              item?.details?.menuItems.map((menuItem) => (
+                <MenuItem
+                  key={menuItem._id}
+                  item={menuItem}
+                  onEdit={() => openEditModal(menuItem)}
+                />
+              ))}
+            <button
+              onClick={() => {
+                navigate("/app/restaurant/create-item", {
+                  state: { categoryId: item._id },
+                });
+              }}
+            >
+              Add a product
+            </button>
+          </div>
+        </div>
+      );
+    } else if (item.type === "banner") {
+      return (
+        <div key={item._id} className="banner-section">
+          <img src={item.details.imageUrl} alt={item.details.title} />
+        </div>
+      );
+    }
+    return null;
+  };
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -99,17 +110,18 @@ function Menu() {
           onCreateCategory={() => setCreateCategoryModalOpen(true)}
         />
       </div>
-      <div className="menu-items">
-        {items &&
-          items
-            .filter((item) => item.type === "category")
-            .map(renderCategorySection)}
-      </div>
+      <div className="menu-items">{items && items.map(renderSection)}</div>
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}
         onSave={handleAddCategory}
       />
+      {/* <EditMenuItemModal
+        isOpen={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSave={handleEditMenuItem}
+        item={itemToEdit}
+      /> */}
     </div>
   );
 }

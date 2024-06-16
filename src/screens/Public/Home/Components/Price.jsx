@@ -64,7 +64,7 @@ function Price() {
         <div className="price-card popular">
           <div className="prices-container">
             <h4>
-              <b>Most Popular</b>
+              <b>Advanced</b>
             </h4>
             <h3>
               $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>49</span>
@@ -111,7 +111,7 @@ function Price() {
         <div className="price-card">
           <div className="prices-container">
             <h4>
-              <b>Standard Plan</b>
+              <b>Premium</b>
             </h4>
             <h3>
               $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>59</span>

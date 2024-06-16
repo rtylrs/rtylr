@@ -12,7 +12,7 @@ const CreateItem = React.lazy(() =>
   import("../screens/Vendor/Menu/CreateItem")
 );
 const VendorSettings = React.lazy(() =>
-  import("../screens/Vendor/VendorSettings")
+  import("../screens/Vendor/Settings/VendorSettings")
 );
 const Addons = React.lazy(() => import("../screens/Vendor/Addons"));
 const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes"));
@@ -20,6 +20,7 @@ const CreateQrCode = React.lazy(() =>
   import("../screens/Vendor/QrCode/CreateQrCode")
 );
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
+const Design = React.lazy(() => import("../screens/Vendor/Design/Design"));
 
 const VendorRoutes = [
   {
@@ -108,6 +109,16 @@ const VendorRoutes = [
     element: (
       <Vendor>
         <Billing />
+      </Vendor>
+    ),
+    exact: true,
+  },
+
+  {
+    path: "/app/restaurant/design",
+    element: (
+      <Vendor>
+        <Design />
       </Vendor>
     ),
     exact: true,

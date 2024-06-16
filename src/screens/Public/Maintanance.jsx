@@ -47,7 +47,7 @@ function Maintanance() {
       <h1>Under Maintanance</h1>
       <h2>Sorry for the inconvenience.</h2>
       <h3>To contact us in the meantime please email:</h3>
-      <a href="mailto:vbitez@voxire.com">vbitez@voxire.com</a>
+      <a href="mailto:info@vbitez.voxire.com">info@vbitez.voxire.com</a>
     </div>
   );
 }
