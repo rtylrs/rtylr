@@ -63,11 +63,13 @@ function RegisterRestaurant() {
   return (
     <div className="register-container">
       <div className="image-container">
-        <img
-          src="/images/Register.jpg"
-          alt="Restaurant"
+        <video
+          autoPlay
+          muted
+          loop
+          src="/videos/Register.mp4"
           className="register-image"
-        />
+        ></video>
       </div>
       <div className="register-form">
         <h2>Sign Up</h2>

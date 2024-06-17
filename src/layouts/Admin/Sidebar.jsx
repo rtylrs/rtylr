@@ -11,7 +11,6 @@ import {
   faChevronUp,
   faShoppingBag,
   faCog,
-  faArrowUpRightFromSquare,
   faBarsProgress,
   faSquare,
   faNewspaper,
@@ -31,10 +30,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
-import QRCode from "qrcode";
-
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
-  // Define state to track the visibility of each section
   const {
     customersVisible,
     managementVisible,
@@ -44,39 +40,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
     ordersVisible,
     donationsVisible,
     toggleSection,
-  } = useSidebar(); // Access the context using the hook
-
-  const downloadQRCode = async () => {
-    const link = window.location.origin;
-
-    // Generate the QR code
-    const canvas = await QRCode.toCanvas(link, {
-      errorCorrectionLevel: "H",
-      width: 256,
-      margin: 1,
-    });
-
-    // Convert the QR code canvas to a blob (PNG format)
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-
-        // Create a download link and trigger the download
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Qr Code.png";
-        a.click();
-
-        URL.revokeObjectURL(url);
-      }
-    });
-  };
+  } = useSidebar();
 
   return (
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
         <div className="sidebar__title__container">
-          <p className="sidebar__title">Admin Panel</p>
+          <p className="sidebar__title">Vbitez Admin</p>
         </div>
         <FontAwesomeIcon
           className="close__icon"
@@ -409,25 +379,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
           <Link to="/manage/settings" id="link">
             Settings
-          </Link>
-        </div>
-        {/* <div
-          className={`sidebar__link ${
-            location.pathname === "/manage/addons" ? "active" : ""
-          }`}
-        >
-          <FontAwesomeIcon icon={faPuzzlePiece} className="sidebar__icon" />
-          <Link to="/manage/addons" id="link">
-            Add-Ons
-          </Link>
-        </div> */}
-        <div className={`sidebar__link`}>
-          <FontAwesomeIcon
-            icon={faArrowUpRightFromSquare}
-            className="sidebar__icon"
-          />
-          <Link to="/" id="link" target="_blank">
-            Open Website
           </Link>
         </div>
       </div>
