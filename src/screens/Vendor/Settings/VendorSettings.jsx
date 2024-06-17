@@ -21,7 +21,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>General</h2>
-            <p>View and update your store details</p>
+            <span>View and update your store details</span>
           </div>
         </div>
         <div className="settings-item">
@@ -30,10 +30,10 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Plan and permissions</h2>
-            <p>
+            <span>
               View plan information and manage what staff can see or do in your
               store
-            </p>
+            </span>
           </div>
         </div>
         <div className="settings-item">
@@ -42,7 +42,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Payments</h2>
-            <p>Enable and manage your store's payment providers</p>
+            <span>Enable and manage your store's payment providers</span>
           </div>
         </div>
         <div className="settings-item">
@@ -51,16 +51,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Files</h2>
-            <p>Upload images, videos, and documents</p>
-          </div>
-        </div>
-        <div className="settings-item">
-          <div className="settings-icon">
-            <FontAwesomeIcon icon={faDatabase} />
-          </div>
-          <div className="settings-content">
-            <h2>Backups</h2>
-            <p>Check your last backups</p>
+            <span>Upload images, videos, and documents</span>
           </div>
         </div>
         <div className="settings-item">
@@ -69,7 +60,9 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Store languages</h2>
-            <p>Manage the languages your customers can view on your store</p>
+            <span>
+              Manage the languages your customers can view on your store
+            </span>
           </div>
         </div>
         <div className="settings-item">
@@ -78,7 +71,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Legal</h2>
-            <p>Manage your store's legal pages</p>
+            <span>Manage your store's legal pages</span>
           </div>
         </div>
       </div>
