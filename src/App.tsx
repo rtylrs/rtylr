@@ -42,6 +42,7 @@ import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { selectRole } from "./redux/reducers/userSlice";
 import ToolBar from "./components/ToolBar";
+import { RootState } from "./redux/store";
 
 const App = () => {
   //Hooks
@@ -50,7 +51,7 @@ const App = () => {
   const dispatch = useDispatch();
 
   // Redux
-  const config = useSelector((state) => state.config);
+  const config = useSelector((state: RootState) => state.config);
   const role = useSelector(selectRole);
 
   // States
@@ -150,53 +151,28 @@ const App = () => {
       <Routes key={location.pathname} location={location}>
         {/* Auth Routes */}
         {AuthRoutes.map((route, index) => (
-          <Route
-            key={index}
-            path={route.path}
-            exact={route.exact}
-            element={route.element}
-          />
+          <Route key={index} path={route.path} element={route.element} />
         ))}
 
         {/* Public Routes */}
         {PublicRoutes.map((route, index) => (
-          <Route
-            key={index}
-            path={route.path}
-            exact={route.exact}
-            element={route.element}
-          />
+          <Route key={index} path={route.path} element={route.element} />
         ))}
 
         {/* User routes */}
         {UserRoutes.map((route, index) => (
-          <Route
-            key={index}
-            path={route.path}
-            exact={route.exact}
-            element={route.element}
-          />
+          <Route key={index} path={route.path} element={route.element} />
         ))}
 
-        <Route exact path="/manage" element={<AdminRoute />}>
+        <Route path="/manage" element={<AdminRoute />}>
           {AdminRoutes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              exact={route.exact}
-              element={route.element}
-            />
+            <Route key={index} path={route.path} element={route.element} />
           ))}
         </Route>
 
-        <Route exact path="/app/restaurant" element={<BusinessRoute />}>
+        <Route path="/app/restaurant" element={<BusinessRoute />}>
           {VendorRoutes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              exact={route.exact}
-              element={route.element}
-            />
+            <Route key={index} path={route.path} element={route.element} />
           ))}
         </Route>
 

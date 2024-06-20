@@ -30,7 +30,6 @@ const VendorRoutes = [
         <VendorDashboard />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/addons",
@@ -39,7 +38,6 @@ const VendorRoutes = [
         <Addons />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/settings",
@@ -48,7 +46,6 @@ const VendorRoutes = [
         <VendorSettings />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/menus",
@@ -57,7 +54,6 @@ const VendorRoutes = [
         <Menus />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/menu",
@@ -66,7 +62,6 @@ const VendorRoutes = [
         <Menu />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/menu/:id",
@@ -75,7 +70,6 @@ const VendorRoutes = [
         <MenuWithId />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/create-item",
@@ -84,7 +78,6 @@ const VendorRoutes = [
         <CreateItem />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/qr-codes",
@@ -93,7 +86,6 @@ const VendorRoutes = [
         <QrCodes />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/qr-codes/create",
@@ -102,7 +94,6 @@ const VendorRoutes = [
         <CreateQrCode />
       </Vendor>
     ),
-    exact: true,
   },
   {
     path: "/app/restaurant/billing",
@@ -111,7 +102,6 @@ const VendorRoutes = [
         <Billing />
       </Vendor>
     ),
-    exact: true,
   },
 
   {
@@ -121,7 +111,6 @@ const VendorRoutes = [
         <Design />
       </Vendor>
     ),
-    exact: true,
   },
 ];
 

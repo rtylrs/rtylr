@@ -25,7 +25,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/about",
@@ -36,7 +35,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/pricing",
@@ -47,7 +45,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/contact",
@@ -58,7 +55,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/feedback",
@@ -69,7 +65,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/collection/:collectionName",
@@ -78,7 +73,6 @@ const PublicRoutes = [
         <Collection />
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/all-blogs",
@@ -89,7 +83,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/faqs",
@@ -100,7 +93,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/news/:newsId",
@@ -111,7 +103,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/restaurant/:id",
@@ -120,7 +111,6 @@ const PublicRoutes = [
         <Menu />
       </AnimatedRoutes>
     ),
-    exact: true,
   },
   {
     path: "/uses",
@@ -131,7 +121,6 @@ const PublicRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
 ];
 

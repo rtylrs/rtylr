@@ -32,7 +32,6 @@ const AdminRoutes = [
         <Dashboard />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/blog",
@@ -41,7 +40,6 @@ const AdminRoutes = [
         <AdminBlog />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/feedback",
@@ -50,7 +48,6 @@ const AdminRoutes = [
         <AdminFeedback />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/products",
@@ -59,7 +56,6 @@ const AdminRoutes = [
         <AdminProducts />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/users",
@@ -68,7 +64,6 @@ const AdminRoutes = [
         <Users />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/settings",
@@ -77,7 +72,6 @@ const AdminRoutes = [
         <AdminSettings />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/config/about",
@@ -86,7 +80,6 @@ const AdminRoutes = [
         <AboutConfig />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/sections/faqs",
@@ -95,7 +88,6 @@ const AdminRoutes = [
         <Faqs />
       </Admin>
     ),
-    exact: true,
   },
   {
     path: "/manage/sections/faqs/add",
@@ -104,7 +96,6 @@ const AdminRoutes = [
         <AddFaq />
       </Admin>
     ),
-    exact: true,
   },
 ];
 

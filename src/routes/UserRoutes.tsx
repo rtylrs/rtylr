@@ -14,7 +14,6 @@ const UserRoutes = [
         <Profile />
       </DashboardLayout>
     ),
-    exact: true,
   },
   {
     path: "/settings",
@@ -23,7 +22,6 @@ const UserRoutes = [
         <SettingsPage />
       </DashboardLayout>
     ),
-    exact: true,
   },
   {
     path: "/account/cart",
@@ -32,7 +30,6 @@ const UserRoutes = [
         <Cart />
       </DashboardLayout>
     ),
-    exact: true,
   },
 ];
 
