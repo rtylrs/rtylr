@@ -6,7 +6,9 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
-function Hero() {
+import React from "react";
+
+const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { accent } = useColors();
@@ -48,6 +50,6 @@ function Hero() {
       </div>
     </div>
   );
-}
+};
 
 export default Hero;

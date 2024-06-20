@@ -1,9 +1,3 @@
-/*
-  File Created By: Vite js
-  Last Edited: Sunday 12 May 2024
-  Last Edited by: Mohamad Homsi
-*/
-
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
@@ -36,26 +30,32 @@ const theme = createTheme({
 
 Modal.setAppElement("#root");
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <CookiesProvider>
-      <ThemeProvider theme={theme}>
-        <Suspense fallback={<Loader />}>
-          <I18nextProvider i18n={i18next}>
-            <Provider store={store}>
-              <PersistGate loading={null} persistor={persistor}>
-                <BrowserRouter>
-                  <SidebarProvider>
-                    <App />
-                    <ToastContainer />
-                    <ScrollToTop />
-                  </SidebarProvider>
-                </BrowserRouter>
-              </PersistGate>
-            </Provider>
-          </I18nextProvider>
-        </Suspense>
-      </ThemeProvider>
-    </CookiesProvider>
-  </React.StrictMode>
-);
+const rootElement = document.getElementById("root");
+
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <CookiesProvider>
+        <ThemeProvider theme={theme}>
+          <Suspense fallback={<Loader />}>
+            <I18nextProvider i18n={i18next}>
+              <Provider store={store}>
+                <PersistGate loading={null} persistor={persistor}>
+                  <BrowserRouter>
+                    <SidebarProvider>
+                      <App />
+                      <ToastContainer />
+                      <ScrollToTop />
+                    </SidebarProvider>
+                  </BrowserRouter>
+                </PersistGate>
+              </Provider>
+            </I18nextProvider>
+          </Suspense>
+        </ThemeProvider>
+      </CookiesProvider>
+    </React.StrictMode>
+  );
+} else {
+  <div>No root element found</div>;
+}

@@ -1,11 +1,11 @@
 import React from "react";
 import Header from "./PublicHeader";
 import Footer from "./PublicFooter";
-
-import PropTypes from "prop-types";
 import Loader from "../loader/Loader";
 
-function Public({ children }) {
+const Public: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const [loading, setLoading] = React.useState(false);
 
   return (
@@ -23,20 +23,21 @@ function Public({ children }) {
           }}
         >
           {React.Children.map(children, (child) => {
-            return React.cloneElement(child, {
-              startLoading: () => setLoading(true),
-              endLoading: () => setLoading(false),
-            });
+            return React.isValidElement<{
+              startLoading: () => void;
+              endLoading: () => void;
+            }>(child)
+              ? React.cloneElement(child, {
+                  startLoading: () => setLoading(true),
+                  endLoading: () => setLoading(false),
+                })
+              : child;
           })}
         </div>
         <Footer />
       </div>
     </div>
   );
-}
-
-Public.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default Public;

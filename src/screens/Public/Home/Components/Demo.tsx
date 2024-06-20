@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import VbitezButton from "../../../../components/Buttons/Buttons";
+import React from "react";
 
-function Demo() {
+const Demo: React.FC<{}> = () => {
   const { t } = useTranslation();
   return (
     <div className="demo-section">
@@ -15,6 +16,6 @@ function Demo() {
       </div>
     </div>
   );
-}
+};
 
 export default Demo;

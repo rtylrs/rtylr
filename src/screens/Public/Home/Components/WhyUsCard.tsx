@@ -1,8 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from "react";
+import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const WhyUsCard = ({ icon, title, description }) => {
+const WhyUsCard: React.FC<{
+  icon: any;
+  title: string;
+  description: string;
+}> = ({ icon, title, description }) => {
   return (
     <div className="why-us-card">
       <div className="icon-container">

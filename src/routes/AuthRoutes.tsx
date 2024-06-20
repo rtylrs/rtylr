@@ -21,7 +21,6 @@ const AuthRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/auth/register/user",
@@ -32,7 +31,6 @@ const AuthRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/auth/register/restaurant",
@@ -43,7 +41,6 @@ const AuthRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/auth/password-reset",
@@ -54,7 +51,6 @@ const AuthRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
   {
     path: "/auth/verify/:token",
@@ -65,7 +61,6 @@ const AuthRoutes = [
         </AnimatedRoutes>
       </Public>
     ),
-    exact: true,
   },
 ];
 
