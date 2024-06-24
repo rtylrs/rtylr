@@ -3,7 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-function Price() {
+import React from "react";
+
+const Price: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -158,11 +160,6 @@ function Price() {
       </div>
     </div>
   );
-}
+};
 
 export default Price;
-/*
-  File Created By: Abed El-Fattah Amouneh
-  Last Edited: Monday 11 July 2024
-  Last Edited by: Abed El-Fattah Amouneh
-*/

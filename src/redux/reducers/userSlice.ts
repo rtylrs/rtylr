@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/api";
 
-interface InitialState {
+export interface UserState {
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
@@ -11,7 +11,7 @@ interface InitialState {
   userId: string | null;
 }
 
-const initialState: InitialState = {
+const initialState: UserState = {
   user: null,
   token: null,
   isAuthenticated: false,

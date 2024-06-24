@@ -7,8 +7,9 @@ import {
   faHandHoldingHeart,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
-function Goals() {
+const Goals: React.FC = () => {
   return (
     <div>
       <section className="home-goals">
@@ -41,6 +42,6 @@ function Goals() {
       </section>
     </div>
   );
-}
+};
 
 export default Goals;

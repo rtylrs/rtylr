@@ -9,7 +9,7 @@ import {
   faFilter,
 } from "@fortawesome/free-solid-svg-icons";
 
-function Features() {
+const Features: React.FC<{}> = () => {
   const { t } = useTranslation();
 
   return (
@@ -75,9 +75,7 @@ function Features() {
             <h4>
               <b>{t("Features.Feature5-title")}</b>
             </h4>
-            <p>
-            {t("Features.Feature5-description")}
-            </p>
+            <p>{t("Features.Feature5-description")}</p>
           </div>
         </div>
         <div className="feature">
@@ -91,16 +89,9 @@ function Features() {
             <p>{t("Features.Feature6-description")}</p>
           </div>
         </div>
-
-        {/* Add four more similar divs for other features */}
       </div>
     </div>
   );
-}
+};
 
 export default Features;
-/*
-  File Created By: Abed El-Fattah Amouneh
-  Last Edited: Sunday 12 May 2024
-  Last Edited by: Abed El-Fattah Amouneh
-*/
