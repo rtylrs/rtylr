@@ -7,15 +7,18 @@ import { useSelector } from "react-redux";
 import HelmetContainer from "../../components/HelmetContainer";
 import { selectRole } from "../../redux/reducers/userSlice";
 import FreeAccount from "../../components/FreeAccount";
+import { RootState } from "../../redux/store";
 
-function Vendor(props) {
+const Vendor: React.FC<{
+  children?: React.ReactNode;
+}> = (props) => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const user = useSelector((state) => state.user);
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
+  const user = useSelector((state: RootState) => state.user);
   const role = useSelector(selectRole);
 
-  const openSidebar = () => {
-    setSidebarOpen(true);
+  const openSidebar = (open: boolean) => {
+    setSidebarOpen(open);
   };
 
   const closeSidebar = () => {
@@ -31,19 +34,21 @@ function Vendor(props) {
 
     const url = new URL(window.location.href);
     if (!url.searchParams.has("userId")) {
-      url.searchParams.append("userId", user?.userId);
-      if (role !== "admin")
-        url.searchParams.append("plan", user?.user?.planType);
-      else url.searchParams.append("plan", "admin");
+      url.searchParams.append("userId", user?.userId || "");
+      if (role !== "admin") {
+        url.searchParams.append("plan", user?.user?.planType || "");
+      } else {
+        url.searchParams.append("plan", "admin");
+      }
       window.history.replaceState({}, "", url.toString());
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate, user?.userId, user?.user?.planType, role]);
 
   return (
     <>
-      <HelmetContainer title={`${user?.user?.name}'s Dashboard`} />
+      <HelmetContainer title={`${user?.user?.name || "User"}'s Dashboard`} />
       {user?.user?.planType === "free" && <FreeAccount />}
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
@@ -52,7 +57,7 @@ function Vendor(props) {
       </div>
     </>
   );
-}
+};
 
 Vendor.propTypes = {
   children: PropTypes.node.isRequired,

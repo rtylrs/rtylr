@@ -11,7 +11,7 @@ import React from "react";
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { accent } = useColors();
+  const { secondary } = useColors();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   return (
@@ -23,15 +23,15 @@ const Hero: React.FC<{}> = () => {
           <VbitezButton
             onClick={() => {
               if (isAuthenticated) {
-                navigate("/app/restaurant");
+                navigate("/app/business");
               } else {
-                navigate("/auth/register/restaurant");
+                navigate("/auth/register/business");
               }
             }}
           >
             {isAuthenticated ? t("Hero.My Account") : t("Hero.Create Account")}
           </VbitezButton>
-          <VbitezButton onClick={() => navigate("/shop")} variant="secondary">
+          <VbitezButton onClick={() => navigate("/uses")} variant="secondary">
             {t("Hero.Learn More")}
           </VbitezButton>
         </div>
@@ -41,8 +41,8 @@ const Hero: React.FC<{}> = () => {
             marginTop: 10,
           }}
         >
-          <FontAwesomeIcon icon={faStar} color={accent} /> Rated 4.7/5 - from
-          over 350 reviews
+          <FontAwesomeIcon icon={faStar} color={secondary} /> Rated 4.7/5 - from
+          over 150 reviews
         </h5>
       </div>
       <div className="hero-image">

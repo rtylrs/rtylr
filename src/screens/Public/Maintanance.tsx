@@ -1,6 +1,6 @@
 import useColors from "../../hooks/useColors";
 
-function Maintanance() {
+const Maintanance: React.FC = () => {
   const { primary } = useColors();
 
   return (
@@ -50,6 +50,6 @@ function Maintanance() {
       <a href="mailto:info@vbitez.voxire.com">info@vbitez.voxire.com</a>
     </div>
   );
-}
+};
 
 export default Maintanance;

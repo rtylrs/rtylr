@@ -4,7 +4,7 @@
   Last Edited by: Mohamad Homsi
 */
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -18,21 +18,27 @@ import useColors from "../../hooks/useColors";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { useSelector } from "react-redux";
 import { selectLanguage } from "../../services/i18next";
+import { RootState } from "../../redux/store";
 
-const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+interface LinkWithColorProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  color?: string;
+  to: string;
+}
+
+const Header: React.FC<{}> = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
   const [dropdown, setDropdown] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState<string>("en");
 
   useEffect(() => {
-    const language = localStorage.getItem("language");
-
-    if (language) {
-      setLanguage(language);
+    const storedLanguage = localStorage.getItem("language");
+    if (storedLanguage) {
+      setLanguage(storedLanguage);
     }
   }, []);
 
@@ -40,16 +46,16 @@ const Header = () => {
     setIsOpen(!isOpen);
   };
 
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state: RootState) => state.user);
 
-  const LinkWithColor = (props) => {
-    // eslint-disable-next-line react/prop-types
-    const { color, ...rest } = props;
+  const LinkWithColor: React.FC<LinkWithColorProps> = (props) => {
+    const { color, to, ...rest } = props;
     return (
       <Link
         style={{
           color: color || primary,
         }}
+        to={to}
         {...rest}
       />
     );
@@ -62,13 +68,18 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       if (window.scrollY > 150) {
         setScrolled(true);
       } else {
         setScrolled(false);
       }
-    });
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const handleClick = () => {
@@ -76,12 +87,12 @@ const Header = () => {
 
     if (token) {
       if (user.role === "business" || user.role === "admin") {
-        navigate("/app/restaurant/");
+        navigate("/app/business/");
       } else {
         navigate("/app/user/");
       }
     } else {
-      navigate("/auth/register/restaurant");
+      navigate("/auth/register/business");
     }
   };
 
@@ -257,7 +268,7 @@ const Header = () => {
         <div className="mobile-menu">
           <LinkWithColor to="/menu">Menu</LinkWithColor>
           <LinkWithColor to="/deals">Deals</LinkWithColor>
-          <LinkWithColor to="/blog">blog</LinkWithColor>
+          <LinkWithColor to="/blog">Blog</LinkWithColor>
           <LinkWithColor to="/about">About</LinkWithColor>
           <LinkWithColor to="/contact">Contact Us</LinkWithColor>
           <VbitezButton

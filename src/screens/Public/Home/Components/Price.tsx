@@ -52,7 +52,6 @@ const Price: React.FC = () => {
               </li>
             </ul>
             <div className="price-button">
-              <VbitezButton>Purchase Now</VbitezButton>
               <span
                 onClick={() => {
                   navigate("/pricing");
@@ -99,7 +98,7 @@ const Price: React.FC = () => {
               </li>
             </ul>
             <div className="price-button">
-              <VbitezButton>Purchase Now</VbitezButton>
+              {/* <VbitezButton>Get Started</VbitezButton> */}
               <span
                 onClick={() => {
                   navigate("/pricing");
@@ -146,7 +145,7 @@ const Price: React.FC = () => {
               </li>
             </ul>
             <div className="price-button">
-              <VbitezButton>Purchase Now</VbitezButton>
+              {/* <VbitezButton>Get Started</VbitezButton> */}
               <span
                 onClick={() => {
                   navigate("/pricing");
@@ -157,6 +156,21 @@ const Price: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div
+        className="price-button"
+        style={{
+          marginTop: "50px",
+          marginBottom: "0px",
+        }}
+      >
+        <VbitezButton
+          onClick={() => {
+            navigate("/auth/register/business");
+          }}
+        >
+          Get Started
+        </VbitezButton>
       </div>
     </div>
   );

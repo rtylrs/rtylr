@@ -1,30 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import notify from "../../lib/notify/notify";
 import { useDispatch, useSelector } from "react-redux";
-import { GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import {
   RegisterResaurantAsync,
   selectIsAuthenticated,
   selectLoading,
 } from "../../redux/reducers/userSlice";
+import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
-function RegisterRestaurant() {
+const RegisterRestaurant: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [address, setAddress] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [refered, setRefered] = React.useState("");
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const loading = useSelector(selectLoading);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [refered, setRefered] = useState<string>("");
+  const dispatch = useDispatch<AppDispatch>();
+  const isAuthenticated = useSelector((state: RootState) =>
+    selectIsAuthenticated(state)
+  );
+  const loading = useSelector((state: RootState) => selectLoading(state));
 
   const handleRegister = () => {
     if (password === confirmPassword) {
@@ -33,8 +34,6 @@ function RegisterRestaurant() {
           email,
           password,
           name,
-          address,
-          phone,
           refered,
         })
       );
@@ -44,8 +43,7 @@ function RegisterRestaurant() {
   };
 
   const handleRegisterWithGoogle = () => {
-    auth
-      .signInWithPopup(provider)
+    signInWithPopup(auth, provider)
       .then((result) => {
         console.log(result);
       })
@@ -54,7 +52,7 @@ function RegisterRestaurant() {
       });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
@@ -73,7 +71,7 @@ function RegisterRestaurant() {
       </div>
       <div className="register-form">
         <h2>Sign Up</h2>
-        <p>Create your account to get started</p>
+        <p>Create your free account to get started</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -93,20 +91,6 @@ function RegisterRestaurant() {
             placeholder="Email"
             required
             onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="text"
-            placeholder="Address"
-            required
-            onChange={(e) => setAddress(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="text"
-            placeholder="Phone Number"
-            required
-            onChange={(e) => setPhone(e.target.value)}
           />
           <input
             className="register-input"
@@ -134,6 +118,7 @@ function RegisterRestaurant() {
             </button>
             <div className="register-user-social-media">
               <button
+                type="button"
                 className="register-user-google-button"
                 onClick={handleRegisterWithGoogle}
               >
@@ -163,6 +148,6 @@ function RegisterRestaurant() {
       </div>
     </div>
   );
-}
+};
 
 export default RegisterRestaurant;

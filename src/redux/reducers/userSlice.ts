@@ -9,6 +9,7 @@ export interface UserState {
   error: string | null;
   role: string | null;
   userId: string | null;
+  addons: any[];
 }
 
 const initialState: UserState = {
@@ -19,6 +20,7 @@ const initialState: UserState = {
   error: null,
   role: null,
   userId: null,
+  addons: [],
 };
 
 export const loginAsync = createAsyncThunk(
@@ -98,6 +100,7 @@ const userSlice = createSlice({
           user: user,
           isAuthenticated: true,
           loading: false,
+          addons: user.addons,
         };
       })
       .addCase(loginAsync.rejected, (state, action) => {

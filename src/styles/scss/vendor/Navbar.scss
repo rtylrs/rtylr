@@ -74,22 +74,8 @@
   cursor: pointer;
 }
 
-.vendor-navbar__right > div > i:hover {
-  background: #db5957;
-  transition: 0.5s;
-}
-
-.vendor-navbar__right > a > i {
-  color: #fff;
-  font-size: 16px;
-  border-radius: 100px;
-  background: #83a6b0;
-  box-shadow: 2px 2px 5px #d9d9d9, -2px -2px 5px #ffffff;
-  padding: 8px;
-}
-
-.vendor-navbar__right > a > i:hover {
-  background: #699dab;
+.vendor-navbar__right div p:hover {
+  color: #db5957;
   transition: 0.5s;
 }
 

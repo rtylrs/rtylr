@@ -1,30 +1,14 @@
-/*
-  File Created By: Mohamad Homsi
-  Last Edited: Thursday 16 May 2024
-  Last Edited by: Mohamad Homsi
-*/
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import PackageJson from "../../../package.json";
-import { selectLanguage } from "../../services/i18next";
-import { useEffect, useState } from "react";
+import { RootState } from "../../redux/store";
+import React from "react";
 
-const Footer = () => {
-  const config = useSelector((state) => state.config.contactInfo);
-  const [language, setLanguage] = useState("en");
-
-  useEffect(() => {
-    const language = localStorage.getItem("language");
-
-    if (language) {
-      selectLanguage(language);
-      setLanguage(language);
-    }
-  }, []);
+const Footer: React.FC<{}> = () => {
+  const config = useSelector((state: RootState) => state.config.contactInfo);
 
   return (
     <footer className="footer">
@@ -148,30 +132,23 @@ const Footer = () => {
       <div className="footer-version">
         <p
           onMouseEnter={() => {
-            document.querySelector(".footer-version p").innerHTML =
-              "Version " + PackageJson.version;
+            const footerVersionElement =
+              document.querySelector(".footer-version p");
+            if (footerVersionElement) {
+              footerVersionElement.innerHTML = "Version " + PackageJson.version;
+            }
           }}
           onMouseLeave={() => {
-            document.querySelector(".footer-version p").innerHTML =
-              PackageJson.version;
+            const footerVersionElement =
+              document.querySelector(".footer-version p");
+            if (footerVersionElement) {
+              footerVersionElement.innerHTML = PackageJson.version;
+            }
           }}
         >
           {PackageJson.version}
         </p>
       </div>
-      {/* 
-      <div className="footer-language">
-        <select
-          onChange={(e) => {
-            selectLanguage(e.target.value);
-            setLanguage(e.target.value);
-          }}
-          value={language}
-        >
-          <option value="en">English</option>
-          <option value="fr">French</option>
-        </select>
-      </div> */}
     </footer>
   );
 };

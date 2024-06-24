@@ -3,28 +3,28 @@ import Vendor from "../layouts/Vendor/Vendor";
 import MenuWithId from "../screens/Vendor/Menu/MenuWithId";
 
 // Routes
-const VendorDashboard = React.lazy(() =>
-  import("../screens/Vendor/Dashboard/VendorDashboard")
+const VendorDashboard = React.lazy(
+  () => import("../screens/Vendor/Dashboard/VendorDashboard")
 );
 const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu"));
 const Menus = React.lazy(() => import("../screens/Vendor/Menu/Menus"));
-const CreateItem = React.lazy(() =>
-  import("../screens/Vendor/Menu/CreateItem")
+const CreateItem = React.lazy(
+  () => import("../screens/Vendor/Menu/CreateItem")
 );
-const VendorSettings = React.lazy(() =>
-  import("../screens/Vendor/Settings/VendorSettings")
+const VendorSettings = React.lazy(
+  () => import("../screens/Vendor/Settings/VendorSettings")
 );
 const Addons = React.lazy(() => import("../screens/Vendor/Addons"));
 const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes"));
-const CreateQrCode = React.lazy(() =>
-  import("../screens/Vendor/QrCode/CreateQrCode")
+const CreateQrCode = React.lazy(
+  () => import("../screens/Vendor/QrCode/CreateQrCode")
 );
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
 const Design = React.lazy(() => import("../screens/Vendor/Design/Design"));
 
 const VendorRoutes = [
   {
-    path: "/app/restaurant/",
+    path: "/app/business/",
     element: (
       <Vendor>
         <VendorDashboard />
@@ -32,7 +32,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/addons",
+    path: "/app/business/addons",
     element: (
       <Vendor>
         <Addons />
@@ -40,7 +40,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/settings",
+    path: "/app/business/settings",
     element: (
       <Vendor>
         <VendorSettings />
@@ -48,7 +48,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/menus",
+    path: "/app/business/menus",
     element: (
       <Vendor>
         <Menus />
@@ -56,7 +56,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/menu",
+    path: "/app/business/menu",
     element: (
       <Vendor>
         <Menu />
@@ -64,7 +64,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/menu/:id",
+    path: "/app/business/menu/:id",
     element: (
       <Vendor>
         <MenuWithId />
@@ -72,7 +72,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/create-item",
+    path: "/app/business/create-item",
     element: (
       <Vendor>
         <CreateItem />
@@ -80,7 +80,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/qr-codes",
+    path: "/app/business/qr-codes",
     element: (
       <Vendor>
         <QrCodes />
@@ -88,7 +88,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/qr-codes/create",
+    path: "/app/business/qr-codes/create",
     element: (
       <Vendor>
         <CreateQrCode />
@@ -96,7 +96,7 @@ const VendorRoutes = [
     ),
   },
   {
-    path: "/app/restaurant/billing",
+    path: "/app/business/billing",
     element: (
       <Vendor>
         <Billing />
@@ -105,7 +105,7 @@ const VendorRoutes = [
   },
 
   {
-    path: "/app/restaurant/design",
+    path: "/app/business/design",
     element: (
       <Vendor>
         <Design />

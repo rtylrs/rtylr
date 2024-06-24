@@ -1,7 +1,8 @@
 import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
-const AboutUs = () => {
-  const config = useSelector((state) => state.config.aboutContent);
+const AboutUs = (): JSX.Element => {
+  const config = useSelector((state: RootState) => state.config.aboutContent);
 
   return (
     <div className="about-us-container">

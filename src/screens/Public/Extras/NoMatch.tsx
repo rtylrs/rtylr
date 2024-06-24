@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import VbitezButton from "../../../components/Buttons/Buttons";
 
-export default function NoMatch() {
+const NoMatch = (): JSX.Element => {
   const navigate = useNavigate();
 
   const animation = {
@@ -34,4 +34,6 @@ export default function NoMatch() {
       </div>
     </motion.div>
   );
-}
+};
+
+export default NoMatch;
