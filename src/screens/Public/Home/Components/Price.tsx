@@ -4,10 +4,13 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import React from "react";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
 
 const Price: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   return (
     <div className="Prices">
@@ -166,10 +169,14 @@ const Price: React.FC = () => {
       >
         <VbitezButton
           onClick={() => {
-            navigate("/auth/register/business");
+            if (isAuthenticated) {
+              navigate("/app/business");
+            } else {
+              navigate("/auth/register/business");
+            }
           }}
         >
-          Get Started
+          {isAuthenticated ? "Dashboard" : "Get Started"}
         </VbitezButton>
       </div>
     </div>

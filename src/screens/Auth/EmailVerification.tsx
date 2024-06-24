@@ -24,23 +24,21 @@ const EmailVerification = () => {
   }, [token]);
 
   return (
-    <div style={styles.container}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "60vh",
+        backgroundColor: "#f5f5f5",
+        textAlign: "center",
+      }}
+    >
       <h1>Email Verification</h1>
       {loading ? <CircularProgress /> : <p>{message}</p>}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "60vh",
-    backgroundColor: "#f5f5f5",
-    textAlign: "center",
-  },
 };
 
 export default EmailVerification;

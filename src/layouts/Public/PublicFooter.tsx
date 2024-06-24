@@ -127,6 +127,10 @@ const Footer: React.FC<{}> = () => {
           </a>{" "}
           All rights reserved.
         </p>
+        <span>
+          Unless otherwise noted, the use of third-party logos does not imply
+          endorsement, <br /> sponsorship, or affiliation with Vbitez.
+        </span>
       </div>
 
       <div className="footer-version">
