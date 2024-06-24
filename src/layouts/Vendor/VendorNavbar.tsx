@@ -1,16 +1,21 @@
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
+import { RootState } from "../../redux/store";
 
-const VendorNavbar = ({ openSidebar }) => {
+const VendorNavbar: React.FC<{
+  openSidebar: (sidebarOpen: boolean) => void;
+  sidebarOpen: boolean;
+}> = ({ openSidebar }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state: RootState) => state.user);
 
   return (
     <div className="vendor-navbar">
-      <div className="vendor_nav_icon" onClick={() => openSidebar("navbar")}>
+      <div className="vendor_nav_icon" onClick={() => openSidebar(true)}>
         <FontAwesomeIcon icon={faBars} />
       </div>
       <div className="vendor-navbar__left">
@@ -18,12 +23,11 @@ const VendorNavbar = ({ openSidebar }) => {
       </div>
       <div className="vendor-navbar__right">
         <div
-          to="/auth/profile"
           onClick={() => {
             dispatch(logout());
           }}
         >
-          <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
+          <p>Logout</p>
         </div>
       </div>
     </div>

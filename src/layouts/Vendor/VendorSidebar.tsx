@@ -9,23 +9,22 @@ import {
   faCog,
   faArrowUpRightFromSquare,
   faNewspaper,
-  faRss,
   faQrcode,
-  faUserLock,
   faUtensils,
   faMagicWandSparkles,
   faStar,
   faUserPen,
-  faBullhorn,
   faCreditCard,
+  faPuzzlePiece,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
-import PackageJson from "../../../package.json";
+import { RootState } from "../../redux/store";
 
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
-  const { managementVisible, reportsVisible, toggleSection } = useSidebar();
-  const userId = useSelector((state) => state.user.userId);
+  const { reportsVisible, toggleSection } = useSidebar();
+  const userId = useSelector((state: RootState) => state.user.userId);
+  const userAddons = useSelector((state: RootState) => state.user.addons);
   const navigate = useNavigate();
 
   return (
@@ -40,7 +39,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             src="/logo.png"
             alt="logo"
             className="vendor-sidebar__logo"
-            onClick={() => navigate("/app/restaurant/")}
+            onClick={() => navigate("/app/business/")}
             style={{ cursor: "pointer", height: "70px", marginBottom: "10px" }}
           />
         </div>
@@ -48,36 +47,33 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           className="vendor-close__icon"
           onClick={() => closeSidebar()}
           icon={faClose}
-          r
           size="lg"
         />
       </div>
       <div className="vendor-sidebar__menu">
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/" ? "vendor-active" : ""
+            location.pathname === "/app/business/" ? "vendor-active" : ""
           }`}
-          onClick={() => navigate("/app/restaurant/")}
+          onClick={() => navigate("/app/business/")}
         >
           <FontAwesomeIcon icon={faHome} className="vendor-sidebar__icon" />
           <p id="link">Home</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/menu" ? "vendor-active" : ""
+            location.pathname === "/app/business/menu" ? "vendor-active" : ""
           }`}
-          onClick={() => navigate("/app/restaurant/menu")}
+          onClick={() => navigate("/app/business/menu")}
         >
           <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
           <p id="link">Menu</p>
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/design"
-              ? "vendor-active"
-              : ""
+            location.pathname === "/app/business/design" ? "vendor-active" : ""
           }`}
-          onClick={() => navigate("/app/restaurant/design")}
+          onClick={() => navigate("/app/business/design")}
         >
           <FontAwesomeIcon
             icon={faMagicWandSparkles}
@@ -87,11 +83,11 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/qr-codes"
+            location.pathname === "/app/business/qr-codes"
               ? "vendor-active"
               : ""
           }`}
-          onClick={() => navigate("/app/restaurant/qr-codes")}
+          onClick={() => navigate("/app/business/qr-codes")}
         >
           <FontAwesomeIcon icon={faQrcode} className="vendor-sidebar__icon" />
           <p id="link">Qr Codes</p>
@@ -197,40 +193,35 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           </h2>
           {reportsVisible && <>{/* Add report links here */}</>}
         </div>
-        {/* <div
+        <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/addons"
-              ? "vendor-active"
-              : ""
+            location.pathname === "/app/business/addons" ? "vendor-active" : ""
           }`}
+          onClick={() => navigate("/app/business/addons")}
         >
           <FontAwesomeIcon
             icon={faPuzzlePiece}
             className="vendor-sidebar__icon"
           />
-          <Link to="/app/restaurant/addons" id="link">
-            Add-Ons
-          </Link>
-        </div> */}
+          <p id="link"> Add-Ons</p>
+        </div>
         {/* <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restaurant/addons"
+            location.pathname === "/app/business/addons"
               ? "vendor-active"
               : ""
           }`}
         >
           <FontAwesomeIcon icon={faWallet} className="vendor-sidebar__icon" />
-          <Link to="/app/restaurant/addons" id="link">
+          <Link to="/app/business/addons" id="link">
             Commissions
           </Link>
         </div> */}
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restauran/billing"
-              ? "vendor-active"
-              : ""
+            location.pathname === "/app/business/billing" ? "vendor-active" : ""
           }`}
-          onClick={() => navigate("/app/restaurant/billing")}
+          onClick={() => navigate("/app/business/billing")}
         >
           <FontAwesomeIcon
             icon={faCreditCard}
@@ -240,11 +231,11 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/app/restauran/settings"
+            location.pathname === "/app/business/settings"
               ? "vendor-active"
               : ""
           }`}
-          onClick={() => navigate("/app/restaurant/settings")}
+          onClick={() => navigate("/app/business/settings")}
         >
           <FontAwesomeIcon icon={faCog} className="vendor-sidebar__icon" />
           <p id="link">Settings</p>
@@ -257,9 +248,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             icon={faArrowUpRightFromSquare}
             className="vendor-sidebar__icon"
           />
-          <p id="link" target="_blank">
-            View Menu
-          </p>
+          <p id="link">View Menu</p>
         </div>
       </div>
 

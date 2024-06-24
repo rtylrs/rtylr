@@ -1,16 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../components/Buttons/Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useColors from "../../hooks/useColors";
 import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
 import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
-function Contact() {
+const Contact = (): JSX.Element => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { accent } = useColors();
 
   return (
     <div className="ContactUs">
@@ -104,5 +100,5 @@ function Contact() {
       </div>
     </div>
   );
-}
+};
 export default Contact;

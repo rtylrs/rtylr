@@ -75,7 +75,7 @@ function Menu() {
               ))}
             <button
               onClick={() => {
-                navigate("/app/restaurant/create-item", {
+                navigate("/app/business/create-item", {
                   state: { categoryId: item._id },
                 });
               }}

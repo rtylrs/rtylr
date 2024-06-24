@@ -7,8 +7,8 @@ const Login = React.lazy(() => import("../screens/Auth/Login"));
 const RegisterUser = React.lazy(() => import("../screens/Auth/RegisterUser"));
 const RegisterRest = React.lazy(() => import("../screens/Auth/RegisterRest"));
 const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
-const EmailVerification = React.lazy(() =>
-  import("../screens/Auth/EmailVerification")
+const EmailVerification = React.lazy(
+  () => import("../screens/Auth/EmailVerification")
 );
 
 const AuthRoutes = [
@@ -33,7 +33,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: "/auth/register/restaurant",
+    path: "/auth/register/business",
     element: (
       <Public>
         <AnimatedRoutes>

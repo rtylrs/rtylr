@@ -8,17 +8,20 @@ import {
   selectError,
   selectRole,
 } from "../../redux/reducers/userSlice";
+import { RootState, AppDispatch } from "../../redux/store";
 
-function Login() {
+const Login: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const loading = useSelector(selectLoading);
-  const error = useSelector(selectError);
-  const role = useSelector(selectRole);
+  const dispatch: AppDispatch = useDispatch();
+  const isAuthenticated = useSelector((state: RootState) =>
+    selectIsAuthenticated(state)
+  );
+  const loading = useSelector((state: RootState) => selectLoading(state));
+  const error = useSelector((state: RootState) => selectError(state));
+  const role = useSelector((state: RootState) => selectRole(state));
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleSubmit = () => {
     dispatch(loginAsync({ email, password }));
@@ -26,37 +29,16 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (role === "admin") {
-        navigate("/manage");
-      } else if (role === "business") {
-        navigate("/app/restaurant");
+      if (role === "business") {
+        navigate("/app/business");
       } else {
         navigate("/");
       }
     }
   }, [isAuthenticated, navigate, role]);
 
-  useEffect(() => {
-    // Dynamically load the Lottie player script
-    const script = document.createElement("script");
-    script.src =
-      "https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs";
-    script.type = "module";
-    document.body.appendChild(script);
-  }, []);
-
   return (
     <div className="login-container">
-      <div className="lottie-container">
-        <dotlottie-player
-          src="https://lottie.host/13436e76-0a4b-464c-9e28-bb720ca012cf/JDvAdmkONp.json"
-          background="transparent"
-          speed="1"
-          style={{ width: "700px", height: "700px" }}
-          loop
-          autoplay
-        ></dotlottie-player>
-      </div>
       <div className="login-form">
         <img src="/logo.png" alt="Logo" className="logo" />
         <h2>Welcome back!!</h2>
@@ -75,13 +57,13 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className="login-input"
         />
-        <p className="login-error">{error}</p>
+        {error && <p className="login-error">{error}</p>}
         <div className="login-options">
           <span className="forgot-password">Forgot password?</span>
         </div>
         <div className="login-button-wrapper">
           <button className="login-button" onClick={handleSubmit}>
-            {loading ? "Loading..." : "Sign In"}
+            {loading ? "Loading..." : "Login"}
           </button>
         </div>
         <div className="login-separator">
@@ -96,8 +78,11 @@ function Login() {
           <span onClick={() => navigate("/auth/register")}>Sign up</span>
         </p>
       </div>
+      <div className="login-image">
+        <img src="/images/LoginBG.jpg" alt="Logo" className="logo" />
+      </div>
     </div>
   );
-}
+};
 
 export default Login;

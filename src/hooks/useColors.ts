@@ -1,4 +1,3 @@
-
 export default function useColors() {
   return {
     primary: "#040428",

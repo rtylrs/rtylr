@@ -29,7 +29,7 @@ function FreeAccount() {
         </div>
         <button
           className="upgrade-button"
-          onClick={() => navigate("/app/restaurant/billing")}
+          onClick={() => navigate("/app/business/billing")}
         >
           Upgrade Now
         </button>

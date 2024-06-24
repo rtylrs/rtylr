@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 function QrCodes() {
   return (
     <div>
-      <Link to="/app/restaurant/qr-codes/create">Create Qr</Link>
+      <Link to="/app/business/qr-codes/create">Create Qr</Link>
     </div>
   );
 }

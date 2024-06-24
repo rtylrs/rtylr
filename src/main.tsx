@@ -1,10 +1,10 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
+import App from "./App";
 import "./styles/index.scss";
 import { BrowserRouter } from "react-router-dom";
-import Loader from "./layouts/loader/Loader.jsx";
-import { store, persistor } from "./redux/store.js";
+import Loader from "./layouts/loader/Loader";
+import { store, persistor } from "./redux/store";
 import { Provider } from "react-redux";
 import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
@@ -14,7 +14,7 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
-import { SidebarProvider } from "./HOCs/SidebarProvider.jsx";
+import { SidebarProvider } from "./HOCs/SidebarProvider";
 import { ToastContainer } from "react-toastify";
 import { CookiesProvider } from "react-cookie";
 import { PersistGate } from "redux-persist/integration/react";

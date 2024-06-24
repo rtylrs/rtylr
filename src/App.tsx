@@ -44,7 +44,7 @@ import { selectRole } from "./redux/reducers/userSlice";
 import ToolBar from "./components/ToolBar";
 import { RootState } from "./redux/store";
 
-const App = () => {
+const App = (): JSX.Element => {
   //Hooks
   const location = useLocation();
   const { primary } = useColors();
@@ -170,7 +170,7 @@ const App = () => {
           ))}
         </Route>
 
-        <Route path="/app/restaurant" element={<BusinessRoute />}>
+        <Route path="/app/business" element={<BusinessRoute />}>
           {VendorRoutes.map((route, index) => (
             <Route key={index} path={route.path} element={route.element} />
           ))}

@@ -27,7 +27,7 @@ const Menus = () => {
   };
 
   const handleViewMenu = (menuId) => {
-    navigate(`/app/restaurant/menu/${menuId}`);
+    navigate(`/app/business/menu/${menuId}`);
   };
 
   const handleCreateNewMenu = () => {
