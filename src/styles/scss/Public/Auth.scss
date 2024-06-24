@@ -68,7 +68,7 @@
 
       .forgot-password {
         cursor: pointer;
-        color: #007bff;
+        color: $secondary-color;
       }
     }
 
@@ -146,7 +146,7 @@
 
       span {
         cursor: pointer;
-        color: #007bff;
+        color: $secondary-color;
         text-decoration: underline;
       }
     }
@@ -260,7 +260,7 @@
 
       .login-link, .forgot-link {
         cursor: pointer;
-        color: #007bff;
+        color: $secondary-color;
         text-decoration: underline;
         margin: 5px 0;
 
@@ -318,7 +318,7 @@
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
   font-weight: bold;
-  background-color: #007bff;
+  background-color: $secondary-color;
 
   &:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -402,7 +402,7 @@
       cursor: pointer;
       transition: background-color 0.3s, box-shadow 0.3s;
       font-weight: bold;
-      background-color: #007bff;
+      background-color: $secondary-color;
 
       &:hover {
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -421,7 +421,7 @@
 
         .register-user-login-link,
         .register-user-forgot-link {
-          color: #007bff;
+          color: $secondary-color;
           cursor: pointer;
           text-decoration: underline;
 
