@@ -72,6 +72,19 @@ export const addMenuItem = createAsyncThunk(
     }
 );
 
+// Add a new banner
+export const addBanner = createAsyncThunk(
+    'menu/addBanner',
+    async (formData) => {
+        const response = await api.post('/menu/banner', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    }
+);
+
 // Edit a menu item
 export const editMenuItem = createAsyncThunk(
     'menu/editMenuItem',

@@ -14,6 +14,9 @@
     border-radius: 25px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 0.5px solid gray;
+    width: 550px;
+    transition: width 0.3s ease;
+    flex-wrap: wrap;
 
     .vertical-line {
       width: 2px;
@@ -21,13 +24,22 @@
       background-color: #555;
       margin: 0 4px;
     }
+
+    @media (max-width: 768px) {
+      width: 90%;
+    }
   }
   
   .toolbar-item {
     position: relative;
-    margin: 0 12px;
+    margin: 0 10px;
     cursor: pointer;
     transition: transform 0.3s ease;
+
+    span {
+      color: white;
+      font-size: 14px;
+    }
   }
   
   .toolbar-item svg {
