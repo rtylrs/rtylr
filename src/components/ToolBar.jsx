@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Switch, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -39,18 +39,71 @@ const CustomSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
+const useFPS = () => {
+  const [fps, setFps] = useState(0);
+  const frameCount = useRef(0);
+  const lastFrameTime = useRef(Date.now());
+
+  useEffect(() => {
+    const calculateFPS = () => {
+      frameCount.current++;
+      const now = Date.now();
+      const deltaTime = now - lastFrameTime.current;
+
+      if (deltaTime >= 1000) {
+        setFps(frameCount.current);
+        frameCount.current = 0;
+        lastFrameTime.current = now;
+      }
+
+      requestAnimationFrame(calculateFPS);
+    };
+
+    requestAnimationFrame(calculateFPS);
+  }, []);
+
+  return fps;
+};
+
 function ToolBar() {
   const user = useSelector((state) => state.user.user);
   const navigate = useNavigate();
-
   const [mode, setMode] = useState(localStorage.getItem("mode") || "prod");
+  const [showToolbar, setShowToolbar] = useState(
+    localStorage.getItem("showToolbar") === "true"
+  );
+  const fps = useFPS();
 
   useEffect(() => {
     localStorage.setItem("mode", mode);
   }, [mode]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.altKey && e.key === "t") {
+        setShowToolbar((prev) => {
+          const newShowToolbar = !prev;
+          localStorage.setItem("showToolbar", newShowToolbar);
+          return newShowToolbar;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [user]);
+
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "dev" ? "prod" : "dev"));
   };
+
+  const memoryUsage = performance.memory
+    ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + " MB"
+    : "Memory info not available";
+
+  if (!showToolbar) return null;
 
   return (
     <div className="toolbar">
@@ -78,10 +131,18 @@ function ToolBar() {
         <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
       </div>
       <div className="vertical-line"></div>
+      <div className="toolbar-item">
+        <span>FPS: {fps}</span>
+      </div>
+      <div className="vertical-line"></div>
+      <div className="toolbar-item">
+        <span>RAM: {memoryUsage}</span>
+      </div>
+      <div className="vertical-line"></div>
       <div className="toolbar-item profile-item">
         <img
           src={user?.image}
-          alt="Profile 1"
+          alt="Profile"
           style={{
             width: "30px",
             height: "30px",

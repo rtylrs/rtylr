@@ -109,6 +109,13 @@ function Menu() {
           onSelectCategory={setSelectedCategory}
           onCreateCategory={() => setCreateCategoryModalOpen(true)}
         />
+        <button
+          onClick={() => {
+            navigate("/app/restaurant/create-banner");
+          }}
+        >
+          Create Banner
+        </button>
       </div>
       <div className="menu-items">{items && items.map(renderSection)}</div>
       <CreateCategoryModal
