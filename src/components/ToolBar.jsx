@@ -100,7 +100,7 @@ function ToolBar() {
   };
 
   const memoryUsage = performance.memory
-    ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + " MB"
+    ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     : "Memory info not available";
 
   if (!showToolbar) return null;
