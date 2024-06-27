@@ -5,6 +5,7 @@ import MenuItem from "./MenuItem";
 import EditMenuItemModal from "./EditMenuItemModal";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryDropdown from "./CategoryDropdown";
+import { IconPickerItem } from "react-fa-icon-picker";
 import {
   fetchMenu,
   addCategory,
@@ -59,7 +60,13 @@ function Menu() {
       return (
         <div key={item._id} className="category-section">
           <div className="category-header">
-            <span>{item?.details?.name}</span>
+            <div>
+              <span>{item?.details?.name}</span>
+              {item?.details?.icon && (
+                <IconPickerItem icon={item?.details?.icon} />
+              )}
+            </div>
+
             <button onClick={() => handleDeleteCategory(item._id)}>
               Delete
             </button>
@@ -76,7 +83,7 @@ function Menu() {
             <button
               onClick={() => {
                 navigate("/app/business/create-item", {
-                  state: { categoryId: item._id },
+                  state: { categoryId: item.itemId },
                 });
               }}
             >
