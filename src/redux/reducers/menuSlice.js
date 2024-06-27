@@ -112,6 +112,15 @@ export const addCategory = createAsyncThunk(
     }
 );
 
+//Edit Category
+export const editCategory = createAsyncThunk(
+    'menu/editCategory',
+    async ({ categoryId, category }) => {
+        const response = await api.put(`/menu/category/${categoryId}`, category);
+        return { categoryId, category: response.data };
+    }
+);
+
 // Delete a category
 export const deleteCategory = createAsyncThunk(
     'menu/deleteCategory',
