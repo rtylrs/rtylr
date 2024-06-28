@@ -3,19 +3,22 @@ import MenuItem from "./MenuItem";
 import useAsync from "../../../hooks/useAsync";
 import menuApi from "../../../api/menu";
 import { useParams } from "react-router-dom";
+import { IconPickerItem } from "react-fa-icon-picker";
 
 function Menu() {
   const [categories, setCategories] = useState([]);
   const [restaurant, setRestaurant] = useState({});
+  const [theme, setTheme] = useState({});
   const [status, setStatus] = useState("idle");
   const { id } = useParams();
 
   const getMenu = useAsync({
     fn: menuApi.getMenu,
     onSuccess: () => {
-      console.log(getMenu.result.details.menu.items);
-      setCategories(getMenu.result.details.menu.items);
-      setRestaurant(getMenu.result.details.business);
+      const { details } = getMenu.result;
+      setCategories(details.menu.items);
+      setRestaurant(details.business);
+      setTheme(details.theme);
       setStatus("succeeded");
     },
     onError: () => {
@@ -31,19 +34,41 @@ function Menu() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderCategorySection = (category) => (
-    <div key={category._id} className="category-section">
-      <div className="category-header">
-        <span>{category?.details?.name}</span>
-      </div>
-      <div className="category-items">
-        {category &&
-          category.details.menuItems.map((item) => (
-            <MenuItem key={item._id} item={item} />
-          ))}
-      </div>
-    </div>
-  );
+  const renderSection = (item) => {
+    if (item.type === "category") {
+      return (
+        <div key={item._id} className="category-section">
+          <div className="category-header">
+            <div>
+              <span>{item?.details?.name}</span>
+              {item?.details?.icon && (
+                <IconPickerItem icon={item?.details?.icon} />
+              )}
+            </div>
+          </div>
+          <div className="category-items">
+            {item &&
+              item?.details?.menuItems.map((menuItem) => (
+                <MenuItem
+                  key={menuItem._id}
+                  item={menuItem}
+                  onEdit={() => openEditModal(menuItem)}
+                />
+              ))}
+          </div>
+        </div>
+      );
+    } else if (item.type === "banner") {
+      console.log(item);
+      return (
+        <div key={item._id} className="banner-section">
+          <p>{item?.details?.banner.title}</p>
+          <img src={item.details.banner.bannerImage} alt={item.details.title} />
+        </div>
+      );
+    }
+    return null;
+  };
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -54,14 +79,14 @@ function Menu() {
   }
 
   return (
-    <div className="menu-container">
-      <h1>{restaurant?.name}'s Menu</h1>
+    <div
+      className="menu-container"
+      style={{ backgroundColor: theme?.menuBackgroundColor }}
+    >
+      <h1 style={{ color: theme?.primaryColor }}>{restaurant?.name}'s Menu</h1>
       <div className="category-controls"></div>
       <div className="menu-items">
-        {categories &&
-          categories
-            .filter((item) => item.type === "category")
-            .map(renderCategorySection)}
+        {categories && categories.map(renderSection)}
       </div>
     </div>
   );
