@@ -3,6 +3,7 @@ import {
   faChartLine,
   faHome,
   faPaperclip,
+  faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Switch, styled } from "@mui/material";
@@ -118,13 +119,18 @@ function ToolBar() {
       <div
         className="toolbar-item"
         onClick={() => {
+          navigate("/app/business/");
+        }}
+      >
+        <FontAwesomeIcon icon={faUserTie} />
+      </div>
+      <div
+        className="toolbar-item"
+        onClick={() => {
           navigate("/manage");
         }}
       >
         <FontAwesomeIcon icon={faPaperclip} />
-      </div>
-      <div className="toolbar-item">
-        <FontAwesomeIcon icon={faChartLine} />
       </div>
       <div className="vertical-line"></div>
       <div className="toolbar-item">

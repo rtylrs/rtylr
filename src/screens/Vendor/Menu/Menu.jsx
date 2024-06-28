@@ -93,9 +93,11 @@ function Menu() {
         </div>
       );
     } else if (item.type === "banner") {
+      console.log(item);
       return (
         <div key={item._id} className="banner-section">
-          <img src={item.details.imageUrl} alt={item.details.title} />
+          <p>{item?.details?.banner.title}</p>
+          <img src={item.details.banner.bannerImage} alt={item.details.title} />
         </div>
       );
     }
@@ -118,7 +120,7 @@ function Menu() {
         />
         <button
           onClick={() => {
-            navigate("/app/restaurant/create-banner");
+            navigate("/app/business/create-banner");
           }}
         >
           Create Banner

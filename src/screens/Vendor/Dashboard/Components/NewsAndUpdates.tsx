@@ -1,32 +1,39 @@
-import React from "react";
+// import React, { useEffect } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import useAsync from "../../../../hooks/useAsync";
+// import useAsync from "../../../../hooks/useAsync";
 import { formatDate } from "../../../../utils/formatDate";
 import { Link } from "react-router-dom";
-import configApi from "../../../../api/config";
+// import configApi from "../../../../api/config";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
 
 function NewsAndUpdates() {
-  const [news, setNews] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  // const [news, setNews] = React.useState([]);
+  const news = useSelector((state: RootState) => state.config.news);
+  const loading = useSelector((state: RootState) => state.config.loading);
 
-  const getNews = useAsync({
-    fn: configApi.getNews,
-    onSuccess: () => {
-      setLoading(false);
-      setNews(getNews?.result || []);
-    },
-    onError: () => {
-      alert(getNews.error);
-    },
-    callOnMount: true,
-  });
+  // const getNews = useAsync({
+  //   fn: configApi.getNews,
+  //   onSuccess: () => {
+  //     setLoading(false);
+  //     setNews(getNews?.result || []);
+  //   },
+  //   onError: () => {
+  //     alert(getNews.error);
+  //   },
+  //   callOnMount: true,
+  // });
 
   return (
     <div className="news-container">
       {loading
         ? Array(2)
-            .fill()
+            .fill({
+              title: "",
+              date: "",
+              description: "",
+            })
             .map((_, index) => (
               <div key={index} className="news-item">
                 <Skeleton height={100} width={100} />
@@ -59,8 +66,9 @@ function NewsAndUpdates() {
                 alt={item.title}
                 className="news-image"
                 onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://via.placeholder.com/150";
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = "https://via.placeholder.com/150";
                 }}
               />
               <div className="news-content">
