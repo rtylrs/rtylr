@@ -28,9 +28,9 @@ const Footer: React.FC<{}> = () => {
             <li>
               <Link to="https://voxire.com/careers">Careers (Jobs)</Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="https://voxire.com/blog">Blog</Link>
-            </li>
+            </li> */}
           </ul>
         </div>
         <div className="footer-section">
@@ -48,9 +48,9 @@ const Footer: React.FC<{}> = () => {
             <li>
               <Link to="/feedback">Feature Request</Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="/auth/register/user">Referral Program</Link>
-            </li>
+            </li> */}
           </ul>
         </div>
         <div className="footer-section">

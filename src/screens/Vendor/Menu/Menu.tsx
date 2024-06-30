@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
-import EditMenuItemModal from "./EditMenuItemModal";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryDropdown from "./CategoryDropdown";
 import { IconPickerItem } from "react-fa-icon-picker";
@@ -12,13 +11,14 @@ import {
   deleteCategory,
   editMenuItem,
 } from "../../../redux/reducers/menuSlice";
+import { RootState } from "../../../redux/store";
 
 function Menu() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userId = useSelector((state) => state.user.userId);
-  const { items, status } = useSelector((state) => state.menu);
-  const menuId = useSelector((state) => state.menu.id);
+  const userId = useSelector((state: RootState) => state.user.userId);
+  const { items, status } = useSelector((state: RootState) => state.menu);
+  const menuId = useSelector((state: RootState) => state.menu.id);
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isEditModalOpen, setEditModalOpen] = useState(false);

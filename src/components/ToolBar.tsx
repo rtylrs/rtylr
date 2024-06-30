@@ -9,6 +9,7 @@ import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "../redux/store";
 
 const CustomSwitch = styled(Switch)(({ theme }) => ({
   width: 34,
@@ -66,11 +67,11 @@ const useFPS = () => {
 };
 
 function ToolBar() {
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const [mode, setMode] = useState(localStorage.getItem("mode") || "prod");
   const [showToolbar, setShowToolbar] = useState(
-    localStorage.getItem("showToolbar") === "true",
+    localStorage.getItem("showToolbar") === "true"
   );
   const fps = useFPS();
 
@@ -79,11 +80,26 @@ function ToolBar() {
   }, [mode]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.altKey && e.key === "t") {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key === "t";
+      const isCmdOptTPressed = e.metaKey && e.altKey && e.key === "t";
+
+      console.log(
+        "Key pressed:",
+        e.key,
+        "Ctrl:",
+        e.ctrlKey,
+        "Alt:",
+        e.altKey,
+        "Meta:",
+        e.metaKey
+      );
+
+      if (isCtrlAltTPressed || (isMac && isCmdOptTPressed)) {
         setShowToolbar((prev) => {
           const newShowToolbar = !prev;
-          localStorage.setItem("showToolbar", newShowToolbar);
+          localStorage.setItem("showToolbar", newShowToolbar.toString());
           return newShowToolbar;
         });
       }
@@ -103,7 +119,7 @@ function ToolBar() {
     ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     : "Memory info not available";
 
-  if (!showToolbar) return null;
+  // if (!showToolbar) return null;
 
   return (
     <div className="toolbar">
