@@ -42,13 +42,13 @@ import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { selectRole } from "./redux/reducers/userSlice";
 import ToolBar from "./components/ToolBar";
-import { RootState } from "./redux/store";
+import { AppDispatch, RootState } from "./redux/store";
 
 const App = (): JSX.Element => {
   //Hooks
   const location = useLocation();
   const { primary } = useColors();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   // Redux
   const config = useSelector((state: RootState) => state.config);
@@ -111,7 +111,7 @@ const App = (): JSX.Element => {
             onClick={() => {
               window.open(
                 "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
-                "_blank"
+                "_blank",
               );
             }}
             initial={{ opacity: 0, scale: 0.8 }}
