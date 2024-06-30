@@ -12,9 +12,9 @@ function CategoryDropdown({
       >
         <option value="">All Categories</option>
         {categories &&
-          categories?.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat.name}
+          categories?.map((cat, index) => (
+            <option key={index} value={cat}>
+              {cat.details.name}
             </option>
           ))}
       </select>
