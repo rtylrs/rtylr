@@ -6,7 +6,7 @@ import MenuWithId from "../screens/Vendor/Menu/MenuWithId";
 const VendorDashboard = React.lazy(
   () => import("../screens/Vendor/Dashboard/VendorDashboard")
 );
-const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu"));
+const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu.tsx"));
 const Menus = React.lazy(() => import("../screens/Vendor/Menu/Menus"));
 const CreateItem = React.lazy(
   () => import("../screens/Vendor/Menu/CreateItem")

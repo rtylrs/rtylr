@@ -64,6 +64,19 @@ export const RegisterResaurantAsync = createAsyncThunk(
     }
   }
 );
+export const getUserInfo = createAsyncThunk(
+  "user/getUserInfo",
+  async ({}, thunkAPI) => {
+    try {
+      const response = await api.get(`/business/me`);
+      const data = response.data;
+      console.log(data);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue((error as any).response.data);
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: "user",

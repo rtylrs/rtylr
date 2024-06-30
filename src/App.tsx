@@ -34,7 +34,11 @@ import { fetchConfigData } from "./redux/reducers/configSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { selectRole } from "./redux/reducers/userSlice";
+import {
+  getUserInfo,
+  selectIsAuthenticated,
+  selectRole,
+} from "./redux/reducers/userSlice";
 import ToolBar from "./components/ToolBar";
 import { AppDispatch, RootState } from "./redux/store";
 
@@ -46,6 +50,9 @@ const App = (): JSX.Element => {
 
   // Redux
   const config = useSelector((state: RootState) => state.config);
+  const isAuthenticated = useSelector((state: RootState) =>
+    selectIsAuthenticated(state)
+  );
   const role = useSelector(selectRole);
 
   // States
@@ -75,6 +82,10 @@ const App = (): JSX.Element => {
 
     // get config data
     dispatch(fetchConfigData());
+
+    if (isAuthenticated) {
+      dispatch(getUserInfo());
+    }
 
     //eslint-disable-next-line
   }, []);
