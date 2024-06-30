@@ -11,10 +11,10 @@ import {
   deleteCategory,
   editMenuItem,
 } from "../../../redux/reducers/menuSlice";
-import { RootState } from "../../../redux/store";
+import { AppDispatch, RootState } from "../../../redux/store";
 
-function Menu() {
-  const dispatch = useDispatch();
+const Menu: React.FC<{}> = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.user.userId);
   const { items, status } = useSelector((state: RootState) => state.menu);
@@ -46,11 +46,11 @@ function Menu() {
     setCreateCategoryModalOpen(false);
   };
 
-  const handleDeleteCategory = (categoryId) => {
+  const handleDeleteCategory = (categoryId: string) => {
     dispatch(deleteCategory(categoryId));
   };
 
-  const openEditModal = (item) => {
+  const openEditModal = (item: any) => {
     setItemToEdit(item);
     setEditModalOpen(true);
   };
@@ -66,20 +66,18 @@ function Menu() {
                 <IconPickerItem icon={item?.details?.icon} />
               )}
             </div>
-
             <button onClick={() => handleDeleteCategory(item._id)}>
               Delete
             </button>
           </div>
           <div className="category-items">
-            {item &&
-              item?.details?.menuItems.map((menuItem) => (
-                <MenuItem
-                  key={menuItem._id}
-                  item={menuItem}
-                  onEdit={() => openEditModal(menuItem)}
-                />
-              ))}
+            {item?.details?.menuItems?.map((menuItem) => (
+              <MenuItem
+                key={menuItem._id}
+                item={menuItem}
+                onEdit={() => openEditModal(menuItem)}
+              />
+            ))}
             <button
               onClick={() => {
                 navigate("/app/business/create-item", {
@@ -93,11 +91,13 @@ function Menu() {
         </div>
       );
     } else if (item.type === "banner") {
-      console.log(item);
       return (
         <div key={item._id} className="banner-section">
-          <p>{item?.details?.banner.title}</p>
-          <img src={item.details.banner.bannerImage} alt={item.details.title} />
+          <p>{item?.details?.banner?.title}</p>
+          <img
+            src={item?.details?.banner?.bannerImage}
+            alt={item?.details?.title}
+          />
         </div>
       );
     }
@@ -113,7 +113,7 @@ function Menu() {
       <h1>Menu</h1>
       <div className="category-controls">
         <CategoryDropdown
-          categories={items.filter((item) => item.type === "category")}
+          categories={items.filter((item: any) => item.type === "category")}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onCreateCategory={() => setCreateCategoryModalOpen(true)}
@@ -140,6 +140,6 @@ function Menu() {
       /> */}
     </div>
   );
-}
+};
 
 export default Menu;

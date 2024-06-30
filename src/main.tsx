@@ -34,27 +34,25 @@ const rootElement = document.getElementById("root");
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <CookiesProvider>
-        <ThemeProvider theme={theme}>
-          <Suspense fallback={<Loader />}>
-            <I18nextProvider i18n={i18next}>
-              <Provider store={store}>
-                <PersistGate loading={null} persistor={persistor}>
-                  <BrowserRouter>
-                    <SidebarProvider>
-                      <App />
-                      <ToastContainer />
-                      <ScrollToTop />
-                    </SidebarProvider>
-                  </BrowserRouter>
-                </PersistGate>
-              </Provider>
-            </I18nextProvider>
-          </Suspense>
-        </ThemeProvider>
-      </CookiesProvider>
-    </React.StrictMode>
+    <CookiesProvider>
+      <ThemeProvider theme={theme}>
+        <Suspense fallback={<Loader />}>
+          <I18nextProvider i18n={i18next}>
+            <Provider store={store}>
+              <PersistGate loading={null} persistor={persistor}>
+                <BrowserRouter>
+                  <SidebarProvider>
+                    <App />
+                    <ToastContainer />
+                    <ScrollToTop />
+                  </SidebarProvider>
+                </BrowserRouter>
+              </PersistGate>
+            </Provider>
+          </I18nextProvider>
+        </Suspense>
+      </ThemeProvider>
+    </CookiesProvider>
   );
 } else {
   <div>No root element found</div>;

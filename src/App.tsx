@@ -181,15 +181,6 @@ const App = (): JSX.Element => {
           ))}
         </Route>
 
-        <Route
-          path="/test"
-          element={
-            <div>
-              <h1>test</h1>
-            </div>
-          }
-        />
-
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </>
