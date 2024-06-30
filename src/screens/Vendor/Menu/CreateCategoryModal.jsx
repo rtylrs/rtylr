@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
 import { addCategory } from "../../../redux/reducers/menuSlice";
-import { IconPicker } from "react-fa-icon-picker";
+import IconPicker from "react-icons-picker";
 
 function CreateCategoryModal({ isOpen, onClose }) {
   const [category, setCategory] = useState("");
@@ -65,7 +65,11 @@ function CreateCategoryModal({ isOpen, onClose }) {
           </label>
         </div>
         {iconInputType === "picker" ? (
-          <IconPicker value={icon} onChange={setIcon} />
+          <IconPicker value={icon} onChange={setIcon}
+           modalIconNameStyle={{
+            display:"none"
+          }}
+          />
         ) : (
           <input
             type="text"

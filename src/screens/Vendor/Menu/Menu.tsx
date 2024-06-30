@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryDropdown from "./CategoryDropdown";
-import { IconPickerItem } from "react-fa-icon-picker";
+import { IconPickerItem } from "react-icons-picker";
 import {
   fetchMenu,
   addCategory,
@@ -63,7 +63,7 @@ const Menu: React.FC<{}> = () => {
             <div>
               <span>{item?.details?.name}</span>
               {item?.details?.icon && (
-                <IconPickerItem icon={item?.details?.icon} />
+                <IconPickerItem value={item?.details?.icon} />
               )}
             </div>
             <button onClick={() => handleDeleteCategory(item._id)}>
