@@ -1,6 +1,5 @@
 import {
   faBars,
-  faChartLine,
   faHome,
   faPaperclip,
   faUserTie,
@@ -71,7 +70,7 @@ function ToolBar() {
   const navigate = useNavigate();
   const [mode, setMode] = useState(localStorage.getItem("mode") || "prod");
   const [showToolbar, setShowToolbar] = useState(
-    localStorage.getItem("showToolbar") === "true"
+    localStorage.getItem("showToolbar") === "true",
   );
   const fps = useFPS();
 
