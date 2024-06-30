@@ -1,9 +1,3 @@
-/*
-  File Created By: Mohamad Homsi
-  Last Edited: Sunday 12 May 2024
-  Last Edited by: Mohamad Homsi
-*/
-
 import { faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
