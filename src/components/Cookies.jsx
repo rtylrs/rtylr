@@ -1,9 +1,3 @@
-/*
-  File Created By: Mohamad Homsi
-  Last Edited: Sunday 12 May 2024
-  Last Edited by: Mohamad Homsi
-*/
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";

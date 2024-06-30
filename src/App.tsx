@@ -105,7 +105,7 @@ const App = (): JSX.Element => {
             onClick={() => {
               window.open(
                 "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
-                "_blank",
+                "_blank"
               );
             }}
             initial={{ opacity: 0, scale: 0.8 }}
@@ -169,6 +169,15 @@ const App = (): JSX.Element => {
             <Route key={index} path={route.path} element={route.element} />
           ))}
         </Route>
+
+        <Route
+          path="/test"
+          element={
+            <div>
+              <h1>test</h1>
+            </div>
+          }
+        />
 
         <Route path="*" element={<NoMatch />} />
       </Routes>
