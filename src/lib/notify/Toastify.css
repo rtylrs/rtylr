@@ -46,7 +46,7 @@
   position: fixed;
   padding: 4px;
   width: var(--toastify-toast-width);
-  max-width: 20%;
+  max-width: 35%;
   box-sizing: border-box;
   color: #fff;
 }

@@ -63,12 +63,6 @@ const Footer: React.FC<{}> = () => {
               <Link to="/">Terms and Conditions</Link>
             </li>
             <li>
-              <Link to="/ ">Acceptable Use Policy</Link>
-            </li>
-            <li>
-              <Link to="/ ">End User License Agreement</Link>
-            </li>
-            <li>
               <Link to="/ ">Disclaimer</Link>
             </li>
           </ul>

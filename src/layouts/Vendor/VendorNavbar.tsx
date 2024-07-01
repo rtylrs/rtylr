@@ -13,13 +13,18 @@ const VendorNavbar: React.FC<{
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
 
+  console.log(user.user);
+
   return (
     <div className="vendor-navbar">
       <div className="vendor_nav_icon" onClick={() => openSidebar(true)}>
         <FontAwesomeIcon icon={faBars} />
       </div>
       <div className="vendor-navbar__left">
-        <p className="active_link">{user?.user?.name}</p>
+        <p className="active_link">
+          {user?.user?.name}{" "}
+          <span className="plan-type">({user?.user?.planType})</span>
+        </p>
       </div>
       <div className="vendor-navbar__right">
         <div
