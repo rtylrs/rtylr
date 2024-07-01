@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/api";
 
+interface Addons {
+  feedback: boolean;
+  about: boolean;
+  contact: boolean;
+  landing: boolean;
+}
+
 export interface UserState {
   user: any | null;
   token: string | null;
@@ -9,7 +16,7 @@ export interface UserState {
   error: string | null;
   role: string | null;
   userId: string | null;
-  addons: any[];
+  addons: Addons;
 }
 
 const initialState: UserState = {
@@ -20,7 +27,12 @@ const initialState: UserState = {
   error: null,
   role: null,
   userId: null,
-  addons: [],
+  addons: {
+    feedback: false,
+    about: false,
+    contact: false,
+    landing: false,
+  },
 };
 
 export const loginAsync = createAsyncThunk(
@@ -43,14 +55,14 @@ export const loginAsync = createAsyncThunk(
   }
 );
 
-export const RegisterResaurantAsync = createAsyncThunk(
-  "user/RegisterResaurantAsync",
+export const registerRestaurantAsync = createAsyncThunk(
+  "user/registerRestaurantAsync",
   async (
     payload: {
       email: string;
       password: string;
       name: string;
-      refered: string;
+      referred: string;
     },
     thunkAPI
   ) => {
@@ -64,14 +76,14 @@ export const RegisterResaurantAsync = createAsyncThunk(
     }
   }
 );
+
 export const getUserInfo = createAsyncThunk(
   "user/getUserInfo",
-  async ({}, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const response = await api.get(`/business/me`);
-      const data = response.data;
-      console.log(data);
-      return data;
+      console.log(response.data);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue((error as any).response.data);
     }
@@ -118,13 +130,13 @@ const userSlice = createSlice({
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error == (action.payload as { error: string }).error;
+        state.error = (action.payload as { error: string }).error;
       })
-      .addCase(RegisterResaurantAsync.pending, (state) => {
+      .addCase(registerRestaurantAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(RegisterResaurantAsync.fulfilled, (state, action) => {
+      .addCase(registerRestaurantAsync.fulfilled, (state, action) => {
         const { userId, token, user } = action.payload;
         return {
           ...state,
@@ -136,7 +148,27 @@ const userSlice = createSlice({
           loading: false,
         };
       })
-      .addCase(RegisterResaurantAsync.rejected, (state, action) => {
+      .addCase(registerRestaurantAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { error: string }).error;
+      })
+      .addCase(getUserInfo.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserInfo.fulfilled, (state, action) => {
+        const { userId, role, addons, ...user } = action.payload;
+        return {
+          ...state,
+          user,
+          userId,
+          role,
+          addons,
+          isAuthenticated: true,
+          loading: false,
+        };
+      })
+      .addCase(getUserInfo.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { error: string }).error;
       });

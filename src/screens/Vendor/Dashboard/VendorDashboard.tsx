@@ -1,7 +1,7 @@
 import NewsAndUpdates from "./Components/NewsAndUpdates";
 import QuickLinks from "./Components/QuickLinks";
 
-function VendorDashboard() {
+const VendorDashboard = (): JSX.Element => {
   return (
     <div className="vendor-dashboard">
       <div className="main-content">
@@ -14,6 +14,6 @@ function VendorDashboard() {
       </div>
     </div>
   );
-}
+};
 
 export default VendorDashboard;

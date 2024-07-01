@@ -16,6 +16,7 @@ import {
   faUserPen,
   faCreditCard,
   faPuzzlePiece,
+  faFolder,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
@@ -69,6 +70,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
           <p id="link">Menu</p>
         </div>
+
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/design" ? "vendor-active" : ""
@@ -92,14 +94,25 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <FontAwesomeIcon icon={faQrcode} className="vendor-sidebar__icon" />
           <p id="link">Qr Codes</p>
         </div>
+        {userAddons && userAddons?.feedback && (
+          <div
+            className={`vendor-sidebar__link ${
+              location.pathname === "/manage/design" ? "vendor-active" : ""
+            }`}
+            onClick={() => navigate("/manage/design")}
+          >
+            <FontAwesomeIcon icon={faStar} className="vendor-sidebar__icon" />
+            <p id="link">Feedback</p>
+          </div>
+        )}
         <div
           className={`vendor-sidebar__link ${
-            location.pathname === "/manage/design" ? "vendor-active" : ""
+            location.pathname === "/app/business/menus" ? "vendor-active" : ""
           }`}
-          onClick={() => navigate("/manage/design")}
+          onClick={() => navigate("/app/business/menus")}
         >
-          <FontAwesomeIcon icon={faStar} className="vendor-sidebar__icon" />
-          <p id="link">Feedback</p>
+          <FontAwesomeIcon icon={faFolder} className="vendor-sidebar__icon" />
+          <p id="link">My Menus</p>
         </div>
         <div
           className={`vendor-sidebar__link ${

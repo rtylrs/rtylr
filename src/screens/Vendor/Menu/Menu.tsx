@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import CreateCategoryModal from "./CreateCategoryModal";
-import CategoryDropdown from "./CategoryDropdown";
 import { IconPickerItem } from "react-icons-picker";
 import {
   fetchMenu,
@@ -50,12 +49,7 @@ const Menu: React.FC<{}> = () => {
     dispatch(deleteCategory(categoryId));
   };
 
-  const openEditModal = (item: any) => {
-    setItemToEdit(item);
-    setEditModalOpen(true);
-  };
-
-  const renderSection = (item) => {
+  const renderSection = (item: any) => {
     if (item.type === "category") {
       return (
         <div key={item._id} className="category-section">
@@ -66,27 +60,25 @@ const Menu: React.FC<{}> = () => {
                 <IconPickerItem value={item?.details?.icon} />
               )}
             </div>
-            <button onClick={() => handleDeleteCategory(item._id)}>
-              Delete
-            </button>
+            <div>
+              <button
+                onClick={() => {
+                  navigate("/app/business/create-item", {
+                    state: { categoryId: item.itemId },
+                  });
+                }}
+              >
+                Add a product
+              </button>
+              <button onClick={() => handleDeleteCategory(item.itemId)}>
+                Delete
+              </button>
+            </div>
           </div>
           <div className="category-items">
             {item?.details?.menuItems?.map((menuItem) => (
-              <MenuItem
-                key={menuItem._id}
-                item={menuItem}
-                onEdit={() => openEditModal(menuItem)}
-              />
+              <MenuItem key={menuItem._id} item={menuItem} />
             ))}
-            <button
-              onClick={() => {
-                navigate("/app/business/create-item", {
-                  state: { categoryId: item.itemId },
-                });
-              }}
-            >
-              Add a product
-            </button>
           </div>
         </div>
       );
@@ -112,12 +104,13 @@ const Menu: React.FC<{}> = () => {
     <div className="menu-container-vendor">
       <h1>Menu</h1>
       <div className="category-controls">
-        <CategoryDropdown
-          categories={items.filter((item: any) => item.type === "category")}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          onCreateCategory={() => setCreateCategoryModalOpen(true)}
-        />
+        <button
+          onClick={() => {
+            setCreateCategoryModalOpen(true);
+          }}
+        >
+          Create Category
+        </button>
         <button
           onClick={() => {
             navigate("/app/business/create-banner");

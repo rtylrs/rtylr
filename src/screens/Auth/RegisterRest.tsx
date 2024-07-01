@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import {
-  RegisterResaurantAsync,
+  registerRestaurantAsync,
   selectIsAuthenticated,
   selectLoading,
 } from "../../redux/reducers/userSlice";
@@ -20,7 +20,7 @@ const RegisterRestaurant: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [refered, setRefered] = useState<string>("");
+  const [referred, setReferred] = useState<string>("");
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector((state: RootState) =>
     selectIsAuthenticated(state)
@@ -30,11 +30,11 @@ const RegisterRestaurant: React.FC = () => {
   const handleRegister = () => {
     if (password === confirmPassword) {
       dispatch(
-        RegisterResaurantAsync({
+        registerRestaurantAsync({
           email,
           password,
           name,
-          refered,
+          referred,
         })
       );
     } else {
@@ -110,7 +110,7 @@ const RegisterRestaurant: React.FC = () => {
             className="register-input"
             type="text"
             placeholder="Referred By (Optional)"
-            onChange={(e) => setRefered(e.target.value)}
+            onChange={(e) => setReferred(e.target.value)}
           />
           <div>
             <button className="register-button" disabled={loading}>
