@@ -53,13 +53,6 @@
   display: inline;
 }
 
-.vendor-sidebar__nav > i {
-  font-size: 35px;
-  display: none;
-  margin-right: 15px;
-  padding: 15px;
-}
-
 .vendor-sidebar__link {
   padding: 10px;
   border-radius: 3px;
@@ -118,8 +111,8 @@
 }
 
 .vendor-sidebar__link > svg {
-  margin-right: 10px;
-  font-size: 16px;
+  margin-right: 6px;
+  font-size: 15px;
 }
 
 .vendor-sidebar-responsive {

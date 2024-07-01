@@ -46,6 +46,14 @@
   opacity: 0.9;
 }
 
+.plan-type {
+  color: $primary-color;
+  font-weight: 600;
+  font-size: 0.7em;
+  opacity: 0.9;
+  text-transform: capitalize;
+}
+
 .vendor-navbar__right {
   display: flex;
   justify-content: center;

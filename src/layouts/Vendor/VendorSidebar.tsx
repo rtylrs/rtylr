@@ -240,7 +240,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             icon={faCreditCard}
             className="vendor-sidebar__icon"
           />
-          <p id="link">Billing</p>
+          <p id="link">Subscription</p>
         </div>
         <div
           className={`vendor-sidebar__link ${

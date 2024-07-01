@@ -6,12 +6,14 @@ import {
   faPhone,
   faGlobe,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
 import useAsync from "../../hooks/useAsync";
 import userApi from "../../api/user";
 import VbitezButton from "../../components/Buttons/Buttons";
 import { useNavigate } from "react-router-dom";
+import { getUserInfo } from "../../redux/reducers/userSlice";
+import notify from "../../lib/notify/notify";
 
 const ADDONS = [
   {
@@ -47,11 +49,13 @@ const Addons = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInstalled, setShowInstalled] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
   const editAddonsFunc = useAsync({
     fn: userApi.editAddons,
     onSuccess: () => {
-      alert("Updated successfully");
+      notify.success("Updated Successfully");
+      dispatch(getUserInfo());
     },
     onError: () => {
       alert(editAddonsFunc.error);
