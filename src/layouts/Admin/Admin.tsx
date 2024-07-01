@@ -6,11 +6,13 @@ import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { selectRole } from "../../redux/reducers/userSlice";
 import HelmetContainer from "../../components/HelmetContainer";
+import { RootState } from "../../redux/store";
 
 function Admin(props) {
   const navigate = useNavigate();
   const role = useSelector(selectRole);
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const user = useSelector((state: RootState) => state.user);
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
 
   const openSidebar = () => {
     setSidebarOpen(true);
@@ -21,24 +23,27 @@ function Admin(props) {
   };
 
   React.useEffect(() => {
-    // if not user redirect to login
     const token = localStorage.getItem("token");
 
     if (!token) {
       navigate("/auth/login");
-    } else {
-      if (role !== "admin") {
-        navigate("/");
-      }
     }
+
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("userId")) {
+      url.searchParams.append("userId", user?.userId || "");
+      url.searchParams.append("plan", "admin");
+      window.history.replaceState({}, "", url.toString());
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate, user?.userId, user?.user?.planType, role]);
 
   return (
     <>
       <HelmetContainer title="Vbitez - Admin" />
       <div className="Admincontainer">
-        <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
+        <Navbar openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>
         <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
       </div>

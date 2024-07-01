@@ -157,15 +157,16 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(getUserInfo.fulfilled, (state, action) => {
-        const { userId, role, addons, ...user } = action.payload;
+        const { userId, token, user } = action.payload;
         return {
           ...state,
-          user,
-          userId,
-          role,
-          addons,
+          role: user.role,
+          userId: userId,
+          token: token,
+          user: user,
           isAuthenticated: true,
           loading: false,
+          addons: user.addons,
         };
       })
       .addCase(getUserInfo.rejected, (state, action) => {

@@ -1,0 +1,43 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import PropTypes from "prop-types";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/reducers/userSlice";
+import { RootState } from "../../redux/store";
+
+const Navbar = ({ openSidebar }) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="navbar">
+      <div className="nav_icon" onClick={() => openSidebar("navbar")}>
+        <FontAwesomeIcon icon={faBars} />
+      </div>
+
+      <div className="navbar__left">
+        <p>{user?.user?.name}</p>
+      </div>
+      <div className="navbar__right">
+        <div
+          onClick={() => {
+            dispatch(logout());
+          }}
+        >
+          <p>Logout</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+Navbar.propTypes = {
+  openSidebar: PropTypes.func.isRequired,
+};
+
+export default Navbar;

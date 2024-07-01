@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -31,6 +31,8 @@ import {
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const {
     customersVisible,
     managementVisible,
@@ -42,17 +44,20 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
     toggleSection,
   } = useSidebar();
 
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
   return (
     <div className={`sidebar ${sidebarOpen ? "sidebar-responsive" : ""}`}>
       <div className="sidebar__nav">
         <div className="sidebar__title__container">
-          <p className="sidebar__title">Vbitez Admin</p>
+          <p className="sidebar__title">Meow in Meows</p>
         </div>
         <FontAwesomeIcon
           className="close__icon"
-          onClick={() => closeSidebar()}
+          onClick={closeSidebar}
           icon={faClose}
-          r
           size="lg"
         />
       </div>
@@ -61,31 +66,28 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           className={`sidebar__link ${
             location.pathname === "/manage" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage")}
         >
           <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
-          <Link to="/manage" id="link">
-            Home
-          </Link>
+          <p id="link">Home</p>
         </div>
         <div
           className={`sidebar__link ${
             location.pathname === "/manage/products" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage/products")}
         >
           <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
-          <Link to="/manage/products" id="link">
-            Products
-          </Link>
+          <p id="link">Products</p>
         </div>
         <div
           className={`sidebar__link ${
             location.pathname === "/manage/branches" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage/branches")}
         >
           <FontAwesomeIcon icon={faShop} className="sidebar__icon" />
-          <Link to="/manage/branches" id="link">
-            Branches
-          </Link>
+          <p id="link">Branches</p>
         </div>
         <div
           className="sidebar__section"
@@ -108,34 +110,31 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/users" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/users")}
               >
                 <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
-                <Link to="/manage/users" id="link">
-                  Users
-                </Link>
+                <p id="link">Users</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/vendors" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/vendors")}
               >
                 <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
-                <Link to="/manage/vendors" id="link">
-                  Brands
-                </Link>
+                <p id="link">Brands</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/vendors" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/vendors")}
               >
                 <FontAwesomeIcon
                   icon={faSquarePollVertical}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/vendors" id="link">
-                  Survey
-                </Link>
+                <p id="link">Survey</p>
               </div>
             </>
           )}
@@ -164,21 +163,19 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/managment" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/managment")}
               >
                 <FontAwesomeIcon icon={faUserLock} className="sidebar__icon" />
-                <Link to="/manage/managment" id="link">
-                  Permissions
-                </Link>
+                <p id="link">Permissions</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/feedback" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/feedback")}
               >
                 <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
-                <Link to="/manage/feedback" id="link">
-                  Feedback
-                </Link>
+                <p id="link">Feedback</p>
               </div>
             </>
           )}
@@ -204,27 +201,25 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/sections/faqs" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/sections/faqs")}
               >
                 <FontAwesomeIcon
                   icon={faPersonCircleQuestion}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/sections/faqs" id="link">
-                  FAQs
-                </Link>
+                <p id="link">FAQs</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/config/about" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/config/about")}
               >
                 <FontAwesomeIcon
                   icon={faCircleInfo}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/config/about" id="link">
-                  About Us
-                </Link>
+                <p id="link">About Us</p>
               </div>
             </>
           )}
@@ -247,21 +242,19 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/blog" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/blog")}
               >
                 <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
-                <Link to="/manage/blog" id="link">
-                  Blog Posts
-                </Link>
+                <p id="link">Blog Posts</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/blog" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/blog")}
               >
                 <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
-                <Link to="/manage/blog" id="link">
-                  Submited Posts
-                </Link>
+                <p id="link">Submitted Posts</p>
               </div>
             </>
           )}
@@ -304,14 +297,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 className={`sidebar__link admin__link ${
                   location.pathname === "/manage/orders/pending" ? "active" : ""
                 }`}
+                onClick={() => handleNavigation("/manage/orders/pending")}
               >
                 <FontAwesomeIcon
                   icon={faCirclePause}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/orders/pending" id="link">
-                  Pending
-                </Link>
+                <p id="link">Pending</p>
               </div>
               <div
                 className={`sidebar__link admin__link ${
@@ -319,14 +311,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                     ? "active"
                     : ""
                 }`}
+                onClick={() => handleNavigation("/manage/orders/completed")}
               >
                 <FontAwesomeIcon
                   icon={faSquareCheck}
                   className="sidebar__icon"
                 />
-                <Link to="/manage/orders/completed" id="link">
-                  Completed
-                </Link>
+                <p id="link">Completed</p>
               </div>
             </>
           )}
@@ -355,31 +346,28 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           className={`sidebar__link ${
             location.pathname === "/manage/petitions" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage/petitions")}
         >
           <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
-          <Link to="/manage/petitions" id="link">
-            Petitions
-          </Link>
+          <p id="link">Petitions</p>
         </div>
         <div
           className={`sidebar__link ${
             location.pathname === "/manage/events" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage/events")}
         >
           <FontAwesomeIcon icon={faCalendarAlt} className="sidebar__icon" />
-          <Link to="/manage/events" id="link">
-            Events
-          </Link>
+          <p id="link">Events</p>
         </div>
         <div
           className={`sidebar__link ${
             location.pathname === "/manage/settings" ? "active" : ""
           }`}
+          onClick={() => handleNavigation("/manage/settings")}
         >
           <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
-          <Link to="/manage/settings" id="link">
-            Settings
-          </Link>
+          <p id="link">Settings</p>
         </div>
       </div>
     </div>
