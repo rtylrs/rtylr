@@ -4,10 +4,10 @@ import MenuWithId from "../screens/Vendor/Menu/MenuWithId";
 
 // Routes
 const VendorDashboard = React.lazy(
-  () => import("../screens/Vendor/Dashboard/VendorDashboard")
+  () => import("../screens/Vendor/Dashboard/VendorDashboard.tsx")
 );
 const Menu = React.lazy(() => import("../screens/Vendor/Menu/Menu.tsx"));
-const Menus = React.lazy(() => import("../screens/Vendor/Menu/Menus"));
+const Menus = React.lazy(() => import("../screens/Vendor/Menu/Menus.tsx"));
 const CreateItem = React.lazy(
   () => import("../screens/Vendor/Menu/CreateItem")
 );
@@ -15,15 +15,15 @@ const CreateBanner = React.lazy(
   () => import("../screens/Vendor/Menu/CreateBanner")
 );
 const VendorSettings = React.lazy(
-  () => import("../screens/Vendor/Settings/VendorSettings")
+  () => import("../screens/Vendor/Settings/VendorSettings.tsx")
 );
-const Addons = React.lazy(() => import("../screens/Vendor/Addons"));
-const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes"));
+const Addons = React.lazy(() => import("../screens/Vendor/Addons.tsx"));
+const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes.tsx"));
 const CreateQrCode = React.lazy(
-  () => import("../screens/Vendor/QrCode/CreateQrCode")
+  () => import("../screens/Vendor/QrCode/CreateQrCode.tsx")
 );
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
-const Design = React.lazy(() => import("../screens/Vendor/Design/Design"));
+const Design = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
 
 const VendorRoutes = [
   {

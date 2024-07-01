@@ -49,13 +49,21 @@ const initialState: MenuState = {
   error: null,
 };
 
-export const fetchAllMenus = createAsyncThunk<Menu[], { restaurantId: string }>(
-  "menu/fetchAllMenus",
-  async ({ restaurantId }) => {
+export const fetchAllMenus = createAsyncThunk<
+  Menu[],
+  { restaurantId: string },
+  { rejectValue: string }
+>("menu/fetchAllMenus", async ({ restaurantId }, { rejectWithValue }) => {
+  try {
     const response = await api.get(`/menu/menus/${restaurantId}`);
+    if (response.data.message === "No menus found") {
+      return [];
+    }
     return response.data;
+  } catch (error) {
+    return rejectWithValue((error as any).response.data);
   }
-);
+});
 
 export const setActiveMenuId = createAsyncThunk<
   { restaurantId: string; menuId: string },
@@ -99,7 +107,7 @@ export const addMenuItem = createAsyncThunk<
   const formData = new FormData();
   Object.keys(item).forEach((key) => {
     if (Array.isArray(item[key])) {
-      item[key].forEach((subItem, index) => {
+      item[key].forEach((subItem: any, index: number) => {
         formData.append(`${key}[${index}]`, subItem);
       });
     } else {
@@ -165,9 +173,13 @@ export const editCategory = createAsyncThunk<
 
 export const deleteCategory = createAsyncThunk<string, string>(
   "menu/deleteCategory",
-  async (categoryId) => {
-    await api.delete(`/menu/category/${categoryId}`);
-    return categoryId;
+  async (categoryId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/menu/category/${categoryId}`);
+      return categoryId;
+    } catch (error) {
+      return rejectWithValue((error as any).response.data);
+    }
   }
 );
 
@@ -192,7 +204,9 @@ const menuSlice = createSlice({
         fetchAllMenus.fulfilled,
         (state, action: PayloadAction<Menu[]>) => {
           state.status = "succeeded";
-          state.allMenus = action.payload;
+          if (action.payload) {
+            state.allMenus = action.payload;
+          }
         }
       )
       .addCase(fetchAllMenus.rejected, (state, action) => {

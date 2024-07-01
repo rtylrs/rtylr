@@ -1,12 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import VbitezButton from "./Buttons/Buttons";
 
-function Cookies() {
+const Cookies: React.FC = () => {
   const [showPopup, setShowPopup] = useState(true);
 
-  // Check if user has accepted cookies from local storage
   useEffect(() => {
     const acceptedCookies = localStorage.getItem("acceptedCookies");
     if (acceptedCookies === "true") {
@@ -15,18 +14,15 @@ function Cookies() {
   }, []);
 
   const handleAccept = () => {
-    // Set accepted cookies in local storage
-    localStorage.setItem("acceptedCookies", true);
+    localStorage.setItem("acceptedCookies", "true");
     setShowPopup(false);
   };
   const handleDecline = () => {
-    // Set declined cookies in local storage
-    localStorage.setItem("acceptedCookies", false);
+    localStorage.setItem("acceptedCookies", "false");
     setShowPopup(false);
   };
 
   if (!showPopup) {
-    // If user has accepted cookies, don't show popup
     return null;
   }
 
@@ -51,6 +47,6 @@ function Cookies() {
       </div>
     </>
   );
-}
+};
 
 export default Cookies;

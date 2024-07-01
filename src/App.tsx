@@ -84,6 +84,7 @@ const App = (): JSX.Element => {
     dispatch(fetchConfigData());
 
     if (isAuthenticated) {
+      console.log("Fetching user info...");
       dispatch(getUserInfo());
     }
 
@@ -99,9 +100,10 @@ const App = (): JSX.Element => {
         />
       )}
 
-      {config.maintanance && !location.pathname.includes("/manage/") && (
-        <Maintanance />
-      )}
+      {config.maintanance &&
+        !location.pathname.includes("/manage/") &&
+        role &&
+        role !== "admin" && <Maintanance />}
 
       {role && role === "admin" && <ToolBar />}
 

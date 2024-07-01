@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-function FreeAccount() {
-  const [open, setOpen] = React.useState(false);
+const FreeAccount: React.FC<{}> = () => {
+  const [open, setOpen] = React.useState<boolean>(false);
   const navigate = useNavigate();
 
   return (
@@ -36,6 +36,6 @@ function FreeAccount() {
       </div>
     </div>
   );
-}
+};
 
 export default FreeAccount;
