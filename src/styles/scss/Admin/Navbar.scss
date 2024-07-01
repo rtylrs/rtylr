@@ -1,5 +1,5 @@
 .navbar {
-  background: #fff;
+  background: $admin-primary;
   grid-area: nav;
   height: 60px;
   display: flex;
@@ -32,19 +32,14 @@
   margin-right: 10px;
 }
 
-.navbar__left > a {
+.navbar__left > p {
   margin-right: 30px;
   text-decoration: none;
-  color: #a5aaad;
-  font-size: 20px;
+  color: $light-color;
+  font-size: 18px;
   font-weight: 600;
   text-transform: capitalize;
-}
-
-.active_link {
-  color: #231f1b;
-  font-weight: 600;
-  font-size: 1.1em;
+  opacity: 0.8;
 }
 
 .navbar__right {
@@ -53,43 +48,15 @@
   align-items: center;
 }
 
-.navbar__right > a {
-  margin-left: 20px;
-  text-decoration: none;
-}
-
-.navbar__right > div {
-  margin-left: 20px;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.navbar__right > div > i {
+.navbar__right > div > p {
   color: #fff;
   font-size: 16px;
-  border-radius: 100px;
-  background: #83a6b0;
-  box-shadow: 2px 2px 5px #d9d9d9, -2px -2px 5px #ffffff;
-  padding: 8px;
   cursor: pointer;
+  opacity: 0.8;
 }
 
-.navbar__right > div > i:hover {
-  background: #db5957;
-  transition: 0.5s;
-}
-
-.navbar__right > a > i {
-  color: #fff;
-  font-size: 16px;
-  border-radius: 100px;
-  background: #83a6b0;
-  box-shadow: 2px 2px 5px #d9d9d9, -2px -2px 5px #ffffff;
-  padding: 8px;
-}
-
-.navbar__right > a > i:hover {
-  background: #699dab;
+.navbar__right > div > p:hover {
+  color: $error-red;
   transition: 0.5s;
 }
 
