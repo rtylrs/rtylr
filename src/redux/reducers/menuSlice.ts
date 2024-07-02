@@ -92,10 +92,19 @@ export const fetchMenuById = createAsyncThunk<Menu, string>(
   }
 );
 
-export const fetchMenu = createAsyncThunk<Menu, string>(
+interface FetchMenuParams {
+  userId: string;
+  disabled: boolean;
+}
+
+export const fetchMenu = createAsyncThunk<Menu, FetchMenuParams>(
   "menu/fetchMenu",
-  async (restaurantId) => {
-    const response = await api.get(`/menu/${restaurantId}`);
+  async ({ userId, disabled }) => {
+    const response = await api.get(`/menu/${userId}`, {
+      params: {
+        disabled,
+      },
+    });
     return response.data;
   }
 );

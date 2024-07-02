@@ -23,7 +23,7 @@ import Modal from "react-modal";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#0a102f",
+      main: "#262626",
     },
   },
 });

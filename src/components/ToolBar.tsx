@@ -40,7 +40,7 @@ const CustomSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const useFPS = () => {
+const useFPS = (): number => {
   const [fps, setFps] = useState(0);
   const frameCount = useRef(0);
   const lastFrameTime = useRef(Date.now());
@@ -66,11 +66,13 @@ const useFPS = () => {
   return fps;
 };
 
-function ToolBar() {
+const ToolBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
-  const [mode, setMode] = useState(localStorage.getItem("mode") || "prod");
-  const [showToolbar, setShowToolbar] = useState(
+  const [mode, setMode] = useState<string>(
+    localStorage.getItem("mode") || "prod"
+  );
+  const [showToolbar, setShowToolbar] = useState<boolean>(
     localStorage.getItem("showToolbar") === "true"
   );
   const fps = useFPS();
@@ -84,17 +86,6 @@ function ToolBar() {
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key === "t";
       const isCmdOptTPressed = e.metaKey && e.altKey && e.key === "t";
-
-      console.log(
-        "Key pressed:",
-        e.key,
-        "Ctrl:",
-        e.ctrlKey,
-        "Alt:",
-        e.altKey,
-        "Meta:",
-        e.metaKey
-      );
 
       if (isCtrlAltTPressed || (isMac && isCmdOptTPressed)) {
         setShowToolbar((prev) => {
@@ -115,11 +106,13 @@ function ToolBar() {
     setMode((prevMode) => (prevMode === "dev" ? "prod" : "dev"));
   };
 
-  const memoryUsage = performance.memory
-    ? (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
+  const memoryUsage = (performance as any).memory
+    ? ((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     : "Memory info not available";
 
-  // if (!showToolbar) return null;
+  if (!showToolbar) {
+    return null;
+  }
 
   return (
     <div className="toolbar">
@@ -183,6 +176,6 @@ function ToolBar() {
       </div>
     </div>
   );
-}
+};
 
 export default ToolBar;
