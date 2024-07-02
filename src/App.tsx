@@ -121,9 +121,9 @@ const App = (): JSX.Element => {
         />
       )}
 
-      {config.maintanance && !location.pathname.includes("/manage/") && (
-        <Maintanance />
-      )}
+      {config.maintanance &&
+        !location.pathname.includes("/manage/") &&
+        (!role || role !== "admin") && <Maintanance />}
 
       {role && role === "admin" && <ToolBar />}
 
