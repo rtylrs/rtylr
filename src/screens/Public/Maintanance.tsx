@@ -1,9 +1,16 @@
+import React, { useState } from "react";
 import useColors from "../../hooks/useColors";
+import PackageJson from "../../../package.json";
 
 const Maintanance: React.FC = () => {
   const { primary } = useColors();
+  const [clickCount, setClickCount] = useState(0);
 
-  return (
+  const handleVersionClick = () => {
+    setClickCount((prevCount) => prevCount + 1);
+  };
+
+  return clickCount < 10 ? (
     <div className="maintanance">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -48,8 +55,32 @@ const Maintanance: React.FC = () => {
       <h2>Sorry for the inconvenience.</h2>
       <h3>To contact us in the meantime please email:</h3>
       <a href="mailto:info@vbitez.voxire.com">info@vbitez.voxire.com</a>
+      <div
+        className="footer-version"
+        style={{ marginTop: "20px", cursor: "pointer", userSelect: "none" }}
+        onClick={handleVersionClick}
+      >
+        <p
+          onMouseEnter={() => {
+            const footerVersionElement =
+              document.querySelector(".footer-version p");
+            if (footerVersionElement) {
+              footerVersionElement.innerHTML = "Version " + PackageJson.version;
+            }
+          }}
+          onMouseLeave={() => {
+            const footerVersionElement =
+              document.querySelector(".footer-version p");
+            if (footerVersionElement) {
+              footerVersionElement.innerHTML = PackageJson.version;
+            }
+          }}
+        >
+          {PackageJson.version}
+        </p>
+      </div>
     </div>
-  );
+  ) : null;
 };
 
 export default Maintanance;

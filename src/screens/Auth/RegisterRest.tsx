@@ -9,6 +9,7 @@ import {
   registerRestaurantAsync,
   selectIsAuthenticated,
   selectLoading,
+  selectRole,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +28,7 @@ const RegisterRestaurant: React.FC = () => {
     selectIsAuthenticated(state)
   );
   const loading = useSelector((state: RootState) => selectLoading(state));
+  const role = useSelector((state: RootState) => selectRole(state));
 
   const handleRegister = () => {
     if (password === confirmPassword) {
@@ -56,7 +58,11 @@ const RegisterRestaurant: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
-      navigate("/");
+      if (role === "business") {
+        navigate("/app/business");
+      } else {
+        navigate("/");
+      }
     }
   }, [isAuthenticated, navigate]);
 

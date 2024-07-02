@@ -3,7 +3,7 @@ import MenuItem from "./MenuItem";
 import useAsync from "../../../hooks/useAsync";
 import menuApi from "../../../api/menu";
 import { useParams } from "react-router-dom";
-import { IconPickerItem } from "react-fa-icon-picker";
+import { IconPickerItem } from "react-icons-picker";
 
 function Menu() {
   const [categories, setCategories] = useState([]);
@@ -42,7 +42,7 @@ function Menu() {
             <div>
               <span>{item?.details?.name}</span>
               {item?.details?.icon && (
-                <IconPickerItem icon={item?.details?.icon} />
+                <IconPickerItem value={item?.details?.icon} />
               )}
             </div>
           </div>
