@@ -98,9 +98,14 @@ const Addons = () => {
       <div className="addons-header">
         <h1>Add-Ons</h1>
         <div>
-          <button onClick={() => setShowInstalled(!showInstalled)}>
+          <VbitezButton
+            onClick={() => setShowInstalled(!showInstalled)}
+            styles={{
+              height: "35px",
+            }}
+          >
             {showInstalled ? "Show All" : "Installed"}
-          </button>
+          </VbitezButton>
           <input
             type="text"
             placeholder="Search for an add-on"

@@ -121,7 +121,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           onClick={() => navigate("/manage/design")}
         >
           <FontAwesomeIcon icon={faUserPen} className="vendor-sidebar__icon" />
-          <p id="link">Restaurant Information</p>
+          <p id="link">Information</p>
         </div>
         {/* <div
           className="vendor-sidebar__section"
