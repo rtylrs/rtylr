@@ -1,11 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
-function Faq() {
+const Faq: React.FC = () => {
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(null);
-  const faqs = useSelector((state) => state.config.faqs);
+  const faqs = useSelector((state: RootState) => state.config.faqs);
 
   const toggleAnswer = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
@@ -34,5 +35,5 @@ function Faq() {
       </div>
     </div>
   );
-}
+};
 export default Faq;

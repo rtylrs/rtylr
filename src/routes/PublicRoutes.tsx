@@ -7,8 +7,6 @@ const Home = React.lazy(() => import("../screens/Public/Home/Home"));
 const About = React.lazy(() => import("../screens/Public/About"));
 const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
 const Contact = React.lazy(() => import("../screens/Public/Contact"));
-const Feedback = React.lazy(() => import("../screens/Public/Feedback"));
-const AllBlogs = React.lazy(() => import("../screens/Public/AllBlogs"));
 const Faq = React.lazy(() => import("../screens/Public/FAQ"));
 const News = React.lazy(() => import("../screens/Public/News"));
 const Menu = React.lazy(() => import("../screens/Public/Menu/Menu"));
@@ -51,26 +49,6 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <Contact />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/feedback",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Feedback />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/all-blogs",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <AllBlogs />
         </AnimatedRoutes>
       </Public>
     ),
