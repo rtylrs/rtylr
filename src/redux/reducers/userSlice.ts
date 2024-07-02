@@ -17,6 +17,7 @@ export interface UserState {
   role: string | null;
   userId: string | null;
   addons: Addons;
+  visits: any[];
 }
 
 const initialState: UserState = {
@@ -33,6 +34,7 @@ const initialState: UserState = {
     contact: false,
     landing: false,
   },
+  visits: [],
 };
 
 export const loginAsync = createAsyncThunk(
@@ -48,6 +50,7 @@ export const loginAsync = createAsyncThunk(
       const response = await api.post("/auth/login", payload);
       const data = response.data;
       localStorage.setItem("token", data.token);
+
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue((error as any).response.data);
@@ -116,17 +119,11 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
-        const { userId, token, user } = action.payload;
-        return {
-          ...state,
-          role: user.role,
-          userId: userId,
-          token: token,
-          user: user,
-          isAuthenticated: true,
-          loading: false,
-          addons: user.addons,
-        };
+        const { token } = action.payload;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
@@ -137,16 +134,11 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(registerRestaurantAsync.fulfilled, (state, action) => {
-        const { userId, token, user } = action.payload;
-        return {
-          ...state,
-          role: user.role,
-          userId: userId,
-          token: token,
-          user: user,
-          isAuthenticated: true,
-          loading: false,
-        };
+        const { token } = action.payload;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
       })
       .addCase(registerRestaurantAsync.rejected, (state, action) => {
         state.loading = false;
@@ -157,7 +149,7 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(getUserInfo.fulfilled, (state, action) => {
-        const { userId, token, user } = action.payload;
+        const { userId, token, user, visits } = action.payload;
         return {
           ...state,
           role: user.role,
@@ -167,6 +159,7 @@ const userSlice = createSlice({
           isAuthenticated: true,
           loading: false,
           addons: user.addons,
+          visits: visits,
         };
       })
       .addCase(getUserInfo.rejected, (state, action) => {
@@ -178,11 +171,12 @@ const userSlice = createSlice({
 
 export const { login, logout } = userSlice.actions;
 
-export const selectUser = (state) => state.user.user;
-export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
-export const selectLoading = (state) => state.user.loading;
-export const selectError = (state) => state.user.error;
-export const selectRole = (state) => state.user.role;
-export const selectUserId = (state) => state.user.userId;
+export const selectUser = (state: { user: UserState }) => state.user.user;
+export const selectIsAuthenticated = (state: { user: UserState }) =>
+  state.user.isAuthenticated;
+export const selectLoading = (state: { user: UserState }) => state.user.loading;
+export const selectError = (state: { user: UserState }) => state.user.error;
+export const selectRole = (state: { user: UserState }) => state.user.role;
+export const selectUserId = (state: { user: UserState }) => state.user.userId;
 
 export default userSlice.reducer;

@@ -26,7 +26,7 @@ const Menu: React.FC<{}> = () => {
   const [itemToEdit, setItemToEdit] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchMenu(userId));
+    dispatch(fetchMenu({ userId, disabled: true }));
 
     const url = new URL(window.location.href);
     if (!url.searchParams.has("menuId")) {

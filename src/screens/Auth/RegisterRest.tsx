@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import {
+  getUserInfo,
   registerRestaurantAsync,
   selectIsAuthenticated,
   selectLoading,
@@ -54,6 +55,7 @@ const RegisterRestaurant: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      dispatch(getUserInfo());
       navigate("/");
     }
   }, [isAuthenticated, navigate]);

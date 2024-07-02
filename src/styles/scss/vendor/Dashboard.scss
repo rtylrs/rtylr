@@ -119,3 +119,52 @@
     grid-template-columns: 1fr;
   }
 }
+
+// Checks 
+.checks-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: $light-color;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .check-item {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    padding: 5px;
+
+    p {
+      margin: 0;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .major-issue {
+      color: $error-red;
+    }
+
+    .warning {
+      color: $accent-color;
+    }
+  }
+}
+
+.visits-container {
+  display: flex;
+  flex-direction: column;
+  background-color: $light-color;
+  padding: 25px;
+  border-radius: 8px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+
+  div {
+    width: 90%;
+  }
+}

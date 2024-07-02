@@ -42,6 +42,27 @@ import {
 import ToolBar from "./components/ToolBar";
 import { AppDispatch, RootState } from "./redux/store";
 
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+} from "chart.js";
+
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale
+);
+
 const App = (): JSX.Element => {
   //Hooks
   const location = useLocation();

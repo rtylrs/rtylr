@@ -7,6 +7,7 @@ import {
   selectLoading,
   selectError,
   selectRole,
+  getUserInfo,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 
@@ -29,6 +30,8 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      dispatch(getUserInfo());
+
       if (role === "business") {
         navigate("/app/business");
       } else {
