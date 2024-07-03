@@ -25,7 +25,7 @@ const ADDONS = [
   {
     key: "about",
     name: "About",
-    description: "Provide information about your business.",
+    description: "Information about your business.",
     icon: faInfoCircle,
   },
   {
