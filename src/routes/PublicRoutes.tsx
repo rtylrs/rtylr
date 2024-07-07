@@ -11,6 +11,7 @@ const Faq = React.lazy(() => import("../screens/Public/FAQ"));
 const News = React.lazy(() => import("../screens/Public/News"));
 const Menu = React.lazy(() => import("../screens/Public/Menu/Menu"));
 const UseCases = React.lazy(() => import("../screens/Public/UseCases"));
+const Restaunrats = React.lazy(() => import("../screens/Public/Restaunrats"));
 
 const PublicRoutes = [
   {
@@ -87,6 +88,16 @@ const PublicRoutes = [
       <Public>
         <AnimatedRoutes>
           <UseCases />
+        </AnimatedRoutes>
+      </Public>
+    ),
+  },
+  {
+    path: "/restaurants",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <Restaunrats />
         </AnimatedRoutes>
       </Public>
     ),

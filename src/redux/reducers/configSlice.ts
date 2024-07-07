@@ -124,7 +124,6 @@ export const updateAboutContent =
 export const fetchFaqs = () => async (dispatch: AppDispatch) => {
   try {
     const response = await api.get("/config/faqs");
-    console.log(response.data);
     dispatch(setFaqs(response.data));
   } catch (error) {
     console.error("Error fetching FAQs:", error);

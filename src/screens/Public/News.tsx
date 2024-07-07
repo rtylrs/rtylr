@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useAsync from "../../hooks/useAsync";
 import configApi from "../../api/config";
 
-function News() {
-  const { newsId } = useParams();
-  const [news, setNews] = useState(null);
+const News: React.FC<{}> = () => {
+  const { newsId } = useParams<{ newsId: string }>();
+  const [news, setNews] = useState<any>({});
 
   const getNews = useAsync({
     fn: configApi.getSpecificNews,
     onSuccess: () => {
-      setNews(getNews.result);
+      setNews(getNews.result as any);
     },
     onError: () => {
       alert(getNews.error);
@@ -20,7 +20,6 @@ function News() {
 
   useEffect(() => {
     if (newsId) {
-      console.log(newsId);
       getNews.main({
         id: newsId,
       });
@@ -45,7 +44,8 @@ function News() {
         <div>
           <h2>{news.title}</h2>
           <div dangerouslySetInnerHTML={{ __html: news.content }} />
-          {/* <img
+          {/* Uncomment if you need to display the image
+          <img
             src={news.image}
             alt={news.title}
             style={{ height: 200, width: 200 }}
@@ -56,6 +56,6 @@ function News() {
       )}
     </div>
   );
-}
+};
 
 export default News;

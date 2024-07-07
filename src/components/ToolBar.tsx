@@ -66,6 +66,12 @@ const useFPS = (): number => {
   return fps;
 };
 
+const getUserInitials = (name: string): string => {
+  const names = name.split(" ");
+  const initials = names.map((n) => n[0]).join("");
+  return initials.toUpperCase();
+};
+
 const ToolBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
@@ -75,7 +81,12 @@ const ToolBar: React.FC = () => {
   const [showToolbar, setShowToolbar] = useState<boolean>(
     localStorage.getItem("showToolbar") === "true"
   );
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const fps = useFPS();
+
+  const handleMenuToggle = () => {
+    setMenuOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     localStorage.setItem("mode", mode);
@@ -110,70 +121,76 @@ const ToolBar: React.FC = () => {
     ? ((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     : "Memory info not available";
 
-  if (!showToolbar) {
-    return null;
-  }
-
   return (
-    <div className="toolbar">
-      <div
-        className="toolbar-item"
-        onClick={() => {
-          navigate("/");
-        }}
-      >
-        <FontAwesomeIcon icon={faHome} />
-      </div>
-      <div
-        className="toolbar-item"
-        onClick={() => {
-          navigate("/app/business/");
-        }}
-      >
-        <FontAwesomeIcon icon={faUserTie} />
-      </div>
-      <div
-        className="toolbar-item"
-        onClick={() => {
-          navigate("/manage");
-        }}
-      >
-        <FontAwesomeIcon icon={faPaperclip} />
-      </div>
-      <div className="vertical-line"></div>
-      <div className="toolbar-item">
-        <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
-      </div>
-      <div className="vertical-line"></div>
-      <div className="toolbar-item">
-        <span>FPS: {fps}</span>
-      </div>
-      <div className="vertical-line"></div>
-      <div className="toolbar-item">
-        <span>RAM: {memoryUsage}</span>
-      </div>
-      <div className="vertical-line"></div>
-      <div className="toolbar-item profile-item">
-        <img
-          src={user?.image}
-          alt="Profile"
-          style={{
-            width: "30px",
-            height: "30px",
-            borderRadius: "50%",
-            border: "0.02px solid #fff",
+    <div className="toolbar-container">
+      <div className="toolbar">
+        <div
+          className="toolbar-item"
+          onClick={() => {
+            navigate("/");
           }}
-        />
+        >
+          <FontAwesomeIcon icon={faHome} />
+        </div>
+        <div
+          className="toolbar-item"
+          onClick={() => {
+            navigate("/app/business/");
+          }}
+        >
+          <FontAwesomeIcon icon={faUserTie} />
+        </div>
+        <div
+          className="toolbar-item"
+          onClick={() => {
+            navigate("/manage");
+          }}
+        >
+          <FontAwesomeIcon icon={faPaperclip} />
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <span>FPS: {fps}</span>
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <span>RAM: {memoryUsage}</span>
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item profile-item">
+          {user?.name ? (
+            <div className="profile-initials" title={user.name}>
+              {getUserInitials(user.name)}
+            </div>
+          ) : (
+            <div className="profile-initials">?</div>
+          )}
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item" onClick={handleMenuToggle}>
+          <FontAwesomeIcon icon={faBars} />
+        </div>
       </div>
-      <div className="vertical-line"></div>
-      <div
-        className="toolbar-item"
-        onClick={() => {
-          navigate("/manage");
-        }}
-      >
-        <FontAwesomeIcon icon={faBars} />
-      </div>
+      {menuOpen && (
+        <div className="dropdown-menu">
+          <div className="dropdown-item" onClick={() => navigate("/")}>
+            Home
+          </div>
+          <div
+            className="dropdown-item"
+            onClick={() => navigate("/app/business/")}
+          >
+            Business
+          </div>
+          <div className="dropdown-item" onClick={() => navigate("/manage")}>
+            Manage
+          </div>
+        </div>
+      )}
     </div>
   );
 };

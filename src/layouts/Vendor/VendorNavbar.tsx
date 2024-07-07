@@ -13,8 +13,6 @@ const VendorNavbar: React.FC<{
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
 
-  console.log(user.user);
-
   return (
     <div className="vendor-navbar">
       <div className="vendor_nav_icon" onClick={() => openSidebar(true)}>
@@ -32,7 +30,7 @@ const VendorNavbar: React.FC<{
             dispatch(logout());
           }}
         >
-          <p>Logout</p>
+          <p>Log out</p>
         </div>
       </div>
     </div>

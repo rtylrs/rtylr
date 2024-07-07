@@ -18,12 +18,15 @@ const VendorSettings = React.lazy(
   () => import("../screens/Vendor/Settings/VendorSettings.tsx")
 );
 const Addons = React.lazy(() => import("../screens/Vendor/Addons.tsx"));
-const QrCodes = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes.tsx"));
+const QrCodes = React.lazy(
+  () => import("../screens/Vendor/QrCode/QrCodes.tsx")
+);
 const CreateQrCode = React.lazy(
   () => import("../screens/Vendor/QrCode/CreateQrCode.tsx")
 );
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
 const Design = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
+const Preview = React.lazy(() => import("../screens/Vendor/Menu/Preview.tsx"));
 
 const VendorRoutes = [
   {
@@ -114,12 +117,19 @@ const VendorRoutes = [
       </Vendor>
     ),
   },
-
   {
     path: "/app/business/design",
     element: (
       <Vendor>
         <Design />
+      </Vendor>
+    ),
+  },
+  {
+    path: "/app/business/preview",
+    element: (
+      <Vendor>
+        <Preview />
       </Vendor>
     ),
   },

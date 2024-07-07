@@ -105,7 +105,6 @@ const App = (): JSX.Element => {
     dispatch(fetchConfigData());
 
     if (isAuthenticated) {
-      console.log("Fetching user info...");
       dispatch(getUserInfo());
     }
 

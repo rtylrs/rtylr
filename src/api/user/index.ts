@@ -2,7 +2,6 @@ import api from "../../lib/api";
 import { API_ROUTES } from "./routes";
 
 const editAddons = async ({ id, addons }) => {
-  console.log(id, addons);
   try {
     const res = await api.patch(API_ROUTES.PATCH.EDIT_ADDON(id), {
       addons,

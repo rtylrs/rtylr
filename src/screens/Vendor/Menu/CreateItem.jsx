@@ -22,7 +22,6 @@ function CreateItem() {
   const [isHalal, setIsHalal] = useState(false);
 
   useEffect(() => {
-    console.log(categoryId);
     if (!categoryId) {
       navigate(-1);
     }
