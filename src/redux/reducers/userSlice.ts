@@ -85,7 +85,6 @@ export const getUserInfo = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await api.get(`/business/me`);
-      console.log(response.data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue((error as any).response.data);

@@ -1,29 +1,13 @@
-// import React, { useEffect } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-// import useAsync from "../../../../hooks/useAsync";
 import { formatDate } from "../../../../utils/formatDate";
 import { Link } from "react-router-dom";
-// import configApi from "../../../../api/config";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 
 function NewsAndUpdates() {
-  // const [news, setNews] = React.useState([]);
   const news = useSelector((state: RootState) => state.config.news);
   const loading = useSelector((state: RootState) => state.config.loading);
-
-  // const getNews = useAsync({
-  //   fn: configApi.getNews,
-  //   onSuccess: () => {
-  //     setLoading(false);
-  //     setNews(getNews?.result || []);
-  //   },
-  //   onError: () => {
-  //     alert(getNews.error);
-  //   },
-  //   callOnMount: true,
-  // });
 
   return (
     <div className="news-container">

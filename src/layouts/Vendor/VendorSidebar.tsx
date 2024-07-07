@@ -8,7 +8,6 @@ import {
   faChevronUp,
   faCog,
   faArrowUpRightFromSquare,
-  faNewspaper,
   faQrcode,
   faUtensils,
   faMagicWandSparkles,
@@ -17,16 +16,20 @@ import {
   faCreditCard,
   faPuzzlePiece,
   faFolder,
+  faUtensilSpoon,
+  faEye,
+  faChartLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
-  const { reportsVisible, toggleSection } = useSidebar();
+  const { menuVisible, toggleSection } = useSidebar();
   const userId = useSelector((state: RootState) => state.user.userId);
   const userAddons = useSelector((state: RootState) => state.user.addons);
   const navigate = useNavigate();
+  // const user = useSelector((state: RootState) => state.user.user);
 
   return (
     <div
@@ -62,26 +65,75 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <p id="link">Home</p>
         </div>
         <div
-          className={`vendor-sidebar__link ${
-            location.pathname === "/app/business/menu" ? "vendor-active" : ""
-          }`}
-          onClick={() => navigate("/app/business/menu")}
+          className="vendor-sidebar__section"
+          onClick={() => toggleSection("menu")}
         >
-          <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
-          <p id="link">Menu</p>
-        </div>
-
-        <div
-          className={`vendor-sidebar__link ${
-            location.pathname === "/app/business/design" ? "vendor-active" : ""
-          }`}
-          onClick={() => navigate("/app/business/design")}
-        >
-          <FontAwesomeIcon
-            icon={faMagicWandSparkles}
-            className="vendor-sidebar__icon"
-          />
-          <p id="link">Design</p>
+          <h2>
+            <div>
+              <FontAwesomeIcon
+                icon={faUtensilSpoon}
+                className="vendor-sidebar__icon"
+              />
+              Menu
+            </div>
+            {menuVisible ? (
+              <FontAwesomeIcon
+                icon={faChevronUp}
+                className="vendor-sidebar__icon"
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faChevronDown}
+                className="vendor-sidebar__icon"
+              />
+            )}
+          </h2>
+          {menuVisible && (
+            <>
+              <div
+                className={`vendor-sidebar__link vendor-admin__link  ${
+                  location.pathname === "/app/business/menu"
+                    ? "vendor-active"
+                    : ""
+                }`}
+                onClick={() => navigate("/app/business/menu")}
+              >
+                <FontAwesomeIcon
+                  icon={faUtensils}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Catalog</p>
+              </div>
+              <div
+                className={`vendor-sidebar__link vendor-admin__link  ${
+                  location.pathname === "/app/business/design"
+                    ? "vendor-active"
+                    : ""
+                }`}
+                onClick={() => navigate("/app/business/design")}
+              >
+                <FontAwesomeIcon
+                  icon={faMagicWandSparkles}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Customize</p>
+              </div>
+              <div
+                className={`vendor-sidebar__link vendor-admin__link  ${
+                  location.pathname === "/app/business/preview"
+                    ? "vendor-active"
+                    : ""
+                }`}
+                onClick={() => navigate("/app/business/preview")}
+              >
+                <FontAwesomeIcon
+                  icon={faEye}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Preview</p>
+              </div>
+            </>
+          )}
         </div>
         <div
           className={`vendor-sidebar__link ${
@@ -122,6 +174,18 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <FontAwesomeIcon icon={faUserPen} className="vendor-sidebar__icon" />
           <p id="link">Information</p>
+        </div>
+        <div
+          className={`vendor-sidebar__link ${
+            location.pathname === "/manage/design" ? "vendor-active" : ""
+          }`}
+          onClick={() => navigate("/manage/design")}
+        >
+          <FontAwesomeIcon
+            icon={faChartLine}
+            className="vendor-sidebar__icon"
+          />
+          <p id="link">Analytics</p>
         </div>
         {/* <div
           className="vendor-sidebar__section"
@@ -180,32 +244,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             </>
           )}
         </div> */}
-        <div
-          className="vendor-sidebar__section"
-          onClick={() => toggleSection("reports")}
-        >
-          <h2>
-            <div>
-              <FontAwesomeIcon
-                icon={faNewspaper}
-                className="vendor-sidebar__icon"
-              />
-              Reports
-            </div>
-            {reportsVisible ? (
-              <FontAwesomeIcon
-                icon={faChevronUp}
-                className="vendor-sidebar__icon"
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faChevronDown}
-                className="vendor-sidebar__icon"
-              />
-            )}
-          </h2>
-          {reportsVisible && <>{/* Add report links here */}</>}
-        </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/addons" ? "vendor-active" : ""

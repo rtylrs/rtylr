@@ -59,7 +59,6 @@ function Menu() {
         </div>
       );
     } else if (item.type === "banner") {
-      console.log(item);
       return (
         <div key={item._id} className="banner-section">
           <p>{item?.details?.banner.title}</p>

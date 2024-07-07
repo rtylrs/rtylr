@@ -29,7 +29,7 @@ const Navbar = ({ openSidebar }) => {
             dispatch(logout());
           }}
         >
-          <p>Logout</p>
+          <p>Log out</p>
         </div>
       </div>
     </div>

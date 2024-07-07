@@ -119,6 +119,7 @@ const Header: React.FC<{}> = () => {
       >
         <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
         <LinkWithColor to="/pricing">Pricing</LinkWithColor>
+        <LinkWithColor to="/restaurants">Restaurants</LinkWithColor>
         <LinkWithColor to="/uses">Use Cases</LinkWithColor>
         <p
           style={{
@@ -208,11 +209,7 @@ const Header: React.FC<{}> = () => {
           <p>Login</p>
         </button>
 
-        <VbitezButton
-          onClick={handleClick}
-          className="browse-products"
-          hidden={width < 768}
-        >
+        <VbitezButton onClick={handleClick} hidden={width < 768}>
           {user.token ? "Dashboard" : "Register Now"}
         </VbitezButton>
         <div className="lang-dropdown-container">
@@ -277,12 +274,8 @@ const Header: React.FC<{}> = () => {
             <p>Login</p>
           </VbitezButton>
 
-          <VbitezButton onClick={handleClick} className="browse-products">
-            {user.token
-              ? user.role === "admin"
-                ? "Ya Hussein"
-                : "My Account"
-              : "Register Now"}
+          <VbitezButton onClick={handleClick}>
+            {user.token ? "Dashboard" : "Register Now"}
           </VbitezButton>
         </div>
       )}

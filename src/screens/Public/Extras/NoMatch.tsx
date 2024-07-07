@@ -23,13 +23,21 @@ const NoMatch = (): JSX.Element => {
             <h1>Oops!</h1>
             <h2>404 - The Page can't be found</h2>
           </div>
-          <VbitezButton
-            onClick={() => {
-              navigate("/");
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            Go Back
-          </VbitezButton>
+            <VbitezButton
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              Go Back
+            </VbitezButton>
+          </div>
         </div>
       </div>
     </motion.div>
