@@ -54,5 +54,5 @@ if (rootElement) {
     </CookiesProvider>
   );
 } else {
-  <div>No root element found</div>;
+  <div>The App Failed To Load</div>;
 }
