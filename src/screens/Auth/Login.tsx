@@ -8,11 +8,16 @@ import {
   selectError,
   selectRole,
   getUserInfo,
+  restaurantWithGoogleAsync,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
+import { auth } from "../../firebase";
+import notify from "../../lib/notify/notify";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const provider = new GoogleAuthProvider();
   const dispatch: AppDispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) =>
     selectIsAuthenticated(state)
@@ -26,6 +31,18 @@ const Login: React.FC = () => {
 
   const handleSubmit = () => {
     dispatch(loginAsync({ email, password }));
+  };
+
+  const handleGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await getIdToken(user);
+
+      dispatch(restaurantWithGoogleAsync({ idToken }));
+    } catch (error) {
+      notify.error((error as any).message);
+    }
   };
 
   useEffect(() => {
@@ -72,7 +89,7 @@ const Login: React.FC = () => {
         <div className="login-separator">
           <span>or</span>
         </div>
-        <button className="login-social-button">
+        <button className="login-social-button" onClick={handleGoogle}>
           <img src="/images/google-icon.png" alt="Google Icon" />
           Log in with Google
         </button>

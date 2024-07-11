@@ -185,29 +185,8 @@ html, body {
     }
 
     .cookies-buttons {
-      button {
-        padding: 10px 40px;
-        margin: 0 5px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        font-weight: bold;
-
-        &:hover {
-          background-color: #ddd;
-        }
-
-        &:first-child {
-          background-color: $primary-color;
-          color: #fff;
-        }
-
-        &:last-child {
-          background-color: $primary-color;
-          color: #fff;
-        }
-      }
+      display: flex;
+      gap: 10px;
     }
   }
 }
