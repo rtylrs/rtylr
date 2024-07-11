@@ -1,7 +1,7 @@
 {
   "name": "vbitez",
   "private": true,
-  "version": "0.0.6 Alpha",
+  "version": "0.0.8 Alpha",
   "type": "module",
   "scripts": {
     "start": "vite",
