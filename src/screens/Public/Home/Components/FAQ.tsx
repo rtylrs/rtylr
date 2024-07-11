@@ -39,6 +39,9 @@ function Faq() {
       <div
         style={{
           marginTop: "40px",
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
         }}
       >
         <VbitezButton variant="default" onClick={() => navigate("/faqs")}>

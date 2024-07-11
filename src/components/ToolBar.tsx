@@ -2,6 +2,7 @@ import {
   faBars,
   faHome,
   faPaperclip,
+  faTimes,
   faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -172,25 +173,32 @@ const ToolBar: React.FC = () => {
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item" onClick={handleMenuToggle}>
-          <FontAwesomeIcon icon={faBars} />
+          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
         </div>
+
+        {menuOpen && (
+          <div className="dropdown-menu">
+            <div className="dropdown-item" onClick={() => navigate("/")}>
+              Home
+            </div>
+            <div
+              className="dropdown-item"
+              onClick={() => navigate("/app/business/")}
+            >
+              Statistics
+            </div>
+            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+              Restaurants
+            </div>
+            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+              Contacts
+            </div>
+            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+              Settings
+            </div>
+          </div>
+        )}
       </div>
-      {menuOpen && (
-        <div className="dropdown-menu">
-          <div className="dropdown-item" onClick={() => navigate("/")}>
-            Home
-          </div>
-          <div
-            className="dropdown-item"
-            onClick={() => navigate("/app/business/")}
-          >
-            Business
-          </div>
-          <div className="dropdown-item" onClick={() => navigate("/manage")}>
-            Manage
-          </div>
-        </div>
-      )}
     </div>
   );
 };

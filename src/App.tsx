@@ -1,8 +1,21 @@
-//Default imports
+//Package imports
 import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+} from "chart.js";
 
 //Routes
 import PublicRoutes from "./routes/PublicRoutes";
@@ -31,9 +44,6 @@ import { BusinessRoute } from "./utils/BusinessRoute";
 
 // Other imports
 import { fetchConfigData } from "./redux/reducers/configSlice";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import {
   getUserInfo,
   selectIsAuthenticated,
@@ -41,17 +51,6 @@ import {
 } from "./redux/reducers/userSlice";
 import ToolBar from "./components/ToolBar";
 import { AppDispatch, RootState } from "./redux/store";
-
-import {
-  Chart as ChartJS,
-  LineElement,
-  PointElement,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale,
-} from "chart.js";
 
 ChartJS.register(
   LineElement,
