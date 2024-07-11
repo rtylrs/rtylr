@@ -72,7 +72,7 @@ const Price: React.FC = () => {
             </h4>
             <h3>
               $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>49</span>
-              /month
+              /year
             </h3>
             <p>For small restaurant or bar.</p>
 
@@ -119,7 +119,7 @@ const Price: React.FC = () => {
             </h4>
             <h3>
               $ <span style={{ fontSize: "70px", fontWeight: "bold" }}>59</span>
-              /month
+              /year
             </h3>
             <p>For high-demand restaurants and bars.</p>
 
