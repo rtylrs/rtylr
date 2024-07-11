@@ -67,6 +67,7 @@ const App = (): JSX.Element => {
   const location = useLocation();
   const { primary } = useColors();
   const dispatch = useDispatch<AppDispatch>();
+  // const theme = useSelector((state: RootState) => state.theme.theme);
 
   // Redux
   const config = useSelector((state: RootState) => state.config);

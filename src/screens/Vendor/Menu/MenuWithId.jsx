@@ -20,7 +20,7 @@ function MenuWithId() {
       setStatus("failed");
     },
     callOnMount: false,
-  });
+});
 
   useEffect(() => {
     setStatus("loading");
