@@ -40,8 +40,23 @@ const Cookies: React.FC = () => {
             your device.
           </p>
           <div className="cookies-buttons">
-            <VbitezButton onClick={handleAccept}>Accept</VbitezButton>
-            <VbitezButton onClick={handleDecline}>Decline</VbitezButton>
+            <VbitezButton
+              onClick={handleAccept}
+              styles={{
+                height: "40px",
+              }}
+            >
+              Accept
+            </VbitezButton>
+            <VbitezButton
+              onClick={handleDecline}
+              variant="secondary"
+              styles={{
+                height: "40px",
+              }}
+            >
+              Decline
+            </VbitezButton>
           </div>
         </div>
       </div>

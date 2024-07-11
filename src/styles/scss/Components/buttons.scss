@@ -32,24 +32,10 @@
   font-family: $secondary-font;
   background-color: white;
 
-  &:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: $secondary-color;
-    color: white
-}
-}
-
-.vbitez-button-abed {
-  padding: 15px 30px;
-  font-size: 17px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-  font-weight: bold;
-  border: 2px solid;
-  font-family: $secondary-font;
-  background-color: #754698;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -57,4 +43,3 @@
     color: white
 }
 }
-

@@ -80,6 +80,20 @@ export const registerRestaurantAsync = createAsyncThunk(
   }
 );
 
+export const restaurantWithGoogleAsync = createAsyncThunk(
+  "user/restaurantWithGoogleAsync",
+  async (payload: { idToken: string }, thunkAPI) => {
+    try {
+      const response = await api.post("/auth/create/business/google", payload);
+      const data = response.data;
+      localStorage.setItem("token", data.token);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue((error as any).response.data);
+    }
+  }
+);
+
 export const getUserInfo = createAsyncThunk(
   "user/getUserInfo",
   async (_, thunkAPI) => {
@@ -162,6 +176,21 @@ const userSlice = createSlice({
         };
       })
       .addCase(getUserInfo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { error: string }).error;
+      })
+      .addCase(restaurantWithGoogleAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(restaurantWithGoogleAsync.fulfilled, (state, action) => {
+        const { token } = action.payload;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(restaurantWithGoogleAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { error: string }).error;
       });

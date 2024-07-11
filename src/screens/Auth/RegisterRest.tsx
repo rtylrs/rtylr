@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import notify from "../../lib/notify/notify";
 import { useDispatch, useSelector } from "react-redux";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import {
   getUserInfo,
@@ -10,6 +10,7 @@ import {
   selectIsAuthenticated,
   selectLoading,
   selectRole,
+  restaurantWithGoogleAsync,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -45,14 +46,16 @@ const RegisterRestaurant: React.FC = () => {
     }
   };
 
-  const handleRegisterWithGoogle = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((error) => {
-        notify.error(error.message);
-      });
+  const handleRegisterWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await getIdToken(user);
+
+      dispatch(restaurantWithGoogleAsync({ idToken }));
+    } catch (error) {
+      notify.error((error as any).message);
+    }
   };
 
   useEffect(() => {
