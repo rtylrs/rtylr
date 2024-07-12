@@ -71,7 +71,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <h2>
             <div>
               <FontAwesomeIcon
-                icon={faUtensilSpoon}
+                icon={faUtensils}
                 className="vendor-sidebar__icon"
               />
               Menu
@@ -99,7 +99,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 onClick={() => navigate("/app/business/menu")}
               >
                 <FontAwesomeIcon
-                  icon={faUtensils}
+                  icon={faUtensilSpoon}
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Catalog</p>
