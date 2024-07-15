@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
 import { addCategory, editCategory } from "../../../redux/reducers/menuSlice";
-import IconPicker from "react-icons-picker";
 import { AppDispatch, RootState } from "../../../redux/store";
 
 interface CreateCategoryModalProps {
@@ -10,6 +9,7 @@ interface CreateCategoryModalProps {
   onClose: () => void;
   addOrEdit: "add" | "edit";
   categoryData?: {
+    _id: string;
     name: string;
     description: string;
     hasAlcohol: boolean;
@@ -34,15 +34,16 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   const [availability, setAvailability] = useState(
     categoryData?.availability || "always available"
   );
-  const [icon, setIcon] = useState(categoryData?.icon || "");
   const [iconURL, setIconURL] = useState("");
-  const [iconInputType, setIconInputType] = useState("picker");
   const dispatch = useDispatch<AppDispatch>();
   const restaurantId = useSelector((state: RootState) => state.user.userId);
 
+  useEffect(() => {
+    console.log("Modal opened:", isOpen);
+  }, [isOpen]);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    const iconValue = iconInputType === "url" ? iconURL : icon;
     if (category.trim()) {
       const categoryPayload = {
         restaurantId,
@@ -50,23 +51,26 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         description,
         hasAlcohol,
         availability,
-        icon: iconValue,
+        icon: "" || iconURL,
       };
+      console.log("Category Payload:", categoryPayload);
+
       if (addOrEdit === "add") {
         dispatch(addCategory(categoryPayload));
+        console.log("Dispatching addCategory");
       } else if (addOrEdit === "edit" && categoryData) {
         dispatch(
           editCategory({
-            categoryId: categoryData._id,
+            categoryId: categoryData?._id,
             category: categoryPayload,
           })
         );
+        console.log("Dispatching editCategory");
       }
       setCategory("");
       setDescription("");
       setHasAlcohol(false);
       setAvailability("always available");
-      setIcon("");
       setIconURL("");
       onClose();
     } else {
@@ -123,38 +127,12 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
             <option value="always available">Always available</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>
-            <input
-              type="radio"
-              name="iconInputType"
-              value="picker"
-              checked={iconInputType === "picker"}
-              onChange={() => setIconInputType("picker")}
-            />
-            Use Icon Picker
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="iconInputType"
-              value="url"
-              checked={iconInputType === "url"}
-              onChange={() => setIconInputType("url")}
-            />
-            Use Custom URL
-          </label>
-        </div>
-        {iconInputType === "picker" ? (
-          <IconPicker value={icon} onChange={setIcon} />
-        ) : (
-          <input
-            type="text"
-            placeholder="Paste custom icon URL"
-            value={iconURL}
-            onChange={(e) => setIconURL(e.target.value)}
-          />
-        )}
+        <input
+          type="text"
+          placeholder="Paste custom icon URL"
+          value={iconURL}
+          onChange={(e) => setIconURL(e.target.value)}
+        />
         <div className="form-actions">
           <button type="submit">Save</button>
           <button type="button" onClick={onClose}>

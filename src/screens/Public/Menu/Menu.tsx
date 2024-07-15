@@ -3,12 +3,11 @@ import MenuItem from "./MenuItem";
 import useAsync from "../../../hooks/useAsync";
 import menuApi from "../../../api/menu";
 import { useParams } from "react-router-dom";
-import { IconPickerItem } from "react-icons-picker";
 
 function Menu() {
   const [categories, setCategories] = useState([]);
-  const [restaurant, setRestaurant] = useState({});
-  const [theme, setTheme] = useState({});
+  const [restaurant, setRestaurant] = useState<any>();
+  const [theme, setTheme] = useState<any>();
   const [status, setStatus] = useState("idle");
   const { id } = useParams();
 
@@ -42,18 +41,14 @@ function Menu() {
             <div>
               <span>{item?.details?.name}</span>
               {item?.details?.icon && (
-                <IconPickerItem value={item?.details?.icon} />
+                <img src={item?.details?.icon} alt={item?.details?.name} />
               )}
             </div>
           </div>
           <div className="category-items">
             {item &&
               item?.details?.menuItems.map((menuItem) => (
-                <MenuItem
-                  key={menuItem._id}
-                  item={menuItem}
-                  onEdit={() => openEditModal(menuItem)}
-                />
+                <MenuItem key={menuItem._id} item={menuItem} />
               ))}
           </div>
         </div>
