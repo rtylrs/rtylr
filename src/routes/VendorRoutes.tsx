@@ -27,6 +27,7 @@ const CreateQrCode = React.lazy(
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
 const Design = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
 const Preview = React.lazy(() => import("../screens/Vendor/Menu/Preview.tsx"));
+const General = React.lazy(() => import("../screens/Vendor/Settings/General"));
 
 const VendorRoutes = [
   {
@@ -130,6 +131,14 @@ const VendorRoutes = [
     element: (
       <Vendor>
         <Preview />
+      </Vendor>
+    ),
+  },
+  {
+    path: "/app/business/settings/general",
+    element: (
+      <Vendor>
+        <General />
       </Vendor>
     ),
   },

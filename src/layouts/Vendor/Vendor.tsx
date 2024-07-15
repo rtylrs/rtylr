@@ -27,6 +27,7 @@ const Vendor: React.FC<{
 
   React.useEffect(() => {
     const token = localStorage.getItem("token");
+    const mode = localStorage.getItem("mode");
 
     if (!token) {
       navigate("/auth/login");
@@ -34,12 +35,17 @@ const Vendor: React.FC<{
 
     const url = new URL(window.location.href);
     if (!url.searchParams.has("userId")) {
-      url.searchParams.append("userId", user?.userId || "");
+      url.searchParams.append("userId", (user?.userId || "").substring(0, 6));
       if (role !== "admin") {
         url.searchParams.append("plan", user?.user?.planType || "");
       } else {
         url.searchParams.append("plan", "admin");
       }
+
+      if (mode === "dev") {
+        url.searchParams.append("mode", "dev");
+      }
+
       window.history.replaceState({}, "", url.toString());
     }
 

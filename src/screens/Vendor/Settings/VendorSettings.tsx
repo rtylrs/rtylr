@@ -1,16 +1,17 @@
-import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog,
   faUserShield,
   faCreditCard,
   faFile,
-  faDatabase,
   faLanguage,
   faGavel,
 } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const VendorSettings = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="vendor-settings-container">
       <h1>Settings</h1>
@@ -19,7 +20,12 @@ const VendorSettings = () => {
           <div className="settings-icon">
             <FontAwesomeIcon icon={faCog} />
           </div>
-          <div className="settings-content">
+          <div
+            className="settings-content"
+            onClick={() => {
+              navigate("/app/business/settings/general");
+            }}
+          >
             <h2>General</h2>
             <span>View and update your store details</span>
           </div>
