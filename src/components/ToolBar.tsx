@@ -122,6 +122,11 @@ const ToolBar: React.FC = () => {
     ? ((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     : "Memory info not available";
 
+  const toolbarNavigate = (path: string) => {
+    navigate(path);
+    setMenuOpen(false);
+  };
+
   return (
     <div className="toolbar-container">
       <div className="toolbar">
@@ -178,22 +183,31 @@ const ToolBar: React.FC = () => {
 
         {menuOpen && (
           <div className="dropdown-menu">
-            <div className="dropdown-item" onClick={() => navigate("/")}>
+            <div className="dropdown-item" onClick={() => toolbarNavigate("/")}>
               Home
             </div>
             <div
               className="dropdown-item"
-              onClick={() => navigate("/app/business/")}
+              onClick={() => toolbarNavigate("/app/business/")}
             >
               Statistics
             </div>
-            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+            <div
+              className="dropdown-item"
+              onClick={() => toolbarNavigate("/manage")}
+            >
               Restaurants
             </div>
-            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+            <div
+              className="dropdown-item"
+              onClick={() => toolbarNavigate("/manage")}
+            >
               Contacts
             </div>
-            <div className="dropdown-item" onClick={() => navigate("/manage")}>
+            <div
+              className="dropdown-item"
+              onClick={() => toolbarNavigate("/manage")}
+            >
               Settings
             </div>
           </div>

@@ -3,13 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import CreateCategoryModal from "./CreateCategoryModal";
-import { IconPickerItem } from "react-icons-picker";
-import {
-  fetchMenu,
-  addCategory,
-  deleteCategory,
-  editMenuItem,
-} from "../../../redux/reducers/menuSlice";
+import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
 
 const Menu: React.FC<{}> = () => {
@@ -19,11 +13,8 @@ const Menu: React.FC<{}> = () => {
   const { items, status } = useSelector((state: RootState) => state.menu);
   const menuId = useSelector((state: RootState) => state.menu.id);
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] =
     useState(false);
-  const [itemToEdit, setItemToEdit] = useState(null);
 
   useEffect(() => {
     dispatch(fetchMenu({ userId, disabled: true }));
@@ -35,15 +26,15 @@ const Menu: React.FC<{}> = () => {
     }
   }, [dispatch, menuId, userId]);
 
-  const handleEditMenuItem = (updatedItem) => {
-    dispatch(editMenuItem({ categoryId: selectedCategory, item: updatedItem }));
-    setEditModalOpen(false);
-  };
+  // const handleEditMenuItem = (updatedItem) => {
+  //   dispatch(editMenuItem({ categoryId: selectedCategory, item: updatedItem }));
+  //   setEditModalOpen(false);
+  // };
 
-  const handleAddCategory = (category) => {
-    dispatch(addCategory({ restaurantId: userId, name: category }));
-    setCreateCategoryModalOpen(false);
-  };
+  // const handleAddCategory = (category) => {
+  //   dispatch(addCategory({ restaurantId: userId, name: category }));
+  //   setCreateCategoryModalOpen(false);
+  // };
 
   const handleDeleteCategory = (categoryId: string) => {
     dispatch(deleteCategory(categoryId));
@@ -57,7 +48,7 @@ const Menu: React.FC<{}> = () => {
             <div>
               <span>{item?.details?.name}</span>
               {item?.details?.icon && (
-                <IconPickerItem value={item?.details?.icon} />
+                <img src={item?.details?.icon} alt={item?.details?.name} />
               )}
             </div>
             <div>
@@ -123,7 +114,7 @@ const Menu: React.FC<{}> = () => {
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}
-        onSave={handleAddCategory}
+        addOrEdit="add"
       />
       {/* <EditMenuItemModal
         isOpen={isEditModalOpen}

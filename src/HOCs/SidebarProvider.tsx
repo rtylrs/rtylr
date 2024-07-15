@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 interface SidebarContextType {
   customersVisible: boolean;
@@ -37,33 +43,36 @@ interface SidebarProviderProps {
 }
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
-  const getInitialState = (key: string) => localStorage.getItem(key) === "true";
+  const getInitialState = (key: string, defaultValue: boolean = false) => {
+    const savedValue = localStorage.getItem(key);
+    return savedValue === null ? defaultValue : savedValue === "true";
+  };
 
-  const [customersVisible, setCustomersVisible] = useState(
+  const [customersVisible, setCustomersVisible] = useState(() =>
     getInitialState("customersVisible")
   );
-  const [managementVisible, setManagementVisible] = useState(
+  const [managementVisible, setManagementVisible] = useState(() =>
     getInitialState("managementVisible")
   );
-  const [configurationVisible, setConfigurationVisible] = useState(
+  const [configurationVisible, setConfigurationVisible] = useState(() =>
     getInitialState("configurationVisible")
   );
-  const [blogVisible, setBlogVisible] = useState(
+  const [blogVisible, setBlogVisible] = useState(() =>
     getInitialState("blogVisible")
   );
-  const [reportsVisible, setReportsVisible] = useState(
+  const [reportsVisible, setReportsVisible] = useState(() =>
     getInitialState("reportsVisible")
   );
-  const [ordersVisible, setOrdersVisible] = useState(
+  const [ordersVisible, setOrdersVisible] = useState(() =>
     getInitialState("ordersVisible")
   );
-  const [petitionsVisible, setPetitionsVisible] = useState(
+  const [petitionsVisible, setPetitionsVisible] = useState(() =>
     getInitialState("petitionsVisible")
   );
-  const [donationsVisible, setDonationsVisible] = useState(
+  const [donationsVisible, setDonationsVisible] = useState(() =>
     getInitialState("donationsVisible")
   );
-  const [menuVisible, setMenuVisible] = useState(
+  const [menuVisible, setMenuVisible] = useState(() =>
     getInitialState("menuVisible")
   );
 
