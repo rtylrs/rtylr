@@ -4,13 +4,14 @@ import adminApiExport from "../../../api/admin";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { fetchFaqs } from "../../../redux/reducers/configSlice";
+import { AppDispatch } from "../../../redux/store";
 
 const AddFaq = () => {
   const [question, setQuestion] = useState({ en: "", ar: "", fr: "" });
   const [answer, setAnswer] = useState({ en: "", ar: "", fr: "" });
   const [videoUrl, setVideoUrl] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const addFaqFunc = useAsync({
     fn: adminApiExport.addFaq,

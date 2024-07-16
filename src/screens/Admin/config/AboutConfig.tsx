@@ -5,12 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateAboutContent } from "../../../redux/reducers/configSlice";
 import { Button } from "@mui/material";
 import notify from "../../../lib/notify/notify";
+import { AppDispatch, RootState } from "../../../redux/store";
 
 function AboutConfig() {
-  const config = useSelector((state) => state.config.aboutContent);
+  const config = useSelector((state: RootState) => state.config.aboutContent);
   const [text, setText] = useState(config);
   const [isTextModified, setIsTextModified] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleChange = (value) => {
     setText(value);

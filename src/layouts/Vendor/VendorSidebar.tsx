@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -88,53 +89,50 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
               />
             )}
           </h2>
-          {menuVisible && (
-            <>
-              <div
-                className={`vendor-sidebar__link vendor-admin__link  ${
-                  location.pathname === "/app/business/menu"
-                    ? "vendor-active"
-                    : ""
-                }`}
-                onClick={() => navigate("/app/business/menu")}
-              >
-                <FontAwesomeIcon
-                  icon={faUtensilSpoon}
-                  className="vendor-sidebar__icon"
-                />
-                <p id="link">Catalog</p>
-              </div>
-              <div
-                className={`vendor-sidebar__link vendor-admin__link  ${
-                  location.pathname === "/app/business/design"
-                    ? "vendor-active"
-                    : ""
-                }`}
-                onClick={() => navigate("/app/business/design")}
-              >
-                <FontAwesomeIcon
-                  icon={faMagicWandSparkles}
-                  className="vendor-sidebar__icon"
-                />
-                <p id="link">Customize</p>
-              </div>
-              <div
-                className={`vendor-sidebar__link vendor-admin__link  ${
-                  location.pathname === "/app/business/preview"
-                    ? "vendor-active"
-                    : ""
-                }`}
-                onClick={() => navigate("/app/business/preview")}
-              >
-                <FontAwesomeIcon
-                  icon={faEye}
-                  className="vendor-sidebar__icon"
-                />
-                <p id="link">Preview</p>
-              </div>
-            </>
-          )}
         </div>
+        {menuVisible && (
+          <>
+            <div
+              className={`vendor-sidebar__link vendor-admin__link  ${
+                location.pathname === "/app/business/menu"
+                  ? "vendor-active"
+                  : ""
+              }`}
+              onClick={() => navigate("/app/business/menu")}
+            >
+              <FontAwesomeIcon
+                icon={faUtensilSpoon}
+                className="vendor-sidebar__icon"
+              />
+              <p id="link">Catalog</p>
+            </div>
+            <div
+              className={`vendor-sidebar__link vendor-admin__link  ${
+                location.pathname === "/app/business/design"
+                  ? "vendor-active"
+                  : ""
+              }`}
+              onClick={() => navigate("/app/business/design")}
+            >
+              <FontAwesomeIcon
+                icon={faMagicWandSparkles}
+                className="vendor-sidebar__icon"
+              />
+              <p id="link">Customize</p>
+            </div>
+            <div
+              className={`vendor-sidebar__link vendor-admin__link  ${
+                location.pathname === "/app/business/preview"
+                  ? "vendor-active"
+                  : ""
+              }`}
+              onClick={() => navigate("/app/business/preview")}
+            >
+              <FontAwesomeIcon icon={faEye} className="vendor-sidebar__icon" />
+              <p id="link">Preview</p>
+            </div>
+          </>
+        )}
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/qr-codes"
@@ -320,4 +318,4 @@ VendorSidebar.propTypes = {
   closeSidebar: PropTypes.func.isRequired,
 };
 
-export default VendorSidebar;
+export default React.memo(VendorSidebar);
