@@ -22,7 +22,7 @@ const VendorDashboard = (): JSX.Element => {
             marginTop: "20px",
           }}
         >
-          Visits
+          Daily Visits
         </h3>
         <Visits />
       </div>
