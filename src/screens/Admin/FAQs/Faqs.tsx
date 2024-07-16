@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import VbitezButton from "../../../components/Buttons/Buttons";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "../../../redux/store";
 
 function Faqs() {
   const [activeIndex, setActiveIndex] = useState(null);
-  const faqs = useSelector((state) => state.config.faqs);
+  const faqs = useSelector((state: RootState) => state.config.faqs);
   const navigate = useNavigate();
 
-  const toggleAnswer = (index) => {
+  const toggleAnswer = (index: any) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 

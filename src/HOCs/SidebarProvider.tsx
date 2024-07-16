@@ -1,4 +1,4 @@
-import {
+import React, {
   createContext,
   useContext,
   useState,
@@ -76,70 +76,73 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
     getInitialState("menuVisible")
   );
 
+  useEffect(() => {
+    localStorage.setItem("customersVisible", customersVisible.toString());
+  }, [customersVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("managementVisible", managementVisible.toString());
+  }, [managementVisible]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "configurationVisible",
+      configurationVisible.toString()
+    );
+  }, [configurationVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("blogVisible", blogVisible.toString());
+  }, [blogVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("reportsVisible", reportsVisible.toString());
+  }, [reportsVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("ordersVisible", ordersVisible.toString());
+  }, [ordersVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("petitionsVisible", petitionsVisible.toString());
+  }, [petitionsVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("donationsVisible", donationsVisible.toString());
+  }, [donationsVisible]);
+
+  useEffect(() => {
+    localStorage.setItem("menuVisible", menuVisible.toString());
+  }, [menuVisible]);
+
   const toggleSection = (section: string) => {
     switch (section) {
       case "customers":
-        setCustomersVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("customersVisible", newState.toString());
-          return newState;
-        });
+        setCustomersVisible((prev) => !prev);
         break;
       case "management":
-        setManagementVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("managementVisible", newState.toString());
-          return newState;
-        });
+        setManagementVisible((prev) => !prev);
         break;
       case "configuration":
-        setConfigurationVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("configurationVisible", newState.toString());
-          return newState;
-        });
+        setConfigurationVisible((prev) => !prev);
         break;
       case "blog":
-        setBlogVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("blogVisible", newState.toString());
-          return newState;
-        });
+        setBlogVisible((prev) => !prev);
         break;
       case "reports":
-        setReportsVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("reportsVisible", newState.toString());
-          return newState;
-        });
+        setReportsVisible((prev) => !prev);
         break;
       case "orders":
-        setOrdersVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("ordersVisible", newState.toString());
-          return newState;
-        });
+        setOrdersVisible((prev) => !prev);
         break;
       case "petitions":
-        setPetitionsVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("petitionsVisible", newState.toString());
-          return newState;
-        });
+        setPetitionsVisible((prev) => !prev);
         break;
       case "donations":
-        setDonationsVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("donationsVisible", newState.toString());
-          return newState;
-        });
+        setDonationsVisible((prev) => !prev);
         break;
       case "menu":
-        setMenuVisible((prev) => {
-          const newState = !prev;
-          localStorage.setItem("menuVisible", newState.toString());
-          return newState;
-        });
+        setMenuVisible((prev) => !prev);
         break;
       default:
         break;

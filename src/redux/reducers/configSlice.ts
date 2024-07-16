@@ -10,7 +10,7 @@ interface ContactInfo {
 
 interface ConfigState {
   websiteData: any;
-  aboutContent: string | null;
+  aboutContent: any;
   maintanance: boolean;
   bussinessCount: number;
   contactInfo: ContactInfo;
@@ -44,7 +44,7 @@ const configSlice = createSlice({
     setWebsiteData: (state, action: PayloadAction<any>) => {
       state.websiteData = action.payload;
     },
-    setAboutContent: (state, action: PayloadAction<string | null>) => {
+    setAboutContent: (state, action: PayloadAction<any | null>) => {
       state.aboutContent = action.payload;
     },
     setMaintanance: (state, action: PayloadAction<boolean>) => {
