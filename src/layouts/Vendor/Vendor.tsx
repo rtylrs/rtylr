@@ -8,6 +8,9 @@ import HelmetContainer from "../../components/HelmetContainer";
 import { selectRole } from "../../redux/reducers/userSlice";
 import FreeAccount from "../../components/FreeAccount";
 import { RootState } from "../../redux/store";
+import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 
 const Vendor: React.FC<{
   children?: React.ReactNode;
@@ -31,23 +34,31 @@ const Vendor: React.FC<{
 
     if (!token) {
       navigate("/auth/login");
+      return;
     }
 
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("userId")) {
-      url.searchParams.append("userId", (user?.userId || "").substring(0, 6));
-      if (role !== "admin") {
-        url.searchParams.append("plan", user?.user?.planType || "");
-      } else {
-        url.searchParams.append("plan", "admin");
+    const updateUrlParams = () => {
+      const url = new URL(window.location.href);
+
+      if (!url.searchParams.has("userId")) {
+        url.searchParams.append("userId", (user?.userId || "").substring(0, 6));
       }
 
-      if (mode === "dev") {
+      if (!url.searchParams.has("plan")) {
+        url.searchParams.append(
+          "plan",
+          role !== "admin" ? user?.user?.planType || "" : "admin"
+        );
+      }
+
+      if (mode === "dev" && !url.searchParams.has("mode")) {
         url.searchParams.append("mode", "dev");
       }
 
       window.history.replaceState({}, "", url.toString());
-    }
+    };
+
+    updateUrlParams();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, user?.userId, user?.user?.planType, role]);
@@ -55,7 +66,28 @@ const Vendor: React.FC<{
   return (
     <>
       <HelmetContainer title={`${user?.user?.name || "User"}'s Dashboard`} />
-      {user?.user?.planType === "free" && <FreeAccount />}
+      {user?.user?.planType === "free" ? (
+        <FreeAccount />
+      ) : (
+        <motion.div
+          className="whatsappBtn"
+          onClick={() => {
+            window.open(
+              "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
+              "_blank"
+            );
+          }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.8 }}
+          style={{
+            right: "20px",
+          }}
+        >
+          <FontAwesomeIcon icon={faWhatsapp} />
+        </motion.div>
+      )}
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>
