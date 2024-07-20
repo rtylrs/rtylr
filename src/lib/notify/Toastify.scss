@@ -46,10 +46,16 @@
   position: fixed;
   padding: 4px;
   width: var(--toastify-toast-width);
-  max-width: 35%;
+  max-width: 25%;
   box-sizing: border-box;
   color: #fff;
+
+  @media only screen and (max-width: 480px) {
+    max-width: 80%;
+  }
 }
+
+
 .Toastify__toast-container--top-left {
   top: 1em;
   left: 1em;
