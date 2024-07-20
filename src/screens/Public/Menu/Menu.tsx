@@ -33,6 +33,18 @@ function Menu() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (status === "succeeded") {
+      document.title = restaurant?.name || "Menu";
+
+      const url = new URL(window.location.href);
+
+      if (!url.searchParams.has("title")) {
+        url.searchParams.append("title", restaurant?.name || "");
+      }
+    }
+  }, [status]);
+
   const renderSection = (item) => {
     if (item.type === "category") {
       return (

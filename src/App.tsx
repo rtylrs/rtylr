@@ -37,7 +37,6 @@ import HelmetContainer from "./components/HelmetContainer";
 
 //Hooks
 import useColors from "./hooks/useColors";
-
 // Route Checks
 import { AdminRoute } from "./utils/AdminRoute";
 import { BusinessRoute } from "./utils/BusinessRoute";
