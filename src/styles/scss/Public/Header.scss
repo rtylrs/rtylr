@@ -14,7 +14,6 @@
   z-index: 10; 
   
 
-
   &.scrolled {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     background: linear-gradient(
@@ -68,8 +67,8 @@
       }
     }
 
-    @media only screen and (max-width: 768px){
-      visibility: hidden;
+    @media only screen and (max-width: 968px){
+      display: none;
     }
   }
 
@@ -156,7 +155,7 @@
     animation: slideFromTheTop 0.5s ease-in-out;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 968px) {
     .header-left {
       flex-direction: column;
     }

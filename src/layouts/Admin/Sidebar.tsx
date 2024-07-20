@@ -72,24 +72,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           <p id="link">Home</p>
         </div>
         <div
-          className={`sidebar__link ${
-            location.pathname === "/manage/products" ? "active" : ""
-          }`}
-          onClick={() => handleNavigation("/manage/products")}
-        >
-          <FontAwesomeIcon icon={faShoppingBag} className="sidebar__icon" />
-          <p id="link">Products</p>
-        </div>
-        <div
-          className={`sidebar__link ${
-            location.pathname === "/manage/branches" ? "active" : ""
-          }`}
-          onClick={() => handleNavigation("/manage/branches")}
-        >
-          <FontAwesomeIcon icon={faShop} className="sidebar__icon" />
-          <p id="link">Branches</p>
-        </div>
-        <div
           className="sidebar__section"
           onClick={() => toggleSection("customers")}
         >

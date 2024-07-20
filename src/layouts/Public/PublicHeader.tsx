@@ -200,7 +200,7 @@ const Header: React.FC<{}> = () => {
         <button
           className="login-button"
           style={{
-            display: width < 768 ? "none" : user.token ? "none" : "flex",
+            display: width < 968 ? "none" : user.token ? "none" : "flex",
           }}
           onClick={() => {
             navigate("/auth/login");
@@ -209,7 +209,7 @@ const Header: React.FC<{}> = () => {
           <p>Login</p>
         </button>
 
-        <VbitezButton onClick={handleClick} hidden={width < 768}>
+        <VbitezButton onClick={handleClick} hidden={width < 968}>
           {user.token ? "Dashboard" : "Register Now"}
         </VbitezButton>
         <div className="lang-dropdown-container">

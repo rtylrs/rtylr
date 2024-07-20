@@ -14,6 +14,7 @@ import VbitezButton from "../../components/Buttons/Buttons";
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../redux/reducers/userSlice";
 import notify from "../../lib/notify/notify";
+import { CircularProgress } from "@mui/material";
 
 const ADDONS = [
   {
@@ -50,12 +51,15 @@ const Addons = () => {
   const [showInstalled, setShowInstalled] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const [keyLoading, setKeyLoading] = useState<number | null>();
 
   const editAddonsFunc = useAsync({
     fn: userApi.editAddons,
     onSuccess: () => {
-      notify.success("Updated Successfully");
-      dispatch(getUserInfo());
+      dispatch(getUserInfo()).then(() => {
+        notify.success("Updated Successfully");
+        setKeyLoading(null);
+      });
     },
     onError: () => {
       alert(editAddonsFunc.error);
@@ -74,6 +78,8 @@ const Addons = () => {
         id: userId,
         addons: newAddons,
       });
+
+      setKeyLoading(addonKey);
     }
   };
 
@@ -123,12 +129,16 @@ const Addons = () => {
                 <FontAwesomeIcon icon={addon.icon} className="addon-icon" />
                 <h3>{addon.name}</h3>
                 <p>{addon.description}</p>
-                <button
-                  className={userAddons?.[addon.key] ? "installed" : ""}
-                  onClick={() => handleToggleAddon(addon.key)}
-                >
-                  {userAddons?.[addon.key] ? "Remove" : "Install (Free)"}
-                </button>
+                {keyLoading === addon.key ? (
+                  <CircularProgress />
+                ) : (
+                  <button
+                    className={userAddons?.[addon.key] ? "installed" : ""}
+                    onClick={() => handleToggleAddon(addon.key)}
+                  >
+                    {userAddons?.[addon.key] ? "Remove" : "Install (Free)"}
+                  </button>
+                )}
               </div>
             ))}
           </div>

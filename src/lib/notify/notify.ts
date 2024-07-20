@@ -2,7 +2,7 @@
 
 import { toast } from "react-toastify";
 
-import "./Toastify.css"; // Import your custom CSS file
+import "./Toastify.scss"; // Import your custom CSS file
 
 const success = (message: string) => {
   toast.success(message, {
