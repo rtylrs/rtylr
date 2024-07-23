@@ -89,10 +89,14 @@ function Menu() {
       className="menu-container"
       style={{ backgroundColor: theme?.menuBackgroundColor }}
     >
-      <h1 style={{ color: theme?.primaryColor }}>{restaurant?.name}'s Menu</h1>
-      <div className="category-controls"></div>
-      <div className="menu-items">
-        {categories && categories.map(renderSection)}
+      <div className="menu">
+        <h1 style={{ color: theme?.primaryColor }}>
+          {restaurant?.name}'s Menu
+        </h1>
+        <div className="category-controls"></div>
+        <div className="menu-items">
+          {categories && categories.map(renderSection)}
+        </div>
       </div>
     </div>
   );
