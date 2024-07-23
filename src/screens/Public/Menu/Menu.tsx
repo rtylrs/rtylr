@@ -42,6 +42,8 @@ function Menu() {
       if (!url.searchParams.has("title")) {
         url.searchParams.append("title", restaurant?.name || "");
       }
+
+      window.history.replaceState({}, "", url.toString());
     }
   }, [status]);
 
