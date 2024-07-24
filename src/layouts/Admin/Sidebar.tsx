@@ -33,16 +33,7 @@ import { useSidebar } from "../../HOCs/SidebarProvider";
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    customersVisible,
-    managementVisible,
-    configurationVisible,
-    blogVisible,
-    reportsVisible,
-    ordersVisible,
-    donationsVisible,
-    toggleSection,
-  } = useSidebar();
+  const { sectionsVisible, toggleSection } = useSidebar();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -80,13 +71,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
               Customers
             </div>
-            {customersVisible ? (
+            {sectionsVisible["customers"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {customersVisible && (
+          {sectionsVisible["customers"] && (
             <>
               <div
                 className={`sidebar__link admin__link ${
@@ -133,13 +124,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               />
               Management
             </div>
-            {managementVisible ? (
+            {sectionsVisible["management"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {managementVisible && (
+          {sectionsVisible["management"] && (
             <>
               <div
                 className={`sidebar__link admin__link ${
@@ -171,13 +162,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faPenRuler} className="sidebar__icon" />
               Sections
             </div>
-            {configurationVisible ? (
+            {sectionsVisible["configuration"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {configurationVisible && (
+          {sectionsVisible["configuration"] && (
             <>
               <div
                 className={`sidebar__link admin__link ${
@@ -212,13 +203,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
               Blog
             </div>
-            {blogVisible ? (
+            {sectionsVisible["blog"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {blogVisible && (
+          {sectionsVisible["blog"] && (
             <>
               <div
                 className={`sidebar__link admin__link ${
@@ -250,13 +241,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faNewspaper} className="sidebar__icon" />
               Reports
             </div>
-            {reportsVisible ? (
+            {sectionsVisible["reports"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {reportsVisible && <>{/* Add report links here */}</>}
+          {sectionsVisible["reports"] && <>{/* Add report links here */}</>}
         </div>
         <div
           className="sidebar__section"
@@ -267,13 +258,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               <FontAwesomeIcon icon={faRuler} className="sidebar__icon" />
               Orders
             </div>
-            {ordersVisible ? (
+            {sectionsVisible["orders"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {ordersVisible && (
+          {sectionsVisible["orders"] && (
             <>
               <div
                 className={`sidebar__link admin__link ${
@@ -316,13 +307,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
               />
               Donations
             </div>
-            {donationsVisible ? (
+            {sectionsVisible["donations"] ? (
               <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
             )}
           </h2>
-          {donationsVisible && <>{/* Add donation links here */}</>}
+          {sectionsVisible["donations"] && <>{/* Add donation links here */}</>}
         </div>
         <div
           className={`sidebar__link ${

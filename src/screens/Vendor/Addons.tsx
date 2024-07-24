@@ -129,7 +129,7 @@ const Addons = () => {
                 <FontAwesomeIcon icon={addon.icon} className="addon-icon" />
                 <h3>{addon.name}</h3>
                 <p>{addon.description}</p>
-                {keyLoading === addon.key ? (
+                {keyLoading === (addon.key as string | null) ? (
                   <CircularProgress />
                 ) : (
                   <button

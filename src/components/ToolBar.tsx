@@ -1,7 +1,7 @@
 import {
   faBars,
   faHome,
-  faPaperclip,
+  faRotateRight,
   faTimes,
   faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../redux/store";
 
-const CustomSwitch = styled(Switch)(({ theme }) => ({
+const CustomSwitch = styled(Switch)(({}) => ({
   width: 34,
   height: 20,
   padding: 0,
@@ -123,9 +123,24 @@ const ToolBar: React.FC = () => {
     : "Memory info not available";
 
   const toolbarNavigate = (path: string) => {
-    navigate(path);
     setMenuOpen(false);
+    navigate(path);
   };
+
+  const handleClearStorage = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear the local storage? This action cannot be undone."
+      )
+    ) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
+
+  if (!showToolbar) {
+    return null;
+  }
 
   return (
     <div className="toolbar-container">
@@ -133,7 +148,7 @@ const ToolBar: React.FC = () => {
         <div
           className="toolbar-item"
           onClick={() => {
-            navigate("/");
+            toolbarNavigate("/");
           }}
         >
           <FontAwesomeIcon icon={faHome} />
@@ -141,7 +156,7 @@ const ToolBar: React.FC = () => {
         <div
           className="toolbar-item"
           onClick={() => {
-            navigate("/app/business/");
+            toolbarNavigate("/app/business/");
           }}
         >
           <FontAwesomeIcon icon={faUserTie} />
@@ -149,10 +164,10 @@ const ToolBar: React.FC = () => {
         <div
           className="toolbar-item"
           onClick={() => {
-            navigate("/manage");
+            window.location.reload();
           }}
         >
-          <FontAwesomeIcon icon={faPaperclip} />
+          <FontAwesomeIcon icon={faRotateRight} />
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
@@ -203,6 +218,16 @@ const ToolBar: React.FC = () => {
               onClick={() => toolbarNavigate("/manage")}
             >
               Contacts
+            </div>
+            <div
+              className="dropdown-item"
+              onClick={handleClearStorage}
+              style={{
+                color: "#ff0000",
+                fontWeight: "bold",
+              }}
+            >
+              Clear Storage
             </div>
             <div
               className="dropdown-item"

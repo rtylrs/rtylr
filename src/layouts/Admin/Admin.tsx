@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { selectRole } from "../../redux/reducers/userSlice";
 import HelmetContainer from "../../components/HelmetContainer";
 import { RootState } from "../../redux/store";
+import { SidebarProvider } from "../../HOCs/SidebarProvider";
 
 function Admin(props) {
   const navigate = useNavigate();
@@ -39,15 +40,26 @@ function Admin(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
+  const initialSections: string[] = [
+    "customers",
+    "management",
+    "configuration",
+    "blog",
+    "reports",
+    "orders",
+    "petitions",
+    "donations",
+  ];
+
   return (
-    <>
+    <SidebarProvider initialSections={initialSections}>
       <HelmetContainer title="Vbitez - Admin" />
       <div className="Admincontainer">
         <Navbar openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>
         <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
       </div>
-    </>
+    </SidebarProvider>
   );
 }
 

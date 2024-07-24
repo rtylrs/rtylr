@@ -106,6 +106,48 @@ export const getUserInfo = createAsyncThunk(
   }
 );
 
+export const setThemeAsync = createAsyncThunk(
+  "user/setThemeAsync",
+  async (
+    payload: {
+      id: string;
+      themeData: {
+        primaryColor?: string;
+        secondaryColor?: string;
+        loaderColor?: string;
+        accentColor?: string;
+        categoryTitleColor?: string;
+        restaurantDescriptionColor?: string;
+        productTitleColor?: string;
+        productDescriptionColor?: string;
+        productPriceColor?: string;
+        menuBackgroundColor?: string;
+        font?: string;
+        fontSize?: string;
+        categoryFontSize?: string;
+        productPriceFontSize?: string;
+        productDescriptionFontSize?: string;
+        backgroundColor?: string;
+        backgroundImage?: string;
+        imageSize?: string;
+        themeStyle?: string;
+        displaySearchButton?: boolean;
+      };
+    },
+    thunkAPI
+  ) => {
+    try {
+      const response = await api.put(
+        `/business/${payload.id}/theme`,
+        payload.themeData
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue((error as any).response.data);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -127,6 +169,7 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Existing cases...
       .addCase(loginAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -193,6 +236,22 @@ const userSlice = createSlice({
       .addCase(restaurantWithGoogleAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { error: string }).error;
+      })
+      // Set Theme Async
+      .addCase(setThemeAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(setThemeAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        if (state.user) {
+          state.user.theme = action.payload.theme;
+        }
+      })
+      .addCase(setThemeAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { error: string }).error;
       });
   },
 });
@@ -206,5 +265,7 @@ export const selectLoading = (state: { user: UserState }) => state.user.loading;
 export const selectError = (state: { user: UserState }) => state.user.error;
 export const selectRole = (state: { user: UserState }) => state.user.role;
 export const selectUserId = (state: { user: UserState }) => state.user.userId;
+export const selectTheme = (state: { user: UserState }) =>
+  state.user.user?.theme;
 
 export default userSlice.reducer;

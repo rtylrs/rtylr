@@ -11,7 +11,6 @@ import i18next from "./services/i18next";
 import ScrollToTop from "./components/ScrollToTop";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
-import { SidebarProvider } from "./HOCs/SidebarProvider";
 import { ToastContainer } from "react-toastify";
 import { CookiesProvider } from "react-cookie";
 import { PersistGate } from "redux-persist/integration/react";
@@ -40,11 +39,9 @@ if (rootElement) {
             <Provider store={store}>
               <PersistGate loading={null} persistor={persistor}>
                 <BrowserRouter>
-                  <SidebarProvider>
-                    <App />
-                    <ToastContainer />
-                    <ScrollToTop />
-                  </SidebarProvider>
+                  <App />
+                  <ToastContainer />
+                  <ScrollToTop />
                 </BrowserRouter>
               </PersistGate>
             </Provider>
