@@ -19,7 +19,7 @@ function QuickLinks() {
     <div className="quick-links">
       <QuickLink icon={faUtensils} title="Menu" to="/app/business/menu" />
       <QuickLink icon={faFolder} title="My Menus" to="/app/business/menus" />
-      <QuickLink icon={faChartPie} title="Reports" to="/app/business/reports" />
+      {/* <QuickLink icon={faChartPie} title="Reports" to="/app/business/reports" /> */}
       <QuickLink
         icon={faQrcode}
         title="Qr Codes"

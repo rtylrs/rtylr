@@ -11,6 +11,7 @@ import { RootState } from "../../redux/store";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import { SidebarProvider } from "../../HOCs/SidebarProvider";
 
 const Vendor: React.FC<{
   children?: React.ReactNode;
@@ -63,8 +64,20 @@ const Vendor: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
+  const initialSections: string[] = [
+    "customers",
+    "management",
+    "configuration",
+    "blog",
+    "reports",
+    "orders",
+    "petitions",
+    "donations",
+    "menu",
+  ];
+
   return (
-    <>
+    <SidebarProvider initialSections={initialSections}>
       <HelmetContainer title={`${user?.user?.name || "User"}'s Dashboard`} />
       {user?.user?.planType === "free" ? (
         <FreeAccount />
@@ -93,7 +106,7 @@ const Vendor: React.FC<{
         <div className="InnerContainer">{props.children}</div>
         <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
       </div>
-    </>
+    </SidebarProvider>
   );
 };
 

@@ -1,6 +1,9 @@
 import PropTypes from "prop-types";
+import React from "react";
 
-function MenuItem({ item }) {
+const MenuItem: React.FC<{
+  item: any;
+}> = ({ item }: { item: any }) => {
   return (
     <div className="menu-item">
       <img src={item.coverImage} alt={item.name} height={50} width={50} />
@@ -12,11 +15,10 @@ function MenuItem({ item }) {
       </div>
     </div>
   );
-}
+};
 
 export default MenuItem;
 
 MenuItem.propTypes = {
   item: PropTypes.object.isRequired,
-  onEdit: PropTypes.func.isRequired,
 };

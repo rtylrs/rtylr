@@ -17,11 +17,11 @@ const Menu: React.FC<{}> = () => {
     useState(false);
 
   useEffect(() => {
-    dispatch(fetchMenu({ userId, disabled: true }));
+    dispatch(fetchMenu({ userId: userId as string, disabled: true }));
 
     const url = new URL(window.location.href);
     if (!url.searchParams.has("menuId")) {
-      url.searchParams.append("menuId", menuId);
+      url.searchParams.append("menuId", menuId as string);
       window.history.replaceState({}, "", url.toString());
     }
   }, [dispatch, menuId, userId]);
