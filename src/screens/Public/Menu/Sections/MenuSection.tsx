@@ -18,7 +18,7 @@ const MenuSection: React.FC<{
     : menuArray;
 
   return (
-    <div className="menu-container">
+    <div>
       <div className="category-navigation">
         <button
           className={`category-link ${
@@ -41,7 +41,7 @@ const MenuSection: React.FC<{
         ))}
       </div>
 
-      <div className="menu">
+      <div>
         <div className="category-controls"></div>
         <div className="menu-items">
           {filteredMenuArray && filteredMenuArray.map(RenderSection)}

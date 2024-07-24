@@ -1,13 +1,15 @@
 .menu-container {
   width: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+  height: 100%;
 
   .menu {
     width: 100%;
     max-width: 450px;
+    border: 1px solid black;
   }
 
   .bottom-navigation {
