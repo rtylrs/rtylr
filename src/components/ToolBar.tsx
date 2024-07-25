@@ -73,6 +73,19 @@ const getUserInitials = (name: string): string => {
   return initials.toUpperCase();
 };
 
+const getPlatform = () => {
+  const userAgent = navigator.userAgent;
+  if (/Windows/.test(userAgent)) {
+    return "Windows";
+  } else if (/Mac/.test(userAgent)) {
+    return "Mac";
+  } else if (/Linux/.test(userAgent)) {
+    return "Linux";
+  } else {
+    return "Unknown";
+  }
+};
+
 const ToolBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
@@ -95,9 +108,13 @@ const ToolBar: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-      const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key === "t";
-      const isCmdOptTPressed = e.metaKey && e.altKey && e.key === "t";
+      const os = getPlatform();
+      const isMac = os === "Mac";
+
+      const isCtrlAltTPressed =
+        e.ctrlKey && e.altKey && e.key.toLowerCase() === "t";
+      const isCmdOptTPressed =
+        e.metaKey && e.ctrlKey && e.key.toLowerCase() === "t";
 
       if (isCtrlAltTPressed || (isMac && isCmdOptTPressed)) {
         setShowToolbar((prev) => {
