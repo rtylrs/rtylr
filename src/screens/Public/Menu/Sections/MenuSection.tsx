@@ -13,7 +13,8 @@ const MenuSection: React.FC<{
 
   const filteredMenuArray = selectedCategory
     ? menuArray.filter(
-        (item) => item.type === "category" && item._id === selectedCategory
+        (item: { type: string; _id: string }) =>
+          item.type === "category" && item._id === selectedCategory
       )
     : menuArray;
 
