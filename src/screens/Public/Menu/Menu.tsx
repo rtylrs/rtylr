@@ -15,6 +15,8 @@ import MenuSection from "./Sections/MenuSection";
 import AboutSection from "./Sections/AboutSection";
 import ContactSection from "./Sections/ContactSection";
 import FeedbackSection from "./Sections/FeedbackSection";
+import Loader from "../../../layouts/loader/Loader";
+import Alert from "@mui/material/Alert";
 
 function Menu() {
   const [menuArray, setmenuArray] = useState([]);
@@ -68,11 +70,22 @@ function Menu() {
   }, []);
 
   if (status === "loading") {
-    return <div className="menu-container">Loading...</div>;
+    return <Loader />;
   }
 
   if (status === "failed") {
-    return <div className="menu-container">Error loading menu.</div>;
+    return (
+      <div
+        className="menu-container"
+        style={{ justifyContent: "center", alignItems: "center" }}
+      >
+        <div className="menu">
+          <Alert severity="error" style={{ width: "90%", margin: "auto" }}>
+            Failed to load menu
+          </Alert>
+        </div>
+      </div>
+    );
   }
 
   const renderActiveSection = () => {
@@ -103,13 +116,20 @@ function Menu() {
         </h1>
         {renderActiveSection()}
       </div>
-      <div className="bottom-navigation">
+      <div
+        className="bottom-navigation"
+        style={{
+          backgroundColor: theme?.bottomNavigationBackgroundColor,
+        }}
+      >
         <div onClick={() => setActiveSection("about")}>
           <FontAwesomeIcon icon={faInfoCircle} />
+          <p>About</p>
         </div>
         {restaurant?.addons?.landing && (
           <div onClick={() => setActiveSection("menu")}>
             <FontAwesomeIcon icon={faUtensils} />
+            <p>Menu</p>
           </div>
         )}
         <div
@@ -124,12 +144,15 @@ function Menu() {
           <FontAwesomeIcon
             icon={restaurant?.addons.landing ? faHome : faUtensils}
           />
+          <p>{restaurant?.addons?.landing ? "Home" : "Menu"}</p>
         </div>
         <div onClick={() => setActiveSection("contact")}>
           <FontAwesomeIcon icon={faPhone} />
+          <p>Contact</p>
         </div>
         <div onClick={() => setActiveSection("feedback")}>
           <FontAwesomeIcon icon={faComments} />
+          <p>Feedback</p>
         </div>
       </div>
     </div>

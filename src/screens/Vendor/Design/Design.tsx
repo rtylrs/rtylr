@@ -8,6 +8,8 @@ import {
   selectError,
 } from "../../../redux/reducers/userSlice";
 import { AppDispatch } from "../../../redux/store";
+import VbitezButton from "../../../components/Buttons/Buttons";
+import Menu from "../../Public/Menu/Menu";
 
 const Design: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,32 +18,32 @@ const Design: React.FC = () => {
   const loading = useSelector(selectLoading);
   const error = useSelector(selectError);
 
+  const defaultTheme = {
+    primaryColor: "#ffffff",
+    secondaryColor: "#000000",
+    loaderColor: "#000000",
+    accentColor: "#000000",
+    categoryTitleColor: "#000000",
+    restaurantDescriptionColor: "#000000",
+    productTitleColor: "#000000",
+    productDescriptionColor: "#000000",
+    productPriceColor: "#000000",
+    menuBackgroundColor: "#ffffff",
+    font: "Arial",
+    fontSize: "16px",
+    categoryFontSize: "16px",
+    productPriceFontSize: "16px",
+    productDescriptionFontSize: "16px",
+    backgroundColor: "#ffffff",
+    backgroundImage: "",
+    imageSize: "cover",
+    themeStyle: "default",
+    displaySearchButton: true,
+  };
+
   const [themeData, setThemeData] = useState({
-    primaryColor: currentTheme?.primaryColor || "#ffffff",
-    secondaryColor: currentTheme?.secondaryColor || "#000000",
-    loaderColor: currentTheme?.loaderColor || "#000000",
-    accentColor: currentTheme?.accentColor || "#000000",
-    categoryTitleColor: currentTheme?.categoryTitleColor || "#000000",
-    restaurantDescriptionColor:
-      currentTheme?.restaurantDescriptionColor || "#000000",
-    productTitleColor: currentTheme?.productTitleColor || "#000000",
-    productDescriptionColor: currentTheme?.productDescriptionColor || "#000000",
-    productPriceColor: currentTheme?.productPriceColor || "#000000",
-    menuBackgroundColor: currentTheme?.menuBackgroundColor || "#ffffff",
-    font: currentTheme?.font || "Arial",
-    fontSize: currentTheme?.fontSize || "16px",
-    categoryFontSize: currentTheme?.categoryFontSize || "16px",
-    productPriceFontSize: currentTheme?.productPriceFontSize || "16px",
-    productDescriptionFontSize:
-      currentTheme?.productDescriptionFontSize || "16px",
-    backgroundColor: currentTheme?.backgroundColor || "#ffffff",
-    backgroundImage: currentTheme?.backgroundImage || "",
-    imageSize: currentTheme?.imageSize || "cover",
-    themeStyle: currentTheme?.themeStyle || "default",
-    displaySearchButton:
-      currentTheme?.displaySearchButton !== undefined
-        ? currentTheme.displaySearchButton
-        : true,
+    ...defaultTheme,
+    ...currentTheme,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,232 +60,93 @@ const Design: React.FC = () => {
     }
   };
 
+  const renderInput = (label: string, name: string, type: string) => {
+    return (
+      <div key={name}>
+        <label>
+          {label}:
+          <input
+            type={type}
+            name={name}
+            value={themeData[name]}
+            checked={type === "checkbox" ? themeData[name] : undefined}
+            onChange={handleChange}
+          />
+        </label>
+      </div>
+    );
+  };
+
+  const themeFields = [
+    { label: "Primary Color", name: "primaryColor", type: "color" },
+    { label: "Secondary Color", name: "secondaryColor", type: "color" },
+    { label: "Loader Color", name: "loaderColor", type: "color" },
+    { label: "Accent Color", name: "accentColor", type: "color" },
+    {
+      label: "Category Title Color",
+      name: "categoryTitleColor",
+      type: "color",
+    },
+    {
+      label: "Restaurant Description Color",
+      name: "restaurantDescriptionColor",
+      type: "color",
+    },
+    { label: "Product Title Color", name: "productTitleColor", type: "color" },
+    {
+      label: "Product Description Color",
+      name: "productDescriptionColor",
+      type: "color",
+    },
+    { label: "Product Price Color", name: "productPriceColor", type: "color" },
+    {
+      label: "Menu Background Color",
+      name: "menuBackgroundColor",
+      type: "color",
+    },
+    { label: "Font", name: "font", type: "text" },
+    { label: "Font Size", name: "fontSize", type: "text" },
+    { label: "Category Font Size", name: "categoryFontSize", type: "text" },
+    {
+      label: "Product Price Font Size",
+      name: "productPriceFontSize",
+      type: "text",
+    },
+    {
+      label: "Product Description Font Size",
+      name: "productDescriptionFontSize",
+      type: "text",
+    },
+    { label: "Background Color", name: "backgroundColor", type: "color" },
+    { label: "Background Image URL", name: "backgroundImage", type: "text" },
+    { label: "Image Size", name: "imageSize", type: "text" },
+    { label: "Theme Style", name: "themeStyle", type: "text" },
+    {
+      label: "Display Search Button",
+      name: "displaySearchButton",
+      type: "checkbox",
+    },
+  ];
+
   return (
     <div>
       <h2>Edit Theme</h2>
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
-      <div>
-        <label>
-          Primary Color:
-          <input
-            type="color"
-            name="primaryColor"
-            value={themeData.primaryColor}
-            onChange={handleChange}
-          />
-        </label>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        <div>
+          {themeFields.map((field) =>
+            renderInput(field.label, field.name, field.type)
+          )}
+        </div>
       </div>
-      <div>
-        <label>
-          Secondary Color:
-          <input
-            type="color"
-            name="secondaryColor"
-            value={themeData.secondaryColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Loader Color:
-          <input
-            type="color"
-            name="loaderColor"
-            value={themeData.loaderColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Accent Color:
-          <input
-            type="color"
-            name="accentColor"
-            value={themeData.accentColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Category Title Color:
-          <input
-            type="color"
-            name="categoryTitleColor"
-            value={themeData.categoryTitleColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Restaurant Description Color:
-          <input
-            type="color"
-            name="restaurantDescriptionColor"
-            value={themeData.restaurantDescriptionColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Product Title Color:
-          <input
-            type="color"
-            name="productTitleColor"
-            value={themeData.productTitleColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Product Description Color:
-          <input
-            type="color"
-            name="productDescriptionColor"
-            value={themeData.productDescriptionColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Product Price Color:
-          <input
-            type="color"
-            name="productPriceColor"
-            value={themeData.productPriceColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Menu Background Color:
-          <input
-            type="color"
-            name="menuBackgroundColor"
-            value={themeData.menuBackgroundColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Font:
-          <input
-            type="text"
-            name="font"
-            value={themeData.font}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Font Size:
-          <input
-            type="text"
-            name="fontSize"
-            value={themeData.fontSize}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Category Font Size:
-          <input
-            type="text"
-            name="categoryFontSize"
-            value={themeData.categoryFontSize}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Product Price Font Size:
-          <input
-            type="text"
-            name="productPriceFontSize"
-            value={themeData.productPriceFontSize}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Product Description Font Size:
-          <input
-            type="text"
-            name="productDescriptionFontSize"
-            value={themeData.productDescriptionFontSize}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Background Color:
-          <input
-            type="color"
-            name="backgroundColor"
-            value={themeData.backgroundColor}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Background Image URL:
-          <input
-            type="text"
-            name="backgroundImage"
-            value={themeData.backgroundImage}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Image Size:
-          <input
-            type="text"
-            name="imageSize"
-            value={themeData.imageSize}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Theme Style:
-          <input
-            type="text"
-            name="themeStyle"
-            value={themeData.themeStyle}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Display Search Button:
-          <input
-            type="checkbox"
-            name="displaySearchButton"
-            checked={themeData.displaySearchButton}
-            onChange={handleChange}
-          />
-        </label>
-      </div>
-      <button onClick={handleSubmit}>Save Theme</button>
+
+      <VbitezButton onClick={handleSubmit}>Save Theme</VbitezButton>
     </div>
   );
 };

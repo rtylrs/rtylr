@@ -169,7 +169,6 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Existing cases...
       .addCase(loginAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -237,7 +236,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as { error: string }).error;
       })
-      // Set Theme Async
       .addCase(setThemeAsync.pending, (state) => {
         state.loading = true;
         state.error = null;

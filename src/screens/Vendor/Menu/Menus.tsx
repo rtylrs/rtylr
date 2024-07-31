@@ -17,6 +17,7 @@ const Menus = () => {
   );
   const [newMenuName, setNewMenuName] = useState("");
   const [showCreateMenuForm, setShowCreateMenuForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchAllMenus({ restaurantId: userId }));
@@ -46,14 +47,29 @@ const Menus = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredMenus = allMenus.filter((menu: any) =>
+    menu.menuName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
       <h1>Menus</h1>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        placeholder="Search menus..."
+        style={{ marginBottom: "20px", width: "100%", padding: "8px" }}
+      />
       {status === "loading" && <p>Loading...</p>}
       {status === "failed" && <p>{error}</p>}
       {status === "succeeded" && (
         <>
-          {Array.isArray(allMenus) && allMenus.length === 0 ? (
+          {Array.isArray(filteredMenus) && filteredMenus.length === 0 ? (
             <div>
               <p>No menus found. Create a new menu:</p>
               <input
@@ -67,8 +83,8 @@ const Menus = () => {
           ) : (
             <>
               <ul>
-                {Array.isArray(allMenus) &&
-                  allMenus.map((menu: any) => (
+                {Array.isArray(filteredMenus) &&
+                  filteredMenus.map((menu: any) => (
                     <li key={menu._id} style={{ marginBottom: "20px" }}>
                       <h2>{menu.menuName}</h2>
                       <button onClick={() => handleViewMenu(menu._id)}>

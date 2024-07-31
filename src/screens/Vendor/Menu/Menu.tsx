@@ -67,7 +67,7 @@ const Menu: React.FC<{}> = () => {
             </div>
           </div>
           <div className="category-items">
-            {item?.details?.menuItems?.map((menuItem) => (
+            {item?.details?.menuItems?.map((menuItem: any) => (
               <MenuItem key={menuItem._id} item={menuItem} />
             ))}
           </div>
@@ -78,6 +78,7 @@ const Menu: React.FC<{}> = () => {
         <div key={item._id} className="banner-section">
           <p>{item?.details?.banner?.title}</p>
           <img
+            style={{ width: "50%", height: "50%", objectFit: "cover" }}
             src={item?.details?.banner?.bannerImage}
             alt={item?.details?.title}
           />

@@ -21,7 +21,10 @@ import "react-lazy-load-image-component/src/effects/blur.css";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#262626",
+      main: "#040428",
+    },
+    secondary: {
+      main: "#4485c4",
     },
   },
 });
