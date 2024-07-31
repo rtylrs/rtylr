@@ -205,7 +205,7 @@ const ToolBar: React.FC = () => {
               {getUserInitials(user.name)}
             </div>
           ) : (
-            <div className="profile-initials">?</div>
+            <div className="profile-initials"></div>
           )}
         </div>
         <div className="vertical-line"></div>
