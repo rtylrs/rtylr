@@ -15,6 +15,7 @@ interface CreateCategoryModalProps {
     hasAlcohol: boolean;
     availability: string;
     icon: string;
+    parentCategory?: string;
   };
 }
 
@@ -34,9 +35,18 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   const [availability, setAvailability] = useState(
     categoryData?.availability || "always available"
   );
-  const [iconURL, setIconURL] = useState("");
+  const [iconURL, setIconURL] = useState(categoryData?.icon || "");
+  const [parentCategory, setParentCategory] = useState(
+    categoryData?.parentCategory || ""
+  );
+
   const dispatch = useDispatch<AppDispatch>();
   const restaurantId = useSelector((state: RootState) => state.user.userId);
+  const parentCategories = useSelector((state: RootState) =>
+    state.menu.items.filter(
+      (item: any) => item.type === "category" && item.details.isParentCategory
+    )
+  );
 
   useEffect(() => {
     console.log("Modal opened:", isOpen);
@@ -44,14 +54,15 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (category.trim()) {
+    if (category.trim() && parentCategory) {
       const categoryPayload = {
         restaurantId,
         name: category,
         description,
         hasAlcohol,
         availability,
-        icon: "" || iconURL,
+        icon: iconURL,
+        parentCategory,
       };
       console.log("Category Payload:", categoryPayload);
 
@@ -72,9 +83,10 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
       setHasAlcohol(false);
       setAvailability("always available");
       setIconURL("");
+      setParentCategory("");
       onClose();
     } else {
-      alert("Category name cannot be empty.");
+      alert("Category name and parent category cannot be empty.");
     }
   };
 
@@ -127,12 +139,30 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
             <option value="always available">Always available</option>
           </select>
         </div>
-        <input
-          type="text"
-          placeholder="Paste custom icon URL"
-          value={iconURL}
-          onChange={(e) => setIconURL(e.target.value)}
-        />
+        <div className="form-group">
+          <label>Parent Category*</label>
+          <select
+            value={parentCategory}
+            onChange={(e) => setParentCategory(e.target.value)}
+            required
+          >
+            <option value="">Select Parent Category</option>
+            {parentCategories.map((parent: any) => (
+              <option key={parent.itemId} value={parent.itemId}>
+                {parent.details.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Icon URL</label>
+          <input
+            type="text"
+            placeholder="Paste custom icon URL"
+            value={iconURL}
+            onChange={(e) => setIconURL(e.target.value)}
+          />
+        </div>
         <div className="form-actions">
           <button type="submit">Save</button>
           <button type="button" onClick={onClose}>

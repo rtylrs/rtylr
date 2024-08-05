@@ -5,6 +5,7 @@ import MenuItem from "./MenuItem";
 import CreateCategoryModal from "./CreateCategoryModal";
 import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
+import CreateParentCategoryModal from "./CreateParentCategoryModal";
 
 const Menu: React.FC<{}> = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,6 +15,8 @@ const Menu: React.FC<{}> = () => {
   const menuId = useSelector((state: RootState) => state.menu.id);
 
   const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] =
+    useState(false);
+  const [isCreateParentCategoryModalOpen, setCreateParentCategoryModalOpen] =
     useState(false);
 
   useEffect(() => {
@@ -26,66 +29,129 @@ const Menu: React.FC<{}> = () => {
     }
   }, [dispatch, menuId, userId]);
 
-  // const handleEditMenuItem = (updatedItem) => {
-  //   dispatch(editMenuItem({ categoryId: selectedCategory, item: updatedItem }));
-  //   setEditModalOpen(false);
-  // };
-
-  // const handleAddCategory = (category) => {
-  //   dispatch(addCategory({ restaurantId: userId, name: category }));
-  //   setCreateCategoryModalOpen(false);
-  // };
-
   const handleDeleteCategory = (categoryId: string) => {
     dispatch(deleteCategory(categoryId));
   };
 
-  const renderSection = (item: any) => {
-    if (item.type === "category") {
-      return (
-        <div key={item._id} className="category-section">
-          <div className="category-header">
-            <div>
-              <span>{item?.details?.name}</span>
-              {item?.details?.icon && (
-                <img src={item?.details?.icon} alt={item?.details?.name} />
-              )}
-            </div>
-            <div>
+  const renderItems = (items: any) => {
+    return items.map((item: any) => <MenuItem key={item._id} item={item} />);
+  };
+
+  const renderCategory = (category: any) => {
+    return (
+      <div key={category._id} className="category-section">
+        <div className="category-header">
+          <div>
+            <span>{category?.details?.name}</span>
+            {category?.details?.icon && (
+              <img
+                src={category?.details?.icon}
+                alt={category?.details?.name}
+              />
+            )}
+          </div>
+          <div>
+            <button
+              onClick={() => {
+                navigate("/app/business/create-item", {
+                  state: { categoryId: category.itemId },
+                });
+              }}
+            >
+              Add a product
+            </button>
+            <button onClick={() => handleDeleteCategory(category.itemId)}>
+              Delete
+            </button>
+          </div>
+        </div>
+        <div className="category-items">
+          {renderItems(category.details.menuItems)}
+        </div>
+      </div>
+    );
+  };
+
+  const renderParentCategory = (parentCategory: any, childCategories: any) => {
+    return (
+      <div key={parentCategory._id} className="parent-category-section">
+        <div className="parent-category-header">
+          <div>
+            <span>{parentCategory?.details?.name}</span>
+            {parentCategory?.details?.icon && (
+              <img
+                src={parentCategory?.details?.icon}
+                alt={parentCategory?.details?.name}
+              />
+            )}
+          </div>
+          <div>
+            {!parentCategory && (
               <button
                 onClick={() => {
                   navigate("/app/business/create-item", {
-                    state: { categoryId: item.itemId },
+                    state: { categoryId: parentCategory.itemId },
                   });
                 }}
               >
                 Add a product
               </button>
-              <button onClick={() => handleDeleteCategory(item.itemId)}>
-                Delete
-              </button>
-            </div>
-          </div>
-          <div className="category-items">
-            {item?.details?.menuItems?.map((menuItem: any) => (
-              <MenuItem key={menuItem._id} item={menuItem} />
-            ))}
+            )}
+            <button onClick={() => handleDeleteCategory(parentCategory.itemId)}>
+              Delete
+            </button>
           </div>
         </div>
-      );
+        <div className="child-categories">
+          {childCategories.map(renderCategory)}
+        </div>
+      </div>
+    );
+  };
+
+  const groupedCategories = items.reduce((acc: any, item: any) => {
+    if (item.type === "category") {
+      if (item.details.isParentCategory) {
+        acc[item.itemId] = { parent: item, children: [] };
+      } else if (item.details.parentCategory) {
+        if (!acc[item.details.parentCategory]) {
+          acc[item.details.parentCategory] = { parent: null, children: [] };
+        }
+        acc[item.details.parentCategory].children.push(item);
+      } else {
+        acc[item.itemId] = { parent: item, children: [] };
+      }
     } else if (item.type === "banner") {
-      return (
-        <div key={item._id} className="banner-section">
-          <p>{item?.details?.banner?.title}</p>
-          <img
-            style={{ width: "50%", height: "50%", objectFit: "cover" }}
-            src={item?.details?.banner?.bannerImage}
-            alt={item?.details?.title}
-          />
-        </div>
-      );
+      acc[item.itemId] = item;
     }
-    return null;
+    return acc;
+  }, {});
+
+  const renderSections = (items: any) => {
+    return items.map((item: any) => {
+      if (item.type === "banner") {
+        return (
+          <div key={item._id} className="banner-section">
+            <p>{item?.details?.banner?.title}</p>
+            <img
+              style={{ width: "50%", height: "50%", objectFit: "cover" }}
+              src={item?.details?.banner?.bannerImage}
+              alt={item?.details?.title}
+            />
+          </div>
+        );
+      } else if (item.type === "category") {
+        if (item.details.isParentCategory) {
+          const childCategories = groupedCategories[item.itemId].children;
+          return renderParentCategory(item, childCategories);
+        } else if (item.details.parentCategory) {
+          return null;
+        } else {
+          return renderCategory(item);
+        }
+      }
+      return null;
+    });
   };
 
   if (status === "loading") {
@@ -96,6 +162,9 @@ const Menu: React.FC<{}> = () => {
     <div className="menu-container-vendor">
       <h1>Menu</h1>
       <div className="category-controls">
+        <button onClick={() => setCreateParentCategoryModalOpen(true)}>
+          Create Group
+        </button>
         <button
           onClick={() => {
             setCreateCategoryModalOpen(true);
@@ -111,18 +180,17 @@ const Menu: React.FC<{}> = () => {
           Create Banner
         </button>
       </div>
-      <div className="menu-items">{items && items.map(renderSection)}</div>
+      <div className="menu-items">{renderSections(items)}</div>
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}
         addOrEdit="add"
       />
-      {/* <EditMenuItemModal
-        isOpen={isEditModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onSave={handleEditMenuItem}
-        item={itemToEdit}
-      /> */}
+      <CreateParentCategoryModal
+        isOpen={isCreateParentCategoryModalOpen}
+        onClose={() => setCreateParentCategoryModalOpen(false)}
+        addOrEdit="add"
+      />
     </div>
   );
 };
