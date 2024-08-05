@@ -7,11 +7,14 @@ import useColors from "../../../../hooks/useColors";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
 import React from "react";
+import { QRCode } from "react-qrcode-logo";
+import useWindowDimensions from "../../../../utils/useWindowDimensions";
 
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { secondary } = useColors();
+  const { width } = useWindowDimensions();
+  const { primary, secondary } = useColors();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   return (
@@ -46,7 +49,14 @@ const Hero: React.FC<{}> = () => {
         </h5>
       </div>
       <div className="hero-image">
-        <img src="/svg/Hero.svg" alt="qr code on a paper" />
+        {/* <img src="/svg/Hero.svg" alt="qr code on a paper" /> */}
+        <QRCode
+          value="https://vbitez.voxire.com/"
+          bgColor="#ffffff"
+          fgColor={primary}
+          size={width < 768 ? 300 : 400}
+          qrStyle="fluid"
+        />
       </div>
     </div>
   );

@@ -5,29 +5,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClose,
   faHome,
-  faChevronDown,
-  faChevronUp,
+  // faChevronDown,
+  // faChevronUp,
   faCog,
   faArrowUpRightFromSquare,
   faQrcode,
-  faUtensils,
   faMagicWandSparkles,
   faStar,
   faUserPen,
   faCreditCard,
   faPuzzlePiece,
   faFolder,
-  faUtensilSpoon,
-  faEye,
   faChartLine,
   faGlobe,
+  faUtensils,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSidebar } from "../../HOCs/SidebarProvider";
+// import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
-  const { sectionsVisible, toggleSection } = useSidebar();
+  // const { sectionsVisible, toggleSection } = useSidebar();
   const userId = useSelector((state: RootState) => state.user.userId);
   const userAddons = useSelector((state: RootState) => state.user.addons);
   const navigate = useNavigate();
@@ -66,73 +64,26 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <p id="link">Home</p>
         </div>
         <div
-          className="vendor-sidebar__section"
-          onClick={() => toggleSection("menu")}
+          className={`vendor-sidebar__link  ${
+            location.pathname === "/app/business/menu" ? "vendor-active" : ""
+          }`}
+          onClick={() => navigate("/app/business/menu")}
         >
-          <h2>
-            <div>
-              <FontAwesomeIcon
-                icon={faUtensils}
-                className="vendor-sidebar__icon"
-              />
-              Menu
-            </div>
-            {sectionsVisible["menu"] ? (
-              <FontAwesomeIcon
-                icon={faChevronUp}
-                className="vendor-sidebar__icon"
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faChevronDown}
-                className="vendor-sidebar__icon"
-              />
-            )}
-          </h2>
+          <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
+          <p id="link">Menu</p>
         </div>
-        {sectionsVisible["menu"] && (
-          <>
-            <div
-              className={`vendor-sidebar__link vendor-admin__link  ${
-                location.pathname === "/app/business/menu"
-                  ? "vendor-active"
-                  : ""
-              }`}
-              onClick={() => navigate("/app/business/menu")}
-            >
-              <FontAwesomeIcon
-                icon={faUtensilSpoon}
-                className="vendor-sidebar__icon"
-              />
-              <p id="link">Catalog</p>
-            </div>
-            <div
-              className={`vendor-sidebar__link vendor-admin__link  ${
-                location.pathname === "/app/business/design"
-                  ? "vendor-active"
-                  : ""
-              }`}
-              onClick={() => navigate("/app/business/design")}
-            >
-              <FontAwesomeIcon
-                icon={faMagicWandSparkles}
-                className="vendor-sidebar__icon"
-              />
-              <p id="link">Customize</p>
-            </div>
-            <div
-              className={`vendor-sidebar__link vendor-admin__link  ${
-                location.pathname === "/app/business/preview"
-                  ? "vendor-active"
-                  : ""
-              }`}
-              onClick={() => navigate("/app/business/preview")}
-            >
-              <FontAwesomeIcon icon={faEye} className="vendor-sidebar__icon" />
-              <p id="link">Preview</p>
-            </div>
-          </>
-        )}
+        <div
+          className={`vendor-sidebar__link  ${
+            location.pathname === "/app/business/design" ? "vendor-active" : ""
+          }`}
+          onClick={() => navigate("/app/business/design")}
+        >
+          <FontAwesomeIcon
+            icon={faMagicWandSparkles}
+            className="vendor-sidebar__icon"
+          />
+          <p id="link">Customize</p>
+        </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/qr-codes"

@@ -103,7 +103,7 @@ const Vendor: React.FC<{
       )}
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
-        <div className="InnerContainer">{props.children}</div>
+        <div className="InnerContainer-vendor">{props.children}</div>
         <SideBar sidebarOpen={sidebarOpen} closeSidebar={closeSidebar} />
       </div>
     </SidebarProvider>

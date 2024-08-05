@@ -1,7 +1,7 @@
 .InnerContainer {
   grid-area: main;
   overflow-y: auto;
-  background: #f0f2f5;
+  background: $admin-bg;
   padding: 10px 30px 30px 30px;
 }
 
@@ -24,7 +24,6 @@
       "main";
   }
 }
-
 
 .InsuficientPackage {
   display: flex;
