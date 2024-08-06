@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import MenuItem from "./MenuItem";
-import CreateCategoryModal from "./CreateCategoryModal";
+import MenuItem from "./Components/MenuItem";
+import CreateCategoryModal from "./Components/CreateCategoryModal";
 import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
-import CreateParentCategoryModal from "./CreateParentCategoryModal";
+import CreateParentCategoryModal from "./Components/CreateParentCategoryModal";
 
 const Menu: React.FC<{}> = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -131,8 +131,16 @@ const Menu: React.FC<{}> = () => {
     return items.map((item: any) => {
       if (item.type === "banner") {
         return (
-          <div key={item._id} className="banner-section">
-            <p>{item?.details?.banner?.title}</p>
+          <div key={item._id} className="banner-section-vendor">
+            <div>
+              <p>{item?.details?.banner?.title}</p>
+
+              <div>
+                <button onClick={() => setCreateCategoryModalOpen(true)}>
+                  Delete
+                </button>
+              </div>
+            </div>
             <img
               style={{ width: "50%", height: "50%", objectFit: "cover" }}
               src={item?.details?.banner?.bannerImage}
@@ -160,25 +168,32 @@ const Menu: React.FC<{}> = () => {
 
   return (
     <div className="menu-container-vendor">
-      <h1>Menu</h1>
-      <div className="category-controls">
-        <button onClick={() => setCreateParentCategoryModalOpen(true)}>
-          Create Group
-        </button>
-        <button
-          onClick={() => {
-            setCreateCategoryModalOpen(true);
-          }}
-        >
-          Create Category
-        </button>
-        <button
-          onClick={() => {
-            navigate("/app/business/create-banner");
-          }}
-        >
-          Create Banner
-        </button>
+      <div className="menu-header">
+        <h1>Menu</h1>
+        <div className="menu-buttons">
+          <button
+            onClick={() => setCreateParentCategoryModalOpen(true)}
+            className="menu-button"
+          >
+            Create Group
+          </button>
+          <button
+            onClick={() => {
+              setCreateCategoryModalOpen(true);
+            }}
+            className="menu-button"
+          >
+            Create Category
+          </button>
+          <button
+            onClick={() => {
+              navigate("/app/business/create-banner");
+            }}
+            className="menu-button"
+          >
+            Create Banner
+          </button>
+        </div>
       </div>
       <div className="menu-items">{renderSections(items)}</div>
       <CreateCategoryModal

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addBanner } from "../../../redux/reducers/menuSlice";
-import { AppDispatch, RootState } from "../../../redux/store"; // Adjust the import according to your store setup
+import { addBanner } from "../../../../redux/reducers/menuSlice";
+import { AppDispatch, RootState } from "../../../../redux/store"; // Adjust the import according to your store setup
+import Dropzone from "../../../../components/Dropzone";
 
 const CreateBanner = (): JSX.Element => {
   const dispatch = useDispatch<AppDispatch>();
@@ -12,19 +13,19 @@ const CreateBanner = (): JSX.Element => {
     image: null as File | null,
   });
 
+  const handleFileSelected = (file: File) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      image: file,
+    }));
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files) {
-      setFormData({
-        ...formData,
-        image: files[0],
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -59,17 +60,8 @@ const CreateBanner = (): JSX.Element => {
             />
           </label>
         </div>
-        <div>
-          <label>
-            Image:
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleChange}
-            />
-          </label>
-        </div>
+        <Dropzone onFileSelected={handleFileSelected} />
+        {formData.image && <p>Selected file: {formData.image.name}</p>}
         <button type="submit">Create Banner</button>
       </form>
     </div>

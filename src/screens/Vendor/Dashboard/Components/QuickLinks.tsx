@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBookOpen,
   faCog,
   faCreditCard,
   faFolder,
@@ -7,7 +8,6 @@ import {
   faPhoneVolume,
   faPlus,
   faQrcode,
-  faUtensils,
 } from "@fortawesome/free-solid-svg-icons"; // Example icon
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 function QuickLinks() {
   return (
     <div className="quick-links">
-      <QuickLink icon={faUtensils} title="Menu" to="/app/business/menu" />
+      <QuickLink icon={faBookOpen} title="Menu" to="/app/business/menu" />
       <QuickLink icon={faFolder} title="My Menus" to="/app/business/menus" />
       {/* <QuickLink icon={faChartPie} title="Reports" to="/app/business/reports" /> */}
       <QuickLink
@@ -30,7 +30,7 @@ function QuickLinks() {
       />
       <QuickLink
         icon={faMagicWandSparkles}
-        title="Design"
+        title="Appearance"
         to="/app/business/design"
       />
       <QuickLink

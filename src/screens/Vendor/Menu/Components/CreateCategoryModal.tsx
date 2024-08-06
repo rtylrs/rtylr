@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "react-modal";
-import { addCategory, editCategory } from "../../../redux/reducers/menuSlice";
-import { AppDispatch, RootState } from "../../../redux/store";
+import {
+  addCategory,
+  editCategory,
+} from "../../../../redux/reducers/menuSlice";
+import { AppDispatch, RootState } from "../../../../redux/store";
 
 interface CreateCategoryModalProps {
   isOpen: boolean;

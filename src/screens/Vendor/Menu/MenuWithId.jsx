@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import MenuItem from "./MenuItem";
+import MenuItem from "./Components/MenuItem";
 import useAsync from "../../../hooks/useAsync";
 import menuApi from "../../../api/menu";
 import { useParams } from "react-router-dom";
@@ -20,11 +20,11 @@ function MenuWithId() {
       setStatus("failed");
     },
     callOnMount: false,
-});
+  });
 
   useEffect(() => {
     setStatus("loading");
-    getMenu.main({ id }); // Replace with actual restaurant ID
+    getMenu.main({ id });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

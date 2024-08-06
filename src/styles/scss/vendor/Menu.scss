@@ -1,8 +1,69 @@
 .menu-container-vendor {
   padding: 20px;
 
+  .menu-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    padding-bottom: 10px;
+    border-bottom: #959698 0.1px solid;
+
+    h1 {
+      font-size: 24px;
+      margin: 0;
+      color: $primary-color;
+    }
+
+    .menu-buttons {
+      display: flex;
+      gap: 8px;
+
+      .menu-button {
+        border: 1px solid $secondary-color;
+        border-radius: 3px;
+        color: $secondary-color;
+        padding: 4px 12px;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+
+        &:hover {
+          background-color: $secondary-color;
+          color: #ffffff;
+        }
+
+        svg {
+          margin-left: 8px;
+          color: inherit;
+        }
+
+        &.primary {
+          background-color: $secondary-color;
+          color: #ffffff;
+
+          &:hover {
+            background-color: darken($secondary-color, 10%);
+          }
+        }
+      }
+    }
+  }
+
+  .category-section {
+    background-color: #f9f9f9;
+    margin-top: 10px;
+    padding: 10px;
+  }
+
   .category-header {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
@@ -11,25 +72,85 @@
   .category-items {
     padding: 10px;
     margin-bottom: 20px;
-    border: 1px solid #ccc;
-    background-color: $light-color;
     border-radius: 3px;
   }
 
   .menu-item {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    position: relative;
+    background-color: $active-color;
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    &:last-child {
-      border-bottom: none;
-    }
-  }
+    border: 0.1px solid #dbd8d8;
 
-  .menu-item img {
-    border-radius: 50%;
-    margin-right: 10px;
+    .menu-item-image {
+      width: 50px;
+      height: 50px;
+      margin-right: 1rem;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .item-details {
+      flex-grow: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      p {
+        margin: 0.2rem 0;
+        font-size: 0.875rem;
+      }
+    }
+
+    .item-controls {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .edit-button,
+      .menu-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 0.5rem;
+        font-size: 1rem;
+        color: $secondary-color;
+        border: 1px solid $secondary-color;
+
+        &:hover {
+          background-color: #5a6268;
+        }
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 0.5rem;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem 1rem;
+          text-align: left;
+          width: 100%;
+          font-size: 0.875rem;
+
+          &:hover {
+            background: #f5f5f5;
+          }
+        }
+      }
+    }
   }
 
   .item-details {
@@ -69,6 +190,7 @@
     }
   }
 }
+
 .category-modal {
   background: #fff;
   padding: 20px;
@@ -158,4 +280,31 @@
   padding: 20px;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.banner-section-vendor {
+  background-color: $active-color;
+  padding: 20px;
+  margin-top: 10px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  img {
+    align-self: center;
+
+    width: 100%;
+    max-height: 240px;
+    max-width: 450px;
+    object-fit: cover;
+  }
 }

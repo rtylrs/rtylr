@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addMenuItem } from "../../../redux/reducers/menuSlice";
+import { addMenuItem } from "../../../../redux/reducers/menuSlice";
 
 function CreateItem() {
   const navigate = useNavigate();
