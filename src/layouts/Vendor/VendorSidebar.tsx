@@ -18,14 +18,19 @@ import {
   faFolder,
   faChartLine,
   faGlobe,
-  faUtensils,
+  // faUtensils,
+  faBookOpen,
+  faDisplay,
+  faFile,
+  faCircleInfo,
+  faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
-// import { useSidebar } from "../../HOCs/SidebarProvider";
+import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
 const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
-  // const { sectionsVisible, toggleSection } = useSidebar();
+  const { sectionsVisible, toggleSection } = useSidebar();
   const userId = useSelector((state: RootState) => state.user.userId);
   const userAddons = useSelector((state: RootState) => state.user.addons);
   const navigate = useNavigate();
@@ -69,21 +74,137 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/menu")}
         >
-          <FontAwesomeIcon icon={faUtensils} className="vendor-sidebar__icon" />
+          <FontAwesomeIcon icon={faBookOpen} className="vendor-sidebar__icon" />
           <p id="link">Menu</p>
         </div>
-        <div
-          className={`vendor-sidebar__link  ${
-            location.pathname === "/app/business/design" ? "vendor-active" : ""
-          }`}
-          onClick={() => navigate("/app/business/design")}
-        >
-          <FontAwesomeIcon
-            icon={faMagicWandSparkles}
-            className="vendor-sidebar__icon"
-          />
-          <p id="link">Customize</p>
+
+        {/* Appearance Section */}
+        <div className="vendor-sidebar__section">
+          <h2 onClick={() => toggleSection("appearance")}>
+            <div>
+              <FontAwesomeIcon
+                icon={faDisplay}
+                className="vendor-sidebar__icon"
+              />
+              Site Settings
+            </div>
+            {/* {sectionsVisible["appearance"] ? (
+              <FontAwesomeIcon
+                icon={faChevronUp}
+                className="vendor-sidebar__icon"
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faChevronDown}
+                className="vendor-sidebar__icon"
+              />
+            )} */}
+          </h2>
+          {sectionsVisible["appearance"] && (
+            <>
+              <div
+                className={`vendor-sidebar__link admin__link ${
+                  location.pathname === "/manage/design" ? "vendor-active" : ""
+                }`}
+                onClick={() => navigate("/manage/design")}
+              >
+                <FontAwesomeIcon
+                  icon={faUserPen}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Information</p>
+              </div>
+
+              <div
+                className={`vendor-sidebar__link admin__link ${
+                  location.pathname === "/app/business/design"
+                    ? "vendor-active"
+                    : ""
+                }`}
+                onClick={() => navigate("/app/business/design")}
+              >
+                <FontAwesomeIcon
+                  icon={faMagicWandSparkles}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Appearance</p>
+              </div>
+
+              {userAddons && (userAddons?.landing || userAddons?.about) && (
+                <div
+                  className="vendor-sidebar__section"
+                  style={{
+                    marginLeft: "20px",
+                  }}
+                >
+                  <h2 onClick={() => toggleSection("pages")}>
+                    <div>
+                      <FontAwesomeIcon
+                        icon={faFile}
+                        className="vendor-sidebar__icon"
+                      />
+                      Pages
+                    </div>
+                  </h2>
+                  {sectionsVisible["pages"] && (
+                    <>
+                      {userAddons && userAddons?.landing && (
+                        <div
+                          className={`vendor-sidebar__link admin__link ${
+                            location.pathname === "/manage/design"
+                              ? "vendor-active"
+                              : ""
+                          }`}
+                          onClick={() => navigate("/manage/design")}
+                        >
+                          <FontAwesomeIcon
+                            icon={faGlobe}
+                            className="vendor-sidebar__icon"
+                          />
+                          <p id="link">Home page</p>
+                        </div>
+                      )}
+                      {userAddons && userAddons?.about && (
+                        <div
+                          className={`vendor-sidebar__link admin__link ${
+                            location.pathname === "/manage/design"
+                              ? "vendor-active"
+                              : ""
+                          }`}
+                          onClick={() => navigate("/manage/design")}
+                        >
+                          <FontAwesomeIcon
+                            icon={faCircleInfo}
+                            className="vendor-sidebar__icon"
+                          />
+                          <p id="link">About page</p>
+                        </div>
+                      )}
+                      {userAddons && userAddons?.contact && (
+                        <div
+                          className={`vendor-sidebar__link admin__link ${
+                            location.pathname === "/manage/design"
+                              ? "vendor-active"
+                              : ""
+                          }`}
+                          onClick={() => navigate("/manage/design")}
+                        >
+                          <FontAwesomeIcon
+                            icon={faEnvelope}
+                            className="vendor-sidebar__icon"
+                          />
+                          <p id="link">Contact page</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
+        {/* Appearance Section End */}
+
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/qr-codes"
@@ -105,17 +226,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           <p id="link">My Menus</p>
         </div>
 
-        {userAddons && userAddons?.landing && (
-          <div
-            className={`vendor-sidebar__link ${
-              location.pathname === "/manage/design" ? "vendor-active" : ""
-            }`}
-            onClick={() => navigate("/manage/design")}
-          >
-            <FontAwesomeIcon icon={faGlobe} className="vendor-sidebar__icon" />
-            <p id="link">Landing Page</p>
-          </div>
-        )}
         {userAddons && userAddons?.feedback && (
           <div
             className={`vendor-sidebar__link ${
@@ -127,15 +237,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             <p id="link">Feedback</p>
           </div>
         )}
-        <div
-          className={`vendor-sidebar__link ${
-            location.pathname === "/manage/design" ? "vendor-active" : ""
-          }`}
-          onClick={() => navigate("/manage/design")}
-        >
-          <FontAwesomeIcon icon={faUserPen} className="vendor-sidebar__icon" />
-          <p id="link">Information</p>
-        </div>
+
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/manage/design" ? "vendor-active" : ""

@@ -73,7 +73,8 @@ const Vendor: React.FC<{
     "orders",
     "petitions",
     "donations",
-    "menu",
+    "appearance",
+    "pages",
   ];
 
   return (
