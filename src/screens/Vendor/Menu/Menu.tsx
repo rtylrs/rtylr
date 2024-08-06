@@ -6,6 +6,7 @@ import CreateCategoryModal from "./Components/CreateCategoryModal";
 import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
 import CreateParentCategoryModal from "./Components/CreateParentCategoryModal";
+import { CircularProgress } from "@mui/material";
 
 const Menu: React.FC<{}> = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -163,7 +164,18 @@ const Menu: React.FC<{}> = () => {
   };
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress size={60} color="primary" />
+      </div>
+    );
   }
 
   return (
