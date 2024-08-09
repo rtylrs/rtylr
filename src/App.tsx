@@ -1,3 +1,4 @@
+import React from "react";
 //Package imports
 import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
@@ -112,7 +113,7 @@ const App = (): JSX.Element => {
   }, []);
 
   return (
-    <>
+    <React.Fragment>
       {config && (
         <HelmetContainer
           title={"Vbitez - Contactless QR Menu"}
@@ -204,7 +205,7 @@ const App = (): JSX.Element => {
 
         <Route path="*" element={<NoMatch />} />
       </Routes>
-    </>
+    </React.Fragment>
   );
 };
 
