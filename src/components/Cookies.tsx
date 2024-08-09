@@ -1,6 +1,6 @@
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
-import React, { useState, useEffect } from "react";
 import VbitezButton from "./Buttons/Buttons";
 
 const Cookies: React.FC = () => {
@@ -27,7 +27,7 @@ const Cookies: React.FC = () => {
   }
 
   return (
-    <>
+    <React.Fragment>
       <div className="cookies-popup">
         <div className="cookies-content">
           <div className="cookies-header">
@@ -60,7 +60,7 @@ const Cookies: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 };
 
