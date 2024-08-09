@@ -5,7 +5,7 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
-  text-rendering: optimizeLegibility; 
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -27,7 +27,8 @@ a {
   padding: 0;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background-color: #ffffff;
@@ -76,7 +77,7 @@ html, body {
 .whatsappBtn {
   position: fixed;
   bottom: 15px;
-  right:65px;
+  right: 65px;
   z-index: 100;
   border: none;
   border-radius: 5px;
@@ -104,46 +105,45 @@ html, body {
   bottom: 0;
 }
 
-
-//maintanance content 
+//maintanance content
 .maintanance {
-    height: 100%;
-    width: 100%;
-    position: fixed;
-    display: flex;
-    text-align: center;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: $light-color;
-    z-index: 1000;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: $light-color;
+  z-index: 1000;
 
-    h1{
-      font-size: 3em;
-      font-weight: 100;
-      color: $primary-color;
-      margin: 0;
-    }
-    h2{
-      font-size: 1.5em;
-      font-weight: 100;
-      margin-bottom: 0;
-      font-weight: 200;
-      color: $primary-color;
-    }
-    h3{
-      font-size: 1.5em;
-      font-weight: 100;
-      margin-top: 0;
-      font-weight: 200;
-      color: $primary-color;
-    }
-    a{
-      font-size: 1.5em;
-      font-weight: 300;
-      color: $primary-color;
-      text-decoration: none;
-    }
+  h1 {
+    font-size: 3em;
+    font-weight: 100;
+    color: $primary-color;
+    margin: 0;
+  }
+  h2 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-bottom: 0;
+    font-weight: 200;
+    color: $primary-color;
+  }
+  h3 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-top: 0;
+    font-weight: 200;
+    color: $primary-color;
+  }
+  a {
+    font-size: 1.5em;
+    font-weight: 300;
+    color: $primary-color;
+    text-decoration: none;
+  }
 }
 
 .cookies-popup {
@@ -190,7 +190,7 @@ html, body {
   }
 }
 
-//Ticker 
+//Ticker
 .ticker_wrapper {
   overflow: hidden;
   display: flex;
@@ -224,7 +224,7 @@ html, body {
 
 @keyframes tickerAnimation {
   0% {
-    transform: translateX(10%); 
+    transform: translateX(10%);
   }
   100% {
     transform: translateX(-90%);
