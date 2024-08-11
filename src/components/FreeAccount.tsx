@@ -4,7 +4,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const FreeAccount: React.FC<{}> = () => {
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = React.useState<boolean>(true);
   const navigate = useNavigate();
 
   return (
@@ -31,7 +31,7 @@ const FreeAccount: React.FC<{}> = () => {
           className="upgrade-button"
           onClick={() => navigate("/app/business/billing")}
         >
-          Upgrade Now
+          Select a Plan
         </button>
       </div>
     </div>

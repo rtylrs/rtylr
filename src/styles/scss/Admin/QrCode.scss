@@ -10,17 +10,4 @@
     color: $primary-color;
     margin-bottom: 20px;
   }
-
-  .qr-code-container {
-    width: auto;
-    height: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px;
-
-    canvas {
-      border: 1px solid lightekn($primary-color, 20%);
-    }
-  }
 }

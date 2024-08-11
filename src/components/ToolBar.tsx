@@ -167,6 +167,7 @@ const ToolBar: React.FC = () => {
           onClick={() => {
             toolbarNavigate("/");
           }}
+          title="Home"
         >
           <FontAwesomeIcon icon={faHome} />
         </div>

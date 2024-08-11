@@ -4,27 +4,17 @@ import html2canvas from "html2canvas";
 import { saveAs } from "file-saver";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
-
-interface QrOptions {
-  text: string;
-  size: number;
-  fgColor: string;
-  bgColor: string;
-  logoImage: string;
-  logoWidth: number;
-  logoHeight: number;
-  eyeRadius: number;
-  qrStyle: "squares" | "dots" | "fluid" | undefined;
-}
+import { QrCodeTemplate, QrCodeTemplates, QrOptions } from "./templates";
 
 function QrCode() {
   const userId = useSelector((state: RootState) => state.user.userId);
+  const user = useSelector((state: RootState) => state.user.user);
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    text: "https://vbitez.voxire.com/restaurant/" + userId,
+    url: "https://vbitez.voxire.com/restaurant/" + userId,
     size: 150,
     fgColor: "#000000",
     bgColor: "#ffffff",
-    logoImage: "",
+    logoImage: false,
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
@@ -56,7 +46,7 @@ function QrCode() {
   useEffect(() => {
     if (qrOptions.logoImage) {
       const img = new Image();
-      img.src = qrOptions.logoImage;
+      img.src = user.logo;
       img.onload = () => setIsLogoLoaded(true);
       img.onerror = () => {
         alert("Failed to load logo image.");
@@ -70,100 +60,204 @@ function QrCode() {
   return (
     <div className="create-qr-code">
       <h1>QR Code Generator</h1>
-      <p>{qrOptions.text}</p>
+      <div className="qr-code-grid">
+        <div className="edit-section">
+          <div className="qr-template-selection">
+            {QrCodeTemplates.map((template) => (
+              <div
+                className={`template ${
+                  template === qrOptions ? "selected" : ""
+                }`}
+              >
+                <QrCodeTemplate
+                  key={template.name}
+                  {...template}
+                  url={qrOptions.url}
+                  setQrOptions={() => {
+                    setQrOptions({
+                      ...qrOptions,
+                      ...template,
+                    });
 
-      <div className="qr-template-selection">
-        {/* Template options should go here */}
-        <div className="template">Template 1</div>
-        <div className="template selected">Template 2</div>
-        {/* Add more templates as necessary */}
-      </div>
+                    console.log(user);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
 
-      <div className="background-color-selection">
-        <label>Background Color: </label>
-        <input
-          type="color"
-          name="bgColor"
-          value={qrOptions.bgColor}
-          onChange={handleInputChange}
-        />
-      </div>
+          <div className="background-color-selection">
+            <label>Background Color: </label>
+            <input
+              type="color"
+              name="backgroundColor"
+              value={qrOptions.backgroundColor}
+              onChange={handleInputChange}
+            />
+          </div>
 
-      <div className="text-color-selection">
-        <label>Text Color: </label>
-        <input
-          type="color"
-          name="fgColor"
-          value={qrOptions.fgColor}
-          onChange={handleInputChange}
-        />
-      </div>
+          <div className="background-color-selection">
+            <label>Qr Code Background Color: </label>
+            <input
+              type="color"
+              name="bgColor"
+              value={qrOptions.bgColor}
+              onChange={handleInputChange}
+            />
+          </div>
 
-      <div>
-        <label>Logo Width: </label>
-        <input
-          type="number"
-          name="logoWidth"
-          value={qrOptions.logoWidth}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div>
-        <label>Logo Height: </label>
-        <input
-          type="number"
-          name="logoHeight"
-          value={qrOptions.logoHeight}
-          onChange={handleInputChange}
-        />
-      </div>
+          <div className="text-color-selection">
+            <label>Color: </label>
+            <input
+              type="color"
+              name="fgColor"
+              value={qrOptions.fgColor}
+              onChange={handleInputChange}
+            />
+          </div>
 
-      <div>
-        <label>Eye Radius: </label>
-        <input
-          type="number"
-          name="eyeRadius"
-          value={qrOptions.eyeRadius}
-          onChange={handleInputChange}
-        />
+          <div className="text-color-selection">
+            <label>Text Color: </label>
+            <input
+              type="color"
+              name="textColor"
+              value={qrOptions.textColor}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>Logo Width: </label>
+            <input
+              type="number"
+              name="logoWidth"
+              value={qrOptions.logoWidth}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>Logo Height: </label>
+            <input
+              type="number"
+              name="logoHeight"
+              value={qrOptions.logoHeight}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>Eye Radius: </label>
+            <input
+              type="number"
+              name="eyeRadius"
+              value={qrOptions.eyeRadius}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="text-color-selection">
+            <label>Eye color: </label>
+            <input
+              type="color"
+              name="eyeColor"
+              value={qrOptions.eyeColor}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>QR Style: </label>
+            <select
+              name="qrStyle"
+              value={qrOptions.qrStyle}
+              onChange={handleInputChange}
+            >
+              <option value="squares">Squares</option>
+              <option value="dots">Dots</option>
+              <option value="fluid">Fluid</option>
+            </select>
+          </div>
+
+          <div>
+            <label>title: </label>
+            <input
+              type="text"
+              name="text"
+              value={qrOptions.text}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>Description: </label>
+            <input
+              type="text"
+              name="description"
+              value={qrOptions.description}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label>Display Logo: </label>
+            <input
+              type="checkbox"
+              name="logoImage"
+              value={qrOptions.logoImage}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
+        <div className="preview-section">
+          <div
+            ref={qrRef}
+            className="qr-code-container"
+            style={{
+              width: qrOptions.size + 200,
+              height: qrOptions.size + 200,
+              backgroundColor: qrOptions.backgroundColor || qrOptions.bgColor,
+            }}
+          >
+            {qrOptions.text && (
+              <p
+                style={{
+                  color: qrOptions.textColor || qrOptions.fgColor,
+                }}
+              >
+                <strong>{qrOptions.text}</strong>
+              </p>
+            )}
+            <QRCode
+              value={qrOptions.url}
+              size={qrOptions.size + 100}
+              fgColor={qrOptions.fgColor}
+              bgColor={qrOptions.bgColor}
+              logoImage={qrOptions.logoImage ? user?.logo : ""}
+              logoWidth={qrOptions.logoWidth}
+              logoHeight={qrOptions.logoHeight}
+              eyeRadius={qrOptions.eyeRadius}
+              qrStyle={qrOptions.qrStyle}
+              eyeColor={qrOptions.eyeColor}
+              logoPadding={5}
+              removeQrCodeBehindLogo
+            />
+            {qrOptions.description && (
+              <p
+                style={{
+                  color: qrOptions.textColor || qrOptions.fgColor,
+                }}
+              >
+                {qrOptions.description}
+              </p>
+            )}
+          </div>
+          <button className="download-button" onClick={handleDownload}>
+            Download QR Code
+          </button>
+        </div>
       </div>
-      <div>
-        <label>QR Style: </label>
-        <select
-          name="qrStyle"
-          value={qrOptions.qrStyle}
-          onChange={handleInputChange}
-        >
-          <option value="squares">Squares</option>
-          <option value="dots">Dots</option>
-          <option value="fluid">fluid</option>
-        </select>
-      </div>
-      <div
-        ref={qrRef}
-        className="qr-code-container"
-        style={{
-          width: qrOptions.size,
-          height: qrOptions.size,
-        }}
-      >
-        <QRCode
-          value={qrOptions.text}
-          size={qrOptions.size}
-          fgColor={qrOptions.fgColor}
-          bgColor={qrOptions.bgColor}
-          logoImage={qrOptions.logoImage}
-          logoWidth={qrOptions.logoWidth}
-          logoHeight={qrOptions.logoHeight}
-          eyeRadius={qrOptions.eyeRadius}
-          qrStyle={qrOptions.qrStyle}
-          logoPadding={5}
-          removeQrCodeBehindLogo
-        />
-      </div>
-      <button className="download-button" onClick={handleDownload}>
-        Download QR Code
-      </button>
     </div>
   );
 }
