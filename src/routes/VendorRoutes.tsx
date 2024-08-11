@@ -21,9 +21,7 @@ const Addons = React.lazy(() => import("../screens/Vendor/Addons.tsx"));
 const QrCodes = React.lazy(
   () => import("../screens/Vendor/QrCode/QrCodes.tsx")
 );
-const CreateQrCode = React.lazy(
-  () => import("../screens/Vendor/QrCode/CreateQrCode.tsx")
-);
+const QrCode = React.lazy(() => import("../screens/Vendor/QrCode/QrCode.tsx"));
 const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
 const Design = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
 const General = React.lazy(() => import("../screens/Vendor/Settings/General"));
@@ -105,7 +103,7 @@ const VendorRoutes = [
     path: "/app/business/qr-codes/create",
     element: (
       <Vendor>
-        <CreateQrCode />
+        <QrCode />
       </Vendor>
     ),
   },
