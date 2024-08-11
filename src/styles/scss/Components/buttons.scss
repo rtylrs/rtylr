@@ -1,11 +1,10 @@
 .vbitez-button-default {
   color: #fff;
-  padding: 12px 30px;  
+  padding: 12px 30px;
   border: 2px solid $primary-color;
   font-size: 17px;
   border-radius: 3px;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
   font-weight: bold;
   font-family: $secondary-font;
   background-color: $primary-color;
@@ -15,9 +14,12 @@
   align-items: center;
   justify-content: center;
 
+  transition: background-color 0.3s, box-shadow 0.3s;
+
   &:hover {
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      background-color: $secondary-color;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: $secondary-color;
+    transition: background-color 0.3s, box-shadow 0.3s;
   }
 }
 
@@ -26,7 +28,6 @@
   font-size: 17px;
   border-radius: 3px;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
   font-weight: bold;
   border: 2px solid $primary-color;
   font-family: $secondary-font;
@@ -37,9 +38,11 @@
   align-items: center;
   justify-content: center;
 
+  transition: background-color 0.3s, box-shadow 0.3s;
+
   &:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: $secondary-color;
-    color: white
-}
+    color: white;
+  }
 }

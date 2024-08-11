@@ -117,6 +117,21 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
 
               <div
                 className={`vendor-sidebar__link admin__link ${
+                  location.pathname === "/app/business/qr-codes"
+                    ? "vendor-active"
+                    : ""
+                }`}
+                onClick={() => navigate("/app/business/qr-codes")}
+              >
+                <FontAwesomeIcon
+                  icon={faQrcode}
+                  className="vendor-sidebar__icon"
+                />
+                <p id="link">Qr Codes</p>
+              </div>
+
+              <div
+                className={`vendor-sidebar__link admin__link ${
                   location.pathname === "/app/business/design"
                     ? "vendor-active"
                     : ""
@@ -205,17 +220,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         </div>
         {/* Appearance Section End */}
 
-        <div
-          className={`vendor-sidebar__link ${
-            location.pathname === "/app/business/qr-codes"
-              ? "vendor-active"
-              : ""
-          }`}
-          onClick={() => navigate("/app/business/qr-codes")}
-        >
-          <FontAwesomeIcon icon={faQrcode} className="vendor-sidebar__icon" />
-          <p id="link">Qr Codes</p>
-        </div>
         <div
           className={`vendor-sidebar__link ${
             location.pathname === "/app/business/menus" ? "vendor-active" : ""

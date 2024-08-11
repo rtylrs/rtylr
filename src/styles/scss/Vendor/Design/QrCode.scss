@@ -3,39 +3,49 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background-color: #f9f9f9;
 
   h1 {
     font-size: 24px;
     margin-bottom: 20px;
   }
 
-  p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 20px;
+  .qr-code-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
-  label {
-    font-weight: bold;
-    margin-right: 10px;
-  }
+  .edit-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: #f9f9f9;
+    padding: 10px;
 
-  input,
-  select {
-    margin-bottom: 10px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
+    p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
 
-  .qr-code-container {
-    border: 2px solid #f0f0f0;
-    border-radius: 10px;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    input,
+    select {
+      margin-bottom: 10px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
   }
 
   .qr-template-selection {
@@ -57,7 +67,6 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
       &.selected {
-        border-color: #7c5eff;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
@@ -78,17 +87,36 @@
     }
   }
 
-  .download-button {
-    background-color: #7c5eff;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  .preview-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    &:hover {
-      background-color: #6b4cd1;
+    .qr-code-container {
+      border-radius: 10px;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .download-button {
+      background-color: #7c5eff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #6b4cd1;
+      }
     }
   }
 }
