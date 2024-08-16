@@ -66,20 +66,20 @@ function QrCode() {
             {QrCodeTemplates.map((template) => (
               <div
                 className={`template ${
-                  template === qrOptions ? "selected" : ""
+                  template.name === qrOptions.name ? "selected" : ""
                 }`}
               >
                 <QrCodeTemplate
                   key={template.name}
                   {...template}
                   url={qrOptions.url}
+                  logo={user.logo}
                   setQrOptions={() => {
                     setQrOptions({
                       ...qrOptions,
                       ...template,
+                      size: 150,
                     });
-
-                    console.log(user);
                   }}
                 />
               </div>
@@ -204,7 +204,7 @@ function QrCode() {
             <input
               type="checkbox"
               name="logoImage"
-              value={qrOptions.logoImage}
+              checked={qrOptions.logoImage}
               onChange={handleInputChange}
             />
           </div>
