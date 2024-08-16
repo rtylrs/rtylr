@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 
 export interface QrOptions {
@@ -23,7 +24,7 @@ export const QrCodeTemplates: QrOptions[] = [
     name: "template1",
     text: "",
     description: "",
-    size: 150,
+    size: 50,
     fgColor: "#000000",
     bgColor: "#ffffff",
     logoWidth: 50,
@@ -31,83 +32,91 @@ export const QrCodeTemplates: QrOptions[] = [
     eyeRadius: 10,
     qrStyle: "squares",
     backgroundColor: "#ffffff",
+    logoImage: false,
   },
   {
     name: "template2",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 50,
     fgColor: "#000000",
     bgColor: "#ffffff",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: false,
   },
   {
     name: "template3",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 50,
     fgColor: "#000000",
     bgColor: "#ffeb3b",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: false,
   },
   {
     name: "template4",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 50,
     fgColor: "#000000",
     bgColor: "#ffeb3b",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: false,
   },
   {
     name: "template5",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 50,
     fgColor: "#000000",
     bgColor: "#ffeb3b",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: false,
   },
   {
     name: "template6",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 80,
     fgColor: "#000000",
     bgColor: "#ffeb3b",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: true,
   },
   {
     name: "template7",
     text: "Table",
     description: "Scan Me",
-    size: 150,
+    size: 80,
     fgColor: "#000000",
     bgColor: "#ffffff",
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
     qrStyle: "squares",
+    logoImage: true,
   },
 ];
 
 interface QrCodeTemplateProps extends QrOptions {
   setQrOptions: () => void;
+  logo: string;
 }
 
 export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
@@ -118,12 +127,12 @@ export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
   fgColor,
   bgColor,
   logoImage,
-  logoWidth,
-  logoHeight,
   eyeRadius,
+  size,
   qrStyle,
   backgroundColor,
   setQrOptions,
+  logo,
 }) => {
   return (
     <div key={name} className="qrOptions" onClick={() => setQrOptions()}>
@@ -139,14 +148,15 @@ export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
       >
         <QRCode
           value={url}
-          size={50}
+          size={size}
           fgColor={fgColor}
           bgColor={bgColor}
-          logoWidth={logoWidth}
-          logoHeight={logoHeight}
+          logoWidth={50}
+          logoHeight={30}
           eyeRadius={eyeRadius}
           qrStyle={qrStyle}
           logoPadding={5}
+          logoImage={logoImage ? logo : ""}
           removeQrCodeBehindLogo
         />
       </div>

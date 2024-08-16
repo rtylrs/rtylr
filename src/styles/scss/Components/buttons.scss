@@ -17,6 +17,7 @@
   transition: background-color 0.3s, box-shadow 0.3s;
 
   &:hover {
+    // filter: drop-shadow(0 0 1em $primary-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: $secondary-color;
     transition: background-color 0.3s, box-shadow 0.3s;
