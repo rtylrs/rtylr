@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import PropTypes from "prop-types";
 
-function RegisterUser() {
+const RegisterUser: React.FC<{}> = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -113,7 +113,7 @@ function RegisterUser() {
       </div>
     </div>
   );
-}
+};
 
 RegisterUser.propTypes = {
   open: PropTypes.bool.isRequired,
