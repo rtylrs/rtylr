@@ -1,6 +1,7 @@
 import React from "react";
 import Public from "../layouts/Public/public";
 import AnimatedRoutes from "../components/AnimatedRoutes";
+import { elements } from "chart.js";
 
 // Routes
 const Login = React.lazy(() => import("../screens/Auth/Login"));
@@ -9,6 +10,10 @@ const RegisterRest = React.lazy(() => import("../screens/Auth/RegisterRest"));
 const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
 const EmailVerification = React.lazy(
   () => import("../screens/Auth/EmailVerification")
+);
+// Questionnaire Route screens
+const Details = React.lazy(
+  () => import("../screens/Auth/Questionnaire/Details")
 );
 
 const AuthRoutes = [
@@ -58,6 +63,16 @@ const AuthRoutes = [
       <Public>
         <AnimatedRoutes>
           <EmailVerification />
+        </AnimatedRoutes>
+      </Public>
+    ),
+  },
+  {
+    path: "/auth/questionnaire/info",
+    elements: (
+      <Public>
+        <AnimatedRoutes>
+          <Details />
         </AnimatedRoutes>
       </Public>
     ),
