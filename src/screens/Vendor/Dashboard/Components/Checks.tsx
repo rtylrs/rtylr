@@ -8,7 +8,6 @@ import React from "react";
 const Checks: React.FC = () => {
   const [majorIssue, setMajorIssue] = React.useState<number>(0);
   const [warnings, setWarnings] = React.useState<number>(0);
-
   return (
     <div className="checks-container">
       <div className="check-item">
