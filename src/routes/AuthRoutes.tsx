@@ -1,7 +1,6 @@
 import React from "react";
 import Public from "../layouts/Public/public";
 import AnimatedRoutes from "../components/AnimatedRoutes";
-import { elements } from "chart.js";
 
 // Routes
 const Login = React.lazy(() => import("../screens/Auth/Login"));
