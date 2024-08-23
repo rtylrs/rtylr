@@ -68,7 +68,7 @@ const AuthRoutes = [
   },
   {
     path: "/auth/questionnaire/info",
-    elements: (
+    element: (
       <Public>
         <AnimatedRoutes>
           <Details />

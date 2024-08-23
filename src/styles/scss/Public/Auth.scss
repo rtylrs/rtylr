@@ -9,7 +9,7 @@
     align-items: center;
 
     img {
-      width:100%;  
+      width: 100%;
       height: 92vh;
       object-fit: cover;
     }
@@ -80,7 +80,7 @@
 
     .login-button {
       color: #fff;
-      padding: 12px 70px;  
+      padding: 12px 70px;
       border: 2px solid $primary-color;
       font-size: 17px;
       border-radius: 3px;
@@ -156,7 +156,7 @@
 @media (max-width: 768px) {
   .login-container {
     flex-direction: column;
-  
+
     .login-form {
       flex: 1;
       max-width: 100%;
@@ -175,10 +175,10 @@
     justify-content: center;
     align-items: center;
     background: #f0f0f0;
-    
+
     .register-image {
       width: 100%;
-      height:90vh;
+      height: 90vh;
       object-fit: cover;
       object-position: left center;
       filter: brightness(0.9);
@@ -236,7 +236,7 @@
 
       .register-button {
         color: #fff;
-        padding: 12px 70px;  
+        padding: 12px 70px;
         border: 2px solid $primary-color;
         font-size: 17px;
         border-radius: 3px;
@@ -245,7 +245,7 @@
         font-weight: bold;
         font-family: $secondary-font;
         background-color: $primary-color;
-  
+
         &:hover {
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           background-color: $secondary-color;
@@ -258,7 +258,8 @@
       text-align: center;
       color: #666;
 
-      .login-link, .forgot-link {
+      .login-link,
+      .forgot-link {
         cursor: pointer;
         color: $secondary-color;
         text-decoration: underline;
@@ -410,8 +411,6 @@
       }
     }
 
-
-
     .register-user-footer {
       margin-top: 20px;
       text-align: center;
@@ -433,7 +432,6 @@
     }
   }
 }
-
 
 .register-user-social-media {
   width: 100%;
@@ -463,4 +461,9 @@
       margin-right: 8px;
     }
   }
+}
+
+.questionaire-container {
+  display: flex;
+  height: 90vh;
 }
