@@ -62,7 +62,7 @@ const RegisterRestaurant: React.FC = () => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
       if (role === "business") {
-        navigate("/app/business");
+        navigate("/auth/questionnaire");
       } else {
         navigate("/");
       }
