@@ -3,9 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faChevronDown,
+  faRightFromBracket,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import VbitezButton from "../../components/Buttons/Buttons";
 import useColors from "../../hooks/useColors";
@@ -22,6 +23,7 @@ interface LinkWithColorProps
 
 const Header: React.FC<{}> = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const location = useLocation();
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
@@ -197,20 +199,35 @@ const Header: React.FC<{}> = () => {
           )}
         </button>
 
-        <button
-          className="login-button"
-          style={{
-            display: width < 968 ? "none" : user.token ? "none" : "flex",
-          }}
-          onClick={() => {
-            navigate("/auth/login");
-          }}
-        >
-          <p>Login</p>
-        </button>
+        {!location.pathname.includes("/auth/questionnaire") && (
+          <button
+            className="login-button"
+            style={{
+              display: width < 968 ? "none" : user.token ? "none" : "flex",
+            }}
+            onClick={() => {
+              navigate("/auth/login");
+            }}
+          >
+            <p>Login</p>
+          </button>
+        )}
 
         <VbitezButton onClick={handleClick} hidden={width < 968}>
-          {user.token ? "Dashboard" : "Register Now"}
+          {location.pathname.includes("/auth/questionnaire") ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} />
+              <p>Logout</p>
+            </div>
+          ) : (
+            <>{user.token ? "Dashboard" : "Register Now"}</>
+          )}
         </VbitezButton>
         <div className="lang-dropdown-container">
           <div className="selected-language" onClick={toggleDropdown}>

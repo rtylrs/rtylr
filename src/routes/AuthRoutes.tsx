@@ -14,6 +14,12 @@ const EmailVerification = React.lazy(
 const Details = React.lazy(
   () => import("../screens/Auth/Questionnaire/Details")
 );
+const QuestionsOne = React.lazy(
+  () => import("../screens/Auth/Questionnaire/QuestionsOne")
+);
+const QuestionsTwo = React.lazy(
+  () => import("../screens/Auth/Questionnaire/QuestionsTwo")
+);
 
 const AuthRoutes = [
   {
@@ -72,6 +78,26 @@ const AuthRoutes = [
       <Public>
         <AnimatedRoutes>
           <Details />
+        </AnimatedRoutes>
+      </Public>
+    ),
+  },
+  {
+    path: "/auth/questionnaire/info/question-1",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <QuestionsOne />
+        </AnimatedRoutes>
+      </Public>
+    ),
+  },
+  {
+    path: "/auth/questionnaire/info/question-2",
+    element: (
+      <Public>
+        <AnimatedRoutes>
+          <QuestionsTwo />
         </AnimatedRoutes>
       </Public>
     ),

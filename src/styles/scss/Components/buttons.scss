@@ -3,7 +3,7 @@
   padding: 12px 30px;
   border: 2px solid $primary-color;
   font-size: 17px;
-  border-radius: 3px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
   font-family: $secondary-font;
@@ -21,13 +21,14 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: $secondary-color;
     transition: background-color 0.3s, box-shadow 0.3s;
+    border-color: $secondary-color;
   }
 }
 
 .vbitez-button-secondary {
   padding: 15px 30px;
   font-size: 17px;
-  border-radius: 3px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
   border: 2px solid $primary-color;
