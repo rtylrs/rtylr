@@ -26,7 +26,7 @@ function MenuWithId() {
     setStatus("loading");
     getMenu.main({ id });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const renderCategorySection = (category) => (

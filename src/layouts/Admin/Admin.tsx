@@ -37,7 +37,7 @@ function Admin(props) {
       window.history.replaceState({}, "", url.toString());
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
   const initialSections: string[] = [

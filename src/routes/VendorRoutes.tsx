@@ -22,7 +22,7 @@ const QrCodes = React.lazy(
   () => import("../screens/Vendor/QrCode/QrCodes.tsx")
 );
 const QrCode = React.lazy(() => import("../screens/Vendor/QrCode/QrCode.tsx"));
-const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing"));
+const Billing = React.lazy(() => import("../screens/Vendor/Billing/Billing.tsx"));
 const Design = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
 const General = React.lazy(() => import("../screens/Vendor/Settings/General"));
 

@@ -11,7 +11,7 @@ const Navbar = ({ openSidebar }) => {
   const user = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   return (

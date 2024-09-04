@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { QRCode } from "react-qrcode-logo";
 
 export interface QrOptions {
@@ -122,8 +122,8 @@ interface QrCodeTemplateProps extends QrOptions {
 export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
   name,
   url,
-  text,
-  description,
+  // text,
+  // description,
   fgColor,
   bgColor,
   logoImage,

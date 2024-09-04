@@ -25,7 +25,7 @@ const News: React.FC<{}> = () => {
       });
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [newsId]);
 
   return (
