@@ -61,7 +61,7 @@ const Vendor: React.FC<{
 
     updateUrlParams();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
   const initialSections: string[] = [

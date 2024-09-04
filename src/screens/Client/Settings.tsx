@@ -28,8 +28,6 @@ const SettingsPage = () => {
     //   language: userSettings.language,
     //   notifications: userSettings.notifications,
     // });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectLanguage = (language) => {

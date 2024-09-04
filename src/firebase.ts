@@ -17,7 +17,7 @@ let app;
 if (firebase.apps.length === 0) {
   app = firebase.initializeApp(firebaseConfig);
 } else {
-  // eslint-disable-next-line no-unused-vars
+   
   app = firebase.app();
 }
 

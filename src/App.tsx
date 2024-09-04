@@ -25,7 +25,6 @@ import AdminRoutes from "./routes/AdminRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 import VendorRoutes from "./routes/VendorRoutes";
 
-// eslint-disable-next-line
 import i18next from "./services/i18next";
 
 //Screens
@@ -108,8 +107,6 @@ const App = (): JSX.Element => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
     }
-
-    //eslint-disable-next-line
   }, []);
 
   return (

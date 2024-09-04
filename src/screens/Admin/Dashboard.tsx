@@ -14,7 +14,6 @@ function Dashboard() {
   const [allEvents, setAllEvents] = React.useState([]);
   const [users, setUsers] = React.useState(0);
   const [bussiness, setBussiness] = React.useState(0);
-  const [orders, setOrders] = React.useState(0);
   const [reviews, setReviews] = React.useState(0);
   const [events, setEvents] = React.useState(0);
   const [clicks, setClicks] = React.useState(0);

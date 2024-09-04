@@ -20,11 +20,15 @@ const Menus = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    dispatch(fetchAllMenus({ restaurantId: userId }));
+    dispatch(
+      fetchAllMenus({ restaurantId: userId } as {
+        restaurantId: string;
+      })
+    );
   }, [dispatch, userId]);
 
   const handleSetActiveMenu = (menuId) => {
-    dispatch(setActiveMenuId({ restaurantId: userId, menuId }))
+    dispatch(setActiveMenuId({ restaurantId: userId, menuId } as any))
       .then(() => alert("Active menu updated successfully"))
       .catch((err) => console.error("Error setting active menu:", err));
   };
@@ -35,7 +39,9 @@ const Menus = () => {
 
   const handleCreateNewMenu = () => {
     if (newMenuName.trim()) {
-      dispatch(createNewMenu({ restaurantId: userId, menuName: newMenuName }))
+      dispatch(
+        createNewMenu({ restaurantId: userId, menuName: newMenuName } as any)
+      )
         .then(() => {
           setNewMenuName("");
           setShowCreateMenuForm(false);

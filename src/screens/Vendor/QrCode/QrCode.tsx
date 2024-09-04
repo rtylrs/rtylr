@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { QRCode } from "react-qrcode-logo";
 import html2canvas from "html2canvas";

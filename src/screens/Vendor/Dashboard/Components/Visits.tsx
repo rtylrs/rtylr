@@ -3,7 +3,7 @@ import { Line } from "react-chartjs-2";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 
-const Visits: React.FC<{}> = ({}) => {
+const Visits: React.FC<{}> = () => {
   const visitData = useSelector((state: RootState) => state.user.visits);
 
   const chartData = {

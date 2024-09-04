@@ -66,7 +66,7 @@ function Menu() {
     setStatus("loading");
     getMenu.main({ id });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   if (status === "loading") {

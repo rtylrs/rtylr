@@ -1,0 +1,109 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const QuestionsTwo: React.FC = () => {
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const navigate = useNavigate();
+
+  const handleOptionChange = (option: string) => {
+    setSelectedOption(option);
+  };
+
+  const handleContinue = () => {
+    // Logic to handle the continue action
+  };
+
+  const handleSkip = () => {
+    // Logic to handle the skip action
+  };
+
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
+
+  return (
+    <div className="questionaire-container">
+      <form className="questionaire-form">
+        <h1>What best describes you?</h1>
+        <p>This will enable us to customize the system to meet your needs.</p>
+
+        <div className="options-group">
+          <label className="option">
+            <input
+              type="radio"
+              value="Restaurant owner"
+              checked={selectedOption === "Restaurant owner"}
+              onChange={() => handleOptionChange("Restaurant owner")}
+            />
+            Restaurant owner
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              value="Restaurant manager"
+              checked={selectedOption === "Restaurant manager"}
+              onChange={() => handleOptionChange("Restaurant manager")}
+            />
+            Restaurant manager
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              value="Marketing specialist"
+              checked={selectedOption === "Marketing specialist"}
+              onChange={() => handleOptionChange("Marketing specialist")}
+            />
+            Marketing specialist
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              value="Website developer"
+              checked={selectedOption === "Website developer"}
+              onChange={() => handleOptionChange("Website developer")}
+            />
+            Website developer
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              value="I'm looking to place a food order"
+              checked={selectedOption === "I'm looking to place a food order"}
+              onChange={() =>
+                handleOptionChange("I'm looking to place a food order")
+              }
+            />
+            I’m looking to place a food order
+          </label>
+          <label className="option">
+            <input
+              type="radio"
+              value="Other"
+              checked={selectedOption === "Other"}
+              onChange={() => handleOptionChange("Other")}
+            />
+            Other
+          </label>
+        </div>
+
+        <div className="form-actions">
+          <button type="button" onClick={handleBack} className="back-button">
+            ← Back
+          </button>
+          <button type="button" onClick={handleSkip} className="skip-button">
+            Skip
+          </button>
+          <button
+            type="submit"
+            onClick={handleContinue}
+            className="continue-button"
+          >
+            Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default QuestionsTwo;
