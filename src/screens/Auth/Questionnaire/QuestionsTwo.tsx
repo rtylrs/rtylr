@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import VbitezButton from "../../../components/Buttons/Buttons";
 
 const QuestionsTwo: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -14,11 +15,11 @@ const QuestionsTwo: React.FC = () => {
   };
 
   const handleSkip = () => {
-    // Logic to handle the skip action
+    navigate("/app/busi")
   };
 
   const handleBack = () => {
-    navigate(-1); // Go back to the previous page
+    navigate("/auth/questionnaire/info/question-1"); // Go back to the previous page
   };
 
   return (
@@ -85,23 +86,34 @@ const QuestionsTwo: React.FC = () => {
             Other
           </label>
         </div>
-
         <div className="form-actions">
-          <button type="button" onClick={handleBack} className="back-button">
-            ← Back
-          </button>
-          <button type="button" onClick={handleSkip} className="skip-button">
-            Skip
-          </button>
-          <button
-            type="submit"
+          <VbitezButton
             onClick={handleContinue}
-            className="continue-button"
+            styles={{
+              width: "100%",
+            }}
           >
             Continue
-          </button>
+          </VbitezButton>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "10px",
+            }}
+          >
+            <span onClick={handleBack} className="back-button">
+              ← Back
+            </span>
+            <span onClick={handleSkip} className="skip-button">
+              Skip
+            </span>
+          </div>
         </div>
       </form>
+      <div className="questionaire-image">
+        <img src="/svg/info.svg" alt="Logo" className="logo" />
+      </div>
     </div>
   );
 };
