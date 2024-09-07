@@ -8,7 +8,7 @@ const QuestionsOne: React.FC = () => {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    // Implement the logic to handle the continue action
+    navigate("/auth/questionnaire/info/question-2");
   };
 
   const handleSkip = () => {
@@ -72,6 +72,9 @@ const QuestionsOne: React.FC = () => {
           </div>
         </div>
       </form>
+      <div className="questionaire-image">
+        <img src="/svg/info.svg" alt="Logo" className="logo" />
+      </div>
     </div>
   );
 };

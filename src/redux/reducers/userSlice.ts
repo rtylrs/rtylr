@@ -165,6 +165,8 @@ const userSlice = createSlice({
       state.role = null;
       state.userId = null;
       state.token = null;
+      // clear entire local storage
+      // localStorage.clear();
     },
   },
   extraReducers: (builder) => {
