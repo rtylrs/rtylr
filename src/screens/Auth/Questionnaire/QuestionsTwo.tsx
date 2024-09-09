@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../components/Buttons/Buttons";
+import VbitezButton from "../../../components/VbitezButton";
 
 const QuestionsTwo: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -15,7 +15,7 @@ const QuestionsTwo: React.FC = () => {
   };
 
   const handleSkip = () => {
-    navigate("/app/busi")
+    navigate("/app/busi");
   };
 
   const handleBack = () => {

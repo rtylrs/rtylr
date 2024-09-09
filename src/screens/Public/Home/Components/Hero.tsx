@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../../components/Buttons/Buttons";
+import VbitezButton from "../../../../components/VbitezButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";

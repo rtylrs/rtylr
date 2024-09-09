@@ -5,6 +5,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import typescript from "@typescript-eslint/eslint-plugin";
 import typescriptParser from "@typescript-eslint/parser";
+import { TroubleshootRounded } from "@mui/icons-material";
 
 const config = [
   js.configs.recommended,
@@ -14,7 +15,7 @@ const config = [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: { ...globals.browser, JSX: true },
+      globals: { ...globals.browser, JSX: TroubleshootRounded },
       parser: typescriptParser,
       parserOptions: {
         project: "./tsconfig.json",

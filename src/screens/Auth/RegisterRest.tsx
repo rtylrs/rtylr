@@ -15,6 +15,7 @@ import {
 import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import VbitezButton from "../../components/VbitezButton";
 
 const RegisterRestaurant: React.FC = () => {
   const navigate = useNavigate();
@@ -123,19 +124,28 @@ const RegisterRestaurant: React.FC = () => {
             placeholder="Referred By (Optional)"
             onChange={(e) => setReferred(e.target.value)}
           />
-          <div>
-            <button className="register-button" disabled={loading}>
-              {loading ? "Loading..." : "Register"}
-            </button>
+          <div
+            style={{
+              width: "90%",
+            }}
+          >
+            <VbitezButton
+              style={{
+                minWidth: "100%",
+              }}
+              loading={loading}
+            >
+              Register
+            </VbitezButton>
             <div className="register-user-social-media">
-              <button
+              <VbitezButton
                 type="button"
                 className="register-user-google-button"
                 onClick={handleRegisterWithGoogle}
               >
                 <FontAwesomeIcon icon={faGoogle} size="lg" />
                 Sign in with Google
-              </button>
+              </VbitezButton>
             </div>
           </div>
         </form>
