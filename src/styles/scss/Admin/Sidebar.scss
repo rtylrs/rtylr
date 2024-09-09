@@ -62,7 +62,7 @@
 
 .sidebar__link {
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 5px;
   margin-bottom: 5px;
   display: flex;
   flex-direction: row;
@@ -88,7 +88,7 @@
   border-radius: 10px;
   background-color: $light-color;
   transition: 0.5s;
-  
+
   #link {
     text-decoration: none;
     font-size: 14px;

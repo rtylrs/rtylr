@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import VbitezButton from "../../../components/Buttons/Buttons";
+import VbitezButton from "../../../components/VbitezButton";
 
 const NoMatch = (): JSX.Element => {
   const navigate = useNavigate();

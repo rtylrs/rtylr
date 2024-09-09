@@ -14,7 +14,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
-import VbitezButton from "../../components/Buttons/Buttons";
+import VbitezButton from "../../components/VbitezButton";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -85,11 +85,12 @@ const Login: React.FC = () => {
         <div className="login-button-wrapper">
           <VbitezButton
             onClick={handleSubmit}
-            styles={{
-              width: "100%",
+            style={{
+              minWidth: "100%",
             }}
+            loading={loading}
           >
-            {loading ? "Loading..." : "Login"}
+            Login
           </VbitezButton>
         </div>
         <div className="login-separator">

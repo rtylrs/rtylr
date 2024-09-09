@@ -3,12 +3,12 @@ import { useDropzone } from "react-dropzone";
 
 interface DropzoneProps {
   onFileSelected: (file: File) => void;
-  accept?: string;
+  accept?: { [key: string]: string[] };
 }
 
 const Dropzone: React.FC<DropzoneProps> = ({
   onFileSelected,
-  accept = "image/*",
+  accept = { "image/*": [] },
 }) => {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -37,7 +37,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
   );
 };
 
-const dropzoneStyle = {
+const dropzoneStyle: React.CSSProperties = {
   border: "2px dashed #9b51e0",
   borderRadius: "6px",
   padding: "20px",

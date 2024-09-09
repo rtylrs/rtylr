@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import VbitezButton from "../../../../components/Buttons/Buttons";
+import VbitezButton from "../../../../components/VbitezButton";
 import React from "react";
 import { QRCode } from "react-qrcode-logo";
 import useColors from "../../../../hooks/useColors";
@@ -21,7 +21,14 @@ const Demo: React.FC<{}> = () => {
             size={300}
           />
         </div>
-        <VbitezButton variant="default">{t("Demo.button")}</VbitezButton>
+        <VbitezButton
+          variant="default"
+          styles={{
+            borderColor: primary,
+          }}
+        >
+          {t("Demo.button")}
+        </VbitezButton>
       </div>
     </div>
   );

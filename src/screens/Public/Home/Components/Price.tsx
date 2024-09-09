@@ -1,4 +1,4 @@
-import VbitezButton from "../../../../components/Buttons/Buttons";
+import VbitezButton from "../../../../components/VbitezButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";

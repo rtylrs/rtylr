@@ -55,7 +55,7 @@
 
 .vendor-sidebar__link {
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 5px;
   margin-bottom: 5px;
   display: flex;
   flex-direction: row;
@@ -78,7 +78,7 @@
 }
 
 .vendor-active {
-  border-radius: 3px;
+  border-radius: 5px;
   background-color: $active-color;
   transition: 0.5s;
 
@@ -95,7 +95,7 @@
 
 .vendor-sidebar__link:hover {
   border: 0px solid $primary-color;
-  border-radius: 3px;
+  border-radius: 5px;
   background-color: $primary-color;
   transition: 0.5s;
 
