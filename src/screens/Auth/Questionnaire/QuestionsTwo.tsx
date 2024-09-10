@@ -11,15 +11,15 @@ const QuestionsTwo: React.FC = () => {
   };
 
   const handleContinue = () => {
-    // Logic to handle the continue action
+    navigate("/app/business/");
   };
 
   const handleSkip = () => {
-    navigate("/app/busi");
+    navigate("/app/business/");
   };
 
   const handleBack = () => {
-    navigate("/auth/questionnaire/info/question-1"); // Go back to the previous page
+    navigate("/auth/questionnaire/info/question-1");
   };
 
   return (
