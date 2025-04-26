@@ -4,8 +4,8 @@ import i18next from "i18next";
 const getBaseUrl = () => {
   const mode = localStorage.getItem("mode") || "prod";
   return mode === "dev"
-    ? "http://localhost:1024/api/v1/app"
-    : "https://onion-e6t0.onrender.com/api/v1/app";
+    ? "http://localhost:9999/"
+    : "https://onion-tdam.onrender.com/";
 };
 
 const api = axios.create({
