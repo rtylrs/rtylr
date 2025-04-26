@@ -11,24 +11,32 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: 18
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v3
         with:
-          version: 8
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
-      - name: Install Dependencies
+      - name: Configure pnpm
+        run: pnpm config set store-dir ~/.pnpm-store
+
+      - name: Install Dependencies with pnpm
         run: pnpm install --frozen-lockfile
 
-      - name: Build Application
-        run: pnpm build
+      - name: Build Project
+        run: pnpm run build
 
       - name: Delete Existing Files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.1
