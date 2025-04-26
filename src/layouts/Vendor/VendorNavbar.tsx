@@ -1,7 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
 import { RootState } from "../../redux/store";
@@ -35,10 +34,6 @@ const VendorNavbar: React.FC<{
       </div>
     </div>
   );
-};
-
-VendorNavbar.propTypes = {
-  openSidebar: PropTypes.func.isRequired,
 };
 
 export default VendorNavbar;

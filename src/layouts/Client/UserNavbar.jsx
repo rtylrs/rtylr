@@ -6,7 +6,6 @@ import {
   faHome,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import PropTypes from "prop-types";
 
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
@@ -36,10 +35,6 @@ const Navbar = ({ openSidebar }) => {
       </div>
     </div>
   );
-};
-
-Navbar.propTypes = {
-  openSidebar: PropTypes.func.isRequired,
 };
 
 export default Navbar;

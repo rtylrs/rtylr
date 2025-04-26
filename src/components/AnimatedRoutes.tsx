@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import PropTypes from "prop-types";
 
 const animations = {
   initial: {
@@ -28,10 +27,6 @@ const AnimatedRoutes = ({ children }) => {
       {children}
     </motion.div>
   );
-};
-
-AnimatedRoutes.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default AnimatedRoutes;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 const MenuItem: React.FC<{
@@ -18,7 +17,3 @@ const MenuItem: React.FC<{
 };
 
 export default MenuItem;
-
-MenuItem.propTypes = {
-  item: PropTypes.object.isRequired,
-};

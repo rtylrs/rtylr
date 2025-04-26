@@ -3,7 +3,6 @@ import Navbar from "./UserNavbar";
 import SideBar from "./UserSidebar";
 import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
 
 function UserDashboard(props) {
   const navigate = useNavigate();
@@ -24,8 +23,6 @@ function UserDashboard(props) {
         navigate("/");
       }
     });
-
-     
   }, []);
 
   return (
@@ -38,9 +35,5 @@ function UserDashboard(props) {
     // </AnimatedRoutes>
   );
 }
-
-UserDashboard.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default UserDashboard;
