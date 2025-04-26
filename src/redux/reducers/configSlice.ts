@@ -92,7 +92,7 @@ export const fetchConfigData = () => async (dispatch: AppDispatch) => {
       contactNumber,
       faqs,
       news,
-    } = response.data;
+    } = response.data.config;
     dispatch(setAboutContent(aboutContent));
     dispatch(setMaintanance(maintanance));
     dispatch(setBussinessCount(count));
