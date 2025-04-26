@@ -58,7 +58,7 @@ jobs:
           password: ${{ secrets.SFTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./build/
+          local-dir: ./dist/
           server-dir: /subdomains/vbitez.voxire.com/
           exclude: |
             **/.git*
