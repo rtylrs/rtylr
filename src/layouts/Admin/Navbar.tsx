@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import PropTypes from "prop-types";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
@@ -10,9 +9,7 @@ const Navbar = ({ openSidebar }) => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
 
-  useEffect(() => {
-     
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div className="navbar">
@@ -34,10 +31,6 @@ const Navbar = ({ openSidebar }) => {
       </div>
     </div>
   );
-};
-
-Navbar.propTypes = {
-  openSidebar: PropTypes.func.isRequired,
 };
 
 export default Navbar;

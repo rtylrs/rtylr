@@ -2,7 +2,6 @@ import React from "react";
 import Navbar from "./VendorNavbar";
 import SideBar from "./VendorSidebar";
 import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import HelmetContainer from "../../components/HelmetContainer";
 import { selectRole } from "../../redux/reducers/userSlice";
@@ -60,8 +59,6 @@ const Vendor: React.FC<{
     };
 
     updateUrlParams();
-
-     
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
   const initialSections: string[] = [
@@ -109,10 +106,6 @@ const Vendor: React.FC<{
       </div>
     </SidebarProvider>
   );
-};
-
-Vendor.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default Vendor;

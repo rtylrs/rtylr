@@ -9,7 +9,6 @@ import {
   faPlus,
   faQrcode,
 } from "@fortawesome/free-solid-svg-icons"; // Example icon
-import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 function QuickLinks() {
@@ -50,11 +49,5 @@ const QuickLink = ({ icon, title, to }) => (
     <span>{title}</span>
   </Link>
 );
-
-QuickLink.propTypes = {
-  icon: PropTypes.object.isRequired,
-  title: PropTypes.string.isRequired,
-  to: PropTypes.string.isRequired,
-};
 
 export default QuickLinks;

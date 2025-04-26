@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClose,
@@ -68,11 +67,6 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
       </div>
     </div>
   );
-};
-
-SideBar.propTypes = {
-  sidebarOpen: PropTypes.bool.isRequired,
-  closeSidebar: PropTypes.func.isRequired,
 };
 
 export default SideBar;

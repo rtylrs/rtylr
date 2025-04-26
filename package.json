@@ -24,6 +24,7 @@
     "@reduxjs/toolkit": "^2.2.5",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
+    "classnames": "^2.5.1",
     "date-fns": "^3.6.0",
     "file-saver": "^2.0.5",
     "firebase": "^10.12.2",

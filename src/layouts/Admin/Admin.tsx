@@ -2,7 +2,6 @@ import React from "react";
 import Navbar from "./Navbar";
 import SideBar from "./Sidebar";
 import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { selectRole } from "../../redux/reducers/userSlice";
 import HelmetContainer from "../../components/HelmetContainer";
@@ -36,8 +35,6 @@ function Admin(props) {
       url.searchParams.append("plan", "admin");
       window.history.replaceState({}, "", url.toString());
     }
-
-     
   }, [navigate, user?.userId, user?.user?.planType, role]);
 
   const initialSections: string[] = [
@@ -62,9 +59,5 @@ function Admin(props) {
     </SidebarProvider>
   );
 }
-
-Admin.propTypes = {
-  children: PropTypes.node.isRequired,
-};
 
 export default Admin;

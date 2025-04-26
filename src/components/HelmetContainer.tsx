@@ -1,5 +1,4 @@
 import { Helmet } from "react-helmet";
-import PropTypes from "prop-types";
 
 function HelmetContainer({
   title = "Vbitez - Contactless QR Menu",
@@ -53,22 +52,3 @@ function HelmetContainer({
 }
 
 export default HelmetContainer;
-
-HelmetContainer.propTypes = {
-  title: PropTypes.string,
-  description: PropTypes.string,
-  image: PropTypes.string,
-  url: PropTypes.string,
-  author: PropTypes.string,
-  keywords: PropTypes.string,
-  robots: PropTypes.string,
-  ogType: PropTypes.string,
-  ogLocale: PropTypes.string,
-  ogSiteName: PropTypes.string,
-  ogDescription: PropTypes.string,
-  twitterCard: PropTypes.string,
-  twitterSite: PropTypes.string,
-  twitterCreator: PropTypes.string,
-  customMetaTags: PropTypes.arrayOf(PropTypes.object),
-  favicon: PropTypes.string,
-};

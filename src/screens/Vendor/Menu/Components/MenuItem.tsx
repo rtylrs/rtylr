@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
@@ -62,9 +61,5 @@ function MenuItem({ item }) {
     </div>
   );
 }
-
-MenuItem.propTypes = {
-  item: PropTypes.object.isRequired,
-};
 
 export default MenuItem;

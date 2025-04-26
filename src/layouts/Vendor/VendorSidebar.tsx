@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClose,
@@ -380,11 +379,6 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
       </div> */}
     </div>
   );
-};
-
-VendorSidebar.propTypes = {
-  sidebarOpen: PropTypes.bool.isRequired,
-  closeSidebar: PropTypes.func.isRequired,
 };
 
 export default React.memo(VendorSidebar);

@@ -4,7 +4,6 @@ import { auth } from "../../firebase";
 import { GoogleAuthProvider } from "firebase/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import PropTypes from "prop-types";
 
 const RegisterUser: React.FC<{}> = () => {
   const navigate = useNavigate();
@@ -113,11 +112,6 @@ const RegisterUser: React.FC<{}> = () => {
       </div>
     </div>
   );
-};
-
-RegisterUser.propTypes = {
-  open: PropTypes.bool.isRequired,
-  close: PropTypes.func.isRequired,
 };
 
 export default RegisterUser;
