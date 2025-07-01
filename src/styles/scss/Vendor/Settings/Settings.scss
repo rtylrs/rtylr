@@ -25,23 +25,23 @@
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  color: $primary-color;
+  color: var(--primary-color);
 
   svg {
     font-size: 20px;
   }
 
-  span  {
+  span {
     font-size: 14px;
   }
 
   &:hover {
     background-color: #f9f9f9;
-    color: $primary-color;
+    color: var(--primary-color);
   }
 
   .settings-content {
-  width: 85%;
+    width: 85%;
   }
 }
 
@@ -65,4 +65,3 @@
     grid-template-columns: 1fr;
   }
 }
-

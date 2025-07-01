@@ -1,58 +1,57 @@
 .add-faq-container {
-    max-width: 600px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-  
-    .form-group {
-      margin-bottom: 16px;
-    }
-  
-    .form-label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      display: block;
-    }
-  
-    .form-input,
-    .form-textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-  
-      &:focus {
-        border-color: $secondary-color;
-      }
-    }
-  
-    .form-textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-  
-    .form-button {
-      padding: 10px 20px;
-      background-color: $primary-color;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-  
-      &:hover {
-        background-color: $secondary-color;
-      }
+  max-width: 600px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+
+    &:focus {
+      border-color: var(--secondary-color);
     }
   }
-  
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: var(--secondary-color);
+    }
+  }
+}
