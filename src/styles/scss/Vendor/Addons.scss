@@ -14,7 +14,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: $primary-color;
+    color: var(--primary-color);
     font-size: 24px;
     font-weight: bold;
     height: 90dvh;
@@ -103,17 +103,17 @@
             cursor: pointer;
 
             &.installed {
-              background-color: $dark-green-color;
+              background-color: var(--dark-green-color);
               color: #fff;
             }
 
             &.price {
-              background-color: $primary-color;
+              background-color: var(--primary-color);
               color: #fff;
             }
 
             &.add {
-              background-color: $secondary-color;
+              background-color: var(--secondary-color);
               color: #fff;
             }
           }

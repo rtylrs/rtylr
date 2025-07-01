@@ -1,5 +1,5 @@
 .vendor-navbar {
-  background: $vendor-bg;
+  background: var(--vendor-bg);
   grid-area: nav;
   height: 63px;
   display: flex;
@@ -40,14 +40,14 @@
 }
 
 .active_link {
-  color: $primary-color;
+  color: var(--primary-color);
   font-weight: 600;
   font-size: 1.1em;
   opacity: 0.9;
 }
 
 .plan-type {
-  color: $primary-color;
+  color: var(--primary-color);
   font-weight: 600;
   font-size: 0.7em;
   opacity: 0.4;
@@ -76,11 +76,11 @@
   cursor: pointer;
   font-weight: 900;
   opacity: 0.8;
-  color: $primary-color;
+  color: var(--primary-color);
 }
 
 .vendor-navbar__right div p:hover {
-  color: $error-red;
+  color: var(--error-red);
   transition: 0.5s;
 }
 

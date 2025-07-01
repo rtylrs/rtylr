@@ -45,7 +45,7 @@ const Hero: React.FC<{}> = () => {
           }}
         >
           <FontAwesomeIcon icon={faStar} color={secondary} /> Rated 4.7/5 - from
-          over 150 reviews
+          over 500+ reviews
         </h5>
       </div>
       <div className="hero-image">

@@ -1,5 +1,5 @@
 .navbar {
-  background: $admin-primary;
+  background: var(--admin-primary);
   grid-area: nav;
   height: 60px;
   display: flex;
@@ -35,7 +35,7 @@
 .navbar__left > p {
   margin-right: 30px;
   text-decoration: none;
-  color: $light-color;
+  color: var(--light-color);
   font-size: 18px;
   font-weight: 600;
   text-transform: capitalize;
@@ -56,7 +56,7 @@
 }
 
 .navbar__right > div > p:hover {
-  color: $error-red;
+  color: var(--error-red);
   transition: 0.5s;
 }
 

@@ -65,7 +65,11 @@ const VbitezButton: React.FC<VbitezButtonProps> = ({
       style={buttonStyle}
       {...props}
     >
-      {loading ? <CircularProgress size={20} color="inherit" /> : children}
+      {loading ? (
+        <CircularProgress size={20} color="inherit" />
+      ) : (
+        <span>{children}</span>
+      )}
     </button>
   );
 };

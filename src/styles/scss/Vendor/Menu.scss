@@ -14,7 +14,7 @@
     h1 {
       font-size: 24px;
       margin: 0;
-      color: $primary-color;
+      color: var(--primary-color);
     }
 
     .menu-buttons {
@@ -22,9 +22,9 @@
       gap: 8px;
 
       .menu-button {
-        border: 1px solid $secondary-color;
+        border: 1px solid var(--secondary-color);
         border-radius: 5px;
-        color: $secondary-color;
+        color: var(--secondary-color);
         padding: 4px 12px;
         font-size: 14px;
         font-weight: 500;
@@ -34,7 +34,7 @@
         transition: background-color 0.3s, color 0.3s;
 
         &:hover {
-          background-color: $secondary-color;
+          background-color: var(--secondary-color);
           color: #ffffff;
         }
 
@@ -44,11 +44,11 @@
         }
 
         &.primary {
-          background-color: $secondary-color;
+          background-color: var(--secondary-color);
           color: #ffffff;
 
           &:hover {
-            background-color: darken($secondary-color, 10%);
+            filter: brightness(0.9);
           }
         }
       }
@@ -79,7 +79,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    background-color: $active-color;
+    background-color: var(--active-color);
     padding: 10px;
     border: 0.1px solid #dbd8d8;
 
@@ -117,8 +117,8 @@
         cursor: pointer;
         margin-left: 0.5rem;
         font-size: 1rem;
-        color: $secondary-color;
-        border: 1px solid $secondary-color;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
 
         &:hover {
           background-color: #5a6268;
@@ -276,14 +276,14 @@
 }
 
 .parent-category-section {
-  background-color: $active-color;
+  background-color: var(--active-color);
   padding: 20px;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
 .banner-section-vendor {
-  background-color: $active-color;
+  background-color: var(--active-color);
   padding: 20px;
   margin-top: 10px;
 
