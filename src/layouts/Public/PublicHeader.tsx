@@ -113,7 +113,7 @@ const Header: React.FC = () => {
         navigate("/app/user/");
       }
     } else {
-      navigate("/auth/register/business");
+      navigate("/auth/register");
     }
   }, [user.role, navigate]);
 

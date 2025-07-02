@@ -28,7 +28,7 @@ const Hero: React.FC<{}> = () => {
               if (isAuthenticated) {
                 navigate("/app/business");
               } else {
-                navigate("/auth/register/business");
+                navigate("/auth/register");
               }
             }}
           >
