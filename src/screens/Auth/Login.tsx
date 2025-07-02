@@ -78,7 +78,13 @@ const Login: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="login-input"
         />
-        {error && <p className="login-error">{error}</p>}
+        {error && (
+          <p className="login-error">
+            {typeof error === "string"
+              ? error
+              : (error as any)?.message || "An error occurred"}
+          </p>
+        )}
         <div className="login-options">
           <span className="forgot-password">Forgot password?</span>
         </div>
