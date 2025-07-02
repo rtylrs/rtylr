@@ -77,28 +77,7 @@ const Vendor: React.FC<{
   return (
     <SidebarProvider initialSections={initialSections}>
       <HelmetContainer title={`${user?.user?.name || "User"}'s Dashboard`} />
-      {user?.user?.planType === "free" ? (
-        <FreeAccount />
-      ) : (
-        <motion.div
-          className="whatsappBtn"
-          onClick={() => {
-            window.open(
-              "https://api.whatsapp.com/send?phone=96171642565&text=Hello%20Voxire",
-              "_blank"
-            );
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.8 }}
-          style={{
-            right: "20px",
-          }}
-        >
-          <FontAwesomeIcon icon={faWhatsapp} />
-        </motion.div>
-      )}
+      {user?.user?.planType === "free" && <FreeAccount />}
       <div className="VendorContainer">
         <Navbar sidebarOpen={sidebarOpen} openSidebar={openSidebar} />
         <div className="InnerContainer-vendor">{props.children}</div>

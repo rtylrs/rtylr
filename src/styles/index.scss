@@ -12,19 +12,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Performance optimizations */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Optimize animations and transitions */
 * {
   will-change: auto;
 }
 
-/* Optimize for GPU acceleration where beneficial */
 .hero-image img,
 .ticker_wrapper,
 .ScrollToTop,
@@ -90,25 +87,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.whatsappBtn {
-  position: fixed;
-  bottom: 15px;
-  right: 65px;
-  z-index: 100;
-  border: none;
-  border-radius: 5px;
-  padding: 9px;
-  background-color: #2db742;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  svg {
-    color: #fff;
-  }
 }
 
 #demo {
