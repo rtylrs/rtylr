@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container, Typography, TextField } from "@mui/material";
 import { auth } from "../../firebase";
-import VbitezButton from "../../components/VbitezButton";
+import VbitezButton from "../../components/VbitezButton/VbitezButton";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");

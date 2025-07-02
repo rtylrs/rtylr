@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import VbitezButton from "../../components/VbitezButton";
+import VbitezButton from "../../components/VbitezButton/VbitezButton";
 import useColors from "../../hooks/useColors";
 import useWindowDimensions from "../../utils/useWindowDimensions";
 import { useSelector } from "react-redux";

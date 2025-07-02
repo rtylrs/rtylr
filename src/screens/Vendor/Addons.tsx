@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import useAsync from "../../hooks/useAsync";
 import userApi from "../../api/user";
-import VbitezButton from "../../components/VbitezButton";
+import VbitezButton from "../../components/VbitezButton/VbitezButton";
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../redux/reducers/userSlice";
 import notify from "../../lib/notify/notify";

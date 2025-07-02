@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../components/VbitezButton";
+import VbitezButton from "../../../components/VbitezButton/VbitezButton";
 
 const QuestionsOne: React.FC = () => {
   const [website, setWebsite] = useState<string>("");

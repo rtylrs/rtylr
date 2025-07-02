@@ -8,7 +8,7 @@ import {
   selectError,
 } from "../../../redux/reducers/userSlice";
 import { AppDispatch } from "../../../redux/store";
-import VbitezButton from "../../../components/VbitezButton";
+import VbitezButton from "../../../components/VbitezButton/VbitezButton";
 import Menu from "../../Public/Menu/Menu";
 
 const Design: React.FC = () => {

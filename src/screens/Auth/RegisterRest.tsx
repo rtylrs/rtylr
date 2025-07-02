@@ -15,7 +15,7 @@ import {
 import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import VbitezButton from "../../components/VbitezButton";
+import VbitezButton from "../../components/VbitezButton/VbitezButton";
 
 const RegisterRestaurant: React.FC = () => {
   const navigate = useNavigate();
