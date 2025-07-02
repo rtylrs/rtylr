@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../redux/store";
-import VbitezButton from "../../../components/VbitezButton";
+import VbitezButton from "../../../components/VbitezButton/VbitezButton";
 
 const Details: React.FC = () => {
   const navigate = useNavigate();

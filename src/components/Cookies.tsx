@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
-import VbitezButton from "./VbitezButton";
+import VbitezButton from "./VbitezButton/VbitezButton";
 
 const Cookies: React.FC = () => {
   const [showPopup, setShowPopup] = useState(true);

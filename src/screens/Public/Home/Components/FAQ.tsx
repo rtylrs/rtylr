@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import VbitezButton from "../../../../components/VbitezButton";
+import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../../redux/store";
 

@@ -14,7 +14,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
-import VbitezButton from "../../components/VbitezButton";
+import VbitezButton from "../../components/VbitezButton/VbitezButton";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();

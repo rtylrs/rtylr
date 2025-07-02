@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import VbitezButton from "../../../../components/VbitezButton";
+import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
 import React from "react";
 import { QRCode } from "react-qrcode-logo";
 import useColors from "../../../../hooks/useColors";
