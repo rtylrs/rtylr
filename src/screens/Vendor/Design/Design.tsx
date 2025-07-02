@@ -132,7 +132,14 @@ const Design: React.FC = () => {
     <div>
       <h2>Edit Theme</h2>
       {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
+      {error && (
+        <p>
+          Error:{" "}
+          {typeof error === "string"
+            ? error
+            : (error as any)?.message || "An error occurred"}
+        </p>
+      )}
       <div
         style={{
           display: "flex",

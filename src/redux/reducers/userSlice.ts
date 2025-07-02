@@ -184,7 +184,8 @@ const userSlice = createSlice({
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as { error: string }).error;
+        const payload = action.payload as any;
+        state.error = payload?.message || payload?.error || "Login failed";
       })
       .addCase(registerRestaurantAsync.pending, (state) => {
         state.loading = true;
@@ -199,7 +200,9 @@ const userSlice = createSlice({
       })
       .addCase(registerRestaurantAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as { error: string }).error;
+        const payload = action.payload as any;
+        state.error =
+          payload?.message || payload?.error || "Registration failed";
       })
       .addCase(getUserInfo.pending, (state) => {
         state.loading = true;
@@ -221,7 +224,9 @@ const userSlice = createSlice({
       })
       .addCase(getUserInfo.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as { error: string }).error;
+        const payload = action.payload as any;
+        state.error =
+          payload?.message || payload?.error || "Failed to get user info";
       })
       .addCase(restaurantWithGoogleAsync.pending, (state) => {
         state.loading = true;
@@ -236,7 +241,9 @@ const userSlice = createSlice({
       })
       .addCase(restaurantWithGoogleAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as { error: string }).error;
+        const payload = action.payload as any;
+        state.error =
+          payload?.message || payload?.error || "Google login failed";
       })
       .addCase(setThemeAsync.pending, (state) => {
         state.loading = true;
@@ -251,7 +258,9 @@ const userSlice = createSlice({
       })
       .addCase(setThemeAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as { error: string }).error;
+        const payload = action.payload as any;
+        state.error =
+          payload?.message || payload?.error || "Failed to update theme";
       });
   },
 });
