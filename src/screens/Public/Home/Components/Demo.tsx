@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
 import React from "react";
-import { QRCode } from "react-qrcode-logo";
 import useColors from "../../../../hooks/useColors";
 
 const Demo: React.FC<{}> = () => {
@@ -14,15 +13,18 @@ const Demo: React.FC<{}> = () => {
         <h2>{t("Demo.title")}</h2>
         <p>{t("Demo.description")}</p>
         <div className="qr-code">
-          <QRCode
-            value="https://vbitez.voxire.com/"
-            bgColor="#ffffff"
-            fgColor={primary}
-            size={300}
+          <img
+            src="/images/VoxireWebsiteQR.png"
+            alt="QR code for vbitez.voxire.com"
+            style={{
+              width: 300,
+              maxWidth: "100%",
+              height: "auto",
+            }}
           />
         </div>
         <VbitezButton
-          variant="default"
+          variant="primary"
           styles={{
             borderColor: primary,
           }}

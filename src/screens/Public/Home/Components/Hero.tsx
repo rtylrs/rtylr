@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
@@ -6,7 +7,6 @@ import { faArrowRight, faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
-import React from "react";
 import { QRCode } from "react-qrcode-logo";
 import useWindowDimensions from "../../../../utils/useWindowDimensions";
 
@@ -16,6 +16,19 @@ const Hero: React.FC<{}> = () => {
   const { width } = useWindowDimensions();
   const { primary, secondary } = useColors();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+
+  const memoizedQRCode = useMemo(
+    () => (
+      <QRCode
+        value="https://vbitez.voxire.com/"
+        bgColor="#ffffff"
+        fgColor={primary}
+        size={width < 768 ? 300 : 400}
+        qrStyle="fluid"
+      />
+    ),
+    [width, primary]
+  );
 
   return (
     <div className="Hero">
@@ -52,16 +65,7 @@ const Hero: React.FC<{}> = () => {
           over 500+ reviews
         </h5>
       </div>
-      <div className="hero-image">
-        {/* <img src="/svg/Hero.svg" alt="qr code on a paper" /> */}
-        <QRCode
-          value="https://vbitez.voxire.com/"
-          bgColor="#ffffff"
-          fgColor={primary}
-          size={width < 768 ? 300 : 400}
-          qrStyle="fluid"
-        />
-      </div>
+      <div className="hero-image">{memoizedQRCode}</div>
     </div>
   );
 };
