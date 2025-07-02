@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 const animations = {
   initial: {
     opacity: 0,
-    y: -100,
+    y: -20,
   },
   animate: {
     opacity: 1,
@@ -11,7 +11,7 @@ const animations = {
   },
   exit: {
     opacity: 0,
-    y: 100,
+    y: 20,
   },
 };
 
@@ -22,7 +22,10 @@ const AnimatedRoutes = ({ children }) => {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0 }} //TODO: fix animation and transition
+      transition={{
+        duration: 0.2,
+        ease: "easeOut",
+      }}
     >
       {children}
     </motion.div>

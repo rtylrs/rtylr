@@ -25,7 +25,7 @@ const Ticker: React.FC = () => {
   );
 
   const tickerContent = useMemo(() => {
-    const items = Array.from({ length: 8 }, (_, index) => (
+    const items = Array.from({ length: 4 }, (_, index) => (
       <TickerItem key={index} text={tickerData.text} emoji={tickerData.emoji} />
     ));
 
