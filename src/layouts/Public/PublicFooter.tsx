@@ -48,10 +48,6 @@ const Footer: React.FC<{}> = () => {
             <li>
               <Link to="/feedback">Feature Request</Link>
             </li>
-            {/* <li>
-              <Link to="/auth/register/user">Referral Program</Link>
-            </li> */}
-          </ul>
         </div>
         <div className="footer-section">
           <h3>Legal</h3>

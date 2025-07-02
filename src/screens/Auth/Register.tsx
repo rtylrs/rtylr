@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import VbitezButton from "../../components/VbitezButton/VbitezButton";
 
-const RegisterRestaurant: React.FC = () => {
+const Register: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const [email, setEmail] = useState<string>("");
@@ -171,4 +171,4 @@ const RegisterRestaurant: React.FC = () => {
   );
 };
 
-export default RegisterRestaurant;
+export default Register;
