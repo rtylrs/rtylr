@@ -91,10 +91,6 @@ const Footer: React.FC<{}> = () => {
       <div className="footer-social">
         <h3>Follow or Contact Us</h3>
         <div className="social-icons">
-          <a href="https://api.whatsapp.com/send?phone=96171642565">
-            <FontAwesomeIcon icon={faWhatsapp} />
-          </a>
-
           <a href="https://www.instagram.com/voxire.tech">
             <FontAwesomeIcon icon={faInstagram} />
           </a>
