@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faStar } from "@fortawesome/free-solid-svg-icons";
 import useColors from "../../../../hooks/useColors";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
@@ -34,7 +34,11 @@ const Hero: React.FC<{}> = () => {
           >
             {isAuthenticated ? t("Hero.My Account") : t("Hero.Create Account")}
           </VbitezButton>
-          <VbitezButton onClick={() => navigate("/uses")} variant="secondary">
+          <VbitezButton
+            onClick={() => navigate("/uses")}
+            variant="secondary"
+            suffix={<FontAwesomeIcon icon={faArrowRight} />}
+          >
             {t("Hero.Learn More")}
           </VbitezButton>
         </div>
