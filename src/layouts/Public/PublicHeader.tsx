@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -21,15 +21,43 @@ interface LinkWithColorProps
   to: string;
 }
 
-const Header: React.FC<{}> = () => {
+const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
+  const [languageDropdown, setLanguageDropdown] = useState(false);
+  const [language, setLanguage] = useState<string>("en");
+
   const location = useLocation();
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
-  const [dropdown, setDropdown] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState<string>("en");
+  const user = useSelector((state: RootState) => state.user);
+
+  const isMobile = useMemo(() => width < 968, [width]);
+  const isQuestionnaire = useMemo(
+    () => location.pathname.includes("/auth/questionnaire"),
+    [location.pathname]
+  );
+  const isInnerPage = useMemo(() => document.location.pathname !== "/", []);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const shouldBeScrolled = window.scrollY > 150;
+          setScrolled(shouldBeScrolled);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const storedLanguage = localStorage.getItem("language");
@@ -38,47 +66,44 @@ const Header: React.FC<{}> = () => {
     }
   }, []);
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const user = useSelector((state: RootState) => state.user);
-
-  const LinkWithColor: React.FC<LinkWithColorProps> = (props) => {
-    const { color, to, ...rest } = props;
-    return (
-      <Link
-        style={{
-          color: color || primary,
-        }}
-        to={to}
-        {...rest}
-      />
-    );
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const [scrolled, setScrolled] = useState(false);
-
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 150) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      if (dropdown && !target.closest(".header-left")) {
+        setDropdown(false);
+      }
+
+      if (languageDropdown && !target.closest(".lang-dropdown-container")) {
+        setLanguageDropdown(false);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, [dropdown, languageDropdown]);
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
-  const handleClick = () => {
+  const toggleDropdown = useCallback(() => {
+    setDropdown((prev) => !prev);
+  }, []);
+
+  const toggleLanguageDropdown = useCallback(() => {
+    setLanguageDropdown((prev) => !prev);
+  }, []);
+
+  const handleLanguageChange = useCallback((lang: string) => {
+    selectLanguage(lang);
+    setLanguage(lang);
+    setLanguageDropdown(false);
+  }, []);
+
+  const handleClick = useCallback(() => {
     const token = localStorage.getItem("token");
 
     if (token) {
@@ -90,14 +115,55 @@ const Header: React.FC<{}> = () => {
     } else {
       navigate("/auth/register/business");
     }
-  };
+  }, [user.role, navigate]);
+
+  const handleLogoClick = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  const handleLoginClick = useCallback(() => {
+    navigate("/auth/login");
+  }, [navigate]);
+
+  const handleNavigation = useCallback(
+    (path: string) => {
+      setDropdown(false);
+      navigate(path);
+    },
+    [navigate]
+  );
+
+  const handleExternalLink = useCallback(() => {
+    setDropdown(false);
+    window.open("https://voxire.com/careers", "_blank");
+  }, []);
+
+  const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
+    return (props) => {
+      const { color, to, ...rest } = props;
+      return (
+        <Link
+          style={{
+            color: color || primary,
+          }}
+          to={to}
+          {...rest}
+        />
+      );
+    };
+  }, [primary]);
+
+  const headerClasses = useMemo(() => {
+    const classes = ["header"];
+    if (isMobileMenuOpen) classes.push("mobile-menu-open");
+    if (scrolled) classes.push("scrolled");
+    if (isInnerPage) classes.push("inner");
+    return classes.join(" ");
+  }, [isMobileMenuOpen, scrolled, isInnerPage]);
 
   return (
     <header
-      className={`header ${isMobileMenuOpen ? "mobile-menu-open" : ""}
-          ${scrolled ? "scrolled" : ""}
-            ${document.location.pathname !== "/" ? "inner" : ""}
-          `}
+      className={headerClasses}
       style={{
         position: "fixed",
       }}
@@ -107,12 +173,11 @@ const Header: React.FC<{}> = () => {
         style={{
           cursor: "pointer",
         }}
-        onClick={() => {
-          navigate("/");
-        }}
+        onClick={handleLogoClick}
       >
         <img src={"/logo.png"} alt="Logo" />
       </div>
+
       <div
         className="header-left"
         style={{
@@ -127,9 +192,7 @@ const Header: React.FC<{}> = () => {
           style={{
             color: primary,
           }}
-          onClick={() => {
-            setDropdown(!dropdown);
-          }}
+          onClick={toggleDropdown}
         >
           Company
           <FontAwesomeIcon
@@ -138,50 +201,19 @@ const Header: React.FC<{}> = () => {
               marginLeft: "5px",
               fontSize: "14px",
               transform: dropdown ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
             }}
           />
         </p>
 
-        <div
-          className="header-dropdown"
-          style={{
-            display: dropdown ? "block" : "none",
-          }}
-        >
-          <h6
-            onClick={() => {
-              setDropdown(false);
-              navigate("/about");
-            }}
-          >
-            About Us
-          </h6>
-          <h6
-            onClick={() => {
-              setDropdown(false);
-              navigate("/contact");
-            }}
-          >
-            Contact Us
-          </h6>
-
-          <h6
-            onClick={() => {
-              setDropdown(false);
-              navigate("/faqs");
-            }}
-          >
-            FAQs
-          </h6>
-          <h6
-            onClick={() => {
-              setDropdown(false);
-              window.open("https://voxire.com/careers", "_blank");
-            }}
-          >
-            Careers (Jobs)
-          </h6>
-        </div>
+        {dropdown && (
+          <div className="header-dropdown">
+            <h6 onClick={() => handleNavigation("/about")}>About Us</h6>
+            <h6 onClick={() => handleNavigation("/contact")}>Contact Us</h6>
+            <h6 onClick={() => handleNavigation("/faqs")}>FAQs</h6>
+            <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
+          </div>
+        )}
       </div>
 
       <div className="header-right">
@@ -191,30 +223,30 @@ const Header: React.FC<{}> = () => {
           style={{
             color: primary,
           }}
+          aria-label="Toggle mobile menu"
         >
-          {isMobileMenuOpen ? (
-            <FontAwesomeIcon icon={faTimes} />
-          ) : (
-            <FontAwesomeIcon icon={faBars} />
-          )}
+          <FontAwesomeIcon
+            icon={isMobileMenuOpen ? faTimes : faBars}
+            style={{
+              transition: "transform 0.2s ease",
+            }}
+          />
         </button>
 
-        {!location.pathname.includes("/auth/questionnaire") && (
+        {!isQuestionnaire && (
           <button
             className="login-button"
             style={{
-              display: width < 968 ? "none" : user.token ? "none" : "flex",
+              display: isMobile ? "none" : user.token ? "none" : "flex",
             }}
-            onClick={() => {
-              navigate("/auth/login");
-            }}
+            onClick={handleLoginClick}
           >
             <p>Login</p>
           </button>
         )}
 
-        <VbitezButton onClick={handleClick} hidden={width < 968}>
-          {location.pathname.includes("/auth/questionnaire") ? (
+        <VbitezButton onClick={handleClick} hidden={isMobile}>
+          {isQuestionnaire ? (
             <div
               style={{
                 display: "flex",
@@ -229,49 +261,28 @@ const Header: React.FC<{}> = () => {
             <>{user.token ? "Dashboard" : "Register Now"}</>
           )}
         </VbitezButton>
+
         <div className="lang-dropdown-container">
-          <div className="selected-language" onClick={toggleDropdown}>
+          <div className="selected-language" onClick={toggleLanguageDropdown}>
             {language}
             <FontAwesomeIcon
               icon={faChevronDown}
               style={{
-                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transform: languageDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
               }}
             />
           </div>
-          {isOpen && (
+          {languageDropdown && (
             <div className="languages-dropdown">
-              <span
-                onClick={() => {
-                  selectLanguage("en");
-                  setLanguage("en");
-                  setIsOpen(false);
-                }}
-              >
-                English
-              </span>
-              <span
-                onClick={() => {
-                  selectLanguage("ar");
-                  setLanguage("ar");
-                  setIsOpen(false);
-                }}
-              >
-                Arabic
-              </span>
-              <span
-                onClick={() => {
-                  selectLanguage("fr");
-                  setLanguage("fr");
-                  setIsOpen(false);
-                }}
-              >
-                French
-              </span>
+              <span onClick={() => handleLanguageChange("en")}>English</span>
+              <span onClick={() => handleLanguageChange("ar")}>Arabic</span>
+              <span onClick={() => handleLanguageChange("fr")}>French</span>
             </div>
           )}
         </div>
       </div>
+
       {isMobileMenuOpen && (
         <div className="mobile-menu">
           <LinkWithColor to="/menu">Menu</LinkWithColor>
@@ -284,9 +295,7 @@ const Header: React.FC<{}> = () => {
               display: user.token ? "none" : "flex",
               marginBottom: "0px",
             }}
-            onClick={() => {
-              navigate("/auth/login");
-            }}
+            onClick={handleLoginClick}
           >
             <p>Login</p>
           </VbitezButton>
