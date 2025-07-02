@@ -4,7 +4,10 @@ import { CircularProgress } from "@mui/material";
 import "./VbitezButton.scss";
 
 interface VbitezButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    "onClick" | "prefix" | "suffix"
+  > {
   children: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   variant?: "primary" | "secondary" | "outline" | "ghost";
@@ -15,6 +18,8 @@ interface VbitezButtonProps
   loading?: boolean;
   fullWidth?: boolean;
   styles?: CSSProperties;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
 }
 
 /**
@@ -32,6 +37,8 @@ interface VbitezButtonProps
  * @param styles - Additional inline styles
  * @param disabled - Disable the button
  * @param className - Additional CSS classes
+ * @param prefix - Icon/image to display before the text
+ * @param suffix - Icon/image to display after the text
  */
 const VbitezButton: React.FC<VbitezButtonProps> = ({
   children,
@@ -46,6 +53,8 @@ const VbitezButton: React.FC<VbitezButtonProps> = ({
   secondaryColor,
   styles,
   className,
+  prefix,
+  suffix,
   ...props
 }) => {
   const buttonClassName = classNames(
@@ -79,6 +88,25 @@ const VbitezButton: React.FC<VbitezButtonProps> = ({
     }
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="vbitez-button-content">
+          <CircularProgress size={20} color="inherit" />
+          <span className="vbitez-button-text">{children}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="vbitez-button-content">
+        {prefix && <span className="vbitez-button-prefix">{prefix}</span>}
+        <span className="vbitez-button-text">{children}</span>
+        {suffix && <span className="vbitez-button-suffix">{suffix}</span>}
+      </div>
+    );
+  };
+
   return (
     <button
       className={buttonClassName}
@@ -88,14 +116,7 @@ const VbitezButton: React.FC<VbitezButtonProps> = ({
       aria-disabled={disabled || loading}
       {...props}
     >
-      {loading ? (
-        <div className="vbitez-button-content">
-          <CircularProgress size={20} color="inherit" />
-          <span className="vbitez-button-text">{children}</span>
-        </div>
-      ) : (
-        <span className="vbitez-button-text">{children}</span>
-      )}
+      {renderContent()}
     </button>
   );
 };

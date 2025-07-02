@@ -75,6 +75,11 @@
       align-items: center;
       gap: 8px;
     }
+
+    .vbitez-button-prefix,
+    .vbitez-button-suffix {
+      display: none;
+    }
   }
 
   .vbitez-button-content {
@@ -85,6 +90,45 @@
 
   .vbitez-button-text {
     display: inline-block;
+    line-height: 1;
+  }
+
+  .vbitez-button-prefix,
+  .vbitez-button-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .vbitez-button-prefix {
+    order: 1;
+  }
+
+  .vbitez-button-text {
+    order: 2;
+  }
+
+  .vbitez-button-suffix {
+    order: 3;
+  }
+
+  &.vbitez-button-sm {
+    .vbitez-button-prefix,
+    .vbitez-button-suffix {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &.vbitez-button-lg {
+    .vbitez-button-prefix,
+    .vbitez-button-suffix {
+      width: 18px;
+      height: 18px;
+    }
   }
 }
 
