@@ -10,7 +10,7 @@ import i18next from "./services/i18next";
 import ScrollToTop from "./components/ScrollToTop";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "sonner";
 import { CookiesProvider } from "react-cookie";
 import { PersistGate } from "redux-persist/integration/react";
 import Modal from "react-modal";
@@ -42,7 +42,7 @@ if (rootElement) {
               <PersistGate loading={null} persistor={persistor}>
                 <BrowserRouter>
                   <App />
-                  <ToastContainer />
+                  <Toaster expand={false} richColors />
                   <ScrollToTop />
                 </BrowserRouter>
               </PersistGate>

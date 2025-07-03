@@ -45,6 +45,7 @@ const useFPS = (): number => {
   const [fps, setFps] = useState(0);
   const frameCount = useRef(0);
   const lastFrameTime = useRef(Date.now());
+  const animationId = useRef<number>();
 
   useEffect(() => {
     const calculateFPS = () => {
@@ -52,25 +53,25 @@ const useFPS = (): number => {
       const now = Date.now();
       const deltaTime = now - lastFrameTime.current;
 
-      if (deltaTime >= 1000) {
+      if (deltaTime >= 2000) {
         setFps(frameCount.current);
         frameCount.current = 0;
         lastFrameTime.current = now;
       }
 
-      requestAnimationFrame(calculateFPS);
+      animationId.current = requestAnimationFrame(calculateFPS);
     };
 
-    requestAnimationFrame(calculateFPS);
+    animationId.current = requestAnimationFrame(calculateFPS);
+
+    return () => {
+      if (animationId.current) {
+        cancelAnimationFrame(animationId.current);
+      }
+    };
   }, []);
 
   return fps;
-};
-
-const getUserInitials = (name: string): string => {
-  const names = name.split(" ");
-  const initials = names.map((n) => n[0]).join("");
-  return initials.toUpperCase();
 };
 
 const getPlatform = () => {
@@ -86,17 +87,20 @@ const getPlatform = () => {
   }
 };
 
-const ToolBar: React.FC = () => {
+const ToolBarContent: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const [mode, setMode] = useState<string>(
     localStorage.getItem("mode") || "prod"
   );
-  const [showToolbar, setShowToolbar] = useState<boolean>(
-    localStorage.getItem("showToolbar") === "true"
-  );
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const fps = useFPS();
+
+  const isAdmin = user?.role === "admin";
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const showAdminItems = isAdmin || !isLocalhost;
 
   const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);
@@ -105,6 +109,145 @@ const ToolBar: React.FC = () => {
   useEffect(() => {
     localStorage.setItem("mode", mode);
   }, [mode]);
+
+  const handleModeChange = () => {
+    setMode((prevMode) => (prevMode === "dev" ? "prod" : "dev"));
+  };
+
+  const [memoryUsage, setMemoryUsage] = useState("N/A");
+
+  useEffect(() => {
+    const updateMemoryUsage = () => {
+      if ((performance as any).memory) {
+        const used = (performance as any).memory.usedJSHeapSize / 1024 / 1024;
+        const total = (performance as any).memory.totalJSHeapSize / 1024 / 1024;
+        setMemoryUsage(`${used.toFixed(1)}MB / ${total.toFixed(1)}MB`);
+      }
+    };
+
+    const interval = setInterval(updateMemoryUsage, 5000);
+    updateMemoryUsage();
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const toolbarNavigate = (path: string) => {
+    setMenuOpen(false);
+    navigate(path);
+  };
+
+  const handleClearStorage = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear the local storage? This action cannot be undone."
+      )
+    ) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
+
+  return (
+    <div className="toolbar-container">
+      <div className="toolbar">
+        <div
+          className="toolbar-item"
+          onClick={() => {
+            toolbarNavigate("/");
+          }}
+          title="Home"
+        >
+          <FontAwesomeIcon icon={faHome} />
+        </div>
+        {showAdminItems && (
+          <div
+            className="toolbar-item"
+            onClick={() => {
+              toolbarNavigate("/app/business/");
+            }}
+          >
+            <FontAwesomeIcon icon={faUserTie} />
+          </div>
+        )}
+        <div
+          className="toolbar-item"
+          onClick={() => {
+            window.location.reload();
+          }}
+        >
+          <FontAwesomeIcon icon={faRotateRight} />
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <span>FPS: {fps}</span>
+        </div>
+        <div className="vertical-line"></div>
+        <div className="toolbar-item">
+          <span>RAM: {memoryUsage}</span>
+        </div>
+
+        <div className="toolbar-item" onClick={handleMenuToggle}>
+          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+        </div>
+
+        {menuOpen && (
+          <div className="dropdown-menu">
+            <div className="dropdown-item" onClick={() => toolbarNavigate("/")}>
+              Home
+            </div>
+            {showAdminItems && (
+              <>
+                <div
+                  className="dropdown-item"
+                  onClick={() => toolbarNavigate("/app/business/")}
+                >
+                  Statistics
+                </div>
+                <div
+                  className="dropdown-item"
+                  onClick={() => toolbarNavigate("/manage")}
+                >
+                  Restaurants
+                </div>
+                <div
+                  className="dropdown-item"
+                  onClick={() => toolbarNavigate("/manage")}
+                >
+                  Contacts
+                </div>
+                <div
+                  className="dropdown-item"
+                  onClick={() => toolbarNavigate("/manage")}
+                >
+                  Settings
+                </div>
+              </>
+            )}
+            <div
+              className="dropdown-item"
+              onClick={handleClearStorage}
+              style={{
+                color: "#ff0000",
+                fontWeight: "bold",
+              }}
+            >
+              Clear Storage
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ToolBar: React.FC = () => {
+  const [showToolbar, setShowToolbar] = useState<boolean>(
+    localStorage.getItem("showToolbar") === "true"
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -129,135 +272,17 @@ const ToolBar: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [user]);
+  }, []);
 
-  const handleModeChange = () => {
-    setMode((prevMode) => (prevMode === "dev" ? "prod" : "dev"));
-  };
+  const isProduction =
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1";
 
-  const memoryUsage = (performance as any).memory
-    ? ((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
-    : "Memory info not available";
-
-  const toolbarNavigate = (path: string) => {
-    setMenuOpen(false);
-    navigate(path);
-  };
-
-  const handleClearStorage = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear the local storage? This action cannot be undone."
-      )
-    ) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
-
-  if (!showToolbar) {
+  if (!showToolbar || isProduction) {
     return null;
   }
 
-  return (
-    <div className="toolbar-container">
-      <div className="toolbar">
-        <div
-          className="toolbar-item"
-          onClick={() => {
-            toolbarNavigate("/");
-          }}
-          title="Home"
-        >
-          <FontAwesomeIcon icon={faHome} />
-        </div>
-        <div
-          className="toolbar-item"
-          onClick={() => {
-            toolbarNavigate("/app/business/");
-          }}
-        >
-          <FontAwesomeIcon icon={faUserTie} />
-        </div>
-        <div
-          className="toolbar-item"
-          onClick={() => {
-            window.location.reload();
-          }}
-        >
-          <FontAwesomeIcon icon={faRotateRight} />
-        </div>
-        <div className="vertical-line"></div>
-        <div className="toolbar-item">
-          <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
-        </div>
-        <div className="vertical-line"></div>
-        <div className="toolbar-item">
-          <span>FPS: {fps}</span>
-        </div>
-        <div className="vertical-line"></div>
-        <div className="toolbar-item">
-          <span>RAM: {memoryUsage}</span>
-        </div>
-        <div className="vertical-line"></div>
-        <div className="toolbar-item profile-item">
-          {user?.name ? (
-            <div className="profile-initials" title={user.name}>
-              {getUserInitials(user.name)}
-            </div>
-          ) : (
-            <div className="profile-initials"></div>
-          )}
-        </div>
-        <div className="vertical-line"></div>
-        <div className="toolbar-item" onClick={handleMenuToggle}>
-          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
-        </div>
-
-        {menuOpen && (
-          <div className="dropdown-menu">
-            <div className="dropdown-item" onClick={() => toolbarNavigate("/")}>
-              Home
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => toolbarNavigate("/app/business/")}
-            >
-              Statistics
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => toolbarNavigate("/manage")}
-            >
-              Restaurants
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => toolbarNavigate("/manage")}
-            >
-              Contacts
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={handleClearStorage}
-              style={{
-                color: "#ff0000",
-                fontWeight: "bold",
-              }}
-            >
-              Clear Storage
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={() => toolbarNavigate("/manage")}
-            >
-              Settings
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <ToolBarContent />;
 };
 
 export default ToolBar;
