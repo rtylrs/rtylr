@@ -13,7 +13,7 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-echo "Deploying version: $VERSION"
+echo "Version: $VERSION"
 
 git add package.json
 
