@@ -31,7 +31,7 @@ import NoMatch from "./screens/Public/Extras/NoMatch";
 import Maintanance from "./screens/Public/Maintanance";
 
 //Components
-import Cookies from "./components/Cookies";
+import Cookies from "./components/Cookies/Cookies";
 import HelmetContainer from "./components/HelmetContainer";
 
 //Hooks
