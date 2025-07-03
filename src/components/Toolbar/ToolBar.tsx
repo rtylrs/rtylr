@@ -10,7 +10,8 @@ import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { RootState } from "../redux/store";
+import { RootState } from "../../redux/store";
+import "./ToolBar.scss";
 
 const CustomSwitch = styled(Switch)(({}) => ({
   width: 34,

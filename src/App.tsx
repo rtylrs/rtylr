@@ -48,7 +48,7 @@ import {
   selectIsAuthenticated,
   selectRole,
 } from "./redux/reducers/userSlice";
-import ToolBar from "./components/ToolBar";
+import ToolBar from "./components/Toolbar/ToolBar";
 import { AppDispatch, RootState } from "./redux/store";
 
 ChartJS.register(
