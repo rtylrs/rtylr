@@ -50,7 +50,7 @@ The application will be available at `http://localhost:5173`
 - `pnpm build` - Build for production
 - `pnpm preview` - Preview production build locally
 - `pnpm lint` - Run ESLint
-- `pnpm deploy` - Build and deploy to Firebase
+- `pnpm deploy` - Build and deploy to HostGator via FTP
 
 ### Project Structure
 
