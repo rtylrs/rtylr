@@ -9,6 +9,7 @@ import {
   selectRole,
   getUserInfo,
   restaurantWithGoogleAsync,
+  clearError,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
@@ -47,6 +48,11 @@ const Login: React.FC = () => {
       notify.error((error as any).message);
     }
   };
+
+  useEffect(() => {
+    // Clear any existing errors when component mounts
+    dispatch(clearError());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
