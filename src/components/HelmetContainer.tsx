@@ -1,23 +1,42 @@
 import { Helmet } from "react-helmet";
 
+interface HelmetContainerProps {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  author?: string;
+  keywords?: string;
+  robots?: string;
+  ogType?: string;
+  ogLocale?: string;
+  ogSiteName?: string;
+  ogDescription?: string;
+  twitterCard?: string;
+  twitterSite?: string;
+  twitterCreator?: string;
+  customMetaTags?: any[];
+  favicon?: string;
+}
+
 function HelmetContainer({
   title = "Vbitez - Contactless QR Menu",
-  description,
-  image,
-  url,
-  author,
-  keywords,
-  robots,
-  ogType,
-  ogLocale,
-  ogSiteName,
-  ogDescription,
-  twitterCard,
-  twitterSite,
-  twitterCreator,
-  customMetaTags,
-  favicon,
-}) {
+  description = "",
+  image = "",
+  url = "",
+  author = "",
+  keywords = "",
+  robots = "",
+  ogType = "",
+  ogLocale = "",
+  ogSiteName = "",
+  ogDescription = "",
+  twitterCard = "",
+  twitterSite = "",
+  twitterCreator = "",
+  customMetaTags = [],
+  favicon = "",
+}: HelmetContainerProps) {
   return (
     <Helmet>
       <meta charSet="utf-8" />
