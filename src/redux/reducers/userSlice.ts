@@ -168,6 +168,9 @@ const userSlice = createSlice({
       // clear entire local storage
       // localStorage.clear();
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -265,7 +268,7 @@ const userSlice = createSlice({
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, clearError } = userSlice.actions;
 
 export const selectUser = (state: { user: UserState }) => state.user.user;
 export const selectIsAuthenticated = (state: { user: UserState }) =>

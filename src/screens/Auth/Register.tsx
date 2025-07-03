@@ -9,8 +9,10 @@ import {
   registerRestaurantAsync,
   selectIsAuthenticated,
   selectLoading,
+  selectError,
   selectRole,
   restaurantWithGoogleAsync,
+  clearError,
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,6 +32,7 @@ const Register: React.FC = () => {
     selectIsAuthenticated(state)
   );
   const loading = useSelector((state: RootState) => selectLoading(state));
+  const error = useSelector((state: RootState) => selectError(state));
   const role = useSelector((state: RootState) => selectRole(state));
 
   const handleRegister = () => {
@@ -58,6 +61,11 @@ const Register: React.FC = () => {
       notify.error((error as any).message);
     }
   };
+
+  useEffect(() => {
+    // Clear any existing errors when component mounts
+    dispatch(clearError());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -169,6 +177,21 @@ const Register: React.FC = () => {
                 .
               </small>
             </div>
+
+            {error && (
+              <p
+                style={{
+                  color: "#dc2626",
+                  fontSize: 14,
+                  marginBottom: 16,
+                  textAlign: "center",
+                }}
+              >
+                {typeof error === "string"
+                  ? error
+                  : (error as any)?.message || "An error occurred"}
+              </p>
+            )}
 
             <VbitezButton
               variant="primary"
