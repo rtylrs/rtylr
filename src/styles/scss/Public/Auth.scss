@@ -1,3 +1,136 @@
+// =============================================================================
+// AUTH STYLES - Reusable styles for login and register forms
+// =============================================================================
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: white;
+  padding: 20px;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 550px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.auth-form {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h2 {
+    margin-bottom: 8px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+  }
+
+  p {
+    margin-bottom: 32px;
+    color: #666;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.auth-input {
+  width: 100%;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: white;
+  color: #374151;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  &:hover {
+    border-color: #9ca3af;
+  }
+}
+
+.auth-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 24px 0;
+  color: #9ca3af;
+  font-size: 14px;
+  position: relative;
+
+  span {
+    background: white;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: #e5e7eb;
+    z-index: 0;
+  }
+}
+
+.auth-footer {
+  margin-top: 32px;
+  text-align: center;
+  color: #666;
+
+  p {
+    margin: 8px 0;
+    font-size: 14px;
+  }
+
+  .auth-link {
+    cursor: pointer;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+  }
+}
+
+// =============================================================================
+// LOGIN SPECIFIC STYLES
+// =============================================================================
+
 .login-container {
   display: flex;
   height: 90vh;
@@ -164,304 +297,10 @@
     }
   }
 }
-.register-container {
-  display: flex;
-  max-height: 90vh;
-  background: #f5f5f5;
 
-  .image-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #f0f0f0;
-
-    .register-image {
-      width: 100%;
-      height: 90vh;
-      object-fit: cover;
-      object-position: left center;
-      filter: brightness(0.9);
-    }
-  }
-
-  .register-form {
-    flex: 1;
-    padding: 40px 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: white;
-    border-radius: 0 10px 10px 0;
-
-    .logo {
-      width: 150px;
-      height: auto;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      font-size: 32px;
-      color: #333;
-      text-align: center;
-    }
-
-    p {
-      margin-bottom: 20px;
-      color: #666;
-      text-align: center;
-    }
-
-    form {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .register-input {
-        width: 90%;
-        padding: 10px;
-        margin: 8px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        outline: none;
-        font-size: 14px;
-
-        &::placeholder {
-          color: #aaa;
-        }
-      }
-
-      .register-button {
-        color: #fff;
-        padding: 12px 70px;
-        border: 2px solid var(--primary-color);
-        font-size: 17px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s, box-shadow 0.3s;
-        font-weight: bold;
-        font-family: var(--secondary-font);
-        background-color: var(--primary-color);
-
-        &:hover {
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          background-color: var(--secondary-color);
-        }
-      }
-    }
-
-    .register-footer {
-      margin-top: 15px;
-      text-align: center;
-      color: #666;
-
-      .login-link,
-      .forgot-link {
-        cursor: pointer;
-        color: var(--secondary-color);
-        text-decoration: underline;
-        margin: 5px 0;
-
-        &:hover {
-          color: #0056b3;
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .register-container {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-
-    .image-container {
-      display: none;
-    }
-
-    .register-form {
-      flex: 1;
-      max-width: 100%;
-      border-radius: 10px;
-      padding: 20px;
-    }
-  }
-}
-
-/* General styles for both registration forms */
-.register-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  font-size: 14px;
-
-  &::placeholder {
-    color: #aaa;
-  }
-}
-
-.register-button {
-  width: 100%;
-  color: #fff;
-  padding: 12px;
-  margin-top: 20px;
-  border: none;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-  font-weight: bold;
-  background-color: var(--secondary-color);
-
-  &:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #0056b3;
-  }
-}
-
-/* RegisterUser specific styles */
-.register-user-container {
-  display: flex;
-  height: 90vh;
-  background: #f5f5f5;
-
-  .register-user-image-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #e0e0e0;
-
-    .register-user-image {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .register-user-form {
-    flex: 1;
-    padding: 40px 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: white;
-    border-radius: 0 10px 10px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-
-    .register-user-logo {
-      width: 150px;
-      height: auto;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      font-size: 32px;
-      color: #333;
-      text-align: center;
-    }
-
-    p {
-      margin-bottom: 20px;
-      color: #666;
-      text-align: center;
-    }
-
-    .register-user-input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      outline: none;
-      font-size: 14px;
-
-      &::placeholder {
-        color: #aaa;
-      }
-    }
-
-    .register-user-button {
-      width: 100%;
-      color: #fff;
-      padding: 12px;
-      margin-top: 20px;
-      border: none;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      font-weight: bold;
-      background-color: var(--secondary-color);
-
-      &:hover {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background-color: #0056b3;
-      }
-    }
-
-    .register-user-footer {
-      margin-top: 20px;
-      text-align: center;
-
-      p {
-        margin: 5px 0;
-
-        .register-user-login-link,
-        .register-user-forgot-link {
-          color: var(--secondary-color);
-          cursor: pointer;
-          text-decoration: underline;
-
-          &:hover {
-            text-decoration: none;
-          }
-        }
-      }
-    }
-  }
-}
-
-.register-user-social-media {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-
-  .register-user-google-button {
-    width: 100%;
-    padding: 12px;
-    color: var(--primary-color);
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s, box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .fa-google {
-      margin-right: 8px;
-    }
-  }
-}
+// =============================================================================
+// QUESTIONNAIRE STYLES
+// =============================================================================
 
 .questionaire-container {
   display: flex;
@@ -567,5 +406,42 @@
     @media only screen and (max-width: 768px) {
       display: none;
     }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 16px;
+  }
+
+  .auth-form-container {
+    max-width: 100%;
+  }
+
+  .auth-form {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-form {
+    padding: 24px 16px;
+
+    h2 {
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+
+  .auth-input {
+    padding: 14px 16px;
+    font-size: 14px;
   }
 }
