@@ -31,7 +31,7 @@
   }
 
   &:active {
-    transform: translateY(1px);
+    transform: none;
   }
 
   &.vbitez-button-sm {
@@ -142,11 +142,9 @@
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
   }
 
   &:active:not(.vbitez-button-disabled) {
-    transform: translateY(0);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
@@ -162,11 +160,9 @@
     border-color: var(--secondary-color);
     color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
   }
 
   &:active:not(.vbitez-button-disabled) {
-    transform: translateY(0);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
@@ -180,11 +176,9 @@
     background-color: var(--primary-color);
     color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
   }
 
   &:active:not(.vbitez-button-disabled) {
-    transform: translateY(0);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
@@ -197,11 +191,9 @@
   &:hover:not(.vbitez-button-disabled) {
     background-color: rgba(0, 0, 0, 0.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
   }
 
   &:active:not(.vbitez-button-disabled) {
-    transform: translateY(0);
     background-color: rgba(0, 0, 0, 0.1);
   }
 }

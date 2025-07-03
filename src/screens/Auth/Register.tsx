@@ -71,100 +71,95 @@ const Register: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="register-container">
-      <div className="image-container">
-        <video
-          autoPlay
-          muted
-          loop
-          src="/videos/Register.mp4"
-          className="register-image"
-        ></video>
-      </div>
-      <div className="register-form">
-        <h2>Sign Up</h2>
-        <p>Create your free account to get started</p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleRegister();
-          }}
-        >
-          <input
-            className="register-input"
-            type="text"
-            placeholder="Restaurant Name"
-            required
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="email"
-            placeholder="Email"
-            required
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="password"
-            placeholder="Password"
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="password"
-            placeholder="Confirm Password"
-            required
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <input
-            className="register-input"
-            type="text"
-            placeholder="Referred By (Optional)"
-            onChange={(e) => setReferred(e.target.value)}
-          />
-          <div
-            style={{
-              width: "90%",
+    <div className="auth-container">
+      <div className="auth-form-container">
+        <div className="auth-form">
+          <h2>Sign Up</h2>
+          <p>Create your free account to get started</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleRegister();
             }}
           >
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Restaurant Name"
+              required
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="Email"
+              required
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="Password"
+              required
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="password"
+              placeholder="Confirm Password"
+              required
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Referred By (Optional)"
+              onChange={(e) => setReferred(e.target.value)}
+            />
+
             <VbitezButton
-              style={{
-                minWidth: "100%",
-              }}
+              variant="primary"
+              size="md"
+              fullWidth
               loading={loading}
+              type="submit"
             >
               Register
             </VbitezButton>
-            <div className="register-user-social-media">
-              <VbitezButton
-                type="button"
-                className="register-user-google-button"
-                onClick={handleRegisterWithGoogle}
-              >
-                <FontAwesomeIcon icon={faGoogle} size="lg" />
-                Sign in with Google
-              </VbitezButton>
+
+            <div className="auth-separator">
+              <span>or</span>
             </div>
-          </div>
-        </form>
-        <div className="register-footer">
-          <p>
-            Already have an account?{" "}
-            <span
-              className="login-link"
-              onClick={() => navigate("/auth/login")}
+
+            <VbitezButton
+              variant="outline"
+              size="md"
+              fullWidth
+              type="button"
+              onClick={handleRegisterWithGoogle}
+              prefix={<FontAwesomeIcon icon={faGoogle} />}
             >
-              Login Now.
-            </span>
-          </p>
-          <p
-            className="forgot-link"
-            onClick={() => navigate("/auth/forgot-password")}
-          >
-            Forgot Password?
-          </p>
+              Sign in with Google
+            </VbitezButton>
+          </form>
+
+          <div className="auth-footer">
+            <p>
+              Already have an account?{" "}
+              <span
+                className="auth-link"
+                onClick={() => navigate("/auth/login")}
+              >
+                Login Now.
+              </span>
+            </p>
+            <p
+              className="auth-link"
+              onClick={() => navigate("/auth/forgot-password")}
+            >
+              Forgot Password?
+            </p>
+          </div>
         </div>
       </div>
     </div>
