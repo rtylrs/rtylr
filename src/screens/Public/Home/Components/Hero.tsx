@@ -49,7 +49,7 @@ const Hero: React.FC<{}> = () => {
           </VbitezButton>
           <VbitezButton
             onClick={() => navigate("/uses")}
-            variant="secondary"
+            variant="outline"
             suffix={<FontAwesomeIcon icon={faArrowRight} />}
           >
             {t("Hero.Learn More")}

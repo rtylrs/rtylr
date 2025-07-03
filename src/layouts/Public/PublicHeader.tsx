@@ -245,7 +245,7 @@ const Header: React.FC = () => {
           </button>
         )}
 
-        <VbitezButton onClick={handleClick} hidden={isMobile}>
+        <VbitezButton onClick={handleClick} hidden={isMobile} variant="primary">
           {isQuestionnaire ? (
             <div
               style={{
