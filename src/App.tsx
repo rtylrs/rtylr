@@ -121,7 +121,10 @@ const App = (): JSX.Element => {
         !location.pathname.includes("/manage/") &&
         (!role || role !== "admin") && <Maintanance />}
 
-      {role && role === "admin" && <ToolBar />}
+      {(role && role === "admin") ||
+      window.location.hostname === "localhost" ? (
+        <ToolBar />
+      ) : null}
 
       <Cookies />
 

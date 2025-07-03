@@ -59,7 +59,7 @@ export default defineConfig({
             "framer-motion",
             "@fortawesome/react-fontawesome",
           ],
-          styles: ["@mui/material", "react-toastify", "slick-carousel"],
+          styles: ["@mui/material", "slick-carousel"],
         },
       },
       input: {
