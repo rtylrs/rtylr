@@ -7,9 +7,6 @@ import HelmetContainer from "../../components/HelmetContainer";
 import { selectRole } from "../../redux/reducers/userSlice";
 import FreeAccount from "../../components/FreeAccount";
 import { RootState } from "../../redux/store";
-import { motion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { SidebarProvider } from "../../HOCs/SidebarProvider";
 
 const Vendor: React.FC<{

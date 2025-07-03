@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "package.json"
 
 jobs:
   deploy:
@@ -12,16 +14,36 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+        with:
+          fetch-depth: 2
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Check if version changed
+        id: version-check
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          PREVIOUS_VERSION=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
+          echo "Previous version: $PREVIOUS_VERSION"
+
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "Version changed"
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version unchanged"
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Cache pnpm dependencies
+        if: steps.version-check.outputs.should_deploy == 'true'
         uses: actions/cache@v3
         with:
           path: ~/.pnpm-store
@@ -30,15 +52,19 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Configure pnpm
+        if: steps.version-check.outputs.should_deploy == 'true'
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Dependencies with pnpm
+        if: steps.version-check.outputs.should_deploy == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build Project
+        if: steps.version-check.outputs.should_deploy == 'true'
         run: pnpm run build
 
       - name: Delete Existing Files
+        if: steps.version-check.outputs.should_deploy == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.1
         with:
           server: ${{ secrets.SFTP_HOST }}
@@ -51,6 +77,7 @@ jobs:
           dangerous-clean-slate: true
 
       - name: Deploy Build Files
+        if: steps.version-check.outputs.should_deploy == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.1
         with:
           server: ${{ secrets.SFTP_HOST }}
@@ -65,3 +92,7 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/.github/**
+
+      - name: Skip deployment
+        if: steps.version-check.outputs.should_deploy == 'false'
+        run: echo "Skipping deployment - version unchanged"
