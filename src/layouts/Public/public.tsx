@@ -1,43 +1,46 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Header from "./PublicHeader";
 import Footer from "./PublicFooter";
-import Loader from "../loader/Loader";
 
 const Public: React.FC<{
   children: React.ReactNode;
-}> = ({ children }) => {
-  const [loading, setLoading] = React.useState(false);
+  hasPadding?: boolean;
+  paddingTop?: string;
+  hasHeader?: boolean;
+  hasFooter?: boolean;
+}> = React.memo(
+  ({
+    children,
+    hasPadding = true,
+    paddingTop = "30px",
+    hasHeader = true,
+    hasFooter = true,
+  }) => {
+    const marginTop = useMemo(() => {
+      const pathname = document.location.pathname;
+      if (pathname === "/") {
+        return "0px";
+      }
+      return hasPadding ? paddingTop : "0px";
+    }, [hasPadding, paddingTop]);
 
-  return (
-    <div>
-      {loading && <Loader />}
-      <div
-        style={{
-          display: loading ? "none" : "",
-        }}
-      >
-        <Header />
-        <div
-          style={{
-            marginTop: document.location.pathname === "/" ? "0px" : "80px",
-          }}
-        >
-          {React.Children.map(children, (child) => {
-            return React.isValidElement<{
-              startLoading: () => void;
-              endLoading: () => void;
-            }>(child)
-              ? React.cloneElement(child, {
-                  startLoading: () => setLoading(true),
-                  endLoading: () => setLoading(false),
-                })
-              : child;
-          })}
-        </div>
-        <Footer />
+    const contentStyle = useMemo(
+      () => ({
+        marginTop,
+      }),
+      [marginTop]
+    );
+
+    return (
+      <div>
+        {hasHeader && <Header />}
+        <div style={contentStyle}>{children}</div>
+        {hasFooter && <Footer />}
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+Public.displayName = "Public";
 
 export default Public;
