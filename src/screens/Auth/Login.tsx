@@ -14,6 +14,8 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import VbitezButton from "../../components/VbitezButton/VbitezButton";
 
 const Login: React.FC = () => {
@@ -59,60 +61,105 @@ const Login: React.FC = () => {
   }, [isAuthenticated, navigate, role]);
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <img src="/logo.png" alt="Logo" className="logo" />
-        <h2>Welcome back!!</h2>
-        <p>Please enter your details.</p>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="login-input"
-        />
-        <input
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="login-input"
-        />
-        {error && (
-          <p className="login-error">
-            {typeof error === "string"
-              ? error
-              : (error as any)?.message || "An error occurred"}
-          </p>
-        )}
-        <div className="login-options">
-          <span className="forgot-password">Forgot password?</span>
-        </div>
-        <div className="login-button-wrapper">
-          <VbitezButton
-            onClick={handleSubmit}
-            style={{
-              minWidth: "100%",
+    <div className="auth-container">
+      <div className="auth-form-container">
+        <div className="auth-form">
+          <h2>Welcome back!</h2>
+          <p>Please enter your details to sign in</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
             }}
-            loading={loading}
           >
-            Login
-          </VbitezButton>
+            <label htmlFor="login-email" className="auth-label">
+              Email
+            </label>
+            <input
+              id="login-email"
+              className="auth-input"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <label htmlFor="login-password" className="auth-label">
+              Password
+            </label>
+            <input
+              id="login-password"
+              className="auth-input"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            {error && (
+              <p
+                style={{
+                  color: "#dc2626",
+                  fontSize: 14,
+                  marginBottom: 16,
+                  textAlign: "center",
+                }}
+              >
+                {typeof error === "string"
+                  ? error
+                  : (error as any)?.message || "An error occurred"}
+              </p>
+            )}
+
+            <div style={{ width: "100%", marginBottom: 16 }}>
+              <span
+                className="auth-link"
+                onClick={() => navigate("/auth/forgot-password")}
+                style={{ fontSize: 14, cursor: "pointer" }}
+              >
+                Forgot password?
+              </span>
+            </div>
+
+            <VbitezButton
+              variant="primary"
+              size="md"
+              fullWidth
+              loading={loading}
+              type="submit"
+            >
+              Login
+            </VbitezButton>
+
+            <div className="auth-separator">
+              <span>or</span>
+            </div>
+
+            <VbitezButton
+              variant="outline"
+              size="md"
+              fullWidth
+              type="button"
+              onClick={handleGoogle}
+              prefix={<FontAwesomeIcon icon={faGoogle} />}
+            >
+              Sign in with Google
+            </VbitezButton>
+          </form>
+
+          <div className="auth-footer">
+            <p>
+              Don't have an account?{" "}
+              <span
+                className="auth-link"
+                onClick={() => navigate("/auth/register")}
+              >
+                Sign up
+              </span>
+            </p>
+          </div>
         </div>
-        <div className="login-separator">
-          <span>or</span>
-        </div>
-        <button className="login-social-button" onClick={handleGoogle}>
-          <img src="/images/google-icon.png" alt="Google Icon" />
-          Log in with Google
-        </button>
-        <p className="signup-link">
-          Don’t have an account?{" "}
-          <span onClick={() => navigate("/auth/register")}>Sign up</span>
-        </p>
-      </div>
-      <div className="login-image">
-        <img src="/images/LoginBG.jpg" alt="Logo" className="logo" />
       </div>
     </div>
   );
