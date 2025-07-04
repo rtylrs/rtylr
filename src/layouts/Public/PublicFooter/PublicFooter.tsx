@@ -94,13 +94,11 @@ const Footer: React.FC = () => {
                 <div className="contact-item">
                   <span className="contact-label">Email:</span>
                   <a
-                    href={`mailto:${
-                      config?.contactEmail || "vbitez@voxire.com"
-                    }`}
+                    href={`mailto:${config?.contactEmail || "info@vbitez.com"}`}
                     className="contact-link"
                     aria-label="Send us an email"
                   >
-                    {config?.contactEmail || "vbitez@voxire.com"}
+                    {config?.contactEmail || "info@vbitez.com"}
                   </a>
                 </div>
 
