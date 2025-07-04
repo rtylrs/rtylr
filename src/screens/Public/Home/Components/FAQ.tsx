@@ -44,7 +44,7 @@ function Faq() {
           marginBottom: "20px",
         }}
       >
-        <VbitezButton variant="default" onClick={() => navigate("/faqs")}>
+        <VbitezButton variant="secondary" onClick={() => navigate("/faqs")}>
           View All
         </VbitezButton>
       </div>

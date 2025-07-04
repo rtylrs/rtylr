@@ -161,7 +161,6 @@ const Price: React.FC = () => {
         </div>
       </div>
       <div
-        className="price-button"
         style={{
           marginTop: "50px",
           marginBottom: "0px",

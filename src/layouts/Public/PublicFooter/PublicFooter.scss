@@ -90,6 +90,8 @@
           position: relative;
           border-left: 2.5px solid transparent;
           background: none;
+          padding-left: 0.4em;
+          display: inline-block;
           &::before {
             display: none;
           }
@@ -97,7 +99,6 @@
           &:focus {
             color: var(--primary-color);
             border-left: 2.5px solid var(--primary-color);
-            padding-left: 1.2em;
             background: none;
             outline: none;
           }
