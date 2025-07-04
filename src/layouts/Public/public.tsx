@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import Header from "./PublicHeader";
-import Footer from "./PublicFooter";
+import Footer from "./PublicFooter/PublicFooter";
 
 const Public: React.FC<{
   children: React.ReactNode;

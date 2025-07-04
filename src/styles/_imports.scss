@@ -5,7 +5,6 @@
 
 // SCSS imports Public
 @include meta.load-css("./scss/Public/Header.scss");
-@include meta.load-css("./scss/Public/Footer.scss");
 @include meta.load-css("./scss/Public/Auth.scss");
 @include meta.load-css("./scss/Public/Home.scss");
 @include meta.load-css("./scss/Public/About.scss");
