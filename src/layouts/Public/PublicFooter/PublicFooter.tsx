@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
         { to: "/contact", label: "Contact Us" },
         {
           to: "https://voxire.com/careers",
-          label: "Careers (Jobs)",
+          label: "Careers",
           external: true,
         },
       ],
@@ -29,7 +29,6 @@ const Footer: React.FC = () => {
         { to: "/faqs", label: "FAQs" },
         { to: "/pricing", label: "Pricing" },
         { to: "/feedback", label: "Feedback" },
-        { to: "/feedback", label: "Feature Request" },
       ],
     },
     {
