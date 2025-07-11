@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MenuItem from "./Components/MenuItem";
 import useAsync from "../../../hooks/useAsync";
-import menuApi from "../../../api/menu";
+import { menuApi } from "../../../api";
 import { useParams } from "react-router-dom";
 
 function MenuWithId() {
