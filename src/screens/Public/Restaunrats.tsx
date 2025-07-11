@@ -1,6 +1,6 @@
 import React from "react";
 import useAsync from "../../hooks/useAsync";
-import businessApi from "../../api/business";
+import { businessApi } from "../../api";
 
 const Restaunrats = (): JSX.Element => {
   const [restaurants, setRestaurants] = React.useState<any>([]);

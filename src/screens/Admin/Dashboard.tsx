@@ -7,20 +7,20 @@ import {
   faStarHalfStroke,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import adminApi from "../../api/admin";
+import { adminApi } from "../../api";
 import useAsync from "../../hooks/useAsync";
 
 function Dashboard() {
   const [allEvents, setAllEvents] = React.useState([]);
   const [users, setUsers] = React.useState(0);
-  const [bussiness, setBussiness] = React.useState(0);
+  const [business, setBusiness] = React.useState(0);
   const [reviews, setReviews] = React.useState(0);
   const [events, setEvents] = React.useState(0);
   const [clicks, setClicks] = React.useState(0);
   const [reviewsData, setReviewsData] = React.useState([]);
 
   const getUsersCount = useAsync({
-    fn: adminApi.UserCount,
+    fn: adminApi.getUserCount,
     onSuccess: () => {
       setUsers(getUsersCount.result?.count);
     },
@@ -30,13 +30,13 @@ function Dashboard() {
     callOnMount: true,
   });
 
-  const getBussinessCount = useAsync({
-    fn: adminApi.BussinessCount,
+  const getBusinessCount = useAsync({
+    fn: adminApi.getBusinessCount,
     onSuccess: () => {
-      setBussiness(getBussinessCount.result?.count);
+      setBusiness(getBusinessCount.result?.count);
     },
     onError: () => {
-      alert(getBussinessCount.error);
+      alert(getBusinessCount.error);
     },
     callOnMount: true,
   });
@@ -75,7 +75,7 @@ function Dashboard() {
                 <p className="text-primary-p">Restaurants</p>
               </div>
 
-              <span className="font-bold text-title">{bussiness}</span>
+              <span className="font-bold text-title">{business}</span>
             </div>
           </div>
 

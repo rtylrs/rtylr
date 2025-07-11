@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useAsync from "../../../hooks/useAsync";
-import adminApiExport from "../../../api/admin";
+import { adminApi } from "../../../api";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { fetchFaqs } from "../../../redux/reducers/configSlice";
@@ -14,7 +14,7 @@ const AddFaq = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const addFaqFunc = useAsync({
-    fn: adminApiExport.addFaq,
+    fn: adminApi.addFaq,
     onSuccess: () => {
       alert("FAQ added successfully");
       dispatch(fetchFaqs());

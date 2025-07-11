@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useAsync from "../../../hooks/useAsync";
-import menuApi from "../../../api/menu";
+import { menuApi } from "../../../api";
 import LandingSection from "./Sections/LandingSection";
 import MenuSection from "./Sections/MenuSection";
 import AboutSection from "./Sections/AboutSection";
