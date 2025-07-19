@@ -7,6 +7,10 @@ on:
     paths:
       - "package.json"
 
+env:
+  TELEGRAM_BOT_TOKEN: 7250945940:AAGxOe0ahPZy2UfzGjQfXR4XC5vjThrnvow
+  TELEGRAM_CHAT_ID: -4810256950
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -63,19 +67,6 @@ jobs:
         if: steps.version-check.outputs.should_deploy == 'true'
         run: pnpm run build
 
-      - name: Delete Existing Files
-        if: steps.version-check.outputs.should_deploy == 'true'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          server-dir: /subdomains/vbitez.voxire.com/
-          dry-run: false
-          dangerous-clean-slate: true
-
       - name: Deploy Build Files
         if: steps.version-check.outputs.should_deploy == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.1
@@ -87,6 +78,7 @@ jobs:
           port: 21
           local-dir: ./dist/
           server-dir: /subdomains/vbitez.voxire.com/
+          dangerous-clean-slate: true
           exclude: |
             **/.git*
             **/.git*/**
@@ -96,3 +88,27 @@ jobs:
       - name: Skip deployment
         if: steps.version-check.outputs.should_deploy == 'false'
         run: echo "Skipping deployment - version unchanged"
+
+      - name: Send Telegram Notification - Success
+        if: steps.version-check.outputs.should_deploy == 'true' && success()
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+
+          MESSAGE="🚀 *Deployment Successful!*
+
+          📦 **Project:** Vbitez
+          🔢 **Version:** $CURRENT_VERSION
+          🔗 **Commit:** $COMMIT_HASH
+          📝 **Message:** $COMMIT_MESSAGE
+          ⏰ **Time:** $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
+          curl -s -X POST \
+            "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${{ env.TELEGRAM_CHAT_ID }}\",
+              \"text\": \"$MESSAGE\",
+              \"parse_mode\": \"Markdown\"
+            }"
