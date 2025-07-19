@@ -12,7 +12,7 @@ interface ConfigState {
   websiteData: any;
   aboutContent: any;
   maintanance: boolean;
-  bussinessCount: number;
+  businessCount: number;
   contactInfo: ContactInfo;
   faqs: any[];
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -25,7 +25,7 @@ const initialState: ConfigState = {
   websiteData: null,
   aboutContent: null,
   maintanance: false,
-  bussinessCount: 0,
+  businessCount: 0,
   contactInfo: {
     contactEmail: null,
     contactNumber: null,
@@ -50,8 +50,8 @@ const configSlice = createSlice({
     setMaintanance: (state, action: PayloadAction<boolean>) => {
       state.maintanance = action.payload;
     },
-    setBussinessCount: (state, action: PayloadAction<number>) => {
-      state.bussinessCount = action.payload;
+    setBusinessCount: (state, action: PayloadAction<number>) => {
+      state.businessCount = action.payload;
     },
     setContactInfo: (state, action: PayloadAction<ContactInfo>) => {
       state.contactInfo = action.payload;
@@ -72,7 +72,7 @@ export const {
   setWebsiteData,
   setAboutContent,
   setMaintanance,
-  setBussinessCount,
+  setBusinessCount,
   setContactInfo,
   setFaqs,
   setNews,
@@ -95,7 +95,7 @@ export const fetchConfigData = () => async (dispatch: AppDispatch) => {
     } = response.data.config;
     dispatch(setAboutContent(aboutContent));
     dispatch(setMaintanance(maintanance));
-    dispatch(setBussinessCount(count));
+    dispatch(setBusinessCount(count));
     dispatch(
       setContactInfo({
         contactEmail,
