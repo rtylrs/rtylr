@@ -25,7 +25,7 @@ The GitHub workflow automatically deploys apps when:
 ### Current App Versions
 
 - **Landing**: v0.0.2
-- **Dashboard**: v0.0.1
+- **Dashboard**: v0.0.2
 - **Menu**: v0.0.1
 
 ## 🚀 Deploying Apps
@@ -49,13 +49,9 @@ The script automatically:
 4. **Commits changes intelligently**:
    - Other uncommitted changes → separate commit
    - Version bump → clean isolated commit
-5. **Provides next steps** for pushing to trigger deployment
+5. **Pushes automatically** to trigger deployment
 
-Then simply push:
-
-```bash
-git push origin main
-```
+That's it! The deployment starts immediately.
 
 ### Method 2: Manual Version Update
 
@@ -81,27 +77,20 @@ git push origin main
 To deploy multiple apps simultaneously, update their versions in the same commit:
 
 ```bash
-# Update multiple app versions
+# Update multiple app versions (each pushes automatically)
 node scripts/bump-version.js landing
 node scripts/bump-version.js dashboard
-
-# Commit all changes
-git add apps/*/version.json
-git commit -m "🚀 Deploy landing v0.0.2 and dashboard v0.0.2"
-git push origin main
 ```
 
 ## 📋 Deployment Process
 
-When you push version changes, the workflow:
+When you run the bump script, it:
 
-1. **🔍 Detects Changes**: Scans for version changes in app `version.json` files
-2. **🏗️ Builds Apps**: Only builds apps that have version changes
-3. **🚀 Deploys**: Deploys each app to its respective subdomain:
-   - Landing → `vbitez.voxire.com`
-   - Dashboard → `dashboard.vbitez.voxire.com`
-   - Menu → `menu.vbitez.voxire.com`
-4. **📱 Notifies**: Sends success notification to Telegram with deployment details
+1. **🔍 Verifies Build**: Ensures your code works before any changes
+2. **📈 Bumps Version**: Updates version.json with rollover logic
+3. **💾 Commits Smart**: Separates other changes from version bump
+4. **🚀 Pushes Auto**: Triggers GitHub Actions deployment
+5. **📱 Notifies**: Sends Telegram notification when complete
 
 ## 🎯 Deployment Targets
 
@@ -137,24 +126,21 @@ Successful deployments send rich notifications including:
 3. When ready to deploy:
    ```bash
    node scripts/bump-version.js <app-name>
-   # Script builds, commits, and shows next steps
-   git push origin main
+   # Script builds, commits, pushes, and triggers deployment automatically!
    ```
 
 ### For Hotfixes
 
 ```bash
-# Script handles build verification and commits automatically
+# Script handles everything automatically - build, commit, push, deploy
 node scripts/bump-version.js <app-name>
-git push origin main
 ```
 
 ### For Any Updates
 
 ```bash
-# All deployments use the same simple workflow
+# Single command deployment - couldn't be simpler!
 node scripts/bump-version.js <app-name>
-git push origin main
 ```
 
 ### What the Script Does
@@ -162,7 +148,8 @@ git push origin main
 - ✅ **Builds first** - ensures your code works before committing
 - ✅ **Smart commits** - separates other changes from version bumps
 - ✅ **Clean history** - each version bump is an isolated commit
-- ✅ **Clear feedback** - shows exactly what happened and next steps
+- ✅ **Auto-deploys** - pushes automatically to trigger deployment
+- ✅ **Clear feedback** - shows exactly what happened and deployment status
 
 ## 🔧 Configuration
 
