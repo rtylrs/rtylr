@@ -4,7 +4,13 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "deploy:landing": "node scripts/bump-version.js landing",
+    "deploy:dashboard": "node scripts/bump-version.js dashboard",
+    "deploy:menu": "node scripts/bump-version.js menu",
+    "version:patch": "node scripts/bump-version.js",
+    "version:minor": "node scripts/bump-version.js $npm_config_app minor",
+    "version:major": "node scripts/bump-version.js $npm_config_app major"
   },
   "private": true,
   "dependencies": {
@@ -96,13 +102,5 @@
   },
   "nx": {
     "includedScripts": []
-  },
-  "deployment": {
-    "version": "0.0.1",
-    "timestamp": "2025-07-23T08:52:22.087Z",
-    "deployTarget": "landing",
-    "apps": [
-      "landing"
-    ]
   }
 }
