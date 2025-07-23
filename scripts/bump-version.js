@@ -22,6 +22,7 @@ This script:
 3. Bumps the app version only if build succeeds (with rollover logic)
 4. Commits only the version.json change
 5. Handles other uncommitted changes separately
+6. Automatically pushes to trigger deployment
 
 Version rollover logic:
 - Patch increments by 1 (0.0.1 → 0.0.2)
@@ -145,12 +146,15 @@ try {
     execCommand(`git commit -m "🚀 Bump ${appName} to v${newVersion}"`, `Committing version bump`);
     console.log(`✅ Version bump committed: ${appName} v${newVersion}`);
 
-    // 6. Instructions for next steps
+    // 6. Push to trigger deployment automatically
+    execCommand(`git push origin main`, `Pushing to trigger deployment`);
+    console.log(`✅ Pushed to origin/main - deployment triggered!`);
+
+    // 7. Success message
     console.log('');
-    console.log('🎯 Next steps:');
-    console.log('   git push origin main    # Push to trigger deployment');
-    console.log('');
-    console.log(`📦 Deployment will build and deploy ${appName} v${newVersion}`);
+    console.log('🎉 Deployment process started successfully!');
+    console.log(`📦 GitHub Actions will now build and deploy ${appName} v${newVersion}`);
+    console.log('📱 You\'ll receive a Telegram notification when deployment completes');
 
 } catch (error) {
     console.error('❌ Error during version bump process:', error.message);
