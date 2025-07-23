@@ -7,7 +7,8 @@
     "test": "nx test",
     "deploy:landing": "node scripts/bump-version.js landing",
     "deploy:dashboard": "node scripts/bump-version.js dashboard",
-    "deploy:menu": "node scripts/bump-version.js menu"
+    "deploy:menu": "node scripts/bump-version.js menu",
+    "deploy": "echo 'Usage: npm run deploy:<app-name> where <app-name> is landing, dashboard, or menu'"
   },
   "private": true,
   "dependencies": {
