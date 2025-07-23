@@ -217,8 +217,8 @@ jobs:
             COMMITS=$(git log --oneline --reverse -10 --pretty=format:"• %h %s")
           fi
 
-          # Format commits for Telegram (limit length)
-          FORMATTED_COMMITS=$(echo "$COMMITS" | head -10)
+          # Filter out deployment bump messages and limit length
+          FORMATTED_COMMITS=$(echo "$COMMITS" | grep -v "🚀 Bump" | grep -v "🔧 Fix Telegram" | grep -v "🧹 Clean up deployment" | head -10)
 
           # Build the message
           MESSAGE="🚀 Deployment Successful!"
