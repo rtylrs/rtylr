@@ -6,23 +6,24 @@ const path = require('path');
 // Parse command line arguments
 const args = process.argv.slice(2);
 const appName = args[0];
-const versionType = args[1] || 'patch'; // patch, minor, major
 
 const validApps = ['landing', 'dashboard', 'menu'];
-const validVersionTypes = ['patch', 'minor', 'major'];
 
 function showUsage() {
     console.log(`
-Usage: node scripts/bump-version.js <app> [version-type]
+Usage: node scripts/bump-version.js <app>
 
 Apps: ${validApps.join(', ')}
-Version types: ${validVersionTypes.join(', ')} (default: patch)
+
+This script automatically increments the patch version, with rollover logic:
+- Patch increments by 1 (0.0.1 → 0.0.2)
+- At patch 100, rolls to next minor (0.0.99 → 0.1.0)  
+- At minor 100, rolls to next major (0.99.99 → 1.0.0)
 
 Examples:
-  node scripts/bump-version.js landing patch    # 1.0.0 → 1.0.1
-  node scripts/bump-version.js dashboard minor # 1.0.0 → 1.1.0
-  node scripts/bump-version.js menu major      # 1.0.0 → 2.0.0
-  node scripts/bump-version.js landing         # defaults to patch
+  node scripts/bump-version.js landing     # 0.0.1 → 0.0.2
+  node scripts/bump-version.js dashboard   # 0.0.99 → 0.1.0 (rollover)
+  node scripts/bump-version.js menu        # 0.99.99 → 1.0.0 (rollover)
 `);
 }
 
@@ -32,26 +33,27 @@ if (!appName || !validApps.includes(appName)) {
     process.exit(1);
 }
 
-if (!validVersionTypes.includes(versionType)) {
-    console.error('❌ Invalid version type');
-    showUsage();
-    process.exit(1);
-}
-
-function bumpVersion(currentVersion, type) {
+function bumpVersion(currentVersion) {
     const parts = currentVersion.split('.').map(Number);
-    const [major, minor, patch] = parts;
+    let [major, minor, patch] = parts;
 
-    switch (type) {
-        case 'major':
-            return `${major + 1}.0.0`;
-        case 'minor':
-            return `${major}.${minor + 1}.0`;
-        case 'patch':
-            return `${major}.${minor}.${patch + 1}`;
-        default:
-            throw new Error('Invalid version type');
+    // Increment patch
+    let newPatch = patch + 1;
+    let newMinor = minor;
+    let newMajor = major;
+
+    // Rollover logic like deploy.sh
+    if (newPatch > 99) {
+        newPatch = 0;
+        newMinor = minor + 1;
+
+        if (newMinor > 99) {
+            newMinor = 0;
+            newMajor = major + 1;
+        }
     }
+
+    return `${newMajor}.${newMinor}.${newPatch}`;
 }
 
 try {
@@ -65,7 +67,7 @@ try {
 
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
     const currentVersion = packageJson.version;
-    const newVersion = bumpVersion(currentVersion, versionType);
+    const newVersion = bumpVersion(currentVersion);
 
     packageJson.version = newVersion;
 
