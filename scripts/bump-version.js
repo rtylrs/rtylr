@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -15,7 +16,14 @@ Usage: node scripts/bump-version.js <app>
 
 Apps: ${validApps.join(', ')}
 
-This script automatically increments the patch version, with rollover logic:
+This script:
+1. Ensures dependencies are installed (runs pnpm install if needed)
+2. Builds the app first to verify it works
+3. Bumps the app version only if build succeeds (with rollover logic)
+4. Commits only the version.json change
+5. Handles other uncommitted changes separately
+
+Version rollover logic:
 - Patch increments by 1 (0.0.1 → 0.0.2)
 - At patch 100, rolls to next minor (0.0.99 → 0.1.0)  
 - At minor 100, rolls to next major (0.99.99 → 1.0.0)
@@ -56,28 +64,95 @@ function bumpVersion(currentVersion) {
     return `${newMajor}.${newMinor}.${newPatch}`;
 }
 
-try {
-    const packagePath = path.join(__dirname, '..', 'apps', appName, 'package.json');
+function execCommand(command, description) {
+    try {
+        console.log(`🔄 ${description}...`);
+        const output = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+        return output.trim();
+    } catch (error) {
+        console.error(`❌ Failed to ${description.toLowerCase()}`);
+        console.error(error.message);
+        process.exit(1);
+    }
+}
 
-    if (!fs.existsSync(packagePath)) {
-        console.error(`❌ Package.json not found for app: ${appName}`);
-        console.error(`Expected path: ${packagePath}`);
+function checkGitStatus() {
+    try {
+        const status = execSync('git status --porcelain', { encoding: 'utf8' });
+        return status.trim();
+    } catch (error) {
+        console.error('❌ Failed to check git status');
+        process.exit(1);
+    }
+}
+
+try {
+    const versionPath = path.join(__dirname, '..', 'apps', appName, 'version.json');
+    const relativeVersionPath = `apps/${appName}/version.json`;
+
+    if (!fs.existsSync(versionPath)) {
+        console.error(`❌ version.json not found for app: ${appName}`);
+        console.error(`Expected path: ${versionPath}`);
         process.exit(1);
     }
 
-    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-    const currentVersion = packageJson.version;
+    // Check for existing uncommitted changes
+    const initialStatus = checkGitStatus();
+    const hasOtherChanges = initialStatus.length > 0;
+
+    if (hasOtherChanges) {
+        console.log('📝 Found existing uncommitted changes - will handle separately');
+    }
+
+    // 1. Ensure dependencies are installed
+    const nodeModulesPath = path.join(__dirname, '..', 'node_modules');
+    if (!fs.existsSync(nodeModulesPath)) {
+        execCommand('pnpm install', 'Installing dependencies');
+        console.log('✅ Dependencies installed');
+    }
+
+    // 2. Build the app FIRST to verify it works before changing anything
+    execCommand(`npx nx build ${appName}`, `Building ${appName} to verify it works`);
+    console.log(`✅ ${appName} built successfully - safe to bump version`);
+
+    // 3. Only now bump version since we know the build works
+    const versionJson = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+    const currentVersion = versionJson.version;
     const newVersion = bumpVersion(currentVersion);
 
-    packageJson.version = newVersion;
+    versionJson.version = newVersion;
 
-    fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
+    fs.writeFileSync(versionPath, JSON.stringify(versionJson, null, 2) + '\n');
 
-    console.log(`✅ Successfully bumped ${appName} version: ${currentVersion} → ${newVersion}`);
-    console.log(`📁 Updated: ${packagePath}`);
-    console.log(`💡 Commit and push this change to trigger deployment for ${appName}`);
+    console.log(`✅ Bumped ${appName} version: ${currentVersion} → ${newVersion}`);
+    console.log(`📁 Updated: ${versionPath}`);
+
+    // 4. Handle git commits
+    if (hasOtherChanges) {
+        // First commit other changes
+        execCommand('git add .', 'Staging all changes');
+        execCommand(`git reset HEAD ${relativeVersionPath}`, `Unstaging ${relativeVersionPath}`);
+
+        const stagedFiles = execSync('git diff --cached --name-only', { encoding: 'utf8' }).trim();
+        if (stagedFiles) {
+            execCommand(`git commit -m "📝 Commit changes before ${appName} version bump"`, 'Committing other changes');
+            console.log('✅ Other changes committed separately');
+        }
+    }
+
+    // 5. Commit only the version.json version change
+    execCommand(`git add ${relativeVersionPath}`, `Staging ${relativeVersionPath}`);
+    execCommand(`git commit -m "🚀 Bump ${appName} to v${newVersion}"`, `Committing version bump`);
+    console.log(`✅ Version bump committed: ${appName} v${newVersion}`);
+
+    // 6. Instructions for next steps
+    console.log('');
+    console.log('🎯 Next steps:');
+    console.log('   git push origin main    # Push to trigger deployment');
+    console.log('');
+    console.log(`📦 Deployment will build and deploy ${appName} v${newVersion}`);
 
 } catch (error) {
-    console.error('❌ Error bumping version:', error.message);
+    console.error('❌ Error during version bump process:', error.message);
     process.exit(1);
 } 
