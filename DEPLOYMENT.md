@@ -34,15 +34,16 @@ The GitHub workflow automatically deploys apps when:
 Use the provided utility script to bump versions easily:
 
 ```bash
-# Bump patch version (1.0.0 → 1.0.1)
-node scripts/bump-version.js landing
-
-# Bump minor version (1.0.0 → 1.1.0)
-node scripts/bump-version.js dashboard minor
-
-# Bump major version (1.0.0 → 2.0.0)
-node scripts/bump-version.js menu major
+# Automatically bump patch version with rollover logic
+node scripts/bump-version.js landing     # 0.0.1 → 0.0.2
+node scripts/bump-version.js dashboard   # 0.0.99 → 0.1.0 (rollover)  
+node scripts/bump-version.js menu        # 0.99.99 → 1.0.0 (rollover)
 ```
+
+The script uses the same auto-increment logic as deploy.sh:
+- Patch increments by 1 (0.0.1 → 0.0.2)
+- At patch 100, rolls to next minor (0.0.99 → 0.1.0)
+- At minor 100, rolls to next major (0.99.99 → 1.0.0)
 
 Then commit and push:
 ```bash
@@ -125,27 +126,27 @@ Successful deployments send rich notifications including:
 2. Test locally using `nx serve <app-name>`
 3. When ready to deploy:
    ```bash
-   node scripts/bump-version.js <app-name> patch
+   node scripts/bump-version.js <app-name>
    git add apps/<app-name>/package.json
-   git commit -m "✨ Add new feature to <app-name> v1.0.X"
+   git commit -m "✨ Add new feature to <app-name>"
    git push origin main
    ```
 
 ### For Hotfixes
 ```bash
-# Quick patch deployment
-node scripts/bump-version.js <app-name> patch
+# Quick deployment (auto-increments version)
+node scripts/bump-version.js <app-name>
 git add apps/<app-name>/package.json
-git commit -m "🐛 Hotfix for <app-name> v1.0.X"
+git commit -m "🐛 Hotfix for <app-name>"
 git push origin main
 ```
 
-### For Breaking Changes
+### For Any Updates
 ```bash
-# Major version bump for breaking changes
-node scripts/bump-version.js <app-name> major
+# All deployments use the same simple command
+node scripts/bump-version.js <app-name>
 git add apps/<app-name>/package.json
-git commit -m "💥 BREAKING: Update <app-name> to v2.0.0"
+git commit -m "🚀 Deploy <app-name> updates"
 git push origin main
 ```
 
@@ -197,9 +198,18 @@ The deployment workflow triggers on:
 
 5. **Version Coordination**: Keep related apps in sync when they share dependencies
 
-## 🔄 Backward Compatibility
+## 🔄 Migration from deploy.sh
 
-The system maintains backward compatibility with the old deployment metadata approach in `package.json`. If no app version changes are detected, it will fall back to checking for deployment metadata in the root `package.json`.
+This new system **replaces** the old `deploy.sh` script. Key differences:
+
+| Old System (deploy.sh) | New System (per-app) |
+|------------------------|----------------------|
+| Single main package.json version | Individual app versions |
+| Deployment metadata in root | Version changes trigger deployment |
+| Manual script execution | Simple npm scripts |
+| All apps deploy together | Selective app deployment |
+
+**The system maintains backward compatibility** - if no app version changes are detected, it will fall back to checking for deployment metadata in the root `package.json`.
 
 ---
 
