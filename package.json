@@ -8,7 +8,8 @@
     "deploy:landing": "node scripts/bump-version.js landing",
     "deploy:dashboard": "node scripts/bump-version.js dashboard",
     "deploy:menu": "node scripts/bump-version.js menu",
-    "deploy": "echo 'Usage: npm run deploy:<app-name> where <app-name> is landing, dashboard, or menu'"
+    "deploy:all": "node scripts/bump-version.js all",
+    "deploy": "echo 'Usage: npm run deploy:<app-name> where <app-name> is landing, dashboard, menu, or all'"
   },
   "private": true,
   "dependencies": {
