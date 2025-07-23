@@ -202,7 +202,7 @@ jobs:
           for app in "${APPS[@]}"; do
             if [ -n "$app" ] && [ -f "apps/$app/version.json" ]; then
               VERSION=$(node -p "require('./apps/$app/version.json').version")
-              APP_VERSIONS="$APP_VERSIONS• **$app**: \`v$VERSION\`\n"
+              APP_VERSIONS="$APP_VERSIONS• $app: v$VERSION\n"
             fi
           done
 
@@ -211,29 +211,22 @@ jobs:
 
           if [ -n "$LAST_TAG" ]; then
             echo "Last deployed version: $LAST_TAG"
-            # Get all commits since the last tag
-            COMMITS=$(git log --oneline --reverse "${LAST_TAG}..HEAD" --pretty=format:"• \`%h\` %s" 2>/dev/null || git log --oneline --reverse -10 --pretty=format:"• \`%h\` %s")
+            COMMITS=$(git log --oneline --reverse "${LAST_TAG}..HEAD" --pretty=format:"• %h %s" 2>/dev/null || git log --oneline --reverse -10 --pretty=format:"• %h %s")
           else
             echo "No previous tag found, showing last 10 commits"
-            # If no previous tag, show last 10 commits
-            COMMITS=$(git log --oneline --reverse -10 --pretty=format:"• \`%h\` %s")
+            COMMITS=$(git log --oneline --reverse -10 --pretty=format:"• %h %s")
           fi
 
-          # Format commits for Telegram (escape special characters)
-          FORMATTED_COMMITS=$(echo "$COMMITS" | sed 's/[_*\[\]()~`>#+=|{}.!-]/\\&/g' | head -15)
+          # Format commits for Telegram (limit length)
+          FORMATTED_COMMITS=$(echo "$COMMITS" | head -10)
 
           # Build the message
-          MESSAGE="🚀 **Deployment Successful\\!**
-
-          📦 **Project:** Vbitez Multi\\-App
-          📱 **Deployed Apps:** \`$DEPLOY_APPS\`
-          ⏰ **Time:** $(date '+%Y\\-%m\\-%d %H:%M:%S UTC')
-
-          📋 **App Versions:**
-          $APP_VERSIONS
-
-          📝 **Changes since last deployment:**
-          $FORMATTED_COMMITS"
+          MESSAGE="🚀 Deployment Successful!"
+          MESSAGE="$MESSAGE\n\n📦 Project: Vbitez Multi-App"
+          MESSAGE="$MESSAGE\n📱 Apps: $DEPLOY_APPS"
+          MESSAGE="$MESSAGE\n⏰ Time: $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          MESSAGE="$MESSAGE\n\n📋 App Versions:\n$APP_VERSIONS"
+          MESSAGE="$MESSAGE\n📝 Recent Changes:\n$FORMATTED_COMMITS"
 
           # Send to Telegram
           curl -s -X POST \
@@ -241,8 +234,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{
               \"chat_id\": \"${{ env.TELEGRAM_CHAT_ID }}\",
-              \"text\": \"$MESSAGE\",
-              \"parse_mode\": \"MarkdownV2\"
+              \"text\": \"$MESSAGE\"
             }"
 
       - name: Clean up deployment metadata
