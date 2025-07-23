@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 const args = process.argv.slice(2);
 const appName = args[0];
 
-const validApps = ['landing', 'dashboard', 'menu'];
+const validApps = ['landing', 'dashboard', 'menu', 'all'];
 
 function showUsage() {
     console.log(`
@@ -33,6 +33,7 @@ Examples:
   node scripts/bump-version.js landing     # 0.0.1 → 0.0.2
   node scripts/bump-version.js dashboard   # 0.0.99 → 0.1.0 (rollover)
   node scripts/bump-version.js menu        # 0.99.99 → 1.0.0 (rollover)
+  node scripts/bump-version.js all         # Deploy all apps
 `);
 }
 
@@ -40,6 +41,32 @@ if (!appName || !validApps.includes(appName)) {
     console.error('❌ Invalid or missing app name');
     showUsage();
     process.exit(1);
+}
+
+// Handle "all" option
+if (appName === 'all') {
+    console.log('🚀 Deploying all apps...');
+    const appsToProcess = ['landing', 'dashboard', 'menu'];
+
+    for (const app of appsToProcess) {
+        console.log(`\n═══════════════════════════════════════`);
+        console.log(`🎯 Processing ${app.toUpperCase()}`);
+        console.log(`═══════════════════════════════════════`);
+
+        try {
+            // Run the script recursively for each app
+            execCommand(`node scripts/bump-version.js ${app}`, `Deploying ${app}`);
+            console.log(`✅ ${app} deployment completed successfully`);
+        } catch (error) {
+            console.error(`❌ Failed to deploy ${app}:`, error.message);
+            process.exit(1);
+        }
+    }
+
+    console.log(`\n🎉 All apps deployed successfully!`);
+    console.log(`📦 GitHub Actions will deploy: ${appsToProcess.join(', ')}`);
+    console.log('📱 You\'ll receive Telegram notifications for each deployment');
+    process.exit(0);
 }
 
 function bumpVersion(currentVersion) {

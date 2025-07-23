@@ -39,6 +39,7 @@ Use the provided utility script to bump versions easily:
 node scripts/bump-version.js landing     # 0.0.1 → 0.0.2
 node scripts/bump-version.js dashboard   # 0.0.99 → 0.1.0 (rollover)
 node scripts/bump-version.js menu        # 0.99.99 → 1.0.0 (rollover)
+node scripts/bump-version.js all         # Deploy all apps at once
 ```
 
 The script automatically:
@@ -72,12 +73,23 @@ That's it! The deployment starts immediately.
    git push origin main
    ```
 
-### Method 3: Deploy Multiple Apps
+### Method 3: Deploy All Apps
 
-To deploy multiple apps simultaneously, update their versions in the same commit:
+To deploy all apps at once:
 
 ```bash
-# Update multiple app versions (each pushes automatically)
+# Deploy all apps automatically
+node scripts/bump-version.js all
+# or
+npm run deploy:all
+```
+
+### Method 4: Deploy Multiple Specific Apps
+
+To deploy multiple specific apps:
+
+```bash
+# Deploy specific apps (each pushes automatically)
 node scripts/bump-version.js landing
 node scripts/bump-version.js dashboard
 ```
