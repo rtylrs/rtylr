@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/*/package.json'
+      - 'apps/*/version.json'
       - 'package.json'
 
 env:
@@ -42,15 +42,15 @@ jobs:
           for app in landing dashboard menu; do
             echo "Checking $app..."
             
-            APP_PACKAGE="apps/$app/package.json"
+            APP_VERSION_FILE="apps/$app/version.json"
             
-            if [ -f "$APP_PACKAGE" ]; then
-              CURRENT_VERSION=$(node -p "require('./$APP_PACKAGE').version")
+            if [ -f "$APP_VERSION_FILE" ]; then
+              CURRENT_VERSION=$(node -p "require('./$APP_VERSION_FILE').version")
               echo "Current $app version: $CURRENT_VERSION"
               
-              # Check if the app package.json changed in this commit
-              if git diff --name-only HEAD~1 HEAD | grep -q "$APP_PACKAGE"; then
-                PREVIOUS_VERSION=$(git show HEAD~1:$APP_PACKAGE 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
+              # Check if the app version.json changed in this commit
+              if git diff --name-only HEAD~1 HEAD | grep -q "$APP_VERSION_FILE"; then
+                PREVIOUS_VERSION=$(git show HEAD~1:$APP_VERSION_FILE 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
                 echo "Previous $app version: $PREVIOUS_VERSION"
                 
                 if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
@@ -58,13 +58,13 @@ jobs:
                   APPS_TO_DEPLOY="$APPS_TO_DEPLOY$app,"
                   DEPLOYMENT_NEEDED=true
                 else
-                  echo "ℹ️ $app package.json changed but version unchanged"
+                  echo "ℹ️ $app version.json changed but version unchanged"
                 fi
               else
-                echo "ℹ️ $app package.json unchanged"
+                echo "ℹ️ $app version.json unchanged"
               fi
             else
-              echo "❌ No package.json found for $app"
+              echo "❌ No version.json found for $app"
             fi
           done
 
@@ -200,8 +200,8 @@ jobs:
           APP_VERSIONS=""
           IFS=',' read -ra APPS <<< "$DEPLOY_APPS"
           for app in "${APPS[@]}"; do
-            if [ -n "$app" ] && [ -f "apps/$app/package.json" ]; then
-              VERSION=$(node -p "require('./apps/$app/package.json').version")
+            if [ -n "$app" ] && [ -f "apps/$app/version.json" ]; then
+              VERSION=$(node -p "require('./apps/$app/version.json').version")
               APP_VERSIONS="$APP_VERSIONS• **$app**: \`v$VERSION\`\n"
             fi
           done
