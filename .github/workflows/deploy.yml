@@ -1,11 +1,11 @@
-name: Deploy Vbitez
+name: Deploy Vbitez Multi-App
 
 on:
   push:
     branches:
       - main
     paths:
-      - "package.json"
+      - 'package.json'
 
 env:
   TELEGRAM_BOT_TOKEN: 7250945940:AAGxOe0ahPZy2UfzGjQfXR4XC5vjThrnvow
@@ -29,25 +29,51 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Check if version changed
-        id: version-check
+      - name: Check if deployment is needed
+        id: deployment-check
         run: |
+          # Check if deployment metadata exists in package.json
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: $CURRENT_VERSION"
+          DEPLOYMENT_INFO=$(node -p "require('./package.json').deployment || null")
 
-          PREVIOUS_VERSION=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
-          echo "Previous version: $PREVIOUS_VERSION"
-
-          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
-            echo "Version changed"
+          if [ "$DEPLOYMENT_INFO" != "null" ]; then
+            echo "Deploy metadata found in package.json"
+            
+            DEPLOY_TARGET=$(node -p "require('./package.json').deployment.deployTarget")
+            DEPLOY_APPS=$(node -p "require('./package.json').deployment.apps.join(',')")
+            VERSION=$(node -p "require('./package.json').deployment.version")
+            
+            echo "Deploy target: $DEPLOY_TARGET"
+            echo "Deploy apps: $DEPLOY_APPS"
+            echo "Version: $VERSION"
+            
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "deploy_target=$DEPLOY_TARGET" >> "$GITHUB_OUTPUT"
+            echo "deploy_apps=$DEPLOY_APPS" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           else
-            echo "Version unchanged"
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            # Check if this is a version change (fallback for manual deployments)
+            echo "Current version: $CURRENT_VERSION"
+
+            PREVIOUS_VERSION=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
+            echo "Previous version: $PREVIOUS_VERSION"
+
+            if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+              echo "Version changed but no deployment metadata found - deploying all apps as fallback"
+              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+              echo "deploy_target=all" >> "$GITHUB_OUTPUT"
+              echo "deploy_apps=landing,dashboard,menu" >> "$GITHUB_OUTPUT"
+              echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+            else
+              echo "No deployment needed - version unchanged and no deployment metadata"
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+              echo "deploy_target=none" >> "$GITHUB_OUTPUT"
+              echo "deploy_apps=" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Cache pnpm dependencies
-        if: steps.version-check.outputs.should_deploy == 'true'
+        if: steps.deployment-check.outputs.should_deploy == 'true'
         uses: actions/cache@v3
         with:
           path: ~/.pnpm-store
@@ -56,19 +82,35 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Configure pnpm
-        if: steps.version-check.outputs.should_deploy == 'true'
+        if: steps.deployment-check.outputs.should_deploy == 'true'
         run: pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Dependencies with pnpm
-        if: steps.version-check.outputs.should_deploy == 'true'
+        if: steps.deployment-check.outputs.should_deploy == 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Build Project
-        if: steps.version-check.outputs.should_deploy == 'true'
-        run: pnpm run build
+      - name: Build Selected Apps
+        if: steps.deployment-check.outputs.should_deploy == 'true'
+        run: |
+          DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
+          DEPLOY_TARGET="${{ steps.deployment-check.outputs.deploy_target }}"
 
-      - name: Deploy Build Files
-        if: steps.version-check.outputs.should_deploy == 'true'
+          echo "Building apps: $DEPLOY_APPS"
+
+          IFS=',' read -ra APPS <<< "$DEPLOY_APPS"
+          for app in "${APPS[@]}"; do
+            echo "Building $app..."
+            npx nx build "$app"
+            if [ $? -eq 0 ]; then
+              echo "✅ $app built successfully"
+            else
+              echo "❌ Failed to build $app"
+              exit 1
+            fi
+          done
+
+      - name: Deploy Landing App
+        if: steps.deployment-check.outputs.should_deploy == 'true' && (contains(steps.deployment-check.outputs.deploy_apps, 'landing') || steps.deployment-check.outputs.deploy_target == 'all')
         uses: SamKirkland/FTP-Deploy-Action@v4.3.1
         with:
           server: ${{ secrets.SFTP_HOST }}
@@ -76,7 +118,7 @@ jobs:
           password: ${{ secrets.SFTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./dist/
+          local-dir: ./dist/landing/
           server-dir: /subdomains/vbitez.voxire.com/
           dangerous-clean-slate: true
           exclude: |
@@ -85,14 +127,52 @@ jobs:
             **/node_modules/**
             **/.github/**
 
+      - name: Deploy Dashboard App
+        if: steps.deployment-check.outputs.should_deploy == 'true' && (contains(steps.deployment-check.outputs.deploy_apps, 'dashboard') || steps.deployment-check.outputs.deploy_target == 'all')
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./dist/dashboard/
+          server-dir: /subdomains/dashboard.vbitez.voxire.com/
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+
+      - name: Deploy Menu App
+        if: steps.deployment-check.outputs.should_deploy == 'true' && (contains(steps.deployment-check.outputs.deploy_apps, 'menu') || steps.deployment-check.outputs.deploy_target == 'all')
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./dist/menu/
+          server-dir: /subdomains/menu.vbitez.voxire.com/
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+
       - name: Skip deployment
-        if: steps.version-check.outputs.should_deploy == 'false'
-        run: echo "Skipping deployment - version unchanged"
+        if: steps.deployment-check.outputs.should_deploy == 'false'
+        run: echo "Skipping deployment - no deployment metadata found or version unchanged"
 
       - name: Send Telegram Notification - Success
-        if: steps.version-check.outputs.should_deploy == 'true' && success()
+        if: steps.deployment-check.outputs.should_deploy == 'true' && success()
         run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          CURRENT_VERSION="${{ steps.deployment-check.outputs.version }}"
+          DEPLOY_TARGET="${{ steps.deployment-check.outputs.deploy_target }}"
+          DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
           COMMIT_HASH=$(git rev-parse --short HEAD)
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
 
@@ -100,6 +180,8 @@ jobs:
 
           📦 **Project:** Vbitez
           🔢 **Version:** $CURRENT_VERSION
+          🎯 **Target:** $DEPLOY_TARGET
+          📱 **Apps:** $DEPLOY_APPS
           🔗 **Commit:** $COMMIT_HASH
           📝 **Message:** $COMMIT_MESSAGE
           ⏰ **Time:** $(date '+%Y-%m-%d %H:%M:%S UTC')"
@@ -112,3 +194,52 @@ jobs:
               \"text\": \"$MESSAGE\",
               \"parse_mode\": \"Markdown\"
             }"
+
+      - name: Send Telegram Notification - Failure
+        if: steps.deployment-check.outputs.should_deploy == 'true' && failure()
+        run: |
+          CURRENT_VERSION="${{ steps.deployment-check.outputs.version }}"
+          DEPLOY_TARGET="${{ steps.deployment-check.outputs.deploy_target }}"
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+
+          MESSAGE="❌ *Deployment Failed!*
+
+          📦 **Project:** Vbitez
+          🔢 **Version:** $CURRENT_VERSION
+          🎯 **Target:** $DEPLOY_TARGET
+          🔗 **Commit:** $COMMIT_HASH
+          ⏰ **Time:** $(date '+%Y-%m-%d %H:%M:%S UTC')
+
+          Please check the GitHub Actions logs for details."
+
+          curl -s -X POST \
+            "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${{ env.TELEGRAM_CHAT_ID }}\",
+              \"text\": \"$MESSAGE\",
+              \"parse_mode\": \"Markdown\"
+            }"
+
+      - name: Clean up deployment metadata
+        if: steps.deployment-check.outputs.should_deploy == 'true' && success()
+        run: |
+          # Remove deployment metadata from package.json after successful deployment
+          node -e "
+          const fs = require('fs');
+          const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          if (packageJson.deployment) {
+            delete packageJson.deployment;
+            fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+          }
+          "
+
+          if git diff --quiet; then
+            echo "No deployment metadata to clean up"
+          else
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add package.json
+            git commit -m "🧹 Clean up deployment metadata"
+            git push origin main
+          fi
