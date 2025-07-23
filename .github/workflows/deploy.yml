@@ -222,7 +222,7 @@ jobs:
 
           # Build the message
           MESSAGE="🚀 Deployment Successful!"
-          MESSAGE="$MESSAGE\n\n📦 Project: Vbitez Multi-App"
+          MESSAGE="$MESSAGE\n\n📦 Project: Vbitez"
           MESSAGE="$MESSAGE\n📱 Apps: $DEPLOY_APPS"
           MESSAGE="$MESSAGE\n⏰ Time: $(date '+%Y-%m-%d %H:%M:%S UTC')"
           MESSAGE="$MESSAGE\n\n📋 App Versions:\n$APP_VERSIONS"
