@@ -1,0 +1,132 @@
+.addons {
+  padding: 20px;
+  position: relative;
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #e3e4e57c;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary-color);
+    font-size: 24px;
+    font-weight: bold;
+    height: 90dvh;
+    gap: 20px;
+  }
+
+  .overlay-message {
+    text-align: center;
+  }
+
+  .addons-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  }
+
+  .addons-content {
+    .addon-category {
+      margin-bottom: 20px;
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      .addon-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .addon-card {
+          flex: 1 1 calc(25% - 20px);
+          display: flex;
+          min-width: 200px;
+          max-width: 300px;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          justify-content: space-between;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+
+          .addon-icon {
+            font-size: 40px;
+            color: #007bff;
+            margin-bottom: 10px;
+          }
+
+          h3 {
+            font-size: 18px;
+            margin: 10px 0;
+          }
+
+          p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+          }
+
+          button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+
+            &.installed {
+              background-color: var(--dark-green-color);
+              color: #fff;
+            }
+
+            &.price {
+              background-color: var(--primary-color);
+              color: #fff;
+            }
+
+            &.add {
+              background-color: var(--secondary-color);
+              color: #fff;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .more-addons {
+    h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+  }
+}

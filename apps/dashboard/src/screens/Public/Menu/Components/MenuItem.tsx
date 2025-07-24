@@ -1,0 +1,19 @@
+import React from "react";
+
+const MenuItem: React.FC<{
+  item: any;
+}> = ({ item }: { item: any }) => {
+  return (
+    <div className="menu-item">
+      <img src={item.coverImage} alt={item.name} height={50} width={50} />
+      <div className="item-details">
+        <h3>{item.name}</h3>
+        <div className="item-controls">
+          <p>Price: {item.price} $</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MenuItem;

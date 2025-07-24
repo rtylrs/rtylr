@@ -1,0 +1,143 @@
+@use "sass:color";
+
+@use "imports";
+@use "fonts";
+@use "variables";
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  will-change: auto;
+}
+
+.hero-image img,
+.ticker_wrapper,
+.ScrollToTop,
+.whatsappBtn {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--dark-color);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--secondary-color);
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+  color: var(--secondary-color);
+  scroll-behavior: smooth;
+  color: var(--primary-color);
+}
+
+.MuiInputBase-root {
+  background-color: white;
+}
+
+::-webkit-scrollbar {
+  width: 0.8rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+  transition: 0.3s;
+}
+
+.ScrollToTop {
+  position: fixed;
+  bottom: 15px;
+  right: 20px;
+  z-index: 100;
+  cursor: pointer;
+  padding: 9px;
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#demo {
+  z-index: 10;
+  padding: 5px;
+  background-color: #0a102f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  bottom: 0;
+}
+
+//maintanance content
+.maintanance {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-color);
+  z-index: 1000;
+
+  h1 {
+    font-size: 3em;
+    font-weight: 100;
+    color: var(--primary-color);
+    margin: 0;
+  }
+  h2 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-bottom: 0;
+    font-weight: 200;
+    color: var(--primary-color);
+  }
+  h3 {
+    font-size: 1.5em;
+    font-weight: 100;
+    margin-top: 0;
+    font-weight: 200;
+    color: var(--primary-color);
+  }
+  a {
+    font-size: 1.5em;
+    font-weight: 300;
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+}
