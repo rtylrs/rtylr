@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 const args = process.argv.slice(2);
 const appName = args[0];
 
-const validApps = ['landing', 'dashboard', 'menu', 'all'];
+const validApps = ['landing', 'dashboard', 'menu', 'auth', 'all'];
 
 function showUsage() {
     console.log(`
@@ -46,7 +46,7 @@ if (!appName || !validApps.includes(appName)) {
 // Handle "all" option
 if (appName === 'all') {
     console.log('🚀 Deploying all apps...');
-    const appsToProcess = ['landing', 'dashboard', 'menu'];
+    const appsToProcess = ['landing', 'dashboard', 'menu', 'auth'];
 
     for (const app of appsToProcess) {
         console.log(`\n═══════════════════════════════════════`);
