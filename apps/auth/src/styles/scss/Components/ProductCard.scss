@@ -1,0 +1,142 @@
+.productCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 5px;
+  gap: 20px;
+  height: min(100%, 420px);
+
+  &:hover {
+    transform: translateY(-5px);
+    transition: 0.6s ease-in-out;
+  }
+
+  &:not(:hover) {
+    transform: translateY(0);
+    transition: 0.6s ease-in-out;
+  }
+
+  h4, p {
+    margin: 0;
+    padding: 0;
+  }
+
+  .imageContainer {
+    width: 100%;
+    min-height: 250px;
+    max-height: 250px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 100%;
+      min-height: 250px;
+      object-fit: cover;
+    }
+  }
+
+  h4.name {
+    font-size: 16px;
+    text-transform: capitalize;
+    align-self: flex-start;
+    margin-left: 10px;
+  }
+
+  p.creator {
+    font-size: 14px;
+    color: #666;
+    align-self: flex-start;
+    margin-left: 10px;
+
+    strong {
+      font-weight: bold;
+    }
+  }
+
+  p.price {
+    font-size: 14px;
+    color: black;
+    text-align: right;
+    font-weight: bold;
+  }
+
+  .ctaContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  button {
+    width: 48%;
+    padding: 5px 0;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &.addBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: min(10%, 10px);
+      background-color: transparent;
+      border: 1px solid rgb(121, 85, 72);
+      color: black;
+
+      &:hover {
+        background-color: rgb(121, 85, 72);
+        color: #fff;
+        transition: 0.6s ease-in-out;
+      }
+    }
+
+    &.buyBtn {
+      background-color: #2ecc71;
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      margin: 0 auto;
+      height: 30px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #29ac00;
+        transition: 0.6s ease-in-out;
+      }
+    }
+  }
+
+
+  @media only screen and (max-width: 768px) {
+    height: 100%;
+    width: 100%;
+    gap: 10px;
+
+    .imageContainer {
+      min-height: 200px;
+      max-height: 200px;
+    }
+
+    h4.name {
+      font-size: 14px;
+    }
+
+    p.creator {
+      font-size: 12px;
+    }
+
+    p.price {
+      font-size: 12px;
+    }
+
+    .ctaContainer {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+}

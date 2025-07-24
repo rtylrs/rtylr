@@ -1,0 +1,180 @@
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Modal from "react-modal";
+import {
+  addCategory,
+  editCategory,
+} from "../../../../redux/reducers/menuSlice";
+import { AppDispatch, RootState } from "../../../../redux/store";
+
+interface CreateCategoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  addOrEdit: "add" | "edit";
+  categoryData?: {
+    _id: string;
+    name: string;
+    description: string;
+    hasAlcohol: boolean;
+    availability: string;
+    icon: string;
+    parentCategory?: string;
+  };
+}
+
+const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
+  isOpen,
+  onClose,
+  addOrEdit,
+  categoryData,
+}) => {
+  const [category, setCategory] = useState(categoryData?.name || "");
+  const [description, setDescription] = useState(
+    categoryData?.description || ""
+  );
+  const [hasAlcohol, setHasAlcohol] = useState(
+    categoryData?.hasAlcohol || false
+  );
+  const [availability, setAvailability] = useState(
+    categoryData?.availability || "always available"
+  );
+  const [iconURL, setIconURL] = useState(categoryData?.icon || "");
+  const [parentCategory, setParentCategory] = useState(
+    categoryData?.parentCategory || ""
+  );
+
+  const dispatch = useDispatch<AppDispatch>();
+  const restaurantId = useSelector((state: RootState) => state.user.userId);
+  const parentCategories = useSelector((state: RootState) =>
+    state.menu.items.filter(
+      (item: any) => item.type === "category" && item.details.isParentCategory
+    )
+  );
+
+  useEffect(() => {
+    console.log("Modal opened:", isOpen);
+  }, [isOpen]);
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    if (category.trim() && parentCategory) {
+      const categoryPayload = {
+        restaurantId,
+        name: category,
+        description,
+        hasAlcohol,
+        availability,
+        icon: iconURL,
+        parentCategory,
+      };
+      console.log("Category Payload:", categoryPayload);
+
+      if (addOrEdit === "add") {
+        dispatch(addCategory(categoryPayload));
+        console.log("Dispatching addCategory");
+      } else if (addOrEdit === "edit" && categoryData) {
+        dispatch(
+          editCategory({
+            categoryId: categoryData?._id,
+            category: categoryPayload,
+          })
+        );
+        console.log("Dispatching editCategory");
+      }
+      setCategory("");
+      setDescription("");
+      setHasAlcohol(false);
+      setAvailability("always available");
+      setIconURL("");
+      setParentCategory("");
+      onClose();
+    } else {
+      alert("Category name and parent category cannot be empty.");
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      className="category-modal"
+      overlayClassName="modal-overlay"
+    >
+      <h2>{addOrEdit === "add" ? "Create" : "Edit"} Category</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Category Name*</label>
+          <input
+            type="text"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="e.g. Appetizers, Salads, Drinks, etc."
+          />
+        </div>
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={hasAlcohol}
+              onChange={(e) => setHasAlcohol(e.target.checked)}
+            />
+            Show alcohol warning
+          </label>
+        </div>
+        <div className="form-group">
+          <label>Category Availability:</label>
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+          >
+            <option value="hidden">Hidden</option>
+            <option value="available at certain time">
+              Available at certain time
+            </option>
+            <option value="always available">Always available</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Parent Category*</label>
+          <select
+            value={parentCategory}
+            onChange={(e) => setParentCategory(e.target.value)}
+            required
+          >
+            <option value="">Select Parent Category</option>
+            {parentCategories.map((parent: any) => (
+              <option key={parent.itemId} value={parent.itemId}>
+                {parent.details.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Icon URL</label>
+          <input
+            type="text"
+            placeholder="Paste custom icon URL"
+            value={iconURL}
+            onChange={(e) => setIconURL(e.target.value)}
+          />
+        </div>
+        <div className="form-actions">
+          <button type="submit">Save</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+export default CreateCategoryModal;

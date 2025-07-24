@@ -1,0 +1,105 @@
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 300px; /* Adjust the width to your preference */
+    margin: 0 auto;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .modal-content h2 {
+    margin-bottom: 20px;
+  }
+  
+  .modal-content .MuiTextField-root {
+    margin-bottom: 20px;
+  }
+  
+  .modal-content .MuiButton-root {
+    margin-top: 10px;
+  }
+  
+
+
+.adminProducts {
+  text-align: center;
+}
+
+.header-admin {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
+// .table {
+//   width: 100%;
+//   margin-top: 20px;
+//   border-collapse: collapse;
+
+//   th,
+//   td {
+//     border: 1px solid #ccc;
+//     padding: 10px;
+//     text-align: left;
+//   }
+
+//   th {
+//     background-color: #f2f2f2;
+//   }
+// }
+
+
+.modal {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.about-config {
+  padding: 2rem;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  span {
+    position: relative; /* Set the position to relative for the overlay */
+  }
+
+  .overlay-about {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2); /* Grey with 60% opacity */
+    z-index: 2; /* Overlay above other content */
+    border-radius: 7px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    padding: 20px;
+  }
+
+  form {
+    padding: 20px;
+    label {
+      display: block;
+      font-size: 1.2rem;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-height: 200px;
+    }
+  }
+}
