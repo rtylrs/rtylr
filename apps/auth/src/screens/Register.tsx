@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import notify from "../../lib/notify/notify";
-import { useDispatch, useSelector } from "react-redux";
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
-import { auth } from "../../firebase";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import notify from '../lib/notify/notify';
+import { useDispatch, useSelector } from 'react-redux';
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
+import { auth } from '../firebase';
 import {
   getUserInfo,
   registerRestaurantAsync,
@@ -13,20 +13,20 @@ import {
   selectRole,
   restaurantWithGoogleAsync,
   clearError,
-} from "../../redux/reducers/userSlice";
-import { RootState, AppDispatch } from "../../redux/store";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
+} from '../redux/reducers/userSlice';
+import { RootState, AppDispatch } from '../redux/store';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import VbitezButton from '../components/VbitezButton/VbitezButton';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [referred, setReferred] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [referred, setReferred] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector((state: RootState) =>
     selectIsAuthenticated(state)
@@ -46,7 +46,7 @@ const Register: React.FC = () => {
         })
       );
     } else {
-      notify.error("Password does not match");
+      notify.error('Password does not match');
     }
   };
 
@@ -70,10 +70,10 @@ const Register: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
-      if (role === "business") {
-        navigate("/auth/questionnaire");
+      if (role === 'business') {
+        navigate('/auth/questionnaire');
       } else {
-        navigate("/");
+        navigate('/');
       }
     }
   }, [isAuthenticated, navigate]);
@@ -95,7 +95,7 @@ const Register: React.FC = () => {
               style={{
                 fontWeight: 600,
                 marginBottom: 4,
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Restaurant Name
@@ -113,7 +113,7 @@ const Register: React.FC = () => {
               style={{
                 fontWeight: 600,
                 marginBottom: 4,
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Email
@@ -131,7 +131,7 @@ const Register: React.FC = () => {
               style={{
                 fontWeight: 600,
                 marginBottom: 4,
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Password
@@ -149,7 +149,7 @@ const Register: React.FC = () => {
               style={{
                 fontWeight: 600,
                 marginBottom: 4,
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Confirm Password
@@ -163,14 +163,14 @@ const Register: React.FC = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
 
-            <div style={{ width: "100%", marginBottom: 12 }}>
-              <small style={{ color: "#888", fontSize: 13 }}>
-                By pressing Register, you agree to our{" "}
+            <div style={{ width: '100%', marginBottom: 12 }}>
+              <small style={{ color: '#888', fontSize: 13 }}>
+                By pressing Register, you agree to our{' '}
                 <a
                   href="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ textDecoration: "underline", color: "inherit" }}
+                  style={{ textDecoration: 'underline', color: 'inherit' }}
                 >
                   Terms and Services
                 </a>
@@ -181,15 +181,15 @@ const Register: React.FC = () => {
             {error && (
               <p
                 style={{
-                  color: "#dc2626",
+                  color: '#dc2626',
                   fontSize: 14,
                   marginBottom: 16,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
-                {typeof error === "string"
+                {typeof error === 'string'
                   ? error
-                  : (error as any)?.message || "An error occurred"}
+                  : (error as any)?.message || 'An error occurred'}
               </p>
             )}
 
@@ -221,17 +221,17 @@ const Register: React.FC = () => {
 
           <div className="auth-footer">
             <p>
-              Already have an account?{" "}
+              Already have an account?{' '}
               <span
                 className="auth-link"
-                onClick={() => navigate("/auth/login")}
+                onClick={() => navigate('/auth/login')}
               >
                 Login Now.
               </span>
             </p>
             <p
               className="auth-link"
-              onClick={() => navigate("/auth/forgot-password")}
+              onClick={() => navigate('/auth/forgot-password')}
             >
               Forgot Password?
             </p>
