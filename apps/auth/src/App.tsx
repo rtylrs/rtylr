@@ -1,7 +1,7 @@
 import React from "react";
 //Package imports
 import { useState, useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,11 +18,7 @@ import {
 } from "chart.js";
 
 //Routes
-import PublicRoutes from "./routes/PublicRoutes";
-import UserRoutes from "./routes/UserRoutes";
-import AdminRoutes from "./routes/AdminRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
-import VendorRoutes from "./routes/VendorRoutes";
 
 import i18next from "./services/i18next";
 
@@ -37,10 +33,6 @@ import HelmetContainer from "./components/HelmetContainer";
 //Hooks
 import useColors from "./hooks/useColors";
 
-// Route Checks
-import { AdminRoute } from "./utils/AdminRoute";
-import { BusinessRoute } from "./utils/BusinessRoute";
-
 // Other imports
 import { fetchConfigData } from "./redux/reducers/configSlice";
 import {
@@ -48,8 +40,6 @@ import {
   selectIsAuthenticated,
   selectRole,
 } from "./redux/reducers/userSlice";
-import ToolBar from "./components/Toolbar/ToolBar";
-import { AppDispatch, RootState } from "./redux/store";
 
 ChartJS.register(
   LineElement,
@@ -61,127 +51,103 @@ ChartJS.register(
   CategoryScale
 );
 
-const App = (): JSX.Element => {
-  //Hooks
+function App() {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { primary } = useColors();
-  const dispatch = useDispatch<AppDispatch>();
-  // const theme = useSelector((state: RootState) => state.theme.theme);
-
-  // Redux
-  const config = useSelector((state: RootState) => state.config);
-  const isAuthenticated = useSelector((state: RootState) =>
-    selectIsAuthenticated(state)
-  );
+  
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const role = useSelector(selectRole);
 
-  // States
-  const [showTopBtn, setShowTopBtn] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
+  // Scroll to top functionality
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShowTopBtn(true);
-      } else {
-        setShowTopBtn(false);
-      }
+      setShowScrollToTop(window.scrollY > 300);
     };
-
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Load configuration data
   useEffect(() => {
-    const language = localStorage.getItem("language");
-    if (language) {
-      i18next.changeLanguage(language);
-    }
-
-    // get config data
     dispatch(fetchConfigData());
+  }, [dispatch]);
 
+  // Load user info if authenticated
+  useEffect(() => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
     }
+  }, [dispatch, isAuthenticated]);
+
+  // Maintenance mode check
+  useEffect(() => {
+    const maintenanceMode = process.env.REACT_APP_MAINTENANCE_MODE === "true";
+    setIsMaintenanceMode(maintenanceMode);
   }, []);
 
+  if (isMaintenanceMode) {
+    return <Maintanance />;
+  }
+
   return (
-    <React.Fragment>
-      {config && (
-        <HelmetContainer
-          title={"Vbitez - Contactless QR Menu"}
-          favicon={"/favicon.ico"}
-        />
-      )}
-
-      {config.maintanance &&
-        !location.pathname.includes("/manage/") &&
-        (!role || role !== "admin") && <Maintanance />}
-
-      {(role && role === "admin") ||
-      window.location.hostname === "localhost" ? (
-        <ToolBar />
-      ) : null}
-
-      <Cookies />
-
-      {showTopBtn && !location.pathname.includes("/restaurant/") && (
-        <motion.div
-          className="ScrollToTop"
-          onClick={() => {
-            setShowTopBtn(false);
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.8 }}
-          style={{
-            backgroundColor: primary,
-          }}
-        >
-          <FontAwesomeIcon icon={faChevronUp} />
-        </motion.div>
-      )}
-
-      <Routes key={location.pathname} location={location}>
-        {/* Auth Routes */}
+    <>
+      <HelmetContainer />
+      
+      <Routes>
+        {/* Authentication Routes */}
         {AuthRoutes.map((route, index) => (
           <Route key={index} path={route.path} element={route.element} />
         ))}
 
-        {/* Public Routes */}
-        {PublicRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        {/* User routes */}
-        {UserRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        <Route path="/manage" element={<AdminRoute />}>
-          {AdminRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
-          ))}
-        </Route>
-
-        <Route path="/app/business" element={<BusinessRoute />}>
-          {VendorRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
-          ))}
-        </Route>
-
+        {/* Default redirect to login */}
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        
+        {/* 404 Not Found */}
         <Route path="*" element={<NoMatch />} />
       </Routes>
-    </React.Fragment>
+
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <motion.button
+          className="scroll-to-top"
+          onClick={scrollToTop}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: primary,
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "50px",
+            height: "50px",
+            cursor: "pointer",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <FontAwesomeIcon icon={faChevronUp} />
+        </motion.button>
+      )}
+
+      <Cookies />
+    </>
   );
-};
+}
 
 export default App;
