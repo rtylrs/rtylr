@@ -39,7 +39,7 @@ jobs:
           DEPLOYMENT_NEEDED=false
 
           # Check each app for version changes
-          for app in landing dashboard menu; do
+          for app in landing dashboard menu auth; do
             echo "Checking $app..."
             
             APP_VERSION_FILE="apps/$app/version.json"
@@ -179,6 +179,24 @@ jobs:
           port: 21
           local-dir: ./dist/menu/
           server-dir: /subdomains/menu.vbitez.voxire.com/
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+
+      - name: Deploy Auth App
+        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'auth')
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./dist/auth/
+          server-dir: /subdomains/auth.vbitez.voxire.com/
           dangerous-clean-slate: true
           exclude: |
             **/.git*
