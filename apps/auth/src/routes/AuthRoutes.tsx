@@ -1,28 +1,18 @@
-import React from "react";
-import Public from "../layouts/Public/public";
-import AnimatedRoutes from "../components/AnimatedRoutes";
+import React from 'react';
+import Public from '../layouts/Public/public';
+import AnimatedRoutes from '../components/AnimatedRoutes';
 
 // Routes
-const Login = React.lazy(() => import("../screens/Auth/Login"));
-const Register = React.lazy(() => import("../screens/Auth/Register"));
-const ForgotPassword = React.lazy(() => import("../screens/Auth/Reset"));
+const Login = React.lazy(() => import('../screens/Login'));
+const Register = React.lazy(() => import('../screens/Register'));
+const ForgotPassword = React.lazy(() => import('../screens/Reset'));
 const EmailVerification = React.lazy(
-  () => import("../screens/Auth/EmailVerification")
-);
-// Questionnaire Route screens
-const Details = React.lazy(
-  () => import("../screens/Auth/Questionnaire/Details")
-);
-const QuestionsOne = React.lazy(
-  () => import("../screens/Auth/Questionnaire/QuestionsOne")
-);
-const QuestionsTwo = React.lazy(
-  () => import("../screens/Auth/Questionnaire/QuestionsTwo")
+  () => import('../screens/EmailVerification')
 );
 
 const AuthRoutes = [
   {
-    path: "/auth/login",
+    path: '/auth/login',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -32,7 +22,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: "/auth/register",
+    path: '/auth/register',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -42,7 +32,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: "/auth/password-reset",
+    path: '/auth/password-reset',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -52,41 +42,11 @@ const AuthRoutes = [
     ),
   },
   {
-    path: "/auth/verify/:token",
+    path: '/auth/verify/:token',
     element: (
       <Public>
         <AnimatedRoutes>
           <EmailVerification />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/auth/questionnaire/info",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Details />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/auth/questionnaire/info/question-1",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <QuestionsOne />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/auth/questionnaire/info/question-2",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <QuestionsTwo />
         </AnimatedRoutes>
       </Public>
     ),

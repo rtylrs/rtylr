@@ -1,51 +1,5 @@
-@use "sass:meta";
-
-//Fonts and common styles
-@include meta.load-css("./scss/common.scss");
+@use 'sass:meta';
 
 // SCSS imports Public
-@include meta.load-css("./scss/Public/Header.scss");
-@include meta.load-css("./scss/Public/Auth.scss");
-@include meta.load-css("./scss/Public/Home.scss");
-@include meta.load-css("./scss/Public/About.scss");
-@include meta.load-css("./scss/Public/Pricing.scss");
-@include meta.load-css("./scss/Public/Contact.scss");
-@include meta.load-css("./scss/Public/Collection.scss");
-@include meta.load-css("./scss/Public/Shop.scss");
-@include meta.load-css("./scss/Public/FAQ.scss");
-@include meta.load-css("./scss/Public/Menu.scss");
-
-// Scss imports Components
-@include meta.load-css("./scss/Components/Alert.scss");
-@include meta.load-css("./scss/Components/ProductCard.scss");
-@include meta.load-css("./scss/Components/ProductsGrid.scss");
-@include meta.load-css("./scss/Components/Slider.scss");
-
-// Scss imports Client
-@include meta.load-css("./scss/Client/UserLayout.scss");
-@include meta.load-css("./scss/Client/Profile.scss");
-@include meta.load-css("./scss/Client/Join.scss");
-@include meta.load-css("./scss/Client/Settings.scss");
-@include meta.load-css("./scss/Client/Journey.scss");
-
-//Admin Imports
-@include meta.load-css("./scss/Admin/Admin.scss");
-@include meta.load-css("./scss/Admin/Navbar.scss");
-@include meta.load-css("./scss/Admin/Sidebar.scss");
-@include meta.load-css("./scss/Admin/Common.scss");
-@include meta.load-css("./scss/Admin/Users.scss");
-@include meta.load-css("./scss/Admin/Dashboard.scss");
-@include meta.load-css("./scss/Admin/QrCode.scss");
-@include meta.load-css("./scss/Admin/Faq.scss");
-
-//Vendor Imports
-@include meta.load-css("./scss/Vendor/Vendor.scss");
-@include meta.load-css("./scss/Vendor/Navbar.scss");
-@include meta.load-css("./scss/Vendor/Sidebar.scss");
-@include meta.load-css("./scss/Vendor/Dashboard.scss");
-@include meta.load-css("./scss/Vendor/Menu.scss");
-@include meta.load-css("./scss/Vendor/Common.scss");
-@include meta.load-css("./scss/Vendor/Addons.scss");
-@include meta.load-css("./scss/Vendor/Settings/Settings.scss");
-@include meta.load-css("./scss/Vendor/Settings/General.scss");
-@include meta.load-css("./scss/Vendor/Design/QrCode.scss");
+@include meta.load-css('./scss/Header.scss');
+@include meta.load-css('./scss/Auth.scss');

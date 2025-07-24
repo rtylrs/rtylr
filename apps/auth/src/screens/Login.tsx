@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   loginAsync,
   selectIsAuthenticated,
@@ -10,14 +10,14 @@ import {
   getUserInfo,
   restaurantWithGoogleAsync,
   clearError,
-} from "../../redux/reducers/userSlice";
-import { RootState, AppDispatch } from "../../redux/store";
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
-import { auth } from "../../firebase";
-import notify from "../../lib/notify/notify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
+} from '../redux/reducers/userSlice';
+import { RootState, AppDispatch } from '../redux/store';
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
+import { auth } from '../firebase';
+import notify from '../lib/notify/notify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import VbitezButton from '../components/VbitezButton/VbitezButton';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +30,8 @@ const Login: React.FC = () => {
   const error = useSelector((state: RootState) => selectError(state));
   const role = useSelector((state: RootState) => selectRole(state));
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
   const handleSubmit = () => {
     dispatch(loginAsync({ email, password }));
@@ -58,10 +58,10 @@ const Login: React.FC = () => {
     if (isAuthenticated) {
       dispatch(getUserInfo());
 
-      if (role === "business") {
-        navigate("/app/business");
+      if (role === 'business') {
+        navigate('/app/business');
       } else {
-        navigate("/");
+        navigate('/');
       }
     }
   }, [isAuthenticated, navigate, role]);
@@ -106,23 +106,23 @@ const Login: React.FC = () => {
             {error && (
               <p
                 style={{
-                  color: "#dc2626",
+                  color: '#dc2626',
                   fontSize: 14,
                   marginBottom: 16,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
-                {typeof error === "string"
+                {typeof error === 'string'
                   ? error
-                  : (error as any)?.message || "An error occurred"}
+                  : (error as any)?.message || 'An error occurred'}
               </p>
             )}
 
-            <div style={{ width: "100%", marginBottom: 16 }}>
+            <div style={{ width: '100%', marginBottom: 16 }}>
               <span
                 className="auth-link"
-                onClick={() => navigate("/auth/forgot-password")}
-                style={{ fontSize: 14, cursor: "pointer" }}
+                onClick={() => navigate('/auth/forgot-password')}
+                style={{ fontSize: 14, cursor: 'pointer' }}
               >
                 Forgot password?
               </span>
@@ -156,10 +156,10 @@ const Login: React.FC = () => {
 
           <div className="auth-footer">
             <p>
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <span
                 className="auth-link"
-                onClick={() => navigate("/auth/register")}
+                onClick={() => navigate('/auth/register')}
               >
                 Sign up
               </span>

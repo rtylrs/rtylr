@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 
 function getWindowDimensions() {
   const { innerWidth: width, innerHeight: height } = window;
@@ -16,7 +16,7 @@ function throttle<T extends (...args: any[]) => any>(
   let inThrottle: boolean;
   return ((...args: any[]) => {
     if (!inThrottle) {
-      func.apply(this, args);
+      func.apply(this as any, args);
       inThrottle = true;
       setTimeout(() => (inThrottle = false), limit);
     }
@@ -39,8 +39,8 @@ export default function useWindowDimensions() {
   );
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
   return { ...windowDimensions, isMobile };
