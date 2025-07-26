@@ -52,7 +52,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   );
 
   useEffect(() => {
-    console.log("Modal opened:", isOpen);
+    // Modal open state changed
   }, [isOpen]);
 
   const handleSubmit = (e: any) => {
@@ -67,11 +67,9 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         icon: iconURL,
         parentCategory,
       };
-      console.log("Category Payload:", categoryPayload);
 
       if (addOrEdit === "add") {
         dispatch(addCategory(categoryPayload));
-        console.log("Dispatching addCategory");
       } else if (addOrEdit === "edit" && categoryData) {
         dispatch(
           editCategory({
@@ -79,7 +77,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
             category: categoryPayload,
           })
         );
-        console.log("Dispatching editCategory");
       }
       setCategory("");
       setDescription("");

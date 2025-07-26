@@ -16,17 +16,14 @@ function MenuItem({ item }) {
   };
 
   const handleDelete = () => {
-    console.log(item);
     handleMenuClose();
   };
 
   const handleDuplicate = () => {
-    console.log("Duplicate item");
     handleMenuClose();
   };
 
   const handleHide = () => {
-    console.log("Hide item");
     handleMenuClose();
   };
 

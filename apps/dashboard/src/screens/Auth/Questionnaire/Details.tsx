@@ -14,7 +14,6 @@ const Details: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   const handleSubmit = () => {
-    console.log({ restaurantName, firstName, lastName, phoneNumber });
     navigate("/auth/questionnaire/info/question-1");
   };
 

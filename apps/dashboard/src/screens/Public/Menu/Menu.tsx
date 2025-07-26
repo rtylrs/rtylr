@@ -56,7 +56,7 @@ function Menu() {
           setRetryCount(retryCount + 1);
         }, 10000);
       } else {
-        console.log("Failed to load menu");
+        console.error("Failed to load menu");
       }
     },
     callOnMount: false,
