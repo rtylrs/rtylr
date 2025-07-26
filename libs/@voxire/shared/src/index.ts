@@ -11,5 +11,5 @@ export { HelmetContainer } from './components/HelmetContainer';
 // Types
 export * from './types/common';
 
-// Styles
+// Styles for mui components
 export * from './styles/theme';

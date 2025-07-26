@@ -71,28 +71,32 @@ jobs:
               # Get files with their change status (last commit only)
               CHANGED_FILES=""
               
-              # Get all changed files with their status
-              CHANGED_STATUS=$(git diff --name-status HEAD~1 HEAD | grep "^$lib/")
+              # Process each type of change separately to avoid subshell issues
               
-              # Process each changed file based on its status
-              while IFS=$'\t' read -r status file; do
-                case $status in
-                  A)
-                    CHANGED_FILES="$CHANGED_FILES  • ➕ Added: $file\n"
-                    ;;
-                  M)
-                    CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
-                    ;;
-                  D)
-                    CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
-                    ;;
-                  R)
-                    # For renamed files, get the old name
-                    OLD_NAME=$(git diff --name-status HEAD~1 HEAD | grep "^R.*$file" | awk '{print $2}')
-                    CHANGED_FILES="$CHANGED_FILES  • 🔄 Renamed: $OLD_NAME → $file\n"
-                    ;;
-                esac
-              done <<< "$CHANGED_STATUS"
+              # Get added files
+              ADDED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^A" | awk '{print $2}' | grep "^$lib/" || true)
+              for file in $ADDED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ➕ Added: $file\n"
+              done
+              
+              # Get modified files
+              MODIFIED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^M" | awk '{print $2}' | grep "^$lib/" || true)
+              for file in $MODIFIED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
+              done
+              
+              # Get deleted files
+              DELETED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^D" | awk '{print $2}' | grep "^$lib/" || true)
+              for file in $DELETED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
+              done
+              
+              # Get renamed files
+              RENAMED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^R" | awk '{print $3}' | grep "^$lib/" || true)
+              for file in $RENAMED_FILES; do
+                OLD_NAME=$(git diff --name-status HEAD~1 HEAD | grep "^R.*$file" | awk '{print $2}')
+                CHANGED_FILES="$CHANGED_FILES  • 🔄 Renamed: $OLD_NAME → $file\n"
+              done
               
               if [ -n "$CHANGED_FILES" ]; then
                 CHANGED_FILES_DETAILS="$CHANGED_FILES_DETAILS\n📁 $lib:\n$CHANGED_FILES"
