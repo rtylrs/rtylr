@@ -26,13 +26,26 @@ function throttle<T extends (...args: any[]) => any>(
 }
 
 export function useWindowDimensions() {
-  const [windowDimensions, setWindowDimensions] = useState(
-    getWindowDimensions()
-  );
-  const [isMobile, setIsMobile] = useState(windowDimensions.width <= 768);
+  const [windowDimensions, setWindowDimensions] = useState(() => {
+    // During SSR, return default values
+    if (typeof window === 'undefined') {
+      return { width: 0, height: 0 };
+    }
+    return getWindowDimensions();
+  });
+
+  const [isMobile, setIsMobile] = useState(() => {
+    // During SSR, return false as default
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    const dimensions = getWindowDimensions();
+    return dimensions.width <= 768;
+  });
 
   const handleResize = useCallback(
     throttle(() => {
+      if (typeof window === 'undefined') return;
       const dimensions = getWindowDimensions();
       setWindowDimensions(dimensions);
       setIsMobile(dimensions.width <= 768);
@@ -42,6 +55,11 @@ export function useWindowDimensions() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Set initial dimensions after mount to ensure we have the correct values
+    const dimensions = getWindowDimensions();
+    setWindowDimensions(dimensions);
+    setIsMobile(dimensions.width <= 768);
 
     window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
