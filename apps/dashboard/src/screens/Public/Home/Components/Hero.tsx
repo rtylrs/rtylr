@@ -1,14 +1,14 @@
-import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faStar } from "@fortawesome/free-solid-svg-icons";
-import useColors from "../../../../hooks/useColors";
-import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../../../../redux/reducers/userSlice";
-import { QRCode } from "react-qrcode-logo";
-import useWindowDimensions from "../../../../utils/useWindowDimensions";
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import VbitezButton from '../../../../components/VbitezButton/VbitezButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
+import useColors from '../../../../hooks/useColors';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../../../../redux/reducers/userSlice';
+import { QRCode } from 'react-qrcode-logo';
+import { useWindowDimensions } from '@voxire/utils';
 
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
@@ -33,26 +33,26 @@ const Hero: React.FC<{}> = () => {
   return (
     <div className="Hero">
       <div className="hero-text">
-        <h1 className="vbitez-title">{t("Hero.welcome")}</h1>
-        <h2>{t("Hero.discover")}</h2>
+        <h1 className="vbitez-title">{t('Hero.welcome')}</h1>
+        <h2>{t('Hero.discover')}</h2>
         <div className="hero-buttons">
           <VbitezButton
             onClick={() => {
               if (isAuthenticated) {
-                navigate("/app/business");
+                navigate('/app/business');
               } else {
-                navigate("/auth/register");
+                navigate('/auth/register');
               }
             }}
           >
-            {isAuthenticated ? t("Hero.My Account") : t("Hero.Create Account")}
+            {isAuthenticated ? t('Hero.My Account') : t('Hero.Create Account')}
           </VbitezButton>
           <VbitezButton
-            onClick={() => navigate("/uses")}
+            onClick={() => navigate('/uses')}
             variant="outline"
             suffix={<FontAwesomeIcon icon={faArrowRight} />}
           >
-            {t("Hero.Learn More")}
+            {t('Hero.Learn More')}
           </VbitezButton>
         </div>
         <h5

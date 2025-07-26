@@ -1,9 +1,9 @@
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
-import { formatDate } from "../../../../utils/formatDate";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../redux/store";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import { formatting } from '@voxire/utils';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../redux/store';
 
 function NewsAndUpdates() {
   const news = useSelector((state: RootState) => state.config.news);
@@ -14,9 +14,9 @@ function NewsAndUpdates() {
       {loading
         ? Array(2)
             .fill({
-              title: "",
-              date: "",
-              description: "",
+              title: '',
+              date: '',
+              description: '',
             })
             .map((_, index) => (
               <div key={index} className="news-item">
@@ -24,7 +24,7 @@ function NewsAndUpdates() {
                 <div
                   className="news-content"
                   style={{
-                    marginLeft: "10px",
+                    marginLeft: '10px',
                   }}
                 >
                   <h3 className="news-title">
@@ -52,17 +52,19 @@ function NewsAndUpdates() {
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.onerror = null;
-                  target.src = "https://via.placeholder.com/150";
+                  target.src = 'https://via.placeholder.com/150';
                 }}
               />
               <div className="news-content">
                 <h3 className="news-title">{item.title}</h3>
-                <p className="news-date">{formatDate(item.createdAt)}</p>
+                <p className="news-date">
+                  {formatting.formatDate(item.createdAt)}
+                </p>
                 <p className="news-description">
                   {item.shortContent?.slice(0, 50)?.trim()}
                   {item.shortContent &&
                     item.shortContent?.length > 50 &&
-                    "....."}
+                    '.....'}
                 </p>
               </div>
             </Link>

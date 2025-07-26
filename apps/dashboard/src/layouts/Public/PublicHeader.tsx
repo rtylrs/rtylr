@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBars,
   faChevronDown,
   faRightFromBracket,
   faTimes,
-} from "@fortawesome/free-solid-svg-icons";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+} from '@fortawesome/free-solid-svg-icons';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
-import useColors from "../../hooks/useColors";
-import useWindowDimensions from "../../utils/useWindowDimensions";
-import { useSelector } from "react-redux";
-import { selectLanguage } from "../../services/i18next";
-import { RootState } from "../../redux/store";
+import VbitezButton from '../../components/VbitezButton/VbitezButton';
+import useColors from '../../hooks/useColors';
+import { useWindowDimensions } from '@voxire/utils';
+import { useSelector } from 'react-redux';
+import { selectLanguage } from '../../services/i18next';
+import { RootState } from '../../redux/store';
 
 interface LinkWithColorProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const [languageDropdown, setLanguageDropdown] = useState(false);
-  const [language, setLanguage] = useState<string>("en");
+  const [language, setLanguage] = useState<string>('en');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,10 +36,10 @@ const Header: React.FC = () => {
 
   const isMobile = useMemo(() => width < 968, [width]);
   const isQuestionnaire = useMemo(
-    () => location.pathname.includes("/auth/questionnaire"),
+    () => location.pathname.includes('/auth/questionnaire'),
     [location.pathname]
   );
-  const isInnerPage = useMemo(() => document.location.pathname !== "/", []);
+  const isInnerPage = useMemo(() => document.location.pathname !== '/', []);
 
   useEffect(() => {
     let ticking = false;
@@ -55,12 +55,12 @@ const Header: React.FC = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem("language");
+    const storedLanguage = localStorage.getItem('language');
     if (storedLanguage) {
       setLanguage(storedLanguage);
     }
@@ -70,18 +70,18 @@ const Header: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
 
-      if (dropdown && !target.closest(".header-left")) {
+      if (dropdown && !target.closest('.header-left')) {
         setDropdown(false);
       }
 
-      if (languageDropdown && !target.closest(".lang-dropdown-container")) {
+      if (languageDropdown && !target.closest('.lang-dropdown-container')) {
         setLanguageDropdown(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdown, languageDropdown]);
 
@@ -104,25 +104,25 @@ const Header: React.FC = () => {
   }, []);
 
   const handleClick = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
 
     if (token) {
-      if (user.role === "business" || user.role === "admin") {
-        navigate("/app/business/");
+      if (user.role === 'business' || user.role === 'admin') {
+        navigate('/app/business/');
       } else {
-        navigate("/app/user/");
+        navigate('/app/user/');
       }
     } else {
-      navigate("/auth/register");
+      navigate('/auth/register');
     }
   }, [user.role, navigate]);
 
   const handleLogoClick = useCallback(() => {
-    navigate("/");
+    navigate('/');
   }, [navigate]);
 
   const handleLoginClick = useCallback(() => {
-    navigate("/auth/login");
+    navigate('/auth/login');
   }, [navigate]);
 
   const handleNavigation = useCallback(
@@ -135,7 +135,7 @@ const Header: React.FC = () => {
 
   const handleExternalLink = useCallback(() => {
     setDropdown(false);
-    window.open("https://voxire.com/careers", "_blank");
+    window.open('https://voxire.com/careers', '_blank');
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
@@ -154,34 +154,34 @@ const Header: React.FC = () => {
   }, [primary]);
 
   const headerClasses = useMemo(() => {
-    const classes = ["header"];
-    if (isMobileMenuOpen) classes.push("mobile-menu-open");
-    if (scrolled) classes.push("scrolled");
-    if (isInnerPage) classes.push("inner");
-    return classes.join(" ");
+    const classes = ['header'];
+    if (isMobileMenuOpen) classes.push('mobile-menu-open');
+    if (scrolled) classes.push('scrolled');
+    if (isInnerPage) classes.push('inner');
+    return classes.join(' ');
   }, [isMobileMenuOpen, scrolled, isInnerPage]);
 
   return (
     <header
       className={headerClasses}
       style={{
-        position: "fixed",
+        position: 'fixed',
       }}
     >
       <div
         className="header-center"
         style={{
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
         onClick={handleLogoClick}
       >
-        <img src={"/logo.png"} alt="Logo" />
+        <img src={'/logo.png'} alt="Logo" />
       </div>
 
       <div
         className="header-left"
         style={{
-          transform: "translateX(5%)",
+          transform: 'translateX(5%)',
         }}
       >
         <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
@@ -198,19 +198,19 @@ const Header: React.FC = () => {
           <FontAwesomeIcon
             icon={faChevronDown}
             style={{
-              marginLeft: "5px",
-              fontSize: "14px",
-              transform: dropdown ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s ease",
+              marginLeft: '5px',
+              fontSize: '14px',
+              transform: dropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
             }}
           />
         </p>
 
         {dropdown && (
           <div className="header-dropdown">
-            <h6 onClick={() => handleNavigation("/about")}>About Us</h6>
-            <h6 onClick={() => handleNavigation("/contact")}>Contact Us</h6>
-            <h6 onClick={() => handleNavigation("/faqs")}>FAQs</h6>
+            <h6 onClick={() => handleNavigation('/about')}>About Us</h6>
+            <h6 onClick={() => handleNavigation('/contact')}>Contact Us</h6>
+            <h6 onClick={() => handleNavigation('/faqs')}>FAQs</h6>
             <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
           </div>
         )}
@@ -228,7 +228,7 @@ const Header: React.FC = () => {
           <FontAwesomeIcon
             icon={isMobileMenuOpen ? faTimes : faBars}
             style={{
-              transition: "transform 0.2s ease",
+              transition: 'transform 0.2s ease',
             }}
           />
         </button>
@@ -237,7 +237,7 @@ const Header: React.FC = () => {
           <button
             className="login-button"
             style={{
-              display: isMobile ? "none" : user.token ? "none" : "flex",
+              display: isMobile ? 'none' : user.token ? 'none' : 'flex',
             }}
             onClick={handleLoginClick}
           >
@@ -249,8 +249,8 @@ const Header: React.FC = () => {
           {isQuestionnaire ? (
             <div
               style={{
-                display: "flex",
-                flexDirection: "row",
+                display: 'flex',
+                flexDirection: 'row',
                 gap: 10,
               }}
             >
@@ -258,7 +258,7 @@ const Header: React.FC = () => {
               <p>Logout</p>
             </div>
           ) : (
-            <>{user.token ? "Dashboard" : "Register Now"}</>
+            <>{user.token ? 'Dashboard' : 'Register Now'}</>
           )}
         </VbitezButton>
 
@@ -268,16 +268,16 @@ const Header: React.FC = () => {
             <FontAwesomeIcon
               icon={faChevronDown}
               style={{
-                transform: languageDropdown ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.2s ease",
+                transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
               }}
             />
           </div>
           {languageDropdown && (
             <div className="languages-dropdown">
-              <span onClick={() => handleLanguageChange("en")}>English</span>
-              <span onClick={() => handleLanguageChange("ar")}>Arabic</span>
-              <span onClick={() => handleLanguageChange("fr")}>French</span>
+              <span onClick={() => handleLanguageChange('en')}>English</span>
+              <span onClick={() => handleLanguageChange('ar')}>Arabic</span>
+              <span onClick={() => handleLanguageChange('fr')}>French</span>
             </div>
           )}
         </div>
@@ -292,8 +292,8 @@ const Header: React.FC = () => {
           <LinkWithColor to="/contact">Contact Us</LinkWithColor>
           <VbitezButton
             styles={{
-              display: user.token ? "none" : "flex",
-              marginBottom: "0px",
+              display: user.token ? 'none' : 'flex',
+              marginBottom: '0px',
             }}
             onClick={handleLoginClick}
           >
@@ -301,7 +301,7 @@ const Header: React.FC = () => {
           </VbitezButton>
 
           <VbitezButton onClick={handleClick}>
-            {user.token ? "Dashboard" : "Register Now"}
+            {user.token ? 'Dashboard' : 'Register Now'}
           </VbitezButton>
         </div>
       )}
