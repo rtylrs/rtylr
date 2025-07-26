@@ -34,7 +34,7 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
   const restaurantId = useSelector((state: RootState) => state.user.userId);
 
   useEffect(() => {
-    console.log("Modal opened:", isOpen);
+    // Modal open state changed
   }, [isOpen]);
 
   const handleSubmit = (e: any) => {
@@ -47,11 +47,9 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
         isParentCategory: true,
         icon: iconURL,
       };
-      console.log("Parent Category Payload:", categoryPayload);
 
       if (addOrEdit === "add") {
         dispatch(addCategory(categoryPayload));
-        console.log("Dispatching addCategory");
       } else if (addOrEdit === "edit" && categoryData) {
         dispatch(
           editCategory({
@@ -59,7 +57,6 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
             category: categoryPayload,
           })
         );
-        console.log("Dispatching editCategory");
       }
 
       setCategory("");
