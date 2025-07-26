@@ -16,7 +16,7 @@ import {
 import { RootState, AppDispatch } from '../redux/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import VbitezButton from '../components/VbitezButton/VbitezButton';
+import { Button } from '@voxire/shared';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -191,7 +191,7 @@ const Register: React.FC = () => {
               </p>
             )}
 
-            <VbitezButton
+            <Button
               variant="primary"
               size="md"
               fullWidth
@@ -199,13 +199,13 @@ const Register: React.FC = () => {
               type="submit"
             >
               Register
-            </VbitezButton>
+            </Button>
 
             <div className="auth-separator">
               <span>or</span>
             </div>
 
-            <VbitezButton
+            <Button
               variant="outline"
               size="md"
               fullWidth
@@ -214,7 +214,7 @@ const Register: React.FC = () => {
               prefix={<FontAwesomeIcon icon={faGoogle} />}
             >
               Sign in with Google
-            </VbitezButton>
+            </Button>
           </form>
 
           <div className="auth-footer">

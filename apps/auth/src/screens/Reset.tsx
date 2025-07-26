@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Container, Typography, TextField } from '@mui/material';
 import { auth } from '../firebase';
-import VbitezButton from '../components/VbitezButton/VbitezButton';
+import { Button } from '@voxire/shared';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -52,13 +52,9 @@ function ForgotPassword() {
           justifyContent: 'flex-end',
         }}
       >
-        <VbitezButton
-          fullWidth
-          onClick={handleResetPassword}
-          disabled={requestSent}
-        >
+        <Button fullWidth onClick={handleResetPassword} disabled={requestSent}>
           Reset Password
-        </VbitezButton>
+        </Button>
       </div>
       {message && (
         <Typography

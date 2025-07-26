@@ -1,0 +1,9 @@
+@use 'sass:meta';
+
+@include meta.load-css('./styles/_variables.scss');
+
+@include meta.load-css('./components/Button/Button.scss');
+@include meta.load-css('./components/Card/Card.scss');
+@include meta.load-css('./components/Input/Input.scss');
+@include meta.load-css('./components/Modal/Modal.scss');
+@include meta.load-css('./components/LoadingSpinner/LoadingSpinner.scss');

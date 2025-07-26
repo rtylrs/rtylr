@@ -1,133 +1,251 @@
 .voxire-button {
   position: relative;
-  transition: all 0.2s ease-in-out;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-    sans-serif;
-  font-weight: 500;
-  text-transform: none;
-  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font-family: var(
+    --secondary-font,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  will-change: transform, box-shadow;
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
   }
 
   &:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transform: none;
   }
 
-  &__loader {
-    margin-right: 0.5rem;
+  &.voxire-button-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+    gap: 6px;
   }
 
-  // Size variants
-  &--small {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    min-height: 32px;
+  &.voxire-button-md {
+    padding: 12px 24px;
+    font-size: 16px;
+    gap: 8px;
   }
 
-  &--medium {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    min-height: 40px;
+  &.voxire-button-lg {
+    padding: 16px 32px;
+    font-size: 18px;
+    gap: 10px;
   }
 
-  &--large {
-    padding: 1rem 1.5rem;
-    font-size: 1.125rem;
-    min-height: 48px;
+  &.voxire-button-full-width {
+    width: 100%;
   }
 
-  // Color variants
-  &--primary {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-      }
-    }
-  }
-
-  &--secondary {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #dc004e 0%, #c51162 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #c51162 0%, #ad1457 100%);
-      }
-    }
-  }
-
-  &--success {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #1b5e20 0%, #0d4f14 100%);
-      }
-    }
-  }
-
-  &--warning {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #ed6c02 0%, #e65100 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #e65100 0%, #bf360c 100%);
-      }
-    }
-  }
-
-  &--error {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
-      }
-    }
-  }
-
-  &--info {
-    &.MuiButton-contained {
-      background: linear-gradient(135deg, #0288d1 0%, #0277bd 100%);
-
-      &:hover {
-        background: linear-gradient(135deg, #0277bd 0%, #01579b 100%);
-      }
-    }
-  }
-
-  // Loading state
-  &--loading {
-    pointer-events: none;
-
-    .voxire-button__loader {
-      animation: spin 1s linear infinite;
-    }
-  }
-
-  // Disabled state
-  &--disabled {
+  &.voxire-button-disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    pointer-events: none;
 
-    &:hover {
+    &:active {
       transform: none;
-      box-shadow: none;
+    }
+  }
+
+  &.voxire-button-loading {
+    cursor: wait;
+    pointer-events: none;
+
+    .voxire-button-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      display: none;
+    }
+  }
+
+  .voxire-button-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voxire-button-text {
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .voxire-button-prefix,
+  .voxire-button-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .voxire-button-prefix {
+    order: 1;
+  }
+
+  .voxire-button-text {
+    order: 2;
+  }
+
+  .voxire-button-suffix {
+    order: 3;
+  }
+
+  &.voxire-button-sm {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &.voxire-button-lg {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 18px;
+      height: 18px;
     }
   }
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+.voxire-button-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  to {
-    transform: rotate(360deg);
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-secondary {
+  background-color: white;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-outline {
+  background-color: transparent;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--primary-color);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .voxire-button-ghost {
+    &:hover:not(.voxire-button-disabled) {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active:not(.voxire-button-disabled) {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .voxire-button {
+    &.voxire-button-lg {
+      padding: 14px 28px;
+      font-size: 16px;
+    }
+
+    &.voxire-button-md {
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+
+    &.voxire-button-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }
+}
+
+@media (prefers-contrast: high) {
+  .voxire-button {
+    border-width: 3px;
+
+    &:focus-visible {
+      outline-width: 3px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voxire-button {
+    transition: none;
+
+    &:hover,
+    &:active {
+      transform: none;
+    }
   }
 }

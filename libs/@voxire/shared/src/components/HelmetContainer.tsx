@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 
 interface HelmetContainerProps {
   title?: string;
@@ -19,24 +19,24 @@ interface HelmetContainerProps {
   favicon?: string;
 }
 
-function HelmetContainer({
-  title = "Vbitez - Contactless QR Menu",
-  description = "",
-  image = "",
-  url = "",
-  author = "",
-  keywords = "",
-  robots = "",
-  ogType = "",
-  ogLocale = "",
-  ogSiteName = "",
-  ogDescription = "",
-  twitterCard = "",
-  twitterSite = "",
-  twitterCreator = "",
+export const HelmetContainer = ({
+  title = '',
+  description = '',
+  image = '',
+  url = '',
+  author = '',
+  keywords = '',
+  robots = '',
+  ogType = '',
+  ogLocale = '',
+  ogSiteName = '',
+  ogDescription = '',
+  twitterCard = '',
+  twitterSite = '',
+  twitterCreator = '',
   customMetaTags = [],
-  favicon = "",
-}: HelmetContainerProps) {
+  favicon = '',
+}: HelmetContainerProps) => {
   return (
     <Helmet>
       <meta charSet="utf-8" />
@@ -68,6 +68,4 @@ function HelmetContainer({
         customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
     </Helmet>
   );
-}
-
-export default HelmetContainer;
+};
