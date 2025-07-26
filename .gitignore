@@ -7,3 +7,6 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 /dist
 node_modules/
+
+# VSCode
+.vscode/

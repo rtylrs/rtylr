@@ -6,8 +6,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
   background: white;
+  height: 95vh;
 }
 
 .auth-form-container {
@@ -91,7 +91,7 @@
   }
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     left: 0;
     right: 0;
@@ -133,6 +133,7 @@
 .login-container {
   display: flex;
   height: 90vh;
+  overflow: hidden;
 
   .login-image {
     flex: 1;
@@ -242,7 +243,7 @@
 
       &::before,
       &::after {
-        content: "";
+        content: '';
         flex: 1;
         height: 1px;
         background: #888;
@@ -349,7 +350,7 @@
         color: #333;
         cursor: pointer;
 
-        input[type="radio"] {
+        input[type='radio'] {
           margin-right: 15px;
           accent-color: #a65cf0;
         }

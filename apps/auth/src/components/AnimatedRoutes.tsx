@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
+import React from 'react';
 
 const animations = {
   initial: {
@@ -15,7 +16,7 @@ const animations = {
   },
 };
 
-const AnimatedRoutes = ({ children }) => {
+const AnimatedRoutes = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
       variants={animations}
@@ -24,7 +25,7 @@ const AnimatedRoutes = ({ children }) => {
       exit="exit"
       transition={{
         duration: 0.2,
-        ease: "easeOut",
+        ease: 'easeOut',
       }}
     >
       {children}
