@@ -17,9 +17,11 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'esm' : format}.js`,
     },
     rollupOptions: {
-      external: ['date-fns', 'lodash'],
+      external: ['react', 'react-dom', 'date-fns', 'lodash'],
       output: {
         globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
           'date-fns': 'dateFns',
           lodash: '_',
         },

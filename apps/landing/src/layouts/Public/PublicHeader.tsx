@@ -10,7 +10,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import VbitezButton from '../../components/VbitezButton/VbitezButton';
 import useColors from '../../hooks/useColors';
-import { useWindowDimensions } from '../../hooks/useWindowDimensions';
+import { useWindowDimensions } from '@voxire/utils';
 import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
 import { RootState } from '../../redux/store';
