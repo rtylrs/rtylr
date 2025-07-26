@@ -1,16 +1,30 @@
-// Colors
-$primary-color: #1976d2;
-$secondary-color: #dc004e;
-$success-color: #2e7d32;
-$warning-color: #ed6c02;
-$error-color: #d32f2f;
-$info-color: #0288d1;
+:root {
+  --primary-color: #040428;
+  --secondary-color: #4485c4;
+  --accent-color: #03aed2;
+  --dark-green-color: #016b63;
+  --background-color: #ffffff;
+  --bg-color: #fcfaff;
+  --light-color: #fff;
+  --dark-color: #000;
+  --item-background-color: #373737;
+  --text-color: #fff;
+  --subtext-color: #b0b0b0;
+  --light-gray: #d9d9d9;
+  --error-red: #ff0000;
+  --active-color: #e3e4e5;
+  --admin-bg: #eff0f1;
+  --admin-primary: #262626;
+  --vendor-bg: #eff0f1;
 
-// Typography
-$font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-  'Roboto', sans-serif;
-$font-family-secondary: 'ggsans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-  'Roboto', sans-serif;
+  --primary-font: 'Plus Jakarta Sans', sans-serif;
+  --primary-font-bold: 'Plus Jakarta Sans Extra Bold', sans-serif;
+  --gg-sans: 'Gg-Sans', sans-serif;
+  --secondary-font: 'Inter', sans-serif;
+  --tertiary-font: 'Inter', sans-serif;
+  --quaternary-font: 'Inter', sans-serif;
+  --quinary-font: 'Inter', sans-serif;
+}
 
 $font-size-xs: 0.75rem;
 $font-size-sm: 0.875rem;

@@ -48,10 +48,8 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "${resolve(
-          __dirname,
-          'src/styles/_variables.scss'
-        )}";`,
+        api: 'modern',
+        quietDeps: true,
       },
     },
   },

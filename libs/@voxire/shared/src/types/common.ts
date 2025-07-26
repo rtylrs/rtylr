@@ -4,13 +4,23 @@ export interface BaseComponentProps {
   children?: React.ReactNode;
 }
 
-export interface ButtonProps extends BaseComponentProps {
-  variant?: 'contained' | 'outlined' | 'text';
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
-  size?: 'small' | 'medium' | 'large';
-  disabled?: boolean;
-  loading?: boolean;
+export interface ButtonProps
+  extends Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    'onClick' | 'prefix' | 'suffix'
+  > {
+  children: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  color?: string;
+  secondaryColor?: string;
+  hidden?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  styles?: React.CSSProperties;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
 }
 
 export interface InputProps extends BaseComponentProps {
