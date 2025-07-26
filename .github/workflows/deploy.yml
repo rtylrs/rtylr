@@ -209,6 +209,7 @@ jobs:
         run: |
           DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
           COMMIT_HASH=$(git rev-parse --short HEAD)
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
           # Get app versions for deployed apps
           APP_VERSIONS=""
@@ -217,6 +218,45 @@ jobs:
             if [ -n "$app" ] && [ -f "apps/$app/version.json" ]; then
               VERSION=$(node -p "require('./apps/$app/version.json').version")
               APP_VERSIONS="$APP_VERSIONS• $app: v$VERSION\n"
+            fi
+          done
+
+          # Get changed files for each deployed app with change types
+          CHANGED_FILES_DETAILS=""
+          IFS=',' read -ra APPS <<< "$DEPLOY_APPS"
+          for app in "${APPS[@]}"; do
+            if [ -n "$app" ]; then
+              # Get files with their change status
+              CHANGED_FILES=""
+              
+              # Get modified files
+              MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | grep "^apps/$app/" | head -5)
+              for file in $MODIFIED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
+              done
+              
+              # Get renamed files
+              RENAMED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^R" | awk '{print $3}' | grep "^apps/$app/" | head -3)
+              for file in $RENAMED_FILES; do
+                OLD_NAME=$(git diff --name-status HEAD~1 HEAD | grep "^R.*$file" | awk '{print $2}')
+                CHANGED_FILES="$CHANGED_FILES  • 🔄 Renamed: $OLD_NAME → $file\n"
+              done
+              
+              # Get deleted files
+              DELETED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^D" | awk '{print $2}' | grep "^apps/$app/" | head -3)
+              for file in $DELETED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
+              done
+              
+              # Get added files
+              ADDED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^A" | awk '{print $2}' | grep "^apps/$app/" | head -3)
+              for file in $ADDED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ➕ Added: $file\n"
+              done
+              
+              if [ -n "$CHANGED_FILES" ]; then
+                CHANGED_FILES_DETAILS="$CHANGED_FILES_DETAILS\n📁 $app:\n$CHANGED_FILES"
+              fi
             fi
           done
 
@@ -237,8 +277,11 @@ jobs:
           # Build the message
           MESSAGE="📦 Project: Vbitez"
           MESSAGE="$MESSAGE\n📱 Apps: $DEPLOY_APPS"
+          MESSAGE="$MESSAGE\n📝 Commit: $COMMIT_HASH"
+          MESSAGE="$MESSAGE\n💬 Message: $COMMIT_MESSAGE"
           MESSAGE="$MESSAGE\n⏰ Time: $(date '+%Y-%m-%d %H:%M:%S UTC')"
           MESSAGE="$MESSAGE\n\n📋 App Versions:\n$APP_VERSIONS"
+          MESSAGE="$MESSAGE\n📄 Changed Files:$CHANGED_FILES_DETAILS"
           MESSAGE="$MESSAGE\n📝 Recent Changes:\n$FORMATTED_COMMITS"
 
           # Send to Telegram using shared script

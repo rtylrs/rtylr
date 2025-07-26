@@ -63,14 +63,41 @@ jobs:
           COMMIT_HASH=$(git rev-parse --short HEAD)
           COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
-          # Get changed files for each library
+          # Get changed files for each library with change types
           CHANGED_FILES_DETAILS=""
           IFS=',' read -ra LIBS <<< "$LIBRARIES"
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
-              FILES=$(git diff --name-only HEAD~1 HEAD | grep "^$lib/" | head -3 | sed 's/^/  • /')
-              if [ -n "$FILES" ]; then
-                CHANGED_FILES_DETAILS="$CHANGED_FILES_DETAILS\n📁 $lib:\n$FILES"
+              # Get files with their change status
+              CHANGED_FILES=""
+              
+              # Get modified files
+              MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | grep "^$lib/" | head -5)
+              for file in $MODIFIED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
+              done
+              
+              # Get renamed files
+              RENAMED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^R" | awk '{print $3}' | grep "^$lib/" | head -3)
+              for file in $RENAMED_FILES; do
+                OLD_NAME=$(git diff --name-status HEAD~1 HEAD | grep "^R.*$file" | awk '{print $2}')
+                CHANGED_FILES="$CHANGED_FILES  • 🔄 Renamed: $OLD_NAME → $file\n"
+              done
+              
+              # Get deleted files
+              DELETED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^D" | awk '{print $2}' | grep "^$lib/" | head -3)
+              for file in $DELETED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
+              done
+              
+              # Get added files
+              ADDED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^A" | awk '{print $2}' | grep "^$lib/" | head -3)
+              for file in $ADDED_FILES; do
+                CHANGED_FILES="$CHANGED_FILES  • ➕ Added: $file\n"
+              done
+              
+              if [ -n "$CHANGED_FILES" ]; then
+                CHANGED_FILES_DETAILS="$CHANGED_FILES_DETAILS\n📁 $lib:\n$CHANGED_FILES"
               fi
             fi
           done
