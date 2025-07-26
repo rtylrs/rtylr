@@ -63,35 +63,42 @@ jobs:
           COMMIT_HASH=$(git rev-parse --short HEAD)
           COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
-          # Get changed files for each library with change types
+          # Get changed files for each library with change types since last library update
           CHANGED_FILES_DETAILS=""
           IFS=',' read -ra LIBS <<< "$LIBRARIES"
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
-              # Get files with their change status
+              # Get files with their change status since last library update
               CHANGED_FILES=""
               
-              # Get modified files
-              MODIFIED_FILES=$(git diff --name-only HEAD~1 HEAD | grep "^$lib/" | head -5)
-              for file in $MODIFIED_FILES; do
-                CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
+              # Use last 10 commits as the range for library changes
+              DIFF_RANGE="HEAD~10..HEAD"
+              
+              # Get all changed files for this library since last update
+              ALL_CHANGED_FILES=$(git diff --name-only $DIFF_RANGE | grep "^$lib/" | sort | uniq | head -10)
+              
+              for file in $ALL_CHANGED_FILES; do
+                # Check if file was added, modified, or deleted
+                if git show HEAD:$file >/dev/null 2>&1; then
+                  # File exists in current commit
+                  if git show $DIFF_RANGE --name-status | grep -q "^[AM].*$file"; then
+                    CHANGED_FILES="$CHANGED_FILES  • 📝 Updated: $file\n"
+                  fi
+                else
+                  # File doesn't exist in current commit (was deleted)
+                  CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
+                fi
               done
               
               # Get renamed files
-              RENAMED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^R" | awk '{print $3}' | grep "^$lib/" | head -3)
+              RENAMED_FILES=$(git diff --name-status $DIFF_RANGE | grep "^R" | awk '{print $3}' | grep "^$lib/" | head -3)
               for file in $RENAMED_FILES; do
-                OLD_NAME=$(git diff --name-status HEAD~1 HEAD | grep "^R.*$file" | awk '{print $2}')
+                OLD_NAME=$(git diff --name-status $DIFF_RANGE | grep "^R.*$file" | awk '{print $2}')
                 CHANGED_FILES="$CHANGED_FILES  • 🔄 Renamed: $OLD_NAME → $file\n"
               done
               
-              # Get deleted files
-              DELETED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^D" | awk '{print $2}' | grep "^$lib/" | head -3)
-              for file in $DELETED_FILES; do
-                CHANGED_FILES="$CHANGED_FILES  • ❌ Deleted: $file\n"
-              done
-              
-              # Get added files
-              ADDED_FILES=$(git diff --name-status HEAD~1 HEAD | grep "^A" | awk '{print $2}' | grep "^$lib/" | head -3)
+              # Get newly added files
+              ADDED_FILES=$(git diff --name-status $DIFF_RANGE | grep "^A" | awk '{print $2}' | grep "^$lib/" | head -3)
               for file in $ADDED_FILES; do
                 CHANGED_FILES="$CHANGED_FILES  • ➕ Added: $file\n"
               done

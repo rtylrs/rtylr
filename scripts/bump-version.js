@@ -173,14 +173,21 @@ try {
     execCommand(`git commit -m "🚀 Bump ${appName} to v${newVersion}"`, `Committing version bump`);
     console.log(`✅ Version bump committed: ${appName} v${newVersion}`);
 
-    // 6. Push to trigger deployment automatically
+    // 6. Create app-specific tag
+    const tagName = `${appName}-v${newVersion}`;
+    execCommand(`git tag ${tagName}`, `Creating tag ${tagName}`);
+    console.log(`✅ Created tag: ${tagName}`);
+
+    // 7. Push to trigger deployment automatically
     execCommand(`git push origin main`, `Pushing to trigger deployment`);
+    execCommand(`git push origin ${tagName}`, `Pushing tag ${tagName}`);
     console.log(`✅ Pushed to origin/main - deployment triggered!`);
 
-    // 7. Success message
+    // 8. Success message
     console.log('');
     console.log('🎉 Deployment process started successfully!');
     console.log(`📦 GitHub Actions will now build and deploy ${appName} v${newVersion}`);
+    console.log(`🏷️  Tag created: ${tagName}`);
     console.log('📱 You\'ll receive a Telegram notification when deployment completes');
 
 } catch (error) {
