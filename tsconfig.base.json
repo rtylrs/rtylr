@@ -15,7 +15,9 @@
     "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@voxire/*": ["libs/@voxire/*/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
