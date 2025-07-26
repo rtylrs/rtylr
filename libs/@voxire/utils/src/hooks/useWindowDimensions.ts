@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 
 function getWindowDimensions() {
+  if (typeof window === 'undefined') {
+    return { width: 0, height: 0 };
+  }
   const { innerWidth: width, innerHeight: height } = window;
   return {
     width,
@@ -8,7 +11,6 @@ function getWindowDimensions() {
   };
 }
 
-// Throttle function to limit how often the resize handler runs
 function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
@@ -16,14 +18,14 @@ function throttle<T extends (...args: any[]) => any>(
   let inThrottle: boolean;
   return ((...args: any[]) => {
     if (!inThrottle) {
-      func.apply(this, args);
+      func.apply(null, args);
       inThrottle = true;
       setTimeout(() => (inThrottle = false), limit);
     }
   }) as T;
 }
 
-export default function useWindowDimensions() {
+export function useWindowDimensions() {
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
   );
@@ -34,13 +36,15 @@ export default function useWindowDimensions() {
       const dimensions = getWindowDimensions();
       setWindowDimensions(dimensions);
       setIsMobile(dimensions.width <= 768);
-    }, 100), // Throttle to 100ms
+    }, 100),
     []
   );
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window === 'undefined') return;
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
   return { ...windowDimensions, isMobile };
