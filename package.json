@@ -1,7 +1,6 @@
 {
   "name": "vbitez",
   "version": "0.0.1",
-  "license": "MIT",
   "scripts": {
     "build": "nx build",
     "test": "nx test",
