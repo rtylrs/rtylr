@@ -1,44 +1,24 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../lib/api";
-
-interface Addons {
-  feedback: boolean;
-  about: boolean;
-  contact: boolean;
-  landing: boolean;
-}
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../lib/api';
 
 export interface UserState {
-  user: any | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
   role: string | null;
-  userId: string | null;
-  addons: Addons;
-  visits: any[];
 }
 
 const initialState: UserState = {
-  user: null,
   token: null,
   isAuthenticated: false,
-  loading: false,
   error: null,
+  loading: false,
   role: null,
-  userId: null,
-  addons: {
-    feedback: false,
-    about: false,
-    contact: false,
-    landing: false,
-  },
-  visits: [],
 };
 
 export const loginAsync = createAsyncThunk(
-  "user/loginAsync",
+  'user/loginAsync',
   async (
     payload: {
       email: string;
@@ -47,9 +27,9 @@ export const loginAsync = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-      const response = await api.post("/auth/login", payload);
+      const response = await api.post('/auth/login', payload);
       const data = response.data;
-      localStorage.setItem("token", data.token);
+      localStorage.setItem('token', data.token);
 
       return data;
     } catch (error) {
@@ -59,7 +39,7 @@ export const loginAsync = createAsyncThunk(
 );
 
 export const registerRestaurantAsync = createAsyncThunk(
-  "user/registerRestaurantAsync",
+  'user/registerRestaurantAsync',
   async (
     payload: {
       email: string;
@@ -70,9 +50,9 @@ export const registerRestaurantAsync = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-      const response = await api.post("/auth/create/business", payload);
+      const response = await api.post('/auth/create/business', payload);
       const data = response.data;
-      localStorage.setItem("token", data.token);
+      localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue((error as any).response.data);
@@ -81,12 +61,12 @@ export const registerRestaurantAsync = createAsyncThunk(
 );
 
 export const restaurantWithGoogleAsync = createAsyncThunk(
-  "user/restaurantWithGoogleAsync",
+  'user/restaurantWithGoogleAsync',
   async (payload: { idToken: string }, thunkAPI) => {
     try {
-      const response = await api.post("/auth/create/business/google", payload);
+      const response = await api.post('/auth/create/business/google', payload);
       const data = response.data;
-      localStorage.setItem("token", data.token);
+      localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue((error as any).response.data);
@@ -94,79 +74,22 @@ export const restaurantWithGoogleAsync = createAsyncThunk(
   }
 );
 
-export const getUserInfo = createAsyncThunk(
-  "user/getUserInfo",
-  async (_, thunkAPI) => {
-    try {
-      const response = await api.get(`/business/me`);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue((error as any).response.data);
-    }
-  }
-);
-
-export const setThemeAsync = createAsyncThunk(
-  "user/setThemeAsync",
-  async (
-    payload: {
-      id: string;
-      themeData: {
-        primaryColor?: string;
-        secondaryColor?: string;
-        loaderColor?: string;
-        accentColor?: string;
-        categoryTitleColor?: string;
-        restaurantDescriptionColor?: string;
-        productTitleColor?: string;
-        productDescriptionColor?: string;
-        productPriceColor?: string;
-        menuBackgroundColor?: string;
-        font?: string;
-        fontSize?: string;
-        categoryFontSize?: string;
-        productPriceFontSize?: string;
-        productDescriptionFontSize?: string;
-        backgroundColor?: string;
-        backgroundImage?: string;
-        imageSize?: string;
-        themeStyle?: string;
-        displaySearchButton?: boolean;
-      };
-    },
-    thunkAPI
-  ) => {
-    try {
-      const response = await api.put(
-        `/business/${payload.id}/theme`,
-        payload.themeData
-      );
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue((error as any).response.data);
-    }
-  }
-);
-
 const userSlice = createSlice({
-  name: "user",
+  name: 'user',
   initialState,
   reducers: {
     login: (state, action) => {
-      state.user = action.payload;
+      state.token = action.payload.token;
+      state.role = action.payload.role;
       state.isAuthenticated = true;
     },
     logout: (state) => {
-      state.user = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("token");
+      localStorage.removeItem('token');
       state.loading = false;
       state.error = null;
       state.role = null;
-      state.userId = null;
       state.token = null;
-      // clear entire local storage
-      // localStorage.clear();
     },
     clearError: (state) => {
       state.error = null;
@@ -179,8 +102,9 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
-        const { token } = action.payload;
+        const { token, role } = action.payload;
         state.token = token;
+        state.role = role;
         state.isAuthenticated = true;
         state.loading = false;
         state.error = null;
@@ -188,15 +112,16 @@ const userSlice = createSlice({
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
         const payload = action.payload as any;
-        state.error = payload?.message || payload?.error || "Login failed";
+        state.error = payload?.message || payload?.error || 'Login failed';
       })
       .addCase(registerRestaurantAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(registerRestaurantAsync.fulfilled, (state, action) => {
-        const { token } = action.payload;
+        const { token, role } = action.payload;
         state.token = token;
+        state.role = role;
         state.isAuthenticated = true;
         state.loading = false;
         state.error = null;
@@ -205,39 +130,16 @@ const userSlice = createSlice({
         state.loading = false;
         const payload = action.payload as any;
         state.error =
-          payload?.message || payload?.error || "Registration failed";
-      })
-      .addCase(getUserInfo.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getUserInfo.fulfilled, (state, action) => {
-        const { userId, token, user, visits } = action.payload;
-        return {
-          ...state,
-          role: user.role,
-          userId: userId,
-          token: token,
-          user: user,
-          isAuthenticated: true,
-          loading: false,
-          addons: user.addons,
-          visits: visits,
-        };
-      })
-      .addCase(getUserInfo.rejected, (state, action) => {
-        state.loading = false;
-        const payload = action.payload as any;
-        state.error =
-          payload?.message || payload?.error || "Failed to get user info";
+          payload?.message || payload?.error || 'Registration failed';
       })
       .addCase(restaurantWithGoogleAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(restaurantWithGoogleAsync.fulfilled, (state, action) => {
-        const { token } = action.payload;
+        const { token, role } = action.payload;
         state.token = token;
+        state.role = role;
         state.isAuthenticated = true;
         state.loading = false;
         state.error = null;
@@ -246,38 +148,18 @@ const userSlice = createSlice({
         state.loading = false;
         const payload = action.payload as any;
         state.error =
-          payload?.message || payload?.error || "Google login failed";
-      })
-      .addCase(setThemeAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(setThemeAsync.fulfilled, (state, action) => {
-        state.loading = false;
-        state.error = null;
-        if (state.user) {
-          state.user.theme = action.payload.theme;
-        }
-      })
-      .addCase(setThemeAsync.rejected, (state, action) => {
-        state.loading = false;
-        const payload = action.payload as any;
-        state.error =
-          payload?.message || payload?.error || "Failed to update theme";
+          payload?.message || payload?.error || 'Google login failed';
       });
   },
 });
 
 export const { login, logout, clearError } = userSlice.actions;
 
-export const selectUser = (state: { user: UserState }) => state.user.user;
 export const selectIsAuthenticated = (state: { user: UserState }) =>
   state.user.isAuthenticated;
 export const selectLoading = (state: { user: UserState }) => state.user.loading;
 export const selectError = (state: { user: UserState }) => state.user.error;
 export const selectRole = (state: { user: UserState }) => state.user.role;
-export const selectUserId = (state: { user: UserState }) => state.user.userId;
-export const selectTheme = (state: { user: UserState }) =>
-  state.user.user?.theme;
+export const selectToken = (state: { user: UserState }) => state.user.token;
 
 export default userSlice.reducer;

@@ -1,8 +1,8 @@
-@use "sass:color";
+@use 'sass:color';
 
-@use "imports";
-@use "fonts";
-@use "variables";
+@use 'imports';
+@use 'fonts';
+@use 'variables';
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -47,8 +47,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--background-color);
-  height: 100vh;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--secondary-color);
   scroll-behavior: smooth;
   color: var(--primary-color);

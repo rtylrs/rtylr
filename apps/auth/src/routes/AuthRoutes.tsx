@@ -12,7 +12,7 @@ const EmailVerification = React.lazy(
 
 const AuthRoutes = [
   {
-    path: '/auth/login',
+    path: '/',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -22,7 +22,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: '/auth/register',
+    path: '/register',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -32,7 +32,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: '/auth/password-reset',
+    path: '/password-reset',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -42,7 +42,7 @@ const AuthRoutes = [
     ),
   },
   {
-    path: '/auth/verify/:token',
+    path: '/verify/:token',
     element: (
       <Public>
         <AnimatedRoutes>

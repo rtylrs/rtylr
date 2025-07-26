@@ -48,5 +48,6 @@ if (rootElement) {
     </ThemeProvider>
   );
 } else {
-  <div>The App Failed To Load</div>;
+  console.error('Root element not found');
+  document.body.innerHTML = '<div>The App Failed To Load</div>';
 }

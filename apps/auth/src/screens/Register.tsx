@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import {
-  getUserInfo,
   registerRestaurantAsync,
   selectIsAuthenticated,
   selectLoading,
@@ -69,7 +68,6 @@ const Register: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getUserInfo());
       if (role === 'business') {
         navigate('/auth/questionnaire');
       } else {
@@ -222,16 +220,13 @@ const Register: React.FC = () => {
           <div className="auth-footer">
             <p>
               Already have an account?{' '}
-              <span
-                className="auth-link"
-                onClick={() => navigate('/auth/login')}
-              >
+              <span className="auth-link" onClick={() => navigate('/')}>
                 Login Now.
               </span>
             </p>
             <p
               className="auth-link"
-              onClick={() => navigate('/auth/forgot-password')}
+              onClick={() => navigate('/forgot-password')}
             >
               Forgot Password?
             </p>
