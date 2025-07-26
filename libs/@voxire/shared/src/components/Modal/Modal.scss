@@ -1,0 +1,75 @@
+
+
+.voxire-modal {
+  .MuiDialog-paper {
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-xl;
+    overflow: hidden;
+  }
+
+  &__title {
+    background: linear-gradient(
+      135deg,
+      $primary-color 0%,
+      darken($primary-color, 10%) 100%
+    );
+    color: white;
+    font-family: $font-family-primary;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-lg;
+    padding: $spacing-md $spacing-lg;
+    position: relative;
+
+    .MuiDialogTitle-root {
+      color: white;
+    }
+  }
+
+  &__close-button {
+    position: absolute;
+    right: $spacing-sm;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__content {
+    padding: $spacing-lg;
+    font-family: $font-family-primary;
+  }
+
+  // Max width variants
+  &--max-width-xs {
+    .MuiDialog-paper {
+      max-width: 444px;
+    }
+  }
+
+  &--max-width-sm {
+    .MuiDialog-paper {
+      max-width: 600px;
+    }
+  }
+
+  &--max-width-md {
+    .MuiDialog-paper {
+      max-width: 900px;
+    }
+  }
+
+  &--max-width-lg {
+    .MuiDialog-paper {
+      max-width: 1200px;
+    }
+  }
+
+  &--max-width-xl {
+    .MuiDialog-paper {
+      max-width: 1536px;
+    }
+  }
+}

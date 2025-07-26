@@ -1,0 +1,133 @@
+.voxire-button {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    sans-serif;
+  font-weight: 500;
+  text-transform: none;
+  border-radius: 0.5rem;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  &__loader {
+    margin-right: 0.5rem;
+  }
+
+  // Size variants
+  &--small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    min-height: 32px;
+  }
+
+  &--medium {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    min-height: 40px;
+  }
+
+  &--large {
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    min-height: 48px;
+  }
+
+  // Color variants
+  &--primary {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+      }
+    }
+  }
+
+  &--secondary {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #dc004e 0%, #c51162 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #c51162 0%, #ad1457 100%);
+      }
+    }
+  }
+
+  &--success {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #1b5e20 0%, #0d4f14 100%);
+      }
+    }
+  }
+
+  &--warning {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #ed6c02 0%, #e65100 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #e65100 0%, #bf360c 100%);
+      }
+    }
+  }
+
+  &--error {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+      }
+    }
+  }
+
+  &--info {
+    &.MuiButton-contained {
+      background: linear-gradient(135deg, #0288d1 0%, #0277bd 100%);
+
+      &:hover {
+        background: linear-gradient(135deg, #0277bd 0%, #01579b 100%);
+      }
+    }
+  }
+
+  // Loading state
+  &--loading {
+    pointer-events: none;
+
+    .voxire-button__loader {
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  // Disabled state
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
