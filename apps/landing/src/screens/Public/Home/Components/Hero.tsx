@@ -8,7 +8,7 @@ import useColors from '../../../../hooks/useColors';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../../redux/reducers/userSlice';
 import { QRCode } from 'react-qrcode-logo';
-import { useWindowDimensions } from '../../../../hooks/useWindowDimensions';
+import { useWindowDimensions } from '@voxire/utils';
 
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
