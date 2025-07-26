@@ -23,7 +23,6 @@
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "../../libs/@voxire/shared/src/components/HelmetContainer.tsx"
+    "src/**/*.tsx"
   ]
 }
