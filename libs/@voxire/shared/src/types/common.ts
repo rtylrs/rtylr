@@ -35,6 +35,13 @@ export interface InputProps extends BaseComponentProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  id?: string;
+  name?: string;
+  autoComplete?: string;
+  label?: string;
+  hasLabel?: boolean;
+  labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
+  autoFocus?: boolean;
 }
 
 export interface ModalProps extends BaseComponentProps {
@@ -55,4 +62,8 @@ export interface CardProps extends BaseComponentProps {
 export interface LoadingSpinnerProps extends BaseComponentProps {
   size?: 'small' | 'medium' | 'large';
   color?: 'primary' | 'secondary' | 'inherit';
+}
+
+export interface AnimatedRoutesProps extends BaseComponentProps {
+  animationType?: 'slide' | 'fade' | 'scale' | 'slideUp' | 'slideDown' | 'none';
 }

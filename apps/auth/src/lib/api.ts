@@ -1,8 +1,9 @@
 import axios from "axios";
 import i18next from "i18next";
+import { getCookie } from "./cookies";
 
 const getBaseUrl = () => {
-  const mode = localStorage.getItem("mode") || "prod";
+  const mode = getCookie("mode") || "prod";
   return mode === "dev"
     ? "http://localhost:9999/"
     : "https://onion-tdam.onrender.com/";
@@ -15,7 +16,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const user = localStorage.getItem("token");
+      const user = getCookie("token");
       if (user) {
         config.headers["authorization"] = `Bearer ${user}`;
       }

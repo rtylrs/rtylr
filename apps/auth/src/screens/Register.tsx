@@ -16,7 +16,7 @@ import {
 import { RootState, AppDispatch } from '../redux/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { Button } from '@voxire/shared';
+import { Button, Input } from '@voxire/shared';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -88,74 +88,34 @@ const Register: React.FC = () => {
               handleRegister();
             }}
           >
-            <label
-              htmlFor="register-name"
-              style={{
-                fontWeight: 600,
-                marginBottom: 4,
-                alignSelf: 'flex-start',
-              }}
-            >
-              Restaurant Name
-            </label>
-            <input
+            <Input
               id="register-name"
-              className="auth-input"
               type="text"
+              label="Restaurant Name"
               placeholder="Restaurant Name"
               required
               onChange={(e) => setName(e.target.value)}
             />
-            <label
-              htmlFor="register-email"
-              style={{
-                fontWeight: 600,
-                marginBottom: 4,
-                alignSelf: 'flex-start',
-              }}
-            >
-              Email
-            </label>
-            <input
+            <Input
               id="register-email"
-              className="auth-input"
               type="email"
+              label="Email"
               placeholder="Email"
               required
               onChange={(e) => setEmail(e.target.value)}
             />
-            <label
-              htmlFor="register-password"
-              style={{
-                fontWeight: 600,
-                marginBottom: 4,
-                alignSelf: 'flex-start',
-              }}
-            >
-              Password
-            </label>
-            <input
+            <Input
               id="register-password"
-              className="auth-input"
               type="password"
+              label="Password"
               placeholder="Password"
               required
               onChange={(e) => setPassword(e.target.value)}
             />
-            <label
-              htmlFor="register-confirm-password"
-              style={{
-                fontWeight: 600,
-                marginBottom: 4,
-                alignSelf: 'flex-start',
-              }}
-            >
-              Confirm Password
-            </label>
-            <input
+            <Input
               id="register-confirm-password"
-              className="auth-input"
               type="password"
+              label="Confirm Password"
               placeholder="Confirm Password"
               required
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -226,7 +186,7 @@ const Register: React.FC = () => {
             </p>
             <p
               className="auth-link"
-              onClick={() => navigate('/forgot-password')}
+              onClick={() => navigate('/password-reset')}
             >
               Forgot Password?
             </p>

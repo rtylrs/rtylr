@@ -47,32 +47,6 @@
   }
 }
 
-.auth-input {
-  width: 100%;
-  padding: 10px 10px;
-  margin-bottom: 16px;
-  border: 1.5px solid #d0d0d0;
-  border-radius: 4px;
-  outline: none;
-  font-size: 15px;
-  font-family: inherit;
-  background: white;
-  color: #222;
-  box-shadow: none;
-  transition: border-color 0.2s;
-
-  &::placeholder {
-    color: #b0b0b0;
-    opacity: 1;
-    font-size: 15px;
-  }
-
-  &:focus {
-    border-color: #222;
-    box-shadow: none;
-  }
-}
-
 .auth-separator {
   display: flex;
   align-items: center;
@@ -439,17 +413,4 @@
       font-size: 14px;
     }
   }
-
-  .auth-input {
-    padding: 14px 16px;
-    font-size: 14px;
-  }
-}
-
-.auth-label {
-  color: #888;
-  font-weight: 500;
-  margin-bottom: 4px;
-  align-self: flex-start;
-  font-size: 15px;
 }

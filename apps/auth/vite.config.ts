@@ -37,7 +37,7 @@ export default defineConfig(() => ({
     preprocessorOptions: {
       scss: {
         additionalData: `
-          @use "@app/styles/index.scss";
+          @use "@app/index.scss";
         `,
         api: 'modern-compiler' as const,
       },
