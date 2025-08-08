@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import Header from './PublicHeader';
+import { HelmetContainer } from '@voxire/shared';
 
 const Public: React.FC<{
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const Public: React.FC<{
 
     return (
       <div>
+        <HelmetContainer title="Vbitez Auth" />
         {hasHeader && <Header />}
         <div style={contentStyle}>{children}</div>
       </div>

@@ -16,7 +16,7 @@ import { auth } from '../firebase';
 import notify from '../lib/notify/notify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { Button } from '@voxire/shared';
+import { Button, Input } from '@voxire/shared';
 import { HelmetContainer } from '@voxire/shared';
 
 const Login: React.FC = () => {
@@ -50,7 +50,6 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    // Clear any existing errors when component mounts
     dispatch(clearError());
   }, [dispatch]);
 
@@ -78,29 +77,25 @@ const Login: React.FC = () => {
                 handleSubmit();
               }}
             >
-              <label htmlFor="login-email" className="auth-label">
-                Email
-              </label>
-              <input
+              <Input
                 id="login-email"
-                className="auth-input"
                 type="email"
+                label="Email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                style={{ marginBottom: 16 }}
               />
-              <label htmlFor="login-password" className="auth-label">
-                Password
-              </label>
-              <input
+              <Input
                 id="login-password"
-                className="auth-input"
                 type="password"
+                label="Password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                style={{ marginBottom: 16 }}
               />
 
               {error && (
@@ -121,7 +116,7 @@ const Login: React.FC = () => {
               <div style={{ width: '100%', marginBottom: 16 }}>
                 <span
                   className="auth-link"
-                  onClick={() => navigate('/auth/forgot-password')}
+                  onClick={() => navigate('/password-reset')}
                   style={{ fontSize: 14, cursor: 'pointer' }}
                 >
                   Forgot password?
@@ -159,7 +154,7 @@ const Login: React.FC = () => {
                 Don't have an account?{' '}
                 <span
                   className="auth-link"
-                  onClick={() => navigate('/auth/register')}
+                  onClick={() => navigate('/register')}
                 >
                   Sign up
                 </span>

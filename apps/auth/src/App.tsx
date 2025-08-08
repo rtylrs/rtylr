@@ -1,11 +1,9 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-//Routes
 import AuthRoutes from './routes/AuthRoutes';
 
 function App() {
-
   return (
     <React.Fragment>
       <Routes>

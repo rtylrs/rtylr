@@ -1,11 +1,10 @@
 import React from 'react';
 import Public from '../layouts/Public/public';
-import AnimatedRoutes from '../components/AnimatedRoutes';
+import { AnimatedRoutes } from '@voxire/shared';
 
-// Routes
 const Login = React.lazy(() => import('../screens/Login'));
 const Register = React.lazy(() => import('../screens/Register'));
-const ForgotPassword = React.lazy(() => import('../screens/Reset'));
+const ResetPassword = React.lazy(() => import('../screens/ResetPassword'));
 const EmailVerification = React.lazy(
   () => import('../screens/EmailVerification')
 );
@@ -36,7 +35,7 @@ const AuthRoutes = [
     element: (
       <Public>
         <AnimatedRoutes>
-          <ForgotPassword />
+          <ResetPassword />
         </AnimatedRoutes>
       </Public>
     ),

@@ -1,5 +1,0 @@
-@use 'sass:meta';
-
-// SCSS imports Public
-@include meta.load-css('./scss/Header.scss');
-@include meta.load-css('./scss/Auth.scss');

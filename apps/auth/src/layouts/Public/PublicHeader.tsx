@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 import { selectLanguage } from '../../services/i18next';
+import { getCookie } from '../../lib/cookies';
 
 const Header: React.FC = () => {
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem('language');
+    const storedLanguage = getCookie('language');
     if (storedLanguage) {
       setLanguage(storedLanguage);
     }
@@ -42,13 +45,33 @@ const Header: React.FC = () => {
 
   return (
     <header className="header">
-      <div className="header-logo" style={{ cursor: 'pointer' }}>
+      <div
+        className="header-logo"
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate('/')}
+        role="button"
+        aria-label="Go to home"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') navigate('/');
+        }}
+      >
         <img src={'/logo.png'} alt="Logo" />
       </div>
 
       <div className="lang-dropdown-container">
-        <div className="selected-language" onClick={toggleLanguageDropdown}>
-          {language}
+        <div
+          className="selected-language"
+          onClick={toggleLanguageDropdown}
+          role="button"
+          aria-haspopup="listbox"
+          aria-expanded={languageDropdown}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') toggleLanguageDropdown();
+          }}
+        >
+          {language?.toUpperCase()}
           <FontAwesomeIcon
             icon={faChevronDown}
             style={{
@@ -58,10 +81,32 @@ const Header: React.FC = () => {
           />
         </div>
         {languageDropdown && (
-          <div className="languages-dropdown">
-            <span onClick={() => handleLanguageChange('en')}>English</span>
-            <span onClick={() => handleLanguageChange('ar')}>Arabic</span>
-            <span onClick={() => handleLanguageChange('fr')}>French</span>
+          <div
+            className="languages-dropdown"
+            role="listbox"
+            aria-label="Select language"
+          >
+            <span
+              role="option"
+              aria-selected={language === 'en'}
+              onClick={() => handleLanguageChange('en')}
+            >
+              English
+            </span>
+            <span
+              role="option"
+              aria-selected={language === 'ar'}
+              onClick={() => handleLanguageChange('ar')}
+            >
+              Arabic
+            </span>
+            <span
+              role="option"
+              aria-selected={language === 'fr'}
+              onClick={() => handleLanguageChange('fr')}
+            >
+              French
+            </span>
           </div>
         )}
       </div>

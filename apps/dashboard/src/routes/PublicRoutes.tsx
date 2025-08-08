@@ -1,21 +1,21 @@
-import AnimatedRoutes from "../components/AnimatedRoutes";
-import Public from "../layouts/Public/public";
-import React from "react";
+import { AnimatedRoutes } from '@voxire/shared';
+import Public from '../layouts/Public/public';
+import React from 'react';
 
 // Routes
-const Home = React.lazy(() => import("../screens/Public/Home/Home"));
-const About = React.lazy(() => import("../screens/Public/About"));
-const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
-const Contact = React.lazy(() => import("../screens/Public/Contact"));
-const Faq = React.lazy(() => import("../screens/Public/FAQ"));
-const News = React.lazy(() => import("../screens/Public/News"));
-const Menu = React.lazy(() => import("../screens/Public/Menu/Menu"));
-const UseCases = React.lazy(() => import("../screens/Public/UseCases"));
-const Restaunrats = React.lazy(() => import("../screens/Public/Restaunrats"));
+const Home = React.lazy(() => import('../screens/Public/Home/Home'));
+const About = React.lazy(() => import('../screens/Public/About'));
+const Pricing = React.lazy(() => import('../screens/Public/Pricing'));
+const Contact = React.lazy(() => import('../screens/Public/Contact'));
+const Faq = React.lazy(() => import('../screens/Public/FAQ'));
+const News = React.lazy(() => import('../screens/Public/News'));
+const Menu = React.lazy(() => import('../screens/Public/Menu/Menu'));
+const UseCases = React.lazy(() => import('../screens/Public/UseCases'));
+const Restaunrats = React.lazy(() => import('../screens/Public/Restaunrats'));
 
 const PublicRoutes = [
   {
-    path: "/",
+    path: '/',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -25,7 +25,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/about",
+    path: '/about',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -35,7 +35,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/pricing",
+    path: '/pricing',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -45,7 +45,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/contact",
+    path: '/contact',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -55,7 +55,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/faqs",
+    path: '/faqs',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -65,7 +65,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/news/:newsId",
+    path: '/news/:newsId',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -75,7 +75,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/restaurant/:id",
+    path: '/restaurant/:id',
     element: (
       <AnimatedRoutes>
         <Menu />
@@ -83,7 +83,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/uses",
+    path: '/uses',
     element: (
       <Public>
         <AnimatedRoutes>
@@ -93,7 +93,7 @@ const PublicRoutes = [
     ),
   },
   {
-    path: "/restaurants",
+    path: '/restaurants',
     element: (
       <Public>
         <AnimatedRoutes>
