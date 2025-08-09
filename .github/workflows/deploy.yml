@@ -208,41 +208,61 @@ jobs:
         if: steps.deployment-check.outputs.should_deploy == 'true' && success()
         run: |
           DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
-          COMMIT_HASH=$(git rev-parse --short HEAD)
 
-          # Get app versions for deployed apps
-          APP_VERSIONS=""
+          # Send individual notifications for each deployed app
           IFS=',' read -ra APPS <<< "$DEPLOY_APPS"
           for app in "${APPS[@]}"; do
             if [ -n "$app" ] && [ -f "apps/$app/version.json" ]; then
               VERSION=$(node -p "require('./apps/$app/version.json').version")
-              APP_VERSIONS="$APP_VERSIONS• $app: v$VERSION\n"
+              TAG_NAME="${app}-v${VERSION}"
+              
+              echo "Sending notification for $app v$VERSION"
+              
+              # Find the last version bump commit for this app
+              LAST_BUMP_COMMIT=$(git log --oneline --grep="🚀 Bump $app" --max-count=1 --format="%H" 2>/dev/null || echo "")
+              
+              if [ -n "$LAST_BUMP_COMMIT" ]; then
+                # Get commits since the last bump that affect this app
+                COMMITS=$(git log --oneline --pretty=format:"%s" "${LAST_BUMP_COMMIT}..HEAD^" -- "apps/$app/" "libs/" 2>/dev/null | head -10)
+              else
+                # If no previous bump, show last 10 commits that affect this app
+                COMMITS=$(git log --oneline --max-count=10 --pretty=format:"%s" -- "apps/$app/" 2>/dev/null)
+              fi
+              
+              # Format commits for Telegram
+              if [ -n "$COMMITS" ]; then
+                FORMATTED_COMMITS=""
+                COUNTER=1
+                while IFS= read -r commit; do
+                  if [ -n "$commit" ] && [ $COUNTER -le 10 ]; then
+                    FORMATTED_COMMITS="$FORMATTED_COMMITS$COUNTER. $commit\n"
+                    COUNTER=$((COUNTER + 1))
+                  fi
+                done <<< "$COMMITS"
+                
+                if [ -n "$FORMATTED_COMMITS" ]; then
+                  COMMIT_SECTION="\n\n📝 Changes in this deployment:\n$FORMATTED_COMMITS"
+                else
+                  COMMIT_SECTION="\n\n📝 No changes found for $app since last deployment."
+                fi
+              else
+                COMMIT_SECTION="\n\n📝 No changes found for $app since last deployment."
+              fi
+              
+              # Build the message for this app
+              MESSAGE="🚀 ${app^^} DEPLOYMENT COMPLETE ✅"
+              MESSAGE="$MESSAGE\n\n🏷️ Version: v$VERSION"
+              MESSAGE="$MESSAGE\n🌍 Environment: Production"
+              MESSAGE="$MESSAGE\n⏰ Time: $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
+              MESSAGE="$MESSAGE$COMMIT_SECTION"
+              MESSAGE="$MESSAGE\n\n🎉 Deployment successful!"
+              
+              # Send notification for this app
+              ./scripts/telegram-notify.sh "app-deployment" "$MESSAGE"
+              
+              echo "✅ Telegram notification sent for $app"
             fi
           done
-
-          # Get the last deployed version tag
-          LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
-
-          if [ -n "$LAST_TAG" ]; then
-            echo "Last deployed version: $LAST_TAG"
-            COMMITS=$(git log --oneline --reverse "${LAST_TAG}..HEAD" --pretty=format:"• %h %s" 2>/dev/null || git log --oneline --reverse -10 --pretty=format:"• %h %s")
-          else
-            echo "No previous tag found, showing last 10 commits"
-            COMMITS=$(git log --oneline --reverse -10 --pretty=format:"• %h %s")
-          fi
-
-          # Filter out deployment bump messages and limit length
-          FORMATTED_COMMITS=$(echo "$COMMITS" | grep -v "🚀 Bump" | grep -v "🔧 Fix Telegram" | grep -v "🧹 Clean up deployment" | head -10)
-
-          # Build the message
-          MESSAGE="📦 Project: Vbitez"
-          MESSAGE="$MESSAGE\n📱 Apps: $DEPLOY_APPS"
-          MESSAGE="$MESSAGE\n⏰ Time: $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          MESSAGE="$MESSAGE\n\n📋 App Versions:\n$APP_VERSIONS"
-          MESSAGE="$MESSAGE\n📝 Recent Changes:\n$FORMATTED_COMMITS"
-
-          # Send to Telegram using shared script
-          ./scripts/telegram-notify.sh "app-deployment" "$MESSAGE"
 
       - name: Clean up deployment metadata
         if: steps.deployment-check.outputs.should_deploy == 'true' && success()
