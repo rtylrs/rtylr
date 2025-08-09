@@ -9,7 +9,6 @@ const Pricing = React.lazy(() => import('../screens/Pricing'));
 const Contact = React.lazy(() => import('../screens/Contact'));
 const Faq = React.lazy(() => import('../screens/FAQ'));
 const News = React.lazy(() => import('../screens/News'));
-const UseCases = React.lazy(() => import('../screens/UseCases'));
 
 const AppRoutes = [
   {
@@ -68,16 +67,6 @@ const AppRoutes = [
       <MainLayout>
         <AnimatedRoutes>
           <News />
-        </AnimatedRoutes>
-      </MainLayout>
-    ),
-  },
-  {
-    path: '/uses',
-    element: (
-      <MainLayout>
-        <AnimatedRoutes>
-          <UseCases />
         </AnimatedRoutes>
       </MainLayout>
     ),
