@@ -218,32 +218,64 @@ jobs:
               
               echo "Sending notification for $app v$VERSION"
               
-              # Find the last version bump commit for this app
-              LAST_BUMP_COMMIT=$(git log --oneline --grep="🚀 Bump $app" --max-count=1 --format="%H" 2>/dev/null || echo "")
+              # Find the last two version bump commits for this app
+              LAST_TWO_BUMPS=$(git log --oneline --grep="🚀 Bump $app" --max-count=2 --format="%H" 2>/dev/null || echo "")
               
-              if [ -n "$LAST_BUMP_COMMIT" ]; then
-                # Get commits since the last bump that affect this app
-                COMMITS=$(git log --oneline --pretty=format:"%s" "${LAST_BUMP_COMMIT}..HEAD^" -- "apps/$app/" "libs/" 2>/dev/null | head -10)
+              if [ -n "$LAST_TWO_BUMPS" ]; then
+                CURRENT_BUMP=$(echo "$LAST_TWO_BUMPS" | head -n 1)
+                PREVIOUS_BUMP=$(echo "$LAST_TWO_BUMPS" | tail -n 1)
+                
+                if [ "$CURRENT_BUMP" != "$PREVIOUS_BUMP" ]; then
+                  # Get commits between the previous bump and current bump that affect this app
+                  COMMITS=$(git log --oneline --pretty=format:"%s" "${PREVIOUS_BUMP}..${CURRENT_BUMP}^" -- "apps/$app/" "libs/" 2>/dev/null | head -10)
+                else
+                  # Only one bump found, get commits from beginning that affect this app
+                  COMMITS=$(git log --oneline --max-count=10 --pretty=format:"%s" "${CURRENT_BUMP}^" -- "apps/$app/" 2>/dev/null)
+                fi
               else
                 # If no previous bump, show last 10 commits that affect this app
                 COMMITS=$(git log --oneline --max-count=10 --pretty=format:"%s" -- "apps/$app/" 2>/dev/null)
               fi
               
-              # Format commits for Telegram
+              # Format commits for Telegram and filter out generic messages
               if [ -n "$COMMITS" ]; then
                 FORMATTED_COMMITS=""
                 COUNTER=1
                 while IFS= read -r commit; do
+                  # Skip generic commit messages
+                  if [[ "$commit" =~ ^📝\ Commit\ changes\ before.*version\ bump$ ]] || \
+                     [[ "$commit" =~ ^🧹\ Clean\ up ]] || \
+                     [[ "$commit" =~ ^🚀\ Bump ]] || \
+                     [[ "$commit" =~ ^Merge\ branch ]] || \
+                     [[ "$commit" =~ ^Update\ .gitignore$ ]]; then
+                    continue
+                  fi
+                  
                   if [ -n "$commit" ] && [ $COUNTER -le 10 ]; then
                     FORMATTED_COMMITS="$FORMATTED_COMMITS$COUNTER. $commit\n"
                     COUNTER=$((COUNTER + 1))
                   fi
                 done <<< "$COMMITS"
                 
-                if [ -n "$FORMATTED_COMMITS" ]; then
-                  COMMIT_SECTION="\n\n📝 Changes in this deployment:\n$FORMATTED_COMMITS"
+                # If no meaningful commits after filtering, get more detailed info
+                if [ -z "$FORMATTED_COMMITS" ]; then
+                  # Get file changes from the commits
+                  FILES_CHANGED=$(git log --name-only --pretty=format:"" "${PREVIOUS_BUMP}..${CURRENT_BUMP}^" -- "apps/$app/" 2>/dev/null | grep -v "^$" | sort -u | head -5)
+                  
+                  if [ -n "$FILES_CHANGED" ]; then
+                    COMMIT_SECTION="\n\n📝 Files changed in this deployment:\n"
+                    FILE_COUNTER=1
+                    while IFS= read -r file; do
+                      if [ -n "$file" ] && [ $FILE_COUNTER -le 5 ]; then
+                        COMMIT_SECTION="$COMMIT_SECTION$FILE_COUNTER. $file\n"
+                        FILE_COUNTER=$((FILE_COUNTER + 1))
+                      fi
+                    done <<< "$FILES_CHANGED"
+                  else
+                    COMMIT_SECTION="\n\n📝 Minor changes in this deployment (no major commits detected)."
+                  fi
                 else
-                  COMMIT_SECTION="\n\n📝 No changes found for $app since last deployment."
+                  COMMIT_SECTION="\n\n📝 Changes in this deployment:\n$FORMATTED_COMMITS"
                 fi
               else
                 COMMIT_SECTION="\n\n📝 No changes found for $app since last deployment."
