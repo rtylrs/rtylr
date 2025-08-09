@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import useAsync from "../../hooks/useAsync";
-import { configApi } from "../../api";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import useAsync from '../hooks/useAsync';
+import { configApi } from '../api';
 
 const News: React.FC<{}> = () => {
   const { newsId } = useParams<{ newsId: string }>();
@@ -24,20 +24,18 @@ const News: React.FC<{}> = () => {
         id: newsId,
       });
     }
-
-     
   }, [newsId]);
 
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        textAlign: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
         padding: 40,
-        minHeight: "60vh",
+        minHeight: '60vh',
         maxWidth: 1350,
-        margin: "0 auto",
+        margin: '0 auto',
       }}
     >
       {news ? (
