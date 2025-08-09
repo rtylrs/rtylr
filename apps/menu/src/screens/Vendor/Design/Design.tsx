@@ -8,7 +8,7 @@ import {
   selectError,
 } from "../../../redux/reducers/userSlice";
 import { AppDispatch } from "../../../redux/store";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import Menu from "../../Public/Menu/Menu";
 
 const Design: React.FC = () => {
@@ -153,7 +153,7 @@ const Design: React.FC = () => {
         </div>
       </div>
 
-      <VbitezButton onClick={handleSubmit}>Save Theme</VbitezButton>
+      <Button onClick={handleSubmit}>Save Theme</Button>
     </div>
   );
 };

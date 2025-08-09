@@ -1,4 +1,4 @@
-import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
@@ -101,7 +101,7 @@ const Price: React.FC = () => {
               </li>
             </ul>
             <div className="price-button">
-              {/* <VbitezButton>Get Started</VbitezButton> */}
+              {/* <Button>Get Started</Button> */}
               <span
                 onClick={() => {
                   navigate("/pricing");
@@ -148,7 +148,7 @@ const Price: React.FC = () => {
               </li>
             </ul>
             <div className="price-button">
-              {/* <VbitezButton>Get Started</VbitezButton> */}
+              {/* <Button>Get Started</Button> */}
               <span
                 onClick={() => {
                   navigate("/pricing");
@@ -166,7 +166,7 @@ const Price: React.FC = () => {
           marginBottom: "0px",
         }}
       >
-        <VbitezButton
+        <Button
           onClick={() => {
             if (isAuthenticated) {
               navigate("/app/business");
@@ -176,7 +176,7 @@ const Price: React.FC = () => {
           }}
         >
           {isAuthenticated ? "Dashboard" : "Get Started"}
-        </VbitezButton>
+        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 
 const QuestionsTwo: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -87,14 +87,14 @@ const QuestionsTwo: React.FC = () => {
           </label>
         </div>
         <div className="form-actions">
-          <VbitezButton
+          <Button
             onClick={handleContinue}
             styles={{
               width: "100%",
             }}
           >
             Continue
-          </VbitezButton>
+          </Button>
           <div
             style={{
               display: "flex",

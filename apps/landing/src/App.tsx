@@ -18,17 +18,13 @@ import {
 } from 'chart.js';
 
 //Routes
-import PublicRoutes from './routes/PublicRoutes';
-import UserRoutes from './routes/UserRoutes';
-import AdminRoutes from './routes/AdminRoutes';
-import AuthRoutes from './routes/AuthRoutes';
-import VendorRoutes from './routes/VendorRoutes';
+import AppRoutes from './routes';
 
 import i18next from './services/i18next';
 
 //Screens
-import NoMatch from './screens/Public/Extras/NoMatch';
-import Maintanance from './screens/Public/Maintanance';
+import NoMatch from './screens/Extras/NoMatch';
+import Maintanance from './screens/Maintanance';
 
 //Components
 import Cookies from './components/Cookies/Cookies';
@@ -36,10 +32,6 @@ import HelmetContainer from './components/HelmetContainer';
 
 //Hooks
 import useColors from './hooks/useColors';
-
-// Route Checks
-import { AdminRoute } from './utils/AdminRoute';
-import { BusinessRoute } from './utils/BusinessRoute';
 
 // Other imports
 import { fetchConfigData } from './redux/reducers/configSlice';
@@ -151,28 +143,8 @@ const App = (): JSX.Element => {
       )}
 
       <Routes key={location.pathname} location={location}>
-        {/* Auth Routes */}
-        {AuthRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        {/* Public Routes */}
-        {PublicRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        {/* User routes */}
-        {UserRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        <Route path="/manage" element={<AdminRoute />}>
-          {AdminRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
-          ))}
-        </Route>
-
-        {VendorRoutes.map((route, index) => (
+        {/* App Routes */}
+        {AppRoutes.map((route, index) => (
           <Route key={index} path={route.path} element={route.element} />
         ))}
 

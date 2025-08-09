@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../redux/store";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../redux/store';
+import { Button } from '@voxire/shared';
 
 const Details: React.FC = () => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
 
-  const [restaurantName, setRestaurantName] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [restaurantName, setRestaurantName] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
 
   const handleSubmit = () => {
-    navigate("/auth/questionnaire/info/question-1");
+    navigate('/auth/questionnaire/info/question-1');
   };
 
   return (
@@ -56,14 +56,14 @@ const Details: React.FC = () => {
               required
             />
           </div>
-          <VbitezButton
+          <Button
             styles={{
-              width: "100%",
+              width: '100%',
             }}
             onClick={handleSubmit}
           >
             Continue
-          </VbitezButton>
+          </Button>
         </form>
         <p className="required-field">* Required field</p>
       </div>

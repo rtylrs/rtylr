@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { Container, Typography, TextField } from "@mui/material";
-import { auth } from "../../firebase";
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
+import { useState } from 'react';
+import { Container, Typography, TextField } from '@mui/material';
+import { auth } from '../../firebase';
+import { Button } from '@voxire/shared';
 
 function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const [requestSent, setRequestSent] = useState(false);
 
   const handleResetPassword = async () => {
     try {
       await auth.sendPasswordResetEmail(email);
       setRequestSent(true);
-      setMessage("Password reset email sent. Check your inbox.");
+      setMessage('Password reset email sent. Check your inbox.');
     } catch (error) {
       setMessage(`Error: ${error.message}`);
     }
@@ -22,8 +22,8 @@ function ForgotPassword() {
     <Container
       maxWidth="sm"
       style={{
-        minHeight: "50vh",
-        paddingTop: "10vh",
+        minHeight: '50vh',
+        paddingTop: '10vh',
       }}
     >
       <Typography variant="h5" gutterBottom>
@@ -47,24 +47,20 @@ function ForgotPassword() {
       />
       <div
         style={{
-          marginTop: "1rem",
-          display: "flex",
-          justifyContent: "flex-end",
+          marginTop: '1rem',
+          display: 'flex',
+          justifyContent: 'flex-end',
         }}
       >
-        <VbitezButton
-          fullWidth
-          onClick={handleResetPassword}
-          disabled={requestSent}
-        >
+        <Button fullWidth onClick={handleResetPassword} disabled={requestSent}>
           Reset Password
-        </VbitezButton>
+        </Button>
       </div>
       {message && (
         <Typography
           variant="body2"
           color="textSecondary"
-          style={{ marginTop: "1rem" }}
+          style={{ marginTop: '1rem' }}
         >
           {message}
         </Typography>

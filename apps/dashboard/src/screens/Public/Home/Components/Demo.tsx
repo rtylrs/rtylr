@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import React from "react";
 import useColors from "../../../../hooks/useColors";
 
@@ -23,14 +23,14 @@ const Demo: React.FC<{}> = () => {
             }}
           />
         </div>
-        <VbitezButton
+        <Button
           variant="primary"
           styles={{
             borderColor: primary,
           }}
         >
           {t("Demo.button")}
-        </VbitezButton>
+        </Button>
       </div>
     </div>
   );

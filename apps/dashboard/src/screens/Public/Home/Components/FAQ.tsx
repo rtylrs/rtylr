@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import VbitezButton from "../../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../../redux/store";
 
@@ -44,9 +44,9 @@ function Faq() {
           marginBottom: "20px",
         }}
       >
-        <VbitezButton variant="secondary" onClick={() => navigate("/faqs")}>
+        <Button variant="secondary" onClick={() => navigate("/faqs")}>
           View All
-        </VbitezButton>
+        </Button>
       </div>
     </div>
   );

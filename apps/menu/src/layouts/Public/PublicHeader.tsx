@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import VbitezButton from '../../components/VbitezButton/VbitezButton';
+import { Button } from '@voxire/shared';
 import useColors from '../../hooks/useColors';
 import { useWindowDimensions } from '@voxire/utils';
 import { useSelector } from 'react-redux';
@@ -245,7 +245,7 @@ const Header: React.FC = () => {
           </button>
         )}
 
-        <VbitezButton onClick={handleClick} hidden={isMobile} variant="primary">
+        <Button onClick={handleClick} hidden={isMobile} variant="primary">
           {isQuestionnaire ? (
             <div
               style={{
@@ -260,7 +260,7 @@ const Header: React.FC = () => {
           ) : (
             <>{user.token ? 'Dashboard' : 'Register Now'}</>
           )}
-        </VbitezButton>
+        </Button>
 
         <div className="lang-dropdown-container">
           <div className="selected-language" onClick={toggleLanguageDropdown}>
@@ -290,7 +290,7 @@ const Header: React.FC = () => {
           <LinkWithColor to="/blog">Blog</LinkWithColor>
           <LinkWithColor to="/about">About</LinkWithColor>
           <LinkWithColor to="/contact">Contact Us</LinkWithColor>
-          <VbitezButton
+          <Button
             styles={{
               display: user.token ? 'none' : 'flex',
               marginBottom: '0px',
@@ -298,11 +298,11 @@ const Header: React.FC = () => {
             onClick={handleLoginClick}
           >
             <p>Login</p>
-          </VbitezButton>
+          </Button>
 
-          <VbitezButton onClick={handleClick}>
+          <Button onClick={handleClick}>
             {user.token ? 'Dashboard' : 'Register Now'}
-          </VbitezButton>
+          </Button>
         </div>
       )}
     </header>

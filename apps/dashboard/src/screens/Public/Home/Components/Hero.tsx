@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import VbitezButton from '../../../../components/VbitezButton/VbitezButton';
+import { Button } from '@voxire/shared';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
 import useColors from '../../../../hooks/useColors';
@@ -36,7 +36,7 @@ const Hero: React.FC<{}> = () => {
         <h1 className="vbitez-title">{t('Hero.welcome')}</h1>
         <h2>{t('Hero.discover')}</h2>
         <div className="hero-buttons">
-          <VbitezButton
+          <Button
             onClick={() => {
               if (isAuthenticated) {
                 navigate('/app/business');
@@ -46,14 +46,14 @@ const Hero: React.FC<{}> = () => {
             }}
           >
             {isAuthenticated ? t('Hero.My Account') : t('Hero.Create Account')}
-          </VbitezButton>
-          <VbitezButton
+          </Button>
+          <Button
             onClick={() => navigate('/uses')}
             variant="outline"
             suffix={<FontAwesomeIcon icon={faArrowRight} />}
           >
             {t('Hero.Learn More')}
-          </VbitezButton>
+          </Button>
         </div>
         <h5
           style={{

@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
-import VbitezButton from "../VbitezButton/VbitezButton";
-import "./Cookies.scss";
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCookieBite } from '@fortawesome/free-solid-svg-icons';
+import { Button } from '@voxire/shared';
+import './Cookies.scss';
 
 const Cookies: React.FC = () => {
   const [showPopup, setShowPopup] = useState(true);
 
   useEffect(() => {
-    const acceptedCookies = localStorage.getItem("acceptedCookies");
-    if (acceptedCookies === "true") {
+    const acceptedCookies = localStorage.getItem('acceptedCookies');
+    if (acceptedCookies === 'true') {
       setShowPopup(false);
     }
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem("acceptedCookies", "true");
+    localStorage.setItem('acceptedCookies', 'true');
     setShowPopup(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem("acceptedCookies", "false");
+    localStorage.setItem('acceptedCookies', 'false');
     setShowPopup(false);
   };
 
@@ -47,12 +47,12 @@ const Cookies: React.FC = () => {
         </div>
 
         <div className="cookies-actions">
-          <VbitezButton variant="primary" size="sm" onClick={handleAccept}>
+          <Button variant="primary" size="sm" onClick={handleAccept}>
             Accept All
-          </VbitezButton>
-          <VbitezButton variant="outline" size="sm" onClick={handleDecline}>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDecline}>
             Decline
-          </VbitezButton>
+          </Button>
         </div>
 
         <div className="cookies-footer">

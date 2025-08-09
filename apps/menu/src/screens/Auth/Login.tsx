@@ -17,7 +17,7 @@ import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -128,7 +128,7 @@ const Login: React.FC = () => {
               </span>
             </div>
 
-            <VbitezButton
+            <Button
               variant="primary"
               size="md"
               fullWidth
@@ -136,13 +136,13 @@ const Login: React.FC = () => {
               type="submit"
             >
               Login
-            </VbitezButton>
+            </Button>
 
             <div className="auth-separator">
               <span>or</span>
             </div>
 
-            <VbitezButton
+            <Button
               variant="outline"
               size="md"
               fullWidth
@@ -151,7 +151,7 @@ const Login: React.FC = () => {
               prefix={<FontAwesomeIcon icon={faGoogle} />}
             >
               Sign in with Google
-            </VbitezButton>
+            </Button>
           </form>
 
           <div className="auth-footer">
