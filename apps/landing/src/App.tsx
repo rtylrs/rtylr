@@ -30,6 +30,9 @@ import Maintanance from './screens/Maintanance';
 import Cookies from './components/Cookies/Cookies';
 import HelmetContainer from './components/HelmetContainer';
 
+//Utilities
+import { getCookie } from './lib/cookies';
+
 //Hooks
 import useColors from './hooks/useColors';
 
@@ -87,7 +90,7 @@ const App = (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    const language = localStorage.getItem('language');
+    const language = getCookie('language');
     if (language) {
       i18next.changeLanguage(language);
     }
