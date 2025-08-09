@@ -14,16 +14,9 @@ const Pricing = () => {
           </thead>
           <tbody>
             <tr>
-              <td>A/B Testing</td>
-              <td>No-cost</td>
-              <td>No-cost</td>
-              <td>No-cost</td>
-            </tr>
-            <tr>
               <td>Analytics</td>
-              <td>No-cost</td>
-              <td>No-cost</td>
-              <td>No-cost</td>
+              <td>No-cost, subject to quotas and limits</td>
+              <td>No-cost, subject to quotas and limits</td>
             </tr>
             <tr>
               <td>App Check</td>
