@@ -4,6 +4,13 @@ import classNames from 'classnames';
 import { LoadingSpinnerProps } from '../../types/common';
 import './LoadingSpinner.scss';
 
+/**
+ * @param size - Size of the spinner: small, medium, or large (default: medium)
+ * @param color - Color theme: primary, secondary, or inherit (default: primary)
+ * @param className - Additional CSS classes for the spinner container
+ * @param style - Additional inline styles for the spinner container
+ * @param children - Optional content to display below the spinner (e.g., loading text)
+ */
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   color = 'primary',
