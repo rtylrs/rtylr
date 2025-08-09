@@ -10,7 +10,6 @@ const Contact = React.lazy(() => import('../screens/Contact'));
 const Faq = React.lazy(() => import('../screens/FAQ'));
 const News = React.lazy(() => import('../screens/News'));
 const UseCases = React.lazy(() => import('../screens/UseCases'));
-const Restaunrats = React.lazy(() => import('../screens/Restaunrats'));
 
 const AppRoutes = [
   {
@@ -79,16 +78,6 @@ const AppRoutes = [
       <MainLayout>
         <AnimatedRoutes>
           <UseCases />
-        </AnimatedRoutes>
-      </MainLayout>
-    ),
-  },
-  {
-    path: '/restaurants',
-    element: (
-      <MainLayout>
-        <AnimatedRoutes>
-          <Restaunrats />
         </AnimatedRoutes>
       </MainLayout>
     ),
