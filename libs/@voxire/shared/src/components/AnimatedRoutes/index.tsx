@@ -89,6 +89,10 @@ const animations = {
   },
 };
 
+/**
+ * @param children - React components/routes to animate
+ * @param animationType - Type of animation: slide, fade, scale, slideUp, slideDown, or none (default: fade)
+ */
 const AnimatedRoutes: React.FC<AnimatedRoutesProps> = ({
   children,
   animationType = 'slideDown',

@@ -5,6 +5,16 @@ import classNames from 'classnames';
 import { ModalProps } from '../../types/common';
 import './Modal.scss';
 
+/**
+ * @param open - Whether the modal is open and visible
+ * @param onClose - Function called when modal should be closed
+ * @param title - Optional title text to display in the modal header
+ * @param maxWidth - Maximum width of the modal: xs, sm, md, lg, or xl (default: md)
+ * @param fullWidth - Whether the modal should take full width of its container (default: true)
+ * @param className - Additional CSS classes for the modal container
+ * @param style - Additional inline styles for the modal container
+ * @param children - Content to render inside the modal body
+ */
 const Modal: React.FC<ModalProps> = ({
   open,
   onClose,

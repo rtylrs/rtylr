@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from 'react';
 
 interface IconProps {
   icon: string;
@@ -11,11 +11,21 @@ interface IconProps {
   titleId?: string;
 }
 
+/**
+ * @param icon - Name of the icon file (without .svg extension)
+ * @param className - Additional CSS classes for the icon container
+ * @param color - Color of the icon (CSS color value)
+ * @param size - Size of the icon in pixels or CSS units (default: 1em)
+ * @param style - Additional inline styles for the icon container
+ * @param alt - Alternative text for accessibility
+ * @param title - Title attribute for accessibility and tooltips
+ * @param titleId - ID for the title element (for accessibility)
+ */
 const Icon: React.FC<IconProps> = ({
   icon,
   className,
   color,
-  size = "1em",
+  size = '1em',
   style,
   alt,
   title,
@@ -61,7 +71,13 @@ const Icon: React.FC<IconProps> = ({
   return (
     <span
       className={className}
-      style={{ color, width: size, height: size, display: 'inline-block', ...style }}
+      style={{
+        color,
+        width: size,
+        height: size,
+        display: 'inline-block',
+        ...style,
+      }}
       title={title}
       aria-labelledby={titleId}
       dangerouslySetInnerHTML={{ __html: svgContent }}

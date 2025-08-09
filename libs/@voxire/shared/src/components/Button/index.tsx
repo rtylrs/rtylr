@@ -23,19 +23,17 @@ interface ButtonProps
 }
 
 /**
- * Modern, accessible button component for the Voxire UI.
- *
  * @param children - The content to display inside the button
  * @param onClick - Click event handler
- * @param variant - Button style variant: primary, secondary, outline, or ghost
- * @param size - Button size: sm, md, or lg
- * @param color - Custom primary color
- * @param secondaryColor - Custom secondary color
- * @param hidden - Whether to hide the button
- * @param loading - Show loading spinner
- * @param fullWidth - Make button full width
+ * @param variant - Button style variant: primary, secondary, outline, or ghost (default: primary)
+ * @param size - Button size: sm, md, or lg (default: md)
+ * @param color - Custom primary color override
+ * @param secondaryColor - Custom secondary color override
+ * @param hidden - Whether to hide the button (default: false)
+ * @param loading - Show loading spinner and disable interaction (default: false)
+ * @param fullWidth - Make button full width (default: false)
  * @param styles - Additional inline styles
- * @param disabled - Disable the button
+ * @param disabled - Disable the button (default: false)
  * @param className - Additional CSS classes
  * @param prefix - Icon/image to display before the text
  * @param suffix - Icon/image to display after the text
