@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 
 const NoMatch = (): JSX.Element => {
   const navigate = useNavigate();
@@ -30,13 +30,13 @@ const NoMatch = (): JSX.Element => {
               alignItems: "center",
             }}
           >
-            <VbitezButton
+            <Button
               onClick={() => {
                 navigate("/");
               }}
             >
               Go Back
-            </VbitezButton>
+            </Button>
           </div>
         </div>
       </div>

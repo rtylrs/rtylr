@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import useAsync from "../../hooks/useAsync";
 import { userApi } from "../../api";
-import VbitezButton from "../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../redux/reducers/userSlice";
 import notify from "../../lib/notify/notify";
@@ -96,22 +96,22 @@ const Addons = () => {
           <div className="overlay-message">
             Addons are not available in the free plan
           </div>
-          <VbitezButton onClick={() => navigate("/app/business/billing")}>
+          <Button onClick={() => navigate("/app/business/billing")}>
             Upgrade
-          </VbitezButton>
+          </Button>
         </div>
       )}
       <div className="addons-header">
         <h1>Add-Ons</h1>
         <div>
-          <VbitezButton
+          <Button
             onClick={() => setShowInstalled(!showInstalled)}
             styles={{
               height: "35px",
             }}
           >
             {showInstalled ? "Show All" : "Installed"}
-          </VbitezButton>
+          </Button>
           <input
             type="text"
             placeholder="Search for an add-on"

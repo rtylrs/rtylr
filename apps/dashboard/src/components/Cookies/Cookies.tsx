@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCookieBite } from "@fortawesome/free-solid-svg-icons";
-import VbitezButton from "../VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import "./Cookies.scss";
 
 const Cookies: React.FC = () => {
@@ -47,12 +47,12 @@ const Cookies: React.FC = () => {
         </div>
 
         <div className="cookies-actions">
-          <VbitezButton variant="primary" size="sm" onClick={handleAccept}>
+          <Button variant="primary" size="sm" onClick={handleAccept}>
             Accept All
-          </VbitezButton>
-          <VbitezButton variant="outline" size="sm" onClick={handleDecline}>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDecline}>
             Decline
-          </VbitezButton>
+          </Button>
         </div>
 
         <div className="cookies-footer">

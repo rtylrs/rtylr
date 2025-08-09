@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../redux/store";
 
@@ -22,14 +22,14 @@ function Faqs() {
           marginBottom: "20px",
         }}
       >
-        <VbitezButton
+        <Button
           variant="default"
           onClick={() => {
             navigate("/manage/sections/faqs/add");
           }}
         >
           Add FAQ
-        </VbitezButton>
+        </Button>
       </div>
       <div className="faq-container">
         {faqs &&

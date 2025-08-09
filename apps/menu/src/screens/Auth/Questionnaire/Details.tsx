@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../redux/store";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 
 const Details: React.FC = () => {
   const navigate = useNavigate();
@@ -56,14 +56,14 @@ const Details: React.FC = () => {
               required
             />
           </div>
-          <VbitezButton
+          <Button
             styles={{
               width: "100%",
             }}
             onClick={handleSubmit}
           >
             Continue
-          </VbitezButton>
+          </Button>
         </form>
         <p className="required-field">* Required field</p>
       </div>

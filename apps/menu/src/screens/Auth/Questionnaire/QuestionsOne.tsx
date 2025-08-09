@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import VbitezButton from "../../../components/VbitezButton/VbitezButton";
+import { Button } from '@voxire/shared';
 
 const QuestionsOne: React.FC = () => {
   const [website, setWebsite] = useState<string>("");
@@ -48,14 +48,14 @@ const QuestionsOne: React.FC = () => {
           <small>Example: ubereats.com/en/store/your-restaurant</small>
         </div>
         <div className="form-actions">
-          <VbitezButton
+          <Button
             onClick={handleContinue}
             styles={{
               width: "100%",
             }}
           >
             Continue
-          </VbitezButton>
+          </Button>
           <div
             style={{
               display: "flex",
