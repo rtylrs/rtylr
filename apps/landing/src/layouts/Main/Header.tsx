@@ -13,6 +13,7 @@ import useColors from '../../hooks/useColors';
 import { useWindowDimensions } from '@voxire/utils';
 import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
+import { getCookie } from '../../lib/cookies';
 import { RootState } from '../../redux/store';
 
 interface LinkWithColorProps
@@ -60,7 +61,7 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem('language');
+    const storedLanguage = getCookie('language');
     if (storedLanguage) {
       setLanguage(storedLanguage);
     }
