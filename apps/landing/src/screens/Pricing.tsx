@@ -7,7 +7,7 @@ const Pricing = () => {
           <thead>
             <tr>
               <th>Products</th>
-              <th className="free-plan">Free Pla</th>
+              <th className="free-plan">Free Plam</th>
               <th className="pro-plan">Basic Plan</th>
               <th className="enterprise-plan">Ultimate Plan</th>
             </tr>
