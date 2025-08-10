@@ -219,7 +219,7 @@ jobs:
               echo "Sending notification for $app v$VERSION"
               
               # Build the message for this app
-              MESSAGE="🚀 DEPLOYMENT COMPLETE ✅"
+              MESSAGE="🚀 DEPLOYMENT COMPLETE"
               MESSAGE="$MESSAGE\n\n📱 App: ${app^}"
               MESSAGE="$MESSAGE\n🏷️ Version: v$VERSION"
               MESSAGE="$MESSAGE\n🌍 Environment: Production"
