@@ -3,18 +3,6 @@
 //Fonts and common styles
 @include meta.load-css("./scss/common.scss");
 
-// SCSS imports Public
-@include meta.load-css("./scss/Public/Header.scss");
-@include meta.load-css("./scss/Public/Auth.scss");
-@include meta.load-css("./scss/Public/Home.scss");
-@include meta.load-css("./scss/Public/About.scss");
-@include meta.load-css("./scss/Public/Pricing.scss");
-@include meta.load-css("./scss/Public/Contact.scss");
-@include meta.load-css("./scss/Public/Collection.scss");
-@include meta.load-css("./scss/Public/Shop.scss");
-@include meta.load-css("./scss/Public/FAQ.scss");
-@include meta.load-css("./scss/Public/Menu.scss");
-
 // Scss imports Components
 @include meta.load-css("./scss/Components/Alert.scss");
 @include meta.load-css("./scss/Components/ProductCard.scss");

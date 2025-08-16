@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@voxire/shared';
 
 const NoMatch = (): JSX.Element => {
@@ -25,14 +25,14 @@ const NoMatch = (): JSX.Element => {
           </div>
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
             <Button
               onClick={() => {
-                navigate("/");
+                navigate('/');
               }}
             >
               Go Back
@@ -45,3 +45,4 @@ const NoMatch = (): JSX.Element => {
 };
 
 export default NoMatch;
+
