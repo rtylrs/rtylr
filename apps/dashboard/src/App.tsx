@@ -18,7 +18,6 @@ import {
 } from 'chart.js';
 
 //Routes
-import PublicRoutes from './routes/PublicRoutes';
 import UserRoutes from './routes/UserRoutes';
 import AdminRoutes from './routes/AdminRoutes';
 import AuthRoutes from './routes/AuthRoutes';
@@ -26,12 +25,10 @@ import VendorRoutes from './routes/VendorRoutes';
 
 import i18next from './services/i18next';
 
-//Screens
-import NoMatch from './screens/Public/Extras/NoMatch';
-import Maintanance from './screens/Public/Maintanance';
-
 //Components
 import Cookies from './components/Cookies/Cookies';
+import Maintanance from './screens/Maintanance';
+import NoMatch from './screens/Extras/NoMatch';
 
 //Utilities
 import { getCookie } from './lib/cookies';
@@ -156,11 +153,6 @@ const App = (): JSX.Element => {
       <Routes key={location.pathname} location={location}>
         {/* Auth Routes */}
         {AuthRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-
-        {/* Public Routes */}
-        {PublicRoutes.map((route, index) => (
           <Route key={index} path={route.path} element={route.element} />
         ))}
 
