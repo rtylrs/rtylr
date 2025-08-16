@@ -1,11 +1,13 @@
-import axios from "axios";
-import i18next from "i18next";
+import axios from 'axios';
+import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  const mode = localStorage.getItem("mode") || "prod";
-  return mode === "dev"
-    ? "http://localhost:9999/"
-    : "https://onion-tdam.onrender.com/";
+  const isLocalhost =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+  return isLocalhost
+    ? 'http://localhost:9999/'
+    : 'https://onion-tdam.onrender.com/';
 };
 
 const api = axios.create({
@@ -15,11 +17,11 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const user = localStorage.getItem("token");
+      const user = localStorage.getItem('token');
       if (user) {
-        config.headers["authorization"] = `Bearer ${user}`;
+        config.headers['authorization'] = `Bearer ${user}`;
       }
-      config.headers["accept-language"] = i18next.language;
+      config.headers['accept-language'] = i18next.language;
       return config;
     } catch (error) {
       return Promise.reject(error);

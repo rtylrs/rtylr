@@ -4,6 +4,8 @@ import React from 'react';
 
 // Routes
 const Home = React.lazy(() => import('../screens/Public/Home/Home'));
+const Chat = React.lazy(() => import('../screens/Chat/Chat'));
+
 const About = React.lazy(() => import('../screens/Public/About'));
 const Pricing = React.lazy(() => import('../screens/Public/Pricing'));
 const Contact = React.lazy(() => import('../screens/Public/Contact'));
@@ -22,6 +24,14 @@ const PublicRoutes = [
           <Home />
         </AnimatedRoutes>
       </Public>
+    ),
+  },
+  {
+    path: '/chat',
+    element: (
+      <AnimatedRoutes>
+        <Chat />
+      </AnimatedRoutes>
     ),
   },
   {
