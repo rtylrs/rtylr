@@ -11,6 +11,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
+      SLACK_CHANNEL_ID: C09BC3LEQTY
 
     steps:
       - name: Checkout Repository
@@ -204,7 +207,7 @@ jobs:
         if: steps.deployment-check.outputs.should_deploy == 'false'
         run: echo "Skipping deployment - no app version changes detected"
 
-      - name: Send Telegram Notification - Success
+      - name: Send Slack Notification - Success
         if: steps.deployment-check.outputs.should_deploy == 'true' && success()
         run: |
           DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
@@ -214,21 +217,20 @@ jobs:
           for app in "${APPS[@]}"; do
             if [ -n "$app" ] && [ -f "apps/$app/version.json" ]; then
               VERSION=$(node -p "require('./apps/$app/version.json').version")
-              TAG_NAME="${app}-v${VERSION}"
               
-              echo "Sending notification for $app v$VERSION"
+              echo "Sending Slack notification for $app v$VERSION"
               
-              # Build the message for this app
-              MESSAGE="🚀 DEPLOYMENT COMPLETE"
-              MESSAGE="$MESSAGE\n\n📱 App: ${app^}"
-              MESSAGE="$MESSAGE\n🏷️ Version: v$VERSION"
-              MESSAGE="$MESSAGE\n🌍 Environment: Production"
-              MESSAGE="$MESSAGE\n⏰ Time: $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
+              # Build the Slack message
+              SLACK_MESSAGE="🚀 *DEPLOYMENT COMPLETE*\n\n📱 *App:* ${app^}\n🏷️ *Version:* v$VERSION\n🌍 *Environment:* Production\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
               
-              # Send notification for this app
-              ./scripts/telegram-notify.sh "app-deployment" "$MESSAGE"
+              # Send to Slack
+              curl -s -X POST \
+                "https://slack.com/api/chat.postMessage" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+                -d "{\"channel\": \"${{ env.SLACK_CHANNEL_ID }}\", \"text\": \"$SLACK_MESSAGE\", \"mrkdwn\": true}"
               
-              echo "✅ Telegram notification sent for $app"
+              echo "✅ Slack notification sent for $app"
             fi
           done
 
