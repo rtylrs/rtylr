@@ -1,0 +1,176 @@
+name: Publish Libraries
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'libs/**/package.json'
+      - 'libs/**/src/**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
+      SLACK_CHANNEL_ID: C09BC3LEQTY
+      NODE_AUTH_TOKEN: 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
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Check which libraries need publishing
+        id: publish-check
+        run: |
+          echo "Checking for library version changes..."
+
+          LIBS_TO_PUBLISH=""
+          PUBLISH_NEEDED=false
+
+          # Check each library for version changes
+          for lib in shared utils; do
+            echo "Checking @voxire/$lib..."
+            
+            LIB_PACKAGE_FILE="libs/@voxire/$lib/package.json"
+            
+            if [ -f "$LIB_PACKAGE_FILE" ]; then
+              CURRENT_VERSION=$(node -p "require('./$LIB_PACKAGE_FILE').version")
+              echo "Current @voxire/$lib version: $CURRENT_VERSION"
+              
+              # Check if the library package.json changed in this commit
+              if git diff --name-only HEAD~1 HEAD | grep -q "$LIB_PACKAGE_FILE"; then
+                PREVIOUS_VERSION=$(git show HEAD~1:$LIB_PACKAGE_FILE 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" || echo "none")
+                echo "Previous @voxire/$lib version: $PREVIOUS_VERSION"
+                
+                if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+                  echo "✅ @voxire/$lib version changed: $PREVIOUS_VERSION → $CURRENT_VERSION"
+                  LIBS_TO_PUBLISH="$LIBS_TO_PUBLISH$lib,"
+                  PUBLISH_NEEDED=true
+                else
+                  echo "ℹ️ @voxire/$lib package.json changed but version unchanged"
+                fi
+              else
+                echo "ℹ️ @voxire/$lib package.json unchanged"
+              fi
+            else
+              echo "❌ No package.json found for @voxire/$lib"
+            fi
+          done
+
+          # Remove trailing comma
+          LIBS_TO_PUBLISH=$(echo "$LIBS_TO_PUBLISH" | sed 's/,$//')
+
+          if [ "$PUBLISH_NEEDED" = true ]; then
+            echo "Libraries to publish: $LIBS_TO_PUBLISH"
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "publish_libs=$LIBS_TO_PUBLISH" >> "$GITHUB_OUTPUT"
+          else
+            echo "No publishing needed"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "publish_libs=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cache pnpm dependencies
+        if: steps.publish-check.outputs.should_publish == 'true'
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Configure pnpm
+        if: steps.publish-check.outputs.should_publish == 'true'
+        run: pnpm config set store-dir ~/.pnpm-store
+
+      - name: Install Dependencies
+        if: steps.publish-check.outputs.should_publish == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Libraries
+        if: steps.publish-check.outputs.should_publish == 'true'
+        run: |
+          PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
+          echo "Building libraries: $PUBLISH_LIBS"
+
+          IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
+          for lib in "${LIBS[@]}"; do
+            if [ -n "$lib" ]; then
+              echo "Building @voxire/$lib..."
+              cd "libs/@voxire/$lib"
+              pnpm build
+              if [ $? -eq 0 ]; then
+                echo "✅ @voxire/$lib built successfully"
+              else
+                echo "❌ Failed to build @voxire/$lib"
+                exit 1
+              fi
+              cd ../../../..
+            fi
+          done
+
+      - name: Publish Libraries
+        if: steps.publish-check.outputs.should_publish == 'true'
+        run: |
+          PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
+          echo "Publishing libraries: $PUBLISH_LIBS"
+
+          IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
+          for lib in "${LIBS[@]}"; do
+            if [ -n "$lib" ]; then
+              echo "Publishing @voxire/$lib..."
+              cd "libs/@voxire/$lib"
+              npm publish --access restricted
+              if [ $? -eq 0 ]; then
+                echo "✅ @voxire/$lib published successfully"
+              else
+                echo "❌ Failed to publish @voxire/$lib"
+                exit 1
+              fi
+              cd ../../../..
+            fi
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
+
+      - name: Send Slack Notification - Success
+        if: steps.publish-check.outputs.should_publish == 'true' && success()
+        run: |
+          PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
+
+          # Send individual notifications for each published library
+          IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
+          for lib in "${LIBS[@]}"; do
+            if [ -n "$lib" ] && [ -f "libs/@voxire/$lib/package.json" ]; then
+              VERSION=$(node -p "require('./libs/@voxire/$lib/package.json').version")
+              
+              echo "Sending Slack notification for @voxire/$lib v$VERSION"
+              
+              # Build the Slack message
+              SLACK_MESSAGE="📦 *LIBRARY PUBLISHED*\n\n📚 *Library:* @voxire/$lib\n🏷️ *Version:* v$VERSION\n🌍 *Registry:* npm\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
+              
+              # Send to Slack
+              curl -s -X POST \
+                "https://slack.com/api/chat.postMessage" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+                -d "{\"channel\": \"${{ env.SLACK_CHANNEL_ID }}\", \"text\": \"$SLACK_MESSAGE\", \"mrkdwn\": true}"
+              
+              echo "✅ Slack notification sent for @voxire/$lib"
+            fi
+          done
+      - name: Skip publishing
+        if: steps.publish-check.outputs.should_publish == 'false'
+        run: echo "Skipping publishing - no library version changes detected"
