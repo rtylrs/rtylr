@@ -56,7 +56,7 @@ jobs:
             echo "changed_libraries=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Send Telegram Notification - Library Updates
+      - name: Send Slack Notification - Library Updates
         if: steps.library-check.outputs.library_changes_detected == 'true'
         run: |
           LIBRARIES="${{ steps.library-check.outputs.changed_libraries }}"
@@ -104,13 +104,15 @@ jobs:
             fi
           done
 
-          # Build the message
-          MESSAGE="📚 Library Updates Detected"
-          MESSAGE="$MESSAGE\n\n🔧 Libraries: $LIBRARIES"
-          MESSAGE="$MESSAGE\n📝 Commit: $COMMIT_HASH"
-          MESSAGE="$MESSAGE\n💬 Message: $COMMIT_MESSAGE"
-          MESSAGE="$MESSAGE\n⏰ Time: $(date '+%Y-%m-%d %H:%M:%S UTC')"
-          MESSAGE="$MESSAGE\n\n📄 Changed Files:$CHANGED_FILES_DETAILS"
+          # Build the Slack message
+          SLACK_MESSAGE="📚 *Library Updates Detected*\n\n🔧 *Libraries:* $LIBRARIES\n📝 *Commit:* $COMMIT_HASH\n💬 *Message:* $COMMIT_MESSAGE\n⏰ *Time:* $(date '+%Y-%m-%d %H:%M:%S UTC')\n\n📄 *Changed Files:*$CHANGED_FILES_DETAILS"
 
-          # Send to Telegram using shared script
-          ./scripts/telegram-notify.sh "library-update" "$MESSAGE"
+          # Send to Slack
+          curl -s -X POST \
+            "https://slack.com/api/chat.postMessage" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+            -d "{\"channel\": \"${{ env.SLACK_CHANNEL_ID }}\", \"text\": \"$SLACK_MESSAGE\", \"mrkdwn\": true}"
+        env:
+          SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
+          SLACK_CHANNEL_ID: C09BC3LEQTY
