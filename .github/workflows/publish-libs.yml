@@ -186,7 +186,7 @@ jobs:
               LIB_PATH="libs/@voxire/$lib"
               if [ -d "$LIB_PATH" ]; then
                 cd "$LIB_PATH"
-                npm publish --access restricted
+                npm publish --access public
                 if [ $? -eq 0 ]; then
                   echo "✅ @voxire/$lib published successfully"
                 else
