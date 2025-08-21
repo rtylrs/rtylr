@@ -1,4 +1,4 @@
-name: Publish Libraries
+name: Publish Libraries to GitHub Packages
 
 on:
   push:
@@ -11,11 +11,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    env:
-      SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
-      SLACK_CHANNEL_ID: C09BC3LEQTY
-      NODE_AUTH_TOKEN: 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
-
+    permissions:
+      contents: read
+      packages: write
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -26,30 +25,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@voxire'
 
       - name: Install pnpm
         run: npm install -g pnpm
-
-      - name: Verify Repository Structure
-        run: |
-          echo "=== Repository Structure Verification ==="
-          echo "Current directory: $(pwd)"
-          echo "Root directory contents:"
-          ls -la
-          echo ""
-          echo "Libs directory contents:"
-          ls -la libs/ || echo "libs directory not found"
-          echo ""
-          echo "Voxire directory contents:"
-          ls -la libs/@voxire/ || echo "@voxire directory not found"
-          echo ""
-          echo "Shared directory contents:"
-          ls -la libs/@voxire/shared/ || echo "shared directory not found"
-          echo ""
-          echo "Utils directory contents:"
-          ls -la libs/@voxire/utils/ || echo "utils directory not found"
-          echo "=== End Verification ==="
 
       - name: Check which libraries need publishing
         id: publish-check
@@ -127,29 +107,13 @@ jobs:
           echo "Building libraries: $PUBLISH_LIBS"
           echo "Workspace root: $WORKSPACE_ROOT"
 
-          # Debug: Check directories before each build
-          echo "=== Pre-build directory check ==="
-          ls -la libs/@voxire/
-          echo "=== End pre-build check ==="
-
           IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
               echo "Building @voxire/$lib..."
               LIB_PATH="$WORKSPACE_ROOT/libs/@voxire/$lib"
-              echo "Checking if $LIB_PATH exists..."
-              
-              # Debug: Check this specific directory
-              echo "=== Checking $LIB_PATH ==="
-              ls -la "$LIB_PATH" 2>/dev/null || echo "Directory listing failed"
-              echo "=== End check ==="
-              
               if [ -d "$LIB_PATH" ]; then
-                echo "Directory exists, building..."
                 cd "$LIB_PATH"
-                echo "Changed to directory: $(pwd)"
-                echo "Directory contents:"
-                ls -la
                 pnpm build
                 if [ $? -eq 0 ]; then
                   echo "✅ @voxire/$lib built successfully"
@@ -158,16 +122,8 @@ jobs:
                   exit 1
                 fi
                 cd "$WORKSPACE_ROOT"
-                echo "Returned to workspace root: $(pwd)"
-                
-                # Debug: Check if directories still exist after build
-                echo "=== Post-build directory check ==="
-                ls -la libs/@voxire/ 2>/dev/null || echo "libs/@voxire/ no longer exists!"
-                echo "=== End post-build check ==="
               else
                 echo "❌ Directory $LIB_PATH does not exist"
-                echo "Available directories in libs/@voxire/:"
-                ls -la libs/@voxire/ 2>/dev/null || echo "libs/@voxire/ does not exist"
                 exit 1
               fi
             fi
@@ -186,7 +142,7 @@ jobs:
               LIB_PATH="libs/@voxire/$lib"
               if [ -d "$LIB_PATH" ]; then
                 cd "$LIB_PATH"
-                npm publish --access public
+                npm publish
                 if [ $? -eq 0 ]; then
                   echo "✅ @voxire/$lib published successfully"
                 else
@@ -200,8 +156,6 @@ jobs:
               fi
             fi
           done
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
 
       - name: Send Slack Notification - Success
         if: steps.publish-check.outputs.should_publish == 'true' && success()
@@ -217,7 +171,7 @@ jobs:
               echo "Sending Slack notification for @voxire/$lib v$VERSION"
               
               # Build the Slack message
-              SLACK_MESSAGE="📦 *LIBRARY PUBLISHED*\n\n📚 *Library:* @voxire/$lib\n🏷️ *Version:* v$VERSION\n🌍 *Registry:* npm\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
+              SLACK_MESSAGE="📦 *LIBRARY PUBLISHED*\n\n📚 *Library:* @voxire/$lib\n🏷️ *Version:* v$VERSION\n🌍 *Registry:* GitHub Packages\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
               
               # Send to Slack
               curl -s -X POST \
@@ -229,6 +183,10 @@ jobs:
               echo "✅ Slack notification sent for @voxire/$lib"
             fi
           done
+        env:
+          SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
+          SLACK_CHANNEL_ID: C09BC3LEQTY
+
       - name: Skip publishing
         if: steps.publish-check.outputs.should_publish == 'false'
         run: echo "Skipping publishing - no library version changes detected"
