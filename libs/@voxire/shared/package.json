@@ -1,7 +1,6 @@
 {
   "name": "@voxire/shared",
   "version": "0.0.8",
-  "private": true,
   "description": "Shared UI components for Voxire applications",
   "main": "../../../dist/@voxire/shared/index.js",
   "module": "../../../dist/@voxire/shared/index.esm.js",
