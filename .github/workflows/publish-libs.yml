@@ -125,12 +125,11 @@ jobs:
           PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
           echo "Building libraries: $PUBLISH_LIBS"
           echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Libs directory contents:"
-          ls -la libs/
-          echo "Voxire directory contents:"
+          
+          # Debug: Check directories before each build
+          echo "=== Pre-build directory check ==="
           ls -la libs/@voxire/
+          echo "=== End pre-build check ==="
 
           IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
           for lib in "${LIBS[@]}"; do
@@ -138,9 +137,18 @@ jobs:
               echo "Building @voxire/$lib..."
               LIB_PATH="libs/@voxire/$lib"
               echo "Checking if $LIB_PATH exists..."
+              
+              # Debug: Check this specific directory
+              echo "=== Checking $LIB_PATH ==="
+              ls -la "$LIB_PATH" 2>/dev/null || echo "Directory listing failed"
+              echo "=== End check ==="
+              
               if [ -d "$LIB_PATH" ]; then
                 echo "Directory exists, building..."
                 cd "$LIB_PATH"
+                echo "Changed to directory: $(pwd)"
+                echo "Directory contents:"
+                ls -la
                 pnpm build
                 if [ $? -eq 0 ]; then
                   echo "✅ @voxire/$lib built successfully"
@@ -149,8 +157,11 @@ jobs:
                   exit 1
                 fi
                 cd ../../../..
+                echo "Returned to: $(pwd)"
               else
                 echo "❌ Directory $LIB_PATH does not exist"
+                echo "Available directories in libs/@voxire/:"
+                ls -la libs/@voxire/
                 exit 1
               fi
             fi
