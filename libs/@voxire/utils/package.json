@@ -1,6 +1,6 @@
 {
   "name": "@voxire/utils",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "description": "Utility functions for Voxire applications",
   "main": "../../../dist/@voxire/utils/index.js",
