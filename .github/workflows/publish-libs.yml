@@ -20,7 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3
@@ -30,6 +30,26 @@ jobs:
 
       - name: Install pnpm
         run: npm install -g pnpm
+
+      - name: Verify Repository Structure
+        run: |
+          echo "=== Repository Structure Verification ==="
+          echo "Current directory: $(pwd)"
+          echo "Root directory contents:"
+          ls -la
+          echo ""
+          echo "Libs directory contents:"
+          ls -la libs/ || echo "libs directory not found"
+          echo ""
+          echo "Voxire directory contents:"
+          ls -la libs/@voxire/ || echo "@voxire directory not found"
+          echo ""
+          echo "Shared directory contents:"
+          ls -la libs/@voxire/shared/ || echo "shared directory not found"
+          echo ""
+          echo "Utils directory contents:"
+          ls -la libs/@voxire/utils/ || echo "utils directory not found"
+          echo "=== End Verification ==="
 
       - name: Check which libraries need publishing
         id: publish-check
