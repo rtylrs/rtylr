@@ -123,9 +123,10 @@ jobs:
         if: steps.publish-check.outputs.should_publish == 'true'
         run: |
           PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
+          WORKSPACE_ROOT="$(pwd)"
           echo "Building libraries: $PUBLISH_LIBS"
-          echo "Current directory: $(pwd)"
-          
+          echo "Workspace root: $WORKSPACE_ROOT"
+
           # Debug: Check directories before each build
           echo "=== Pre-build directory check ==="
           ls -la libs/@voxire/
@@ -135,7 +136,7 @@ jobs:
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
               echo "Building @voxire/$lib..."
-              LIB_PATH="libs/@voxire/$lib"
+              LIB_PATH="$WORKSPACE_ROOT/libs/@voxire/$lib"
               echo "Checking if $LIB_PATH exists..."
               
               # Debug: Check this specific directory
@@ -156,12 +157,17 @@ jobs:
                   echo "❌ Failed to build @voxire/$lib"
                   exit 1
                 fi
-                cd ../../../..
-                echo "Returned to: $(pwd)"
+                cd "$WORKSPACE_ROOT"
+                echo "Returned to workspace root: $(pwd)"
+                
+                # Debug: Check if directories still exist after build
+                echo "=== Post-build directory check ==="
+                ls -la libs/@voxire/ 2>/dev/null || echo "libs/@voxire/ no longer exists!"
+                echo "=== End post-build check ==="
               else
                 echo "❌ Directory $LIB_PATH does not exist"
                 echo "Available directories in libs/@voxire/:"
-                ls -la libs/@voxire/
+                ls -la libs/@voxire/ 2>/dev/null || echo "libs/@voxire/ does not exist"
                 exit 1
               fi
             fi
