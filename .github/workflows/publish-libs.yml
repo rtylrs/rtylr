@@ -104,20 +104,35 @@ jobs:
         run: |
           PUBLISH_LIBS="${{ steps.publish-check.outputs.publish_libs }}"
           echo "Building libraries: $PUBLISH_LIBS"
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Libs directory contents:"
+          ls -la libs/
+          echo "Voxire directory contents:"
+          ls -la libs/@voxire/
 
           IFS=',' read -ra LIBS <<< "$PUBLISH_LIBS"
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
               echo "Building @voxire/$lib..."
-              cd "libs/@voxire/$lib"
-              pnpm build
-              if [ $? -eq 0 ]; then
-                echo "✅ @voxire/$lib built successfully"
+              LIB_PATH="libs/@voxire/$lib"
+              echo "Checking if $LIB_PATH exists..."
+              if [ -d "$LIB_PATH" ]; then
+                echo "Directory exists, building..."
+                cd "$LIB_PATH"
+                pnpm build
+                if [ $? -eq 0 ]; then
+                  echo "✅ @voxire/$lib built successfully"
+                else
+                  echo "❌ Failed to build @voxire/$lib"
+                  exit 1
+                fi
+                cd ../../../..
               else
-                echo "❌ Failed to build @voxire/$lib"
+                echo "❌ Directory $LIB_PATH does not exist"
                 exit 1
               fi
-              cd ../../../..
             fi
           done
 
@@ -131,15 +146,21 @@ jobs:
           for lib in "${LIBS[@]}"; do
             if [ -n "$lib" ]; then
               echo "Publishing @voxire/$lib..."
-              cd "libs/@voxire/$lib"
-              npm publish --access restricted
-              if [ $? -eq 0 ]; then
-                echo "✅ @voxire/$lib published successfully"
+              LIB_PATH="libs/@voxire/$lib"
+              if [ -d "$LIB_PATH" ]; then
+                cd "$LIB_PATH"
+                npm publish --access restricted
+                if [ $? -eq 0 ]; then
+                  echo "✅ @voxire/$lib published successfully"
+                else
+                  echo "❌ Failed to publish @voxire/$lib"
+                  exit 1
+                fi
+                cd ../../../..
               else
-                echo "❌ Failed to publish @voxire/$lib"
+                echo "❌ Directory $LIB_PATH does not exist"
                 exit 1
               fi
-              cd ../../../..
             fi
           done
         env:
