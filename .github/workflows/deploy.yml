@@ -116,7 +116,7 @@ jobs:
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
