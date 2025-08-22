@@ -23,8 +23,8 @@ jobs:
 
       - name: Configure git for private repos
         run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://${{ github.token }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${{ github.token }}@github.com/".insteadOf "git@github.com:"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,12 +35,13 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: latest
-      
+
       - name: Configure pnpm for private repos
         run: |
           # Configure pnpm to use the same git authentication as the workflow
           pnpm config set git-checks false
-          pnpm config set git-config-url "https://${{ secrets.GITHUB_TOKEN }}@github.com/"
+          # Use the built-in GITHUB_TOKEN for authentication
+          pnpm config set git-config-url "https://${{ github.token }}@github.com/"
 
       - name: Get pnpm store directory
         shell: bash
