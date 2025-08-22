@@ -35,6 +35,12 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: latest
+      
+      - name: Configure pnpm for private repos
+        run: |
+          # Configure pnpm to use the same git authentication as the workflow
+          pnpm config set git-checks false
+          pnpm config set git-config-url "https://${{ secrets.GITHUB_TOKEN }}@github.com/"
 
       - name: Get pnpm store directory
         shell: bash
@@ -116,7 +122,10 @@ jobs:
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          # Configure pnpm to use the same git authentication
+          pnpm config set git-checks false
+          pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
