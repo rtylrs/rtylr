@@ -11,6 +11,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
     env:
       SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
       SLACK_CHANNEL_ID: C09BC3LEQTY
@@ -41,6 +45,11 @@ jobs:
           # Configure pnpm to use the same git authentication as the workflow
           pnpm config set git-checks false
           pnpm config set git-config-url "https://${{ secrets.ACCESS_TOKEN }}@github.com/"
+          # Force pnpm to use HTTPS instead of SSH for GitHub repos
+          pnpm config set git-config-ssh false
+          # Set explicit git protocol to HTTPS
+          git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com/".insteadOf "ssh://git@github.com/"
 
       - name: Get pnpm store directory
         shell: bash
