@@ -13,6 +13,8 @@ import { Toaster } from 'sonner';
 import { PersistGate } from 'redux-persist/integration/react';
 import Modal from 'react-modal';
 
+import './index.scss';
+
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import '@voxire/shared/styles';
 

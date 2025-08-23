@@ -33,16 +33,6 @@ export default defineConfig(() => ({
       '@root': path.resolve(__dirname, '../..'),
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `
-          @use "@app/index.scss";
-        `,
-        api: 'modern-compiler' as const,
-      },
-    },
-  },
   server: {
     port: 5176,
     host: true,
