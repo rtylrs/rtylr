@@ -16,6 +16,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import Modal from 'react-modal';
 
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import '@voxire/shared/styles';
 
 const theme = createTheme({
   palette: {
