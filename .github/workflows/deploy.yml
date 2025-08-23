@@ -139,26 +139,26 @@ jobs:
         run: |
           # Delete lockfile to force fresh resolution with HTTPS URLs
           rm -f pnpm-lock.yaml
-          
+
           # DEBUG: Show current git config
           echo "=== CURRENT GIT CONFIG ==="
           git config --global --list | grep url || echo "No URL configs found"
-          
+
           # Configure git credentials for this session
           git config --global credential.helper store
           echo "https://x-access-token:${ACCESS_TOKEN}@github.com" > ~/.git-credentials
-          
+
           # DEBUG: Test git access directly
           echo "=== TESTING GIT ACCESS ==="
           git ls-remote https://github.com/Voxire/shared.git HEAD || echo "HTTPS access failed"
-          
+
           # Force pnpm to use HTTPS instead of SSH
           pnpm config set git-checks false
-          
+
           # DEBUG: Show what pnpm is trying to resolve
           echo "=== PNPM RESOLUTION DEBUG ==="
           pnpm why @voxire/shared || echo "Not found in package.json"
-          
+
           # Try with verbose logging
           pnpm install --reporter=append-only
 
