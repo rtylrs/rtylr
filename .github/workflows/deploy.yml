@@ -27,7 +27,7 @@ jobs:
 
       - name: Configure Git for private repos
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Configure git to use Personal Access Token for private repositories
           git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
@@ -133,9 +133,9 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          GIT_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # NUCLEAR OPTION: Clear ALL pnpm caches and force fresh install
           rm -rf pnpm-lock.yaml
@@ -151,11 +151,11 @@ jobs:
           echo "=== TESTING GIT ACCESS WITH TOKEN ==="
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/shared.git HEAD && echo "✅ Voxire/shared access SUCCESS" || echo "❌ Voxire/shared access failed"
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/utils.git HEAD && echo "✅ Voxire/utils access SUCCESS" || echo "❌ Voxire/utils access failed"
-          
+
           # DEBUG: Check what package.json actually contains
           echo "=== PACKAGE.JSON CONTENT ==="
           grep -A 2 -B 2 "@voxire" package.json
-          
+
           # FORCE pnpm to use our URL mapping
           echo "=== FORCING URL MAPPING ==="
           pnpm config set "@voxire:registry" "https://x-access-token:${ACCESS_TOKEN}@github.com"
