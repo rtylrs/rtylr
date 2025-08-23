@@ -136,7 +136,7 @@ jobs:
           echo "=== TESTING UTILS REPO ACCESS ==="
           echo "Testing utils repo:"
           git ls-remote git@github.com:Voxire/utils.git main || echo "Utils repo access failed"
-          
+
           echo "=== DEBUGGING UTILS REPO ACCESS ==="
           echo "Testing different repo name variations:"
           git ls-remote git@github.com:Voxire/utils.git main 2>&1 || echo "Voxire/utils failed"
