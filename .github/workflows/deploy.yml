@@ -110,39 +110,34 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
                     fi
 
-      - name: Setup SSH Deploy Keys
-        if: steps.deployment-check.outputs.should_deploy == 'true'
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
-          echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
-          chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
-          # Use GitHub Actions built-in SSH agent
-          echo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
-          echo "SSH_AGENT_PID: $SSH_AGENT_PID"
-          
-          # Add keys to existing agent
-          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils || echo "SSH add failed"
-          
-          # List loaded keys
-          ssh-add -l || echo "No keys loaded"
+      
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
           # Clear all caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-
+          
+          # Setup SSH agent with deploy keys
+          echo "=== SETTING UP SSH AGENT ==="
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
+          echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
+          chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          
+          # Start SSH agent and add keys
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          
           echo "=== SSH DEPLOY KEYS DEBUG ==="
-          echo "Testing SSH connections..."
+          echo "SSH agent status:"
           ssh-add -l
-
+          
           # Test SSH access to both repos
           echo "=== TESTING SSH ACCESS ==="
           ssh -T git@github.com || echo "SSH connection test completed"
-
+          
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
           pnpm install --no-frozen-lockfile
