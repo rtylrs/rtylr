@@ -10,7 +10,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@voxire/shared';
 import useColors from '../../hooks/useColors';
-import { useWindowDimensions } from '@voxire/utils';
+import { useWindowDimensions } from '@voxire/shared/utils';
 import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
 import { getCookie } from '../../lib/cookies';
