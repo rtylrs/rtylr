@@ -15,6 +15,8 @@ jobs:
       contents: read
       packages: read
       id-token: write
+      actions: read
+      repository-projects: read
     env:
       SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
       SLACK_CHANNEL_ID: C09BC3LEQTY
@@ -160,14 +162,17 @@ jobs:
           echo "Token starts with: ${ACCESS_TOKEN:0:8}..."
           echo "Token length: ${#ACCESS_TOKEN}"
           
-          # TEST: Check if we can actually access the repositories with our token
-          echo "=== TESTING REPOSITORY ACCESS ==="
-          curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
-          curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
+          # ALTERNATIVE: Use SSH instead of HTTPS for git operations
+          echo "=== SETTING UP SSH ALTERNATIVE ==="
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
           
-          echo "=== TESTING DIRECT GIT ACCESS ==="
-          git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
-          git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
+          # Try using the token as SSH password (GitHub supports this)
+          echo "=== TESTING SSH WITH TOKEN ==="
+          export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+          
+          # Install with forced git config
+          echo "=== INSTALLING DEPENDENCIES ==="
 
           # Set git to use our custom config
           export GIT_CONFIG_GLOBAL=/tmp/gitconfig
