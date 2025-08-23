@@ -73,8 +73,30 @@ jobs:
         run: |
           # Configure pnpm to use SSH for private repos
           pnpm config set git-checks false
-          # Ensure pnpm uses SSH for GitHub repos
-          pnpm config set git-config-ssh true
+          
+          # Configure SSH for specific GitHub repositories
+          git config --global url."git@github-shared:Voxire/shared.git".insteadOf "https://github.com/Voxire/shared.git"
+          git config --global url."git@github-utils:Voxire/utils.git".insteadOf "https://github.com/Voxire/utils.git"
+          
+          # Also configure for git:// URLs
+          git config --global url."git@github-shared:Voxire/shared.git".insteadOf "git://github.com/Voxire/shared.git"
+          git config --global url."git@github-utils:Voxire/utils.git".insteadOf "git://github.com/Voxire/utils.git"
+          
+          echo "✅ Git SSH configuration completed"
+
+      - name: Test SSH Connections
+        run: |
+          echo "Testing SSH connections to private repositories..."
+          
+          # Test connection to shared repo
+          echo "Testing connection to @voxire/shared..."
+          ssh -T git@github-shared 2>&1 | head -5
+          
+          # Test connection to utils repo
+          echo "Testing connection to @voxire/utils..."
+          ssh -T git@github-utils 2>&1 | head -5
+          
+          echo "✅ SSH connections tested"
 
       - name: Get pnpm store directory
         shell: bash
