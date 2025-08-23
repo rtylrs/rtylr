@@ -149,8 +149,17 @@ jobs:
 
           # DEBUG: Test git access directly to the correct URLs WITH TOKEN
           echo "=== TESTING GIT ACCESS WITH TOKEN ==="
+          echo "Token starts with: ${ACCESS_TOKEN:0:8}..."
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/shared.git HEAD && echo "✅ Voxire/shared access SUCCESS" || echo "❌ Voxire/shared access failed"
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/utils.git HEAD && echo "✅ Voxire/utils access SUCCESS" || echo "❌ Voxire/utils access failed"
+          
+          # DEBUG: Show git config
+          echo "=== GIT CONFIG DEBUG ==="
+          git config --global --list | grep url || echo "No URL configs"
+          
+          # DEBUG: Try manual curl test
+          echo "=== CURL TEST ==="
+          curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "API access failed"
 
           # DEBUG: Check what package.json actually contains
           echo "=== PACKAGE.JSON CONTENT ==="
