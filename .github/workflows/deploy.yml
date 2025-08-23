@@ -152,11 +152,11 @@ jobs:
           echo "Token starts with: ${ACCESS_TOKEN:0:8}..."
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/shared.git HEAD && echo "✅ Voxire/shared access SUCCESS" || echo "❌ Voxire/shared access failed"
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/utils.git HEAD && echo "✅ Voxire/utils access SUCCESS" || echo "❌ Voxire/utils access failed"
-          
+
           # DEBUG: Show git config
           echo "=== GIT CONFIG DEBUG ==="
           git config --global --list | grep url || echo "No URL configs"
-          
+
           # DEBUG: Try manual curl test
           echo "=== CURL TEST ==="
           curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "API access failed"
@@ -173,8 +173,9 @@ jobs:
           pnpm config set git-checks false
           pnpm config set store-dir ~/.pnpm-store-clean
 
-          # Fresh install with no cache
-          pnpm install --no-frozen-lockfile --force
+          # EMERGENCY: Use npm instead of pnpm - pnpm is broken with git auth
+          echo "=== SWITCHING TO NPM ==="
+          npm install
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
