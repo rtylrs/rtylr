@@ -132,9 +132,19 @@ jobs:
           echo "SSH agent status:"
           ssh-add -l
 
-          # Test SSH access to both repos
-          echo "=== TESTING SSH ACCESS ==="
-          ssh -T git@github.com || echo "SSH connection test completed"
+          # Test SSH access to each repo individually
+          echo "=== TESTING SSH ACCESS TO SHARED ==="
+          ssh -T git@github.com-Voxire-shared || echo "SSH test for shared completed"
+          
+          echo "=== TESTING SSH ACCESS TO UTILS ==="
+          ssh -T git@github.com-Voxire-utils || echo "SSH test for utils completed"
+          
+          echo "=== TESTING GIT LS-REMOTE FOR EACH REPO ==="
+          echo "Testing shared repo:"
+          git ls-remote git@github.com:Voxire/shared.git main || echo "Shared repo access failed"
+          
+          echo "Testing utils repo:"
+          git ls-remote git@github.com:Voxire/utils.git main || echo "Utils repo access failed"
 
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
