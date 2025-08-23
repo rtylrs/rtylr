@@ -133,7 +133,7 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN: 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
           GIT_CONFIG_GLOBAL: /tmp/gitconfig
         run: |
           # NUCLEAR: Clear ALL possible caches
@@ -155,11 +155,16 @@ jobs:
           echo "Testing git config:"
           git config --file /tmp/gitconfig --list
 
+          # DEBUG: Check what token we're actually getting
+          echo "=== TOKEN DEBUG ==="
+          echo "Token starts with: ${ACCESS_TOKEN:0:8}..."
+          echo "Token length: ${#ACCESS_TOKEN}"
+          
           # TEST: Check if we can actually access the repositories with our token
           echo "=== TESTING REPOSITORY ACCESS ==="
           curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
           curl -H "Authorization: token ${ACCESS_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
-
+          
           echo "=== TESTING DIRECT GIT ACCESS ==="
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
           git ls-remote https://x-access-token:${ACCESS_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
