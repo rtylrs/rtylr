@@ -134,21 +134,31 @@ jobs:
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GIT_CONFIG_GLOBAL: /tmp/gitconfig
         run: |
           # NUCLEAR: Clear ALL possible caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store ~/.local/share/pnpm ~/.cache/pnpm
-          
-          # RE-CONFIGURE GIT (the previous step might not have applied correctly)
-          echo "=== RE-CONFIGURING GIT URL REWRITING ==="
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git+ssh://git@github.com/"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
-          
-          echo "Git config now contains:"
-          git config --global --list | grep url
-          
-          # Install with clean environment
+
+          # FORCE GIT CONFIG using environment file approach
+          echo "=== FORCING GIT CONFIG ==="
+          cat > /tmp/gitconfig << EOF
+          [url "https://x-access-token:${ACCESS_TOKEN}@github.com/"]
+              insteadOf = https://github.com/
+              insteadOf = git@github.com:
+              insteadOf = git+ssh://git@github.com/
+              insteadOf = ssh://git@github.com/
+          EOF
+
+          echo "Git config file contents:"
+          cat /tmp/gitconfig
+
+          echo "Testing git config:"
+          git config --file /tmp/gitconfig --list
+
+          # Set git to use our custom config
+          export GIT_CONFIG_GLOBAL=/tmp/gitconfig
+
+          # Install with forced git config
           pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
