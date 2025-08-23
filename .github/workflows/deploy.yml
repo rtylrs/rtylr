@@ -139,7 +139,8 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          installation-id: ${{ secrets.APP_INSTALLATION_ID }}
+          owner: Voxire
+          repositories: shared,utils,vbitez
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
