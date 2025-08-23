@@ -132,10 +132,31 @@ jobs:
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          # Clear caches and install
-          rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-          pnpm install --no-frozen-lockfile
+          # NUCLEAR: Clear ALL possible caches
+          rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store ~/.local/share/pnpm ~/.cache/pnpm
+          
+          # Force pnpm to forget everything and use our git config
+          pnpm config delete store-dir || true
+          pnpm config set git-checks false
+          
+          # Show what URLs pnpm will actually use
+          echo "=== DEBUGGING PNPM URL RESOLUTION ==="
+          echo "Package.json contains:"
+          grep -A 2 "@voxire" package.json
+          
+          echo "Git config contains:"
+          git config --global --list | grep url || echo "No URL configs found"
+          
+          # Try to force pnpm to use our rewritten URLs
+          echo "=== FORCING PNPM TO USE HTTPS ==="
+          pnpm config set git-shallow-hosts "github.com"
+          
+          # Install with maximum verbosity to see what URLs it's trying
+          echo "=== INSTALLING WITH DEBUG ==="
+          pnpm install --no-frozen-lockfile --reporter=append-only --loglevel=debug
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
