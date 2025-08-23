@@ -145,7 +145,7 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
           GIT_CONFIG_GLOBAL: /tmp/gitconfig
         run: |
           # NUCLEAR: Clear ALL possible caches
@@ -154,7 +154,7 @@ jobs:
           # FORCE GIT CONFIG using environment file approach
           echo "=== FORCING GIT CONFIG ==="
           cat > /tmp/gitconfig << EOF
-          [url "https://x-access-token:${GITHUB_TOKEN}@github.com/"]
+          [url "https://x-access-token:${APP_TOKEN}@github.com/"]
               insteadOf = https://github.com/
               insteadOf = git@github.com:
               insteadOf = git+ssh://git@github.com/
@@ -169,28 +169,28 @@ jobs:
 
           # DEBUG: Check what token we're actually getting
           echo "=== TOKEN DEBUG ==="
-          echo "GitHub App Token starts with: ${GITHUB_TOKEN:0:8}..."
-          echo "Token length: ${#GITHUB_TOKEN}"
+          echo "GitHub App Token starts with: ${APP_TOKEN:0:8}..."
+          echo "Token length: ${#APP_TOKEN}"
 
           # Test GitHub App token access
           echo "=== TESTING GITHUB APP TOKEN ACCESS ==="
-          curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
-          curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
+          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
+          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
 
           echo "=== TESTING DIRECT GIT ACCESS WITH APP TOKEN ==="
-          git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
-          git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
+          git ls-remote https://x-access-token:${APP_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
+          git ls-remote https://x-access-token:${APP_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
 
           echo "=== INSTALLING DEPENDENCIES ==="
 
           # Set git to use our custom config
           export GIT_CONFIG_GLOBAL=/tmp/gitconfig
-          
-          # FORCE: Update package.json to use HTTPS URLs with token
-          echo "=== FORCING PACKAGE.JSON TO USE HTTPS WITH TOKEN ==="
-          sed -i 's|"@voxire/shared": "https://github.com/Voxire/shared.git#main"|"@voxire/shared": "https://x-access-token:'${GITHUB_TOKEN}'@github.com/Voxire/shared.git#main"|g' package.json
-          sed -i 's|"@voxire/utils": "https://github.com/Voxire/utils.git#main"|"@voxire/utils": "https://x-access-token:'${GITHUB_TOKEN}'@github.com/Voxire/utils.git#main"|g' package.json
-          
+
+          # FORCE: Update package.json to use HTTPS URLs with GitHub App token
+          echo "=== FORCING PACKAGE.JSON TO USE HTTPS WITH APP TOKEN ==="
+          sed -i 's|"@voxire/shared": "https://github.com/Voxire/shared.git#main"|"@voxire/shared": "https://x-access-token:'${APP_TOKEN}'@github.com/Voxire/shared.git#main"|g' package.json
+          sed -i 's|"@voxire/utils": "https://github.com/Voxire/utils.git#main"|"@voxire/utils": "https://x-access-token:'${APP_TOKEN}'@github.com/Voxire/utils.git#main"|g' package.json
+
           echo "Updated package.json dependencies:"
           grep -A 2 "@voxire" package.json
 
