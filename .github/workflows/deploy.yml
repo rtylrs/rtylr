@@ -130,7 +130,7 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install Dependencies
+            - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -138,25 +138,18 @@ jobs:
           # NUCLEAR: Clear ALL possible caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store ~/.local/share/pnpm ~/.cache/pnpm
           
-          # Force pnpm to forget everything and use our git config
-          pnpm config delete store-dir || true
-          pnpm config set git-checks false
+          # RE-CONFIGURE GIT (the previous step might not have applied correctly)
+          echo "=== RE-CONFIGURING GIT URL REWRITING ==="
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git+ssh://git@github.com/"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
           
-          # Show what URLs pnpm will actually use
-          echo "=== DEBUGGING PNPM URL RESOLUTION ==="
-          echo "Package.json contains:"
-          grep -A 2 "@voxire" package.json
+          echo "Git config now contains:"
+          git config --global --list | grep url
           
-          echo "Git config contains:"
-          git config --global --list | grep url || echo "No URL configs found"
-          
-          # Try to force pnpm to use our rewritten URLs
-          echo "=== FORCING PNPM TO USE HTTPS ==="
-          pnpm config set git-shallow-hosts "github.com"
-          
-          # Install with maximum verbosity to see what URLs it's trying
-          echo "=== INSTALLING WITH DEBUG ==="
-          pnpm install --no-frozen-lockfile --reporter=append-only --loglevel=debug
+          # Install with clean environment
+          pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
