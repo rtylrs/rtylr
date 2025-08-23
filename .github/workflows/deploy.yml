@@ -110,7 +110,7 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
           fi
 
-            - name: Setup SSH Deploy Keys
+      - name: Setup SSH Deploy Keys
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
           mkdir -p ~/.ssh
@@ -126,15 +126,15 @@ jobs:
         run: |
           # Clear all caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-          
+
           echo "=== SSH DEPLOY KEYS DEBUG ==="
           echo "Testing SSH connections..."
           ssh-add -l
-          
+
           # Test SSH access to both repos
           echo "=== TESTING SSH ACCESS ==="
           ssh -T git@github.com || echo "SSH connection test completed"
-          
+
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
           pnpm install --no-frozen-lockfile
