@@ -27,17 +27,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Configure Git for private repos
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: |
-          # Configure git to use Personal Access Token for private repositories
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git+ssh://git@github.com/"
-          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
-          echo "✅ Git configured to use Personal Access Token for private repos"
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -47,12 +36,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: latest
-
-      - name: Configure pnpm
-        run: |
-          # Configure pnpm for private repos
-          pnpm config set git-checks false
-          echo "✅ pnpm configured for private repos"
 
       - name: Get pnpm store directory
         shell: bash
@@ -146,55 +129,24 @@ jobs:
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
-          GIT_CONFIG_GLOBAL: /tmp/gitconfig
         run: |
-          # NUCLEAR: Clear ALL possible caches
-          rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store ~/.local/share/pnpm ~/.cache/pnpm
-
-          # FORCE GIT CONFIG using environment file approach
-          echo "=== FORCING GIT CONFIG ==="
-          cat > /tmp/gitconfig << EOF
-          [url "https://x-access-token:${APP_TOKEN}@github.com/"]
-              insteadOf = https://github.com/
-              insteadOf = git@github.com:
-              insteadOf = git+ssh://git@github.com/
-              insteadOf = ssh://git@github.com/
-          EOF
-
-          echo "Git config file contents:"
-          cat /tmp/gitconfig
-
-          echo "Testing git config:"
-          git config --file /tmp/gitconfig --list
-
-          # DEBUG: Check what token we're actually getting
-          echo "=== TOKEN DEBUG ==="
-          echo "GitHub App Token starts with: ${APP_TOKEN:0:8}..."
+          # Clear all caches
+          rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
+          
+          echo "=== GITHUB APP TOKEN DEBUG ==="
+          echo "Token starts with: ${APP_TOKEN:0:8}..."
           echo "Token length: ${#APP_TOKEN}"
-
-          # Test GitHub App token access
-          echo "=== TESTING GITHUB APP TOKEN ACCESS ==="
-          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
-          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
-
-          echo "=== TESTING DIRECT GIT ACCESS WITH APP TOKEN ==="
-          git ls-remote https://x-access-token:${APP_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
-          git ls-remote https://x-access-token:${APP_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
-
+          
+          # Test API access
+          echo "=== TESTING API ACCESS ==="
+          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ API access failed"
+          
+          # Test git access using the token directly
+          echo "=== TESTING GIT ACCESS ==="
+          git ls-remote "https://${APP_TOKEN}@github.com/Voxire/shared.git" HEAD || echo "❌ Git access failed"
+          
+          # Install dependencies using the token
           echo "=== INSTALLING DEPENDENCIES ==="
-
-          # Set git to use our custom config
-          export GIT_CONFIG_GLOBAL=/tmp/gitconfig
-
-          # FORCE: Update package.json to use HTTPS URLs with GitHub App token
-          echo "=== FORCING PACKAGE.JSON TO USE HTTPS WITH APP TOKEN ==="
-          sed -i 's|"@voxire/shared": "https://github.com/Voxire/shared.git#main"|"@voxire/shared": "https://'${APP_TOKEN}'@github.com/Voxire/shared.git#main"|g' package.json
-          sed -i 's|"@voxire/utils": "https://github.com/Voxire/utils.git#main"|"@voxire/utils": "https://'${APP_TOKEN}'@github.com/Voxire/utils.git#main"|g' package.json
-
-          echo "Updated package.json dependencies:"
-          grep -A 2 "@voxire" package.json
-
-          # Install with forced git config
           pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
