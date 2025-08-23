@@ -143,6 +143,13 @@ jobs:
           git ls-remote git@github.com:Voxire/Utils.git main 2>&1 || echo "Voxire/Utils failed"
           git ls-remote git@github.com:Voxire/UTILS.git main 2>&1 || echo "Voxire/UTILS failed"
 
+          echo "=== VERIFYING DEPLOY KEY SETUP ==="
+          echo "Checking if utils deploy key is loaded:"
+          ssh-add -l | grep utils || echo "No utils key found"
+
+          echo "Testing direct SSH connection to utils:"
+          ssh -T git@github.com 2>&1 | grep -i utils || echo "No utils-specific SSH response"
+
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
           pnpm install --no-frozen-lockfile
