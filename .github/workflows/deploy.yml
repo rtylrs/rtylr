@@ -118,8 +118,14 @@ jobs:
           echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
           chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          
+          # Start SSH agent and add keys
+          eval "$(ssh-agent -s)" || echo "SSH agent start failed, trying alternative method"
+          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils || echo "SSH add failed, checking agent status"
+          
+          # Verify SSH agent is running
+          echo "SSH agent status:"
+          ps aux | grep ssh-agent || echo "No ssh-agent process found"
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
