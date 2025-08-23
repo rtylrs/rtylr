@@ -139,14 +139,14 @@ jobs:
         run: |
           # Delete lockfile to force fresh resolution with HTTPS URLs
           rm -f pnpm-lock.yaml
-          
+
           # Configure git credentials for this session
           git config --global credential.helper store
           echo "https://x-access-token:${ACCESS_TOKEN}@github.com" > ~/.git-credentials
-          
+
           # Force pnpm to use HTTPS instead of SSH
           pnpm config set git-checks false
-          
+
           # Install with fresh resolution
           pnpm install
 
