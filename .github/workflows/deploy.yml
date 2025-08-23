@@ -73,29 +73,29 @@ jobs:
         run: |
           # Configure pnpm to use SSH for private repos
           pnpm config set git-checks false
-          
+
           # Configure SSH for specific GitHub repositories
           git config --global url."git@github-shared:Voxire/shared.git".insteadOf "https://github.com/Voxire/shared.git"
           git config --global url."git@github-utils:Voxire/utils.git".insteadOf "https://github.com/Voxire/utils.git"
-          
+
           # Also configure for git:// URLs
           git config --global url."git@github-shared:Voxire/shared.git".insteadOf "git://github.com/Voxire/shared.git"
           git config --global url."git@github-utils:Voxire/utils.git".insteadOf "git://github.com/Voxire/utils.git"
-          
+
           echo "✅ Git SSH configuration completed"
 
       - name: Test SSH Connections
         run: |
           echo "Testing SSH connections to private repositories..."
-          
+
           # Test connection to shared repo
           echo "Testing connection to @voxire/shared..."
           ssh -T git@github-shared 2>&1 | head -5
-          
+
           # Test connection to utils repo
           echo "Testing connection to @voxire/utils..."
           ssh -T git@github-utils 2>&1 | head -5
-          
+
           echo "✅ SSH connections tested"
 
       - name: Get pnpm store directory
@@ -181,97 +181,25 @@ jobs:
         run: |
           pnpm install --no-frozen-lockfile
 
-      - name: Build Selected Apps
+      - name: Deploy Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
           DEPLOY_APPS="${{ steps.deployment-check.outputs.deploy_apps }}"
-          echo "Building apps: $DEPLOY_APPS"
+          echo "Deploying apps: $DEPLOY_APPS"
 
           IFS=',' read -ra APPS <<< "$DEPLOY_APPS"
           for app in "${APPS[@]}"; do
             if [ -n "$app" ]; then
-              echo "Building $app..."
-              npx nx build "$app"
+              echo "Deploying $app..."
+              pnpm run "deploy:$app"
               if [ $? -eq 0 ]; then
-                echo "✅ $app built successfully"
+                echo "✅ $app deployed successfully"
               else
-                echo "❌ Failed to build $app"
+                echo "❌ Failed to deploy $app"
                 exit 1
               fi
             fi
           done
-
-      - name: Deploy Landing App
-        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'landing')
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/landing/
-          server-dir: /subdomains/vbitez.voxire.com/
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
-
-      - name: Deploy Dashboard App
-        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'dashboard')
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/dashboard/
-          server-dir: /subdomains/dashboard.vbitez.voxire.com/
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
-
-      - name: Deploy Menu App
-        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'menu')
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/menu/
-          server-dir: /subdomains/menu.vbitez.voxire.com/
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
-
-      - name: Deploy Auth App
-        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'auth')
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/auth/
-          server-dir: /subdomains/auth.vbitez.voxire.com/
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
 
       - name: Skip deployment
         if: steps.deployment-check.outputs.should_deploy == 'false'
@@ -291,7 +219,7 @@ jobs:
               echo "Sending Slack notification for $app v$VERSION"
               
               # Build the Slack message
-              SLACK_MESSAGE="🚀 *DEPLOYMENT COMPLETE*\n\n📱 *App:* ${app^}\n🏷️ *Version:* v$VERSION\n🌍 *Environment:* Production\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')"
+              SLACK_MESSAGE="🚀 *DEPLOYMENT COMPLETE*\n\n📱 *App:* ${app^}\n🏷️ *Version:* v$VERSION\n🌍 *Environment:* Production\n⏰ *Time:* $(date -u '+%m/%d/%Y, %I:%M:%S %p UTC')\n\n✅ *Successfully deployed using pnpm deploy:$app*"
               
               # Send to Slack
               curl -s -X POST \
