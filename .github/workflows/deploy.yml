@@ -27,7 +27,7 @@ jobs:
 
       - name: Configure Git for private repos
         env:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Configure git to use Personal Access Token for private repositories
           git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
@@ -133,7 +133,7 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
