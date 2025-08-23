@@ -123,6 +123,19 @@ jobs:
           echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
           chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+          
+          # Configure SSH to use specific keys for each repo
+          echo "Host github.com-Voxire-shared" >> ~/.ssh/config
+          echo "  Hostname github.com" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_rsa_shared" >> ~/.ssh/config
+          echo "  IdentitiesOnly yes" >> ~/.ssh/config
+          echo "Host github.com-Voxire-utils" >> ~/.ssh/config
+          echo "  Hostname github.com" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_rsa_utils" >> ~/.ssh/config
+          echo "  IdentitiesOnly yes" >> ~/.ssh/config
+          
+          echo "=== SSH CONFIG DEBUG ==="
+          cat ~/.ssh/config
 
           # Start SSH agent and add keys
           eval "$(ssh-agent -s)"
