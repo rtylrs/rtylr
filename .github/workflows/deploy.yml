@@ -25,39 +25,11 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Setup SSH for private repos
+      - name: Configure Git for private repos
         run: |
-          # Create SSH directory and set permissions
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
-          # Add deploy keys for private organization repositories
-          echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
-          echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
-          chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
-
-          # Configure SSH to use specific keys for each repo
-          cat >> ~/.ssh/config << EOF
-          Host github-shared
-            HostName github.com
-            User git
-            IdentityFile ~/.ssh/id_rsa_shared
-            IdentitiesOnly yes
-            StrictHostKeyChecking no
-          Host github-utils
-            HostName github.com
-            User git
-            IdentityFile ~/.ssh/id_rsa_utils
-            IdentitiesOnly yes
-            StrictHostKeyChecking no
-          EOF
-
-          chmod 600 ~/.ssh/config
-
-          # Start SSH agent and add keys
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa_shared
-          ssh-add ~/.ssh/id_rsa_utils
+          # Configure git to use GITHUB_TOKEN for private repositories
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+          echo "✅ Git configured to use GITHUB_TOKEN for private repos"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -69,34 +41,13 @@ jobs:
         with:
           version: latest
 
-      - name: Configure pnpm for SSH
+      - name: Configure pnpm
         run: |
-          # Configure pnpm to use SSH for private repos
+          # Configure pnpm for private repos
           pnpm config set git-checks false
-          
-          # Configure SSH for specific GitHub repositories
-          git config --global url."git@github-shared:Voxire/shared.git".insteadOf "https://github.com/Voxire/shared.git"
-          git config --global url."git@github-utils:Voxire/utils.git".insteadOf "https://github.com/Voxire/utils.git"
-          
-          # Also configure for git:// URLs
-          git config --global url."git@github-shared:Voxire/shared.git".insteadOf "git://github.com/Voxire/shared.git"
-          git config --global url."git@github-utils:Voxire/utils.git".insteadOf "git://github.com/Voxire/utils.git"
-          
-          echo "✅ Git SSH configuration completed"
+          echo "✅ pnpm configured for private repos"
 
-      - name: Test SSH Connections
-        run: |
-          echo "Testing SSH connections to private repositories..."
-          
-          # Test connection to shared repo
-          echo "Testing connection to @voxire/shared..."
-          ssh -T git@github-shared 2>&1 | head -5
-          
-          # Test connection to utils repo
-          echo "Testing connection to @voxire/utils..."
-          ssh -T git@github-utils 2>&1 | head -5
-          
-          echo "✅ SSH connections tested"
+
 
       - name: Get pnpm store directory
         shell: bash
