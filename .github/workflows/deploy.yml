@@ -113,11 +113,10 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
-          # Clear all caches
-          rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
+          # Clear node_modules only, preserve lockfile and cache
+          rm -rf node_modules
 
           # Setup SSH agent with deploy keys
-          echo "=== SETTING UP SSH AGENT ==="
           mkdir -p ~/.ssh
           echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
           chmod 600 ~/.ssh/id_rsa_shared
@@ -127,16 +126,7 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_shared
 
-          echo "=== SSH DEPLOY KEY DEBUG ==="
-          echo "SSH agent status:"
-          ssh-add -l
-
-          # Test shared repo access
-          echo "=== TESTING SHARED REPO ACCESS ==="
-          git ls-remote git@github.com:Voxire/shared.git main || echo "Shared repo access failed"
-
-          # Install dependencies using SSH
-          echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
+          # Install dependencies using SSH (force update lockfile if needed)
           pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
