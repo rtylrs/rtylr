@@ -108,7 +108,7 @@ jobs:
             echo "No deployment needed"
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
-          fi
+                    fi
 
       - name: Setup SSH Deploy Keys
         if: steps.deployment-check.outputs.should_deploy == 'true'
@@ -119,13 +119,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           
-          # Start SSH agent and add keys
-          eval "$(ssh-agent -s)" || echo "SSH agent start failed, trying alternative method"
-          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils || echo "SSH add failed, checking agent status"
+          # Use GitHub Actions built-in SSH agent
+          echo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
+          echo "SSH_AGENT_PID: $SSH_AGENT_PID"
           
-          # Verify SSH agent is running
-          echo "SSH agent status:"
-          ps aux | grep ssh-agent || echo "No ssh-agent process found"
+          # Add keys to existing agent
+          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils || echo "SSH add failed"
+          
+          # List loaded keys
+          ssh-add -l || echo "No keys loaded"
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
