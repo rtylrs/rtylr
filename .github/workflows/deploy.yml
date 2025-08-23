@@ -26,9 +26,12 @@ jobs:
           fetch-depth: 2
 
       - name: Configure Git for private repos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Configure git to use GITHUB_TOKEN for private repositories
           git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "git@github.com:"
           echo "✅ Git configured to use GITHUB_TOKEN for private repos"
 
       - name: Setup Node.js
@@ -127,6 +130,8 @@ jobs:
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm install --no-frozen-lockfile
 
