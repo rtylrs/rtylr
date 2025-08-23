@@ -123,7 +123,7 @@ jobs:
           echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
           chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
+
           # Configure SSH to use specific keys for each repo
           echo "Host github.com-Voxire-shared" >> ~/.ssh/config
           echo "  Hostname github.com" >> ~/.ssh/config
@@ -133,7 +133,7 @@ jobs:
           echo "  Hostname github.com" >> ~/.ssh/config
           echo "  IdentityFile ~/.ssh/id_rsa_utils" >> ~/.ssh/config
           echo "  IdentitiesOnly yes" >> ~/.ssh/config
-          
+
           echo "=== SSH CONFIG DEBUG ==="
           cat ~/.ssh/config
 
@@ -150,18 +150,9 @@ jobs:
           echo "Testing utils repo:"
           git ls-remote git@github.com:Voxire/utils.git main || echo "Utils repo access failed"
 
-          echo "=== DEBUGGING UTILS REPO ACCESS ==="
-          echo "Testing different repo name variations:"
-          git ls-remote git@github.com:Voxire/utils.git main 2>&1 || echo "Voxire/utils failed"
-          git ls-remote git@github.com:Voxire/Utils.git main 2>&1 || echo "Voxire/Utils failed"
-          git ls-remote git@github.com:Voxire/UTILS.git main 2>&1 || echo "Voxire/UTILS failed"
-
-          echo "=== VERIFYING DEPLOY KEY SETUP ==="
+                    echo "=== VERIFYING DEPLOY KEY SETUP ==="
           echo "Checking if utils deploy key is loaded:"
           ssh-add -l | grep utils || echo "No utils key found"
-
-          echo "Testing direct SSH connection to utils:"
-          ssh -T git@github.com 2>&1 | grep -i utils || echo "No utils-specific SSH response"
 
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
