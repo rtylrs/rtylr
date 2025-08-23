@@ -136,12 +136,17 @@ jobs:
           echo "=== TESTING API ACCESS ==="
           curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ API access failed"
 
-          # Test git access using the token directly
-          echo "=== TESTING GIT ACCESS ==="
-          git ls-remote "https://${APP_TOKEN}@github.com/Voxire/shared.git" HEAD || echo "❌ Git access failed"
-
-          # Install dependencies using the token
-          echo "=== INSTALLING DEPENDENCIES ==="
+                    # Extract temp clone token from API response
+          echo "=== EXTRACTING TEMP CLONE TOKEN ==="
+          TEMP_CLONE_TOKEN=$(curl -s -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared | jq -r '.temp_clone_token')
+          echo "Temp clone token: ${TEMP_CLONE_TOKEN:0:8}..."
+          
+          # Test git access using the temp clone token
+          echo "=== TESTING GIT ACCESS WITH TEMP CLONE TOKEN ==="
+          git ls-remote "https://${TEMP_CLONE_TOKEN}@github.com/Voxire/shared.git" HEAD || echo "❌ Git access failed"
+          
+          # Install dependencies using the temp clone token
+          echo "=== INSTALLING DEPENDENCIES WITH TEMP CLONE TOKEN ==="
           pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
