@@ -132,10 +132,19 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Generate GitHub App Token
+        if: steps.deployment-check.outputs.should_deploy == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.APP_INSTALLATION_ID }}
+
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          ACCESS_TOKEN: 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
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GIT_CONFIG_GLOBAL: /tmp/gitconfig
         run: |
           # NUCLEAR: Clear ALL possible caches
@@ -144,7 +153,7 @@ jobs:
           # FORCE GIT CONFIG using environment file approach
           echo "=== FORCING GIT CONFIG ==="
           cat > /tmp/gitconfig << EOF
-          [url "https://x-access-token:${ACCESS_TOKEN}@github.com/"]
+          [url "https://x-access-token:${GITHUB_TOKEN}@github.com/"]
               insteadOf = https://github.com/
               insteadOf = git@github.com:
               insteadOf = git+ssh://git@github.com/
@@ -159,19 +168,18 @@ jobs:
 
           # DEBUG: Check what token we're actually getting
           echo "=== TOKEN DEBUG ==="
-          echo "Token starts with: ${ACCESS_TOKEN:0:8}..."
-          echo "Token length: ${#ACCESS_TOKEN}"
-          
-          # ALTERNATIVE: Use SSH instead of HTTPS for git operations
-          echo "=== SETTING UP SSH ALTERNATIVE ==="
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
-          # Try using the token as SSH password (GitHub supports this)
-          echo "=== TESTING SSH WITH TOKEN ==="
-          export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-          
-          # Install with forced git config
+          echo "GitHub App Token starts with: ${GITHUB_TOKEN:0:8}..."
+          echo "Token length: ${#GITHUB_TOKEN}"
+
+          # Test GitHub App token access
+          echo "=== TESTING GITHUB APP TOKEN ACCESS ==="
+          curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ Cannot access Voxire/shared"
+          curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/Voxire/utils || echo "❌ Cannot access Voxire/utils"
+
+          echo "=== TESTING DIRECT GIT ACCESS WITH APP TOKEN ==="
+          git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/Voxire/shared.git HEAD || echo "❌ Git cannot access Voxire/shared"
+          git ls-remote https://x-access-token:${GITHUB_TOKEN}@github.com/Voxire/utils.git HEAD || echo "❌ Git cannot access Voxire/utils"
+
           echo "=== INSTALLING DEPENDENCIES ==="
 
           # Set git to use our custom config
