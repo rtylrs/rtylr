@@ -110,43 +110,33 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate GitHub App Token
+            - name: Setup SSH Deploy Keys
         if: steps.deployment-check.outputs.should_deploy == 'true'
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: Voxire
-          repositories: shared,utils,vbitez
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
+          echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
+          chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
 
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
-        env:
-          APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           # Clear all caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-
-          echo "=== GITHUB APP TOKEN DEBUG ==="
-          echo "Token starts with: ${APP_TOKEN:0:8}..."
-          echo "Token length: ${#APP_TOKEN}"
-
-          # Test API access
-          echo "=== TESTING API ACCESS ==="
-          curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ API access failed"
-
-                    # Extract temp clone token from API response
-          echo "=== EXTRACTING TEMP CLONE TOKEN ==="
-          TEMP_CLONE_TOKEN=$(curl -s -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared | jq -r '.temp_clone_token')
-          echo "Temp clone token: ${TEMP_CLONE_TOKEN:0:8}..."
           
-          # Test git access using the temp clone token
-          echo "=== TESTING GIT ACCESS WITH TEMP CLONE TOKEN ==="
-          git ls-remote "https://${TEMP_CLONE_TOKEN}@github.com/Voxire/shared.git" HEAD || echo "❌ Git access failed"
+          echo "=== SSH DEPLOY KEYS DEBUG ==="
+          echo "Testing SSH connections..."
+          ssh-add -l
           
-          # Install dependencies using the temp clone token
-          echo "=== INSTALLING DEPENDENCIES WITH TEMP CLONE TOKEN ==="
+          # Test SSH access to both repos
+          echo "=== TESTING SSH ACCESS ==="
+          ssh -T git@github.com || echo "SSH connection test completed"
+          
+          # Install dependencies using SSH
+          echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
           pnpm install --no-frozen-lockfile
 
       - name: Build Selected Apps
