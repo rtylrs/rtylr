@@ -185,6 +185,14 @@ jobs:
 
           # Set git to use our custom config
           export GIT_CONFIG_GLOBAL=/tmp/gitconfig
+          
+          # FORCE: Update package.json to use HTTPS URLs with token
+          echo "=== FORCING PACKAGE.JSON TO USE HTTPS WITH TOKEN ==="
+          sed -i 's|"@voxire/shared": "https://github.com/Voxire/shared.git#main"|"@voxire/shared": "https://x-access-token:'${GITHUB_TOKEN}'@github.com/Voxire/shared.git#main"|g' package.json
+          sed -i 's|"@voxire/utils": "https://github.com/Voxire/utils.git#main"|"@voxire/utils": "https://x-access-token:'${GITHUB_TOKEN}'@github.com/Voxire/utils.git#main"|g' package.json
+          
+          echo "Updated package.json dependencies:"
+          grep -A 2 "@voxire" package.json
 
           # Install with forced git config
           pnpm install --no-frozen-lockfile
