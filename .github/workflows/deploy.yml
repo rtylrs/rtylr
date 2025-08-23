@@ -32,6 +32,8 @@ jobs:
           # Configure git to use Personal Access Token for private repositories
           git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
           git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git+ssh://git@github.com/"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
           echo "✅ Git configured to use Personal Access Token for private repos"
 
       - name: Setup Node.js
@@ -132,12 +134,19 @@ jobs:
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GIT_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Delete lockfile to force fresh resolution with HTTPS URLs
           rm -f pnpm-lock.yaml
+          
+          # Configure git credentials for this session
+          git config --global credential.helper store
+          echo "https://x-access-token:${ACCESS_TOKEN}@github.com" > ~/.git-credentials
+          
           # Force pnpm to use HTTPS instead of SSH
           pnpm config set git-checks false
-          pnpm config set registry https://registry.npmjs.org/
+          
           # Install with fresh resolution
           pnpm install
 
