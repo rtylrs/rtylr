@@ -173,9 +173,8 @@ jobs:
           pnpm config set git-checks false
           pnpm config set store-dir ~/.pnpm-store-clean
 
-          # EMERGENCY: Use npm instead of pnpm - pnpm is broken with git auth
-          echo "=== SWITCHING TO NPM ==="
-          npm install
+          # Fresh install with no cache
+          pnpm install --no-frozen-lockfile --force
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
