@@ -139,7 +139,8 @@ jobs:
 
           # Start SSH agent and add keys
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          ssh-add ~/.ssh/id_rsa_shared
+          ssh-add ~/.ssh/id_rsa_utils
 
           echo "=== SSH DEPLOY KEYS DEBUG ==="
           echo "SSH agent status:"
@@ -147,8 +148,8 @@ jobs:
 
           # Test utils repo access (shared is working, so focus on utils)
           echo "=== TESTING UTILS REPO ACCESS ==="
-          echo "Testing utils repo:"
-          git ls-remote git@github.com:Voxire/utils.git main || echo "Utils repo access failed"
+          echo "Testing utils repo with specific host:"
+          git ls-remote git@github.com-Voxire-utils:Voxire/utils.git main || echo "Utils repo access failed"
 
                     echo "=== VERIFYING DEPLOY KEY SETUP ==="
           echo "Checking if utils deploy key is loaded:"
