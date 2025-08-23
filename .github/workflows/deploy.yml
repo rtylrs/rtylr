@@ -47,8 +47,6 @@ jobs:
           pnpm config set git-checks false
           echo "✅ pnpm configured for private repos"
 
-
-
       - name: Get pnpm store directory
         shell: bash
         run: |
