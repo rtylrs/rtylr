@@ -27,11 +27,11 @@ jobs:
 
       - name: Configure Git for private repos
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Configure git to use Personal Access Token for private repositories
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${ACCESS_TOKEN}@github.com/".insteadOf "git@github.com:"
           echo "✅ Git configured to use Personal Access Token for private repos"
 
       - name: Setup Node.js
@@ -131,9 +131,15 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          pnpm install --no-frozen-lockfile
+          # Delete lockfile to force fresh resolution with HTTPS URLs
+          rm -f pnpm-lock.yaml
+          # Force pnpm to use HTTPS instead of SSH
+          pnpm config set git-checks false
+          pnpm config set registry https://registry.npmjs.org/
+          # Install with fresh resolution
+          pnpm install
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
