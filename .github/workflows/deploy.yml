@@ -110,14 +110,12 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
                     fi
 
-      
-
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
           # Clear all caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-          
+
           # Setup SSH agent with deploy keys
           echo "=== SETTING UP SSH AGENT ==="
           mkdir -p ~/.ssh
@@ -125,19 +123,19 @@ jobs:
           echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
           chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
+
           # Start SSH agent and add keys
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
-          
+
           echo "=== SSH DEPLOY KEYS DEBUG ==="
           echo "SSH agent status:"
           ssh-add -l
-          
+
           # Test SSH access to both repos
           echo "=== TESTING SSH ACCESS ==="
           ssh -T git@github.com || echo "SSH connection test completed"
-          
+
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
           pnpm install --no-frozen-lockfile
