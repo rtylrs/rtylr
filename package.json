@@ -1,6 +1,7 @@
 {
   "name": "vbitez",
   "version": "0.0.1",
+  "description": "Vbitez Multi-App Platform",
   "scripts": {
     "build": "nx build",
     "test": "nx test",
