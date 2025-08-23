@@ -120,40 +120,20 @@ jobs:
           echo "=== SETTING UP SSH AGENT ==="
           mkdir -p ~/.ssh
           echo "${{ secrets.SHARED_DEPLOY_KEY }}" > ~/.ssh/id_rsa_shared
-          echo "${{ secrets.UTILS_DEPLOY_KEY }}" > ~/.ssh/id_rsa_utils
-          chmod 600 ~/.ssh/id_rsa_shared ~/.ssh/id_rsa_utils
+          chmod 600 ~/.ssh/id_rsa_shared
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-          # Configure SSH to use specific keys for each repo
-          echo "Host github.com-Voxire-shared" >> ~/.ssh/config
-          echo "  Hostname github.com" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_rsa_shared" >> ~/.ssh/config
-          echo "  IdentitiesOnly yes" >> ~/.ssh/config
-          echo "Host github.com-Voxire-utils" >> ~/.ssh/config
-          echo "  Hostname github.com" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_rsa_utils" >> ~/.ssh/config
-          echo "  IdentitiesOnly yes" >> ~/.ssh/config
-
-          echo "=== SSH CONFIG DEBUG ==="
-          cat ~/.ssh/config
-
-          # Start SSH agent and add keys
+          # Start SSH agent and add key
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_shared
-          ssh-add ~/.ssh/id_rsa_utils
 
-          echo "=== SSH DEPLOY KEYS DEBUG ==="
+          echo "=== SSH DEPLOY KEY DEBUG ==="
           echo "SSH agent status:"
           ssh-add -l
 
-          # Test utils repo access (shared is working, so focus on utils)
-          echo "=== TESTING UTILS REPO ACCESS ==="
-          echo "Testing utils repo with specific host:"
-          git ls-remote git@github.com-Voxire-utils:Voxire/utils.git main || echo "Utils repo access failed"
-
-                    echo "=== VERIFYING DEPLOY KEY SETUP ==="
-          echo "Checking if utils deploy key is loaded:"
-          ssh-add -l | grep utils || echo "No utils key found"
+          # Test shared repo access
+          echo "=== TESTING SHARED REPO ACCESS ==="
+          git ls-remote git@github.com:Voxire/shared.git main || echo "Shared repo access failed"
 
           # Install dependencies using SSH
           echo "=== INSTALLING DEPENDENCIES WITH SSH ==="
