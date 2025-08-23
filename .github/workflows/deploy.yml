@@ -37,15 +37,10 @@ jobs:
         with:
           version: latest
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
+          path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
@@ -132,19 +127,19 @@ jobs:
         run: |
           # Clear all caches
           rm -rf pnpm-lock.yaml node_modules ~/.pnpm-store
-          
+
           echo "=== GITHUB APP TOKEN DEBUG ==="
           echo "Token starts with: ${APP_TOKEN:0:8}..."
           echo "Token length: ${#APP_TOKEN}"
-          
+
           # Test API access
           echo "=== TESTING API ACCESS ==="
           curl -H "Authorization: token ${APP_TOKEN}" https://api.github.com/repos/Voxire/shared || echo "❌ API access failed"
-          
+
           # Test git access using the token directly
           echo "=== TESTING GIT ACCESS ==="
           git ls-remote "https://${APP_TOKEN}@github.com/Voxire/shared.git" HEAD || echo "❌ Git access failed"
-          
+
           # Install dependencies using the token
           echo "=== INSTALLING DEPENDENCIES ==="
           pnpm install --no-frozen-lockfile
