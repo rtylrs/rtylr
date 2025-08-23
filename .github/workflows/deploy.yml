@@ -130,7 +130,7 @@ jobs:
             echo "deploy_apps=" >> "$GITHUB_OUTPUT"
           fi
 
-            - name: Install Dependencies
+      - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
