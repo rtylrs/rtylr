@@ -142,20 +142,20 @@ jobs:
           rm -rf node_modules
           rm -rf ~/.pnpm-store
           rm -rf ~/.local/share/pnpm
-          
+
           # Configure git credentials for this session
           git config --global credential.helper store
           echo "https://x-access-token:${ACCESS_TOKEN}@github.com" > ~/.git-credentials
-          
-          # DEBUG: Test git access directly to the updated URLs
-          echo "=== TESTING GIT ACCESS TO NEW URLs ==="
-          git ls-remote https://github.com/voxire/shared.git HEAD || echo "voxire/shared access failed"
-          git ls-remote https://github.com/voxire/utils.git HEAD || echo "voxire/utils access failed"
-          
+
+          # DEBUG: Test git access directly to the correct URLs
+          echo "=== TESTING GIT ACCESS TO CORRECT URLs ==="
+          git ls-remote https://github.com/Voxire/shared.git HEAD || echo "Voxire/shared access failed"
+          git ls-remote https://github.com/Voxire/utils.git HEAD || echo "Voxire/utils access failed"
+
           # Force pnpm to use HTTPS and disable all caching
           pnpm config set git-checks false
           pnpm config set store-dir ~/.pnpm-store-clean
-          
+
           # Fresh install with no cache
           pnpm install --no-frozen-lockfile --force
 
