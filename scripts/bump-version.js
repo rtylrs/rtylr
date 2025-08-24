@@ -24,7 +24,7 @@ This script:
 5. Handles other uncommitted changes separately
 6. Creates app-specific git tag
 7. Automatically pushes to trigger deployment
-8. GitHub Actions will send Telegram notification with commit messages after deployment completes
+8. GitHub Actions will send Slack notification with commit messages after deployment completes
 
 Version rollover logic:
 - Patch increments by 1 (0.0.1 → 0.0.2)
@@ -79,7 +79,7 @@ if (appName === 'all') {
 
     console.log(`\n🎉 All apps deployment process completed!`);
     console.log(`📦 GitHub Actions will deploy: ${appsToProcess.join(', ')}`);
-    console.log('📱 Telegram notifications will be sent after each deployment completes');
+    console.log('📱 Slack notifications will be sent after each deployment completes');
     process.exit(successCount === appsToProcess.length ? 0 : 1);
 }
 
@@ -206,7 +206,7 @@ try {
     console.log('🎉 Deployment process started successfully!');
     console.log(`📦 GitHub Actions will now build and deploy ${appName} v${newVersion}`);
     console.log(`🏷️  Tag created: ${tagName}`);
-    console.log('📱 Telegram notification will be sent after deployment completes');
+    console.log('Have a ');
 
 } catch (error) {
     console.error('❌ Error during version bump process:', error.message);
