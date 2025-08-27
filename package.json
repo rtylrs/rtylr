@@ -6,11 +6,10 @@
     "build": "nx build",
     "test": "nx test",
     "deploy:landing": "node scripts/bump-version.js landing",
-    "deploy:dashboard": "node scripts/bump-version.js dashboard",
     "deploy:menu": "node scripts/bump-version.js menu",
     "deploy:auth": "node scripts/bump-version.js auth",
     "deploy:all": "node scripts/bump-version.js all",
-    "deploy": "echo 'Usage: npm run deploy:<app-name> where <app-name> is landing, dashboard, menu, auth, or all'"
+    "deploy": "echo 'Usage: npm run deploy:<app-name> where <app-name> is landing, menu, auth, or all'"
   },
   "private": true,
   "dependencies": {
