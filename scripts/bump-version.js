@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 const args = process.argv.slice(2);
 const appName = args[0];
 
-const validApps = ['landing', 'dashboard', 'menu', 'auth', 'all'];
+const validApps = ['landing', 'menu', 'auth', 'all'];
 
 function showUsage() {
     console.log(`
@@ -33,7 +33,7 @@ Version rollover logic:
 
 Examples:
   node scripts/bump-version.js landing     # Deploy landing app with change log
-  node scripts/bump-version.js dashboard   # Deploy dashboard app with change log
+
   node scripts/bump-version.js menu        # Deploy menu app with change log
   node scripts/bump-version.js all         # Deploy all apps with individual notifications
 `);
@@ -48,7 +48,7 @@ if (!appName || !validApps.includes(appName)) {
 // Handle "all" option
 if (appName === 'all') {
     console.log('🚀 Deploying all apps...');
-    const appsToProcess = ['landing', 'dashboard', 'menu', 'auth'];
+    const appsToProcess = ['landing', 'menu', 'auth'];
     const deploymentResults = [];
 
     for (const app of appsToProcess) {

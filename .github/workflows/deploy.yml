@@ -54,7 +54,7 @@ jobs:
           DEPLOYMENT_NEEDED=false
 
           # Check each app for version changes
-          for app in landing dashboard menu auth; do
+          for app in landing menu auth; do
             echo "Checking $app..."
             
             APP_VERSION_FILE="apps/$app/version.json"
@@ -160,24 +160,6 @@ jobs:
           port: 21
           local-dir: ./dist/landing/
           server-dir: /subdomains/vbitez.voxire.com/
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.github/**
-
-      - name: Deploy Dashboard App
-        if: steps.deployment-check.outputs.should_deploy == 'true' && contains(steps.deployment-check.outputs.deploy_apps, 'dashboard')
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.1
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./dist/dashboard/
-          server-dir: /subdomains/dashboard.vbitez.voxire.com/
           dangerous-clean-slate: true
           exclude: |
             **/.git*
