@@ -45,6 +45,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Clear shared library cache
+        run: |
+          pnpm store prune
+
       - name: Check which apps need deployment
         id: deployment-check
         run: |
@@ -113,8 +117,9 @@ jobs:
       - name: Install Dependencies
         if: steps.deployment-check.outputs.should_deploy == 'true'
         run: |
-          # Clear node_modules only, preserve lockfile and cache
+          # Clear node_modules and cache
           rm -rf node_modules
+          pnpm store prune
 
           # Setup SSH agent with deploy keys
           mkdir -p ~/.ssh
@@ -126,8 +131,8 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_shared
 
-          # Install dependencies using SSH (force update lockfile if needed)
-          pnpm install --no-frozen-lockfile
+          # Install dependencies using SSH with no cache
+          pnpm install --no-cache --no-frozen-lockfile
 
       - name: Build Selected Apps
         if: steps.deployment-check.outputs.should_deploy == 'true'
