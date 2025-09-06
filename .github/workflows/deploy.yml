@@ -45,10 +45,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Clear shared library cache
-        run: |
-          pnpm store prune
-
       - name: Check which apps need deployment
         id: deployment-check
         run: |
