@@ -50,7 +50,7 @@ jobs:
         if: steps.tag-check.outputs.exists == 'false'
         run: |
           echo "Cleaning up old tags..."
-          
+
           # Get all tags and delete them (except the one we're about to create)
           TAGS=$(git tag -l)
           if [ -n "$TAGS" ]; then
