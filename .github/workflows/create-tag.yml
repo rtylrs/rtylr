@@ -46,24 +46,6 @@ jobs:
             echo "Tag $VERSION does not exist"
           fi
 
-      - name: Clean up old tags
-        if: steps.tag-check.outputs.exists == 'false'
-        run: |
-          echo "Cleaning up old tags..."
-
-          # Get all tags and delete them (except the one we're about to create)
-          TAGS=$(git tag -l)
-          if [ -n "$TAGS" ]; then
-            echo "Found existing tags: $TAGS"
-            for tag in $TAGS; do
-              echo "Deleting tag: $tag"
-              git tag -d "$tag" || true
-              git push origin ":refs/tags/$tag" || true
-            done
-            echo "All old tags cleaned up"
-          else
-            echo "No existing tags to clean up"
-          fi
 
       - name: Create and push tag
         if: steps.tag-check.outputs.exists == 'false'
