@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import notify from '../lib/notify/notify';
-import { useDispatch, useSelector } from 'react-redux';
+import { useUserStore } from '../stores/userStore';
+import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
-import {
-  registerRestaurantAsync,
-  selectIsAuthenticated,
-  selectLoading,
-  selectError,
-  selectRole,
-  restaurantWithGoogleAsync,
-  clearError,
-} from '../redux/reducers/userSlice';
-import { RootState, AppDispatch } from '../redux/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { Button, Input } from '@voxire/shared';
@@ -26,24 +17,18 @@ const Register: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [referred, setReferred] = useState<string>('');
-  const dispatch = useDispatch<AppDispatch>();
-  const isAuthenticated = useSelector((state: RootState) =>
-    selectIsAuthenticated(state)
-  );
-  const loading = useSelector((state: RootState) => selectLoading(state));
-  const error = useSelector((state: RootState) => selectError(state));
-  const role = useSelector((state: RootState) => selectRole(state));
+  const { isAuthenticated, loading, error, role, clearError } = useUserStore();
+  const registerMutation = useRegisterRestaurant();
+  const googleAuthMutation = useGoogleAuth();
 
   const handleRegister = () => {
     if (password === confirmPassword) {
-      dispatch(
-        registerRestaurantAsync({
-          email,
-          password,
-          name,
-          referred,
-        })
-      );
+      registerMutation.mutate({
+        email,
+        password,
+        name,
+        referred,
+      });
     } else {
       notify.error('Password does not match');
     }
@@ -55,7 +40,7 @@ const Register: React.FC = () => {
       const user = result.user;
       const idToken = await getIdToken(user);
 
-      dispatch(restaurantWithGoogleAsync({ idToken }));
+      googleAuthMutation.mutate({ idToken });
     } catch (error) {
       notify.error((error as any).message);
     }
@@ -63,8 +48,8 @@ const Register: React.FC = () => {
 
   useEffect(() => {
     // Clear any existing errors when component mounts
-    dispatch(clearError());
-  }, [dispatch]);
+    clearError();
+  }, [clearError]);
 
   useEffect(() => {
     if (isAuthenticated) {
