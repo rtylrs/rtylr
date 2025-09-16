@@ -1,0 +1,117 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+
+import { selectLanguage } from '../../services/i18next';
+import { getCookie } from '../../lib/cookies';
+
+const Header: React.FC = () => {
+  const [languageDropdown, setLanguageDropdown] = useState(false);
+  const [language, setLanguage] = useState<string>('en');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedLanguage = getCookie('language');
+    if (storedLanguage) {
+      setLanguage(storedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      if (languageDropdown && !target.closest('.lang-dropdown-container')) {
+        setLanguageDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [languageDropdown]);
+
+  const toggleLanguageDropdown = useCallback(() => {
+    setLanguageDropdown((prev) => !prev);
+  }, []);
+
+  const handleLanguageChange = useCallback((lang: string) => {
+    selectLanguage(lang);
+    setLanguage(lang);
+    setLanguageDropdown(false);
+  }, []);
+
+  return (
+    <header className="header">
+      <div
+        className="header-logo"
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate('/')}
+        role="button"
+        aria-label="Go to home"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') navigate('/');
+        }}
+      >
+        <img src={'/logo.png'} alt="Logo" />
+      </div>
+
+      <div className="lang-dropdown-container">
+        <div
+          className="selected-language"
+          onClick={toggleLanguageDropdown}
+          role="button"
+          aria-haspopup="listbox"
+          aria-expanded={languageDropdown}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') toggleLanguageDropdown();
+          }}
+        >
+          {language?.toUpperCase()}
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            style={{
+              transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+            }}
+          />
+        </div>
+        {languageDropdown && (
+          <div
+            className="languages-dropdown"
+            role="listbox"
+            aria-label="Select language"
+          >
+            <span
+              role="option"
+              aria-selected={language === 'en'}
+              onClick={() => handleLanguageChange('en')}
+            >
+              English
+            </span>
+            <span
+              role="option"
+              aria-selected={language === 'ar'}
+              onClick={() => handleLanguageChange('ar')}
+            >
+              Arabic
+            </span>
+            <span
+              role="option"
+              aria-selected={language === 'fr'}
+              onClick={() => handleLanguageChange('fr')}
+            >
+              French
+            </span>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+export default Header;
