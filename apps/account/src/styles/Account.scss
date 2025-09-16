@@ -1,8 +1,8 @@
 // =============================================================================
-// AUTH STYLES - Reusable styles for login and register forms
+// ACCOUNT STYLES - Reusable styles for login and register forms
 // =============================================================================
 
-.auth-container {
+.account-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,7 +10,7 @@
   height: 95vh;
 }
 
-.auth-form-container {
+.account-form-container {
   width: 100%;
   max-width: 550px;
   background: white;
@@ -18,7 +18,7 @@
   overflow: hidden;
 }
 
-.auth-form {
+.account-form {
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@
   }
 }
 
-.auth-separator {
+.account-separator {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,7 +76,7 @@
   }
 }
 
-.auth-footer {
+.account-footer {
   margin-top: 32px;
   text-align: center;
   color: #666;
@@ -86,7 +86,7 @@
     font-size: 14px;
   }
 
-  .auth-link {
+  .account-link {
     cursor: pointer;
     color: var(--primary-color);
     text-decoration: none;
@@ -388,21 +388,21 @@
 // =============================================================================
 
 @media (max-width: 768px) {
-  .auth-container {
+  .account-container {
     padding: 16px;
   }
 
-  .auth-form-container {
+  .account-form-container {
     max-width: 100%;
   }
 
-  .auth-form {
+  .account-form {
     padding: 32px 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .auth-form {
+  .account-form {
     padding: 24px 16px;
 
     h2 {

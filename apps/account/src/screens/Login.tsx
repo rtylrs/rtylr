@@ -66,9 +66,9 @@ const Login: React.FC = () => {
   return (
     <React.Fragment>
       <HelmetContainer title="Login" />
-      <div className="auth-container">
-        <div className="auth-form-container">
-          <div className="auth-form">
+      <div className="account-container">
+        <div className="account-form-container">
+          <div className="account-form">
             <h2>Welcome back!</h2>
             <p>Please enter your details to sign in</p>
             <form
@@ -115,7 +115,7 @@ const Login: React.FC = () => {
 
               <div style={{ width: '100%', marginBottom: 16 }}>
                 <span
-                  className="auth-link"
+                  className="account-link"
                   onClick={() => navigate('/password-reset')}
                   style={{ fontSize: 14, cursor: 'pointer' }}
                 >
@@ -133,7 +133,7 @@ const Login: React.FC = () => {
                 Login
               </Button>
 
-              <div className="auth-separator">
+              <div className="account-separator">
                 <span>or</span>
               </div>
 
@@ -149,11 +149,11 @@ const Login: React.FC = () => {
               </Button>
             </form>
 
-            <div className="auth-footer">
+            <div className="account-footer">
               <p>
                 Don't have an account?{' '}
                 <span
-                  className="auth-link"
+                  className="account-link"
                   onClick={() => navigate('/register')}
                 >
                   Sign up

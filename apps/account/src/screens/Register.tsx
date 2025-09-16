@@ -69,7 +69,7 @@ const Register: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       if (role === 'business') {
-        navigate('/auth/questionnaire');
+        navigate('/account/questionnaire');
       } else {
         navigate('/');
       }
@@ -77,9 +77,9 @@ const Register: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="auth-container">
-      <div className="auth-form-container">
-        <div className="auth-form">
+    <div className="account-container">
+      <div className="account-form-container">
+        <div className="account-form">
           <h2>Sign Up</h2>
           <p>Create your free account to get started</p>
           <form
@@ -161,7 +161,7 @@ const Register: React.FC = () => {
               Register
             </Button>
 
-            <div className="auth-separator">
+            <div className="account-separator">
               <span>or</span>
             </div>
 
@@ -177,15 +177,15 @@ const Register: React.FC = () => {
             </Button>
           </form>
 
-          <div className="auth-footer">
+          <div className="account-footer">
             <p>
               Already have an account?{' '}
-              <span className="auth-link" onClick={() => navigate('/')}>
+              <span className="account-link" onClick={() => navigate('/')}>
                 Login Now.
               </span>
             </p>
             <p
-              className="auth-link"
+              className="account-link"
               onClick={() => navigate('/password-reset')}
             >
               Forgot Password?

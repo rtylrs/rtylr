@@ -18,10 +18,10 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="account-container">
       <HelmetContainer title="Reset Password" />
-      <div className="auth-form-container">
-        <div className="auth-form">
+      <div className="account-form-container">
+        <div className="account-form">
           <h2>Forgot Password</h2>
           <p>
             Enter your email address, and we will send you a link to reset your
@@ -70,10 +70,10 @@ const ResetPassword: React.FC = () => {
             </Button>
           </form>
 
-          <div className="auth-footer">
+          <div className="account-footer">
             <p>
               Remember your password?{' '}
-              <span className="auth-link" onClick={() => window.history.back()}>
+              <span className="account-link" onClick={() => window.history.back()}>
                 Back to login
               </span>
             </p>

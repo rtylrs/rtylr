@@ -46,7 +46,6 @@ jobs:
             echo "Tag $VERSION does not exist"
           fi
 
-
       - name: Create and push tag
         if: steps.tag-check.outputs.exists == 'false'
         run: |

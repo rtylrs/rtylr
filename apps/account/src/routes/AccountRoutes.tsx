@@ -9,7 +9,7 @@ const EmailVerification = React.lazy(
   () => import('../screens/EmailVerification')
 );
 
-const AuthRoutes = [
+const AccountRoutes = [
   {
     path: '/',
     element: (
@@ -52,4 +52,4 @@ const AuthRoutes = [
   },
 ];
 
-export default AuthRoutes;
+export default AccountRoutes;

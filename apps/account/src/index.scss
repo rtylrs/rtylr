@@ -1,7 +1,7 @@
 @use 'sass:meta';
 
 @include meta.load-css('./styles/Header.scss');
-@include meta.load-css('./styles/Auth.scss');
+@include meta.load-css('./styles/Account.scss');
 @include meta.load-css('./styles/fonts.scss');
 @include meta.load-css('./styles/variables.scss');
 
