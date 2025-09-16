@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  loginAsync,
-  selectIsAuthenticated,
-  selectLoading,
-  selectError,
-  selectRole,
-  restaurantWithGoogleAsync,
-  clearError,
-} from '../redux/reducers/userSlice';
-import { RootState, AppDispatch } from '../redux/store';
+import { useUserStore } from '../stores/userStore';
+import { useLogin, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import notify from '../lib/notify/notify';
@@ -22,19 +13,15 @@ import { HelmetContainer } from '@voxire/shared';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const dispatch: AppDispatch = useDispatch();
-  const isAuthenticated = useSelector((state: RootState) =>
-    selectIsAuthenticated(state)
-  );
-  const loading = useSelector((state: RootState) => selectLoading(state));
-  const error = useSelector((state: RootState) => selectError(state));
-  const role = useSelector((state: RootState) => selectRole(state));
+  const { isAuthenticated, loading, error, role, clearError } = useUserStore();
+  const loginMutation = useLogin();
+  const googleAuthMutation = useGoogleAuth();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   const handleSubmit = () => {
-    dispatch(loginAsync({ email, password }));
+    loginMutation.mutate({ email, password });
   };
 
   const handleGoogle = async () => {
@@ -43,15 +30,15 @@ const Login: React.FC = () => {
       const user = result.user;
       const idToken = await getIdToken(user);
 
-      dispatch(restaurantWithGoogleAsync({ idToken }));
+      googleAuthMutation.mutate({ idToken });
     } catch (error) {
       notify.error((error as any).message);
     }
   };
 
   useEffect(() => {
-    dispatch(clearError());
-  }, [dispatch]);
+    clearError();
+  }, [clearError]);
 
   useEffect(() => {
     if (isAuthenticated) {

@@ -3,15 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/shared';
-import { store, persistor } from './redux/store';
-import { Provider } from 'react-redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './services/i18next';
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/material/styles';
 import { Toaster } from 'sonner';
-import { PersistGate } from 'redux-persist/integration/react';
 import Modal from 'react-modal';
+import { queryClient } from './lib/queryClient';
 
 import './index.scss';
 
@@ -38,14 +37,12 @@ if (rootElement) {
     <ThemeProvider theme={theme}>
       <Suspense fallback={<FullScreenLoader />}>
         <I18nextProvider i18n={i18next}>
-          <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <BrowserRouter>
-                <App />
-                <Toaster expand={false} richColors />
-              </BrowserRouter>
-            </PersistGate>
-          </Provider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <App />
+              <Toaster expand={false} richColors />
+            </BrowserRouter>
+          </QueryClientProvider>
         </I18nextProvider>
       </Suspense>
     </ThemeProvider>
