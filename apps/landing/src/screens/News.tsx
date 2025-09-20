@@ -1,30 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import useAsync from '../hooks/useAsync';
+import React from 'react';
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
 import { configApi } from '../api';
 
 const News: React.FC<{}> = () => {
-  const { newsId } = useParams<{ newsId: string }>();
-  const [news, setNews] = useState<any>({});
+  const router = useRouter();
+  const { newsId } = router.query;
 
-  const getNews = useAsync({
-    fn: configApi.getSpecificNews,
-    onSuccess: () => {
-      setNews(getNews.result as any);
-    },
-    onError: () => {
-      alert(getNews.error);
-    },
-    callOnMount: false,
+  const { data: news, isLoading, error } = useQuery({
+    queryKey: ['news', newsId],
+    queryFn: () => configApi.getSpecificNews({ id: newsId as string }),
+    enabled: !!newsId,
   });
 
-  useEffect(() => {
-    if (newsId) {
-      getNews.main({
-        id: newsId,
-      });
-    }
-  }, [newsId]);
+  if (error) {
+    return <div>Error loading news</div>;
+  }
 
   return (
     <div
@@ -38,7 +29,9 @@ const News: React.FC<{}> = () => {
         margin: '0 auto',
       }}
     >
-      {news ? (
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : news ? (
         <div>
           <h2>{news.title}</h2>
           <div dangerouslySetInnerHTML={{ __html: news.content }} />
@@ -50,7 +43,7 @@ const News: React.FC<{}> = () => {
           /> */}
         </div>
       ) : (
-        <p>Loading...</p>
+        <p>News not found</p>
       )}
     </div>
   );

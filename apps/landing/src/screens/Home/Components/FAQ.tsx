@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Button } from '@voxire/shared';
-import { useNavigate } from 'react-router-dom';
-import { RootState } from '../../../redux/store';
+import { useRouter } from 'next/router';
+import { useConfigStore } from '../../../stores/configStore';
 
 function Faq() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(null);
-  const faqs = useSelector((state: RootState) => state.config.faqs);
+  const { faqs } = useConfigStore();
 
   const toggleAnswer = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
@@ -44,7 +43,7 @@ function Faq() {
           marginBottom: '20px',
         }}
       >
-        <Button variant="secondary" onClick={() => navigate('/faqs')}>
+        <Button variant="secondary" onClick={() => router.push('/faqs')}>
           View All
         </Button>
       </div>

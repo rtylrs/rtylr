@@ -1,21 +1,20 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { Button } from '@voxire/shared';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
 import useColors from '../../../hooks/useColors';
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../../redux/reducers/userSlice';
+import { useUserStore } from '../../../stores/userStore';
 import { QRCode } from 'react-qrcode-logo';
 import { useWindowDimensions } from '@voxire/shared/utils';
 
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const { primary, secondary } = useColors();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { isAuthenticated } = useUserStore();
 
   const memoizedQRCode = useMemo(
     () => (
@@ -39,16 +38,16 @@ const Hero: React.FC<{}> = () => {
           <Button
             onClick={() => {
               if (isAuthenticated) {
-                navigate('/app/business');
+                router.push('/app/business');
               } else {
-                navigate('/auth/register');
+                router.push('/auth/register');
               }
             }}
           >
             {isAuthenticated ? t('Hero.My Account') : t('Hero.Create Account')}
           </Button>
           <Button
-            onClick={() => navigate('/uses')}
+            onClick={() => router.push('/uses')}
             variant="outline"
             suffix={<FontAwesomeIcon icon={faArrowRight} />}
           >

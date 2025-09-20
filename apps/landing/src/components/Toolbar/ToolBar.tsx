@@ -8,10 +8,9 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { RootState } from "../../redux/store";
-import "./ToolBar.scss";
+import { useRouter } from 'next/router';
+import { useUserStore } from '../../stores/userStore';
+import styles from "./ToolBar.module.scss";
 
 const CustomSwitch = styled(Switch)(({}) => ({
   width: 34,
@@ -89,8 +88,8 @@ const getPlatform = () => {
 };
 
 const ToolBarContent: React.FC = () => {
-  const user = useSelector((state: RootState) => state.user.user);
-  const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
+  const router = useRouter();
   const [mode, setMode] = useState<string>(
     localStorage.getItem("mode") || "prod"
   );
@@ -134,7 +133,7 @@ const ToolBarContent: React.FC = () => {
 
   const toolbarNavigate = (path: string) => {
     setMenuOpen(false);
-    navigate(path);
+    router.push(path);
   };
 
   const handleClearStorage = () => {
@@ -149,7 +148,7 @@ const ToolBarContent: React.FC = () => {
   };
 
   return (
-    <div className="toolbar-container">
+    <div className={styles['toolbar-container']}>
       <div className="toolbar">
         <div
           className="toolbar-item"

@@ -6,15 +6,15 @@ import {
   faRightFromBracket,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import { Button } from '@voxire/shared';
 import useColors from '../../hooks/useColors';
 import { useWindowDimensions } from '@voxire/shared/utils';
-import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
 import { getCookie } from '../../lib/cookies';
-import { RootState } from '../../redux/store';
+import { useUserStore } from '../../stores/userStore';
 
 interface LinkWithColorProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -29,20 +29,24 @@ const Header: React.FC = () => {
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
-  const user = useSelector((state: RootState) => state.user);
+  const user = useUserStore();
 
   const isMobile = useMemo(() => width < 968, [width]);
   const isQuestionnaire = useMemo(
-    () => location.pathname.includes('/auth/questionnaire'),
-    [location.pathname]
+    () => typeof window !== 'undefined' && router.pathname.includes('/auth/questionnaire'),
+    [router.pathname]
   );
-  const isInnerPage = useMemo(() => document.location.pathname !== '/', []);
+  const isInnerPage = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return document.location.pathname !== '/';
+  }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     let ticking = false;
 
     const handleScroll = () => {
@@ -109,45 +113,62 @@ const Header: React.FC = () => {
 
     if (token) {
       if (user.role === 'business' || user.role === 'admin') {
-        navigate('/app/business/');
+        router.push('/app/business/');
       } else {
-        navigate('/app/user/');
+        router.push('/app/user/');
       }
     } else {
-      navigate('/auth/register');
+      router.push('/auth/register');
     }
-  }, [user.role, navigate]);
+  }, [user.role, router.push]);
 
   const handleLogoClick = useCallback(() => {
-    navigate('/');
-  }, [navigate]);
+    router.push('/');
+  }, [router.push]);
 
   const handleLoginClick = useCallback(() => {
-    navigate('/auth/login');
-  }, [navigate]);
+    router.push('/auth/login');
+  }, [router.push]);
 
   const handleNavigation = useCallback(
     (path: string) => {
       setDropdown(false);
-      navigate(path);
+      router.push(path);
     },
-    [navigate]
+    [router.push]
   );
 
   const handleExternalLink = useCallback(() => {
     setDropdown(false);
-    window.open('https://voxire.com/careers', '_blank');
+    if (typeof window !== 'undefined') {
+      window.open('https://voxire.com/careers', '_blank');
+    }
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
     return (props) => {
       const { color, to, ...rest } = props;
+      // If no 'to' prop, return a clickable element but not a Link
+      if (!to) {
+        return (
+          <a
+            href="#"
+            style={{
+              color: color || primary,
+              textDecoration: 'none',
+            }}
+            onClick={(e) => e.preventDefault()}
+            {...rest}
+          />
+        );
+      }
       return (
         <Link
+          href={to}
           style={{
             color: color || primary,
+            textDecoration: 'none',
           }}
-          to={to}
           {...rest}
         />
       );

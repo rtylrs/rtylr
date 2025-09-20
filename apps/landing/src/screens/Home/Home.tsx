@@ -1,7 +1,7 @@
 import React from 'react';
 import Hero from './Components/Hero';
 import Features from './Components/Features';
-import Ticker from '../../components/Ticker/Ticker';
+// import Ticker from '../../components/Ticker/Ticker';
 import Price from './Components/Price';
 import Demo from './Components/Demo';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -12,7 +12,7 @@ const Home = (): JSX.Element => {
     <React.Fragment>
       <HelmetContainer />
       <Hero />
-      <Ticker />
+      {/* <Ticker /> */}
       <Features />
       <Demo />
       <Price />

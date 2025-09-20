@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useConfigStore } from '../stores/configStore';
 
 const Faq: React.FC = () => {
   const { t } = useTranslation();
-  const [activeIndex, setActiveIndex] = useState(null);
-  const faqs = useSelector((state: RootState) => state.config.faqs);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const faqs = useConfigStore((state) => state.faqs);
 
-  const toggleAnswer = (index) => {
+  const toggleAnswer = (index: number) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 

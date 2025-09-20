@@ -1,14 +1,13 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram } from '@fortawesome/free-brands-svg-icons';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import Link from 'next/link';
 import PackageJson from '@root/package.json';
-import { RootState } from '../../../redux/store';
+import { useConfigStore } from '../../../stores/configStore';
 import React from 'react';
-import './Footer.scss';
+import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
-  const config = useSelector((state: RootState) => state.config.contactInfo);
+  const { contactInfo } = useConfigStore();
 
   const footerSections = [
     {
@@ -51,19 +50,19 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="footer" role="contentinfo">
-      <div className="footer-container">
-        <div className="footer-header">
-          <img src="/logo.png" alt="Vbitez Logo" className="footer-logo" />
+    <footer className={styles.footer} role="contentinfo">
+      <div className={styles['footer-container']}>
+        <div className={styles['footer-header']}>
+          <img src="/logo.png" alt="Vbitez Logo" className={styles['footer-logo']} />
         </div>
 
-        <div className="footer-content">
-          <div className="footer-nav">
+        <div className={styles['footer-content']}>
+          <div className={styles['footer-nav']}>
             {footerSections.map((section, index) => (
-              <div key={index} className="footer-section">
-                <h3 className="footer-section-title">{section.title}</h3>
+              <div key={index} className={styles['footer-section']}>
+                <h3 className={styles['footer-section-title']}>{section.title}</h3>
                 <nav aria-label={`${section.title} navigation`}>
-                  <ul className="footer-links">
+                  <ul className={styles['footer-links']}>
                     {section.links.map((link, linkIndex) => (
                       <li key={linkIndex}>
                         {link.external ? (
@@ -71,14 +70,18 @@ const Footer: React.FC = () => {
                             href={link.to}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="footer-link"
+                            className={styles['footer-link']}
                           >
                             {link.label}
                           </a>
-                        ) : (
-                          <Link to={link.to} className="footer-link">
+                        ) : link.to ? (
+                          <Link href={link.to} className={styles['footer-link']}>
                             {link.label}
                           </Link>
+                        ) : (
+                          <span className={styles['footer-link']}>
+                            {link.label}
+                          </span>
                         )}
                       </li>
                     ))}
@@ -87,24 +90,24 @@ const Footer: React.FC = () => {
               </div>
             ))}
 
-            <div className="footer-section">
-              <h3 className="footer-section-title">Contact</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <span className="contact-label">Email:</span>
+            <div className={styles['footer-section']}>
+              <h3 className={styles['footer-section-title']}>Contact</h3>
+              <div className={styles['contact-info']}>
+                <div className={styles['contact-item']}>
+                  <span className={styles['contact-label']}>Email:</span>
                   <a
-                    href={`mailto:${config?.contactEmail || 'info@vbitez.com'}`}
-                    className="contact-link"
+                    href={`mailto:${contactInfo?.contactEmail || 'info@vbitez.com'}`}
+                    className={styles['contact-link']}
                     aria-label="Send us an email"
                   >
-                    {config?.contactEmail || 'info@vbitez.com'}
+                    {contactInfo?.contactEmail || 'info@vbitez.com'}
                   </a>
                 </div>
 
-                <div className="contact-item">
-                  <span className="contact-label">Follow us:</span>
+                <div className={styles['contact-item']}>
+                  <span className={styles['contact-label']}>Follow us:</span>
                   <div
-                    className="social-icons"
+                    className={styles['social-icons']}
                     role="group"
                     aria-label="Social media links"
                   >
@@ -116,7 +119,7 @@ const Footer: React.FC = () => {
                         rel={
                           social.external ? 'noopener noreferrer' : undefined
                         }
-                        className="social-link"
+                        className={styles['social-link']}
                         aria-label={social.label}
                       >
                         <FontAwesomeIcon icon={social.icon} />
@@ -129,30 +132,30 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <div className="footer-bottom-content">
-            <p className="copyright">
+        <div className={styles['footer-bottom']}>
+          <div className={styles['footer-bottom-content']}>
+            <p className={styles.copyright}>
               &copy; {new Date().getFullYear()}{' '}
               <a
                 href="https://voxire.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="company-link"
+                className={styles['company-link']}
               >
                 Voxire
               </a>{' '}
               All rights reserved.
             </p>
-            <p className="disclaimer">
+            <p className={styles.disclaimer}>
               Unless otherwise noted, the use of third-party logos does not
               imply endorsement, sponsorship, or affiliation with Vbitez.
             </p>
           </div>
         </div>
 
-        <div className="footer-version">
+        <div className={styles['footer-version']}>
           <button
-            className="version-button"
+            className={styles['version-button']}
             aria-label={`Current version: ${PackageJson.version}`}
           >
             {PackageJson.version}

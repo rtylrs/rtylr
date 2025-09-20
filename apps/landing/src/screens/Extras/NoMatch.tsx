@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { Button } from '@voxire/shared';
 
 const NoMatch = (): JSX.Element => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const animation = {
     hidden: { opacity: 0.2, y: 100 },
@@ -32,7 +32,7 @@ const NoMatch = (): JSX.Element => {
           >
             <Button
               onClick={() => {
-                navigate('/');
+                router.push('/');
               }}
             >
               Go Back
