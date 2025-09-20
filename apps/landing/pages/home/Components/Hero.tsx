@@ -20,7 +20,7 @@ const Hero: React.FC<{}> = () => {
   const memoizedQRCode = useMemo(
     () => (
       <QRCode
-        value="https://vbitez.voxire.com/"
+        value="https://rtylr.voxire.com/"
         bgColor="#ffffff"
         fgColor={primary}
         size={width < 768 ? 300 : 400}
@@ -33,7 +33,7 @@ const Hero: React.FC<{}> = () => {
   return (
     <div className={styles['Hero']}>
       <div className={styles['hero-text']}>
-        <h1 className="vbitez-title">{t('Hero.welcome')}</h1>
+        <h1 className="rtylr-title">{t('Hero.welcome')}</h1>
         <h2>{t('Hero.discover')}</h2>
         <div className={styles['hero-buttons']}>
           <Button

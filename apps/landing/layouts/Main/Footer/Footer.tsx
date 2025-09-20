@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
     <footer className={styles.footer} role="contentinfo">
       <div className={styles['footer-container']}>
         <div className={styles['footer-header']}>
-          <img src="/logo.png" alt="Vbitez Logo" className={styles['footer-logo']} />
+          <img src="/logo.png" alt="Rtylr Logo" className={styles['footer-logo']} />
         </div>
 
         <div className={styles['footer-content']}>
@@ -94,11 +94,11 @@ const Footer: React.FC = () => {
                 <div className={styles['contact-item']}>
                   <span className={styles['contact-label']}>Email:</span>
                   <a
-                    href={`mailto:${contactInfo?.contactEmail || 'info@vbitez.com'}`}
+                    href={`mailto:${contactInfo?.contactEmail || 'info@rtylr.com'}`}
                     className={styles['contact-link']}
                     aria-label="Send us an email"
                   >
-                    {contactInfo?.contactEmail || 'info@vbitez.com'}
+                    {contactInfo?.contactEmail || 'info@rtylr.com'}
                   </a>
                 </div>
 
@@ -146,7 +146,7 @@ const Footer: React.FC = () => {
             </p>
             <p className={styles.disclaimer}>
               Unless otherwise noted, the use of third-party logos does not
-              imply endorsement, sponsorship, or affiliation with Vbitez.
+              imply endorsement, sponsorship, or affiliation with Rtylr.
             </p>
           </div>
         </div>

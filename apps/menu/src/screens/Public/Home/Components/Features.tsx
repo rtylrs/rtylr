@@ -15,7 +15,7 @@ const Features: React.FC<{}> = () => {
 
   return (
     <div className="Features">
-      <h1 className="vbitez-title features-text">
+      <h1 className="rtylr-title features-text">
         {t("Features.Features-title")}
       </h1>
 

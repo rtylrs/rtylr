@@ -15,7 +15,7 @@ const Demo: React.FC<{}> = () => {
         <div className="qr-code">
           <img
             src="/images/VoxireWebsiteQR.png"
-            alt="QR code for vbitez.voxire.com"
+            alt="QR code for rtylr.voxire.com"
             style={{
               width: 300,
               maxWidth: "100%",

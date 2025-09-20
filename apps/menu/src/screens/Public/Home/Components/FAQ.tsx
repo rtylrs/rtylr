@@ -17,7 +17,7 @@ function Faq() {
 
   return (
     <div className="faq-section">
-      <h2 className="vbitez-title">{t("QandA.title")}</h2>
+      <h2 className="rtylr-title">{t("QandA.title")}</h2>
       <div className="faq-container">
         {faqs &&
           faqs.slice(0, 8).map((item: any, index: number) => (

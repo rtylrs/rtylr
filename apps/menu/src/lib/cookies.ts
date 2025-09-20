@@ -73,8 +73,8 @@ export function getDefaultCookieDomain(): string | undefined {
     hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
   if (isLocalhost) return undefined;
 
-  if (hostname === 'vbitez.com' || hostname.endsWith('.vbitez.com')) {
-    return 'vbitez.com';
+  if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) {
+    return 'rtylr.com';
   }
 
   return undefined;

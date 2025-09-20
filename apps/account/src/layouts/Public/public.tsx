@@ -26,7 +26,7 @@ const Public: React.FC<{
 
     return (
       <div>
-        <HelmetContainer title="Vbitez Account" />
+        <HelmetContainer title="Rtylr Account" />
         {hasHeader && <Header />}
         <div style={contentStyle}>{children}</div>
       </div>

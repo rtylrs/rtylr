@@ -1,7 +1,7 @@
 {
-  "name": "vbitez",
+  "name": "rtylr",
   "version": "0.0.0",
-  "description": "Vbitez Multi-App Platform",
+  "description": "Rtylr Multi-App Platform",
   "scripts": {
     "build": "nx build",
     "test": "nx test"

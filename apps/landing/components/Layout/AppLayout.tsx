@@ -89,7 +89,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <React.Fragment>
       {configData && (
         <HelmetContainer
-          title={'Vbitez - Contactless QR Menu'}
+          title={'Rtylr - Contactless QR Menu'}
           favicon={'/favicon.ico'}
         />
       )}

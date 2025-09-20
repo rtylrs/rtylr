@@ -64,7 +64,7 @@ export const useUserStore = create<UserState>()(
       reset: () => set(initialState),
     }),
     {
-      name: 'vbitez-user',
+      name: 'rtylr-user',
       storage: createJSONStorage(() => localStorage),
     }
   )
