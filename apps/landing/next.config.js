@@ -12,10 +12,15 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
+  // Static export configuration for hosting providers like HostGator
+  output: 'export',
+  trailingSlash: true,
+  distDir: '../../dist/landing',
+
   // Asset and image configuration
   images: {
     domains: [],
-    unoptimized: false,
+    unoptimized: true, // Required for static export
   },
 
   // Webpack configuration for aliases
