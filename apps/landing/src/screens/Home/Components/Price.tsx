@@ -2,15 +2,14 @@ import { Button } from '@voxire/shared';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../../redux/reducers/userSlice';
+import { useUserStore } from '../../../stores/userStore';
 
 const Price: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const router = useRouter();
+  const { isAuthenticated } = useUserStore();
 
   return (
     <div className="Prices">
@@ -57,7 +56,7 @@ const Price: React.FC = () => {
             <div className="price-button">
               <span
                 onClick={() => {
-                  navigate('/pricing');
+                  router.push('/pricing');
                 }}
               >
                 Learn More
@@ -104,7 +103,7 @@ const Price: React.FC = () => {
               {/* <Button>Get Started</Button> */}
               <span
                 onClick={() => {
-                  navigate('/pricing');
+                  router.push('/pricing');
                 }}
               >
                 Learn More
@@ -151,7 +150,7 @@ const Price: React.FC = () => {
               {/* <Button>Get Started</Button> */}
               <span
                 onClick={() => {
-                  navigate('/pricing');
+                  router.push('/pricing');
                 }}
               >
                 Learn More
@@ -169,9 +168,9 @@ const Price: React.FC = () => {
         <Button
           onClick={() => {
             if (isAuthenticated) {
-              navigate('/app/business');
+              router.push('/app/business');
             } else {
-              navigate('/auth/register');
+              router.push('/auth/register');
             }
           }}
         >

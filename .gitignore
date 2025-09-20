@@ -8,5 +8,9 @@ vitest.config.*.timestamp*
 /dist
 node_modules/
 
+# Next.js
+.next/
+next-env.d.ts
+
 # VSCode
 .vscode/

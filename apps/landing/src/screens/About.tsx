@@ -1,12 +1,11 @@
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { useConfigStore } from '../stores/configStore';
 
 const AboutUs = (): JSX.Element => {
-  const config = useSelector((state: RootState) => state.config.aboutContent);
+  const aboutContent = useConfigStore((state) => state.aboutContent);
 
   return (
     <div className="about-us-container">
-      {config && <div dangerouslySetInnerHTML={{ __html: config }} />}
+      {aboutContent && <div dangerouslySetInnerHTML={{ __html: aboutContent }} />}
     </div>
   );
 };

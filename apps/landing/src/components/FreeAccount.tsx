@@ -1,11 +1,11 @@
 import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const FreeAccount: React.FC<{}> = () => {
   const [open, setOpen] = React.useState<boolean>(true);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div
@@ -29,7 +29,7 @@ const FreeAccount: React.FC<{}> = () => {
         </div>
         <button
           className="upgrade-button"
-          onClick={() => navigate("/app/business/billing")}
+          onClick={() => router.push("/app/business/billing")}
         >
           Select a Plan
         </button>

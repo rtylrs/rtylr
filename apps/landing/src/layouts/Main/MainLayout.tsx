@@ -17,7 +17,8 @@ const MainLayout: React.FC<{
     hasFooter = true,
   }) => {
     const marginTop = useMemo(() => {
-      const pathname = document.location.pathname;
+      if (typeof window === 'undefined') return '0px';
+      const pathname = window.location.pathname;
       if (pathname === '/') {
         return '0px';
       }
