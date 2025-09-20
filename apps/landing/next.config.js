@@ -22,14 +22,14 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@app': path.resolve(__dirname, './src'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@styles': path.resolve(__dirname, './src/styles'),
-      '@interfaces': path.resolve(__dirname, './src/interfaces'),
-      '@scss': path.resolve(__dirname, './src/scss/'),
+      '@app': path.resolve(__dirname, '.'),
+      '@pages': path.resolve(__dirname, './pages'),
+      '@components': path.resolve(__dirname, './components'),
+      '@hooks': path.resolve(__dirname, './hooks'),
+      '@utils': path.resolve(__dirname, './utils'),
+      '@styles': path.resolve(__dirname, './styles'),
+      '@interfaces': path.resolve(__dirname, './interfaces'),
+      '@scss': path.resolve(__dirname, './scss/'),
       '@root': path.resolve(__dirname, '../..'),
     };
 
