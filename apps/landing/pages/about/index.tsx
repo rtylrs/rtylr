@@ -15,8 +15,8 @@ const AboutPage = (): JSX.Element => {
             <div dangerouslySetInnerHTML={{ __html: aboutContent }} />
           ) : (
             <div className={styles['about-fallback']}>
-              <h1>About Vbitez</h1>
-              <p>Welcome to Vbitez - transforming restaurant experiences with digital innovation.</p>
+              <h1>About Rtylr</h1>
+              <p>Welcome to Rtylr - transforming restaurant experiences with digital innovation.</p>
             </div>
           )}
         </div>

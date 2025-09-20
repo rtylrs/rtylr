@@ -115,7 +115,7 @@ const App = (): JSX.Element => {
     <React.Fragment>
       {config && (
         <HelmetContainer
-          title={'Vbitez - Contactless QR Menu'}
+          title={'Rtylr - Contactless QR Menu'}
           favicon={'/favicon.ico'}
         />
       )}

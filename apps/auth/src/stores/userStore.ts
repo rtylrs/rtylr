@@ -66,7 +66,7 @@ export const useUserStore = create<UserStore>()(
       getToken: () => getCookie('token'),
     }),
     {
-      name: 'vbitez:voxire:user',
+      name: 'rtylr:voxire:user',
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         role: state.role,

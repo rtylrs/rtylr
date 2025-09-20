@@ -20,7 +20,7 @@ interface HelmetContainerProps {
 }
 
 function HelmetContainer({
-  title = "Vbitez - Contactless QR Menu",
+  title = "Rtylr - Contactless QR Menu",
   description = "",
   image = "",
   url = "",

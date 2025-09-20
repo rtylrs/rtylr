@@ -50,7 +50,7 @@ function Admin(props) {
 
   return (
     <SidebarProvider initialSections={initialSections}>
-      <HelmetContainer title="Vbitez - Admin" />
+      <HelmetContainer title="Rtylr - Admin" />
       <div className="Admincontainer">
         <Navbar openSidebar={openSidebar} />
         <div className="InnerContainer">{props.children}</div>

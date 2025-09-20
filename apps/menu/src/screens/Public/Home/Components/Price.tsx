@@ -14,8 +14,8 @@ const Price: React.FC = () => {
 
   return (
     <div className="Prices">
-      <h1 className="vbitez-title price-text">{t("PricingSection.title")}</h1>
-      <p className="vbitez-text-price-text">
+      <h1 className="rtylr-title price-text">{t("PricingSection.title")}</h1>
+      <p className="rtylr-text-price-text">
         {t("PricingSection.description")}
       </p>
       <div className="price-container">

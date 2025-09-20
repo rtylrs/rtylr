@@ -62,7 +62,7 @@ const Contact = (): JSX.Element => {
               <span>★★★★★</span>
             </div>
             <p>
-              "Vbitez transformed our restaurant experience with their digital
+              "Rtylr transformed our restaurant experience with their digital
               menu system. Our customers love it and we see increased efficiency
               in our service."
             </p>

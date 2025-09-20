@@ -11,7 +11,7 @@ function QrCode() {
   const userId = useSelector((state: RootState) => state.user.userId);
   const user = useSelector((state: RootState) => state.user.user);
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    url: "https://vbitez.voxire.com/restaurant/" + userId,
+    url: "https://rtylr.voxire.com/restaurant/" + userId,
     size: 150,
     fgColor: "#000000",
     bgColor: "#ffffff",

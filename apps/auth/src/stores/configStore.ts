@@ -57,7 +57,7 @@ export const useConfigStore = create<ConfigStore>()(
       setLoading: (loading: boolean) => set({ loading }),
     }),
     {
-      name: 'vbitez:voxire:config',
+      name: 'rtylr:voxire:config',
     }
   )
 );

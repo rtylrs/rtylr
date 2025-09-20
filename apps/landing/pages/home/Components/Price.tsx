@@ -14,8 +14,8 @@ const Price: React.FC = () => {
 
   return (
     <div className={styles['Prices']}>
-      <h1 className={`vbitez-title ${styles['price-text']}`}>{t('PricingSection.title')}</h1>
-      <p className={styles['vbitez-text-price-text']}>
+      <h1 className={`rtylr-title ${styles['price-text']}`}>{t('PricingSection.title')}</h1>
+      <p className={styles['rtylr-text-price-text']}>
         {t('PricingSection.description')}
       </p>
       <div className={styles['price-container']}>

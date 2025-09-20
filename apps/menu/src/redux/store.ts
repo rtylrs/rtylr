@@ -7,7 +7,7 @@ import menuReducer from "./reducers/menuSlice";
 import themeReducer from "./reducers/themeSlice";
 
 const persistConfig = {
-  key: "vbitez:voxire:root",
+  key: "rtylr:voxire:root",
   storage,
 };
 
