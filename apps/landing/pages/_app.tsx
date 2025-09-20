@@ -6,11 +6,11 @@ import { I18nextProvider } from 'react-i18next';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CookiesProvider } from 'react-cookie';
 
-import i18next from '../src/services/i18next';
+import i18next from '../services/i18next';
 
 // Import global styles
 import '@voxire/shared/styles';
-import '../src/styles/index.scss';
+import '../styles/index.scss';
 
 const theme = createTheme({
   palette: {
@@ -29,8 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
-            cacheTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 60 * 1000,
             retry: 1,
             refetchOnWindowFocus: false,
           },
@@ -42,7 +41,6 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 
   useEffect(() => {
-    // Set modal app element for accessibility - only on client side
     if (typeof window !== 'undefined') {
       const Modal = require('react-modal');
       Modal.setAppElement('#__next');

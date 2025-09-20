@@ -1,0 +1,45 @@
+.about-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  line-height: 1.6;
+
+  h1 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+  }
+
+  h2, h3 {
+    color: var(--primary-color);
+    margin: 1.5rem 0 1rem 0;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+  }
+
+  ul, ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.about-fallback {
+  text-align: center;
+  padding: 3rem 0;
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+  }
+}
