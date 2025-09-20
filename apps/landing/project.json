@@ -10,14 +10,14 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/landing"
+        "outputPath": "dist/landing"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/landing"
+          "outputPath": "dist/landing"
         },
         "production": {
-          "outputPath": "dist/apps/landing"
+          "outputPath": "dist/landing"
         }
       }
     },
