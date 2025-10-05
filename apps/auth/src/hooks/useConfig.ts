@@ -1,16 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
 import { useConfigStore } from '../stores/configStore';
-
-interface ConfigData {
-  maintanance: boolean;
-  aboutContent: any;
-  count: number;
-  contactEmail: string;
-  contactNumber: string;
-  faqs: any[];
-  news: any[];
-}
+import { GetGlobalConfigResponse, Config, Features, ConfigData } from '../types/config';
 
 export const useConfigData = () => {
   const {

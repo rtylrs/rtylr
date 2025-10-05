@@ -62,7 +62,6 @@ export default defineConfig(() => ({
       transformMixedEsModules: true,
     },
     rollupOptions: {
-      external: ['@voxire/shared', '@voxire/shared/styles'],
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -91,6 +90,7 @@ export default defineConfig(() => ({
       '@reduxjs/toolkit',
       'framer-motion',
       '@fortawesome/react-fontawesome',
+      '@voxire/shared',
     ],
   },
 }));
