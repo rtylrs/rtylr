@@ -1,5 +1,4 @@
-import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import React from "react";
 import { useRouter } from "next/router";
 
@@ -16,7 +15,7 @@ const FreeAccount: React.FC<{}> = () => {
     >
       <div className="free-account-header">
         <button className="dropdown-button" onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon icon={open ? faCaretDown : faCaretUp} />
+          {open ? <HiChevronDown /> : <HiChevronUp />}
         </button>
       </div>
       <div

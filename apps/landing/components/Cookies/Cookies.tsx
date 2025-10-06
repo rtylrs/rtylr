@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCookieBite } from '@fortawesome/free-solid-svg-icons';
+import { HiCake } from 'react-icons/hi2';
 import { Button } from '@voxire/shared';
 import styles from './Cookies.module.scss';
 
@@ -33,7 +32,7 @@ const Cookies: React.FC = () => {
       <div className={styles['cookies-popup']}>
         <div className={styles['cookies-header']}>
           <div className={styles['cookies-icon']}>
-            <FontAwesomeIcon icon={faCookieBite} />
+            <HiCake />
           </div>
           <h3>We value your privacy</h3>
         </div>

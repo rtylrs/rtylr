@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { HiChevronUp } from 'react-icons/hi2';
 import {
   Chart as ChartJS,
   LineElement,
@@ -18,6 +17,7 @@ import i18next from '../../services/i18next';
 import HelmetContainer from '../HelmetContainer';
 import { getCookie } from '../../lib/cookies';
 import useColors from '../../hooks/useColors';
+import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 
 // Import Zustand stores and React Query hooks
 import { useUserStore } from '../../stores/userStore';
@@ -123,11 +123,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             backgroundColor: primary,
           }}
         >
-          <FontAwesomeIcon icon={faChevronUp} />
+          <HiChevronUp />
         </motion.div>
       )}
 
       {children}
+      <CustomScrollbar />
     </React.Fragment>
   );
 };

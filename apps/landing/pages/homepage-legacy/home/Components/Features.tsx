@@ -1,14 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBarsProgress,
-  faPenToSquare,
-  faStar,
-  faCamera,
-  faGlobe,
-  faFilter,
-} from "@fortawesome/free-solid-svg-icons";
+import { HiChartBar, HiPencil, HiStar, HiCamera, HiGlobeAlt, HiFilter } from 'react-icons/hi';
 import styles from '../Home.module.scss';
 
 const Features: React.FC<{}> = () => {
@@ -23,7 +15,7 @@ const Features: React.FC<{}> = () => {
       <div className={styles['features-container']}>
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} style={{ color: "#655496" }} />{" "}
+            <HiCamera style={{ color: "#655496" }} />
           </div>
           <div className={styles['feature-container']}>
             <h4>
@@ -35,7 +27,7 @@ const Features: React.FC<{}> = () => {
 
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon icon={faBarsProgress} />{" "}
+            <HiChartBar />
           </div>
           <div className={styles['feature-container']}>
             <h4>
@@ -46,7 +38,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon icon={faGlobe} />
+            <HiGlobeAlt />
           </div>
           <div className={styles['feature-container']}>
             <h4>
@@ -57,10 +49,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon
-              icon={faPenToSquare}
-              style={{ color: "#000000" }}
-            />{" "}
+            <HiPencil style={{ color: "#000000" }} />
           </div>
           <div className={styles['feature-container']}>
             <h4>
@@ -71,7 +60,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon icon={faFilter} />
+            <HiFilter />
           </div>
           <div className={styles['feature-container']}>
             <h4>
@@ -82,7 +71,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className={styles['feature']}>
           <div className="icon">
-            <FontAwesomeIcon icon={faStar} style={{ color: "#FFD43B" }} />
+            <HiStar style={{ color: "#FFD43B" }} />
           </div>
           <div className={styles['feature-container']}>
             <h4>

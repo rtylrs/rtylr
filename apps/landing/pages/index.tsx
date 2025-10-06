@@ -1,25 +1,17 @@
 import React from 'react';
-import AppLayout from '../components/Layout/AppLayout';
-import MainLayout from '../layouts/Main/MainLayout';
-import Hero from './home/Components/Hero';
-import Features from './home/Components/Features';
-import Price from './home/Components/Price';
-import Demo from './home/Components/Demo';
 import HelmetContainer from '../components/HelmetContainer';
-import Ticker from '../components/Ticker/Ticker';
+import styles from './index.module.scss';
 
 const HomePage = (): JSX.Element => {
   return (
-    <AppLayout>
-      <MainLayout>
-        <HelmetContainer />
-        <Hero />
-        <Ticker />
-        <Features />
-        <Demo />
-        <Price />
-      </MainLayout>
-    </AppLayout>
+    <>
+      <HelmetContainer title="Rtylr | Run your business with AI." />
+      <div className={styles.comingSoon}>
+        <div className={styles.content}>
+          <h1 className={styles.title}>Coming Soon</h1>
+        </div>
+      </div>
+    </>
   );
 };
 

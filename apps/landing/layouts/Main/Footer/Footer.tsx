@@ -1,5 +1,4 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram } from '@fortawesome/free-brands-svg-icons';
+import { FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
 import PackageJson from '@root/package.json';
 import { useConfigStore } from '../../../stores/configStore';
@@ -41,7 +40,7 @@ const Footer: React.FC = () => {
   const socialLinks = [
     {
       href: 'https://www.instagram.com/voxire.tech',
-      icon: faInstagram,
+      icon: FaInstagram,
       label: 'Follow us on Instagram',
       external: true,
     },
@@ -120,7 +119,7 @@ const Footer: React.FC = () => {
                         className={styles['social-link']}
                         aria-label={social.label}
                       >
-                        <FontAwesomeIcon icon={social.icon} />
+                        <social.icon />
                       </a>
                     ))}
                   </div>

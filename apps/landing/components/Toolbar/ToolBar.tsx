@@ -1,11 +1,4 @@
-import {
-  faBars,
-  faHome,
-  faRotateRight,
-  faTimes,
-  faUserTie,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { HiMenu, HiHome, HiArrowPath, HiX, HiUserCircle } from "react-icons/hi2";
 import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from 'next/router';
@@ -157,7 +150,7 @@ const ToolBarContent: React.FC = () => {
           }}
           title="Home"
         >
-          <FontAwesomeIcon icon={faHome} />
+          <HiHome />
         </div>
         {showAdminItems && (
           <div
@@ -166,7 +159,7 @@ const ToolBarContent: React.FC = () => {
               toolbarNavigate("/app/business/");
             }}
           >
-            <FontAwesomeIcon icon={faUserTie} />
+            <HiUserCircle />
           </div>
         )}
         <div
@@ -175,7 +168,7 @@ const ToolBarContent: React.FC = () => {
             window.location.reload();
           }}
         >
-          <FontAwesomeIcon icon={faRotateRight} />
+          <HiArrowPath />
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
@@ -191,7 +184,7 @@ const ToolBarContent: React.FC = () => {
         </div>
 
         <div className="toolbar-item" onClick={handleMenuToggle}>
-          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+          {menuOpen ? <HiX /> : <HiMenu />}
         </div>
 
         {menuOpen && (

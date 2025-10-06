@@ -1,6 +1,5 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRocketchat, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { HiChat, HiPhone, HiMail } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
@@ -16,7 +15,7 @@ const ContactPage = (): JSX.Element => {
           <div className={styles['contactus-container']}>
             <div className={styles['contactus-card']}>
               <div className={styles['contactus-icon']}>
-                <FontAwesomeIcon icon={faRocketchat} />
+                <HiChat />
               </div>
               <h2>
                 <b>Chat with us</b>
@@ -28,7 +27,7 @@ const ContactPage = (): JSX.Element => {
             </div>
             <div className={styles['contactus-card']}>
               <div className={styles['contactus-icon']}>
-                <FontAwesomeIcon icon={faPhone} />
+                <HiPhone />
               </div>
               <h2>
                 <b>Give us a call</b>
@@ -40,7 +39,7 @@ const ContactPage = (): JSX.Element => {
             </div>
             <div className={styles['contactus-card']}>
               <div className={styles['contactus-icon']}>
-                <FontAwesomeIcon icon={faEnvelope} />
+                <HiMail />
               </div>
               <h2>
                 <b>Email Us</b>
