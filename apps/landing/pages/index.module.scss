@@ -15,8 +15,16 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 70%, rgba(233, 235, 223, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 70% 30%, rgba(233, 235, 223, 0.02) 0%, transparent 50%);
+    background: radial-gradient(
+        circle at 30% 70%,
+        rgba(233, 235, 223, 0.03) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 30%,
+        rgba(233, 235, 223, 0.02) 0%,
+        transparent 50%
+      );
   }
 
   .content {
@@ -27,13 +35,30 @@
     padding: 0 20px;
   }
 
+  .logoContainer {
+    margin-bottom: 40px;
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .logo {
+    max-width: 400px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
   .title {
-    font-size: clamp(4rem, 8vw, 8rem);
+    font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;
-    color: #E9EBDF;
+    color: #e9ebdf;
     margin: 0;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #E9EBDF 0%, #d4d6ca 100%);
+    background: linear-gradient(135deg, #e9ebdf 0%, #d4d6ca 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -52,7 +77,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -73,8 +99,16 @@
 
 @media (max-width: 768px) {
   .comingSoon {
+    .logoContainer {
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      max-width: 300px;
+    }
+
     .title {
-      font-size: clamp(3rem, 12vw, 6rem);
+      font-size: clamp(2rem, 8vw, 3rem);
     }
 
     .subtitle {
