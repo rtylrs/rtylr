@@ -1,10 +1,9 @@
 import { Button } from '@voxire/shared';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { HiStar } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useUserStore } from '../../../stores/userStore';
+import { useUserStore } from '../../../../stores/userStore';
 import styles from '../Home.module.scss';
 
 const Price: React.FC = () => {
@@ -33,22 +32,19 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 {t('PricingSection.Section1_star1')}
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 {t('PricingSection.Section1_star2')}
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 Basic widget customization
@@ -79,22 +75,19 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 Unlimited chats & websites
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 60-day conversations history
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 Basic widget customization
@@ -126,22 +119,19 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 Unlimited chats & websites
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 60-day conversations history
               </li>
               <li>
-                <FontAwesomeIcon
-                  icon={faStar}
+                <HiStar
                   style={{ color: 'black', marginRight: '8px' }}
                 />
                 Basic widget customization

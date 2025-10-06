@@ -18,6 +18,15 @@
   padding: 0;
 }
 
+html {
+  background-color: #151515;
+}
+
+#__next {
+  background-color: #151515;
+  min-height: 100vh;
+}
+
 * {
   will-change: auto;
 }
@@ -46,33 +55,35 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--background-color);
+  background-color: #151515;
   height: 100vh;
   font-family: "Inter", sans-serif;
   color: var(--secondary-color);
   scroll-behavior: smooth;
   color: var(--primary-color);
+  scrollbar-gutter: stable;
 }
 
 .MuiInputBase-root {
   background-color: white;
 }
 
+/* Hide default scrollbar */
 ::-webkit-scrollbar {
-  width: 0.8rem;
+  width: 0;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
+  background: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary-color);
-  transition: 0.3s;
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .ScrollToTop {

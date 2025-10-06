@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { I18nextProvider } from 'react-i18next';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CookiesProvider } from 'react-cookie';
@@ -56,9 +55,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           </I18nextProvider>
         </ThemeProvider>
       </CookiesProvider>
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
     </QueryClientProvider>
   );
 }

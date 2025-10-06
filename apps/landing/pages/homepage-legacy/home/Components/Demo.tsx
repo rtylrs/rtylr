@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@voxire/shared';
 import React from 'react';
-import useColors from '../../../hooks/useColors';
+import useColors from '../../../../hooks/useColors';
 import styles from '../Home.module.scss';
 
 const Demo: React.FC<{}> = () => {

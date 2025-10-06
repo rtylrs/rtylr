@@ -2,10 +2,9 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { Button } from '@voxire/shared';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
-import useColors from '../../../hooks/useColors';
-import { useUserStore } from '../../../stores/userStore';
+import { HiArrowRight, HiStar } from 'react-icons/hi';
+import useColors from '../../../../hooks/useColors';
+import { useUserStore } from '../../../../stores/userStore';
 import { QRCode } from 'react-qrcode-logo';
 import { useWindowDimensions } from '@voxire/shared/utils';
 import styles from '../Home.module.scss';
@@ -50,7 +49,7 @@ const Hero: React.FC<{}> = () => {
           <Button
             onClick={() => router.push('/uses')}
             variant="outline"
-            suffix={<FontAwesomeIcon icon={faArrowRight} />}
+            suffix={<HiArrowRight />}
           >
             {t('Hero.Learn More')}
           </Button>
@@ -61,7 +60,7 @@ const Hero: React.FC<{}> = () => {
             marginTop: 10,
           }}
         >
-          <FontAwesomeIcon icon={faStar} color={secondary} /> Rated 4.7/5 - from
+          <HiStar color={secondary} /> Rated 4.7/5 - from
           over 500+ reviews
         </h5>
       </div>

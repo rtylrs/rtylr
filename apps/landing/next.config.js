@@ -46,7 +46,7 @@ const nextConfig = {
     optimizePackageImports: [
       '@mui/material',
       '@mui/icons-material',
-      '@fortawesome/react-fontawesome',
+      'react-icons',
     ],
   },
 

@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faBars,
-  faChevronDown,
-  faRightFromBracket,
-  faTimes,
-} from '@fortawesome/free-solid-svg-icons';
+import { HiMenu, HiX, HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -37,7 +31,9 @@ const Header: React.FC = () => {
 
   const isMobile = useMemo(() => width < 968, [width]);
   const isQuestionnaire = useMemo(
-    () => typeof window !== 'undefined' && router.pathname.includes('/auth/questionnaire'),
+    () =>
+      typeof window !== 'undefined' &&
+      router.pathname.includes('/auth/questionnaire'),
     [router.pathname]
   );
   const isInnerPage = useMemo(() => {
@@ -109,21 +105,11 @@ const Header: React.FC = () => {
     setLanguageDropdown(false);
   }, []);
 
-  const handleClick = useCallback(() => {
-    const token = localStorage.getItem('token');
-
-    if (token) {
-      if (user.role === 'business' || user.role === 'admin') {
-        router.push('/app/business/');
-      } else {
-        router.push('/app/user/');
-      }
-    } else {
-      if (typeof window !== 'undefined') {
-        window.location.href = 'https://auth.rtylr.com/register';
-      }
+  const handleSignupClick = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.location.href = 'https://auth.rtylr.com/register';
     }
-  }, [user.role, router.push]);
+  }, []);
 
   const handleLogoClick = useCallback(() => {
     router.push('/');
@@ -152,14 +138,15 @@ const Header: React.FC = () => {
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
     return (props) => {
-      const { color, to, ...rest } = props;
+      const { color, to, className, ...rest } = props;
       // If no 'to' prop, return a clickable element but not a Link
       if (!to) {
         return (
           <a
             href="#"
+            className={className}
             style={{
-              color: color || primary,
+              color: color || 'white',
               textDecoration: 'none',
             }}
             onClick={(e) => e.preventDefault()}
@@ -170,15 +157,16 @@ const Header: React.FC = () => {
       return (
         <Link
           href={to}
+          className={className}
           style={{
-            color: color || primary,
+            color: color || 'white',
             textDecoration: 'none',
           }}
           {...rest}
         />
       );
     };
-  }, [primary]);
+  }, []);
 
   const headerClasses = useMemo(() => {
     let classes = styles.header;
@@ -189,113 +177,93 @@ const Header: React.FC = () => {
   }, [isMobileMenuOpen, scrolled, isInnerPage]);
 
   return (
-    <header
-      className={headerClasses}
-      style={{
-        position: 'fixed',
-      }}
-    >
-      <div
-        className={styles['header-center']}
-        style={{
-          cursor: 'pointer',
-        }}
-        onClick={handleLogoClick}
-      >
-        <img src={'/logo.png'} alt="Logo" />
-      </div>
+    <header className={headerClasses}>
+      <div className={styles['header-left']}>
+        <div className={styles['logo-container']} onClick={handleLogoClick}>
+          <img src={'/logo.png'} alt="Logo" />
+        </div>
 
-      <div
-        className={styles['header-left']}
-        style={{
-          transform: 'translateX(5%)',
-        }}
-      >
-        <LinkWithColor to="/restaurant/69">Demo</LinkWithColor>
-        <LinkWithColor to="/pricing">Pricing</LinkWithColor>
-        <p
-          style={{
-            color: primary,
-          }}
-          onClick={toggleDropdown}
-        >
-          Company
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            style={{
-              marginLeft: '5px',
-              fontSize: '14px',
-              transform: dropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-            }}
-          />
-        </p>
-
-        {dropdown && (
-          <div className={styles['header-dropdown']}>
-            <h6 onClick={() => handleNavigation('/about')}>About Us</h6>
-            <h6 onClick={() => handleNavigation('/contact')}>Contact Us</h6>
-            <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
+        <nav className={styles['nav-links']}>
+          <div className={styles['nav-item']}>
+            <p className={styles['nav-link']} onClick={toggleDropdown}>
+              Features
+              <HiChevronDown
+                className={styles['dropdown-icon']}
+                style={{
+                  transform: dropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              />
+            </p>
+            {dropdown && (
+              <div className={styles['header-dropdown']}>
+                <h6 onClick={() => handleNavigation('/about')}>About Us</h6>
+                <h6 onClick={() => handleNavigation('/contact')}>Contact Us</h6>
+                <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
+              </div>
+            )}
           </div>
-        )}
+
+          <LinkWithColor to="/pricing" className={styles['nav-link']}>
+            Pricing
+          </LinkWithColor>
+          <LinkWithColor to="/usecases" className={styles['nav-link']}>
+            Use Cases
+          </LinkWithColor>
+          <LinkWithColor to="/contact" className={styles['nav-link']}>
+            Contact
+          </LinkWithColor>
+          <LinkWithColor to="/faq" className={styles['nav-link']}>
+            FAQ
+          </LinkWithColor>
+        </nav>
       </div>
 
       <div className={styles['header-right']}>
         <button
           className={styles['mobile-menu-toggle']}
           onClick={toggleMobileMenu}
-          style={{
-            color: primary,
-          }}
           aria-label="Toggle mobile menu"
         >
-          <FontAwesomeIcon
-            icon={isMobileMenuOpen ? faTimes : faBars}
-            style={{
-              transition: 'transform 0.2s ease',
-            }}
-          />
+          {isMobileMenuOpen ? <HiX /> : <HiMenu />}
         </button>
 
-        <a
-          href="https://auth.rtylr.com/"
-          style={{
-            color: primary,
-            textDecoration: 'none',
-            fontWeight: '600',
-            fontSize: '16px',
-            marginRight: '20px',
-            cursor: 'pointer',
-          }}
-        >
-          Login
-        </a>
-
-        <Button
-          onClick={handleClick}
-          variant="primary"
-        >
-          Register Now
-        </Button>
-
-        <div className={styles['lang-dropdown-container']}>
-          <div className={styles['selected-language']} onClick={toggleLanguageDropdown}>
-            {language}
-            <FontAwesomeIcon
-              icon={faChevronDown}
-              style={{
-                transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-              }}
-            />
-          </div>
+        <div className={styles['language-selector-container']}>
+          <span
+            className={styles['language-selector']}
+            onClick={toggleLanguageDropdown}
+          >
+            {language === 'en'
+              ? 'English'
+              : language === 'ar'
+              ? 'عربي'
+              : 'Français'}
+          </span>
           {languageDropdown && (
             <div className={styles['languages-dropdown']}>
               <span onClick={() => handleLanguageChange('en')}>English</span>
-              <span onClick={() => handleLanguageChange('ar')}>Arabic</span>
-              <span onClick={() => handleLanguageChange('fr')}>French</span>
+              <span onClick={() => handleLanguageChange('ar')}>عربي</span>
+              <span onClick={() => handleLanguageChange('fr')}>Français</span>
             </div>
           )}
+        </div>
+
+        <div className={styles['header-buttons']}>
+          <Button
+            onClick={handleLoginClick}
+            variant="soft"
+            width="140px"
+            height="40px"
+          >
+            Sign In
+          </Button>
+          <Button
+            onClick={handleSignupClick}
+            variant="dark-outline"
+            width="140px"
+            height="40px"
+          >
+            Sign Up
+          </Button>
         </div>
       </div>
 
@@ -316,9 +284,7 @@ const Header: React.FC = () => {
             <p>Login</p>
           </Button>
 
-          <Button onClick={handleClick}>
-            Register Now
-          </Button>
+          <Button onClick={handleSignupClick}>Register Now</Button>
         </div>
       )}
     </header>

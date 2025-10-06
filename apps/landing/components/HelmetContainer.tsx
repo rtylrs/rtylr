@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 
 interface HelmetContainerProps {
   title?: string;
@@ -20,22 +20,22 @@ interface HelmetContainerProps {
 }
 
 function HelmetContainer({
-  title = "Rtylr - Contactless QR Menu",
-  description = "",
-  image = "",
-  url = "",
-  author = "",
-  keywords = "",
-  robots = "",
-  ogType = "",
-  ogLocale = "",
-  ogSiteName = "",
-  ogDescription = "",
-  twitterCard = "",
-  twitterSite = "",
-  twitterCreator = "",
+  title = 'Rtylr',
+  description = '',
+  image = '',
+  url = '',
+  author = '',
+  keywords = '',
+  robots = '',
+  ogType = '',
+  ogLocale = '',
+  ogSiteName = '',
+  ogDescription = '',
+  twitterCard = '',
+  twitterSite = '',
+  twitterCreator = '',
   customMetaTags = [],
-  favicon = "",
+  favicon = '',
 }: HelmetContainerProps) {
   return (
     <Helmet>
