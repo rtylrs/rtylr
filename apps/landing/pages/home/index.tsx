@@ -2,7 +2,7 @@ import React from 'react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
-import styles from './home.module.scss';
+import styles from './Home.module.scss';
 
 const NewHomePage = (): JSX.Element => {
   return (
