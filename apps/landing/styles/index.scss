@@ -1,8 +1,8 @@
-@use "sass:color";
+@use 'sass:color';
 
-@use "imports";
-@use "fonts";
-@use "variables";
+@use 'imports';
+@use 'fonts';
+@use 'variables';
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -19,11 +19,11 @@
 }
 
 html {
-  background-color: #151515;
+  background-color: #0d0d0d;
 }
 
 #__next {
-  background-color: #151515;
+  background-color: #0d0d0d;
   min-height: 100vh;
 }
 
@@ -55,9 +55,9 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #151515;
+  background-color: #0d0d0d;
   height: 100vh;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--secondary-color);
   scroll-behavior: smooth;
   color: var(--primary-color);
