@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { HiMenu, HiX, HiChevronDown } from 'react-icons/hi';
+import { HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import { Button, APP_URLS, ASSETS } from '@voxire/shared';
-import useColors from '../../../hooks/useColors';
-import { useWindowDimensions } from '@voxire/shared/utils';
 import { selectLanguage } from '../../../services/i18next';
 import { getCookie } from '../../../lib/cookies';
-import { useUserStore } from '../../../stores/userStore';
+import { navigateExternal } from '../../../lib/navigation';
+import HeaderMobile from './HeaderMobile';
 import styles from './Header.module.scss';
 
 interface LinkWithColorProps
@@ -25,37 +24,23 @@ const Header: React.FC = () => {
   const [language, setLanguage] = useState<string>('en');
 
   const router = useRouter();
-  const { primary } = useColors();
-  const { width } = useWindowDimensions();
-  const user = useUserStore();
-
-  const isMobile = useMemo(() => width < 968, [width]);
-  const isQuestionnaire = useMemo(
-    () =>
-      typeof window !== 'undefined' &&
-      router.pathname.includes('/auth/questionnaire'),
-    [router.pathname]
-  );
-  const isInnerPage = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return document.location.pathname !== '/';
-  }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
-        requestAnimationFrame(() => {
-          const shouldBeScrolled = window.scrollY > 150;
+        window.requestAnimationFrame(() => {
+          const shouldBeScrolled = window.scrollY > 0;
           setScrolled(shouldBeScrolled);
           ticking = false;
         });
         ticking = true;
       }
     };
+
+    const shouldBeScrolled = window.scrollY > 0;
+    setScrolled(shouldBeScrolled);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -106,9 +91,7 @@ const Header: React.FC = () => {
   }, []);
 
   const handleSignupClick = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.location.href = `${APP_URLS.auth}/register`;
-    }
+    navigateExternal(`${APP_URLS.auth}/register`);
   }, []);
 
   const handleLogoClick = useCallback(() => {
@@ -116,9 +99,7 @@ const Header: React.FC = () => {
   }, [router.push]);
 
   const handleLoginClick = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.location.href = APP_URLS.auth;
-    }
+    navigateExternal(APP_URLS.auth);
   }, []);
 
   const handleNavigation = useCallback(
@@ -131,15 +112,12 @@ const Header: React.FC = () => {
 
   const handleExternalLink = useCallback(() => {
     setDropdown(false);
-    if (typeof window !== 'undefined') {
-      window.open('https://voxire.com/careers', '_blank');
-    }
+    window.open('https://voxire.com/careers', '_blank', 'noopener,noreferrer');
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
     return (props) => {
       const { color, to, className, ...rest } = props;
-      // If no 'to' prop, return a clickable element but not a Link
       if (!to) {
         return (
           <a
@@ -171,10 +149,13 @@ const Header: React.FC = () => {
   const headerClasses = useMemo(() => {
     let classes = styles.header;
     if (isMobileMenuOpen) classes += ` ${styles['mobile-menu-open']}`;
-    if (scrolled) classes += ` ${styles.scrolled}`;
-    if (isInnerPage) classes += ` ${styles.inner}`;
+    if (!scrolled) {
+      classes += ` ${styles['initial-position']}`;
+    } else {
+      classes += ` ${styles.scrolled}`;
+    }
     return classes;
-  }, [isMobileMenuOpen, scrolled, isInnerPage]);
+  }, [isMobileMenuOpen, scrolled]);
 
   return (
     <header className={headerClasses}>
@@ -219,13 +200,12 @@ const Header: React.FC = () => {
       </div>
 
       <div className={styles['header-right']}>
-        <button
-          className={styles['mobile-menu-toggle']}
-          onClick={toggleMobileMenu}
-          aria-label="Toggle mobile menu"
-        >
-          {isMobileMenuOpen ? <HiX /> : <HiMenu />}
-        </button>
+        <HeaderMobile
+          isOpen={isMobileMenuOpen}
+          onToggle={toggleMobileMenu}
+          onLoginClick={handleLoginClick}
+          onSignupClick={handleSignupClick}
+        />
 
         <div className={styles['language-selector-container']}>
           <span
@@ -266,27 +246,6 @@ const Header: React.FC = () => {
           </Button>
         </div>
       </div>
-
-      {isMobileMenuOpen && (
-        <div className={styles['mobile-menu']}>
-          <LinkWithColor to="/menu">Menu</LinkWithColor>
-          <LinkWithColor to="/deals">Deals</LinkWithColor>
-          <LinkWithColor to="/blog">Blog</LinkWithColor>
-          <LinkWithColor to="/about">About</LinkWithColor>
-          <LinkWithColor to="/contact">Contact Us</LinkWithColor>
-          <Button
-            styles={{
-              display: 'flex',
-              marginBottom: '0px',
-            }}
-            onClick={handleLoginClick}
-          >
-            <p>Login</p>
-          </Button>
-
-          <Button onClick={handleSignupClick}>Register Now</Button>
-        </div>
-      )}
     </header>
   );
 };

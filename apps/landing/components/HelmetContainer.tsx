@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet';
+import Head from 'next/head';
 
 interface HelmetContainerProps {
   title?: string;
@@ -38,7 +38,7 @@ function HelmetContainer({
   favicon = '',
 }: HelmetContainerProps) {
   return (
-    <Helmet>
+    <Head>
       <meta charSet="utf-8" />
       <title>{title}</title>
       {favicon && <link rel="icon" href={favicon} type="image/x-icon" />}
@@ -66,7 +66,7 @@ function HelmetContainer({
 
       {customMetaTags &&
         customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
-    </Helmet>
+    </Head>
   );
 }
 

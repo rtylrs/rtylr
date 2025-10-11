@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Header from './Header/Header';
 import Footer from './Footer/Footer';
 
@@ -16,14 +17,19 @@ const MainLayout: React.FC<{
     hasHeader = true,
     hasFooter = true,
   }) => {
+    const router = useRouter();
+    const [isHomePage, setIsHomePage] = useState(true);
+
+    useEffect(() => {
+      setIsHomePage(router.pathname === '/');
+    }, [router.pathname]);
+
     const marginTop = useMemo(() => {
-      if (typeof window === 'undefined') return '0px';
-      const pathname = window.location.pathname;
-      if (pathname === '/') {
+      if (isHomePage) {
         return '0px';
       }
       return hasPadding ? paddingTop : '0px';
-    }, [hasPadding, paddingTop]);
+    }, [isHomePage, hasPadding, paddingTop]);
 
     const contentStyle = useMemo(
       () => ({
