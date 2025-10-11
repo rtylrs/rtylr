@@ -1,119 +1,22 @@
-.comingSoon {
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.newHomepage {
+  min-height: 100vh;
   background-color: #0d0d0d;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-        circle at 30% 70%,
-        rgba(233, 235, 223, 0.03) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 70% 30%,
-        rgba(233, 235, 223, 0.02) 0%,
-        transparent 50%
-      );
-  }
+  color: white;
+  padding-top: 80px; // Account for fixed header
 
   .content {
-    text-align: center;
-    z-index: 1;
-    position: relative;
-    max-width: 800px;
-    padding: 0 20px;
-  }
-
-  .logoContainer {
-    margin-bottom: 40px;
-    animation: fadeInUp 1s ease-out 0.2s forwards;
-    opacity: 0;
-  }
-
-  .logo {
-    max-width: 400px;
-    height: auto;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
-
-  .title {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 900;
-    color: #e9ebdf;
-    margin: 0;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #e9ebdf 0%, #d4d6ca 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: float 3s ease-in-out infinite;
-  }
-
-  .subtitle {
-    font-size: clamp(1.25rem, 3vw, 2rem);
-    color: rgba(233, 235, 223, 0.8);
-    margin: 24px 0 0 0;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    opacity: 0;
-    animation: fadeInUp 1s ease-out 0.5s forwards;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .comingSoon {
-    .logoContainer {
-      margin-bottom: 30px;
-    }
+  .newHomepage {
+    padding-top: 70px; // Smaller header on mobile
 
-    .logo {
-      max-width: 300px;
-    }
-
-    .title {
-      font-size: clamp(2rem, 8vw, 3rem);
-    }
-
-    .subtitle {
-      font-size: clamp(1rem, 4vw, 1.5rem);
-      margin-top: 16px;
+    .content {
+      padding: 20px 16px;
     }
   }
 }
