@@ -19,7 +19,9 @@ interface LinkWithColorProps
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
+  const [featuresDropdown, setFeaturesDropdown] = useState(false);
+  const [solutionsDropdown, setSolutionsDropdown] = useState(false);
+  const [resourcesDropdown, setResourcesDropdown] = useState(false);
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
 
@@ -57,8 +59,22 @@ const Header: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
 
-      if (dropdown && !target.closest('.header-left')) {
-        setDropdown(false);
+      if (featuresDropdown && !target.closest('.features-dropdown-container')) {
+        setFeaturesDropdown(false);
+      }
+
+      if (
+        solutionsDropdown &&
+        !target.closest('.solutions-dropdown-container')
+      ) {
+        setSolutionsDropdown(false);
+      }
+
+      if (
+        resourcesDropdown &&
+        !target.closest('.resources-dropdown-container')
+      ) {
+        setResourcesDropdown(false);
       }
 
       if (languageDropdown && !target.closest('.lang-dropdown-container')) {
@@ -70,14 +86,33 @@ const Header: React.FC = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdown, languageDropdown]);
+  }, [
+    featuresDropdown,
+    solutionsDropdown,
+    resourcesDropdown,
+    languageDropdown,
+  ]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
-  const toggleDropdown = useCallback(() => {
-    setDropdown((prev) => !prev);
+  const toggleFeaturesDropdown = useCallback(() => {
+    setFeaturesDropdown((prev) => !prev);
+    setSolutionsDropdown(false);
+    setResourcesDropdown(false);
+  }, []);
+
+  const toggleSolutionsDropdown = useCallback(() => {
+    setSolutionsDropdown((prev) => !prev);
+    setFeaturesDropdown(false);
+    setResourcesDropdown(false);
+  }, []);
+
+  const toggleResourcesDropdown = useCallback(() => {
+    setResourcesDropdown((prev) => !prev);
+    setFeaturesDropdown(false);
+    setSolutionsDropdown(false);
   }, []);
 
   const toggleLanguageDropdown = useCallback(() => {
@@ -104,15 +139,17 @@ const Header: React.FC = () => {
 
   const handleNavigation = useCallback(
     (path: string) => {
-      setDropdown(false);
+      setFeaturesDropdown(false);
+      setSolutionsDropdown(false);
+      setResourcesDropdown(false);
       router.push(path);
     },
-    [router.push]
+    [router]
   );
 
-  const handleExternalLink = useCallback(() => {
-    setDropdown(false);
-    window.open('https://voxire.com/careers', '_blank', 'noopener,noreferrer');
+  const handleExternalLink = useCallback((url: string) => {
+    setResourcesDropdown(false);
+    window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
@@ -165,21 +202,76 @@ const Header: React.FC = () => {
         </div>
 
         <nav className={styles['nav-links']}>
-          <div className={styles['nav-item']}>
-            <p className={styles['nav-link']} onClick={toggleDropdown}>
+          <div className={`${styles['nav-item']} features-dropdown-container`}>
+            <p className={styles['nav-link']} onClick={toggleFeaturesDropdown}>
               Features
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
-                  transform: dropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transform: featuresDropdown
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
                 }}
               />
             </p>
-            {dropdown && (
+            {featuresDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6 onClick={() => handleNavigation('/about')}>About Us</h6>
-                <h6 onClick={() => handleNavigation('/contact')}>Contact Us</h6>
-                <h6 onClick={handleExternalLink}>Careers (Jobs)</h6>
+                <h6 onClick={() => handleNavigation('/features/pos')}>
+                  POS & Payments
+                </h6>
+                <h6 onClick={() => handleNavigation('/features/inventory')}>
+                  Inventory Management
+                </h6>
+                <h6 onClick={() => handleNavigation('/features/ecommerce')}>
+                  eCommerce & Online Ordering
+                </h6>
+                <h6 onClick={() => handleNavigation('/features/kds')}>
+                  Kitchen Display (KDS)
+                </h6>
+                <h6 onClick={() => handleNavigation('/features/analytics')}>
+                  Analytics & AI
+                </h6>
+                <h6 onClick={() => handleNavigation('/features/offline')}>
+                  Offline Sync
+                </h6>
+              </div>
+            )}
+          </div>
+
+          <div className={`${styles['nav-item']} solutions-dropdown-container`}>
+            <p className={styles['nav-link']} onClick={toggleSolutionsDropdown}>
+              Solutions
+              <HiChevronDown
+                className={styles['dropdown-icon']}
+                style={{
+                  transform: solutionsDropdown
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
+                }}
+              />
+            </p>
+            {solutionsDropdown && (
+              <div className={styles['header-dropdown']}>
+                <h6
+                  onClick={() => handleNavigation('/solutions/food-beverage')}
+                >
+                  Food & Beverage
+                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/retail')}>
+                  Retail & Omnichannel
+                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/services')}>
+                  Services & Appointments
+                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/grocery')}>
+                  Grocery & Convenience
+                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/wholesale')}>
+                  Wholesale & B2B
+                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/events')}>
+                  Events & Hospitality
+                </h6>
               </div>
             )}
           </div>
@@ -187,14 +279,42 @@ const Header: React.FC = () => {
           <LinkWithColor to="/pricing" className={styles['nav-link']}>
             Pricing
           </LinkWithColor>
-          <LinkWithColor to="/usecases" className={styles['nav-link']}>
-            Use Cases
-          </LinkWithColor>
+
+          <div className={`${styles['nav-item']} resources-dropdown-container`}>
+            <p className={styles['nav-link']} onClick={toggleResourcesDropdown}>
+              Resources
+              <HiChevronDown
+                className={styles['dropdown-icon']}
+                style={{
+                  transform: resourcesDropdown
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
+                }}
+              />
+            </p>
+            {resourcesDropdown && (
+              <div className={styles['header-dropdown']}>
+                <h6 onClick={() => handleNavigation('/blog')}>Blog</h6>
+                <h6
+                  onClick={() => handleExternalLink('https://docs.rtylr.com')}
+                >
+                  Documentation
+                </h6>
+                <h6 onClick={() => handleNavigation('/about')}>About</h6>
+                <h6
+                  onClick={() =>
+                    handleExternalLink('https://voxire.com/careers')
+                  }
+                >
+                  Careers
+                </h6>
+                <h6 onClick={() => handleNavigation('/support')}>Support</h6>
+              </div>
+            )}
+          </div>
+
           <LinkWithColor to="/contact" className={styles['nav-link']}>
             Contact
-          </LinkWithColor>
-          <LinkWithColor to="/faq" className={styles['nav-link']}>
-            FAQ
           </LinkWithColor>
         </nav>
       </div>

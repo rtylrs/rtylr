@@ -1,6 +1,6 @@
 import React from 'react';
 import { APP_URLS, Button } from '@voxire/shared';
-import { navigateExternal } from '../../../../lib/navigation';
+import { navigateExternal } from '../../../lib/navigation';
 import styles from './HeroSection.module.scss';
 import { FaArrowRight } from 'react-icons/fa';
 
@@ -18,15 +18,15 @@ const HeroSection = (): JSX.Element => {
       <div className={styles.topBanner}>
         <div className={styles.bannerContainer}>
           <div className={styles.leftSection}>
-            <h3>Try our online</h3>
-            <h3>free demo now!</h3>
+            <h3>Start Your Free Trial</h3>
+            <p className={styles.subtitle}>No credit card required</p>
             <Button
               variant="dark-outline"
               className={styles.registerButton}
               onClick={handleRegisterClick}
               suffix={<FaArrowRight />}
             >
-              Register Now
+              Get Started Free
             </Button>
           </div>
 
@@ -49,8 +49,8 @@ const HeroSection = (): JSX.Element => {
 
             <div className={styles.videoSection}>
               <div className={styles.videoText}>
-                <h3>Super Quick</h3>
-                <h3>& Easy Set-up</h3>
+                <h3>Quick & Easy</h3>
+                <h3>Setup</h3>
               </div>
               <div className={styles.videoPlaceholder}>
                 <div className={styles.playButton}>▶</div>
@@ -71,28 +71,53 @@ const HeroSection = (): JSX.Element => {
           </div>
           <div className={styles.heroSidebar}>
             <button className={styles.demoButton} onClick={handleFreeDemo}>
-              Free Demo
+              Book a Demo
             </button>
             <p className={styles.description}>
-              Cloud-native management software that unifies POS, inventory,
-              eCommerce and warehousing — AI-powered and offline sync.
+              Your single source of truth for in-store, online, and back-office
+              operations. POS · Inventory · eCommerce · Analytics — works
+              offline, scales globally.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Trusted By Section */}
+      {/* Stats Section */}
       <div className={styles.trustedBy}>
         <div className={styles.trustedContainer}>
           <div className={styles.logoScroll}>
-            <div className={styles.logoItem}>eBird</div>
-            <div className={styles.logoItem}>rarify</div>
-            <div className={styles.logoItem}>_zapier</div>
-            <div className={styles.logoItem}>SUPERHUMAN</div>
-            <div className={styles.logoItem}>LottieFiles</div>
-            <div className={styles.logoItem}>dribbble</div>
-            <div className={styles.logoItem}>MR MARVIS</div>
-            <div className={styles.logoItem}>HOD</div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>50K+</div>
+              <div className={styles.statLabel}>Daily Transactions</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>99.9%</div>
+              <div className={styles.statLabel}>Uptime</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>20+</div>
+              <div className={styles.statLabel}>Countries</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>24/7</div>
+              <div className={styles.statLabel}>Support</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>Offline</div>
+              <div className={styles.statLabel}>Always Works</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>AI</div>
+              <div className={styles.statLabel}>Powered</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>Multi</div>
+              <div className={styles.statLabel}>Language</div>
+            </div>
+            <div className={styles.logoItem}>
+              <div className={styles.statNumber}>Cloud</div>
+              <div className={styles.statLabel}>Native</div>
+            </div>
           </div>
         </div>
       </div>

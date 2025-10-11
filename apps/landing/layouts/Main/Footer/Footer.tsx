@@ -1,62 +1,104 @@
-import { FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
-import PackageJson from '@root/package.json';
-import { useConfigStore } from '../../../stores/configStore';
-import { ASSETS } from '@voxire/shared';
+import { ASSETS, APP_URLS, Button } from '@voxire/shared';
 import React from 'react';
+import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
-  const { contactInfo } = useConfigStore();
+  const handleSignupClick = () => {
+    navigateExternal(`${APP_URLS.auth}/register`);
+  };
+
+  const handleBookDemoClick = () => {
+    navigateExternal(`${APP_URLS.menu}/contact`);
+  };
 
   const footerSections = [
     {
-      title: 'Company',
+      title: 'FEATURES',
       links: [
-        { to: '/about', label: 'About Us' },
-        { to: '/contact', label: 'Contact Us' },
-        {
-          to: 'https://voxire.com/careers',
-          label: 'Careers',
-          external: true,
-        },
+        { to: '/features/pos', label: 'POS & Payments' },
+        { to: '/features/inventory', label: 'Inventory Management' },
+        { to: '/features/ecommerce', label: 'eCommerce & Online Ordering' },
+        { to: '/features/kds', label: 'Kitchen Display (KDS)' },
+        { to: '/features/analytics', label: 'Analytics & AI' },
+        { to: '/features/offline', label: 'Offline Sync' },
       ],
     },
     {
-      title: 'Quick Links',
-      links: [{ to: '/pricing', label: 'Pricing' }],
+      title: 'SOLUTIONS',
+      links: [
+        { to: '/solutions/food-beverage', label: 'Food & Beverage' },
+        { to: '/solutions/retail', label: 'Retail & Omnichannel' },
+        { to: '/solutions/services', label: 'Services & Appointments' },
+        { to: '/solutions/grocery', label: 'Grocery & Convenience' },
+        { to: '/solutions/wholesale', label: 'Wholesale & B2B' },
+        { to: '/solutions/events', label: 'Events & Hospitality' },
+      ],
     },
     {
-      title: 'Legal',
+      title: 'RESOURCES',
       links: [
-        { to: '/', label: 'Privacy Policy' },
-        { to: '/', label: 'Terms and Conditions' },
-        { to: '/', label: 'Disclaimer' },
+        { to: '/blog', label: 'Blog' },
+        {
+          to: 'https://docs.rtylr.com',
+          label: 'Documentation',
+          external: true,
+        },
+        { to: '/use-cases', label: 'Use Cases' },
+        { to: '/integrations', label: 'Integrations' },
+        { to: '/support', label: 'Support' },
+        { to: '/customers', label: 'Customer Stories' },
+      ],
+    },
+    {
+      title: 'DEVELOPERS',
+      links: [
+        {
+          to: 'https://docs.rtylr.com',
+          label: 'Documentation',
+          external: true,
+        },
+        {
+          to: 'https://docs.rtylr.com/api',
+          label: 'API Reference',
+          external: true,
+        },
+        { to: '/integrations', label: 'Integrations' },
+        { to: '/changelog', label: 'Changelog' },
+        { to: 'https://status.rtylr.com', label: 'Status', external: true },
+      ],
+    },
+    {
+      title: 'COMPANY',
+      links: [
+        { to: '/about', label: 'About' },
+        { to: 'https://voxire.com/careers', label: 'Careers', external: true },
+        { to: '/partners', label: 'Partners' },
+        { to: '/contact', label: 'Contact' },
+        { to: '/newsroom', label: 'Newsroom' },
       ],
     },
   ];
 
-  const socialLinks = [
-    {
-      href: 'https://www.instagram.com/voxire.tech',
-      icon: FaInstagram,
-      label: 'Follow us on Instagram',
-      external: true,
-    },
-  ];
+  const socialLinks: Array<{
+    href: string;
+    icon: React.ComponentType;
+    label: string;
+  }> = [];
 
   return (
     <footer className={styles.footer} role="contentinfo">
       <div className={styles['footer-container']}>
-        <div className={styles['footer-header']}>
-          <img
-            src={ASSETS.logos.dark}
-            alt="Rtylr Logo"
-            className={styles['footer-logo']}
-          />
-        </div>
+        <div className={styles['footer-top']}>
+          <div className={styles['footer-logo-section']}>
+            <img
+              src={ASSETS.logos.light}
+              alt="Rtylr Logo"
+              className={styles['footer-logo']}
+            />
+          </div>
 
-        <div className={styles['footer-content']}>
           <div className={styles['footer-nav']}>
             {footerSections.map((section, index) => (
               <div key={index} className={styles['footer-section']}>
@@ -76,17 +118,13 @@ const Footer: React.FC = () => {
                           >
                             {link.label}
                           </a>
-                        ) : link.to ? (
+                        ) : (
                           <Link
                             href={link.to}
                             className={styles['footer-link']}
                           >
                             {link.label}
                           </Link>
-                        ) : (
-                          <span className={styles['footer-link']}>
-                            {link.label}
-                          </span>
                         )}
                       </li>
                     ))}
@@ -94,79 +132,50 @@ const Footer: React.FC = () => {
                 </nav>
               </div>
             ))}
+          </div>
 
-            <div className={styles['footer-section']}>
-              <h3 className={styles['footer-section-title']}>Contact</h3>
-              <div className={styles['contact-info']}>
-                <div className={styles['contact-item']}>
-                  <span className={styles['contact-label']}>Email:</span>
-                  <a
-                    href={`mailto:${
-                      contactInfo?.contactEmail || 'info@rtylr.com'
-                    }`}
-                    className={styles['contact-link']}
-                    aria-label="Send us an email"
-                  >
-                    {contactInfo?.contactEmail || 'info@rtylr.com'}
-                  </a>
-                </div>
-
-                <div className={styles['contact-item']}>
-                  <span className={styles['contact-label']}>Follow us:</span>
-                  <div
-                    className={styles['social-icons']}
-                    role="group"
-                    aria-label="Social media links"
-                  >
-                    {socialLinks.map((social, index) => (
-                      <a
-                        key={index}
-                        href={social.href}
-                        target={social.external ? '_blank' : undefined}
-                        rel={
-                          social.external ? 'noopener noreferrer' : undefined
-                        }
-                        className={styles['social-link']}
-                        aria-label={social.label}
-                      >
-                        <social.icon />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className={styles['footer-cta']}>
+            <Button
+              onClick={handleSignupClick}
+              variant="dark-outline"
+              className={styles['cta-button']}
+            >
+              Start for free
+            </Button>
+            <Button
+              onClick={handleBookDemoClick}
+              variant="soft"
+              className={styles['cta-button']}
+            >
+              Book a demo
+            </Button>
           </div>
         </div>
 
         <div className={styles['footer-bottom']}>
-          <div className={styles['footer-bottom-content']}>
-            <p className={styles.copyright}>
-              &copy; {new Date().getFullYear()}{' '}
-              <a
-                href="https://voxire.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles['company-link']}
-              >
-                Voxire
-              </a>{' '}
-              All rights reserved.
-            </p>
-            <p className={styles.disclaimer}>
-              Unless otherwise noted, the use of third-party logos does not
-              imply endorsement, sponsorship, or affiliation with Rtylr.
-            </p>
+          <div className={styles['footer-legal']}>
+            <Link href="/legal/terms" className={styles['legal-link']}>
+              TERMS OF USE
+            </Link>
+            <Link href="/legal/privacy-policy" className={styles['legal-link']}>
+              PRIVACY POLICY
+            </Link>
+            <Link href="/legal/security" className={styles['legal-link']}>
+              SECURITY
+            </Link>
+            <Link href="/trust" className={styles['legal-link']}>
+              TRUST CENTER
+            </Link>
+            <a
+              href="https://voxire.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles['legal-link']}
+            >
+              A VOXIRE COMPANY
+            </a>
           </div>
-        </div>
-
-        <div className={styles['footer-version']}>
-          <button
-            className={styles['version-button']}
-            aria-label={`Current version: ${PackageJson.version}`}
-          >
-            {PackageJson.version}
-          </button>
+          <p className={styles.copyright}>© RTYLR {new Date().getFullYear()}</p>
         </div>
       </div>
     </footer>
