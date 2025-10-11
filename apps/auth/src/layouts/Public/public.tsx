@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Header from './PublicHeader';
+import Header from './Header';
 import { HelmetContainer } from '@voxire/shared';
 
 const Public: React.FC<{

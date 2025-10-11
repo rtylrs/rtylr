@@ -2,6 +2,8 @@ import React from 'react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import HeroSection from './components/HeroSection/HeroSection';
+import PricingSection from './components/PricingSection/PricingSection';
 import styles from './Home.module.scss';
 
 const NewHomePage = (): JSX.Element => {
@@ -10,7 +12,8 @@ const NewHomePage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer title="Rtylr | Run your business with AI." />
         <div className={styles.newHomepage}>
-          <div className={styles.content}></div>
+          <HeroSection />
+          <PricingSection />
         </div>
       </MainLayout>
     </AppLayout>

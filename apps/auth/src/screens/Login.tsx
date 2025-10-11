@@ -6,7 +6,7 @@ import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import notify from '../lib/notify/notify';
 import { FaGoogle } from 'react-icons/fa';
-import { Button, Input } from '@voxire/shared';
+import { Button, Input, APP_URLS } from '@voxire/shared';
 import { HelmetContainer } from '@voxire/shared';
 
 const Login: React.FC = () => {
@@ -51,12 +51,12 @@ const Login: React.FC = () => {
 
   return (
     <React.Fragment>
-      <HelmetContainer title="Login" />
+      <HelmetContainer title="Login | Rtylr" />
       <div className="auth-container">
         <div className="auth-form-container">
           <div className="auth-form">
-            <h2>Welcome back!</h2>
-            <p>Please enter your details to sign in</p>
+            <h2>Welcome back.</h2>
+            <p>Log in to your account below.</p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -71,7 +71,7 @@ const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{ marginBottom: 16 }}
+                style={{ marginBottom: 20 }}
               />
               <Input
                 id="login-password"
@@ -81,7 +81,7 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ marginBottom: 16 }}
+                style={{ marginBottom: 20 }}
               />
 
               {error && (
@@ -116,7 +116,7 @@ const Login: React.FC = () => {
                 loading={loading}
                 type="submit"
               >
-                Login
+                Sign In
               </Button>
 
               <div className="auth-separator">
@@ -135,7 +135,7 @@ const Login: React.FC = () => {
               </Button>
             </form>
 
-            <div className="auth-footer">
+            <div className="auth-footer" style={{ alignItems: 'flex-start' }}>
               <p>
                 Don't have an account?{' '}
                 <span
@@ -147,6 +147,31 @@ const Login: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="auth-page-footer">
+          <p>
+            Need help logging in?{' '}
+            <span
+              className="auth-link"
+              onClick={() => navigate('/password-reset')}
+            >
+              Reset your password
+            </span>
+          </p>
+          <p className="privacy-text">
+            By using Rtylr, you acknowledge that we collect and use your
+            personal information as described in our{' '}
+            <a
+              href={`${APP_URLS.landing}/legal/privacy-policy`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="auth-link"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
         </div>
       </div>
     </React.Fragment>

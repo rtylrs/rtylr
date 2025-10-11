@@ -1,0 +1,123 @@
+.pricingSection {
+  padding: 100px 0;
+  background: #0d0d0d;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 60px;
+  }
+
+  .pricingGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #333;
+    border: 1px solid #333;
+  }
+
+  .pricingCard {
+    background: #1a1a1a;
+    padding: 40px 30px;
+    position: relative;
+    transition: all 0.3s ease;
+
+    .planName {
+      font-size: 1.125rem;
+      font-weight: 400;
+      color: white;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .priceContainer {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 12px;
+
+      .currency {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: white;
+      }
+
+      .amount {
+        font-size: 3rem;
+        font-weight: 400;
+        color: white;
+        margin-left: 2px;
+      }
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #888;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .description {
+      font-size: 0.875rem;
+      color: #888;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .getStartedButton {
+      background: transparent;
+      color: #888;
+      border: 1px solid #333;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .arrow {
+        margin-left: 8px;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        border-color: #555;
+        color: #aaa;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .pricingSection {
+    padding: 60px 0;
+
+    .sectionTitle {
+      font-size: 2rem;
+      margin-bottom: 40px;
+    }
+
+    .pricingGrid {
+      grid-template-columns: 1fr;
+    }
+
+    .pricingCard {
+      padding: 30px 20px;
+
+      .priceContainer .amount {
+        font-size: 2.5rem;
+      }
+    }
+  }
+}

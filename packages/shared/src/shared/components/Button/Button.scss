@@ -10,7 +10,7 @@
     --secondary-font,
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI",
+    'Segoe UI',
     Roboto,
     sans-serif
   );
@@ -23,7 +23,6 @@
   user-select: none;
   white-space: nowrap;
   outline: none;
-  will-change: transform, box-shadow;
 
   &:focus-visible {
     outline: 2px solid var(--primary-color);
@@ -136,16 +135,10 @@
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover:not(.voxire-button-disabled) {
-    background-color: var(--secondary-color);
-    border-color: var(--secondary-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active:not(.voxire-button-disabled) {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background-color: #2a2a2a;
+    border-color: #2a2a2a;
   }
 }
 
@@ -153,17 +146,11 @@
   background-color: white;
   border-color: var(--primary-color);
   color: var(--primary-color);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover:not(.voxire-button-disabled) {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active:not(.voxire-button-disabled) {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -175,11 +162,6 @@
   &:hover:not(.voxire-button-disabled) {
     background-color: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active:not(.voxire-button-disabled) {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -190,7 +172,6 @@
 
   &:hover:not(.voxire-button-disabled) {
     background-color: rgba(0, 0, 0, 0.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   &:active:not(.voxire-button-disabled) {
@@ -203,19 +184,16 @@
   border-color: #eaebe0;
   color: #374151;
   border-radius: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &:hover:not(.voxire-button-disabled) {
-    background-color: #e0e1d6;
-    border-color: #e0e1d6;
+    background-color: #ffffff;
+    border-color: #ffffff;
     color: #1f2937;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &:active:not(.voxire-button-disabled) {
-    background-color: #d6d7cc;
-    border-color: #d6d7cc;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background-color: #f9fafb;
+    border-color: #f9fafb;
   }
 }
 
@@ -224,19 +202,16 @@
   border-color: #423e3a;
   color: #f9fafb;
   border-radius: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &:hover:not(.voxire-button-disabled) {
     background-color: #1a1b19;
     border-color: #524d47;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   }
 
   &:active:not(.voxire-button-disabled) {
     background-color: #141514;
     border-color: #625c54;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 }
 

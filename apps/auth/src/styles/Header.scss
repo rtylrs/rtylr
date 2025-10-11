@@ -7,9 +7,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 5%;
+  padding: 20px 25px 20px 25px;
   background-color: transparent;
-  height: 70px;
+  height: 80px;
   color: #f5f5f5;
   z-index: 1000;
   user-select: none;
@@ -24,17 +24,14 @@
     justify-content: center;
     align-items: center;
     width: auto;
-    transition: transform 0.2s ease;
 
     img {
-      max-width: 160px;
+      max-width: 130px;
       height: auto;
       z-index: 2000;
-      transition: transform 0.3s ease;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 
       @media only screen and (max-width: 768px) {
-        max-width: 120px;
+        max-width: 100px;
       }
     }
   }
@@ -56,10 +53,8 @@
   display: flex;
   cursor: pointer;
   font-family: Arial, sans-serif;
-  width: 60px;
 
   @media only screen and (max-width: 768px) {
-    width: 50px;
     margin-right: 5px;
   }
 
@@ -73,9 +68,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
+    text-transform: capitalize;
 
     @media only screen and (max-width: 768px) {
       padding: 8px 10px;
@@ -86,7 +79,6 @@
     &:hover {
       background-color: rgba(0, 0, 0, 0.04);
       border-color: rgba(0, 0, 0, 0.1);
-      transform: translateY(-1px);
     }
 
     svg {
@@ -134,6 +126,7 @@
       transition: all 0.2s ease;
       cursor: pointer;
       position: relative;
+      text-transform: capitalize;
 
       @media only screen and (max-width: 768px) {
         padding: 8px 10px;

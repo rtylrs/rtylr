@@ -2,6 +2,7 @@ import { FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
 import PackageJson from '@root/package.json';
 import { useConfigStore } from '../../../stores/configStore';
+import { ASSETS } from '@voxire/shared';
 import React from 'react';
 import styles from './Footer.module.scss';
 
@@ -23,9 +24,7 @@ const Footer: React.FC = () => {
     },
     {
       title: 'Quick Links',
-      links: [
-        { to: '/pricing', label: 'Pricing' },
-      ],
+      links: [{ to: '/pricing', label: 'Pricing' }],
     },
     {
       title: 'Legal',
@@ -50,14 +49,20 @@ const Footer: React.FC = () => {
     <footer className={styles.footer} role="contentinfo">
       <div className={styles['footer-container']}>
         <div className={styles['footer-header']}>
-          <img src="/logo.png" alt="Rtylr Logo" className={styles['footer-logo']} />
+          <img
+            src={ASSETS.logos.dark}
+            alt="Rtylr Logo"
+            className={styles['footer-logo']}
+          />
         </div>
 
         <div className={styles['footer-content']}>
           <div className={styles['footer-nav']}>
             {footerSections.map((section, index) => (
               <div key={index} className={styles['footer-section']}>
-                <h3 className={styles['footer-section-title']}>{section.title}</h3>
+                <h3 className={styles['footer-section-title']}>
+                  {section.title}
+                </h3>
                 <nav aria-label={`${section.title} navigation`}>
                   <ul className={styles['footer-links']}>
                     {section.links.map((link, linkIndex) => (
@@ -72,7 +77,10 @@ const Footer: React.FC = () => {
                             {link.label}
                           </a>
                         ) : link.to ? (
-                          <Link href={link.to} className={styles['footer-link']}>
+                          <Link
+                            href={link.to}
+                            className={styles['footer-link']}
+                          >
                             {link.label}
                           </Link>
                         ) : (
@@ -93,7 +101,9 @@ const Footer: React.FC = () => {
                 <div className={styles['contact-item']}>
                   <span className={styles['contact-label']}>Email:</span>
                   <a
-                    href={`mailto:${contactInfo?.contactEmail || 'info@rtylr.com'}`}
+                    href={`mailto:${
+                      contactInfo?.contactEmail || 'info@rtylr.com'
+                    }`}
                     className={styles['contact-link']}
                     aria-label="Send us an email"
                   >

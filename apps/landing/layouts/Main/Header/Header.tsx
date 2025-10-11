@@ -3,7 +3,7 @@ import { HiMenu, HiX, HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { Button } from '@voxire/shared';
+import { Button, APP_URLS, ASSETS } from '@voxire/shared';
 import useColors from '../../../hooks/useColors';
 import { useWindowDimensions } from '@voxire/shared/utils';
 import { selectLanguage } from '../../../services/i18next';
@@ -107,7 +107,7 @@ const Header: React.FC = () => {
 
   const handleSignupClick = useCallback(() => {
     if (typeof window !== 'undefined') {
-      window.location.href = 'https://auth.rtylr.com/register';
+      window.location.href = `${APP_URLS.auth}/register`;
     }
   }, []);
 
@@ -117,7 +117,7 @@ const Header: React.FC = () => {
 
   const handleLoginClick = useCallback(() => {
     if (typeof window !== 'undefined') {
-      window.location.href = 'https://auth.rtylr.com/';
+      window.location.href = APP_URLS.auth;
     }
   }, []);
 
@@ -180,7 +180,7 @@ const Header: React.FC = () => {
     <header className={headerClasses}>
       <div className={styles['header-left']}>
         <div className={styles['logo-container']} onClick={handleLogoClick}>
-          <img src={'/logo.png'} alt="Logo" />
+          <img src={ASSETS.logos.light} alt="Logo" />
         </div>
 
         <nav className={styles['nav-links']}>

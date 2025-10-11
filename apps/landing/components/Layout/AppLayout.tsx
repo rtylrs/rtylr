@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { motion } from 'framer-motion';
-import { HiChevronUp } from 'react-icons/hi2';
 import {
   Chart as ChartJS,
   LineElement,
@@ -16,7 +14,6 @@ import {
 import i18next from '../../services/i18next';
 import HelmetContainer from '../HelmetContainer';
 import { getCookie } from '../../lib/cookies';
-import useColors from '../../hooks/useColors';
 import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 
 // Import Zustand stores and React Query hooks
@@ -41,7 +38,6 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const router = useRouter();
-  const { primary } = useColors();
 
   // Zustand stores
   const { isAuthenticated, role } = useUserStore();
@@ -58,25 +54,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { data: userData } = useUserInfo();
 
   // States
-  const [showTopBtn, setShowTopBtn] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShowTopBtn(true);
-      } else {
-        setShowTopBtn(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const language = getCookie('language');
@@ -94,7 +71,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         />
       )}
 
-
       {/* Toolbar and Cookies components temporarily commented out */}
       {/* {(role && role === 'admin') ||
       (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? (
@@ -102,30 +78,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       ) : null} */}
 
       {/* <Cookies /> */}
-
-      {showTopBtn && !router.pathname.includes('/restaurant/') && (
-        <motion.div
-          className="ScrollToTop"
-          onClick={() => {
-            setShowTopBtn(false);
-            if (typeof window !== 'undefined') {
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth',
-              });
-            }
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.8 }}
-          style={{
-            backgroundColor: primary,
-          }}
-        >
-          <HiChevronUp />
-        </motion.div>
-      )}
 
       {children}
       <CustomScrollbar />

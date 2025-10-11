@@ -6,7 +6,7 @@ import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FaGoogle } from 'react-icons/fa';
-import { Button, Input } from '@voxire/shared';
+import { Button, Input, HelmetContainer, APP_URLS } from '@voxire/shared';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -14,8 +14,6 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [referred, setReferred] = useState<string>('');
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
@@ -25,8 +23,8 @@ const Register: React.FC = () => {
       registerMutation.mutate({
         email,
         password,
-        name,
-        referred,
+        name: email.split('@')[0], // Use email prefix as name for now
+        referred: '',
       });
     } else {
       notify.error('Password does not match');
@@ -61,123 +59,128 @@ const Register: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="auth-container">
-      <div className="auth-form-container">
-        <div className="auth-form">
-          <h2>Sign Up</h2>
-          <p>Create your free account to get started</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleRegister();
-            }}
-          >
-            <Input
-              id="register-name"
-              type="text"
-              label="Restaurant Name"
-              placeholder="Restaurant Name"
-              required
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Input
-              id="register-email"
-              type="email"
-              label="Email"
-              placeholder="Email"
-              required
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              id="register-password"
-              type="password"
-              label="Password"
-              placeholder="Password"
-              required
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Input
-              id="register-confirm-password"
-              type="password"
-              label="Confirm Password"
-              placeholder="Confirm Password"
-              required
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+    <React.Fragment>
+      <HelmetContainer title="Register | Rtylr" />
+      <div className="auth-container">
+        <div className="auth-form-container">
+          <div className="auth-form">
+            <h2>Welcome to Rtylr.</h2>
+            <p>Sign up to start managing everything in one place.</p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleRegister();
+              }}
+            >
+              <Input
+                id="register-email"
+                type="email"
+                label="Email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{ marginBottom: 20 }}
+              />
+              <Input
+                id="register-password"
+                type="password"
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ marginBottom: 20 }}
+              />
+              <Input
+                id="register-confirm-password"
+                type="password"
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                style={{ marginBottom: 20 }}
+              />
 
-            <div style={{ width: '100%', marginBottom: 12 }}>
-              <small style={{ color: '#888', fontSize: 13 }}>
-                By pressing Register, you agree to our{' '}
-                <a
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'underline', color: 'inherit' }}
+              {error && (
+                <p
+                  style={{
+                    color: '#dc2626',
+                    fontSize: 14,
+                    marginBottom: 16,
+                    textAlign: 'center',
+                  }}
                 >
-                  Terms and Services
-                </a>
-                .
-              </small>
-            </div>
+                  {typeof error === 'string'
+                    ? error
+                    : (error as any)?.message || 'An error occurred'}
+                </p>
+              )}
 
-            {error && (
-              <p
-                style={{
-                  color: '#dc2626',
-                  fontSize: 14,
-                  marginBottom: 16,
-                  textAlign: 'center',
-                }}
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                loading={loading}
+                type="submit"
               >
-                {typeof error === 'string'
-                  ? error
-                  : (error as any)?.message || 'An error occurred'}
+                Sign Up
+              </Button>
+
+              <div className="auth-separator">
+                <span>or</span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="md"
+                fullWidth
+                type="button"
+                onClick={handleRegisterWithGoogle}
+                prefix={<FaGoogle />}
+              >
+                Sign up with Google
+              </Button>
+            </form>
+
+            <div className="auth-footer" style={{ alignItems: 'flex-start' }}>
+              <p>
+                Already have an account?{' '}
+                <span className="auth-link" onClick={() => navigate('/')}>
+                  Sign in
+                </span>
               </p>
-            )}
-
-            <Button
-              variant="primary"
-              size="md"
-              fullWidth
-              loading={loading}
-              type="submit"
-            >
-              Register
-            </Button>
-
-            <div className="auth-separator">
-              <span>or</span>
             </div>
+          </div>
+        </div>
 
-            <Button
-              variant="outline"
-              size="md"
-              fullWidth
-              type="button"
-              onClick={handleRegisterWithGoogle}
-              prefix={<FaGoogle />}
-            >
-              Sign in with Google
-            </Button>
-          </form>
-
-          <div className="auth-footer">
-            <p>
-              Already have an account?{' '}
-              <span className="auth-link" onClick={() => navigate('/')}>
-                Login Now.
-              </span>
-            </p>
-            <p
+        <div className="auth-page-footer">
+          <p>
+            Need help signing up?{' '}
+            <span
               className="auth-link"
               onClick={() => navigate('/password-reset')}
             >
-              Forgot Password?
-            </p>
-          </div>
+              Reset your password
+            </span>
+          </p>
+          <p className="privacy-text">
+            By using Rtylr, you acknowledge that we collect and use your
+            personal information as described in our{' '}
+            <a
+              href={`${APP_URLS.landing}/legal/privacy-policy`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="auth-link"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
