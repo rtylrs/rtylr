@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import ReactSelect, { StylesConfig, components } from 'react-select';
 import classNames from 'classnames';
 import { SelectProps } from '../../types/common';
 import './Select.scss';
 
 /**
- * A reusable select component that displays options with title and optional description
+ * A reusable searchable select component that displays options with title and optional description
  * @param options - Array of select options with id, title, optional description, and value
  * @param value - Currently selected value
  * @param placeholder - Placeholder text when no option is selected
@@ -22,8 +23,9 @@ import './Select.scss';
  * @param required - Whether the field is required
  * @param className - Additional CSS classes
  * @param style - Additional inline styles
+ * @param isSearchable - Whether the dropdown is searchable (default: true)
  */
-const Select: React.FC<SelectProps> = ({
+const Select: React.FC<SelectProps & { isSearchable?: boolean }> = ({
   options = [],
   value,
   placeholder = 'Select an option',
@@ -41,84 +43,138 @@ const Select: React.FC<SelectProps> = ({
   required = false,
   className,
   style,
+  isSearchable = true,
   children,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
+  const selectedOption = options.find((option) => option.value === value);
 
-  const selectedOption = options.find(option => option.value === value);
+  const reactSelectOptions = options.map((option) => ({
+    value: option.value,
+    label: option.title,
+    description: option.description,
+  }));
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+  const selectedReactSelectOption = selectedOption
+    ? {
+        value: selectedOption.value,
+        label: selectedOption.title,
+        description: selectedOption.description,
       }
-    };
+    : null;
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Close dropdown on escape key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-        toggleRef.current?.focus();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isOpen]);
-
-  const handleToggle = () => {
-    if (!disabled) {
-      setIsOpen(!isOpen);
-      if (!isOpen && onFocus) {
-        onFocus();
-      }
-    }
+  const customStyles: StylesConfig = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: '50px',
+      backgroundColor: '#e8e4d9',
+      borderColor: error ? '#d32f2f' : '#1a1a1a',
+      borderWidth: '1px',
+      borderRadius: '0',
+      boxShadow: state.isFocused
+        ? error
+          ? '0 0 0 1px #d32f2f'
+          : '0 0 0 1px #1a1a1a'
+        : 'none',
+      '&:hover': {
+        borderColor: error ? '#d32f2f' : '#1a1a1a',
+      },
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.6 : 1,
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      padding: '8px 16px',
+    }),
+    input: (base) => ({
+      ...base,
+      margin: '0',
+      padding: '0',
+      color: '#1a1a1a',
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: 'rgba(26, 26, 26, 0.5)',
+      fontSize: '1rem',
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#1a1a1a',
+      fontSize: '1rem',
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: '#f5f3ed',
+      borderRadius: '0',
+      border: '1px solid #1a1a1a',
+      borderTop: 'none',
+      marginTop: '-1px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      zIndex: 9999,
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: '0',
+      maxHeight: '300px',
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? 'rgba(26, 26, 26, 0.08)'
+        : state.isFocused
+        ? 'rgba(26, 26, 26, 0.05)'
+        : 'transparent',
+      color: '#1a1a1a',
+      cursor: 'pointer',
+      padding: '14px 16px',
+      borderBottom: '1px solid rgba(26, 26, 26, 0.1)',
+      fontSize: '1rem',
+      '&:last-child': {
+        borderBottom: 'none',
+      },
+      '&:active': {
+        backgroundColor: 'rgba(26, 26, 26, 0.08)',
+      },
+    }),
+    indicatorSeparator: () => ({
+      display: 'none',
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: '#1a1a1a',
+      padding: '8px 16px',
+      '&:hover': {
+        color: '#1a1a1a',
+      },
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      color: '#1a1a1a',
+      padding: '8px',
+      '&:hover': {
+        color: '#1a1a1a',
+      },
+    }),
   };
 
-  const handleSelect = (option: typeof options[0]) => {
-    if (!disabled) {
-      setIsOpen(false);
-      if (onChange) {
-        onChange(option.value, option);
-      }
-      if (onBlur) {
-        onBlur();
-      }
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (disabled) return;
-    
-    switch (event.key) {
-      case 'Enter':
-      case ' ':
-        event.preventDefault();
-        handleToggle();
-        break;
-      case 'ArrowDown':
-        event.preventDefault();
-        if (!isOpen) {
-          setIsOpen(true);
-        }
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        if (!isOpen) {
-          setIsOpen(true);
-        }
-        break;
-    }
+  const CustomOption = (props: any) => {
+    return (
+      <components.Option {...props}>
+        <div>
+          <div>{props.data.label}</div>
+          {props.data.description && (
+            <div
+              style={{
+                fontSize: '0.875rem',
+                color: 'rgba(26, 26, 26, 0.6)',
+                marginTop: '4px',
+              }}
+            >
+              {props.data.description}
+            </div>
+          )}
+        </div>
+      </components.Option>
+    );
   };
 
   const dropdownClasses = classNames(
@@ -126,21 +182,14 @@ const Select: React.FC<SelectProps> = ({
     {
       'voxire-select--disabled': disabled,
       'voxire-select--error': error,
-      'voxire-select--open': isOpen,
     },
     className
   );
 
-  const toggleClasses = classNames('voxire-select__toggle', {
-    'voxire-select__toggle--placeholder': !selectedOption,
-    'voxire-select__toggle--disabled': disabled,
-    'voxire-select__toggle--error': error,
-  });
-
   return (
     <div className={dropdownClasses} style={style}>
       {hasLabel && label && (
-        <label 
+        <label
           {...labelProps}
           htmlFor={id}
           className={classNames('voxire-select__label', labelProps?.className)}
@@ -149,91 +198,41 @@ const Select: React.FC<SelectProps> = ({
           {required && <span className="voxire-select__required">*</span>}
         </label>
       )}
-      
-      <div className="voxire-select__container" ref={dropdownRef}>
-        <button
-          ref={toggleRef}
-          type="button"
-          id={id}
-          name={name}
-          className={toggleClasses}
-          onClick={handleToggle}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          aria-haspopup="listbox"
-          aria-expanded={isOpen}
-          aria-labelledby={hasLabel && label ? `${id}-label` : undefined}
-        >
-          <span className="voxire-select__value">
-            {selectedOption ? selectedOption.title : placeholder}
-          </span>
-          <svg 
-            className={classNames('voxire-select__chevron', {
-              'voxire-select__chevron--open': isOpen
-            })}
-            width="12" 
-            height="12" 
-            viewBox="0 0 12 12" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M3 4.5L6 7.5L9 4.5" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        
-        {isOpen && (
-          <div 
-            className="voxire-select__menu"
-            role="listbox"
-            aria-labelledby={hasLabel && label ? `${id}-label` : undefined}
-          >
-            {options.map((option) => (
-              <div
-                key={option.id}
-                className={classNames('voxire-select__option', {
-                  'voxire-select__option--selected': option.value === value
-                })}
-                onClick={() => handleSelect(option)}
-                role="option"
-                aria-selected={option.value === value}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleSelect(option);
-                  }
-                }}
-              >
-                <div className="voxire-select__option-title">
-                  {option.title}
-                </div>
-                {option.description && (
-                  <div className="voxire-select__option-description">
-                    {option.description}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      
+
+      <ReactSelect
+        inputId={id}
+        name={name}
+        options={reactSelectOptions}
+        value={selectedReactSelectOption}
+        onChange={(newValue: any) => {
+          if (onChange && newValue) {
+            const foundOption = options.find((o) => o.value === newValue.value);
+            if (foundOption) {
+              onChange(newValue.value, foundOption);
+            }
+          }
+        }}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        placeholder={placeholder}
+        isDisabled={disabled}
+        isSearchable={isSearchable}
+        isClearable={false}
+        styles={customStyles}
+        components={{ Option: CustomOption }}
+        classNamePrefix="voxire-react-select"
+      />
+
       {helperText && (
-        <div 
+        <div
           className={classNames('voxire-select__helper', {
-            'voxire-select__helper--error': error
+            'voxire-select__helper--error': error,
           })}
         >
           {helperText}
         </div>
       )}
-      
+
       {children}
     </div>
   );

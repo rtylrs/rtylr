@@ -1,16 +1,20 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { ASSETS, APP_URLS, Button } from '@voxire/shared';
 import React from 'react';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
+  const router = useRouter();
+  const isDemoPage = router.pathname === '/demo';
+
   const handleSignupClick = () => {
     navigateExternal(`${APP_URLS.auth}/register`);
   };
 
   const handleBookDemoClick = () => {
-    navigateExternal(`${APP_URLS.menu}/contact`);
+    router.push('/demo');
   };
 
   const footerSections = [
@@ -142,13 +146,15 @@ const Footer: React.FC = () => {
             >
               Start for free
             </Button>
-            <Button
-              onClick={handleBookDemoClick}
-              variant="soft"
-              className={styles['cta-button']}
-            >
-              Book a demo
-            </Button>
+            {!isDemoPage && (
+              <Button
+                onClick={handleBookDemoClick}
+                variant="soft"
+                className={styles['cta-button']}
+              >
+                Book a demo
+              </Button>
+            )}
           </div>
         </div>
 
