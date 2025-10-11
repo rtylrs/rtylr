@@ -26,8 +26,8 @@
     width: auto;
 
     img {
-      max-width: 130px;
-      height: auto;
+      max-width: auto;
+      height: 35px;
       z-index: 2000;
 
       @media only screen and (max-width: 768px) {
