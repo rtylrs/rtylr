@@ -1,8 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
-import { faPhone } from "@fortawesome/free-solid-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { FaRocketchat } from "react-icons/fa";
+import { FaPhone, FaEnvelope } from "react-icons/fa";
 import React from "react";
 
 const Contact = (): JSX.Element => {
@@ -13,7 +11,7 @@ const Contact = (): JSX.Element => {
       <div className="contactus-container">
         <div className="contactus-card">
           <div className="contactus-icon">
-            <FontAwesomeIcon icon={faRocketchat} />
+            <FaRocketchat />
           </div>
           <h2>
             <b>Chat with us</b>
@@ -25,7 +23,7 @@ const Contact = (): JSX.Element => {
         </div>
         <div className="contactus-card">
           <div className="contactus-icon">
-            <FontAwesomeIcon icon={faPhone} />
+            <FaPhone />
           </div>
           <h2>
             <b>Give us a call</b>
@@ -38,7 +36,7 @@ const Contact = (): JSX.Element => {
         </div>
         <div className="contactus-card">
           <div className="contactus-icon">
-            <FontAwesomeIcon icon={faEnvelope} />
+            <FaEnvelope />
           </div>
           <h2>
             <b>Email Us</b>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBars,
-  faChevronDown,
-  faRightFromBracket,
-  faTimes,
-} from '@fortawesome/free-solid-svg-icons';
+  FaBars,
+  FaChevronDown,
+  FaSignOutAlt,
+  FaTimes,
+} from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@voxire/shared';
@@ -196,8 +195,7 @@ const Header: React.FC = () => {
           onClick={toggleDropdown}
         >
           Company
-          <FontAwesomeIcon
-            icon={faChevronDown}
+          <FaChevronDown
             style={{
               marginLeft: '5px',
               fontSize: '14px',
@@ -226,12 +224,19 @@ const Header: React.FC = () => {
           }}
           aria-label="Toggle mobile menu"
         >
-          <FontAwesomeIcon
-            icon={isMobileMenuOpen ? faTimes : faBars}
-            style={{
-              transition: 'transform 0.2s ease',
-            }}
-          />
+          {isMobileMenuOpen ? (
+            <FaTimes
+              style={{
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          ) : (
+            <FaBars
+              style={{
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          )}
         </button>
 
         {!isQuestionnaire && (
@@ -255,7 +260,7 @@ const Header: React.FC = () => {
                 gap: 10,
               }}
             >
-              <FontAwesomeIcon icon={faRightFromBracket} />
+              <FaSignOutAlt />
               <p>Logout</p>
             </div>
           ) : (
@@ -266,8 +271,7 @@ const Header: React.FC = () => {
         <div className="lang-dropdown-container">
           <div className="selected-language" onClick={toggleLanguageDropdown}>
             {language}
-            <FontAwesomeIcon
-              icon={faChevronDown}
+            <FaChevronDown
               style={{
                 transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease',

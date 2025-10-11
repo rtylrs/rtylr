@@ -84,7 +84,7 @@ export default defineConfig(() => ({
             'react-redux',
             '@reduxjs/toolkit',
             'framer-motion',
-            '@fortawesome/react-fontawesome',
+            'react-icons',
           ],
           styles: ['@mui/material', 'slick-carousel'],
         },
@@ -99,7 +99,7 @@ export default defineConfig(() => ({
       'react-redux',
       '@reduxjs/toolkit',
       'framer-motion',
-      '@fortawesome/react-fontawesome',
+      'react-icons',
     ],
   },
 }));

@@ -1,32 +1,29 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClose,
-  faHome,
-  faUser,
-  faBuilding,
-  faCube,
-  faChevronDown,
-  faChevronUp,
-  // faShoppingBag,
-  faCog,
-  faBarsProgress,
-  faSquare,
-  faNewspaper,
-  faRuler,
-  faCrosshairs,
-  faHandHoldingDollar,
-  faRss,
-  // faShop,
-  faPenRuler,
-  faCalendarAlt,
-  faCirclePause,
-  faSquareCheck,
-  faSquarePollVertical,
-  faUserLock,
-  faCircleInfo,
-  faPersonCircleQuestion,
-} from "@fortawesome/free-solid-svg-icons";
+  FaTimes,
+  FaHome,
+  FaUser,
+  FaBuilding,
+  FaCube,
+  FaChevronDown,
+  FaChevronUp,
+  FaCog,
+  FaChartBar,
+  FaSquare,
+  FaNewspaper,
+  FaRuler,
+  FaCrosshairs,
+  FaHandHoldingUsd,
+  FaRss,
+  FaPenAlt,
+  FaCalendarAlt,
+  FaPause,
+  FaCheckSquare,
+  FaChartLine,
+  FaUserLock,
+  FaInfoCircle,
+  FaQuestionCircle,
+} from "react-icons/fa";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
@@ -44,10 +41,9 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         <div className="sidebar__title__container">
           <p className="sidebar__title">Meow in Meows</p>
         </div>
-        <FontAwesomeIcon
+        <FaTimes
           className="close__icon"
           onClick={closeSidebar}
-          icon={faClose}
           size="lg"
         />
       </div>
@@ -58,7 +54,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => handleNavigation("/manage")}
         >
-          <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
+          <FaHome className="sidebar__icon" />
           <p id="link">Home</p>
         </div>
         <div
@@ -67,13 +63,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+              <FaUser className="sidebar__icon" />
               Customers
             </div>
             {sectionsVisible["customers"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["customers"] && (
@@ -84,7 +80,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/users")}
               >
-                <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+                <FaUser className="sidebar__icon" />
                 <p id="link">Users</p>
               </div>
               <div
@@ -93,7 +89,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/vendors")}
               >
-                <FontAwesomeIcon icon={faBuilding} className="sidebar__icon" />
+                <FaBuilding className="sidebar__icon" />
                 <p id="link">Brands</p>
               </div>
               <div
@@ -102,8 +98,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/vendors")}
               >
-                <FontAwesomeIcon
-                  icon={faSquarePollVertical}
+                <FaChartLine
                   className="sidebar__icon"
                 />
                 <p id="link">Survey</p>
@@ -117,16 +112,15 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon
-                icon={faBarsProgress}
+              <FaChartBar
                 className="sidebar__icon"
               />
               Management
             </div>
             {sectionsVisible["management"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["management"] && (
@@ -137,7 +131,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/managment")}
               >
-                <FontAwesomeIcon icon={faUserLock} className="sidebar__icon" />
+                <FaUserLock className="sidebar__icon" />
                 <p id="link">Permissions</p>
               </div>
               <div
@@ -146,7 +140,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/feedback")}
               >
-                <FontAwesomeIcon icon={faRss} className="sidebar__icon" />
+                <FaRss className="sidebar__icon" />
                 <p id="link">Feedback</p>
               </div>
             </>
@@ -158,13 +152,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon icon={faPenRuler} className="sidebar__icon" />
+              <FaPenAlt className="sidebar__icon" />
               Sections
             </div>
             {sectionsVisible["configuration"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["configuration"] && (
@@ -175,8 +169,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/sections/faqs")}
               >
-                <FontAwesomeIcon
-                  icon={faPersonCircleQuestion}
+                <FaQuestionCircle
                   className="sidebar__icon"
                 />
                 <p id="link">FAQs</p>
@@ -187,8 +180,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/config/about")}
               >
-                <FontAwesomeIcon
-                  icon={faCircleInfo}
+                <FaInfoCircle
                   className="sidebar__icon"
                 />
                 <p id="link">About Us</p>
@@ -199,13 +191,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         <div className="sidebar__section" onClick={() => toggleSection("blog")}>
           <h2>
             <div>
-              <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+              <FaCube className="sidebar__icon" />
               Blog
             </div>
             {sectionsVisible["blog"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["blog"] && (
@@ -216,7 +208,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/blog")}
               >
-                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
+                <FaSquare className="sidebar__icon" />
                 <p id="link">Blog Posts</p>
               </div>
               <div
@@ -225,7 +217,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/blog")}
               >
-                <FontAwesomeIcon icon={faSquare} className="sidebar__icon" />
+                <FaSquare className="sidebar__icon" />
                 <p id="link">Submitted Posts</p>
               </div>
             </>
@@ -237,13 +229,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon icon={faNewspaper} className="sidebar__icon" />
+              <FaNewspaper className="sidebar__icon" />
               Reports
             </div>
             {sectionsVisible["reports"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["reports"] && <>{/* Add report links here */}</>}
@@ -254,13 +246,13 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon icon={faRuler} className="sidebar__icon" />
+              <FaRuler className="sidebar__icon" />
               Orders
             </div>
             {sectionsVisible["orders"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["orders"] && (
@@ -271,8 +263,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/orders/pending")}
               >
-                <FontAwesomeIcon
-                  icon={faCirclePause}
+                <FaPause
                   className="sidebar__icon"
                 />
                 <p id="link">Pending</p>
@@ -285,8 +276,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => handleNavigation("/manage/orders/completed")}
               >
-                <FontAwesomeIcon
-                  icon={faSquareCheck}
+                <FaCheckSquare
                   className="sidebar__icon"
                 />
                 <p id="link">Completed</p>
@@ -300,16 +290,15 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon
-                icon={faHandHoldingDollar}
+              <FaHandHoldingUsd
                 className="sidebar__icon"
               />
               Donations
             </div>
             {sectionsVisible["donations"] ? (
-              <FontAwesomeIcon icon={faChevronUp} className="sidebar__icon" />
+              <FaChevronUp className="sidebar__icon" />
             ) : (
-              <FontAwesomeIcon icon={faChevronDown} className="sidebar__icon" />
+              <FaChevronDown className="sidebar__icon" />
             )}
           </h2>
           {sectionsVisible["donations"] && <>{/* Add donation links here */}</>}
@@ -320,7 +309,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => handleNavigation("/manage/petitions")}
         >
-          <FontAwesomeIcon icon={faCrosshairs} className="sidebar__icon" />
+          <FaCrosshairs className="sidebar__icon" />
           <p id="link">Petitions</p>
         </div>
         <div
@@ -329,7 +318,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => handleNavigation("/manage/events")}
         >
-          <FontAwesomeIcon icon={faCalendarAlt} className="sidebar__icon" />
+          <FaCalendarAlt className="sidebar__icon" />
           <p id="link">Events</p>
         </div>
         <div
@@ -338,7 +327,7 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => handleNavigation("/manage/settings")}
         >
-          <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
+          <FaCog className="sidebar__icon" />
           <p id="link">Settings</p>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 import { selectLanguage } from '../../services/i18next';
@@ -72,8 +71,7 @@ const Header: React.FC = () => {
           }}
         >
           {language?.toUpperCase()}
-          <FontAwesomeIcon
-            icon={faChevronDown}
+          <FaChevronDown
             style={{
               transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s ease',

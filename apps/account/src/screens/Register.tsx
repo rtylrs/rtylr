@@ -14,8 +14,7 @@ import {
   clearError,
 } from '../redux/reducers/userSlice';
 import { RootState, AppDispatch } from '../redux/store';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { FaGoogle } from 'react-icons/fa';
 import { Button, Input } from '@voxire/shared';
 
 const Register: React.FC = () => {
@@ -171,7 +170,7 @@ const Register: React.FC = () => {
               fullWidth
               type="button"
               onClick={handleRegisterWithGoogle}
-              prefix={<FontAwesomeIcon icon={faGoogle} />}
+              prefix={<FaGoogle />}
             >
               Sign in with Google
             </Button>

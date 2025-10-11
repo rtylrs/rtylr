@@ -1,5 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FaBars } from "react-icons/fa";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
@@ -14,7 +13,7 @@ const Navbar = ({ openSidebar }) => {
   return (
     <div className="navbar">
       <div className="nav_icon" onClick={() => openSidebar("navbar")}>
-        <FontAwesomeIcon icon={faBars} />
+        <FaBars />
       </div>
 
       <div className="navbar__left">

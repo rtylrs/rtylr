@@ -1,6 +1,5 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FaBars } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/reducers/userSlice";
 import { RootState } from "../../redux/store";
@@ -15,7 +14,7 @@ const VendorNavbar: React.FC<{
   return (
     <div className="vendor-navbar">
       <div className="vendor_nav_icon" onClick={() => openSidebar(true)}>
-        <FontAwesomeIcon icon={faBars} />
+        <FaBars />
       </div>
       <div className="vendor-navbar__left">
         <p className="active_link">

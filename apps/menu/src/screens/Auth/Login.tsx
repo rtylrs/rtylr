@@ -15,8 +15,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { FaGoogle } from "react-icons/fa";
 import { Button } from '@voxire/shared';
 
 const Login: React.FC = () => {
@@ -148,7 +147,7 @@ const Login: React.FC = () => {
               fullWidth
               type="button"
               onClick={handleGoogle}
-              prefix={<FontAwesomeIcon icon={faGoogle} />}
+              prefix={<FaGoogle />}
             >
               Sign in with Google
             </Button>

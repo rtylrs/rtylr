@@ -1,0 +1,293 @@
+.voxire-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font-family: var(
+    --secondary-font,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif
+  );
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  will-change: transform, box-shadow;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: none;
+  }
+
+  &.voxire-button-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  &.voxire-button-md {
+    padding: 12px 24px;
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  &.voxire-button-lg {
+    padding: 16px 32px;
+    font-size: 18px;
+    gap: 10px;
+  }
+
+  &.voxire-button-full-width {
+    width: 100%;
+  }
+
+  &.voxire-button-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    &:active {
+      transform: none;
+    }
+  }
+
+  &.voxire-button-loading {
+    cursor: wait;
+    pointer-events: none;
+
+    .voxire-button-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      display: none;
+    }
+  }
+
+  .voxire-button-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voxire-button-text {
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .voxire-button-prefix,
+  .voxire-button-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .voxire-button-prefix {
+    order: 1;
+  }
+
+  .voxire-button-text {
+    order: 2;
+  }
+
+  .voxire-button-suffix {
+    order: 3;
+  }
+
+  &.voxire-button-sm {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &.voxire-button-lg {
+    .voxire-button-prefix,
+    .voxire-button-suffix {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.voxire-button-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-secondary {
+  background-color: white;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-outline {
+  background-color: transparent;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--primary-color);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.voxire-button-soft {
+  background-color: #eaebe0;
+  border-color: #eaebe0;
+  color: #374151;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: #e0e1d6;
+    border-color: #e0e1d6;
+    color: #1f2937;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background-color: #d6d7cc;
+    border-color: #d6d7cc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.voxire-button-dark-outline {
+  background-color: #20211f;
+  border-color: #423e3a;
+  color: #f9fafb;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  &:hover:not(.voxire-button-disabled) {
+    background-color: #1a1b19;
+    border-color: #524d47;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  &:active:not(.voxire-button-disabled) {
+    background-color: #141514;
+    border-color: #625c54;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .voxire-button-ghost {
+    &:hover:not(.voxire-button-disabled) {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active:not(.voxire-button-disabled) {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .voxire-button {
+    &.voxire-button-lg {
+      padding: 14px 28px;
+      font-size: 16px;
+    }
+
+    &.voxire-button-md {
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+
+    &.voxire-button-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }
+}
+
+@media (prefers-contrast: high) {
+  .voxire-button {
+    border-width: 3px;
+
+    &:focus-visible {
+      outline-width: 3px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voxire-button {
+    transition: none;
+
+    &:hover,
+    &:active {
+      transform: none;
+    }
+  }
+}

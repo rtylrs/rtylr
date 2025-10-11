@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faStar,
-  faInfoCircle,
-  faPhone,
-  faGlobe,
-} from "@fortawesome/free-solid-svg-icons";
+  FaStar,
+  FaInfoCircle,
+  FaPhone,
+  FaGlobe,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import useAsync from "../../hooks/useAsync";
@@ -21,25 +20,25 @@ const ADDONS = [
     key: "feedback",
     name: "Feedback",
     description: "Collect feedback from your customers.",
-    icon: faStar,
+    icon: FaStar,
   },
   {
     key: "about",
     name: "About",
     description: "Information about your business.",
-    icon: faInfoCircle,
+    icon: FaInfoCircle,
   },
   {
     key: "contact",
     name: "Contact",
     description: "Enable customers to contact you easily.",
-    icon: faPhone,
+    icon: FaPhone,
   },
   {
     key: "landing",
     name: "Landing",
     description: "Create a landing page for your business.",
-    icon: faGlobe,
+    icon: FaGlobe,
   },
 ];
 
@@ -126,7 +125,7 @@ const Addons = () => {
           <div className="addon-grid">
             {filteredAddons.map((addon) => (
               <div key={addon.key} className="addon-card">
-                <FontAwesomeIcon icon={addon.icon} className="addon-icon" />
+                <addon.icon className="addon-icon" />
                 <h3>{addon.name}</h3>
                 <p>{addon.description}</p>
                 {keyLoading === (addon.key as string | null) ? (

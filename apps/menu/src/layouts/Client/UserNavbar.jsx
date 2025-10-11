@@ -1,18 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBars,
-  faHome,
-  faRightFromBracket,
-} from "@fortawesome/free-solid-svg-icons";
+  FaBars,
+  FaHome,
+  FaSignOutAlt,
+} from "react-icons/fa";
 
 const Navbar = ({ openSidebar }) => {
   const navigate = useNavigate();
   return (
     <div className="navbar">
       <div className="nav_icon" onClick={() => openSidebar("navbar")}>
-        <FontAwesomeIcon icon={faBars} />
+        <FaBars />
       </div>
 
       <div className="navbar__left">
@@ -20,7 +19,7 @@ const Navbar = ({ openSidebar }) => {
       </div>
       <div className="navbar__right">
         <Link to="/">
-          <FontAwesomeIcon icon={faHome} size="xl" />
+          <FaHome size="xl" />
         </Link>
         <div
           to="/auth/profile"
@@ -30,7 +29,7 @@ const Navbar = ({ openSidebar }) => {
             });
           }}
         >
-          <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
+          <FaSignOutAlt size="xl" />
         </div>
       </div>
     </div>

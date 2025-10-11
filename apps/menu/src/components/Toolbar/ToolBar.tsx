@@ -1,11 +1,10 @@
 import {
-  faBars,
-  faHome,
-  faRotateRight,
-  faTimes,
-  faUserTie,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  FaBars,
+  FaHome,
+  FaRedo,
+  FaTimes,
+  FaUserTie,
+} from "react-icons/fa";
 import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
@@ -158,7 +157,7 @@ const ToolBarContent: React.FC = () => {
           }}
           title="Home"
         >
-          <FontAwesomeIcon icon={faHome} />
+          <FaHome />
         </div>
         {showAdminItems && (
           <div
@@ -167,7 +166,7 @@ const ToolBarContent: React.FC = () => {
               toolbarNavigate("/app/business/");
             }}
           >
-            <FontAwesomeIcon icon={faUserTie} />
+            <FaUserTie />
           </div>
         )}
         <div
@@ -176,7 +175,7 @@ const ToolBarContent: React.FC = () => {
             window.location.reload();
           }}
         >
-          <FontAwesomeIcon icon={faRotateRight} />
+          <FaRedo />
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
@@ -192,7 +191,7 @@ const ToolBarContent: React.FC = () => {
         </div>
 
         <div className="toolbar-item" onClick={handleMenuToggle}>
-          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+          {menuOpen ? <FaTimes /> : <FaBars />}
         </div>
 
         {menuOpen && (

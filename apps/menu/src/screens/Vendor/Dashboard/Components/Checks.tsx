@@ -1,8 +1,7 @@
 import {
-  faBomb,
-  faTriangleExclamation,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  FaBomb,
+  FaTriangleExclamation,
+} from "react-icons/fa";
 import React from "react";
 
 const Checks: React.FC = () => {
@@ -11,7 +10,7 @@ const Checks: React.FC = () => {
   return (
     <div className="checks-container">
       <div className="check-item">
-        <FontAwesomeIcon icon={faBomb} />
+        <FaBomb />
         <p>
           You have{" "}
           <span className="major-issue">
@@ -20,7 +19,7 @@ const Checks: React.FC = () => {
         </p>
       </div>
       <div className="check-item">
-        <FontAwesomeIcon icon={faTriangleExclamation} />
+        <FaTriangleExclamation />
         <p>
           You have{" "}
           <span className="warning">

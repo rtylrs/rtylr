@@ -1,12 +1,11 @@
 import React from "react";
 import { auth } from "../../firebase";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCartFlatbedSuitcase,
-  faShoppingBag,
-  faStarHalfStroke,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+  FaSuitcase,
+  FaShoppingBag,
+  FaStarHalfAlt,
+  FaUser,
+} from "react-icons/fa";
 import { adminApi } from "../../api";
 import useAsync from "../../hooks/useAsync";
 
@@ -60,7 +59,7 @@ function Dashboard() {
             <i className="fa fa-user"></i>
             <div className="card_inner">
               <div>
-                <FontAwesomeIcon icon={faUser} />
+                <FaUser />
                 <p className="text-primary-p">Users</p>
               </div>
               <span className="font-bold text-title">{users}</span>
@@ -71,7 +70,7 @@ function Dashboard() {
             <i className="fa-solid fa-building"></i>
             <div className="card_inner">
               <div>
-                <FontAwesomeIcon icon={faShoppingBag} />
+                <FaShoppingBag />
                 <p className="text-primary-p">Restaurants</p>
               </div>
 
@@ -83,7 +82,7 @@ function Dashboard() {
             <i className="fa-solid fa-calendar-days"></i>
             <div className="card_inner">
               <div>
-                <FontAwesomeIcon icon={faCartFlatbedSuitcase} />
+                <FaSuitcase />
                 <p className="text-primary-p">Pending Orders</p>
               </div>
               <span className="font-bold text-title">{events}</span>
@@ -94,7 +93,7 @@ function Dashboard() {
             <i className="fa-solid fa-heart"></i>
             <div className="card_inner">
               <div>
-                <FontAwesomeIcon icon={faStarHalfStroke} />
+                <FaStarHalfAlt />
                 <p className="text-primary-p">Avg Rating</p>
               </div>
               <span className="font-bold text-title">{reviews}</span>
@@ -108,8 +107,7 @@ function Dashboard() {
               <div>
                 <h1>
                   Latest
-                  <FontAwesomeIcon
-                    icon={faStarHalfStroke}
+                  <FaStarHalfAlt
                     style={{ marginLeft: "10px" }}
                     size="xs"
                   />

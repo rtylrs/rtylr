@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClose,
-  faHome,
-  faUser,
-  faHeart,
-  faCog,
-  faClockRotateLeft,
-  faCube,
-} from "@fortawesome/free-solid-svg-icons";
+  FaTimes,
+  FaHome,
+  FaUser,
+  FaHeart,
+  FaCog,
+  FaHistory,
+  FaCube,
+} from "react-icons/fa";
 
 const SideBar = ({ sidebarOpen, closeSidebar }) => {
   return (
@@ -19,47 +18,46 @@ const SideBar = ({ sidebarOpen, closeSidebar }) => {
             <img src={Logo} alt="logo" className="sidebar__logo" />
           </Link> */}
         </div>
-        <FontAwesomeIcon
+        <FaTimes
           className="close__icon"
           onClick={() => closeSidebar()}
-          icon={faClose}
           size="lg"
         />
       </div>
       <div className="sidebar__menu">
         <div className="sidebar__link ">
-          <FontAwesomeIcon icon={faHome} className="sidebar__icon" />
+          <FaHome className="sidebar__icon" />
           <Link to="/account" id="link">
             Dashboard
           </Link>
         </div>
         <h2>Management</h2>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faUser} className="sidebar__icon" />
+          <FaUser className="sidebar__icon" />
           <Link to="/profile" id="link">
             Profile
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faHeart} className="sidebar__icon" />
+          <FaHeart className="sidebar__icon" />
           <Link to="/favorites" id="link">
             Favorites
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faClockRotateLeft} className="sidebar__icon" />
+          <FaHistory className="sidebar__icon" />
           <Link to="/my-history" id="link">
             Previous Orders
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faCube} className="sidebar__icon" />
+          <FaCube className="sidebar__icon" />
           <Link to="/blog/public/add" id="link">
             Submit a Blog
           </Link>
         </div>
         <div className="sidebar__link">
-          <FontAwesomeIcon icon={faCog} className="sidebar__icon" />
+          <FaCog className="sidebar__icon" />
           <Link to="/settings" id="link">
             Settings
           </Link>

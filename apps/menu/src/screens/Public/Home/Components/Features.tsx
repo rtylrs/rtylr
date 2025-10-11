@@ -1,14 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBarsProgress,
-  faPenToSquare,
-  faStar,
-  faCamera,
-  faGlobe,
-  faFilter,
-} from "@fortawesome/free-solid-svg-icons";
+  FaBars,
+  FaPen,
+  FaStar,
+  FaCamera,
+  FaGlobe,
+  FaFilter,
+} from "react-icons/fa";
 
 const Features: React.FC<{}> = () => {
   const { t } = useTranslation();
@@ -22,7 +21,7 @@ const Features: React.FC<{}> = () => {
       <div className="features-container">
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faCamera} style={{ color: "#655496" }} />{" "}
+            <FaCamera style={{ color: "#655496" }} />{" "}
           </div>
           <div className="feature-container">
             <h4>
@@ -34,7 +33,7 @@ const Features: React.FC<{}> = () => {
 
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faBarsProgress} />{" "}
+            <FaBars />{" "}
           </div>
           <div className="feature-container">
             <h4>
@@ -45,7 +44,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faGlobe} />
+            <FaGlobe />
           </div>
           <div className="feature-container">
             <h4>
@@ -56,8 +55,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon
-              icon={faPenToSquare}
+            <FaPen
               style={{ color: "#000000" }}
             />{" "}
           </div>
@@ -70,7 +68,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faFilter} />
+            <FaFilter />
           </div>
           <div className="feature-container">
             <h4>
@@ -81,7 +79,7 @@ const Features: React.FC<{}> = () => {
         </div>
         <div className="feature">
           <div className="icon">
-            <FontAwesomeIcon icon={faStar} style={{ color: "#FFD43B" }} />
+            <FaStar style={{ color: "#FFD43B" }} />
           </div>
           <div className="feature-container">
             <h4>

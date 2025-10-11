@@ -1,5 +1,4 @@
-import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +15,7 @@ const FreeAccount: React.FC<{}> = () => {
     >
       <div className="free-account-header">
         <button className="dropdown-button" onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon icon={open ? faCaretDown : faCaretUp} />
+          {open ? <FaCaretDown /> : <FaCaretUp />}
         </button>
       </div>
       <div

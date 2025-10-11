@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { FaChevronUp } from 'react-icons/fa';
 import {
   Chart as ChartJS,
   LineElement,
@@ -149,7 +148,7 @@ const App = (): JSX.Element => {
             backgroundColor: primary,
           }}
         >
-          <FontAwesomeIcon icon={faChevronUp} />
+          <FaChevronUp />
         </motion.div>
       )}
 
