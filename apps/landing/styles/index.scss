@@ -33,7 +33,6 @@ html {
 
 .hero-image img,
 .ticker_wrapper,
-.ScrollToTop,
 .whatsappBtn {
   will-change: transform;
   transform: translateZ(0);
@@ -84,20 +83,6 @@ body {
 
 ::-webkit-scrollbar-corner {
   background: transparent;
-}
-
-.ScrollToTop {
-  position: fixed;
-  bottom: 15px;
-  right: 20px;
-  z-index: 100;
-  cursor: pointer;
-  padding: 9px;
-  border-radius: 5px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 #demo {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { ASSETS } from '@voxire/shared';
 
 import { selectLanguage } from '../../services/i18next';
 import { getCookie } from '../../lib/cookies';
@@ -42,6 +43,17 @@ const Header: React.FC = () => {
     setLanguageDropdown(false);
   }, []);
 
+  const getLanguageDisplay = (lang: string) => {
+    switch (lang) {
+      case 'en':
+        return 'english';
+      case 'ar':
+        return 'arabic';
+      default:
+        return 'english';
+    }
+  };
+
   return (
     <header className="header">
       <div
@@ -55,7 +67,7 @@ const Header: React.FC = () => {
           if (e.key === 'Enter' || e.key === ' ') navigate('/');
         }}
       >
-        <img src={'/logo.png'} alt="Logo" />
+        <img src={ASSETS.logos.dark} alt="Logo" />
       </div>
 
       <div className="lang-dropdown-container">
@@ -70,7 +82,7 @@ const Header: React.FC = () => {
             if (e.key === 'Enter' || e.key === ' ') toggleLanguageDropdown();
           }}
         >
-          {language?.toUpperCase()}
+          {getLanguageDisplay(language)}
           <FaChevronDown
             style={{
               transform: languageDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -89,21 +101,14 @@ const Header: React.FC = () => {
               aria-selected={language === 'en'}
               onClick={() => handleLanguageChange('en')}
             >
-              English
+              english
             </span>
             <span
               role="option"
               aria-selected={language === 'ar'}
               onClick={() => handleLanguageChange('ar')}
             >
-              Arabic
-            </span>
-            <span
-              role="option"
-              aria-selected={language === 'fr'}
-              onClick={() => handleLanguageChange('fr')}
-            >
-              French
+              arabic
             </span>
           </div>
         )}
