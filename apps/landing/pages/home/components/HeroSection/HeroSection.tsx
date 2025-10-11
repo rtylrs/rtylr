@@ -1,15 +1,16 @@
 import React from 'react';
 import { APP_URLS, Button } from '@voxire/shared';
+import { navigateExternal } from '../../../../lib/navigation';
 import styles from './HeroSection.module.scss';
 import { FaArrowRight } from 'react-icons/fa';
 
 const HeroSection = (): JSX.Element => {
   const handleRegisterClick = () => {
-    window.location.href = `${APP_URLS.auth}/register`;
+    navigateExternal(`${APP_URLS.auth}/register`);
   };
 
   const handleFreeDemo = () => {
-    window.location.href = `${APP_URLS.auth}/register`;
+    navigateExternal(`${APP_URLS.auth}/register`);
   };
 
   return (
