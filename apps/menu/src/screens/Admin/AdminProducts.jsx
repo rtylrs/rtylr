@@ -15,8 +15,7 @@ import {
   InputLabel,
   Paper,
 } from "@mui/material";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaPlus } from "react-icons/fa";
 
 function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -82,8 +81,7 @@ function AdminProducts() {
           <h1>Product Management</h1>
           <Button variant="contained" color="primary" onClick={toggleModal}>
             New{" "}
-            <FontAwesomeIcon
-              icon={faPlus}
+            <FaPlus
               size="1x"
               style={{
                 marginLeft: "5px",

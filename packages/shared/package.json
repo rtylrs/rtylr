@@ -1,0 +1,73 @@
+{
+  "name": "@voxire/shared",
+  "version": "0.0.27",
+  "description": "Monorepo containing shared UI components and utilities for Voxire applications",
+  "main": "./dist/shared/index.cjs.js",
+  "module": "./dist/shared/index.esm.js",
+  "types": "./dist/shared/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/shared/index.d.ts",
+      "import": "./dist/shared/index.esm.js",
+      "require": "./dist/shared/index.cjs.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.esm.js",
+      "require": "./dist/utils/index.cjs.js"
+    },
+    "./styles": "./dist/shared.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "dev:hot": "vite --port 3000",
+    "preview": "NODE_ENV=development vite --port 3000",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fortawesome/fontawesome-svg-core": "^7.0.1",
+    "@fortawesome/free-solid-svg-icons": "^7.0.1",
+    "@fortawesome/react-fontawesome": "^3.0.2",
+    "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
+    "classnames": "^2.5.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^11.2.10",
+    "lodash": "^4.17.21",
+    "react-helmet": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@types/react-helmet": "^6.1.11",
+    "@vitejs/plugin-react": "^4.2.0",
+    "sass": "^1.55.0",
+    "typescript": "~5.5.2",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-svgr": "^4.2.0"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "utilities",
+    "utils",
+    "voxire",
+    "shared"
+  ],
+  "author": "Voxire Team",
+  "license": "MIT"
+}

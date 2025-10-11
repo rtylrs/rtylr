@@ -1,29 +1,31 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClose,
-  faHome,
-  // faChevronDown,
-  // faChevronUp,
-  faCog,
-  faArrowUpRightFromSquare,
-  faQrcode,
-  faMagicWandSparkles,
-  faStar,
-  faUserPen,
-  faCreditCard,
-  faPuzzlePiece,
-  faFolder,
-  faChartLine,
-  faGlobe,
-  // faUtensils,
-  faBookOpen,
-  faDisplay,
-  faFile,
-  faCircleInfo,
-  faEnvelope,
-} from "@fortawesome/free-solid-svg-icons";
+  FaTimes,
+  FaHome,
+  FaChevronDown,
+  FaChevronUp,
+  FaCog,
+  FaExternalLinkAlt,
+  FaQrcode,
+  FaMagic,
+  FaStar,
+  FaUserEdit,
+  FaCreditCard,
+  FaPuzzlePiece,
+  FaFolder,
+  FaChartLine,
+  FaGlobe,
+  FaBookOpen,
+  FaDesktop,
+  FaFile,
+  FaInfoCircle,
+  FaEnvelope,
+  FaBullhorn,
+  FaUserLock,
+  FaRss,
+  FaWallet,
+} from "react-icons/fa";
 import { useSidebar } from "../../HOCs/SidebarProvider";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
@@ -50,10 +52,9 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             style={{ cursor: "pointer", height: "70px", marginBottom: "10px" }}
           />
         </div>
-        <FontAwesomeIcon
+        <FaTimes
           className="vendor-close__icon"
           onClick={() => closeSidebar()}
-          icon={faClose}
           size="lg"
         />
       </div>
@@ -64,7 +65,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/")}
         >
-          <FontAwesomeIcon icon={faHome} className="vendor-sidebar__icon" />
+          <FaHome className="vendor-sidebar__icon" />
           <p id="link">Home</p>
         </div>
         <div
@@ -73,7 +74,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/menu")}
         >
-          <FontAwesomeIcon icon={faBookOpen} className="vendor-sidebar__icon" />
+          <FaBookOpen className="vendor-sidebar__icon" />
           <p id="link">Menu</p>
         </div>
 
@@ -81,20 +82,17 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         <div className="vendor-sidebar__section">
           <h2 onClick={() => toggleSection("appearance")}>
             <div>
-              <FontAwesomeIcon
-                icon={faDisplay}
+              <FaDesktop
                 className="vendor-sidebar__icon"
               />
               Site Settings
             </div>
             {/* {sectionsVisible["appearance"] ? (
-              <FontAwesomeIcon
-                icon={faChevronUp}
+              <FaChevronUp
                 className="vendor-sidebar__icon"
               />
             ) : (
-              <FontAwesomeIcon
-                icon={faChevronDown}
+              <FaChevronDown
                 className="vendor-sidebar__icon"
               />
             )} */}
@@ -107,8 +105,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => navigate("/manage/design")}
               >
-                <FontAwesomeIcon
-                  icon={faUserPen}
+                <FaUserEdit
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Information</p>
@@ -122,8 +119,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => navigate("/app/business/qr-codes")}
               >
-                <FontAwesomeIcon
-                  icon={faQrcode}
+                <FaQrcode
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Qr Codes</p>
@@ -137,8 +133,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => navigate("/app/business/design")}
               >
-                <FontAwesomeIcon
-                  icon={faMagicWandSparkles}
+                <FaMagic
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Appearance</p>
@@ -153,8 +148,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 >
                   <h2 onClick={() => toggleSection("pages")}>
                     <div>
-                      <FontAwesomeIcon
-                        icon={faFile}
+                      <FaFile
                         className="vendor-sidebar__icon"
                       />
                       Pages
@@ -171,8 +165,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                           }`}
                           onClick={() => navigate("/manage/design")}
                         >
-                          <FontAwesomeIcon
-                            icon={faGlobe}
+                          <FaGlobe
                             className="vendor-sidebar__icon"
                           />
                           <p id="link">Home page</p>
@@ -187,8 +180,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                           }`}
                           onClick={() => navigate("/manage/design")}
                         >
-                          <FontAwesomeIcon
-                            icon={faCircleInfo}
+                          <FaInfoCircle
                             className="vendor-sidebar__icon"
                           />
                           <p id="link">About page</p>
@@ -203,8 +195,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                           }`}
                           onClick={() => navigate("/manage/design")}
                         >
-                          <FontAwesomeIcon
-                            icon={faEnvelope}
+                          <FaEnvelope
                             className="vendor-sidebar__icon"
                           />
                           <p id="link">Contact page</p>
@@ -225,7 +216,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/menus")}
         >
-          <FontAwesomeIcon icon={faFolder} className="vendor-sidebar__icon" />
+          <FaFolder className="vendor-sidebar__icon" />
           <p id="link">My Menus</p>
         </div>
 
@@ -236,7 +227,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
             }`}
             onClick={() => navigate("/manage/design")}
           >
-            <FontAwesomeIcon icon={faStar} className="vendor-sidebar__icon" />
+            <FaStar className="vendor-sidebar__icon" />
             <p id="link">Feedback</p>
           </div>
         )}
@@ -247,8 +238,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/manage/design")}
         >
-          <FontAwesomeIcon
-            icon={faChartLine}
+          <FaChartLine
             className="vendor-sidebar__icon"
           />
           <p id="link">Analytics</p>
@@ -259,20 +249,17 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
         >
           <h2>
             <div>
-              <FontAwesomeIcon
-                icon={faBullhorn}
+              <FaBullhorn
                 className="vendor-sidebar__icon"
               />
               Marketing
             </div>
             {managementVisible ? (
-              <FontAwesomeIcon
-                icon={faChevronUp}
+              <FaChevronUp
                 className="vendor-sidebar__icon"
               />
             ) : (
-              <FontAwesomeIcon
-                icon={faChevronDown}
+              <FaChevronDown
                 className="vendor-sidebar__icon"
               />
             )}
@@ -287,8 +274,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => navigate("/manage/managment")}
               >
-                <FontAwesomeIcon
-                  icon={faUserLock}
+                <FaUserLock
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Permissions</p>
@@ -301,8 +287,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
                 }`}
                 onClick={() => navigate("/manage/feedback")}
               >
-                <FontAwesomeIcon
-                  icon={faRss}
+                <FaRss
                   className="vendor-sidebar__icon"
                 />
                 <p id="link">Feedback</p>
@@ -318,7 +303,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
               : ""
           }`}
         >
-          <FontAwesomeIcon icon={faWallet} className="vendor-sidebar__icon" />
+          <FaWallet className="vendor-sidebar__icon" />
           <Link to="/app/business/addons" id="link">
             Commissions
           </Link>
@@ -329,8 +314,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/billing")}
         >
-          <FontAwesomeIcon
-            icon={faCreditCard}
+          <FaCreditCard
             className="vendor-sidebar__icon"
           />
           <p id="link">Billing</p>
@@ -343,7 +327,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/settings")}
         >
-          <FontAwesomeIcon icon={faCog} className="vendor-sidebar__icon" />
+          <FaCog className="vendor-sidebar__icon" />
           <p id="link">Settings</p>
         </div>
         <div
@@ -352,8 +336,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           }`}
           onClick={() => navigate("/app/business/addons")}
         >
-          <FontAwesomeIcon
-            icon={faPuzzlePiece}
+          <FaPuzzlePiece
             className="vendor-sidebar__icon"
           />
           <p id="link"> Add-Ons</p>
@@ -362,8 +345,7 @@ const VendorSidebar = ({ sidebarOpen, closeSidebar }) => {
           className={`vendor-sidebar__link`}
           onClick={() => window.open(`/restaurant/${userId}`, "_blank")}
         >
-          <FontAwesomeIcon
-            icon={faArrowUpRightFromSquare}
+          <FaExternalLinkAlt
             className="vendor-sidebar__icon"
           />
           <p id="link">View Menu</p>

@@ -1,12 +1,11 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCog,
-  faUserShield,
-  faCreditCard,
-  faFile,
-  faLanguage,
-  faGavel,
-} from "@fortawesome/free-solid-svg-icons";
+  FaCog,
+  FaUserShield,
+  FaCreditCard,
+  FaFile,
+  FaLanguage,
+  FaGavel,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const VendorSettings = () => {
@@ -18,7 +17,7 @@ const VendorSettings = () => {
       <div className="settings-grid">
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faCog} />
+            <FaCog />
           </div>
           <div
             className="settings-content"
@@ -32,7 +31,7 @@ const VendorSettings = () => {
         </div>
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faUserShield} />
+            <FaUserShield />
           </div>
           <div className="settings-content">
             <h2>Plan and permissions</h2>
@@ -44,7 +43,7 @@ const VendorSettings = () => {
         </div>
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faCreditCard} />
+            <FaCreditCard />
           </div>
           <div className="settings-content">
             <h2>Payments</h2>
@@ -53,7 +52,7 @@ const VendorSettings = () => {
         </div>
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faFile} />
+            <FaFile />
           </div>
           <div className="settings-content">
             <h2>Files</h2>
@@ -62,7 +61,7 @@ const VendorSettings = () => {
         </div>
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faLanguage} />
+            <FaLanguage />
           </div>
           <div className="settings-content">
             <h2>Store languages</h2>
@@ -73,7 +72,7 @@ const VendorSettings = () => {
         </div>
         <div className="settings-item">
           <div className="settings-icon">
-            <FontAwesomeIcon icon={faGavel} />
+            <FaGavel />
           </div>
           <div className="settings-content">
             <h2>Legal</h2>

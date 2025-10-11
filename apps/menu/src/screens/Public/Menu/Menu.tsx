@@ -1,11 +1,10 @@
 import {
-  faComments,
-  faPhone,
-  faUtensils,
-  faHome,
-  faInfoCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+  FaComments,
+  FaPhone,
+  FaUtensils,
+  FaHome,
+  FaInfoCircle,
+} from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useAsync from '../../../hooks/useAsync';
@@ -121,12 +120,12 @@ function Menu() {
         }}
       >
         <div onClick={() => setActiveSection('about')}>
-          <FontAwesomeIcon icon={faInfoCircle} />
+          <FaInfoCircle />
           <p>About</p>
         </div>
         {restaurant?.addons?.landing && (
           <div onClick={() => setActiveSection('menu')}>
-            <FontAwesomeIcon icon={faUtensils} />
+            <FaUtensils />
             <p>Menu</p>
           </div>
         )}
@@ -139,17 +138,15 @@ function Menu() {
             }
           }}
         >
-          <FontAwesomeIcon
-            icon={restaurant?.addons.landing ? faHome : faUtensils}
-          />
+          {restaurant?.addons.landing ? <FaHome /> : <FaUtensils />}
           <p>{restaurant?.addons?.landing ? 'Home' : 'Menu'}</p>
         </div>
         <div onClick={() => setActiveSection('contact')}>
-          <FontAwesomeIcon icon={faPhone} />
+          <FaPhone />
           <p>Contact</p>
         </div>
         <div onClick={() => setActiveSection('feedback')}>
-          <FontAwesomeIcon icon={faComments} />
+          <FaComments />
           <p>Feedback</p>
         </div>
       </div>

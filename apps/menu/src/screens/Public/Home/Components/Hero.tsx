@@ -2,8 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@voxire/shared';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faStar } from '@fortawesome/free-solid-svg-icons';
+import { FaArrowRight, FaStar } from 'react-icons/fa';
 import useColors from '../../../../hooks/useColors';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../../redux/reducers/userSlice';
@@ -50,7 +49,7 @@ const Hero: React.FC<{}> = () => {
           <Button
             onClick={() => navigate('/uses')}
             variant="outline"
-            suffix={<FontAwesomeIcon icon={faArrowRight} />}
+            suffix={<FaArrowRight />}
           >
             {t('Hero.Learn More')}
           </Button>
@@ -61,7 +60,7 @@ const Hero: React.FC<{}> = () => {
             marginTop: 10,
           }}
         >
-          <FontAwesomeIcon icon={faStar} color={secondary} /> Rated 4.7/5 - from
+          <FaStar color={secondary} /> Rated 4.7/5 - from
           over 500+ reviews
         </h5>
       </div>

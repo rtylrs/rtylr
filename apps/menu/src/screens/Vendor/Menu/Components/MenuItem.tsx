@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { FaPen, FaEllipsisV } from "react-icons/fa";
 
 function MenuItem({ item }) {
   const navigate = useNavigate();
@@ -42,10 +41,10 @@ function MenuItem({ item }) {
             navigate(`/app/business/edit-item/${item._id}`);
           }}
         >
-          <FontAwesomeIcon icon={faPen} />
+          <FaPen />
         </button>
         <button className="menu-button" onClick={handleMenuClick}>
-          <FontAwesomeIcon icon={faEllipsisV} />
+          <FaEllipsisV />
         </button>
         {showMenu && (
           <div className="dropdown-menu">

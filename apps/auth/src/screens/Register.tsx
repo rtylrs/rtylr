@@ -5,8 +5,7 @@ import { useUserStore } from '../stores/userStore';
 import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { FaGoogle } from 'react-icons/fa';
 import { Button, Input } from '@voxire/shared';
 
 const Register: React.FC = () => {
@@ -156,7 +155,7 @@ const Register: React.FC = () => {
               fullWidth
               type="button"
               onClick={handleRegisterWithGoogle}
-              prefix={<FontAwesomeIcon icon={faGoogle} />}
+              prefix={<FaGoogle />}
             >
               Sign in with Google
             </Button>

@@ -12,8 +12,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTrash, faX } from "@fortawesome/free-solid-svg-icons";
+import { FaCheck, FaTrash, FaTimes } from "react-icons/fa";
 
 function Users() {
   const [items, setItems] = useState([]);
@@ -79,9 +78,9 @@ function Users() {
                         }}
                       >
                         {item.flagged ? (
-                          <FontAwesomeIcon icon={faCheck} size="lg" />
+                          <FaCheck size="lg" />
                         ) : (
-                          <FontAwesomeIcon icon={faX} size="lg" />
+                          <FaTimes size="lg" />
                         )}
                       </Button>
                     </TableCell>
@@ -93,7 +92,7 @@ function Users() {
                           // Handle delete action
                         }}
                       >
-                        <FontAwesomeIcon icon={faTrash} size="lg" />
+                        <FaTrash size="lg" />
                       </Button>
                     </TableCell>
                   </TableRow>
