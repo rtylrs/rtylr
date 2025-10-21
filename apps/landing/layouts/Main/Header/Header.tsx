@@ -309,6 +309,9 @@ const Header: React.FC = () => {
                   Careers
                 </h6>
                 <h6 onClick={() => handleNavigation('/support')}>Support</h6>
+                <h6 onClick={() => handleExternalLink(APP_URLS.status)}>
+                  Status
+                </h6>
               </div>
             )}
           </div>
