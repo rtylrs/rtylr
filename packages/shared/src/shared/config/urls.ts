@@ -14,6 +14,7 @@ const LOCAL_URLS = {
   menu: 'http://localhost:5177',
   account: 'http://localhost:5178',
   api: 'http://localhost:8080/api',
+  status: 'https://status.rtylr.com',
 } as const;
 
 const PROD_URLS = {
@@ -22,6 +23,7 @@ const PROD_URLS = {
   menu: 'https://menu.rtylr.com',
   account: 'https://account.rtylr.com',
   api: 'https://api.rtylr.com',
+  status: 'https://status.rtylr.com',
 } as const;
 
 export const APP_URLS = isLocalhost ? LOCAL_URLS : PROD_URLS;
