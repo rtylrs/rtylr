@@ -93,7 +93,11 @@ export const Button: React.FC<ButtonProps> = ({
       ? { width: typeof width === "number" ? `${width}px` : width }
       : {}),
     ...(height
-      ? { height: typeof height === "number" ? `${height}px` : height }
+      ? {
+          height: typeof height === "number" ? `${height}px` : height,
+          minHeight: typeof height === "number" ? `${height}px` : height,
+          maxHeight: typeof height === "number" ? `${height}px` : height,
+        }
       : {}),
     ...styles,
     display: hidden ? "none" : "inline-flex",

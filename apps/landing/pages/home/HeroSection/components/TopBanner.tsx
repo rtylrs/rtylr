@@ -13,8 +13,13 @@ const TopBanner: React.FC = () => {
     <div className={styles.topBanner}>
       <div className={styles.bannerContainer}>
         <div className={styles.leftSection}>
-          <h3>Start Your Free Trial</h3>
-          <p className={styles.subtitle}>No credit card required</p>
+          <div className={styles.badgeLine}>
+            <span className={styles.alphaBadge}>ALPHA</span>
+            <span className={styles.badgeText}>The all-in-one POS that grows with you</span>
+          </div>
+          <h3 className={styles.mainHeading}>
+            Run your business with Rtylr
+          </h3>
           <Button
             variant="dark-outline"
             className={styles.registerButton}
@@ -26,31 +31,11 @@ const TopBanner: React.FC = () => {
         </div>
 
         <div className={styles.rightSection}>
-          <div className={styles.qrSection}>
-            <div className={styles.qrCodePlaceholder}>
-              <div className={styles.qrBox}>
-                <img
-                  src="/images/home/hero-banner-qr-code.png"
-                  alt="QR Code"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.videoSection}>
-            <div className={styles.videoText}>
-              <h3>Quick & Easy</h3>
-              <h3>Setup</h3>
-            </div>
-            <div className={styles.videoPlaceholder}>
-              <div className={styles.playButton}>▶</div>
-            </div>
-          </div>
+          <img
+            src="/images/home/hero-banner-top-bar-bg.png"
+            alt="Banner"
+            className={styles.bannerImage}
+          />
         </div>
       </div>
     </div>
