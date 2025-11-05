@@ -1,17 +1,9 @@
-/* Header Styles */
+/* Desktop Header Styles */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 50px;
-  background: rgba(21, 21, 21, 0.3);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  height: 80px;
   color: white;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -24,21 +16,21 @@
     -webkit-backdrop-filter: blur(40px);
   }
 
-  &.inner {
-    background: rgba(21, 21, 21, 0.5);
-    backdrop-filter: blur(35px);
-    -webkit-backdrop-filter: blur(35px);
-  }
-
   &.initial-position {
     background: #0d0d0d !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
 
-  @media only screen and (max-width: 768px) {
-    padding: 15px 20px;
-    height: 70px;
+  &.desktop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 50px;
+    background: rgba(21, 21, 21, 0.3);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    height: 80px;
   }
 }
 
@@ -48,10 +40,6 @@
   align-items: center;
   gap: 40px;
   flex: 1;
-
-  @media only screen and (max-width: 968px) {
-    gap: 0;
-  }
 }
 
 .logo-container {
@@ -67,10 +55,6 @@
     width: auto;
     filter: brightness(0) invert(1);
     transition: transform 0.3s ease;
-
-    @media only screen and (max-width: 768px) {
-      height: 30px;
-    }
   }
 }
 
@@ -78,10 +62,6 @@
   display: flex;
   align-items: center;
   gap: 24px;
-
-  @media only screen and (max-width: 968px) {
-    display: none;
-  }
 }
 
 .nav-item {
@@ -118,28 +98,6 @@
   align-items: center;
 }
 
-.mobile-menu-toggle {
-  display: none;
-  font-size: 24px;
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
-  color: white;
-  z-index: 3000;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: scale(1.1);
-  }
-
-  @media (max-width: 968px) {
-    display: block;
-  }
-}
-
 .language-selector-container {
   position: relative;
 }
@@ -157,19 +115,12 @@
     background-color: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.8) !important;
   }
-
-  @media only screen and (max-width: 968px) {
-    display: none;
-  }
 }
 
 .header-buttons {
   display: flex;
   gap: 6px;
   align-items: center;
-  @media only screen and (max-width: 968px) {
-    display: none;
-  }
 }
 
 /* Dropdowns */
@@ -248,85 +199,7 @@
   }
 }
 
-/* Mobile Menu */
-.mobile-menu {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(26, 26, 26, 0.98) 0%,
-    rgba(26, 26, 26, 0.95) 100%
-  );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 100px 20px 20px;
-  z-index: 2000;
-  animation: slideInFromTop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-
-  a {
-    text-decoration: none;
-    color: white;
-    margin-bottom: 25px;
-    font-size: 20px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    padding: 10px 20px;
-    border-radius: 8px;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      transform: translateX(5px);
-    }
-  }
-
-  button {
-    width: 100%;
-    max-width: 300px;
-    height: 50px;
-    border: none;
-    border-radius: 8px;
-    padding: 0 20px;
-    margin-bottom: 15px;
-    font-size: 16px;
-    font-weight: 600;
-    background-color: white;
-    color: #0d0d0d;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-    }
-  }
-}
-
-@media (max-width: 968px) {
-  .header.mobile-menu-open .mobile-menu {
-    display: flex;
-  }
-}
-
 /* Animations */
-@keyframes slideInFromTop {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes fadeInUp {
   0% {
     opacity: 0;

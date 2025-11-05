@@ -25,7 +25,7 @@ const MainHero: React.FC = () => {
           </button>
           <p className={styles.description}>
             Your single source of truth for in-store, online, and back-office
-            operations. POS · Inventory · eCommerce · Analytics — works offline,
+            operations. POS · Inventory · eCommerce · Analytics works offline,
             scales globally.
           </p>
         </div>
