@@ -42,6 +42,12 @@ const HeaderMobile: React.FC<HeaderMobileProps> = ({
             Blog
           </Link>
           <Link
+            href="/hardware"
+            style={{ textDecoration: 'none', color: 'white' }}
+          >
+            Hardware
+          </Link>
+          <Link
             href="/about"
             style={{ textDecoration: 'none', color: 'white' }}
           >

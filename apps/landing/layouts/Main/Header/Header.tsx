@@ -280,6 +280,10 @@ const Header: React.FC = () => {
             Pricing
           </LinkWithColor>
 
+          <LinkWithColor to="/hardware" className={styles['nav-link']}>
+            Hardware
+          </LinkWithColor>
+
           <div className={`${styles['nav-item']} resources-dropdown-container`}>
             <p className={styles['nav-link']} onClick={toggleResourcesDropdown}>
               Resources
