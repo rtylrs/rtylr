@@ -21,6 +21,11 @@
       max-width: 1400px;
     }
 
+    // Mobile Banner - Simple pill with badge, text, and link
+    .mobileBanner {
+      display: none;
+    }
+
     .leftSection {
       flex: 0 0 40%;
       background: #0d0d0d;
@@ -46,14 +51,19 @@
 
       .alphaBadge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.15);
-        color: #ffffff;
+        background: linear-gradient(
+          135deg,
+          #60a5fa 0%,
+          #a78bfa 50%,
+          #f0f9ff 100%
+        );
+        color: #0d0d0d;
         padding: 4px 12px;
         border-radius: 4px;
         font-size: 0.7rem;
         font-weight: 600;
         letter-spacing: 0.8px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: none;
         flex-shrink: 0;
       }
 
@@ -296,51 +306,110 @@
 
 @media (max-width: 768px) {
   .heroSection {
-    padding-top: 90px;
+    padding-top: 10px;
 
     .topBanner {
-      padding: 0;
+      padding: 0 20px;
+      margin-bottom: 0;
 
+      // Hide desktop layout on mobile
       .bannerContainer {
+        display: none;
+      }
+
+      // Show mobile layout
+      .mobileBanner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         width: 100%;
-        height: auto;
-      }
+        max-width: 100%;
+        padding: 10px 14px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50px;
+        margin: 0 auto;
 
-      .leftSection {
-        padding: 30px 25px;
+        .badgeLine {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0;
+          flex: 1;
+          min-width: 0;
 
-        h3 {
-          font-size: 1.3rem;
-        }
-      }
+          .alphaBadge {
+            flex-shrink: 0;
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: linear-gradient(
+              135deg,
+              #60a5fa 0%,
+              #a78bfa 50%,
+              #f0f9ff 100%
+            );
+            color: #0d0d0d;
+            border: none;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+          }
 
-      .rightSection {
-        flex-direction: column;
+          .badgeTextContainer {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            position: relative;
+          }
 
-        .qrSection {
-          padding: 25px;
+          .badgeText {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: mobileBannerTextScroll 5s linear infinite;
+            will-change: transform;
+          }
 
-          .qrCodePlaceholder {
-            width: 130px;
-            height: 130px;
+          .badgeTextContent {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            display: inline-block;
+            flex-shrink: 0;
           }
         }
 
-        .videoSection {
-          padding: 25px;
+        .mobileLink {
+          flex-shrink: 0;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          background: transparent;
+          color: rgba(255, 255, 255, 0.85);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          padding: 0;
+          margin-left: 4px;
 
-          .videoPlaceholder {
-            width: 120px;
-            height: 170px;
+          &:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #ffffff;
           }
 
-          .videoText {
-            position: static;
-            margin-top: 15px;
+          &:active {
+            transform: scale(0.95);
+          }
 
-            h3 {
-              font-size: 1.1rem;
-            }
+          svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 1.5;
           }
         }
       }
@@ -390,5 +459,15 @@
         }
       }
     }
+  }
+}
+
+// Mobile Banner Text Scroll Animation
+@keyframes mobileBannerTextScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0px));
   }
 }
