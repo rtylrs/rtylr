@@ -1,6 +1,6 @@
 .hardwarePage {
   min-height: calc(100vh - 80px);
-  background: #0d0d0d;
+  background: var(--app-background);
   padding: 120px 20px 80px;
   display: flex;
   align-items: flex-start;

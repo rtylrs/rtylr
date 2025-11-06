@@ -1,8 +1,8 @@
-.newHomepage {
+.Homepage {
   min-height: 100vh;
-  background-color: #0d0d0d;
+  background-color: var(--app-background);
   color: white;
-  padding-top: 80px; // Account for fixed header
+  padding-top: 80px;
 
   .content {
     max-width: 1200px;
@@ -12,8 +12,8 @@
 }
 
 @media (max-width: 768px) {
-  .newHomepage {
-    padding-top: 70px; // Smaller header on mobile
+  .Homepage {
+    padding-top: 70px;
 
     .content {
       padding: 20px 16px;

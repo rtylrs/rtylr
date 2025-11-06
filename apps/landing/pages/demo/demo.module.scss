@@ -1,6 +1,6 @@
 .demoPage {
   min-height: calc(100vh - 80px);
-  background: #0d0d0d;
+  background: var(--app-background);
   padding: 80px 20px;
   display: flex;
   align-items: flex-start;
@@ -14,7 +14,7 @@
   }
 
   .formWrapper {
-    background: #0d0d0d;
+    background: var(--app-background);
     padding: 0;
   }
 

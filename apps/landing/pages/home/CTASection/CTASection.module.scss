@@ -1,0 +1,63 @@
+.ctaSection {
+  padding: 120px 0;
+  background: var(--app-background);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 24px 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.ctaDescription {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 40px 0;
+  line-height: 1.6;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .ctaSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .ctaTitle {
+    font-size: 2rem;
+  }
+
+  .ctaDescription {
+    font-size: 1rem;
+    margin-bottom: 32px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ctaButtons button {
+    width: 100% !important;
+  }
+}
+

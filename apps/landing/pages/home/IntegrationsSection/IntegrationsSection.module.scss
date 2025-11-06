@@ -1,0 +1,103 @@
+.integrationsSection {
+  padding: 120px 0;
+  background: var(--app-background);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 60px 0;
+}
+
+.integrationsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.integrationItem {
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+.integrationLogo {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.integrationName {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: white;
+}
+
+@media (max-width: 1024px) {
+  .integrationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .sectionDescription {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .integrationsSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .sectionDescription {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .integrationsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .integrationItem {
+    padding: 30px;
+  }
+}
+

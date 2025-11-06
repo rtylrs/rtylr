@@ -19,11 +19,11 @@
 }
 
 html {
-  background-color: #0d0d0d;
+  background-color: var(--app-background);
 }
 
 #__next {
-  background-color: #0d0d0d;
+  background-color: var(--app-background);
   min-height: 100vh;
 }
 
@@ -54,7 +54,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #0d0d0d;
+  background-color: var(--app-background);
   height: 100vh;
   font-family: 'Inter', sans-serif;
   color: var(--secondary-color);

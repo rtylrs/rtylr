@@ -1,5 +1,5 @@
 .heroSection {
-  background-color: #0d0d0d;
+  background-color: var(--app-background);
   color: white;
   padding-top: 30px;
   min-height: 100vh;
@@ -28,7 +28,7 @@
 
     .leftSection {
       flex: 0 0 40%;
-      background: #0d0d0d;
+      background: var(--app-background);
       padding: 35px;
       display: flex;
       flex-direction: column;
