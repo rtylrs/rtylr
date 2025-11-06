@@ -1,0 +1,109 @@
+.howItWorksSection {
+  padding: 120px 0;
+  background: var(--app-background);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 80px 0;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 60px;
+  align-items: start;
+}
+
+.stepItem {
+  text-align: left;
+}
+
+.stepNumber {
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.1);
+  line-height: 1;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.stepTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+
+.stepDescription {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .stepsGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .sectionDescription {
+    font-size: 1.1rem;
+    margin-bottom: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .howItWorksSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .sectionDescription {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .stepNumber {
+    font-size: 3rem;
+  }
+
+  .stepTitle {
+    font-size: 1.5rem;
+  }
+
+  .stepDescription {
+    font-size: 1rem;
+  }
+}
+

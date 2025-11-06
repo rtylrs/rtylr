@@ -17,7 +17,7 @@
   }
 
   &.initial-position {
-    background: #0d0d0d !important;
+    background: var(--app-background) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -101,7 +101,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(13, 13, 13, 0.98);
+  background: rgba(26, 26, 26, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   z-index: 2000;
@@ -233,7 +233,7 @@
   gap: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
-  background: rgba(13, 13, 13, 0.98);
+  background: rgba(26, 26, 26, 0.98);
 }
 
 .mobile-menu-buttons {
