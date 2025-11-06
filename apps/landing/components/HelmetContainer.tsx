@@ -48,17 +48,24 @@ function HelmetContainer({
       {robots && <meta name="robots" content={robots} />}
 
       <meta property="og:title" content={title} />
-      <meta property="og:image" content={image} />
-
-      <meta property="og:url" content={url} />
+      {image && <meta property="og:image" content={image} />}
+      {url && <meta property="og:url" content={url} />}
       {ogType && <meta property="og:type" content={ogType} />}
       {ogLocale && <meta property="og:locale" content={ogLocale} />}
       {ogSiteName && <meta property="og:site_name" content={ogSiteName} />}
-      {ogDescription && (
-        <meta property="og:description" content={ogDescription} />
+      {(ogDescription || description) && (
+        <meta
+          property="og:description"
+          content={ogDescription || description}
+        />
       )}
 
       {twitterCard && <meta name="twitter:card" content={twitterCard} />}
+      {twitterCard && <meta name="twitter:title" content={title} />}
+      {twitterCard && description && (
+        <meta name="twitter:description" content={description} />
+      )}
+      {twitterCard && image && <meta name="twitter:image" content={image} />}
       {twitterSite && <meta name="twitter:site" content={twitterSite} />}
       {twitterCreator && (
         <meta name="twitter:creator" content={twitterCreator} />

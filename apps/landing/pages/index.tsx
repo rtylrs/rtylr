@@ -13,10 +13,27 @@ import CTASection from './home/CTASection/CTASection';
 import styles from './index.module.scss';
 
 const HomePage = (): JSX.Element => {
+  const baseUrl = 'https://rtylr.com';
+  const description =
+    'Your single source of truth for in-store, online, and back-office operations. POS · Inventory · eCommerce · Analytics works offline, scales globally.';
+  const title = 'Rtylr | Run your business with AI.';
+  const ogImage = `${baseUrl}/images/home/hero-banner-top-bar-bg.webp`;
+
   return (
     <AppLayout>
       <MainLayout>
-        <HelmetContainer title="Rtylr | Run your business with AI." />
+        <HelmetContainer
+          title={title}
+          description={description}
+          image={ogImage}
+          url={baseUrl}
+          ogType="website"
+          ogLocale="en_US"
+          ogSiteName="Rtylr"
+          ogDescription={description}
+          twitterCard="summary_large_image"
+          keywords="POS, inventory management, eCommerce, analytics, business operations, retail software"
+        />
         <div className={styles.Homepage}>
           <HeroSection />
           <FeaturesSection />
