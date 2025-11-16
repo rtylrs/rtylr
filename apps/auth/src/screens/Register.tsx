@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Activity } from 'react';
 import { useNavigate } from 'react-router-dom';
 import notify from '../lib/notify/notify';
 import { useUserStore } from '../stores/userStore';
@@ -7,6 +8,7 @@ import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FaGoogle } from 'react-icons/fa';
 import { Button, Input, HelmetContainer, APP_URLS } from '@voxire/shared';
+import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const Register: React.FC = () => {
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
+  const showGoogle: boolean = useGoogleSignupVisible();
 
   const handleRegister = () => {
     if (password === confirmPassword) {
@@ -128,20 +131,21 @@ const Register: React.FC = () => {
                 Sign Up
               </Button>
 
-              <div className="auth-separator">
-                <span>or</span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="md"
-                fullWidth
-                type="button"
-                onClick={handleRegisterWithGoogle}
-                prefix={<FaGoogle />}
-              >
-                Sign up with Google
-              </Button>
+              <Activity mode={showGoogle ? 'visible' : 'hidden'}>
+                <div className="auth-separator">
+                  <span>or</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="md"
+                  fullWidth
+                  type="button"
+                  onClick={handleRegisterWithGoogle}
+                  prefix={<FaGoogle />}
+                >
+                  Sign up with Google
+                </Button>
+              </Activity>
             </form>
 
             <div className="auth-footer" style={{ alignItems: 'flex-start' }}>

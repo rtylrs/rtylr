@@ -8,12 +8,12 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 40px 20px;
+  padding: clamp(20px, 3.5vw, 32px) clamp(12px, 2.5vw, 16px);
 }
 
 .auth-form-container {
   width: 100%;
-  max-width: 400px;
+  max-width: clamp(340px, 40vw, 420px);
   overflow: hidden;
 }
 
@@ -23,15 +23,15 @@
 
   h2 {
     margin-bottom: 8px;
-    font-size: 28px;
+    font-size: clamp(20px, 2.6vw, 24px);
     font-weight: 700;
     color: #333;
   }
 
   p {
     color: #666;
-    font-size: 14px;
-    margin-bottom: 24px;
+    font-size: clamp(11.5px, 1.4vw, 13px);
+    margin-bottom: clamp(14px, 2.5vw, 18px);
   }
 
   form {
@@ -47,9 +47,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin: 24px 0;
+  margin: clamp(12px, 2.5vw, 20px) 0;
   color: #9ca3af;
-  font-size: 14px;
+  font-size: 13px;
   position: relative;
 
   span {
@@ -95,21 +95,21 @@
 }
 
 .auth-page-footer {
-  margin-top: 32px;
+  margin-top: clamp(16px, 2.5vw, 24px);
   color: #666666;
-  font-size: 14px;
-  max-width: 400px;
+  font-size: clamp(11.5px, 1.2vw, 12.5px);
+  max-width: clamp(340px, 40vw, 420px);
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 
   p {
     margin: 0;
   }
 
   .privacy-text {
-    font-size: 13px;
+    font-size: clamp(11px, 1.1vw, 12px);
     color: #6b7280;
   }
 

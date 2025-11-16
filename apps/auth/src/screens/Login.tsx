@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Activity } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/userStore';
 import { useLogin, useGoogleAuth } from '../hooks/useAuth';
@@ -8,6 +9,7 @@ import notify from '../lib/notify/notify';
 import { FaGoogle } from 'react-icons/fa';
 import { Button, Input, APP_URLS } from '@voxire/shared';
 import { HelmetContainer } from '@voxire/shared';
+import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const showGoogle: boolean = useGoogleSignupVisible();
 
   const handleSubmit = () => {
     loginMutation.mutate({ email, password });
@@ -119,20 +122,21 @@ const Login: React.FC = () => {
                 Sign In
               </Button>
 
-              <div className="auth-separator">
-                <span>or</span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="md"
-                fullWidth
-                type="button"
-                onClick={handleGoogle}
-                prefix={<FaGoogle />}
-              >
-                Sign in with Google
-              </Button>
+              <Activity mode={showGoogle ? 'visible' : 'hidden'}>
+                <div className="auth-separator">
+                  <span>or</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="md"
+                  fullWidth
+                  type="button"
+                  onClick={handleGoogle}
+                  prefix={<FaGoogle />}
+                >
+                  Sign in with Google
+                </Button>
+              </Activity>
             </form>
 
             <div className="auth-footer" style={{ alignItems: 'flex-start' }}>

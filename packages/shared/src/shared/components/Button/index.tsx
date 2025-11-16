@@ -1,6 +1,6 @@
 import React, { CSSProperties, MouseEvent, ButtonHTMLAttributes } from "react";
 import classNames from "classnames";
-import { CircularProgress } from "@mui/material";
+import LoadingSpinner from "../LoadingSpinner";
 import "./Button.scss";
 
 interface ButtonProps
@@ -113,7 +113,7 @@ export const Button: React.FC<ButtonProps> = ({
     if (loading) {
       return (
         <div className="voxire-button-content">
-          <CircularProgress size={20} color="inherit" />
+          <LoadingSpinner size="small" color="inherit" />
           <span className="voxire-button-text">{children}</span>
         </div>
       );
