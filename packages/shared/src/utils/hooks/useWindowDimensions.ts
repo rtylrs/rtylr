@@ -43,15 +43,12 @@ export function useWindowDimensions() {
     return dimensions.width <= 768;
   });
 
-  const handleResize = useCallback(
-    throttle(() => {
-      if (typeof window === 'undefined') return;
-      const dimensions = getWindowDimensions();
-      setWindowDimensions(dimensions);
-      setIsMobile(dimensions.width <= 768);
-    }, 100),
-    []
-  );
+  const handleResize = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const dimensions = getWindowDimensions();
+    setWindowDimensions(dimensions);
+    setIsMobile(dimensions.width <= 768);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -61,8 +58,9 @@ export function useWindowDimensions() {
     setWindowDimensions(dimensions);
     setIsMobile(dimensions.width <= 768);
 
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => window.removeEventListener('resize', handleResize);
+    const throttledResize = throttle(handleResize, 100);
+    window.addEventListener('resize', throttledResize, { passive: true });
+    return () => window.removeEventListener('resize', throttledResize);
   }, [handleResize]);
 
   return { ...windowDimensions, isMobile };

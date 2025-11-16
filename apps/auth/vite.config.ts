@@ -32,6 +32,7 @@ export default defineConfig(() => ({
       '@scss': path.resolve(__dirname, './src/scss/'),
       '@root': path.resolve(__dirname, '../..'),
     },
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
   },
   server: {
     port: 5176,

@@ -1,16 +1,8 @@
 import React from 'react';
-import { CircularProgress, Box } from '@mui/material';
 import classNames from 'classnames';
 import { LoadingSpinnerProps } from '../../types/common';
 import './LoadingSpinner.scss';
 
-/**
- * @param size - Size of the spinner: small, medium, or large (default: medium)
- * @param color - Color theme: primary, secondary, or inherit (default: primary)
- * @param className - Additional CSS classes for the spinner container
- * @param style - Additional inline styles for the spinner container
- * @param children - Optional content to display below the spinner (e.g., loading text)
- */
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   color = 'primary',
@@ -26,28 +18,11 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     className
   );
 
-  const getSizeValue = () => {
-    switch (size) {
-      case 'small':
-        return 24;
-      case 'large':
-        return 48;
-      default:
-        return 32;
-    }
-  };
-
   return (
-    <Box className={spinnerClasses} style={style} {...props}>
-      <CircularProgress
-        size={getSizeValue()}
-        color={color}
-        className="voxire-loading-spinner__progress"
-      />
-      {children && (
-        <div className="voxire-loading-spinner__content">{children}</div>
-      )}
-    </Box>
+    <div className={spinnerClasses} style={style} {...props}>
+      <div className="voxire-spinner-ring"></div>
+      {children && <div className="voxire-spinner-text">{children}</div>}
+    </div>
   );
 };
 
