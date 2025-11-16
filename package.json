@@ -81,7 +81,7 @@
     "@types/react-modal": "^3.16.3",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitest/ui": "^3.0.0",
     "eslint": "~9.8.0",
     "eslint-config-prettier": "^9.0.0",
@@ -104,5 +104,10 @@
   },
   "nx": {
     "includedScripts": []
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.4.49"
+    }
   }
 }
