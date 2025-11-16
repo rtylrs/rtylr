@@ -12,7 +12,6 @@ const LOCAL_URLS = {
   auth: 'http://localhost:5176',
   landing: 'http://localhost:4200',
   menu: 'http://localhost:5177',
-  account: 'http://localhost:5178',
   api: 'http://localhost:8080/api',
   status: 'https://status.rtylr.com',
 } as const;
@@ -21,7 +20,6 @@ const PROD_URLS = {
   auth: 'https://auth.rtylr.com',
   landing: 'https://rtylr.com',
   menu: 'https://menu.rtylr.com',
-  account: 'https://account.rtylr.com',
   api: 'https://api.rtylr.com',
   status: 'https://status.rtylr.com',
 } as const;

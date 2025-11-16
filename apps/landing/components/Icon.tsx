@@ -1,5 +1,5 @@
 import React, { CSSProperties, useEffect, useState } from "react";
-import { CircularProgress } from "@mui/material";
+import { LoadingSpinner } from "@voxire/shared";
 
 interface SvgIconProps {
   icon: string;
@@ -33,7 +33,7 @@ const SvgIcon: React.FC<SvgIconProps> = ({
   }, [icon]);
 
   if (!svgContent) {
-    return <CircularProgress color="primary" />;
+    return <LoadingSpinner size="small" color="primary" />;
   }
 
   return (

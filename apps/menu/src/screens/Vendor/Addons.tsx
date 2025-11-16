@@ -13,7 +13,7 @@ import { Button } from '@voxire/shared';
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../redux/reducers/userSlice";
 import notify from "../../lib/notify/notify";
-import { CircularProgress } from "@mui/material";
+import { LoadingSpinner } from "@voxire/shared";
 
 const ADDONS = [
   {
@@ -129,7 +129,7 @@ const Addons = () => {
                 <h3>{addon.name}</h3>
                 <p>{addon.description}</p>
                 {keyLoading === (addon.key as string | null) ? (
-                  <CircularProgress />
+                  <LoadingSpinner size="small" color="primary" />
                 ) : (
                   <button
                     className={userAddons?.[addon.key] ? "installed" : ""}

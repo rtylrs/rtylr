@@ -3,10 +3,11 @@ import i18next from 'i18next';
 import { getCookie } from './cookies';
 
 const getBaseUrl = () => {
+  return 'https://api.voxire.dev/';
+
+  // temp hide
   const mode = getCookie('mode') || 'prod';
-  return mode === 'dev'
-    ? 'http://localhost:9999/'
-    : 'https://onion.voxire.dev/';
+  return mode === 'dev' ? 'http://localhost:9999/' : 'https://api.voxire.dev/';
 };
 
 const api = axios.create({

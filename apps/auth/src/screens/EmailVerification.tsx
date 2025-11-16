@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CircularProgress } from '@mui/material';
+import { LoadingSpinner } from '@voxire/shared';
 import api from '../lib/api';
 
 const EmailVerification = () => {
@@ -36,7 +36,11 @@ const EmailVerification = () => {
       }}
     >
       <h1>Email Verification</h1>
-      {loading ? <CircularProgress /> : <p>{message}</p>}
+      {loading ? (
+        <LoadingSpinner size="medium" color="primary" />
+      ) : (
+        <p>{message}</p>
+      )}
     </div>
   );
 };

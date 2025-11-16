@@ -6,7 +6,7 @@ import CreateCategoryModal from "./Components/CreateCategoryModal";
 import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
 import CreateParentCategoryModal from "./Components/CreateParentCategoryModal";
-import { CircularProgress } from "@mui/material";
+import { LoadingSpinner } from "@voxire/shared";
 
 const Menu: React.FC<{}> = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -173,7 +173,7 @@ const Menu: React.FC<{}> = () => {
           height: "80vh",
         }}
       >
-        <CircularProgress size={60} color="primary" />
+        <LoadingSpinner size="large" color="primary" />
       </div>
     );
   }
