@@ -384,7 +384,7 @@ const HeaderMobile: React.FC = () => {
                 Sign Up
               </Button>
             </div>
-            <div className={styles['mobile-language-selector']}>
+            <div className={styles['mobile-language-selector']} style={{ display: 'none' }}>
               <span
                 onClick={() => handleLanguageChange('en')}
                 className={language === 'en' ? styles.active : ''}

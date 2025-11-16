@@ -322,6 +322,7 @@ const HeaderDesktop: React.FC = () => {
       <div className={styles['header-right']}>
         <div
           className={`${styles['language-selector-container']} lang-dropdown-container`}
+          style={{ display: 'none' }}
         >
           <span
             className={styles['language-selector']}
