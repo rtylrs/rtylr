@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package zontriq.credits.v1;
+
+import "proto/common/v1/common.proto";
+
+// Credits describes the credit balance for a user.
+message Credits {
+  int64 id = 1;
+  int32 balance = 2;
+  int32 total_purchased = 3;
+  int32 total_spent = 4;
+  int32 status = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+// CreditTransaction describes a single credit transaction.
+message CreditTransaction {
+  int64 id = 1;
+  int32 amount = 2;
+  string type = 3;
+  string description = 4;
+  string reference_type = 5;
+  int64 reference_id = 6;
+  int32 status = 7;
+  string created_at = 8;
+}
+
+// GetCreditsRequest fetches the credit balance for the authenticated user.
+message GetCreditsRequest {}
+
+// GetCreditsResponse returns the credit balance.
+message GetCreditsResponse {
+  Credits credits = 1;
+}
+
+// ListCreditTransactionsRequest fetches credit transactions.
+message ListCreditTransactionsRequest {
+  string type = 1;
+  common.v1.PaginationRequest pagination = 2;
+}
+
+// ListCreditTransactionsResponse returns credit transactions.
+message ListCreditTransactionsResponse {
+  repeated CreditTransaction transactions = 1;
+  common.v1.PaginationResponse pagination = 2;
+}
+
+// PurchaseCreditsRequest purchases credits.
+message PurchaseCreditsRequest {
+  int32 amount = 1;
+  string payment_method = 2;
+}
+
+// PurchaseCreditsResponse returns the updated balance and transaction.
+message PurchaseCreditsResponse {
+  Credits credits = 1;
+  CreditTransaction transaction = 2;
+}
+
+// SpendCreditsRequest deducts credits for a video generation.
+message SpendCreditsRequest {
+  int32 amount = 1;
+  string description = 2;
+  string reference_type = 3;
+  int64 reference_id = 4;
+}
+
+// SpendCreditsResponse returns the updated balance and transaction.
+message SpendCreditsResponse {
+  Credits credits = 1;
+  CreditTransaction transaction = 2;
+}

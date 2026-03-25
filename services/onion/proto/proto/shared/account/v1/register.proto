@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package shared.account.v1;
+
+// RegisterRequest contains fields required to create a new account.
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+// RegisterResponse returns the created user's info and token.
+message RegisterResponse {
+  string token = 1;
+  string message = 2;
+  int64 user_id = 3;
+  string email = 4;
+  string name = 5;
+}

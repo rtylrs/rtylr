@@ -1,0 +1,11 @@
+version: v1
+name: buf.build/voxire/grimoire
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - STANDARD
+    - COMMENT_MESSAGE
+  except:
+    - PACKAGE_DIRECTORY_MATCH

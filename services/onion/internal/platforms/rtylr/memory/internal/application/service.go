@@ -1,0 +1,292 @@
+package application
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
+	"github.com/voxire/onion/internal/platforms/rtylr/memory/internal/domain"
+	"github.com/voxire/onion/internal/platforms/rtylr/memory/internal/infrastructure"
+)
+
+var ErrAIClientNotAvailable = errors.New("AI client not available for summarization")
+
+type Service struct {
+	repository *infrastructure.Repository
+	aiClient   *snips.Client
+}
+
+func NewService(ctx context.Context) *Service {
+	repo := infrastructure.NewRepository(ctx)
+
+	aiClient, err := snips.NewClient(ctx)
+	if err != nil {
+		logger.Ctx(ctx).Warn("AI client not available for memory summarization", logger.Error(err))
+
+		aiClient = nil
+	}
+
+	return &Service{
+		repository: repo,
+		aiClient:   aiClient,
+	}
+}
+
+func (s *Service) CreateSession(ctx context.Context, userID int, title string) (*domain.ChatSession, error) {
+	sessionID := uuid.New().String()
+
+	session := &domain.ChatSession{
+		UserID:    userID,
+		SessionID: sessionID,
+		Title:     title,
+		Metadata:  "{}",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	return s.repository.CreateChatSession(ctx, session)
+}
+
+func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int) (*domain.ConversationMessage, error) {
+	message := &domain.ConversationMessage{
+		SessionID:  sessionID,
+		UserID:     userID,
+		Role:       role,
+		Content:    content,
+		TokensUsed: tokensUsed,
+		CreatedAt:  time.Now(),
+	}
+
+	return s.repository.CreateMessage(ctx, message)
+}
+
+func (s *Service) GetConversationContext(ctx context.Context, sessionID string, userID int) (*domain.ConversationContext, error) {
+	log := logger.Ctx(ctx)
+
+	log.Info("Getting conversation context",
+		logger.String("session_id", sessionID),
+		logger.Int("user_id", userID))
+
+	contextData, err := s.repository.GetContextForSession(ctx, sessionID, userID)
+	if err != nil {
+		log.Error("Failed to get conversation context from repository", logger.Error(err),
+			logger.String("session_id", sessionID),
+			logger.Int("user_id", userID))
+
+		return nil, fmt.Errorf("failed to get conversation context: %w", err)
+	}
+
+	log.Info("Context data retrieved from repository",
+		logger.String("session_id", sessionID),
+		logger.Int("data_items", len(contextData)))
+
+	conversationContext := &domain.ConversationContext{
+		SessionID: sessionID,
+		UserID:    userID,
+		Messages:  []domain.ConversationMessage{},
+		Summary:   "",
+		Memories:  []domain.UserMemory{},
+	}
+
+	for i := range contextData {
+		item := contextData[i]
+		switch item.Type {
+		case "message":
+			message := domain.ConversationMessage{
+				Role:    item.Role,
+				Content: item.Content,
+			}
+			if item.CreatedAt != nil {
+				message.CreatedAt = *item.CreatedAt
+			}
+
+			conversationContext.Messages = append(conversationContext.Messages, message)
+		case "summary":
+			conversationContext.Summary = item.Summary
+		case "memory":
+			conversationContext.Memories = append(conversationContext.Memories, domain.UserMemory{
+				MemoryType: item.MemoryType,
+				Key:        item.MemoryKey,
+				Value:      item.MemoryValue,
+			})
+		}
+	}
+
+	log.Info("Conversation context built successfully",
+		logger.String("session_id", sessionID),
+		logger.Int("messages", len(conversationContext.Messages)),
+		logger.Int("memories", len(conversationContext.Memories)))
+
+	return conversationContext, nil
+}
+
+func (s *Service) SummarizeSession(ctx context.Context, sessionID string, userID int) error {
+	if s.aiClient == nil {
+		return ErrAIClientNotAvailable
+	}
+
+	messages, err := s.repository.GetSessionMessages(ctx, sessionID)
+	if err != nil {
+		return fmt.Errorf("failed to get session messages: %w", err)
+	}
+
+	if len(messages) < 3 {
+		return nil
+	}
+
+	var conversationText strings.Builder
+	for _, msg := range messages {
+		conversationText.WriteString(fmt.Sprintf("%s: %s\n", msg.Role, msg.Content))
+	}
+
+	prompt := fmt.Sprintf(`Please provide a concise summary of this conversation in 2-3 sentences. Also identify 3-5 key topics discussed and assess the overall sentiment (positive, negative, or neutral).
+
+Conversation:
+%s
+
+Summary:`, conversationText.String())
+
+	summary, err := s.aiClient.CompleteText(ctx, prompt)
+	if err != nil {
+		return fmt.Errorf("failed to generate summary: %w", err)
+	}
+
+	summaryData := s.parseSummaryResponse(summary)
+
+	conversationSummary := &domain.ConversationSummary{
+		UserID:          userID,
+		SessionID:       sessionID,
+		Summary:         summaryData.Summary,
+		KeyTopics:       summaryData.KeyTopics,
+		Sentiment:       summaryData.Sentiment,
+		ImportanceScore: summaryData.ImportanceScore,
+		CreatedAt:       time.Now(),
+	}
+
+	_, err = s.repository.CreateConversationSummary(ctx, conversationSummary)
+	if err != nil {
+		return fmt.Errorf("failed to store conversation summary: %w", err)
+	}
+
+	s.extractAndStoreMemories(ctx, userID, sessionID, messages, summaryData)
+
+	return nil
+}
+
+func (s *Service) extractAndStoreMemories(ctx context.Context, userID int, sessionID string, messages []domain.ConversationMessage, summaryData *SummaryData) {
+	memories := s.identifyMemories(messages, summaryData)
+
+	for _, memory := range memories {
+		userMemory := &domain.UserMemory{
+			UserID:        userID,
+			MemoryType:    memory.Type,
+			Key:           memory.Key,
+			Value:         memory.Value,
+			Confidence:    memory.Confidence,
+			SourceSession: sessionID,
+			CreatedAt:     time.Now(),
+		}
+
+		_, err := s.repository.StoreUserMemory(ctx, userMemory)
+		if err != nil {
+			logger.Ctx(ctx).Warn("Failed to store user memory",
+				logger.Error(err),
+				logger.String("memory_key", memory.Key))
+		}
+	}
+}
+
+func (s *Service) identifyMemories(_ []domain.ConversationMessage, summaryData *SummaryData) []MemoryItem {
+	memories := make([]MemoryItem, 0, len(summaryData.KeyTopics))
+
+	if summaryData.Sentiment != "" {
+		memories = append(memories, MemoryItem{
+			Type:       "preference",
+			Key:        "conversation_style",
+			Value:      fmt.Sprintf("User prefers %s conversations", summaryData.Sentiment),
+			Confidence: 0.8,
+		})
+	}
+
+	for _, topic := range summaryData.KeyTopics {
+		memories = append(memories, MemoryItem{
+			Type:       "interest",
+			Key:        "topic_" + strings.ToLower(strings.ReplaceAll(topic, " ", "_")),
+			Value:      "User is interested in " + topic,
+			Confidence: 0.7,
+		})
+	}
+
+	return memories
+}
+
+func (s *Service) parseSummaryResponse(response string) *SummaryData {
+	lines := strings.Split(response, "\n")
+
+	summaryData := &SummaryData{
+		Summary:         "",
+		KeyTopics:       []string{},
+		Sentiment:       "neutral",
+		ImportanceScore: 1.0,
+	}
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "Summary:") {
+			summaryData.Summary = strings.TrimPrefix(line, "Summary:")
+		} else if strings.HasPrefix(line, "Key topics:") {
+			topics := strings.TrimPrefix(line, "Key topics:")
+			summaryData.KeyTopics = strings.Split(topics, ",")
+		} else if strings.HasPrefix(line, "Sentiment:") {
+			sentiment := strings.TrimPrefix(line, "Sentiment:")
+			summaryData.Sentiment = strings.TrimSpace(sentiment)
+		}
+	}
+
+	return summaryData
+}
+
+func (s *Service) SearchMemories(ctx context.Context, userID int, query string) ([]domain.UserMemory, error) {
+	return s.repository.SearchUserMemory(ctx, userID, query)
+}
+
+func (s *Service) GetUserStats(ctx context.Context, userID int) (*domain.UserStats, error) {
+	stats, err := s.repository.GetSessionStats(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user stats: %w", err)
+	}
+
+	return &domain.UserStats{
+		TotalMessages:       stats.TotalMessages,
+		TotalSessions:       stats.TotalSessions,
+		AvgTokensPerMessage: stats.AvgTokensPerMessage,
+		TotalTokensUsed:     stats.TotalTokensUsed,
+	}, nil
+}
+
+func (s *Service) Close() error {
+	if s.repository != nil {
+		return s.repository.Close()
+	}
+
+	return nil
+}
+
+type SummaryData struct {
+	Summary         string   `json:"summary"`
+	KeyTopics       []string `json:"key_topics"`
+	Sentiment       string   `json:"sentiment"`
+	ImportanceScore float64  `json:"importance_score"`
+}
+
+type MemoryItem struct {
+	Type       string  `json:"type"`
+	Key        string  `json:"key"`
+	Value      string  `json:"value"`
+	Confidence float64 `json:"confidence"`
+}

@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package zontriq.videos.v1;
+
+import "proto/common/v1/common.proto";
+
+// Video describes a generated video.
+message Video {
+  int64 id = 1;
+  int64 series_id = 2;
+  string series_name = 3;
+  string title = 4;
+  string script = 5;
+  string video_url = 6;
+  string thumbnail_url = 7;
+  string state = 8;
+  int32 duration = 9;
+  int32 episode_number = 10;
+  string error_message = 11;
+  int32 status = 12;
+  JobProgress job = 13;
+  string created_at = 14;
+  string updated_at = 15;
+  VideoConfig config = 16;
+}
+
+// VideoConfig stores the generation settings for a video.
+message VideoConfig {
+  string ai_model = 1;
+  string voice = 2;
+  int32 duration_seconds = 3;
+  string preset_style = 4;
+  string quality = 5;
+  string background_music = 6;
+  string publishing_mode = 7;
+  string additional_info = 8;
+  bool captions_enabled = 9;
+  string caption_style = 10;
+  string caption_position = 11;
+  string caption_font = 12;
+}
+
+// JobProgress describes the current generation/render/publish progress for a video.
+message JobProgress {
+  int64 id = 1;
+  string type = 2;
+  string state = 3;
+  int32 progress = 4;
+  string current_step = 5;
+  string error_message = 6;
+  string started_at = 7;
+  string completed_at = 8;
+}
+
+// VideoTarget describes a channel target for a video.
+message VideoTarget {
+  int64 id = 1;
+  int64 video_id = 2;
+  int64 channel_id = 3;
+  string channel_name = 4;
+  string platform = 5;
+  string state = 6;
+  string published_at = 7;
+  string platform_post_id = 8;
+  string platform_post_url = 9;
+  string error_message = 10;
+}
+
+// PublishLogEntry describes a record of a video publish event.
+message PublishLogEntry {
+  int64 id = 1;
+  int64 video_id = 2;
+  int64 channel_id = 3;
+  string platform = 4;
+  string platform_post_id = 5;
+  string platform_post_url = 6;
+  string result = 7;
+  string error_message = 8;
+  string published_at = 9;
+}
+
+// ListVideosRequest fetches videos for the authenticated user.
+message ListVideosRequest {
+  int64 series_id = 1;
+  string state = 2;
+  string platform = 3;
+  common.v1.PaginationRequest pagination = 4;
+}
+
+// ListVideosResponse returns the user videos.
+message ListVideosResponse {
+  repeated Video videos = 1;
+  common.v1.PaginationResponse pagination = 2;
+}
+
+// GetVideoRequest fetches a single video by ID.
+message GetVideoRequest {
+  int64 id = 1;
+}
+
+// GetVideoResponse returns a video with its targets and publish history.
+message GetVideoResponse {
+  Video video = 1;
+  repeated VideoTarget targets = 2;
+  repeated PublishLogEntry publish_log = 3;
+}
+
+// CreateVideoRequest creates a new video with generation settings.
+message CreateVideoRequest {
+  int64 series_id = 1;
+  string title = 2;
+  string script = 3;
+  repeated int64 channel_ids = 4;
+  VideoConfig config = 5;
+}
+
+// CreateVideoResponse returns the created video.
+message CreateVideoResponse {
+  Video video = 1;
+}
+
+// GenerateVideoRequest triggers video generation for a series.
+message GenerateVideoRequest {
+  int64 series_id = 1;
+  repeated int64 channel_ids = 2;
+  VideoConfig config = 3;
+}
+
+// GenerateVideoResponse returns the video with its job progress.
+message GenerateVideoResponse {
+  Video video = 1;
+}
+
+// DeleteVideoRequest soft-deletes a video.
+message DeleteVideoRequest {
+  int64 id = 1;
+}
+
+// DeleteVideoResponse confirms deletion.
+message DeleteVideoResponse {}

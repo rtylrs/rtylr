@@ -1,0 +1,29 @@
+#!/bin/bash
+set -xe
+
+ln -s -f ../../git-hooks/pre-push .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+
+for dir in ./db/dbmodels/*/; do
+ [ -d "$dir" ] || continue
+ find "$dir" -type f ! -name 'queries.go' ! -name 'utils.go' ! -name 'queries_input.go' -delete
+done
+
+# Check sql case
+./scripts/check_sql_case.sh
+
+# Generate SQL code for each module (includes SQL case checking)
+./scripts/generate_sqlc.sh
+
+# Generate protobuf files
+make proto-generate
+
+go vet ./...
+
+# Build all service binaries
+mkdir -p ./bin
+go build -o ./bin/api ./cmd/api/main.go
+go build -o ./bin/worker ./cmd/worker/main.go
+go build -o ./bin/pay ./cmd/pay/main.go
+
+golangci-lint run       

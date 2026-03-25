@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: onion_postgres
+    platform: linux/amd64 # Force AMD64 for PostgreSQL compatibility
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-onion_dev}
+      POSTGRES_USER: ${DB_USER:-onion_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-onion_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schemas:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-onion_user} -d ${DB_NAME:-onion_dev}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      platforms:
+        - linux/arm64
+    container_name: onion_app
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

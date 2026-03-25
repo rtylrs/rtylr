@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package zontriq.series.v1;
+
+import "proto/common/v1/common.proto";
+
+// Series describes a content series template.
+message Series {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string niche = 4;
+  string voice = 5;
+  string style = 6;
+  string frequency = 7;
+  string state = 8;
+  int32 video_count = 9;
+  int32 status = 10;
+  string created_at = 11;
+  string updated_at = 12;
+  string config = 13;
+  string publish_time = 14;
+}
+
+// SeriesContext describes the AI memory and context for a series.
+message SeriesContext {
+  int64 id = 1;
+  int64 series_id = 2;
+  string context = 3;
+  repeated string topics_covered = 4;
+  int32 last_episode_number = 5;
+}
+
+// ListSeriesRequest fetches all series for the authenticated user.
+message ListSeriesRequest {
+  string state = 1;
+  common.v1.PaginationRequest pagination = 2;
+}
+
+// ListSeriesResponse returns the user series.
+message ListSeriesResponse {
+  repeated Series series = 1;
+  common.v1.PaginationResponse pagination = 2;
+}
+
+// GetSeriesRequest fetches a single series by ID.
+message GetSeriesRequest {
+  int64 id = 1;
+}
+
+// GetSeriesResponse returns a series with its context.
+message GetSeriesResponse {
+  Series series = 1;
+  SeriesContext context = 2;
+}
+
+// CreateSeriesRequest creates a new content series.
+message CreateSeriesRequest {
+  string name = 1;
+  string description = 2;
+  string niche = 3;
+  string voice = 4;
+  string style = 5;
+  string frequency = 6;
+  string config = 7;
+  string publish_time = 8;
+  repeated int64 channel_ids = 9;
+}
+
+// CreateSeriesResponse returns the created series.
+message CreateSeriesResponse {
+  Series series = 1;
+}
+
+// UpdateSeriesRequest updates an existing series.
+message UpdateSeriesRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string niche = 4;
+  string voice = 5;
+  string style = 6;
+  string frequency = 7;
+  string state = 8;
+  string config = 9;
+  string publish_time = 10;
+}
+
+// UpdateSeriesResponse returns the updated series.
+message UpdateSeriesResponse {
+  Series series = 1;
+}
+
+// DeleteSeriesRequest soft-deletes a series.
+message DeleteSeriesRequest {
+  int64 id = 1;
+}
+
+// DeleteSeriesResponse confirms deletion.
+message DeleteSeriesResponse {}
+
+// UpdateSeriesContextRequest updates the AI context for a series.
+message UpdateSeriesContextRequest {
+  int64 series_id = 1;
+  string context = 2;
+}
+
+// UpdateSeriesContextResponse returns the updated context.
+message UpdateSeriesContextResponse {
+  SeriesContext context = 1;
+}

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package shared.config.v1;
+
+// GetConfigByOwnerRequest identifies the owner to fetch config for.
+message GetConfigByOwnerRequest {
+  string owner = 1;
+}
+
+// GetConfigByOwnerResponse returns configurations for the owner.
+message GetConfigByOwnerResponse {
+  Config config = 1;
+  Theme theme = 2;
+}
+
+// Theme describes a theme's appearance settings.
+message Theme {
+  int64 id = 1;
+  string primary_color = 2;
+  string secondary_color = 3;
+  string accent_color = 4;
+  string dark_green_color = 5;
+  string background_color = 6;
+  string bg_color = 7;
+  string surface_color = 8;
+  string light_color = 9;
+  string dark_color = 10;
+  string item_background_color = 11;
+  string error_color = 12;
+  string success_color = 13;
+  string warning_color = 14;
+  string info_color = 15;
+  string text_primary_color = 16;
+  string text_secondary_color = 17;
+  string subtext_color = 18;
+  string light_gray_color = 19;
+  string active_color = 20;
+  string admin_background_color = 21;
+  string admin_primary_color = 22;
+  string vendor_background_color = 23;
+  string border_color = 24;
+  string font_family_primary = 25;
+  string font_family_secondary = 26;
+  string font_size_base = 27;
+  string font_size_heading = 28;
+  string mobile_breakpoint = 29;
+}
+
+// Config represents site and application configuration values.
+message Config {
+  string owner_id = 1;
+  string site_name = 2;
+  string logo_url = 3;
+  string favicon_url = 4;
+  repeated string meta_tags = 5;
+  string contact_email = 6;
+  string contact_number = 7;
+  string instagram = 8;
+  bool maintenance_mode = 9;
+  string maintenance_notice = 10;
+  bool addons_enabled = 11;
+  bool enable_reviews = 12;
+  bool enable_wishlist = 13;
+  bool enable_newsletter_signup = 14;
+  string about_content = 15;
+  string footer_sub_text = 16;
+}
+
+// CreateConfigRequest describes a new configuration entry to create.
+message CreateConfigRequest {
+  string owner = 1;
+  string key = 2;
+  string value = 3;
+  string description = 4;
+}
+
+// CreateConfigResponse contains the created config identifier.
+message CreateConfigResponse {
+  int64 config_id = 1;
+  string message = 2;
+}
+
+// GetFeaturesRequest requests all feature flags.
+message GetFeaturesRequest {}
+
+// Features represents evaluated feature flags for a user.
+message Features {
+  // Map of feature key to enabled status.
+  map<string, bool> flags = 1;
+
+  // Whether the user is anonymous (affects evaluation).
+  bool is_anonymous = 2;
+
+  // Session ID for anonymous users (used for consistent evaluation).
+  string session_id = 3;
+}
+
+// GetFeaturesResponse returns feature flags.
+message GetFeaturesResponse {
+  Features features = 2;
+}

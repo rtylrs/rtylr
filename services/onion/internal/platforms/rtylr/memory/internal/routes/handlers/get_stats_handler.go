@@ -1,0 +1,51 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platforms/rtylr/memory/internal/application"
+)
+
+func StatsRoutes() []string {
+	return []string{
+		"/memory/stats",
+	}
+}
+
+type StatsRequest struct {
+	UserID int `json:"user_id"`
+}
+
+type StatsResponse struct {
+	Success bool        `json:"success"`
+	Stats   interface{} `json:"stats,omitempty"`
+	Error   string      `json:"error,omitempty"`
+}
+
+type StatsHandler struct {
+	MemoryService *application.Service
+}
+
+func (h *StatsHandler) Serve(ctx context.Context, req *StatsRequest) (StatsResponse, *errorModels.ServerError) {
+	if req.UserID <= 0 {
+		return StatsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "User ID is required",
+		}
+	}
+
+	stats, err := h.MemoryService.GetUserStats(ctx, req.UserID)
+	if err != nil {
+		return StatsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to get user stats",
+		}
+	}
+
+	return StatsResponse{
+		Success: true,
+		Stats:   stats,
+	}, nil
+}

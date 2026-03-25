@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package zontriq.users.v1;
+
+// Plan describes a subscription tier.
+message Plan {
+  int64 id = 1;
+  string name = 2;
+  string display_name = 3;
+  int32 price_cents = 4;
+  int32 max_videos_per_month = 5;
+  int32 max_channels = 6;
+  int32 max_series = 7;
+  int32 max_automations = 8;
+}
+
+// ListPlansRequest fetches all available plans.
+message ListPlansRequest {}
+
+// ListPlansResponse returns all plans.
+message ListPlansResponse {
+  repeated Plan plans = 1;
+}
+
+// GetUserPlanRequest fetches the plan for the authenticated user.
+message GetUserPlanRequest {}
+
+// GetUserPlanResponse returns the user's current plan.
+message GetUserPlanResponse {
+  Plan plan = 1;
+}

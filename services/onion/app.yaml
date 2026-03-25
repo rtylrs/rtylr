@@ -1,0 +1,22 @@
+name: onion
+services:
+  - name: onion
+    source_dir: /
+    github:
+      repo: voxire/onion
+      branch: main
+    run_command: ./app
+    dockerfile_path: Dockerfile
+    environment_slug: go
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 8080
+    routes:
+      - path: /
+    envs:
+      - key: GO_ENV
+        value: production
+      - key: PORT
+        value: "8080"
+      - key: GO_VERSION
+        value: "1.25.0"

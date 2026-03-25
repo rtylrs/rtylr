@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package shared.account.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// User represents a user account profile.
+message User {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+// GetProfileRequest specifies which user's profile to retrieve.
+message GetProfileRequest {
+  int64 user_id = 1;
+}
+
+// GetProfileResponse contains the requested user's profile data.
+message GetProfileResponse {
+  User user = 1;
+}
+
+// UpdateProfileRequest updates the user's profile.
+message UpdateProfileRequest {
+  string name = 1;
+  string email = 2;
+}
+
+// UpdateProfileResponse returns the updated profile.
+message UpdateProfileResponse {
+  User user = 1;
+}
+
+// ChangePasswordRequest changes the user's password.
+message ChangePasswordRequest {
+  string current_password = 1;
+  string new_password = 2;
+}
+
+// ChangePasswordResponse confirms password change.
+message ChangePasswordResponse {}
+
+// DeleteAccountRequest permanently deletes the user's account.
+message DeleteAccountRequest {
+  string password = 1;
+}
+
+// DeleteAccountResponse confirms account deletion.
+message DeleteAccountResponse {}

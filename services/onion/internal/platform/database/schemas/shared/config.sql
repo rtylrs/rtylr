@@ -1,0 +1,22 @@
+CREATE TABLE config (
+    id SERIAL PRIMARY KEY,
+    owner_id INT NOT NULL,
+    site_name TEXT,
+    logo_url TEXT,
+    favicon_url TEXT,
+    meta_tags TEXT[],
+    contact_email TEXT NOT NULL,
+    contact_number TEXT NOT NULL,
+    instagram TEXT, 
+    maintenance_mode BOOLEAN DEFAULT FALSE,
+    maintenance_notice TEXT,
+    addons_enabled BOOLEAN DEFAULT FALSE,
+    enable_reviews BOOLEAN DEFAULT FALSE,
+    enable_wishlist BOOLEAN DEFAULT FALSE,
+    enable_newsletter_signup BOOLEAN DEFAULT FALSE,
+    about_content TEXT NOT NULL,
+    footer_sub_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_by INT 
+);

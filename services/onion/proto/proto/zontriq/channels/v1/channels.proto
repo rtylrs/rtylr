@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package zontriq.channels.v1;
+
+// Channel describes a connected social media channel.
+message Channel {
+  int64 id = 1;
+  string platform = 2;
+  string platform_channel_id = 3;
+  string channel_name = 4;
+  string channel_handle = 5;
+  string channel_avatar_url = 6;
+  string connection_state = 7;
+  string connected_at = 8;
+  int32 status = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+// ListChannelsRequest fetches all channels for the authenticated user.
+message ListChannelsRequest {
+  string platform = 1;
+}
+
+// ListChannelsResponse returns the user channels.
+message ListChannelsResponse {
+  repeated Channel channels = 1;
+}
+
+// GetChannelRequest fetches a single channel by ID.
+message GetChannelRequest {
+  int64 id = 1;
+}
+
+// GetChannelResponse returns a single channel.
+message GetChannelResponse {
+  Channel channel = 1;
+}
+
+// ConnectChannelRequest initiates an OAuth connection to a platform.
+message ConnectChannelRequest {
+  string platform = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  string token_expires_at = 4;
+  string platform_channel_id = 5;
+  string channel_name = 6;
+  string channel_handle = 7;
+  string channel_avatar_url = 8;
+}
+
+// ConnectChannelResponse returns the newly connected channel.
+message ConnectChannelResponse {
+  Channel channel = 1;
+}
+
+// DisconnectChannelRequest removes a channel connection.
+message DisconnectChannelRequest {
+  int64 id = 1;
+}
+
+// DisconnectChannelResponse confirms disconnection.
+message DisconnectChannelResponse {}
+
+// RefreshChannelTokenRequest refreshes OAuth tokens for a channel.
+message RefreshChannelTokenRequest {
+  int64 id = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  string token_expires_at = 4;
+}
+
+// RefreshChannelTokenResponse returns the updated channel.
+message RefreshChannelTokenResponse {
+  Channel channel = 1;
+}

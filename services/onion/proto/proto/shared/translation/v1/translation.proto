@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package shared.translation.v1;
+
+import "google/protobuf/timestamp.proto";
+import "proto/common/v1/common.proto";
+
+// TranslateRequest requests translation of input text.
+message TranslateRequest {
+  string text = 1;
+  string source_language = 2;
+  string target_language = 3;
+  int64 user_id = 4;
+}
+
+// TranslateResponse returns translated text and metadata.
+message TranslateResponse {
+  string translated_text = 1;
+  string source_language = 2;
+  string target_language = 3;
+  float confidence_score = 4;
+  int64 translation_id = 5;
+}
+
+// GetSupportedLanguagesRequest requests the list of languages.
+message GetSupportedLanguagesRequest {}
+
+// GetSupportedLanguagesResponse returns supported languages.
+message GetSupportedLanguagesResponse {
+  repeated Language languages = 1;
+}
+
+// Language describes a supported language.
+message Language {
+  string code = 1;
+  string name = 2;
+  string native_name = 3;
+  bool is_active = 4;
+}
+
+// GetTranslationHistoryRequest requests paginated translation history.
+message GetTranslationHistoryRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+// GetTranslationHistoryResponse returns translation records with pagination.
+message GetTranslationHistoryResponse {
+  repeated TranslationRecord records = 1;
+  int32 total_count = 2;
+  common.v1.PaginationResponse pagination = 3;
+}
+
+// TranslationRecord represents a single translation event.
+message TranslationRecord {
+  int64 id = 1;
+  int64 user_id = 2;
+  string original_text = 3;
+  string translated_text = 4;
+  string source_language = 5;
+  string target_language = 6;
+  float confidence_score = 7;
+  google.protobuf.Timestamp created_at = 8;
+}

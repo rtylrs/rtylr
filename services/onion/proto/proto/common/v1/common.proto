@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package common.v1;
+
+// Error represents a standard error payload.
+message Error {
+  string code = 1;
+  string message = 2;
+  string details = 3;
+}
+
+// PaginationRequest specifies paging parameters for list calls.
+message PaginationRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+// PaginationResponse describes paging details for list results.
+message PaginationResponse {
+  int32 current_page = 1;
+  int32 page_size = 2;
+  int32 total_pages = 3;
+  int64 total_count = 4;
+  bool has_next = 5;
+  bool has_prev = 6;
+}

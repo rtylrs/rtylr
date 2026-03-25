@@ -1,0 +1,100 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "README.md"
+  workflow_dispatch:
+
+env:
+  SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
+  SLACK_CHANNEL_ID: C09BC3LEQTY
+  ECR_REGISTRY: 021323922317.dkr.ecr.eu-west-1.amazonaws.com
+  ECR_REPOSITORY: voxire/onion
+
+jobs:
+  version:
+    name: Compute Version
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Bump version and create tag
+        id: bump
+        run: |
+          # Get all version tags, normalize to strip v prefix, sort, take highest
+          LATEST=$(git tag --list | sed -n 's/^v\?\([0-9]\+\.[0-9]\+\.[0-9]\+\)$/\1/p' | sort -V | tail -1)
+
+          if [ -z "$LATEST" ]; then
+            NEW_VERSION="0.1.1"
+          else
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST"
+            if [ "$PATCH" -ge 99 ]; then
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              PATCH=$((PATCH + 1))
+            fi
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          # Create and push tag BEFORE building — this is the source of truth
+          git tag -a "$NEW_VERSION" -m "Release ${NEW_VERSION}"
+          git push origin "$NEW_VERSION"
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Created tag $NEW_VERSION"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.bump.outputs.new_version }}
+          NOTES=$(git log --oneline --no-decorate $(git tag --sort=-v:refname | sed -n '2p')..HEAD 2>/dev/null || echo "Initial release")
+          gh release create "$VERSION" --title "$VERSION" --notes "$NOTES"
+
+  build:
+    name: Build and Push
+    needs: version
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        run: |
+          VERSION=${{ needs.version.outputs.new_version }}
+
+          docker build -t $ECR_REPOSITORY .
+
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          echo "Pushed $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"

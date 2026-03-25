@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package zontriq.users.v1;
+
+import "proto/zontriq/users/v1/plan.proto";
+import "proto/zontriq/users/v1/usage.proto";
+import "proto/zontriq/users/v1/preferences.proto";
+
+// ZontriqUser describes a zontriq-specific user account.
+message ZontriqUser {
+  int64 id = 1;
+  int64 user_id = 2;
+  string email = 3;
+  string name = 4;
+  Plan plan = 5;
+  int32 status = 6;
+  bool onboarded = 7;
+  string trial_ends_at = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+// GetZontriqUserRequest fetches the zontriq user profile.
+message GetZontriqUserRequest {}
+
+// CompleteOnboardingRequest marks the user as onboarded.
+message CompleteOnboardingRequest {}
+
+// CompleteOnboardingResponse confirms onboarding completion.
+message CompleteOnboardingResponse {
+  bool onboarded = 1;
+}
+
+// GetZontriqUserResponse returns the zontriq user with usage and preferences.
+message GetZontriqUserResponse {
+  ZontriqUser user = 1;
+  Usage usage = 2;
+  Preferences preferences = 3;
+}
+
+// CreateZontriqUserRequest creates a new zontriq user account.
+message CreateZontriqUserRequest {
+  int64 plan_id = 1;
+}
+
+// CreateZontriqUserResponse returns the created zontriq user.
+message CreateZontriqUserResponse {
+  ZontriqUser user = 1;
+}

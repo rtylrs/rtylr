@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package zontriq.users.v1;
+
+// Usage describes video generation usage for a billing period.
+message Usage {
+  int64 id = 1;
+  string period_start = 2;
+  string period_end = 3;
+  int32 videos_generated = 4;
+  int32 videos_published = 5;
+}

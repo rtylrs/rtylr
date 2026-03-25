@@ -1,0 +1,70 @@
+name: Auto Version Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  version-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get latest tag and increment version
+        id: version
+        run: |
+          # Get the latest tag, default to v0.0.0 if none exists
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+
+          # Remove 'v' prefix and split version
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          # Increment patch version (0.0.1 -> 0.0.2 -> ... -> 0.0.99 -> 0.1.0)
+          PATCH=$((PATCH + 1))
+
+          # Handle rollover: 0.0.99 -> 0.1.0, 0.99.99 -> 1.0.0
+          if [ $PATCH -gt 99 ]; then
+            PATCH=0
+            MINOR=$((MINOR + 1))
+            if [ $MINOR -gt 99 ]; then
+              MINOR=0
+              MAJOR=$((MAJOR + 1))
+            fi
+          fi
+
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git tag ${{ steps.version.outputs.new_version }}
+          git push origin ${{ steps.version.outputs.new_version }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          release_name: Release ${{ steps.version.outputs.new_version }}
+          body: |
+            Automated release for version ${{ steps.version.outputs.new_version }}
+
+            ## Changes
+            - Protocol Buffer definitions updated
+            - Generated code updated
+          draft: false
+          prerelease: false
