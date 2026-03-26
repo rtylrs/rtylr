@@ -9,10 +9,6 @@ on:
       - "README.md"
   workflow_dispatch:
 
-env:
-  SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
-  SLACK_CHANNEL_ID: C09BC3LEQTY
-
 jobs:
   version:
     name: Compute Version

@@ -26,7 +26,6 @@ Onion is a modular Go backend using Clean Architecture with platform-based organ
 internal/
 ├── modules/              # shared across all platforms
 │   ├── config/           # site config, feature flags, themes
-│   ├── core/             # error reporting, slack integration
 │   ├── translation/      # i18n (en, ar, fr)
 │   └── user/             # authentication (email/password/JWT)
 ├── platforms/            # platform-specific modules
@@ -42,7 +41,7 @@ internal/
     ├── cache/            # Redis + in-memory (BigCache)
     ├── snips/            # AI client abstraction (OpenAI, Gemini)
     ├── mailer/           # email with DKIM signing
-    ├── logger/           # structured logging with alerts
+    ├── logger/           # structured logging
     ├── errors/           # error types
     └── utils/            # JWT, password hashing, converters
 ```

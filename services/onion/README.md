@@ -10,7 +10,6 @@ Onion is a full-featured backend framework that provides everything you need to 
 - **Authentication & Security**: JWT-based auth, middleware, and security features
 - **Real-time Capabilities**: WebSocket support, SSE, and streaming
 - **Extensible**: Easy to add new modules and functionality
-- **Slack Integration**: Real-time monitoring and notifications
 - **Auto-recovery**: Panic recovery with automatic server restart
 - **Multi-Platform Support**: HTTP REST APIs for web and internal services
 

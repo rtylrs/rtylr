@@ -3,18 +3,9 @@ package logger
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"log"
 	"log/slog"
 	"os"
-	"strings"
-	"sync"
-
-	"github.com/voxire/onion/internal/platform/utils/alerts"
 )
-
-var ErrAlertsNotInitialized = errors.New("alerts service not initialized")
 
 type ctxKey struct{}
 
@@ -27,17 +18,6 @@ type Field struct {
 	Key   string
 	Value interface{}
 }
-
-type Config struct {
-	AlertsEnabled  bool
-	AlertsChannels map[string]string
-}
-
-var (
-	alertsSvc     *alerts.Service
-	alertsMu      sync.RWMutex
-	alertsEnabled bool
-)
 
 func SetupLogger() {
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})
@@ -60,97 +40,6 @@ func Ctx(ctx context.Context) *Logger {
 	return &Logger{slog.Default(), ctx}
 }
 
-func InitAlertsFromEnv() {
-	slackBotToken := os.Getenv("SLACK_BOT_TOKEN")
-	alertsChannelID := os.Getenv("SLACK_ALERTS_CHANNEL_ID")
-	enabled := os.Getenv("SLACK_LOGGING_ENABLED") == "true"
-
-	if slackBotToken != "" && alertsChannelID != "" {
-		alertsMu.Lock()
-
-		alertsSvc = alerts.NewAlertsService(context.Background(), slackBotToken)
-		alertsSvc.AddChannel("alerts", alertsChannelID)
-
-		alertsEnabled = enabled
-
-		alertsMu.Unlock()
-	}
-}
-
-func ConfigureAlerts(cfg Config) {
-	alertsMu.Lock()
-	defer alertsMu.Unlock()
-
-	if cfg.AlertsEnabled && len(cfg.AlertsChannels) > 0 {
-		slackBotToken := os.Getenv("SLACK_BOT_TOKEN")
-		if slackBotToken != "" {
-			alertsSvc = alerts.NewAlertsService(context.Background(), slackBotToken)
-			for name, channelID := range cfg.AlertsChannels {
-				alertsSvc.AddChannel(name, channelID)
-			}
-
-			alertsEnabled = true
-		}
-	} else {
-		alertsSvc = nil
-		alertsEnabled = false
-	}
-}
-
-func AddAlertsChannel(name, channelID string) {
-	alertsMu.Lock()
-	defer alertsMu.Unlock()
-
-	if alertsSvc != nil {
-		alertsSvc.AddChannel(name, channelID)
-	}
-}
-
-func SendAlertsMessage(channelName, message string) error {
-	alertsMu.RLock()
-	defer alertsMu.RUnlock()
-
-	if alertsSvc == nil {
-		return ErrAlertsNotInitialized
-	}
-
-	return alertsSvc.SendMessage(context.Background(), channelName, message)
-}
-
-func sendNotifications(ctx context.Context, level, message string, fields []Field) {
-	var formattedMessage strings.Builder
-
-	_, _ = fmt.Fprintf(&formattedMessage, "%s: %s", level, message)
-	if len(fields) > 0 {
-		formattedMessage.WriteString("\n")
-
-		for _, f := range fields {
-			_, _ = fmt.Fprintf(&formattedMessage, "• %s: %v\n", f.Key, f.Value)
-		}
-	}
-
-	select {
-	case <-ctx.Done():
-		return
-	default:
-	}
-
-	go func() {
-		alertsMu.RLock()
-
-		currentAlertsSvc := alertsSvc
-		currentAlertsEnabled := alertsEnabled
-
-		alertsMu.RUnlock()
-
-		if currentAlertsEnabled && currentAlertsSvc != nil {
-			if err := currentAlertsSvc.SendMessage(ctx, "alerts", formattedMessage.String()); err != nil {
-				log.Printf("Failed to send alerts notification: %v", err)
-			}
-		}
-	}()
-}
-
 func (l *Logger) Info(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelInfo, "\""+msg+"\"", convertFields(fields)...)
 }
@@ -161,17 +50,14 @@ func (l *Logger) Debug(msg string, fields ...Field) {
 
 func (l *Logger) Error(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelError, msg, convertFields(fields)...)
-	sendNotifications(l.ctx, "[Error]", msg, fields)
 }
 
 func (l *Logger) Warn(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelWarn, msg, convertFields(fields)...)
-	sendNotifications(l.ctx, "[Warn]", msg, fields)
 }
 
 func (l *Logger) Fatal(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelError, msg, convertFields(fields)...)
-	sendNotifications(l.ctx, "[Fatal]", msg, fields)
 	os.Exit(1)
 }
 

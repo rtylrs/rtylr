@@ -7,29 +7,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/utils/alerts"
 )
 
 func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
-	slackBotToken := os.Getenv("SLACK_BOT_TOKEN")
-	requestLogsChannelID := os.Getenv("SLACK_REQUEST_LOGS_CHANNEL")
-
 	serviceName := "onion"
-
-	if slackBotToken == "" || requestLogsChannelID == "" {
-		logger.Global().Warn("Slack request logging not configured, skipping request logging")
-
-		return func(next http.Handler) http.Handler {
-			return next
-		}
-	}
 
 	rateLimiter := &RateLimiter{
 		chatLimit:   30 * time.Second,
@@ -44,9 +31,6 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 		mu:       &sync.RWMutex{},
 		ttl:      15 * time.Minute,
 	}
-
-	alertsSvc := alerts.NewAlertsService(ctx, slackBotToken)
-	alertsSvc.AddChannel("request-logs", requestLogsChannelID)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +70,7 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 
 				if rateLimiter.CanSend("request-logs") {
 					go func() {
-						logRequestToAlerts(ctx, alertsSvc, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
+						logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
 					}()
 				}
 			}()
@@ -278,7 +262,7 @@ func isSensitiveField(key string) bool {
 	return false
 }
 
-func logRequestToAlerts(ctx context.Context, alertsSvc *alerts.Service, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
+func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
 	routeCtx := chi.RouteContext(ctx)
 
 	var routeParams []string
@@ -322,50 +306,29 @@ func logRequestToAlerts(ctx context.Context, alertsSvc *alerts.Service, r *http.
 		countInfo = fmt.Sprintf(" (occurred %d times)", count)
 	}
 
-	message := fmt.Sprintf(`--------------------------------
-
-%s HTTP Request%s
-
-🏢 Service: %s
-📱 Method: %s
-🌐 URL: %s
-📊 Status: %d
-⏱️ Duration: %v
-👤 User Agent: %s
-🌍 Remote IP: %s
-
-📋 Route Parameters:
-%s
-
-🔍 Query Parameters:
-%s
-
-📬 Headers:
-%s
-
-📝 Body Preview:
-%s
-
-📅 Timestamp: %s`,
-		statusIcon,
-		countInfo,
-		serviceName,
-		r.Method,
-		r.URL.String(),
-		statusCode,
-		duration,
-		truncateString(r.UserAgent(), 100),
-		getRemoteIP(r),
-		formatList(routeParams, "• "),
-		formatList(queryParams, "• "),
-		formatList(headerParams, "• "),
-		bodyPreview,
-		time.Now().Format("2006-01-02 15:04:05 UTC"),
-	)
-
-	if err := alertsSvc.SendMessageImmediate(ctx, "request-logs", message); err != nil {
-		logger.Global().Error("Failed to send alerts request log", logger.Error(err))
+	message := fmt.Sprintf("%s HTTP request%s", statusIcon, countInfo)
+	fields := []logger.Field{
+		logger.String("service", serviceName),
+		logger.String("method", r.Method),
+		logger.String("url", r.URL.String()),
+		logger.Int("status", statusCode),
+		logger.String("duration", duration.String()),
+		logger.String("user_agent", truncateString(r.UserAgent(), 100)),
+		logger.String("remote_ip", getRemoteIP(r)),
+		logger.String("route_params", formatList(routeParams, "• ")),
+		logger.String("query_params", formatList(queryParams, "• ")),
+		logger.String("headers", formatList(headerParams, "• ")),
+		logger.String("body_preview", bodyPreview),
+		logger.String("timestamp", time.Now().Format("2006-01-02 15:04:05 UTC")),
 	}
+
+	if statusCode >= 500 {
+		logger.Ctx(ctx).Error(message, fields...)
+
+		return
+	}
+
+	logger.Ctx(ctx).Warn(message, fields...)
 }
 
 func truncateString(s string, maxLen int) string {

@@ -1,16 +1,13 @@
 package http
 
 import (
-	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/utils/alerts"
 )
 
 type blockedRequest struct {
@@ -29,8 +26,6 @@ type securityBatcher struct {
 	mutex       sync.RWMutex
 	ticker      *time.Ticker
 	done        chan bool
-	alertsSvc   *alerts.Service
-	channelName string
 	serviceName string
 }
 
@@ -41,23 +36,12 @@ var (
 
 func getBatcher() *securityBatcher {
 	once.Do(func() {
-		slackBotToken := os.Getenv("SLACK_BOT_TOKEN")
-		securityChannelID := os.Getenv("SLACK_SUSPICIOUS_REQUESTS_CHANNEL")
-
 		serviceName := "onion"
-
-		var alertsSvc *alerts.Service
-		if slackBotToken != "" && securityChannelID != "" {
-			alertsSvc = alerts.NewAlertsService(context.Background(), slackBotToken)
-			alertsSvc.AddChannel("security", securityChannelID)
-		}
 
 		batcher = &securityBatcher{
 			requests:    make(map[string][]blockedRequest),
 			ticker:      time.NewTicker(30 * time.Second),
 			done:        make(chan bool),
-			alertsSvc:   alertsSvc,
-			channelName: "security",
 			serviceName: serviceName,
 		}
 		go batcher.flushRoutine()
@@ -118,22 +102,14 @@ func (b *securityBatcher) flush() {
 		}
 
 		message := formatSecurityMessage(ip, len(requests), reasons, paths, userAgents, methods, allHeaders, allQueryParams, b.serviceName)
-
-		if b.alertsSvc != nil && b.channelName != "" {
-			go func(msg string) {
-				if err := b.alertsSvc.SendMessage(context.Background(), "security", msg); err != nil {
-					logger.Global().Error("Failed to send security alert", logger.Error(err))
-				}
-			}(message)
-		} else {
-			logger.Global().Warn("Blocked malicious requests batch",
-				logger.String("ip", ip),
-				logger.Int("total_requests", len(requests)),
-				logger.String("reasons", formatMap(reasons)),
-				logger.String("paths", formatMap(paths)),
-				logger.String("user_agents", formatMap(userAgents)),
-			)
-		}
+		logger.Global().Warn("Blocked malicious requests batch",
+			logger.String("ip", ip),
+			logger.Int("total_requests", len(requests)),
+			logger.String("reasons", formatMap(reasons)),
+			logger.String("paths", formatMap(paths)),
+			logger.String("user_agents", formatMap(userAgents)),
+			logger.String("summary", message),
+		)
 
 		delete(b.requests, ip)
 	}
