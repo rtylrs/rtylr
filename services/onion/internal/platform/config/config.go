@@ -24,15 +24,6 @@ const (
 	GeminiAPIKeyEnvVar = "GEMINI_API_KEY"
 )
 
-const (
-	R2AccountIDEnvVar       = "R2_ACCOUNT_ID"
-	R2AccessKeyIDEnvVar     = "R2_ACCESS_KEY_ID"
-	R2SecretAccessKeyEnvVar = "R2_SECRET_ACCESS_KEY"
-	R2RegionEnvVar          = "R2_REGION"
-	R2BucketEnvVar          = "R2_BUCKET"
-	R2PublicURLEnvVar       = "R2_PUBLIC_URL"
-)
-
 func GetOpenAIAPIKey() string {
 	return os.Getenv(OpenAIAPIKeyEnvVar)
 }
@@ -64,39 +55,6 @@ func IsGeminiConfigured() bool {
 
 func IsAnyAIConfigured() bool {
 	return IsOpenAIConfigured() || IsGeminiConfigured()
-}
-
-func GetR2AccountID() string {
-	return os.Getenv(R2AccountIDEnvVar)
-}
-
-func GetR2AccessKeyID() string {
-	return os.Getenv(R2AccessKeyIDEnvVar)
-}
-
-func GetR2SecretAccessKey() string {
-	return os.Getenv(R2SecretAccessKeyEnvVar)
-}
-
-func GetR2Region() string {
-	region := os.Getenv(R2RegionEnvVar)
-	if region == "" {
-		return "auto"
-	}
-
-	return region
-}
-
-func GetR2Bucket() string {
-	return os.Getenv(R2BucketEnvVar)
-}
-
-func GetR2PublicURL() string {
-	return os.Getenv(R2PublicURLEnvVar)
-}
-
-func IsR2Configured() bool {
-	return GetR2AccountID() != "" && GetR2AccessKeyID() != "" && GetR2SecretAccessKey() != "" && GetR2Bucket() != ""
 }
 
 func GetRunPodAPIKey() string {
