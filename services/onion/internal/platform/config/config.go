@@ -57,18 +57,6 @@ func IsAnyAIConfigured() bool {
 	return IsOpenAIConfigured() || IsGeminiConfigured()
 }
 
-func GetRunPodAPIKey() string {
-	return os.Getenv("RUNPOD_API_KEY")
-}
-
-func GetRunPodEndpointID() string {
-	return os.Getenv("RUNPOD_ENDPOINT_ID")
-}
-
-func IsRunPodConfigured() bool {
-	return GetRunPodAPIKey() != ""
-}
-
 func GetRunMode() RunMode {
 	mode := os.Getenv("runmode")
 	if mode == "" {

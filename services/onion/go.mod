@@ -17,7 +17,6 @@ require (
 	github.com/openai/openai-go/v2 v2.0.2
 	github.com/puzpuzpuz/xsync/v3 v3.5.1
 	github.com/redis/go-redis/v9 v9.17.0
-	github.com/runpod/go-sdk/pkg/sdk v0.0.0-20240315175250-b8aca7812ff3
 	github.com/toorop/go-dkim v0.0.0-20250226130143-9025cce95817
 	golang.org/x/crypto v0.43.0
 	google.golang.org/api v0.186.0
