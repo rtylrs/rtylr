@@ -12,20 +12,51 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🗄️  Loading database tables from schema files${NC}"
+echo -e "${BLUE}Loading database tables from schema files${NC}"
 
-# Check if Docker Compose is running
-if ! docker-compose ps postgres | grep -q "Up"; then
-    echo -e "${YELLOW}PostgreSQL container is not running. Starting it...${NC}"
-    docker-compose up -d postgres
-    
-    # Wait for PostgreSQL to be ready
-    echo -e "${BLUE}Waiting for PostgreSQL to be ready...${NC}"
-    until docker-compose exec -T postgres pg_isready -U onion_user -d onion_dev; do
-        echo "Waiting for PostgreSQL..."
-        sleep 2
-    done
+if ! command -v psql >/dev/null 2>&1; then
+    echo -e "${RED}psql is required to load schema files.${NC}"
+    exit 1
 fi
+
+if ! command -v pg_isready >/dev/null 2>&1; then
+    echo -e "${RED}pg_isready is required to verify database connectivity.${NC}"
+    exit 1
+fi
+
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5432}"
+DB_NAME="${DB_NAME:-onion_dev}"
+DB_USER="${DB_USER:-onion_user}"
+DB_PASSWORD="${DB_PASSWORD:-onion_password}"
+
+psql_cmd=(psql)
+pg_isready_cmd=(pg_isready)
+
+if [ -n "${DATABASE_URL:-}" ]; then
+    psql_cmd+=("${DATABASE_URL}")
+    pg_isready_cmd+=(-d "${DATABASE_URL}")
+else
+    export PGPASSWORD="${DB_PASSWORD}"
+    psql_cmd+=(
+        -h "${DB_HOST}"
+        -p "${DB_PORT}"
+        -U "${DB_USER}"
+        -d "${DB_NAME}"
+    )
+    pg_isready_cmd+=(
+        -h "${DB_HOST}"
+        -p "${DB_PORT}"
+        -U "${DB_USER}"
+        -d "${DB_NAME}"
+    )
+fi
+
+echo -e "${BLUE}Checking PostgreSQL connectivity...${NC}"
+until "${pg_isready_cmd[@]}" >/dev/null 2>&1; do
+    echo "Waiting for PostgreSQL..."
+    sleep 2
+done
 
 # Schema directories
 SCHEMA_DIRS=("db/schemas" "internal/platform/database/schemas")
@@ -41,22 +72,21 @@ done
 # Function to drop tables not in schema
 drop_orphaned_tables() {
     local schema_tables="$1"
-    local DB_USER="onion_user"
-    local DB_NAME="onion_dev"
-    
+
     echo -e "${BLUE}Checking for orphaned tables...${NC}"
-    
+
     # Get list of existing tables in the database
-    local existing_tables=$(docker-compose exec -T postgres psql -U $DB_USER -d $DB_NAME -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" | tr -d ' ')
-    
+    local existing_tables
+    existing_tables=$("${psql_cmd[@]}" -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" | tr -d ' ')
+
     # Check each existing table
     for table in $existing_tables; do
         # Skip if table is in our schema list
         if echo "$schema_tables" | grep -q "^$table$"; then
             echo -e "${GREEN}✓ Table $table is in schema${NC}"
         else
-            echo -e "${YELLOW}🗑️  Dropping orphaned table: $table${NC}"
-            docker-compose exec -T postgres psql -U $DB_USER -d $DB_NAME -c "DROP TABLE IF EXISTS $table CASCADE;"
+            echo -e "${YELLOW}Dropping orphaned table: $table${NC}"
+            "${psql_cmd[@]}" -c "DROP TABLE IF EXISTS $table CASCADE;"
         fi
     done
 }
@@ -64,17 +94,14 @@ drop_orphaned_tables() {
 # Function to create table if not exists
 create_table_if_not_exists() {
     local file="$1"
-    local filename=$(basename "$file")
-    local table_name=$(basename "$filename" .sql)
-    
+    local filename
+    filename=$(basename "$file")
+    local table_name
+    table_name=$(basename "$filename" .sql)
+
     echo -e "${BLUE}Ensuring table exists: $table_name${NC}"
-    
-    # Use hardcoded DB credentials
-    local DB_USER="onion_user"
-    local DB_NAME="onion_dev"
-    
-    # Read the schema file content and execute it directly
-    if docker-compose exec -T postgres psql -U $DB_USER -d $DB_NAME -c "$(cat "$file")"; then
+
+    if "${psql_cmd[@]}" -v ON_ERROR_STOP=1 -f "$file"; then
         echo -e "${GREEN}✓ Table $table_name is ready${NC}"
     else
         echo -e "${YELLOW}⚠ Table $table_name may already exist or had issues${NC}"
@@ -120,4 +147,4 @@ echo -e "${GREEN}🎉 Database tables loaded successfully!${NC}"
 
 # Show current tables
 echo -e "${BLUE}Current tables in database:${NC}"
-docker-compose exec -T postgres psql -U onion_user -d onion_dev -c "\dt" || true
+"${psql_cmd[@]}" -c "\dt" || true

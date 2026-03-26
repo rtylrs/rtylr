@@ -75,7 +75,7 @@ func getNewRedisClient() redis.UniversalClient {
 	)
 
 	redisClient := redis.NewUniversalClient(&redis.UniversalOptions{
-		ClientName:      "onion-" + config.GetRunModeString(),
+		ClientName:      "onion-api",
 		Addrs:           config.GetRedisHosts(),
 		Username:        config.GetRedisUsername(),
 		Password:        config.GetRedisPassword(),

@@ -10,7 +10,6 @@ bin/
 # Documentation
 *.md
 README.md
-CLAUDE.md
 TODO.md
 
 # IDE files
@@ -43,7 +42,6 @@ coverage/
 
 # Docker files
 Dockerfile*
-docker-compose*.yml
 .dockerignore
 
 # CI/CD

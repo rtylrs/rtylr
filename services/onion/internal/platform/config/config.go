@@ -2,17 +2,7 @@ package config
 
 import (
 	"os"
-	"strings"
 )
-
-type RunMode string
-
-const (
-	APIRunMode RunMode = "default"
-	WorkerMode RunMode = "worker"
-)
-
-const DefaultRunMode = APIRunMode
 
 const (
 	OpenAIAPIKeyEnvVar  = "OPENAI_API_KEY"
@@ -55,39 +45,4 @@ func IsGeminiConfigured() bool {
 
 func IsAnyAIConfigured() bool {
 	return IsOpenAIConfigured() || IsGeminiConfigured()
-}
-
-func GetRunMode() RunMode {
-	mode := os.Getenv("runmode")
-	if mode == "" {
-		return DefaultRunMode
-	}
-
-	mode = strings.ToLower(strings.TrimSpace(mode))
-	switch mode {
-	case string(APIRunMode):
-		return APIRunMode
-	case string(WorkerMode):
-		return WorkerMode
-	default:
-		return DefaultRunMode
-	}
-}
-
-func IsValidRunMode(mode string) bool {
-	mode = strings.ToLower(strings.TrimSpace(mode))
-
-	return mode == string(APIRunMode) || mode == string(WorkerMode)
-}
-
-func GetRunModeString() string {
-	return string(GetRunMode())
-}
-
-func IsDefaultMode() bool {
-	return GetRunMode() == APIRunMode
-}
-
-func IsWorkerMode() bool {
-	return GetRunMode() == WorkerMode
 }

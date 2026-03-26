@@ -16,8 +16,8 @@ Onion is a full-featured backend framework that provides everything you need to 
 ## 📋 Prerequisites
 
 - **Go 1.25.0+**
-- **Docker & Docker Compose**
 - **PostgreSQL 15+**
+- **`psql` and `pg_isready` available locally**
 
 ## 🛠️ Quick Start
 
@@ -27,7 +27,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 git clone git@github.com:voxire/onion.git
 cd onion
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env so DATABASE_URL or DB_* points to a running PostgreSQL instance
 ```
 
 ### 2. Install Dependencies
@@ -43,7 +43,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
 ### 3. Start Development Environment
 
 ```bash
-# Start database and setup schema
+# Validate database connectivity and run local setup checks
 make setup
 
 # Run the application
@@ -53,17 +53,11 @@ make run
 ## 🗄️ Database Management
 
 ```bash
-# Start database
+# Validate the configured database connection
 make setup
-
-# Stop database
-docker-compose down
 
 # Reset database
 ./scripts/reset-db.sh
-
-# View database logs
-docker-compose logs postgres
 
 # Generate SQL code for all modules
 make generate

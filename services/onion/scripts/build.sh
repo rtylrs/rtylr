@@ -20,7 +20,5 @@ go vet ./...
 # Build all service binaries
 mkdir -p ./bin
 go build -o ./bin/api ./cmd/api/main.go
-go build -o ./bin/worker ./cmd/worker/main.go
-go build -o ./bin/pay ./cmd/pay/main.go
 
 golangci-lint run       
