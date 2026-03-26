@@ -1,9 +1,6 @@
 #!/bin/bash
 set -xe
 
-ln -s -f ../../git-hooks/pre-push .git/hooks/pre-push
-chmod +x .git/hooks/pre-push
-
 for dir in ./db/dbmodels/*/; do
  [ -d "$dir" ] || continue
  find "$dir" -type f ! -name 'queries.go' ! -name 'utils.go' ! -name 'queries_input.go' -delete

@@ -15,8 +15,10 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download && go mod verify
 
-# Copy source code
-COPY . .
+# Copy only the source needed to generate SQLC and build the API binary.
+COPY cmd ./cmd
+COPY internal ./internal
+COPY scripts ./scripts
 
 # Make scripts executable
 RUN chmod +x scripts/*.sh
