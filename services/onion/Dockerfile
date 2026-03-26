@@ -18,9 +18,6 @@ RUN go mod download && go mod verify
 # Copy source code
 COPY . .
 
-# Debug: Check if scripts directory exists and list contents
-RUN ls -la scripts/ && echo "Scripts directory contents:"
-
 # Make scripts executable
 RUN chmod +x scripts/*.sh
 
@@ -28,7 +25,7 @@ RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
 
 # Build API binary with optimizations for the target platform
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o /app/api ./cmd/api/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o /app/api ./cmd/api
 
 # Final stage
 FROM alpine:latest
