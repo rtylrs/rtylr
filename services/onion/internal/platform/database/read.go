@@ -139,7 +139,7 @@ func extractSchemaFromPath(filePath string) (string, error) {
 	switch firstPart {
 	case "content":
 		return "content", nil
-	case "tooling", "config", "user", "memory", "translation", "ai", "core":
+	case "tooling", "config", "user", "memory", "ai", "core":
 		return "voxire", nil
 	default:
 		// For any other modules, default to voxire

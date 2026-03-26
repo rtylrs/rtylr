@@ -413,8 +413,6 @@ linters:
             - github.com/golang-jwt/jwt/v5
             - github.com/jackc/pgx/v5
             - github.com/gin-gonic/gin
-            - github.com/toorop/go-dkim
-            - gopkg.in/gomail.v2
             - codnect.io/chrono
             - github.com/beevik/etree
             - golang.org/x/crypto
@@ -451,8 +449,6 @@ linters:
           - github.com/golang-jwt/jwt/v5
           - github.com/jackc/pgx/v5
           - github.com/gin-gonic/gin
-          - github.com/toorop/go-dkim
-          - gopkg.in/gomail.v2
           - codnect.io/chrono
           - github.com/beevik/etree
           - golang.org/x/crypto
