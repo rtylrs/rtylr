@@ -10,7 +10,6 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	accountv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/account/v1"
 )
 
 func RegisterRoutes() []string {
@@ -25,7 +24,21 @@ type RegisterHandler struct {
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
 }
 
-func (h *RegisterHandler) Validate(_ context.Context, req *accountv1.RegisterRequest) *errorModels.ServerError {
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
+type RegisterResponse struct {
+	Token   string `json:"token"`
+	Message string `json:"message"`
+	UserID  int64  `json:"userId"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+}
+
+func (h *RegisterHandler) Validate(_ context.Context, req *RegisterRequest) *errorModels.ServerError {
 	if req.Email == "" || req.Password == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -50,7 +63,7 @@ func (h *RegisterHandler) Validate(_ context.Context, req *accountv1.RegisterReq
 	return nil
 }
 
-func (h *RegisterHandler) Serve(ctx context.Context, req *accountv1.RegisterRequest) (accountv1.RegisterResponse, *errorModels.ServerError) {
+func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (RegisterResponse, *errorModels.ServerError) {
 	var clientIP netip.Addr
 
 	var deviceInfo string
@@ -67,22 +80,22 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *accountv1.RegisterRequ
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrUserAlreadyExists):
-			return accountv1.RegisterResponse{}, &errorModels.ServerError{
+			return RegisterResponse{}, &errorModels.ServerError{
 				Code:    http.StatusConflict,
 				Message: "User with this email already exists",
 			}
 		case errors.Is(err, application.ErrInvalidEmail):
-			return accountv1.RegisterResponse{}, &errorModels.ServerError{
+			return RegisterResponse{}, &errorModels.ServerError{
 				Code:    http.StatusBadRequest,
 				Message: "Invalid email format",
 			}
 		case errors.Is(err, application.ErrWeakPassword):
-			return accountv1.RegisterResponse{}, &errorModels.ServerError{
+			return RegisterResponse{}, &errorModels.ServerError{
 				Code:    http.StatusBadRequest,
 				Message: "Password does not meet security requirements",
 			}
 		default:
-			return accountv1.RegisterResponse{}, &errorModels.ServerError{
+			return RegisterResponse{}, &errorModels.ServerError{
 				Code:    http.StatusTeapot,
 				Message: "Registration failed",
 			}
@@ -108,16 +121,16 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *accountv1.RegisterRequ
 
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
-		return accountv1.RegisterResponse{}, &errorModels.ServerError{
+		return RegisterResponse{}, &errorModels.ServerError{
 			Code:    http.StatusTeapot,
 			Message: "Failed to generate authentication token",
 		}
 	}
 
-	return accountv1.RegisterResponse{
+	return RegisterResponse{
 		Token:   token,
 		Message: "Registration successful",
-		UserId:  userId,
+		UserID:  userId,
 		Email:   registerData.Email,
 		Name:    registerData.FullName,
 	}, nil

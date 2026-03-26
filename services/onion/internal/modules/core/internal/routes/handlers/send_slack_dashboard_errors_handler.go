@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/core/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	corev1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/core/v1"
 )
 
 func SlackDashboardSendRoutes() []string { return []string{"/slack/dashboard/send"} }
@@ -17,7 +16,25 @@ type SlackDashboardSendHandler struct {
 	Service *application.Service
 }
 
-func (h *SlackDashboardSendHandler) Validate(_ context.Context, r *corev1.SlackErrorLogRequest) *errorModels.ServerError {
+type SlackErrorLogRequest struct {
+	Source         string   `json:"source"`
+	Level          string   `json:"level"`
+	Message        string   `json:"message"`
+	Stack          string   `json:"stack"`
+	ComponentStack string   `json:"componentStack"`
+	URL            string   `json:"url"`
+	Args           []string `json:"args"`
+	MetaJSON       string   `json:"metaJson"`
+	Formatted      string   `json:"formatted"`
+}
+
+type SlackErrorLogResponse struct {
+	Status  string `json:"status"`
+	Sent    bool   `json:"sent"`
+	Message string `json:"message"`
+}
+
+func (h *SlackDashboardSendHandler) Validate(_ context.Context, r *SlackErrorLogRequest) *errorModels.ServerError {
 	if strings.TrimSpace(r.Source) == "" || strings.TrimSpace(r.Message) == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
@@ -67,16 +84,16 @@ func (h *SlackDashboardSendHandler) Validate(_ context.Context, r *corev1.SlackE
 		parts = append(parts, fmt.Sprintf("*Component Stack:*\n```%s```", r.ComponentStack))
 	}
 
-	if r.Url != "" {
-		parts = append(parts, "*URL:* "+r.Url)
+	if r.URL != "" {
+		parts = append(parts, "*URL:* "+r.URL)
 	}
 
 	if len(r.Args) > 0 {
 		parts = append(parts, fmt.Sprintf("*Arguments:* %v", r.Args))
 	}
 
-	if r.MetaJson != "" {
-		parts = append(parts, fmt.Sprintf("*Metadata:* %v", r.MetaJson))
+	if r.MetaJSON != "" {
+		parts = append(parts, fmt.Sprintf("*Metadata:* %v", r.MetaJSON))
 	}
 
 	r.Formatted = strings.Join(parts, "\n\n")
@@ -84,8 +101,8 @@ func (h *SlackDashboardSendHandler) Validate(_ context.Context, r *corev1.SlackE
 	return nil
 }
 
-func (h *SlackDashboardSendHandler) Serve(ctx context.Context, req *corev1.SlackErrorLogRequest) (corev1.SlackErrorLogResponse, *errorModels.ServerError) {
+func (h *SlackDashboardSendHandler) Serve(ctx context.Context, req *SlackErrorLogRequest) (SlackErrorLogResponse, *errorModels.ServerError) {
 	h.Service.SendFormattedDashboardAlertsMessage(ctx, req.Formatted)
 
-	return corev1.SlackErrorLogResponse{Status: "ok", Sent: true}, nil
+	return SlackErrorLogResponse{Status: "ok", Sent: true}, nil
 }

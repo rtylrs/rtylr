@@ -7,7 +7,6 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	configv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/config/v1"
 )
 
 func CreateConfigRoutes() []string {
@@ -20,7 +19,19 @@ type CreateConfigHandler struct {
 	ConfigService *application.Service
 }
 
-func (h *CreateConfigHandler) Validate(_ context.Context, req *configv1.CreateConfigRequest) *errorModels.ServerError {
+type CreateConfigRequest struct {
+	Owner       string `json:"owner"`
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+}
+
+type CreateConfigResponse struct {
+	ConfigID int64  `json:"configId"`
+	Message  string `json:"message"`
+}
+
+func (h *CreateConfigHandler) Validate(_ context.Context, req *CreateConfigRequest) *errorModels.ServerError {
 	if req.Owner == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -45,7 +56,7 @@ func (h *CreateConfigHandler) Validate(_ context.Context, req *configv1.CreateCo
 	return nil
 }
 
-func (h *CreateConfigHandler) Serve(ctx context.Context, req *configv1.CreateConfigRequest) (configv1.CreateConfigResponse, *errorModels.ServerError) {
+func (h *CreateConfigHandler) Serve(ctx context.Context, req *CreateConfigRequest) (CreateConfigResponse, *errorModels.ServerError) {
 	configInput := domain.ConfigInput{
 		OwnerId:      req.Owner,
 		SiteName:     req.Key,
@@ -54,13 +65,13 @@ func (h *CreateConfigHandler) Serve(ctx context.Context, req *configv1.CreateCon
 
 	err := h.ConfigService.CreateConfig(ctx, configInput)
 	if err != nil {
-		return configv1.CreateConfigResponse{}, &errorModels.ServerError{
+		return CreateConfigResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to create config",
 		}
 	}
 
-	return configv1.CreateConfigResponse{
+	return CreateConfigResponse{
 		Message: "Config created successfully",
 	}, nil
 }

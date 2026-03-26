@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all generate lint test run run-api run-worker run-pay dev dev-api dev-worker dev-pay sql-check sql-case-check proto-generate
+.PHONY: onion setup build build-all generate lint test run run-api run-worker run-pay dev dev-api dev-worker dev-pay sql-check sql-case-check
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -56,26 +56,6 @@ sql-check:
 
 load-tables:
 	./scripts/load_tables.sh
-
-# Update submodule and regenerate proto files (for developers)
-.PHONY: proto
-proto:
-	@echo "🔄 Updating grimoire submodule..."
-	git submodule update --init --remote proto
-	@echo "🧹 Cleaning generated proto files..."
-	rm -rf internal/platform/models/proto
-	@echo "🔧 Regenerating proto files..."
-	buf generate
-	@echo "✅ Proto files updated and regenerated successfully!"
-
-# Generate proto files only (for Docker builds - no submodule update)
-.PHONY: proto-generate
-proto-generate:
-	@echo "🧹 Cleaning generated proto files..."
-	rm -rf internal/platform/models/proto
-	@echo "🔧 Regenerating proto files..."
-	buf generate
-	@echo "✅ Proto files regenerated successfully!"
 
 clean-generated:
 	./scripts/clean_generated.sh

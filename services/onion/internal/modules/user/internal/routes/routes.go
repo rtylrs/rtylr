@@ -7,46 +7,45 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/modules/user/internal/routes/handlers"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	accountv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/account/v1"
 	"github.com/voxire/onion/internal/platform/server/http"
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *application.Service, provisionerResolver authPkg.PlatformProvisionerResolver) {
-	http.RegisterPOSTWithValidation[accountv1.RegisterRequest, accountv1.RegisterResponse](
+	http.RegisterPOSTWithValidation[handlers.RegisterRequest, handlers.RegisterResponse](
 		ctx,
 		router,
 		handlers.RegisterRoutes(),
 		&handlers.RegisterHandler{UserService: userService, ProvisionerResolver: provisionerResolver},
 	)
-	http.RegisterPOSTWithValidation[accountv1.LoginRequest, accountv1.LoginResponse](
+	http.RegisterPOSTWithValidation[handlers.LoginRequest, handlers.LoginResponse](
 		ctx,
 		router,
 		handlers.LoginRoutes(),
 		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver},
 	)
 
-	http.RegisterGET[accountv1.GetProfileRequest, accountv1.GetProfileResponse](
+	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](
 		ctx,
 		router,
 		handlers.AccountRoutes(),
 		&handlers.AccountHandler{UserService: userService},
 	)
 
-	http.RegisterPOSTWithValidation[accountv1.UpdateProfileRequest, accountv1.UpdateProfileResponse](
+	http.RegisterPOSTWithValidation[handlers.UpdateProfileRequest, handlers.UpdateProfileResponse](
 		ctx,
 		router,
 		handlers.UpdateProfileRoutes(),
 		&handlers.UpdateProfileHandler{UserService: userService},
 	)
 
-	http.RegisterPOSTWithValidation[accountv1.ChangePasswordRequest, accountv1.ChangePasswordResponse](
+	http.RegisterPOSTWithValidation[handlers.ChangePasswordRequest, handlers.ChangePasswordResponse](
 		ctx,
 		router,
 		handlers.ChangePasswordRoutes(),
 		&handlers.ChangePasswordHandler{UserService: userService},
 	)
 
-	http.RegisterPOSTWithValidation[accountv1.DeleteAccountRequest, accountv1.DeleteAccountResponse](
+	http.RegisterPOSTWithValidation[handlers.DeleteAccountRequest, handlers.DeleteAccountResponse](
 		ctx,
 		router,
 		handlers.DeleteAccountRoutes(),

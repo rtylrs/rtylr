@@ -15,9 +15,6 @@ done
 # Generate SQL code for each module (includes SQL case checking)
 ./scripts/generate_sqlc.sh
 
-# Generate protobuf files
-make proto-generate
-
 go vet ./...
 
 # Build all service binaries

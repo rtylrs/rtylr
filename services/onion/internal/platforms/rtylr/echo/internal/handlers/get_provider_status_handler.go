@@ -4,7 +4,6 @@ import (
 	"context"
 
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	echov1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/rtylr/echo/v1"
 	"github.com/voxire/onion/internal/platforms/rtylr/echo/internal/application"
 )
 
@@ -18,10 +17,18 @@ type ProviderStatusHandler struct {
 	SnipsService *application.Service
 }
 
-func (h *ProviderStatusHandler) Serve(ctx context.Context, _ *echov1.GetProviderStatusRequest) (echov1.GetProviderStatusResponse, *errorModels.ServerError) {
+type GetProviderStatusRequest struct{}
+
+type GetProviderStatusResponse struct {
+	Available       bool            `json:"available"`
+	PrimaryProvider string          `json:"primaryProvider"`
+	Providers       map[string]bool `json:"providers"`
+}
+
+func (h *ProviderStatusHandler) Serve(ctx context.Context, _ *GetProviderStatusRequest) (GetProviderStatusResponse, *errorModels.ServerError) {
 	status := h.SnipsService.GetProviderDetails(ctx)
 
-	return echov1.GetProviderStatusResponse{
+	return GetProviderStatusResponse{
 		Available:       status.Available,
 		PrimaryProvider: status.PrimaryProvider,
 		Providers:       status.Providers,

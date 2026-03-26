@@ -8,7 +8,6 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	accountv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/account/v1"
 )
 
 func LoginRoutes() []string {
@@ -23,7 +22,20 @@ type LoginHandler struct {
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
 }
 
-func (h *LoginHandler) Validate(_ context.Context, req *accountv1.LoginRequest) *errorModels.ServerError {
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token   string `json:"token"`
+	Message string `json:"message"`
+	UserID  int64  `json:"userId"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+}
+
+func (h *LoginHandler) Validate(_ context.Context, req *LoginRequest) *errorModels.ServerError {
 	if req.Email == "" || req.Password == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -34,17 +46,17 @@ func (h *LoginHandler) Validate(_ context.Context, req *accountv1.LoginRequest) 
 	return nil
 }
 
-func (h *LoginHandler) Serve(ctx context.Context, req *accountv1.LoginRequest) (accountv1.LoginResponse, *errorModels.ServerError) {
+func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginResponse, *errorModels.ServerError) {
 	userId, err := h.UserService.Authenticate(ctx, req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, application.ErrInvalidCredentials) {
-			return accountv1.LoginResponse{}, &errorModels.ServerError{
+			return LoginResponse{}, &errorModels.ServerError{
 				Code:    http.StatusUnauthorized,
 				Message: "Invalid email or password",
 			}
 		}
 
-		return accountv1.LoginResponse{}, &errorModels.ServerError{
+		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusTeapot,
 			Message: "Authentication failed",
 		}
@@ -69,7 +81,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *accountv1.LoginRequest) (
 
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
-		return accountv1.LoginResponse{}, &errorModels.ServerError{
+		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusTeapot,
 			Message: "Failed to generate authentication token",
 		}
@@ -77,16 +89,16 @@ func (h *LoginHandler) Serve(ctx context.Context, req *accountv1.LoginRequest) (
 
 	user, err := h.UserService.GetUserByID(ctx, userId)
 	if err != nil {
-		return accountv1.LoginResponse{}, &errorModels.ServerError{
+		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusTeapot,
 			Message: "Failed to retrieve user information",
 		}
 	}
 
-	return accountv1.LoginResponse{
+	return LoginResponse{
 		Token:   token,
 		Message: "Login successful",
-		UserId:  userId,
+		UserID:  userId,
 		Email:   user.Email,
 		Name:    user.FullName,
 	}, nil

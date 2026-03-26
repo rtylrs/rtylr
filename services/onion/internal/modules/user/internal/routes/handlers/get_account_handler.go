@@ -3,12 +3,12 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
+	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	accountv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/account/v1"
-	"github.com/voxire/onion/internal/platform/utils/converter"
 )
 
 func AccountRoutes() []string {
@@ -22,18 +22,48 @@ type AccountHandler struct {
 	UserService *application.Service
 }
 
-func (h *AccountHandler) Serve(ctx context.Context, _ *accountv1.GetProfileRequest) (accountv1.GetProfileResponse, *errorModels.ServerError) {
+type GetProfileRequest struct {
+	UserID int64 `json:"userId"`
+}
+
+type ProfileUser struct {
+	ID        int64     `json:"id"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type GetProfileResponse struct {
+	User *ProfileUser `json:"user"`
+}
+
+func newProfileUser(user *domain.User) *ProfileUser {
+	if user == nil {
+		return nil
+	}
+
+	return &ProfileUser{
+		ID:        user.ID,
+		Email:     user.Email,
+		Name:      user.FullName,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func (h *AccountHandler) Serve(ctx context.Context, _ *GetProfileRequest) (GetProfileResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
 	user, err := h.UserService.GetUserByID(ctx, device.User.UserID)
 	if err != nil {
-		return accountv1.GetProfileResponse{}, &errorModels.ServerError{
+		return GetProfileResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to get user account",
 		}
 	}
 
-	return accountv1.GetProfileResponse{
-		User: converter.Convert[*accountv1.User](user),
+	return GetProfileResponse{
+		User: newProfileUser(user),
 	}, nil
 }

@@ -160,7 +160,6 @@ linters:
     paths:
       - vendor/ # Exclude vendor directory
       - third_party/ # Exclude third party code
-      - ".*\\.pb\\.go$" # Exclude protobuf generated files
       - ".*\\.gen\\.go$" # Exclude other generated files
 
   # Basic linter settings
@@ -179,7 +178,7 @@ linters:
         - name: exported
         - name: if-return
         - name: increment-decrement
-        # - name: var-naming # Disabled to allow protobuf field name matching
+        # - name: var-naming
         - name: var-declaration
         - name: package-comments
         - name: range-val-in-closure
@@ -264,10 +263,10 @@ linters:
         - fieldalignment # Can be too pedantic about struct field ordering
 
     staticcheck:
-      # Enable all staticcheck rules except ST1003 (var-naming) for protobuf compatibility
+      # Enable all staticcheck rules except ST1003 (var-naming) for local API type compatibility
       checks:
         - all
-        - "-ST1003" # Disabled to allow protobuf field name matching (e.g., OwnerId vs OwnerID)
+        - "-ST1003" # Disabled to allow existing API field naming (e.g., OwnerId vs OwnerID)
 
     # Bug Detection & Safety linter settings
     exhaustive:
@@ -430,8 +429,6 @@ linters:
             - github.com/aws/aws-sdk-go-v2/credentials
             - github.com/aws/aws-sdk-go-v2/service/s3
             - github.com/Masterminds/squirrel
-            - google.golang.org/protobuf/proto
-            - google.golang.org/protobuf/encoding/protojson
             - github.com/redis/go-redis/v9
             - github.com/allegro/bigcache/v3
             - github.com/puzpuzpuz/xsync/v3
@@ -449,7 +446,6 @@ linters:
           - github.com/joho/godotenv
           - github.com/go-chi/chi/v5
           - github.com/google/uuid
-          - google.golang.org/protobuf
           - github.com/go-sql-driver/mysql
           - go.uber.org/zap
           - github.com/golang-jwt/jwt/v5

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/binary"
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/maputils"
 	"github.com/voxire/onion/internal/platform/utils/sliceutils"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -24,30 +24,16 @@ const (
 	LocalCacheInvalidationChannel = "invalidate-local-cache"
 )
 
-type iCacheable[C any] interface {
-	ToCache() proto.Message
-	FromCache(message proto.Message) C
-}
-
 // Cache is a generic cache implementation with support for in-memory and Redis storage.
-type Cache[M iCacheable[M]] struct{}
+type Cache[M any] struct{}
 
 // Of returns a Cache instance for the specified type.
-func Of[C iCacheable[C]]() Cache[C] {
+func Of[C any]() Cache[C] {
 	return Cache[C]{}
 }
 
-func (c Cache[M]) unmarshal(bytes []byte, message proto.Message, configuration cacherConfiguration) (proto.Message, error) {
-	if configuration.cachedMarshalling {
-		return cachedUnmarshal(bytes, message)
-	}
-
-	err := proto.Unmarshal(bytes, message)
-	if err != nil {
-		return nil, err
-	}
-
-	return message, nil
+func (c Cache[M]) unmarshal(bytes []byte, model *M, _ cacherConfiguration) error {
+	return json.Unmarshal(bytes, model)
 }
 
 // GetOrComputeLegacy retrieves values for the specified IDs from the cache.
@@ -229,7 +215,7 @@ func (c Cache[M]) PutMulti(ctx context.Context, keyVals map[string]M, options ..
 	cacheKeyVals := c.transformMapKeys(keyVals)
 
 	marshalledKeyVals := maputils.Map(cacheKeyVals, func(val M) []byte {
-		bytes, err := proto.Marshal(val.ToCache())
+		bytes, err := json.Marshal(val)
 		if err != nil {
 			logger.Ctx(ctx).Warn("Error while marshalling data to put in cache",
 				logger.Error(err),
@@ -285,20 +271,16 @@ func (c Cache[M]) getMultiByTransformedKeys(ctx context.Context, transformedKeys
 		}
 
 		model := new(M)
-		message := (*model).ToCache()
-
-		var err error
-
-		message, err = c.unmarshal(bytes, message, configuration)
-		if err != nil {
+		if err := c.unmarshal(bytes, model, configuration); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling data from cache store",
 				logger.String("key", key),
 				logger.Error(err),
 			)
+
+			continue
 		}
 
-		result := (*model).FromCache(message)
-		results[key] = result
+		results[key] = *model
 	}
 
 	return results, remainingKeysFromRedis
@@ -330,20 +312,16 @@ func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...Client
 		}
 
 		model := new(M)
-		message := (*model).ToCache()
-
-		var err error
-
-		message, err = c.unmarshal(bytes, message, configuration)
-		if err != nil {
+		if err := c.unmarshal(bytes, model, configuration); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling data from cache store",
 				logger.String("key", key),
 				logger.Error(err),
 			)
+
+			continue
 		}
 
-		result := (*model).FromCache(message)
-		results[key] = result
+		results[key] = *model
 	}
 
 	results = c.recoverMapKeys(results)
@@ -374,7 +352,7 @@ func (c Cache[M]) HashPut(ctx context.Context, id, hashKey string, val M, option
 
 	key := c.appendHashIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to put in redis cache",
 			logger.Error(err),
@@ -407,7 +385,7 @@ func (c Cache[M]) HashPutWithFieldExpiry(ctx context.Context, id, hashKey string
 
 	key := c.appendHashIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to put in redis cache",
 			logger.Error(err),
@@ -441,12 +419,7 @@ func (c Cache[M]) HashGet(ctx context.Context, id, field string, options ...Clie
 	}
 
 	model := new(M)
-	message := (*model).ToCache()
-
-	var err error
-
-	message, err = c.unmarshal(bytes, message, configuration)
-	if err != nil {
+	if err := c.unmarshal(bytes, model, configuration); err != nil {
 		logger.Ctx(ctx).Warn("Error while unmarshalling data from redis",
 			logger.String("key", key),
 			logger.String("field", field),
@@ -456,7 +429,7 @@ func (c Cache[M]) HashGet(ctx context.Context, id, field string, options ...Clie
 		return *new(M), false
 	}
 
-	return (*model).FromCache(message), true
+	return *model, true
 }
 
 // HashGetAll retrieves all key-value pairs of a Redis hash.
@@ -468,19 +441,13 @@ func (c Cache[M]) HashGetAll(ctx context.Context, id string, options ...ClientOp
 
 	for k, v := range redisResults {
 		model := new(M)
-		message := (*model).ToCache()
-
-		var err error
-
-		message, err = c.unmarshal(v, message, configuration)
-		if err != nil {
+		if err := c.unmarshal(v, model, configuration); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling hash data from redis",
 				logger.String("key", key),
 				logger.Error(err),
 			)
 		} else {
-			result := (*model).FromCache(message)
-			results[k] = result
+			results[k] = *model
 		}
 	}
 
@@ -493,7 +460,7 @@ func (c Cache[M]) SortedSetAdd(ctx context.Context, id string, val M, score floa
 
 	key := c.appendSortedSetIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to put in redis cache",
 			logger.Error(err),
@@ -518,7 +485,7 @@ func (c Cache[M]) SortedSetAddKeepLastByRank(ctx context.Context, id string, val
 func (c Cache[M]) SortedSetRemove(ctx context.Context, id string, val M) {
 	key := c.appendSortedSetIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to put in redis cache",
 			logger.Error(err),
@@ -550,10 +517,7 @@ func (c Cache[M]) SortedSetGetAll(ctx context.Context, id string) []M {
 
 	for i, v := range redisResults {
 		model := new(M)
-		message := (*model).ToCache()
-
-		err := proto.Unmarshal(v, message)
-		if err != nil {
+		if err := json.Unmarshal(v, model); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling hash data from redis",
 				logger.String("key", key),
 				logger.Error(err),
@@ -562,8 +526,7 @@ func (c Cache[M]) SortedSetGetAll(ctx context.Context, id string) []M {
 			continue
 		}
 
-		result := (*model).FromCache(message)
-		results[i] = result
+		results[i] = *model
 	}
 
 	return results
@@ -582,7 +545,7 @@ func (c Cache[M]) SetAdd(ctx context.Context, id string, val M, options ...Clien
 
 	key := c.appendSetIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to add to redis set",
 			logger.Error(err),
@@ -598,7 +561,7 @@ func (c Cache[M]) SetAdd(ctx context.Context, id string, val M, options ...Clien
 func (c Cache[M]) SetRemove(ctx context.Context, id string, val M) {
 	key := c.appendSetIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to remove from redis set",
 			logger.Error(err),
@@ -618,10 +581,7 @@ func (c Cache[M]) SetGetAll(ctx context.Context, id string) []M {
 
 	for i, v := range redisResults {
 		model := new(M)
-		message := (*model).ToCache()
-
-		err := proto.Unmarshal(v, message)
-		if err != nil {
+		if err := json.Unmarshal(v, model); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling data from redis set",
 				logger.String("key", key),
 				logger.Error(err),
@@ -630,8 +590,7 @@ func (c Cache[M]) SetGetAll(ctx context.Context, id string) []M {
 			continue
 		}
 
-		result := (*model).FromCache(message)
-		results[i] = result
+		results[i] = *model
 	}
 
 	return results
@@ -650,7 +609,7 @@ func (c Cache[M]) HashSetIfNotExists(ctx context.Context, id, field string, val 
 	configuration := getConfiguration(options...)
 	key := c.appendHashIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to add to redis hash set",
 			logger.Error(err),
@@ -755,7 +714,7 @@ func (c Cache[M]) SetIfNotExists(ctx context.Context, id string, val M, options 
 	configuration := getConfiguration(options...)
 	key := c.appendIdentifierPrefix(id)
 
-	bytes, err := proto.Marshal(val.ToCache())
+	bytes, err := json.Marshal(val)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while marshalling data to add to redis set",
 			logger.Error(err),

@@ -3,12 +3,11 @@ FROM golang:1.25.0-alpine AS builder
 
 WORKDIR /app
 
-# Install build tools, sqlc, and buf
+# Install build tools and sqlc
 RUN apk add --no-cache gcc musl-dev curl make bash
 
-# Install sqlc and buf via Go (architecture agnostic)
+# Install sqlc via Go (architecture agnostic)
 RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0
-RUN go install github.com/bufbuild/buf/cmd/buf@v1.32.2
 
 # Copy go mod and sum files
 COPY go.mod go.sum ./
@@ -27,9 +26,6 @@ RUN chmod +x scripts/*.sh
 
 # Generate SQL code (run script directly with bash)
 RUN bash scripts/generate_sqlc.sh
-
-# Note: Proto files are now committed to the repository
-# Developers run 'make proto' to update submodule and regenerate
 
 # Build all service binaries with optimizations for the target platform
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o /app/api ./cmd/api/main.go

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clean Generated Files Script for Onion Project
-# This script removes all generated SQLC and protobuf files
+# This script removes generated SQLC files
 
 set -e
 
@@ -25,10 +25,9 @@ count_files() {
 echo -e "${BLUE}Counting files to be removed...${NC}"
 sqlc_count=$(find . -name "dbmodels" -type d | wc -l)
 sqlc_go_count=$(find . -name "*.sql.go" -type f 2>/dev/null | wc -l)
-proto_count=$(find . -path "internal/platform/models/proto/generated/*.pb.go" -type f 2>/dev/null | wc -l)
 persistence_count=$(find . -name "sqlc" -type d | wc -l)
 
-total_count=$((sqlc_count + sqlc_go_count + proto_count + persistence_count))
+total_count=$((sqlc_count + sqlc_go_count + persistence_count))
 
 if [ $total_count -eq 0 ]; then
     echo -e "${YELLOW}No generated files found to clean.${NC}"
@@ -38,7 +37,6 @@ fi
 echo -e "${BLUE}Found generated items:${NC}"
 echo -e "  • SQLC dbmodels folders: ${sqlc_count}"
 echo -e "  • SQLC Go files: ${sqlc_go_count} files"
-echo -e "  • Protobuf files: ${proto_count} files"
 echo -e "  • Persistence sqlc folders: ${persistence_count}"
 echo -e "  • Total items: ${total_count}"
 
@@ -65,21 +63,11 @@ if [ $sqlc_go_count -gt 0 ]; then
     find . -name "*.sql.go" -type f -delete 2>/dev/null || true
 fi
 
-# Remove protobuf generated files
-if [ $proto_count -gt 0 ]; then
-    echo -e "${BLUE}Removing protobuf files...${NC}"
-    find . -path "internal/platform/models/proto/generated/*.pb.go" -type f -delete 2>/dev/null || true
-fi
-
 # Remove persistence files
 if [ $persistence_count -gt 0 ]; then
     echo -e "${BLUE}Removing persistence files...${NC}"
     find . -name "sqlc" -type d -exec rm -rf {} \; 2>/dev/null || true
 fi
-
-# Remove protobuf generated folder
-echo -e "${BLUE}Removing protobuf generated folder...${NC}"
-rm -rf internal/platform/models/proto/generated/* 2>/dev/null || true
 
 # Remove empty directories (cleanup any remaining empty dirs)
 echo -e "${BLUE}Cleaning up any remaining empty directories...${NC}"
@@ -89,6 +77,5 @@ echo -e "${GREEN}✅ Generated files cleaned successfully!${NC}"
 echo ""
 echo -e "${BLUE}To regenerate the files, run:${NC}"
 echo -e "  • SQLC: ${GREEN}make generate${NC}"
-echo -e "  • Protobuf: ${GREEN}make proto${NC}"
 echo ""
 echo -e "${YELLOW}Note: You'll need to regenerate these files before building the project.${NC}"

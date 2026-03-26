@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Build and Tag
 
 on:
   push:
@@ -12,8 +12,6 @@ on:
 env:
   SLACK_BOT_TOKEN: xoxb-9396990793185-9382611271909-hV8yvb7g25cJia53GSYMN9FH
   SLACK_CHANNEL_ID: C09BC3LEQTY
-  ECR_REGISTRY: 021323922317.dkr.ecr.eu-west-1.amazonaws.com
-  ECR_REPOSITORY: voxire/onion
 
 jobs:
   version:
@@ -59,42 +57,21 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Created tag $NEW_VERSION"
 
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION=${{ steps.bump.outputs.new_version }}
-          NOTES=$(git log --oneline --no-decorate $(git tag --sort=-v:refname | sed -n '2p')..HEAD 2>/dev/null || echo "Initial release")
-          gh release create "$VERSION" --title "$VERSION" --notes "$NOTES"
-
   build:
-    name: Build and Push
+    name: Build
     needs: version
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push Docker image
+      - name: Build Docker image
         run: |
           VERSION=${{ needs.version.outputs.new_version }}
 
-          docker build -t $ECR_REPOSITORY .
+          docker build \
+            -t voxire/onion:latest \
+            -t voxire/onion:$VERSION \
+            .
 
-          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
-          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-          echo "Pushed $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION"
+          echo "Built voxire/onion:$VERSION"

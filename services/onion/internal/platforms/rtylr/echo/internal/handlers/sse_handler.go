@@ -12,7 +12,6 @@ import (
 
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	echov1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/rtylr/echo/v1"
 	"github.com/voxire/onion/internal/platform/snips"
 	"github.com/voxire/onion/internal/platforms/rtylr/echo/internal/application"
 	"github.com/voxire/onion/internal/platforms/rtylr/memory"
@@ -31,7 +30,19 @@ type GenerateTextStreamHandler struct {
 	MemoryService *memory.Module
 }
 
-func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *echov1.GenerateTextStreamRequest) *errorModels.ServerError {
+type GenerateTextStreamRequest struct {
+	Prompt    string `json:"prompt"`
+	SessionID string `json:"sessionId"`
+	UserID    int64  `json:"userId"`
+}
+
+type GenerateTextStreamResponse struct {
+	Response   string `json:"response"`
+	IsComplete bool   `json:"isComplete"`
+	SessionID  string `json:"sessionId"`
+}
+
+func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTextStreamRequest) *errorModels.ServerError {
 	if req.Prompt == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -39,7 +50,7 @@ func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *echov1.Gene
 		}
 	}
 
-	if req.UserId <= 0 {
+	if req.UserID <= 0 {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "User ID is required",
@@ -49,15 +60,15 @@ func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *echov1.Gene
 	return nil
 }
 
-func (h *GenerateTextStreamHandler) Serve(_ context.Context, _ *echov1.GenerateTextStreamRequest) (echov1.GenerateTextStreamResponse, *errorModels.ServerError) {
+func (h *GenerateTextStreamHandler) Serve(_ context.Context, _ *GenerateTextStreamRequest) (GenerateTextStreamResponse, *errorModels.ServerError) {
 	if !h.AiService.IsAvailable() {
-		return echov1.GenerateTextStreamResponse{}, &errorModels.ServerError{
+		return GenerateTextStreamResponse{}, &errorModels.ServerError{
 			Code:    http.StatusServiceUnavailable,
 			Message: "AI service not available",
 		}
 	}
 
-	return echov1.GenerateTextStreamResponse{}, nil
+	return GenerateTextStreamResponse{}, nil
 }
 
 func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -129,8 +140,8 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req)
 }
 
-func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*echov1.GenerateTextStreamRequest, error) {
-	var req echov1.GenerateTextStreamRequest
+func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*GenerateTextStreamRequest, error) {
+	var req GenerateTextStreamRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, ErrInvalidRequestBody
 	}
@@ -138,44 +149,44 @@ func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*e
 	return &req, nil
 }
 
-func (h *GenerateTextStreamHandler) validateRequest(ctx context.Context, req *echov1.GenerateTextStreamRequest) *errorModels.ServerError {
+func (h *GenerateTextStreamHandler) validateRequest(ctx context.Context, req *GenerateTextStreamRequest) *errorModels.ServerError {
 	return h.Validate(ctx, req)
 }
 
-func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Context, req *echov1.GenerateTextStreamRequest) error {
+func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Context, req *GenerateTextStreamRequest) error {
 	log := logger.Ctx(ctx)
 
 	log.Info("Setting up session and storing message",
-		logger.String("session_id", req.SessionId),
-		logger.Int("user_id", int(req.UserId)),
+		logger.String("session_id", req.SessionID),
+		logger.Int("user_id", int(req.UserID)),
 		logger.String("prompt_length", strconv.Itoa(len(req.Prompt))))
 
-	if req.SessionId == "" {
-		log.Info("Creating new session for user", logger.Int("user_id", int(req.UserId)))
+	if req.SessionID == "" {
+		log.Info("Creating new session for user", logger.Int("user_id", int(req.UserID)))
 
-		session, err := h.MemoryService.GetService().CreateSession(ctx, int(req.UserId), "Auto-generated session")
+		session, err := h.MemoryService.GetService().CreateSession(ctx, int(req.UserID), "Auto-generated session")
 		if err != nil {
-			log.Error("Failed to create session", logger.Error(err), logger.Int("user_id", int(req.UserId)))
+			log.Error("Failed to create session", logger.Error(err), logger.Int("user_id", int(req.UserID)))
 
 			return fmt.Errorf("failed to create session: %w", err)
 		}
 
-		req.SessionId = session.SessionID
-		log.Info("Session created successfully", logger.String("session_id", req.SessionId))
+		req.SessionID = session.SessionID
+		log.Info("Session created successfully", logger.String("session_id", req.SessionID))
 	} else {
-		log.Info("Using existing session", logger.String("session_id", req.SessionId))
+		log.Info("Using existing session", logger.String("session_id", req.SessionID))
 	}
 
 	log.Info("Storing user message",
-		logger.String("session_id", req.SessionId),
-		logger.Int("user_id", int(req.UserId)),
+		logger.String("session_id", req.SessionID),
+		logger.Int("user_id", int(req.UserID)),
 		logger.String("role", "user"))
 
-	_, err := h.MemoryService.GetService().StoreMessage(ctx, req.SessionId, int(req.UserId), "user", req.Prompt, len(req.Prompt)/4)
+	_, err := h.MemoryService.GetService().StoreMessage(ctx, req.SessionID, int(req.UserID), "user", req.Prompt, len(req.Prompt)/4)
 	if err != nil {
 		log.Error("Failed to store message", logger.Error(err),
-			logger.String("session_id", req.SessionId),
-			logger.Int("user_id", int(req.UserId)))
+			logger.String("session_id", req.SessionID),
+			logger.Int("user_id", int(req.UserID)))
 
 		return fmt.Errorf("failed to store message: %w", err)
 	}
@@ -185,25 +196,25 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 	return nil
 }
 
-func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *echov1.GenerateTextStreamRequest) (string, error) {
+func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest) (string, error) {
 	log := logger.Ctx(ctx)
 
 	log.Info("Building enhanced prompt with context",
-		logger.String("session_id", req.SessionId),
-		logger.Int("user_id", int(req.UserId)))
+		logger.String("session_id", req.SessionID),
+		logger.Int("user_id", int(req.UserID)))
 
-	conversationContext, err := h.MemoryService.GetService().GetConversationContext(ctx, req.SessionId, int(req.UserId))
+	conversationContext, err := h.MemoryService.GetService().GetConversationContext(ctx, req.SessionID, int(req.UserID))
 	if err != nil {
 		log.Error("Failed to get conversation context", logger.Error(err),
-			logger.String("session_id", req.SessionId),
-			logger.Int("user_id", int(req.UserId)))
+			logger.String("session_id", req.SessionID),
+			logger.Int("user_id", int(req.UserID)))
 
 		return "", fmt.Errorf("failed to get context: %w", err)
 	}
 
 	log.Info("Context retrieved successfully",
 		logger.String("context_type", fmt.Sprintf("%T", conversationContext)),
-		logger.String("session_id", req.SessionId))
+		logger.String("session_id", req.SessionID))
 
 	return h.buildEnhancedPrompt(req.Prompt, conversationContext), nil
 }
@@ -238,7 +249,7 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *echov1.GenerateTextStreamRequest) {
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest) {
 	var fullResponse strings.Builder
 
 	for {
@@ -256,7 +267,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 
 			if token.Done {
 				if fullResponse.Len() > 0 {
-					go h.storeAIResponse(ctx, req.SessionId, int(req.UserId), fullResponse.String())
+					go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
 				}
 
 				return

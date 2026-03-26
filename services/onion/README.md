@@ -12,7 +12,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 - **Extensible**: Easy to add new modules and functionality
 - **Slack Integration**: Real-time monitoring and notifications
 - **Auto-recovery**: Panic recovery with automatic server restart
-- **Multi-Platform Support**: HTTP REST APIs for web + gRPC for mobile apps
+- **Multi-Platform Support**: HTTP REST APIs for web and internal services
 
 ## 📋 Prerequisites
 
@@ -29,9 +29,6 @@ git clone git@github.com:voxire/onion.git
 cd onion
 cp .env.example .env
 # Edit .env with your configuration
-
-# Initialize the proto submodule (grimoire)
-git submodule update --init --recursive
 ```
 
 ### 2. Install Dependencies
@@ -88,18 +85,6 @@ make load-tables
 make build
 
 # The binary will be at ./bin/onionexec
-```
-
-### Protobuf & gRPC
-
-```bash
-# Initialize or update the proto submodule
-git submodule update --init --recursive
-# Optional: pull latest from the remote for the submodule
-git submodule update --remote proto
-
-# Regenerate protobuf code
-make proto
 ```
 
 ### Code Quality

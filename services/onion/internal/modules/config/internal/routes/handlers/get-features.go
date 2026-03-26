@@ -6,8 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	configv1 "github.com/voxire/onion/internal/platform/models/proto/generated/proto/shared/config/v1"
-	"github.com/voxire/onion/internal/platform/utils/converter"
 )
 
 func GetFeaturesRoutes() []string {
@@ -20,16 +18,32 @@ type GetFeaturesHandler struct {
 	ConfigService *application.Service
 }
 
-func (h *GetFeaturesHandler) Serve(ctx context.Context, _ *configv1.GetFeaturesRequest) (configv1.GetFeaturesResponse, *errorModels.ServerError) {
+type GetFeaturesRequest struct{}
+
+type FeaturesPayload struct {
+	Flags       map[string]bool `json:"flags"`
+	IsAnonymous bool            `json:"isAnonymous"`
+	SessionID   string          `json:"sessionId"`
+}
+
+type GetFeaturesResponse struct {
+	Features *FeaturesPayload `json:"features"`
+}
+
+func (h *GetFeaturesHandler) Serve(ctx context.Context, _ *GetFeaturesRequest) (GetFeaturesResponse, *errorModels.ServerError) {
 	features, err := h.ConfigService.EvaluateAllFeaturesForUser(ctx)
 	if err != nil {
-		return configv1.GetFeaturesResponse{}, &errorModels.ServerError{
+		return GetFeaturesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to evaluate features",
 		}
 	}
 
-	return configv1.GetFeaturesResponse{
-		Features: converter.Convert[*configv1.Features](features),
+	return GetFeaturesResponse{
+		Features: &FeaturesPayload{
+			Flags:       features.Flags,
+			IsAnonymous: features.IsAnonymous,
+			SessionID:   features.SessionId,
+		},
 	}, nil
 }

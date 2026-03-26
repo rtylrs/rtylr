@@ -10,8 +10,6 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 type MiddlewareFunc func(next http.Handler) http.Handler
@@ -114,20 +112,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		if protoMsg, ok := any(&res).(proto.Message); ok {
-			marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
-
-			data, marshalErr := marshaler.Marshal(protoMsg)
-			if marshalErr != nil {
-				logger.Ctx(ctx).Error("Failed to marshal proto response", logger.Error(marshalErr))
-
-				return
-			}
-
-			if _, writeErr := w.Write(data); writeErr != nil {
-				logger.Ctx(ctx).Error("Failed to write proto response", logger.Error(writeErr))
-			}
-		} else if err := json.NewEncoder(w).Encode(res); err != nil {
+		if err := json.NewEncoder(w).Encode(res); err != nil {
 			logger.Ctx(ctx).Error("Failed to encode response", logger.Error(err))
 		}
 	}
