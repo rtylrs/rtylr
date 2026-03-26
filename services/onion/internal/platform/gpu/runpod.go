@@ -19,6 +19,7 @@ var (
 	ErrNotInitialized = errors.New("RunPod GPU not initialized")
 	ErrJobFailed      = errors.New("RunPod job failed")
 	ErrJobTimeout     = errors.New("RunPod job timed out")
+	ErrMissingJobID   = errors.New("RunPod returned no job ID")
 )
 
 func Init(ctx context.Context) error {
@@ -55,7 +56,7 @@ func newEndpoint(endpointID string) (*rpEndpoint.Endpoint, error) {
 	})
 }
 
-func RunAsync(ctx context.Context, input map[string]any) (string, error) {
+func RunAsync(_ context.Context, input map[string]any) (string, error) {
 	ep, err := newEndpoint(defaultEndpointID)
 	if err != nil {
 		return "", err
@@ -69,13 +70,13 @@ func RunAsync(ctx context.Context, input map[string]any) (string, error) {
 	}
 
 	if result.Id == nil {
-		return "", fmt.Errorf("RunPod returned no job ID")
+		return "", ErrMissingJobID
 	}
 
 	return *result.Id, nil
 }
 
-func RunSync(ctx context.Context, input map[string]any, timeout int) (*rpEndpoint.RunSyncOutput, error) {
+func RunSync(_ context.Context, input map[string]any, timeout int) (*rpEndpoint.RunSyncOutput, error) {
 	ep, err := newEndpoint(defaultEndpointID)
 	if err != nil {
 		return nil, err
@@ -101,7 +102,7 @@ func RunSync(ctx context.Context, input map[string]any, timeout int) (*rpEndpoin
 	return result, nil
 }
 
-func GetStatus(ctx context.Context, jobID string) (*rpEndpoint.StatusOutput, error) {
+func GetStatus(_ context.Context, jobID string) (*rpEndpoint.StatusOutput, error) {
 	ep, err := newEndpoint(defaultEndpointID)
 	if err != nil {
 		return nil, err
@@ -114,6 +115,7 @@ func GetStatus(ctx context.Context, jobID string) (*rpEndpoint.StatusOutput, err
 
 func PollUntilDone(ctx context.Context, jobID string, pollInterval, timeout time.Duration) (*rpEndpoint.StatusOutput, error) {
 	deadline := time.After(timeout)
+
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
 
@@ -150,7 +152,7 @@ func PollUntilDone(ctx context.Context, jobID string, pollInterval, timeout time
 	}
 }
 
-func RunOnEndpoint(ctx context.Context, endpointID string, input map[string]any) (string, error) {
+func RunOnEndpoint(_ context.Context, endpointID string, input map[string]any) (string, error) {
 	ep, err := newEndpoint(endpointID)
 	if err != nil {
 		return "", err
@@ -164,13 +166,13 @@ func RunOnEndpoint(ctx context.Context, endpointID string, input map[string]any)
 	}
 
 	if result.Id == nil {
-		return "", fmt.Errorf("RunPod returned no job ID")
+		return "", ErrMissingJobID
 	}
 
 	return *result.Id, nil
 }
 
-func GetHealth(ctx context.Context) (*rpEndpoint.HealthOutput, error) {
+func GetHealth(_ context.Context) (*rpEndpoint.HealthOutput, error) {
 	ep, err := newEndpoint(defaultEndpointID)
 	if err != nil {
 		return nil, err

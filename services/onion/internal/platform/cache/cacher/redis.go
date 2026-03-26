@@ -124,7 +124,7 @@ func (r *redisCache) GetMulti(ctx context.Context, keys []string) (results map[s
 	if len(keys) == 0 {
 		results = make(map[string][]byte)
 
-		return
+		return results, notFound
 	}
 
 	results = make(map[string][]byte, len(keys))
@@ -143,7 +143,7 @@ func (r *redisCache) GetMulti(ctx context.Context, keys []string) (results map[s
 
 		notFound = keys
 
-		return
+		return results, notFound
 	}
 
 	for k, v := range redisResults {
@@ -164,7 +164,7 @@ func (r *redisCache) GetMulti(ctx context.Context, keys []string) (results map[s
 		results[keys[k]] = []byte(vVal)
 	}
 
-	return
+	return results, notFound
 }
 
 // Get retrieves the value associated with a single key from Redis.

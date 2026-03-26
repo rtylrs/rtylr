@@ -38,6 +38,7 @@ func (c Cache[M]) unmarshal(bytes []byte, model *M, _ cacherConfiguration) error
 
 // GetOrComputeLegacy retrieves values for the specified IDs from the cache.
 // If a value is not found in the cache, it invokes the provided fetch function to compute the missing values.
+//
 // Deprecated: use GetOrCompute instead, which supports error handling in fetch function.
 func (c Cache[M]) GetOrComputeLegacy(ctx context.Context, ids []string, fetch func(ctx context.Context, ids []string) map[string]M, options ...ClientOption) map[string]M {
 	// Wrapper function that satisfies the new 'fetch' signature.
@@ -327,7 +328,7 @@ func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...Client
 	results = c.recoverMapKeys(results)
 	notFound = c.recoverListKeys(remainingKeysFromRedis)
 
-	return
+	return results, notFound
 }
 
 // Invalidate invalidates keys from cache.

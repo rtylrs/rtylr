@@ -141,7 +141,7 @@ func (s *Service) SummarizeSession(ctx context.Context, sessionID string, userID
 
 	var conversationText strings.Builder
 	for _, msg := range messages {
-		conversationText.WriteString(fmt.Sprintf("%s: %s\n", msg.Role, msg.Content))
+		_, _ = fmt.Fprintf(&conversationText, "%s: %s\n", msg.Role, msg.Content)
 	}
 
 	prompt := fmt.Sprintf(`Please provide a concise summary of this conversation in 2-3 sentences. Also identify 3-5 key topics discussed and assess the overall sentiment (positive, negative, or neutral).

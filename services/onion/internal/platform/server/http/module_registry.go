@@ -52,10 +52,11 @@ func (mr *ModuleRegistry) registerRoutesRecursive(ctx context.Context, val refle
 		if registerMethod.IsValid() {
 			logger.Ctx(ctx).Debug("Registering routes", logger.String("module", fieldName))
 
-			args := []reflect.Value{
+			args := make([]reflect.Value, 0, 2+len(dependencies))
+			args = append(args,
 				reflect.ValueOf(ctx),
 				reflect.ValueOf(r),
-			}
+			)
 
 			for _, dep := range dependencies {
 				args = append(args, reflect.ValueOf(dep))

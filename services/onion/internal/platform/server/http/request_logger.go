@@ -193,24 +193,26 @@ func (dd *DuplicateDetector) Cleanup() {
 }
 
 func generateRequestKey(r *http.Request, statusCode int) string {
-	key := fmt.Sprintf("%s:%s:%d", r.Method, r.URL.Path, statusCode)
+	var key strings.Builder
+
+	_, _ = fmt.Fprintf(&key, "%s:%s:%d", r.Method, r.URL.Path, statusCode)
 
 	importantParams := []string{"user_id", "session_id", "id"}
 	for _, param := range importantParams {
 		if value := r.URL.Query().Get(param); value != "" {
-			key += fmt.Sprintf(":%s=%s", param, value)
+			_, _ = fmt.Fprintf(&key, ":%s=%s", param, value)
 		}
 	}
 
 	if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil {
 		for i, paramKey := range routeCtx.URLParams.Keys {
 			if i < len(routeCtx.URLParams.Values) {
-				key += fmt.Sprintf(":%s=%s", paramKey, routeCtx.URLParams.Values[i])
+				_, _ = fmt.Fprintf(&key, ":%s=%s", paramKey, routeCtx.URLParams.Values[i])
 			}
 		}
 	}
 
-	return key
+	return key.String()
 }
 
 var sensitiveFields = []string{"password", "token", "authorization"}

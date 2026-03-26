@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/voxire/onion/internal/platform/utils/alerts"
@@ -117,11 +118,14 @@ func SendAlertsMessage(channelName, message string) error {
 }
 
 func sendNotifications(ctx context.Context, level, message string, fields []Field) {
-	formattedMessage := fmt.Sprintf("%s: %s", level, message)
+	var formattedMessage strings.Builder
+
+	_, _ = fmt.Fprintf(&formattedMessage, "%s: %s", level, message)
 	if len(fields) > 0 {
-		formattedMessage += "\n"
+		formattedMessage.WriteString("\n")
+
 		for _, f := range fields {
-			formattedMessage += fmt.Sprintf("• %s: %v\n", f.Key, f.Value)
+			_, _ = fmt.Fprintf(&formattedMessage, "• %s: %v\n", f.Key, f.Value)
 		}
 	}
 
@@ -140,7 +144,7 @@ func sendNotifications(ctx context.Context, level, message string, fields []Fiel
 		alertsMu.RUnlock()
 
 		if currentAlertsEnabled && currentAlertsSvc != nil {
-			if err := currentAlertsSvc.SendMessage(ctx, "alerts", formattedMessage); err != nil {
+			if err := currentAlertsSvc.SendMessage(ctx, "alerts", formattedMessage.String()); err != nil {
 				log.Printf("Failed to send alerts notification: %v", err)
 			}
 		}

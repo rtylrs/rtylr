@@ -149,6 +149,7 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 
 	// Handle interface{} types with type assertions
 	var summary string
+
 	if item.Summary != nil {
 		if s, ok := item.Summary.(string); ok {
 			summary = s
@@ -156,6 +157,7 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 	}
 
 	var keyTopics []string
+
 	if item.KeyTopics != nil {
 		if kt, ok := item.KeyTopics.([]string); ok {
 			keyTopics = kt
@@ -163,6 +165,7 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 	}
 
 	var memoryType string
+
 	if item.MemoryType != nil {
 		if mt, ok := item.MemoryType.(string); ok {
 			memoryType = mt
@@ -170,6 +173,7 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 	}
 
 	var memoryKey string
+
 	if item.MemoryKey != nil {
 		if mk, ok := item.MemoryKey.(string); ok {
 			memoryKey = mk
@@ -177,6 +181,7 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 	}
 
 	var memoryValue string
+
 	if item.MemoryValue != nil {
 		if mv, ok := item.MemoryValue.(string); ok {
 			memoryValue = mv

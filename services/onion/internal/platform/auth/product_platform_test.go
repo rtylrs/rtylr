@@ -18,7 +18,7 @@ func (stubTokenValidator) ValidateTokenFull(context.Context, string) (*TokenClai
 }
 
 func TestResolveProductPlatformFromHeader(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://localhost/account", http.NoBody)
+	req := httptest.NewRequestWithContext(context.Background(), "GET", "http://localhost/account", http.NoBody)
 	req.Header.Set(ProductPlatformHeader, "rtylr")
 	req.Host = "api.voxire.com"
 
@@ -28,7 +28,7 @@ func TestResolveProductPlatformFromHeader(t *testing.T) {
 }
 
 func TestResolveProductPlatformFromOriginFallback(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://localhost/account", http.NoBody)
+	req := httptest.NewRequestWithContext(context.Background(), "GET", "http://localhost/account", http.NoBody)
 	req.Header.Set("Origin", "https://app.voxire.com")
 
 	if got := ResolveProductPlatform(req); got != ProductPlatformVoxire {

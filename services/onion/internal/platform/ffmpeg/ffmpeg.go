@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -27,6 +28,7 @@ func Init() error {
 
 func IsAvailable() bool {
 	_, err := exec.LookPath("ffmpeg")
+
 	return err == nil
 }
 
@@ -37,6 +39,7 @@ func Run(ctx context.Context, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, binaryPath, args...)
 
 	var stdout, stderr bytes.Buffer
+
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
@@ -52,12 +55,12 @@ func Run(ctx context.Context, args ...string) ([]byte, error) {
 func ConcatAudioFiles(ctx context.Context, inputPaths []string, outputPath string) error {
 	listFile := filepath.Join(os.TempDir(), fmt.Sprintf("ffmpeg_concat_%d.txt", time.Now().UnixNano()))
 
-	var content string
+	var content strings.Builder
 	for _, p := range inputPaths {
-		content += fmt.Sprintf("file '%s'\n", p)
+		_, _ = fmt.Fprintf(&content, "file '%s'\n", p)
 	}
 
-	if err := os.WriteFile(listFile, []byte(content), 0o600); err != nil {
+	if err := os.WriteFile(listFile, []byte(content.String()), 0o600); err != nil {
 		return fmt.Errorf("failed to write concat list: %w", err)
 	}
 	defer os.Remove(listFile)
@@ -84,7 +87,7 @@ func MixAudioWithMusic(ctx context.Context, voicePath, musicPath, outputPath str
 	return err
 }
 
-func ConvertToMP3(ctx context.Context, inputPath, outputPath string, bitrate string) error {
+func ConvertToMP3(ctx context.Context, inputPath, outputPath, bitrate string) error {
 	if bitrate == "" {
 		bitrate = "192k"
 	}
@@ -103,6 +106,7 @@ func GetDuration(ctx context.Context, filePath string) (float64, error) {
 	)
 
 	var stdout bytes.Buffer
+
 	cmd.Stdout = &stdout
 
 	if err := cmd.Run(); err != nil {

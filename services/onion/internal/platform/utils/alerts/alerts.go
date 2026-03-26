@@ -157,17 +157,17 @@ func (s *Service) sendBatchedMessages(ctx context.Context, channelID string, mes
 		return s.sendMessageToChannel(ctx, channelID, messages[0].Text)
 	}
 
-	var combinedText string
+	var combinedText strings.Builder
 
 	for i, msg := range messages {
 		if i > 0 {
-			combinedText += "\n\n"
+			combinedText.WriteString("\n\n")
 		}
 
-		combinedText += msg.Text
+		combinedText.WriteString(msg.Text)
 	}
 
-	return s.sendMessageToChannel(ctx, channelID, combinedText)
+	return s.sendMessageToChannel(ctx, channelID, combinedText.String())
 }
 
 func (s *Service) sendMessageToChannel(ctx context.Context, channelID, message string) error {

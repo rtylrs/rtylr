@@ -429,6 +429,9 @@ linters:
             - github.com/aws/aws-sdk-go-v2/credentials
             - github.com/aws/aws-sdk-go-v2/service/s3
             - github.com/Masterminds/squirrel
+            - github.com/runpod/go-sdk/pkg/sdk
+            - github.com/runpod/go-sdk/pkg/sdk/config
+            - github.com/runpod/go-sdk/pkg/sdk/endpoint
             - github.com/redis/go-redis/v9
             - github.com/allegro/bigcache/v3
             - github.com/puzpuzpuz/xsync/v3
@@ -466,6 +469,8 @@ linters:
           - github.com/aws/aws-sdk-go-v2/credentials
           - github.com/aws/aws-sdk-go-v2/service/s3
           - github.com/Masterminds/squirrel
+          - github.com/runpod/go-sdk
+          - github.com/runpod/go-sdk/pkg/sdk
           - github.com/redis/go-redis/v9
           - github.com/allegro/bigcache/v3
           - github.com/puzpuzpuz/xsync/v3

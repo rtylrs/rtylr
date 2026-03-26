@@ -61,8 +61,8 @@ func (h *CareersHandler) Serve(ctx context.Context, _ *GetActiveCareersRequest) 
 	}
 
 	careers := make([]*Career, 0, len(domainCareers))
-	for _, career := range domainCareers {
-		careers = append(careers, newCareer(career))
+	for i := range domainCareers {
+		careers = append(careers, newCareer(domainCareers[i]))
 	}
 
 	return GetActiveCareersResponse{

@@ -28,7 +28,7 @@ func (c *LocalCache) GetMulti(ctx context.Context, keys []string) (results map[s
 		}
 	}
 
-	return
+	return results, notFound
 }
 
 func (c *LocalCache) PutMulti(ctx context.Context, keyVals map[string][]byte, ttl time.Duration) {
