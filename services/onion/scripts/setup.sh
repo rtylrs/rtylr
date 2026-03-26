@@ -4,7 +4,6 @@
 set -e
 
 ENV_FILE=".env"
-EXAMPLE_FILE=".env.example"
 
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -15,9 +14,8 @@ echo -e "${BLUE}Setting up Onion project${NC}"
 
 # Ensure env file exists
 if [ ! -f "$ENV_FILE" ]; then
-    cp "$EXAMPLE_FILE" "$ENV_FILE"
-    echo -e "${GREEN}Created $ENV_FILE from $EXAMPLE_FILE${NC}"
-    echo "Fill in the placeholder values in $ENV_FILE before running the app."
+    echo -e "${YELLOW}$ENV_FILE not found.${NC}"
+    echo "Create $ENV_FILE and configure DATABASE_URL or DB_* before running the app."
 fi
 
 if command -v pg_isready >/dev/null 2>&1; then

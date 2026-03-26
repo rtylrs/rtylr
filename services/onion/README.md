@@ -26,8 +26,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 ```bash
 git clone git@github.com:voxire/onion.git
 cd onion
-cp .env.example .env
-# Edit .env so DATABASE_URL or DB_* points to a running PostgreSQL instance
+# Create .env and point DATABASE_URL or DB_* to a running PostgreSQL instance
 ```
 
 ### 2. Install Dependencies
