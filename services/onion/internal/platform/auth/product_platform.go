@@ -13,7 +13,6 @@ const (
 	ProductPlatformUnknown ProductPlatform = "unknown"
 	ProductPlatformRtylr   ProductPlatform = "rtylr"
 	ProductPlatformVoxire  ProductPlatform = "voxire"
-	ProductPlatformZontriq ProductPlatform = "zontriq"
 )
 
 type productPlatformCtxKey struct{}
@@ -67,8 +66,6 @@ func normalizeProductPlatform(raw string) ProductPlatform {
 		return ProductPlatformRtylr
 	case ProductPlatformVoxire:
 		return ProductPlatformVoxire
-	case ProductPlatformZontriq:
-		return ProductPlatformZontriq
 	default:
 		return ProductPlatformUnknown
 	}
@@ -82,8 +79,6 @@ func inferProductPlatform(candidate string) ProductPlatform {
 		return ProductPlatformRtylr
 	case strings.Contains(candidate, "voxire"), strings.Contains(candidate, "voxelect"):
 		return ProductPlatformVoxire
-	case strings.Contains(candidate, "zontriq"):
-		return ProductPlatformZontriq
 	default:
 		return ProductPlatformUnknown
 	}

@@ -151,6 +151,10 @@ func (l *Logger) Info(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelInfo, "\""+msg+"\"", convertFields(fields)...)
 }
 
+func (l *Logger) Debug(msg string, fields ...Field) {
+	l.LogAttrs(l.ctx, slog.LevelDebug, msg, convertFields(fields)...)
+}
+
 func (l *Logger) Error(msg string, fields ...Field) {
 	l.LogAttrs(l.ctx, slog.LevelError, msg, convertFields(fields)...)
 	sendNotifications(l.ctx, "[Error]", msg, fields)

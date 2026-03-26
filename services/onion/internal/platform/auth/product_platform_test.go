@@ -37,10 +37,10 @@ func TestResolveProductPlatformFromOriginFallback(t *testing.T) {
 }
 
 func TestWithProductPlatformRoundTrip(t *testing.T) {
-	ctx := WithProductPlatform(context.Background(), ProductPlatformZontriq)
+	ctx := WithProductPlatform(context.Background(), ProductPlatformVoxire)
 
-	if got := ProductPlatformCtx(ctx); got != ProductPlatformZontriq {
-		t.Fatalf("expected context platform %q, got %q", ProductPlatformZontriq, got)
+	if got := ProductPlatformCtx(ctx); got != ProductPlatformVoxire {
+		t.Fatalf("expected context platform %q, got %q", ProductPlatformVoxire, got)
 	}
 }
 

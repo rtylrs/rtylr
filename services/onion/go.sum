@@ -156,8 +156,6 @@ github.com/googleapis/enterprise-certificate-proxy v0.3.2 h1:Vie5ybvEvT75RniqhfF
 github.com/googleapis/enterprise-certificate-proxy v0.3.2/go.mod h1:VLSiSSBs/ksPL8kq3OBOQ6WRI2QnaFynd1DCjZ62+V0=
 github.com/googleapis/gax-go/v2 v2.12.5 h1:8gw9KZK8TiVKB6q3zHY3SBzLnrGp6HQjyfYBYGmXdxA=
 github.com/googleapis/gax-go/v2 v2.12.5/go.mod h1:BUDKcWo+RaKq5SC9vVYL0wLADa3VcfswbOMMRmB9H3E=
-github.com/haguro/elevenlabs-go v0.2.4 h1:Z1a/I+b5fAtGSfrhEj97dYG1EbV9uRzSfvz5n5+ud34=
-github.com/haguro/elevenlabs-go v0.2.4/go.mod h1:j15h9w2BpgxlIGWXmCKWPPDaTo2QAO83zFy5J+pFCt8=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
 github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=
@@ -206,8 +204,6 @@ github.com/redis/go-redis/v9 v9.17.0 h1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/
 github.com/redis/go-redis/v9 v9.17.0/go.mod h1:u410H11HMLoB+TP67dz8rL9s6QW2j76l0//kSOd3370=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
-github.com/runpod/go-sdk v0.0.0 h1:SKrjGtT07rFBVWPokn1bkbXtiql3DNw+kW+4uKu0a8w=
-github.com/runpod/go-sdk v0.0.0/go.mod h1:yrLyLBDt9SzdBMNoflJtjlOablAyc0EEm96uLdz9c9c=
 github.com/runpod/go-sdk/pkg/sdk v0.0.0-20240315175250-b8aca7812ff3 h1:qNGN2Tm3+Vkjo30uJg3x4zMy+00GSsVFEkFLUi00gco=
 github.com/runpod/go-sdk/pkg/sdk v0.0.0-20240315175250-b8aca7812ff3/go.mod h1:e9q+ZDGohJ8zwh6d0BGoTZftpRvk7OEI3AT8SlvX6aA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

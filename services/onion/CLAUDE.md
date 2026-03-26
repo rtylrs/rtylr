@@ -31,7 +31,6 @@ internal/
 │   ├── translation/      # i18n (en, ar, fr)
 │   └── user/             # authentication (email/password/JWT)
 ├── platforms/            # platform-specific modules
-│   ├── zontriq/          # Zontriq platform
 │   ├── rtylr/            # Rtylr platform
 │   │   ├── echo/         # AI chat, SSE streaming
 │   │   └── memory/       # conversation sessions, search, summarization
@@ -107,11 +106,8 @@ PostgreSQL schemas are used for platform isolation. Tables live in their respect
 internal/platform/database/schemas/
 ├── shared/     # users, config, feature flags, themes, translations
 ├── voxire/     # vox_users, permissions, careers, clients, expenses, faq
-├── rtylr/      # chat_sessions, conversations, user_memory
-└── zontriq/    # plans, users, channels, series, videos, automations, jobs
+└── rtylr/      # chat_sessions, conversations, user_memory
 ```
-
-The database `search_path` is set to `shared, voxire, rtylr, zontriq, public` so queries work without schema qualification.
 
 ### Code Generation
 

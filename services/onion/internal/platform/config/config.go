@@ -99,28 +99,6 @@ func IsR2Configured() bool {
 	return GetR2AccountID() != "" && GetR2AccessKeyID() != "" && GetR2SecretAccessKey() != "" && GetR2Bucket() != ""
 }
 
-const (
-	ElevenLabsAPIKeyEnvVar  = "ELEVENLABS_API_KEY"
-	ElevenLabsBaseURLEnvVar = "ELEVENLABS_BASE_URL"
-)
-
-func GetElevenLabsAPIKey() string {
-	return os.Getenv(ElevenLabsAPIKeyEnvVar)
-}
-
-func GetElevenLabsBaseURL() string {
-	baseURL := os.Getenv(ElevenLabsBaseURLEnvVar)
-	if baseURL == "" {
-		return "https://api.elevenlabs.io/v1"
-	}
-
-	return baseURL
-}
-
-func IsElevenLabsConfigured() bool {
-	return GetElevenLabsAPIKey() != ""
-}
-
 func GetRunPodAPIKey() string {
 	return os.Getenv("RUNPOD_API_KEY")
 }

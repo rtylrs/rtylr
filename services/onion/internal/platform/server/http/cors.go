@@ -17,9 +17,6 @@ func getAllowedOrigins() []*regexp.Regexp {
 		regexp.MustCompile(`^https?://.*\.voxelect\.com$`),
 		regexp.MustCompile(`^https?://.*\.voxire\.tech$`),
 		regexp.MustCompile(`^https?://.*\.rtylr\.com$`),
-		regexp.MustCompile(`^http://zontriq\.com$`),
-		regexp.MustCompile(`^https://zontriq\.com$`),
-		regexp.MustCompile(`^https?://.*\.zontriq\.com$`),
 	}
 }
 

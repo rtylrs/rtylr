@@ -21,6 +21,7 @@ require (
 	github.com/openai/openai-go/v2 v2.0.2
 	github.com/puzpuzpuz/xsync/v3 v3.5.1
 	github.com/redis/go-redis/v9 v9.17.0
+	github.com/runpod/go-sdk/pkg/sdk v0.0.0-20240315175250-b8aca7812ff3
 	github.com/toorop/go-dkim v0.0.0-20250226130143-9025cce95817
 	golang.org/x/crypto v0.43.0
 	google.golang.org/api v0.186.0
@@ -71,7 +72,6 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
-	github.com/haguro/elevenlabs-go v0.2.4 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
@@ -84,8 +84,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/runpod/go-sdk v0.0.0 // indirect
-	github.com/runpod/go-sdk/pkg/sdk v0.0.0-20240315175250-b8aca7812ff3 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
