@@ -18,7 +18,7 @@ type Career struct {
 }
 
 func (c *Career) FromRows(row sqlc.GetAllCareersRow) {
-	c.Id = int64(row.ID)
+	c.Id = row.ID
 	c.Title = row.Title
 	c.Department = convert.ToString(row.Department)
 	c.Location = convert.ToString(row.Location)

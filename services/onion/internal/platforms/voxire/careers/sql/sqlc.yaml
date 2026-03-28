@@ -1,6 +1,6 @@
 version: "2"
 sql:
-  - engine: "postgresql"
+  - engine: "mysql"
     queries: "queries"
     schema:
       - "../../../../../internal/platform/database/schemas/shared"
@@ -9,6 +9,6 @@ sql:
       go:
         package: "sqlc"
         out: "../internal/infrastructure/persistence/sqlc"
-        sql_package: "pgx/v5"
+        sql_package: "database/sql"
         emit_json_tags: true
         emit_db_tags: true

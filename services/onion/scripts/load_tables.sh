@@ -14,47 +14,39 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}Loading database tables from schema files${NC}"
 
-if ! command -v psql >/dev/null 2>&1; then
-    echo -e "${RED}psql is required to load schema files.${NC}"
+if ! command -v mysql >/dev/null 2>&1; then
+    echo -e "${RED}mysql is required to load schema files.${NC}"
     exit 1
 fi
 
-if ! command -v pg_isready >/dev/null 2>&1; then
-    echo -e "${RED}pg_isready is required to verify database connectivity.${NC}"
+if ! command -v mysqladmin >/dev/null 2>&1; then
+    echo -e "${RED}mysqladmin is required to verify database connectivity.${NC}"
     exit 1
 fi
 
 DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5432}"
+DB_PORT="${DB_PORT:-3306}"
 DB_NAME="${DB_NAME:-onion_dev}"
 DB_USER="${DB_USER:-onion_user}"
 DB_PASSWORD="${DB_PASSWORD:-onion_password}"
 
-psql_cmd=(psql)
-pg_isready_cmd=(pg_isready)
+mysql_cmd=(
+    mysql
+    --host="${DB_HOST}"
+    --port="${DB_PORT}"
+    --user="${DB_USER}"
+    --password="${DB_PASSWORD}"
+    "${DB_NAME}"
+)
 
-if [ -n "${DATABASE_URL:-}" ]; then
-    psql_cmd+=("${DATABASE_URL}")
-    pg_isready_cmd+=(-d "${DATABASE_URL}")
-else
-    export PGPASSWORD="${DB_PASSWORD}"
-    psql_cmd+=(
-        -h "${DB_HOST}"
-        -p "${DB_PORT}"
-        -U "${DB_USER}"
-        -d "${DB_NAME}"
-    )
-    pg_isready_cmd+=(
-        -h "${DB_HOST}"
-        -p "${DB_PORT}"
-        -U "${DB_USER}"
-        -d "${DB_NAME}"
-    )
-fi
-
-echo -e "${BLUE}Checking PostgreSQL connectivity...${NC}"
-until "${pg_isready_cmd[@]}" >/dev/null 2>&1; do
-    echo "Waiting for PostgreSQL..."
+echo -e "${BLUE}Checking MySQL connectivity...${NC}"
+until mysqladmin ping \
+    --host="${DB_HOST}" \
+    --port="${DB_PORT}" \
+    --user="${DB_USER}" \
+    --password="${DB_PASSWORD}" \
+    --silent >/dev/null 2>&1; do
+    echo "Waiting for MySQL..."
     sleep 2
 done
 
@@ -77,7 +69,7 @@ drop_orphaned_tables() {
 
     # Get list of existing tables in the database
     local existing_tables
-    existing_tables=$("${psql_cmd[@]}" -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" | tr -d ' ')
+    existing_tables=$("${mysql_cmd[@]}" --batch --skip-column-names -e "SHOW TABLES;" | tr -d ' ')
 
     # Check each existing table
     for table in $existing_tables; do
@@ -86,7 +78,7 @@ drop_orphaned_tables() {
             echo -e "${GREEN}✓ Table $table is in schema${NC}"
         else
             echo -e "${YELLOW}Dropping orphaned table: $table${NC}"
-            "${psql_cmd[@]}" -c "DROP TABLE IF EXISTS $table CASCADE;"
+            "${mysql_cmd[@]}" -e "DROP TABLE IF EXISTS \`$table\`;"
         fi
     done
 }
@@ -101,7 +93,7 @@ create_table_if_not_exists() {
 
     echo -e "${BLUE}Ensuring table exists: $table_name${NC}"
 
-    if "${psql_cmd[@]}" -v ON_ERROR_STOP=1 -f "$file"; then
+    if "${mysql_cmd[@]}" < "$file"; then
         echo -e "${GREEN}✓ Table $table_name is ready${NC}"
     else
         echo -e "${YELLOW}⚠ Table $table_name may already exist or had issues${NC}"
@@ -147,4 +139,4 @@ echo -e "${GREEN}🎉 Database tables loaded successfully!${NC}"
 
 # Show current tables
 echo -e "${BLUE}Current tables in database:${NC}"
-"${psql_cmd[@]}" -c "\dt" || true
+"${mysql_cmd[@]}" --batch --skip-column-names -e "SHOW TABLES;" || true

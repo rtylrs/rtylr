@@ -30,4 +30,4 @@ SELECT
     font_size_base,
     font_size_heading,
     mobile_breakpoint
-FROM themes WHERE owner_id = $1;
+FROM themes WHERE owner_id = ?;

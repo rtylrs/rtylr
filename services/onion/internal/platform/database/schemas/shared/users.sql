@@ -1,10 +1,10 @@
-CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    full_name TEXT,
-    signup_ip_address INET,
-    signup_device_info TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    full_name TEXT NULL,
+    signup_ip_address VARCHAR(45) NULL,
+    signup_device_info TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

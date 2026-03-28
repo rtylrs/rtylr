@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS expenses (
-    id SERIAL PRIMARY KEY,
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     product VARCHAR(255) NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 1,
-    term VARCHAR(100),
+    term VARCHAR(100) NULL,
     price DECIMAL(10,2) NOT NULL,
-    payment_date DATE,
+    payment_date DATE NULL,
     paid BOOLEAN NOT NULL DEFAULT false,
-    extra_info TEXT,
+    extra_info TEXT NULL,
     subscription BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

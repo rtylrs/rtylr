@@ -1,11 +1,10 @@
 package times
 
 import (
+	"database/sql"
 	"errors"
 	"strings"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var ErrDurationEmpty = errors.New("duration is empty")
@@ -170,15 +169,15 @@ func GetCountryTime(country string) (time.Time, error) {
 	return ParseWithDefault(FormatWithDateTime, locationTime.Format(FormatWithDateTime), locationTime), nil
 }
 
-func FromPgDate(d pgtype.Date) *time.Time {
-	if !d.Valid {
+func FromNullTime(t sql.NullTime) *time.Time {
+	if !t.Valid {
 		return nil
 	}
 
-	return &d.Time
+	return &t.Time
 }
 
-func FromPgTimestamp(t pgtype.Timestamptz) time.Time {
+func FromTimestamp(t sql.NullTime) time.Time {
 	if !t.Valid {
 		return time.Time{}
 	}

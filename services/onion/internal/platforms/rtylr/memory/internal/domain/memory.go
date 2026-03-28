@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/utils/convert"
@@ -71,9 +73,9 @@ func (c *ConversationSummary) FromRows(summary sqlc.ConversationSummary) error {
 	c.UserID = int(summary.UserID)
 	c.SessionID = summary.SessionID
 	c.Summary = summary.Summary
-	c.KeyTopics = summary.KeyTopics
+	c.KeyTopics = convert.ToStringSlice(summary.KeyTopics)
 	c.Sentiment = convert.ToString(summary.Sentiment)
-	c.ImportanceScore = summary.ImportanceScore.Float64
+	c.ImportanceScore = convert.ToFloat64(summary.ImportanceScore)
 	c.CreatedAt = summary.CreatedAt.Time
 
 	return nil
@@ -97,7 +99,7 @@ func (u *UserMemory) FromRows(memory sqlc.UserMemory) error {
 	u.MemoryType = memory.MemoryType
 	u.Key = memory.Key
 	u.Value = memory.Value
-	u.Confidence = memory.Confidence.Float64
+	u.Confidence = convert.ToFloat64(memory.Confidence)
 	u.SourceSession = convert.ToString(memory.SourceSession)
 	u.CreatedAt = memory.CreatedAt.Time
 	u.UpdatedAt = memory.UpdatedAt.Time
@@ -123,8 +125,8 @@ type UserStats struct {
 func (u *UserStats) FromRows(stats sqlc.GetSessionStatsRow) error {
 	u.TotalMessages = stats.TotalMessages
 	u.TotalSessions = stats.TotalSessions
-	u.AvgTokensPerMessage = stats.AvgTokensPerMessage
-	u.TotalTokensUsed = stats.TotalTokensUsed
+	u.AvgTokensPerMessage = interfaceToFloat64(stats.AvgTokensPerMessage)
+	u.TotalTokensUsed = interfaceToInt64(stats.TotalTokensUsed)
 
 	return nil
 }
@@ -147,56 +149,72 @@ func (c *ContextItem) FromRows(item sqlc.GetContextForSessionRow) error {
 		createdAt = &item.CreatedAt.Time
 	}
 
-	// Handle interface{} types with type assertions
-	var summary string
-
-	if item.Summary != nil {
-		if s, ok := item.Summary.(string); ok {
-			summary = s
-		}
-	}
-
-	var keyTopics []string
-
-	if item.KeyTopics != nil {
-		if kt, ok := item.KeyTopics.([]string); ok {
-			keyTopics = kt
-		}
-	}
-
-	var memoryType string
-
-	if item.MemoryType != nil {
-		if mt, ok := item.MemoryType.(string); ok {
-			memoryType = mt
-		}
-	}
-
-	var memoryKey string
-
-	if item.MemoryKey != nil {
-		if mk, ok := item.MemoryKey.(string); ok {
-			memoryKey = mk
-		}
-	}
-
-	var memoryValue string
-
-	if item.MemoryValue != nil {
-		if mv, ok := item.MemoryValue.(string); ok {
-			memoryValue = mv
-		}
-	}
-
 	c.Type = item.Type
 	c.Role = item.Role
 	c.Content = item.Content
 	c.CreatedAt = createdAt
-	c.Summary = summary
-	c.KeyTopics = keyTopics
-	c.MemoryType = memoryType
-	c.MemoryKey = memoryKey
-	c.MemoryValue = memoryValue
+	c.Summary = item.Summary
+	c.KeyTopics = parseJSONStringSlice(item.KeyTopics)
+	c.MemoryType = item.MemoryType
+	c.MemoryKey = item.MemoryKey
+	c.MemoryValue = item.MemoryValue
 
 	return nil
+}
+
+func parseJSONStringSlice(raw string) []string {
+	if raw == "" || raw == "null" {
+		return nil
+	}
+
+	var values []string
+	if err := json.Unmarshal([]byte(raw), &values); err != nil {
+		return nil
+	}
+
+	return values
+}
+
+func interfaceToFloat64(value interface{}) float64 {
+	switch v := value.(type) {
+	case nil:
+		return 0
+	case float64:
+		return v
+	case float32:
+		return float64(v)
+	case int64:
+		return float64(v)
+	case int32:
+		return float64(v)
+	case []byte:
+		f, _ := strconv.ParseFloat(string(v), 64)
+		return f
+	case string:
+		f, _ := strconv.ParseFloat(v, 64)
+		return f
+	default:
+		return 0
+	}
+}
+
+func interfaceToInt64(value interface{}) int64 {
+	switch v := value.(type) {
+	case nil:
+		return 0
+	case int64:
+		return v
+	case int32:
+		return int64(v)
+	case float64:
+		return int64(v)
+	case []byte:
+		i, _ := strconv.ParseInt(string(v), 10, 64)
+		return i
+	case string:
+		i, _ := strconv.ParseInt(v, 10, 64)
+		return i
+	default:
+		return 0
+	}
 }

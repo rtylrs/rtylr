@@ -1,101 +1,108 @@
--- name: CreateChatSession :one
+-- name: CreateChatSession :execresult
 INSERT INTO chat_sessions (user_id, session_id, title, metadata)
-VALUES ($1, $2, $3, $4)
-RETURNING *;
+VALUES (?, ?, ?, ?);
 
 -- name: GetChatSession :one
 SELECT * FROM chat_sessions 
-WHERE session_id = $1 AND user_id = $2;
+WHERE session_id = ? AND user_id = ?;
 
--- name: UpdateChatSession :one
+-- name: UpdateChatSession :exec
 UPDATE chat_sessions 
-SET title = $3, summary = $4, metadata = $5, last_activity = NOW()
-WHERE session_id = $1 AND user_id = $2
-RETURNING *;
+SET title = ?, summary = ?, metadata = ?, last_activity = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+WHERE session_id = ? AND user_id = ?;
 
 -- name: ListUserSessions :many
 SELECT * FROM chat_sessions 
-WHERE user_id = $1 
+WHERE user_id = ? 
 ORDER BY last_activity DESC 
-LIMIT $2 OFFSET $3;
+LIMIT ? OFFSET ?;
 
--- name: CreateMessage :one
+-- name: CreateMessage :execresult
 INSERT INTO conversation_messages (session_id, user_id, role, content, tokens_used, metadata)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING *;
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: GetMessageByID :one
+SELECT * FROM conversation_messages
+WHERE id = ?;
 
 -- name: GetSessionMessages :many
 SELECT * FROM conversation_messages 
-WHERE session_id = $1 
+WHERE session_id = ? 
 ORDER BY created_at ASC;
 
 -- name: GetRecentMessages :many
 SELECT * FROM conversation_messages 
-WHERE user_id = $1 
+WHERE user_id = ? 
 ORDER BY created_at DESC 
-LIMIT $2;
+LIMIT ?;
 
 -- name: GetMessagesByTopic :many
 SELECT cm.*, cs.title AS session_title
 FROM conversation_messages cm
 JOIN chat_sessions cs ON cm.session_id = cs.session_id
-WHERE cm.user_id = $1 
-AND to_tsvector('english', cm.content) @@ plainto_tsquery('english', $2)
+WHERE cm.user_id = ?
+AND MATCH(cm.content) AGAINST (? IN NATURAL LANGUAGE MODE)
 ORDER BY cm.created_at DESC
-LIMIT $3;
+LIMIT ?;
 
--- name: CreateConversationSummary :one
+-- name: CreateConversationSummary :execresult
 INSERT INTO conversation_summaries (user_id, session_id, summary, key_topics, sentiment, importance_score)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING *;
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: GetConversationSummaryByID :one
+SELECT * FROM conversation_summaries
+WHERE id = ?;
 
 -- name: GetUserSummaries :many
 SELECT * FROM conversation_summaries 
-WHERE user_id = $1 
+WHERE user_id = ? 
 ORDER BY importance_score DESC, created_at DESC;
 
--- name: StoreUserMemory :one
-INSERT INTO user_memory (user_id, memory_type, key, value, confidence, source_session)
-VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (user_id, memory_type, key) 
-DO UPDATE SET 
-    value = EXCLUDED.value,
-    confidence = EXCLUDED.confidence,
-    updated_at = NOW()
-RETURNING *;
+-- name: StoreUserMemory :exec
+INSERT INTO user_memory (user_id, memory_type, `key`, value, confidence, source_session)
+VALUES (?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    value = VALUES(value),
+    confidence = VALUES(confidence),
+    source_session = VALUES(source_session),
+    updated_at = CURRENT_TIMESTAMP;
+
+-- name: GetUserMemoryByKey :one
+SELECT * FROM user_memory
+WHERE user_id = ? AND memory_type = ? AND `key` = ?;
 
 -- name: GetUserMemory :many
 SELECT * FROM user_memory 
-WHERE user_id = $1 
-AND (memory_type = $2 OR $2 = '')
+WHERE user_id = ?
+AND (memory_type = ? OR ? = '')
 ORDER BY confidence DESC, updated_at DESC;
 
 -- name: SearchUserMemory :many
 SELECT * FROM user_memory 
-WHERE user_id = $1 
+WHERE user_id = ?
 AND (
-    key ILIKE $2 OR 
-    value ILIKE $2 OR
-    memory_type ILIKE $2
+    `key` LIKE CONCAT('%', ?, '%') OR
+    value LIKE CONCAT('%', ?, '%') OR
+    memory_type LIKE CONCAT('%', ?, '%')
 )
 ORDER BY confidence DESC;
 
 -- name: GetContextForSession :many
 WITH recent_messages AS (
     SELECT * FROM conversation_messages 
-    WHERE conversation_messages.session_id = $1 
+    WHERE conversation_messages.session_id = ? 
     ORDER BY created_at DESC 
     LIMIT 20
 ),
 session_summary AS (
     SELECT summary, key_topics FROM conversation_summaries 
-    WHERE conversation_summaries.session_id = $1 
+    WHERE conversation_summaries.session_id = ? 
     ORDER BY created_at DESC 
     LIMIT 1
 ),
 user_memories AS (
-    SELECT memory_type, key, value FROM user_memory 
-    WHERE user_memory.user_id = $2 
+    SELECT memory_type, `key`, value FROM user_memory
+    WHERE user_memory.user_id = ?
     AND confidence > 0.7
     ORDER BY confidence DESC 
     LIMIT 10
@@ -130,7 +137,7 @@ FROM (
         'summary' AS type,
         NULL AS role,
         summary AS content,
-        NOW() AS created_at,
+        CURRENT_TIMESTAMP AS created_at,
         summary,
         key_topics,
         NULL AS memory_type,
@@ -145,11 +152,11 @@ FROM (
         'memory' AS type,
         NULL AS role,
         value AS content,
-        NOW() AS created_at,
+        CURRENT_TIMESTAMP AS created_at,
         NULL AS summary,
         NULL AS key_topics,
         memory_type,
-        key AS memory_key,
+        `key` AS memory_key,
         value AS memory_value,
         3 AS sort_order
     FROM user_memories
@@ -158,8 +165,8 @@ ORDER BY sort_order, created_at ASC;
 
 -- name: DeleteOldSessions :exec
 DELETE FROM chat_sessions 
-WHERE user_id = $1 
-AND last_activity < NOW() - INTERVAL '30 days';
+WHERE user_id = ?
+AND last_activity < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY);
 
 -- name: GetSessionStats :one
 SELECT 
@@ -168,4 +175,4 @@ SELECT
     AVG(tokens_used) AS avg_tokens_per_message,
     SUM(tokens_used) AS total_tokens_used
 FROM conversation_messages 
-WHERE user_id = $1;
+WHERE user_id = ?;

@@ -13,7 +13,7 @@ SELECT
 WHERE is_active = true
 ORDER BY created_at DESC;
 
--- name: CreateCareer :one
+-- name: CreateCareer :execresult
 INSERT INTO careers (
     title,
     department,
@@ -24,5 +24,5 @@ INSERT INTO careers (
     details,
     is_active
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
-) RETURNING *;
+    ?, ?, ?, ?, ?, ?, ?, ?
+);

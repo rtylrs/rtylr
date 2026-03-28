@@ -6,7 +6,7 @@ SELECT
     enabled,
     reason
 FROM user_feature_overrides
-WHERE user_id = $1
+WHERE user_id = ?
 ORDER BY feature_key;
 
 -- name: GetUserFeatureOverride :one
@@ -17,5 +17,4 @@ SELECT
     enabled,
     reason
 FROM user_feature_overrides
-WHERE user_id = $1 AND feature_key = $2;
-
+WHERE user_id = ? AND feature_key = ?;

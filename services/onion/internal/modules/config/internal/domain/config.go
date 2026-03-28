@@ -65,22 +65,3 @@ type ConfigInput struct {
 	AboutContent           string
 	FooterSubText          string
 }
-
-func (c *ConfigInput) FromRows(row sqlc.CreateConfigRow) {
-	c.OwnerId = convert.Int32ToString(row.OwnerID)
-	c.SiteName = convert.ToString(row.SiteName)
-	c.LogoUrl = convert.ToString(row.LogoUrl)
-	c.FaviconUrl = convert.ToString(row.FaviconUrl)
-	c.MetaTags = convert.ToStringSlice(row.MetaTags)
-	c.ContactEmail = row.ContactEmail
-	c.ContactNumber = row.ContactNumber
-	c.Instagram = convert.ToString(row.Instagram)
-	c.MaintenanceMode = convert.ToBool(row.MaintenanceMode)
-	c.MaintenanceNotice = convert.ToString(row.MaintenanceNotice)
-	c.AddonsEnabled = convert.ToBool(row.AddonsEnabled)
-	c.EnableReviews = convert.ToBool(row.EnableReviews)
-	c.EnableWishlist = convert.ToBool(row.EnableWishlist)
-	c.EnableNewsletterSignup = convert.ToBool(row.EnableNewsletterSignup)
-	c.AboutContent = row.AboutContent
-	c.FooterSubText = convert.ToString(row.FooterSubText)
-}

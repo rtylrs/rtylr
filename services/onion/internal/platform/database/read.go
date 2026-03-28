@@ -2,14 +2,13 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -45,7 +44,7 @@ func (e *Error) Error() string {
 }
 
 type Reader[T any, R any] struct {
-	pool   *pgxpool.Pool
+	pool   *sql.DB
 	schema string
 }
 
@@ -56,7 +55,7 @@ func NewReadExecutor[T, R any](dbType DatabaseType) Reader[T, R] {
 		panic(err) // Or handle this more gracefully depending on your error handling strategy
 	}
 
-	var pool *pgxpool.Pool
+	var pool *sql.DB
 
 	switch dbType {
 	case LoggingDatabase:
@@ -286,7 +285,7 @@ func (r Reader[T, R]) FetchRaw(ctx context.Context, query string, args ...any) (
 	ctx, cancel := readerTimeoutContext(ctx)
 	defer cancel()
 
-	row := r.pool.QueryRow(ctx, query, args...)
+	row := r.pool.QueryRowContext(ctx, query, args...)
 
 	var result T
 
@@ -300,7 +299,7 @@ func (r Reader[T, R]) FetchRaw(ctx context.Context, query string, args ...any) (
 	return result, true
 }
 
-func (r Reader[T, R]) FetchMappedRaw(ctx context.Context, query string, scanFunc func(pgx.Rows) (string, T, error), args ...any) (map[string]T, bool) {
+func (r Reader[T, R]) FetchMappedRaw(ctx context.Context, query string, scanFunc func(*sql.Rows) (string, T, error), args ...any) (map[string]T, bool) {
 	if r.pool == nil {
 		logger.Ctx(ctx).Error("No database connection available")
 
@@ -310,7 +309,7 @@ func (r Reader[T, R]) FetchMappedRaw(ctx context.Context, query string, scanFunc
 	ctx, cancel := readerTimeoutContext(ctx)
 	defer cancel()
 
-	rows, err := r.pool.Query(ctx, query, args...)
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, false
 	}
@@ -332,7 +331,7 @@ func (r Reader[T, R]) FetchMappedRaw(ctx context.Context, query string, scanFunc
 	return result, true
 }
 
-func (r Reader[T, R]) FetchOrderedRaw(ctx context.Context, query string, scanFunc func(pgx.Rows) (T, error), args ...any) ([]T, bool) {
+func (r Reader[T, R]) FetchOrderedRaw(ctx context.Context, query string, scanFunc func(*sql.Rows) (T, error), args ...any) ([]T, bool) {
 	if r.pool == nil {
 		logger.Ctx(ctx).Error("No database connection available")
 
@@ -342,7 +341,7 @@ func (r Reader[T, R]) FetchOrderedRaw(ctx context.Context, query string, scanFun
 	ctx, cancel := readerTimeoutContext(ctx)
 	defer cancel()
 
-	rows, err := r.pool.Query(ctx, query, args...)
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, false
 	}
@@ -376,7 +375,7 @@ func (r Reader[T, R]) CountRaw(ctx context.Context, query string, args ...any) (
 
 	var count int
 
-	err := r.pool.QueryRow(ctx, query, args...).Scan(&count)
+	err := r.pool.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
 		logger.Ctx(ctx).Info("Error scanning count", logger.Error(err))
 

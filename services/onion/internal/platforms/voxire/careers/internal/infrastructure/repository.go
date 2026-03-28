@@ -2,8 +2,8 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/voxire/onion/internal/platform/database"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platforms/voxire/careers/internal/domain"
@@ -12,7 +12,7 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
-	pool    *pgxpool.Pool
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {

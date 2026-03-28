@@ -7,6 +7,5 @@ INSERT INTO feature_evaluations (
     rule_id,
     user_context
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    ?, ?, ?, ?, ?, ?
 );
-

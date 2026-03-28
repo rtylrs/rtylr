@@ -2,10 +2,8 @@ package infrastructure
 
 import (
 	"context"
-	"net/netip"
+	"database/sql"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure/persistence/sqlc"
 	db "github.com/voxire/onion/internal/platform/database"
@@ -15,7 +13,7 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
-	pool    *pgxpool.Pool
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
@@ -28,30 +26,29 @@ func NewRepository(_ context.Context) *Repository {
 }
 
 func (r *Repository) CreateUser(ctx context.Context, user *domain.User) (int64, error) {
-	var signupIP *netip.Addr
-
-	if user.SignupIPAddress != "" {
-		if ip, err := netip.ParseAddr(user.SignupIPAddress); err == nil {
-			signupIP = &ip
-		}
-	}
-
 	arg := sqlc.CreateUserParams{
 		Email:            user.Email,
 		PasswordHash:     user.PasswordHash,
-		FullName:         pgtype.Text{String: user.FullName, Valid: user.FullName != ""},
-		SignupIpAddress:  signupIP,
-		SignupDeviceInfo: pgtype.Text{String: user.SignupDeviceInfo, Valid: user.SignupDeviceInfo != ""},
+		FullName:         sql.NullString{String: user.FullName, Valid: user.FullName != ""},
+		SignupIpAddress:  sql.NullString{String: user.SignupIPAddress, Valid: user.SignupIPAddress != ""},
+		SignupDeviceInfo: sql.NullString{String: user.SignupDeviceInfo, Valid: user.SignupDeviceInfo != ""},
 	}
 
-	createdUser, err := db.NewWriteExecutor[domain.User, sqlc.User](db.MainDatabase).Insert(ctx, r.queries.CreateUser, arg)
+	result, err := r.queries.CreateUser(ctx, arg)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create user", logger.Error(err))
 
 		return 0, err
 	}
 
-	return createdUser.ID, nil
+	userID, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read created user ID", logger.Error(err))
+
+		return 0, err
+	}
+
+	return userID, nil
 }
 
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -77,10 +74,10 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, e
 func (r *Repository) UpdateUser(ctx context.Context, user *domain.User) error {
 	arg := sqlc.UpdateUserProfileParams{
 		ID:       user.ID,
-		FullName: pgtype.Text{String: user.FullName, Valid: user.FullName != ""},
+		FullName: sql.NullString{String: user.FullName, Valid: user.FullName != ""},
 	}
 
-	_, err := db.NewWriteExecutor[domain.User, sqlc.User](db.MainDatabase).Update(ctx, r.queries.UpdateUserProfile, arg)
+	err := r.queries.UpdateUserProfile(ctx, arg)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update user", logger.Error(err))
 

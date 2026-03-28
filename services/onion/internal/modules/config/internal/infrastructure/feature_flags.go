@@ -2,8 +2,8 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
 	db "github.com/voxire/onion/internal/platform/database"
@@ -72,11 +72,11 @@ func (r *Repository) LogFeatureEvaluation(ctx context.Context, evaluation domain
 	}
 
 	params := sqlc.LogFeatureEvaluationParams{
-		UserID:      pgtype.Int4{Int32: userID, Valid: evaluation.UserID != nil},
+		UserID:      sql.NullInt32{Int32: userID, Valid: evaluation.UserID != nil},
 		FeatureKey:  evaluation.FeatureKey,
 		Enabled:     evaluation.Enabled,
-		Reason:      pgtype.Text{String: evaluation.Reason, Valid: evaluation.Reason != ""},
-		RuleID:      pgtype.Int4{Int32: ruleID, Valid: evaluation.RuleID != nil},
+		Reason:      sql.NullString{String: evaluation.Reason, Valid: evaluation.Reason != ""},
+		RuleID:      sql.NullInt32{Int32: ruleID, Valid: evaluation.RuleID != nil},
 		UserContext: userContext,
 	}
 

@@ -2,16 +2,16 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"reflect"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Writer[T any, R any] struct {
-	pool   *pgxpool.Pool
+	pool   *sql.DB
 	schema string
 }
 
@@ -22,7 +22,7 @@ func NewWriteExecutor[T, R any](dbType DatabaseType) Writer[T, R] {
 		panic(err)
 	}
 
-	var pool *pgxpool.Pool
+	var pool *sql.DB
 
 	switch dbType {
 	case LoggingDatabase:

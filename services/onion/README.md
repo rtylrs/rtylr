@@ -6,7 +6,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 
 - **Modular Architecture**: Plug-and-play modules for any feature you need
 - **Production Ready**: Built-in logging, monitoring, error handling, and recovery
-- **Database First**: PostgreSQL with type-safe SQL queries and migrations
+- **Database First**: MySQL with type-safe SQL queries and migrations
 - **Authentication & Security**: JWT-based auth, middleware, and security features
 - **Real-time Capabilities**: WebSocket support, SSE, and streaming
 - **Extensible**: Easy to add new modules and functionality
@@ -16,8 +16,8 @@ Onion is a full-featured backend framework that provides everything you need to 
 ## 📋 Prerequisites
 
 - **Go 1.25.0+**
-- **PostgreSQL 15+**
-- **`psql` and `pg_isready` available locally**
+- **MySQL 8+**
+- **`mysql` and `mysqladmin` available locally**
 
 ## 🛠️ Quick Start
 
@@ -26,7 +26,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 ```bash
 git clone git@github.com:voxire/onion.git
 cd onion
-# Create .env and point DATABASE_URL or DB_* to a running PostgreSQL instance
+# Create .env and point DATABASE_URL or DB_* to a running MySQL instance
 ```
 
 ### 2. Install Dependencies
@@ -52,7 +52,7 @@ make run
 ## 🗄️ Database Management
 
 ```bash
-# Validate the configured database connection
+# Validate the configured MySQL connection
 make setup
 
 # Reset database

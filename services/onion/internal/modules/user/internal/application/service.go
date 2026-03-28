@@ -2,13 +2,13 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/netip"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5"
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -87,7 +87,7 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		return 0, ErrUserAlreadyExists
 	}
 
-	if !errors.Is(err, pgx.ErrNoRows) {
+	if !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
 	}
 
@@ -118,7 +118,7 @@ func (s *Service) RegisterLegacy(ctx context.Context, email, password, fullName 
 func (s *Service) Authenticate(ctx context.Context, email, password string) (int64, error) {
 	user, err := s.repo.GetUserByEmail(ctx, strings.ToLower(email))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, ErrInvalidCredentials
 		}
 

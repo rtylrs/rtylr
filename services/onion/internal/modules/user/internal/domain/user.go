@@ -37,15 +37,15 @@ func (u *User) FromRows(row sqlc.User) {
 	u.FullName = convert.ToString(row.FullName)
 	u.SignupDeviceInfo = convert.ToString(row.SignupDeviceInfo)
 
-	if row.SignupIpAddress != nil {
-		u.SignupIPAddress = row.SignupIpAddress.String()
+	if row.SignupIpAddress.Valid {
+		u.SignupIPAddress = row.SignupIpAddress.String
 	}
 
 	if row.CreatedAt.Valid {
-		u.CreatedAt = convert.ToTimestamp(row.CreatedAt).Time
+		u.CreatedAt = row.CreatedAt.Time
 	}
 
 	if row.UpdatedAt.Valid {
-		u.UpdatedAt = convert.ToTimestamp(row.UpdatedAt).Time
+		u.UpdatedAt = row.UpdatedAt.Time
 	}
 }

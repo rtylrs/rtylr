@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS conversation_summaries (
-    id SERIAL PRIMARY KEY,
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INTEGER NOT NULL,
     session_id VARCHAR(255) NOT NULL,
     summary TEXT NOT NULL,
-    key_topics TEXT[],
-    sentiment VARCHAR(50),
+    key_topics JSON NULL,
+    sentiment VARCHAR(50) NULL,
     importance_score FLOAT DEFAULT 1.0,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_conversation_summaries_user_id ON conversation_summaries(user_id);
+CREATE INDEX idx_conversation_summaries_user_id ON conversation_summaries(user_id);

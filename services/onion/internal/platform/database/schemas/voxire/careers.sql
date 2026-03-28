@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS careers (
-    id SERIAL PRIMARY KEY,
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    department VARCHAR(100),
-    location VARCHAR(100),
-    employment_type VARCHAR(50), -- e.g., Full-time, Part-time, Contract
-    work_mode VARCHAR(20),       -- e.g., remote, hybrid, onsite
-    seniority VARCHAR(50),       -- e.g., junior, mid, senior
+    department VARCHAR(100) NULL,
+    location VARCHAR(100) NULL,
+    employment_type VARCHAR(50) NULL,
+    work_mode VARCHAR(20) NULL,
+    seniority VARCHAR(50) NULL,
     details TEXT NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

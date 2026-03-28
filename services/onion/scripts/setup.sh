@@ -18,28 +18,22 @@ if [ ! -f "$ENV_FILE" ]; then
     echo "Create $ENV_FILE and configure DATABASE_URL or DB_* before running the app."
 fi
 
-if command -v pg_isready >/dev/null 2>&1; then
-    echo -e "${BLUE}Checking PostgreSQL connectivity...${NC}"
+if command -v mysqladmin >/dev/null 2>&1; then
+    echo -e "${BLUE}Checking MySQL connectivity...${NC}"
 
-    if [ -n "${DATABASE_URL:-}" ]; then
-        until pg_isready -d "${DATABASE_URL}"; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-        done
-    else
-        until pg_isready \
-            -h "${DB_HOST:-localhost}" \
-            -p "${DB_PORT:-5432}" \
-            -U "${DB_USER:-onion_user}" \
-            -d "${DB_NAME:-onion_dev}"; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-        done
-    fi
+    until mysqladmin ping \
+        --host="${DB_HOST:-localhost}" \
+        --port="${DB_PORT:-3306}" \
+        --user="${DB_USER:-onion_user}" \
+        --password="${DB_PASSWORD:-onion_password}" \
+        --silent >/dev/null 2>&1; do
+        echo "Waiting for MySQL..."
+        sleep 2
+    done
 
-    echo -e "${GREEN}PostgreSQL is ready${NC}"
+    echo -e "${GREEN}MySQL is ready${NC}"
 else
-    echo -e "${YELLOW}pg_isready is not installed; skipping database connectivity check${NC}"
+    echo -e "${YELLOW}mysqladmin is not installed; skipping database connectivity check${NC}"
 fi
 
 # Generate sqlc code if available

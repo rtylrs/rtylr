@@ -28,7 +28,7 @@ type FeatureRule struct {
 }
 
 func (f *FeatureFlag) FromRows(row sqlc.GetFeatureFlagRow) {
-	f.Id = row.ID
+	f.Id = int32(row.ID)
 	f.Key = row.Key
 	f.Name = row.Name
 	f.Description = convert.ToString(row.Description)
@@ -58,7 +58,7 @@ type FeatureFlagWithRulesRow struct {
 }
 
 func (r *FeatureFlagWithRulesRow) FromRows(row sqlc.GetFeatureFlagsWithRulesRow) {
-	r.FeatureFlagId = row.FeatureFlagID
+	r.FeatureFlagId = int32(row.FeatureFlagID)
 	r.FeatureKey = row.FeatureKey
 	r.FeatureName = row.FeatureName
 	r.FeatureDescription = convert.ToString(row.FeatureDescription)
@@ -66,7 +66,8 @@ func (r *FeatureFlagWithRulesRow) FromRows(row sqlc.GetFeatureFlagsWithRulesRow)
 	r.FeatureRolloutPercentage = convert.ToInt32(row.FeatureRolloutPercentage)
 
 	if row.RuleID.Valid {
-		r.RuleId = &row.RuleID.Int32
+		ruleID := int32(row.RuleID.Int64)
+		r.RuleId = &ruleID
 		r.RuleName = convert.ToString(row.RuleName)
 		r.parseConditions(row.RuleConditions)
 		r.RuleAction = convert.ToString(row.RuleAction)
@@ -250,7 +251,7 @@ type UserFeatureOverride struct {
 }
 
 func (o *UserFeatureOverride) FromRows(row sqlc.GetUserFeatureOverridesRow) {
-	o.Id = row.ID
+	o.Id = int32(row.ID)
 	o.UserId = row.UserID
 	o.FeatureKey = row.FeatureKey
 	o.Enabled = row.Enabled

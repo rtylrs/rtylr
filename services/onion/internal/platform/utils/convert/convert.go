@@ -1,12 +1,12 @@
 package convert
 
 import (
+	"database/sql"
+	"encoding/json"
 	"strconv"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func ToString(t pgtype.Text) string {
+func ToString(t sql.NullString) string {
 	if t.Valid {
 		return t.String
 	}
@@ -22,7 +22,7 @@ func IntToString(i int) string {
 	return strconv.Itoa(i)
 }
 
-func ToBool(b pgtype.Bool) bool {
+func ToBool(b sql.NullBool) bool {
 	if b.Valid {
 		return b.Bool
 	}
@@ -30,7 +30,7 @@ func ToBool(b pgtype.Bool) bool {
 	return false
 }
 
-func ToInt32(i pgtype.Int4) int32 {
+func ToInt32(i sql.NullInt32) int32 {
 	if i.Valid {
 		return i.Int32
 	}
@@ -38,11 +38,28 @@ func ToInt32(i pgtype.Int4) int32 {
 	return 0
 }
 
-func ToStringSlice(s []string) []string {
-	return s
+func ToInt64(i sql.NullInt64) int64 {
+	if i.Valid {
+		return i.Int64
+	}
+
+	return 0
 }
 
-func ToTimestamp(t pgtype.Timestamptz) pgtype.Timestamptz {
+func ToStringSlice(raw json.RawMessage) []string {
+	if len(raw) == 0 {
+		return nil
+	}
+
+	var values []string
+	if err := json.Unmarshal(raw, &values); err != nil {
+		return nil
+	}
+
+	return values
+}
+
+func ToTimestamp(t sql.NullTime) sql.NullTime {
 	return t
 }
 
@@ -54,23 +71,10 @@ func BoolToString(b bool) string {
 	return "0"
 }
 
-func ToFloat64(n pgtype.Numeric) float64 {
-	if !n.Valid {
-		return 0.0
-	}
-
-	if priceFloat8, err := n.Float64Value(); err == nil && priceFloat8.Valid {
-		return priceFloat8.Float64
+func ToFloat64(n sql.NullFloat64) float64 {
+	if n.Valid {
+		return n.Float64
 	}
 
 	return 0.0
-}
-
-func ToNumeric(f float64) pgtype.Numeric {
-	n := pgtype.Numeric{Valid: true}
-	if err := n.Scan(f); err == nil {
-		n.Valid = true
-	}
-
-	return n
 }
