@@ -1,77 +1,150 @@
 .integrationsSection {
   padding: 120px 0;
   background: var(--app-background);
+  position: relative;
+  overflow: hidden;
+
+  // Subtle radial glow behind the grid
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(68, 133, 196, 0.06) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 50px;
   text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  margin-bottom: 64px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color, #03aed2);
+  margin-bottom: 20px;
+  padding: 6px 16px;
+  border: 1px solid rgba(3, 174, 210, 0.25);
+  border-radius: 100px;
+  background: rgba(3, 174, 210, 0.06);
 }
 
 .sectionTitle {
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 600;
   color: white;
-  margin: 0 0 16px 0;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  margin: 0 0 20px 0;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
 
 .sectionDescription {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 60px 0;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 auto;
+  max-width: 480px;
+  line-height: 1.6;
 }
 
 .integrationsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  gap: 16px;
+  margin-bottom: 48px;
 }
 
-.integrationItem {
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+.integrationCard {
+  position: relative;
+  padding: 36px 24px 32px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  transition: all 0.3s ease;
+  cursor: default;
+  transition: background 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    .iconWrapper {
+      border-color: var(--brand-color);
+      box-shadow: 0 0 20px rgba(var(--brand-color), 0.15);
+
+      svg {
+        color: var(--brand-color);
+      }
+    }
+
+    .statusDot {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
   }
 }
 
-.integrationLogo {
-  font-size: 3rem;
-  line-height: 1;
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+
+  svg {
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+  }
 }
 
 .integrationName {
-  font-size: 1.125rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: white;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.01em;
 }
 
-@media (max-width: 1024px) {
-  .integrationsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
 
-  .sectionTitle {
-    font-size: 2.5rem;
-  }
-
-  .sectionDescription {
-    font-size: 1.1rem;
-  }
+.footnote {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 768px) {
@@ -89,15 +162,25 @@
 
   .sectionDescription {
     font-size: 1rem;
-    margin-bottom: 40px;
   }
 
   .integrationsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
-  .integrationItem {
-    padding: 30px;
+  .integrationCard {
+    padding: 28px 16px 24px;
+  }
+
+  .iconWrapper {
+    width: 48px;
+    height: 48px;
   }
 }
 
+@media (max-width: 480px) {
+  .integrationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

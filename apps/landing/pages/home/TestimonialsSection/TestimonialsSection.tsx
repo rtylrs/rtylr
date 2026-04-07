@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { fadeInUp, viewportOnce } from '../../../lib/animations';
 import styles from './TestimonialsSection.module.scss';
 
 const testimonials = [
@@ -20,7 +22,7 @@ const testimonials = [
   },
   {
     quote:
-      'The analytics features give us insights we never had before. It\'s like having a business consultant built-in.',
+      "The analytics features give us insights we never had before. It's like having a business consultant built-in.",
     author: 'Emily Rodriguez',
     role: 'CEO, Fresh Market',
     company: 'Grocery',
@@ -53,14 +55,27 @@ const testimonials = [
 ];
 
 const TestimonialsSection: React.FC = () => {
-  // Duplicate testimonials for seamless looping
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
     <section className={styles.testimonialsSection}>
       <div className={styles.container}>
-        <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
-        <div className={styles.tickersWrapper}>
+        <motion.h2
+          className={styles.sectionTitle}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={fadeInUp}
+        >
+          What Our Customers Say
+        </motion.h2>
+        <motion.div
+          className={styles.tickersWrapper}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
           <div className={styles.tickerContainer}>
             <div className={`${styles.tickerTrack} ${styles.tickerLeft}`}>
               {duplicatedTestimonials.map((testimonial, index) => (
@@ -73,8 +88,12 @@ const TestimonialsSection: React.FC = () => {
                       className={styles.authorImage}
                     />
                     <div className={styles.authorDetails}>
-                      <div className={styles.authorName}>{testimonial.author}</div>
-                      <div className={styles.authorRole}>{testimonial.role}</div>
+                      <div className={styles.authorName}>
+                        {testimonial.author}
+                      </div>
+                      <div className={styles.authorRole}>
+                        {testimonial.role}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -93,19 +112,22 @@ const TestimonialsSection: React.FC = () => {
                       className={styles.authorImage}
                     />
                     <div className={styles.authorDetails}>
-                      <div className={styles.authorName}>{testimonial.author}</div>
-                      <div className={styles.authorRole}>{testimonial.role}</div>
+                      <div className={styles.authorName}>
+                        {testimonial.author}
+                      </div>
+                      <div className={styles.authorRole}>
+                        {testimonial.role}
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 };
 
 export default TestimonialsSection;
-
