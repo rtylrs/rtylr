@@ -1,13 +1,71 @@
 .ctaSection {
-  padding: 120px 0;
-  background: var(--app-background);
+  padding: 140px 0;
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+// Animated background orbs
+.orbOne {
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(68, 133, 196, 0.12) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  filter: blur(60px);
+}
+
+.orbTwo {
+  position: absolute;
+  bottom: -30%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(167, 139, 250, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  filter: blur(60px);
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
   padding: 0 50px;
+  position: relative;
+  z-index: 1;
+}
+
+.content {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color, #03aed2);
+  margin-bottom: 24px;
+  padding: 6px 16px;
+  border: 1px solid rgba(3, 174, 210, 0.25);
+  border-radius: 100px;
+  background: rgba(3, 174, 210, 0.06);
 }
 
 .ctaTitle {
@@ -16,14 +74,15 @@
   color: white;
   margin: 0 0 24px 0;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .ctaDescription {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 40px 0;
-  line-height: 1.6;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 48px 0;
+  line-height: 1.7;
+  max-width: 520px;
 }
 
 .ctaButtons {
@@ -35,7 +94,7 @@
 
 @media (max-width: 768px) {
   .ctaSection {
-    padding: 80px 0;
+    padding: 100px 0;
   }
 
   .container {
@@ -43,21 +102,21 @@
   }
 
   .ctaTitle {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .ctaDescription {
     font-size: 1rem;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
   }
 
   .ctaButtons {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
   }
 
   .ctaButtons button {
     width: 100% !important;
   }
 }
-

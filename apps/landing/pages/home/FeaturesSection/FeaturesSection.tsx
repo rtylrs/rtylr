@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
+import { fadeInUp, viewportOnce } from '../../../lib/animations';
 import styles from './FeaturesSection.module.scss';
 
 interface Feature {
@@ -74,7 +76,6 @@ const FeaturesSection: React.FC = () => {
       });
     }, observerOptions);
 
-    // Observe all feature sections
     features.forEach((feature) => {
       const element = sectionRefs.current[feature.id];
       if (element) {
@@ -96,14 +97,20 @@ const FeaturesSection: React.FC = () => {
     features.find((f) => f.id === activeFeature) || features[0];
 
   return (
-    <section className={styles.featuresSection}>
+    <motion.section
+      className={styles.featuresSection}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={{ duration: 0.6 }}
+    >
       <div className={styles.container}>
         <div className={styles.content}>
           <div className={styles.featuresList}>
             {features.map((feature, index) => (
               <React.Fragment key={feature.id}>
                 {index > 0 && <div className={styles.featureDivider} />}
-                <div
+                <motion.div
                   ref={(el) => {
                     sectionRefs.current[feature.id] = el;
                   }}
@@ -111,6 +118,14 @@ const FeaturesSection: React.FC = () => {
                   className={`${styles.featureItem} ${
                     activeFeature === feature.id ? styles.active : ''
                   }`}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{
+                    delay: index * 0.1,
+                    duration: 0.5,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
                 >
                   <span className={styles.featureCategory}>
                     {feature.category}
@@ -128,13 +143,19 @@ const FeaturesSection: React.FC = () => {
                       {feature.ctaText}
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               </React.Fragment>
             ))}
           </div>
         </div>
 
-        <div className={styles.showcase}>
+        <motion.div
+          className={styles.showcase}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
           <div className={styles.showcaseImageContainer}>
             {features.map((feature) => (
               <div
@@ -151,9 +172,9 @@ const FeaturesSection: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

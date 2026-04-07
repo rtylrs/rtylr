@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
@@ -16,34 +17,62 @@ const TopBanner: React.FC = () => {
   };
 
   return (
-    <div className={styles.topBanner}>
+    <motion.div
+      className={styles.topBanner}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+    >
       {/* Desktop Layout */}
       <div className={styles.bannerContainer}>
         <div className={styles.leftSection}>
-          <div className={styles.badgeLine}>
+          <motion.div
+            className={styles.badgeLine}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             <span className={styles.alphaBadge}>ALPHA</span>
             <span className={styles.badgeText}>
               The all-in-one POS that grows with you
             </span>
-          </div>
-          <h3 className={styles.mainHeading}>Run your business with Rtylr</h3>
-          <Button
-            variant="dark-outline"
-            className={styles.registerButton}
-            onClick={handleRegisterClick}
-            suffix={<FaArrowRight />}
+          </motion.div>
+          <motion.h3
+            className={styles.mainHeading}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
           >
-            Get Started Free
-          </Button>
+            Run your business with Rtylr
+          </motion.h3>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <Button
+              variant="dark-outline"
+              className={styles.registerButton}
+              onClick={handleRegisterClick}
+              suffix={<FaArrowRight />}
+            >
+              Get Started Free
+            </Button>
+          </motion.div>
         </div>
 
-        <div className={styles.rightSection}>
+        <motion.div
+          className={styles.rightSection}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.8, ease: 'easeOut' }}
+        >
           <img
             src="/images/home/hero-banner-top-bar-bg.webp"
             alt="Banner"
             className={styles.bannerImage}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Mobile Layout */}
@@ -69,7 +98,7 @@ const TopBanner: React.FC = () => {
           <HiArrowUpRight />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
