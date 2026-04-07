@@ -3,9 +3,11 @@ const path = require('path');
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  trailingSlash: true,
 
   images: {
-    remotePatterns: [],
+    unoptimized: true,
   },
 
   // Webpack configuration for aliases
