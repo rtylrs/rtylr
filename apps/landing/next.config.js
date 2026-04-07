@@ -2,13 +2,10 @@
 const path = require('path');
 
 const nextConfig = {
-  // Basic Next.js configuration
   reactStrictMode: true,
-  swcMinify: true,
 
-  // Asset and image configuration
   images: {
-    domains: [],
+    remotePatterns: [],
   },
 
   // Webpack configuration for aliases
@@ -37,7 +34,7 @@ const nextConfig = {
   },
 
   // Transpile packages if needed
-  transpilePackages: ['@voxire/components', '@voxire/config', '@voxire/utils'],
+  transpilePackages: ['@voxire/assets', '@voxire/components', '@voxire/config', '@voxire/utils'],
 
   // Environment variables
   env: {
