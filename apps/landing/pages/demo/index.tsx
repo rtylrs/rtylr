@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
-import { Input, Select, Button } from '@voxire/shared';
+import { Input, Select, Button } from '@voxire/components';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import styles from './demo.module.scss';

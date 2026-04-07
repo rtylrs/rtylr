@@ -16,7 +16,7 @@ import {
 } from "../../redux/reducers/userSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { FaGoogle } from "react-icons/fa";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();

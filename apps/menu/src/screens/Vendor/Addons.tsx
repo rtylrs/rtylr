@@ -9,11 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import useAsync from "../../hooks/useAsync";
 import { userApi } from "../../api";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../redux/reducers/userSlice";
 import notify from "../../lib/notify/notify";
-import { LoadingSpinner } from "@voxire/shared";
+import { LoadingSpinner } from "@voxire/components";
 
 const ADDONS = [
   {

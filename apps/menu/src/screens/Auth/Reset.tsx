@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Container, Typography, TextField } from "@mui/material";
 import { auth } from "../../firebase";
-import { Button } from '@voxire/shared';
+import { Button, Input } from '@voxire/components';
+import styles from './Reset.module.scss';
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -19,39 +19,23 @@ function ForgotPassword() {
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      style={{
-        minHeight: "50vh",
-        paddingTop: "10vh",
-      }}
-    >
-      <Typography variant="h5" gutterBottom>
-        Forgot Password
-      </Typography>
-      <Typography variant="body2" color="textSecondary">
-        Enter your email address, and we will send you a link to reset your
-        password.
-      </Typography>
-      <TextField
-        variant="outlined"
-        margin="normal"
-        fullWidth
+    <div className={styles.container}>
+      <h5 className={styles.title}>Forgot Password</h5>
+      <p className={styles.subtitle}>
+        Enter your email address, and we will send you a link to reset your password.
+      </p>
+      <Input
+        type="email"
         id="email"
-        label="Email Address"
         name="email"
+        label="Email Address"
+        hasLabel
         autoComplete="email"
         autoFocus
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <div
-        style={{
-          marginTop: "1rem",
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
+      <div className={styles.actions}>
         <Button
           fullWidth
           onClick={handleResetPassword}
@@ -60,16 +44,8 @@ function ForgotPassword() {
           Reset Password
         </Button>
       </div>
-      {message && (
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          style={{ marginTop: "1rem" }}
-        >
-          {message}
-        </Typography>
-      )}
-    </Container>
+      {message && <p className={styles.message}>{message}</p>}
+    </div>
   );
 }
 

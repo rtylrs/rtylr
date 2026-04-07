@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Tauri specific
+core/target/
+core/Cargo.lock
+
+# Tauri build artifacts
+*.app
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.msi
+*.AppImage
+
+# Logs
+*.log
+
+.idea/

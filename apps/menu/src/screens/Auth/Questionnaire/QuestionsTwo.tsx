@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 
 const QuestionsTwo: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");

@@ -3,8 +3,7 @@ import { defineConfig } from 'vite';
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -17,8 +16,7 @@ export default defineConfig(() => ({
         ref: true,
       },
     }),
-    nxViteTsPaths(),
-    nxCopyAssetsPlugin(['*.md']),
+    tsconfigPaths(),
   ],
   resolve: {
     alias: {

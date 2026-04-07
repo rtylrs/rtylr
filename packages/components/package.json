@@ -1,0 +1,32 @@
+{
+  "name": "@voxire/components",
+  "version": "0.0.1",
+  "description": "Shared UI component library for Voxire apps",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles": "./src/index.scss"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "@voxire/config": "workspace:*",
+    "classnames": "^2.5.1",
+    "framer-motion": "^11.2.10",
+    "react-helmet": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/react-helmet": "^6.1.11",
+    "@vitejs/plugin-react": "^4.7.0",
+    "sass": "^1.55.0",
+    "typescript": "~5.5.2"
+  }
+}

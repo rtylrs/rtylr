@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { FaArrowRight, FaStar } from 'react-icons/fa';
 import useColors from '../../../../hooks/useColors';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../../redux/reducers/userSlice';
 import { QRCode } from 'react-qrcode-logo';
-import { useWindowDimensions } from '@voxire/shared/utils';
+import { useWindowDimensions } from '@voxire/utils';
 
 const Hero: React.FC<{}> = () => {
   const { t } = useTranslation();

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import Header from './Header';
-import { HelmetContainer } from '@voxire/shared';
+import { HelmetContainer } from '@voxire/components';
 
 const Public: React.FC<{
   children: React.ReactNode;

@@ -1,9 +1,9 @@
+import { Button } from '@voxire/components';
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import the styles
 import { useDispatch, useSelector } from "react-redux";
 import { updateAboutContent } from "../../../redux/reducers/configSlice";
-import { Button } from "@mui/material";
 import notify from "../../../lib/notify/notify";
 import { AppDispatch, RootState } from "../../../redux/store";
 

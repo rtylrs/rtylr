@@ -1,0 +1,56 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export type BusinessType = 
+  | 'restaurant'
+  | 'gym'
+  | 'retail'
+  | 'salon'
+  | 'cafe'
+  | 'bar'
+  | 'hotel'
+  | 'other';
+
+interface BusinessState {
+  businessType: BusinessType | null;
+  businessPreferences: Record<string, any>;
+}
+
+interface BusinessActions {
+  setBusinessType: (type: BusinessType) => void;
+  setBusinessPreferences: (preferences: Record<string, any>) => void;
+  updateBusinessPreference: (key: string, value: any) => void;
+}
+
+const initialState: BusinessState = {
+  businessType: null,
+  businessPreferences: {},
+};
+
+export const useBusinessStore = create<BusinessState & BusinessActions>()(
+  persist(
+    (set) => ({
+      ...initialState,
+
+      setBusinessType: (type) => set({ businessType: type }),
+
+      setBusinessPreferences: (preferences) => set({ businessPreferences: preferences }),
+
+      updateBusinessPreference: (key, value) =>
+        set((state) => ({
+          businessPreferences: {
+            ...state.businessPreferences,
+            [key]: value,
+          },
+        })),
+    }),
+    {
+      name: 'business-store',
+      partialize: (state) => ({
+        businessType: state.businessType,
+        businessPreferences: state.businessPreferences,
+      }),
+    }
+  )
+);
+

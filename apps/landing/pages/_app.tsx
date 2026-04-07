@@ -1,26 +1,16 @@
 import { useEffect, useState } from 'react';
+import { injectTheme } from '@voxire/config';
 import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CookiesProvider } from 'react-cookie';
 
 import i18next from '../services/i18next';
 
 // Import global styles
-import '@voxire/shared/styles';
+import '@voxire/components/styles';
 import '../styles/index.scss';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#040428',
-    },
-    secondary: {
-      main: '#4485c4',
-    },
-  },
-});
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(
@@ -49,12 +39,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
-        <ThemeProvider theme={theme}>
-          <I18nextProvider i18n={i18next}>
+            <I18nextProvider i18n={i18next}>
             <Component {...pageProps} />
           </I18nextProvider>
-        </ThemeProvider>
-      </CookiesProvider>
+        </CookiesProvider>
     </QueryClientProvider>
   );
 }

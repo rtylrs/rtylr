@@ -1,6 +1,6 @@
 import React from 'react';
 import Public from '../layouts/Public/public';
-import { AnimatedRoutes } from '@voxire/shared';
+import { AnimatedRoutes } from '@voxire/components';
 
 const Login = React.lazy(() => import('../screens/Login'));
 const Register = React.lazy(() => import('../screens/Register'));

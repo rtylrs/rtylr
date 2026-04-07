@@ -1,0 +1,22 @@
+{
+  "name": "@voxire/utils",
+  "version": "0.0.1",
+  "description": "Shared utility functions and hooks for Voxire apps",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/react": "^19.0.0",
+    "typescript": "~5.5.2"
+  }
+}

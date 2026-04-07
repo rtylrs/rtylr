@@ -1,4 +1,4 @@
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { HiStar } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';

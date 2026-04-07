@@ -1,4 +1,4 @@
-import { AnimatedRoutes } from "@voxire/shared";
+import { AnimatedRoutes } from "@voxire/components";
 import Public from "../layouts/Public/public";
 import React from "react";
 

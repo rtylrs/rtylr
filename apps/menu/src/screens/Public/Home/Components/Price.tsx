@@ -1,4 +1,4 @@
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { FaStar } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

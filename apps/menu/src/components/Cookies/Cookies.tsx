@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaCookieBite } from "react-icons/fa";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import "./Cookies.scss";
 
 const Cookies: React.FC = () => {

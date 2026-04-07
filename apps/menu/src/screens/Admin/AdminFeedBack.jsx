@@ -1,14 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
 
 function AdminFeedBack() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -18,28 +8,27 @@ function AdminFeedBack() {
   return (
     <div className="AdminUsersManagement">
       <div className="AdminUsersManagementInner">
-        <Typography variant="h3">Feedback</Typography>
-        <TableContainer component={Paper}>
-          <Table className="adminTable">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Rating</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {feedbacks &&
-                feedbacks.map((blog) => (
-                  <TableRow key={blog.id}>
-                    <TableCell>{blog.name}</TableCell>
-                    <TableCell>{blog.email}</TableCell>
-                    <TableCell>{blog.rating}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <h3>Feedback</h3>
+        <div className="table-container">
+          <table className="adminTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedbacks && feedbacks.map((blog) => (
+                <tr key={blog.id}>
+                  <td>{blog.name}</td>
+                  <td>{blog.email}</td>
+                  <td>{blog.rating}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

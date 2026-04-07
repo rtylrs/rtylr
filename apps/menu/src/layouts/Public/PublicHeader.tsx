@@ -7,9 +7,9 @@ import {
 } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import useColors from '../../hooks/useColors';
-import { useWindowDimensions } from '@voxire/shared/utils';
+import { useWindowDimensions } from '@voxire/utils';
 import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
 import { getCookie } from '../../lib/cookies';

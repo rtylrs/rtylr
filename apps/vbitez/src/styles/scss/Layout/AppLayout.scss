@@ -1,0 +1,40 @@
+.app-layout {
+  display: grid;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background: #ffffff;
+  grid-template-columns: 0.7fr 1fr 1fr 1fr;
+  grid-template-rows: 50px 1fr;
+  grid-template-areas:
+    "sidebar nav nav nav"
+    "sidebar main main main";
+}
+
+.app-layout__content {
+  grid-area: main;
+  overflow-y: auto;
+  padding: 20px 30px;
+  background: #ffffff;
+}
+
+.app-layout__content.no-padding {
+  padding: 0;
+}
+
+/* Responsive */
+@media only screen and (max-width: 978px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 50px 1fr;
+    grid-template-areas:
+      "nav"
+      "main";
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .app-layout__content {
+    padding: 15px 20px;
+  }
+}

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../redux/store";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 
 const Details: React.FC = () => {
   const navigate = useNavigate();

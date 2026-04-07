@@ -14,8 +14,7 @@ import MenuSection from './Sections/MenuSection';
 import AboutSection from './Sections/AboutSection';
 import ContactSection from './Sections/ContactSection';
 import FeedbackSection from './Sections/FeedbackSection';
-import { FullScreenLoader } from '@voxire/shared';
-import Alert from '@mui/material/Alert';
+import { Alert, FullScreenLoader } from '@voxire/components';
 
 function Menu() {
   const [menuArray, setmenuArray] = useState([]);

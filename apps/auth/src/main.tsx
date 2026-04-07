@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import FeaturesGate from './components/FeaturesGate';
 import { BrowserRouter } from 'react-router-dom';
-import { FullScreenLoader } from '@voxire/shared';
+import { FullScreenLoader } from '@voxire/components';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './services/i18next';
@@ -12,7 +12,7 @@ import Modal from 'react-modal';
 import { queryClient } from './lib/queryClient';
 
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import '@voxire/shared/styles';
+import '@voxire/components/styles';
 
 import './index.scss';
 

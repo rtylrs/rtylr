@@ -7,8 +7,8 @@ import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import notify from '../lib/notify/notify';
 import { FaGoogle } from 'react-icons/fa';
-import { Button, Input, APP_URLS } from '@voxire/shared';
-import { HelmetContainer } from '@voxire/shared';
+import { Button, Input, HelmetContainer } from '@voxire/components';
+import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
 const Login: React.FC = () => {

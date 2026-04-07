@@ -1,20 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Modal,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Paper,
-} from "@mui/material";
+import { Button, Modal, Input } from "@voxire/components";
 import { FaPlus } from "react-icons/fa";
 
 function AdminProducts() {
@@ -33,7 +18,7 @@ function AdminProducts() {
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
-    setSelectedProduct(null); // Reset selected product when the modal is closed
+    setSelectedProduct(null);
     setProductName("");
     setProductPrice(0);
     setProductCategory("");
@@ -53,192 +38,89 @@ function AdminProducts() {
     setProductQuantity(product.quantity);
   };
 
-  const uploadImagesToStorage = async () => {
-    const imageUrls = [];
-
-    return imageUrls;
-  };
+  const uploadImagesToStorage = async () => [];
+  const saveProduct = async () => {};
+  const deleteProduct = (productId) => {};
 
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-
-    // Display image preview
     const previews = selectedFiles.map((file) => URL.createObjectURL(file));
     setImagePreview(previews);
-
-    // Store selected images
     setProductImages(selectedFiles);
   };
-
-  const saveProduct = async () => {};
-
-  const deleteProduct = (productId) => {};
 
   return (
     <div className="AdminUsersManagement">
       <div className="AdminUsersManagementInner">
-        <div className={"header-admin"}>
+        <div className="header-admin">
           <h1>Product Management</h1>
-          <Button variant="contained" color="primary" onClick={toggleModal}>
-            New{" "}
-            <FaPlus
-              size="1x"
-              style={{
-                marginLeft: "5px",
-              }}
-            />
+          <Button variant="primary" onClick={toggleModal}>
+            New <FaPlus style={{ marginLeft: 5 }} />
           </Button>
         </div>
 
-        <TableContainer component={Paper}>
-        <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Image</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Collection</TableCell>
-                <TableCell>Quantity</TableCell>
-                <TableCell>Price</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Collection</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      style={{
-                        width: "100px",
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>{product.quantity}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => {
-                        openEditModal(product);
-                        setUpdatingProduct(true);
-                      }}
-                    >
+                <tr key={product.id}>
+                  <td><img src={product.images[0]} alt={product.name} style={{ width: 100 }} /></td>
+                  <td>{product.name}</td>
+                  <td>{product.category}</td>
+                  <td>{product.quantity}</td>
+                  <td>${product.price.toFixed(2)}</td>
+                  <td>
+                    <Button variant="primary" onClick={() => { openEditModal(product); setUpdatingProduct(true); }}>
                       Edit
                     </Button>{" "}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => deleteProduct(product.id)}
-                    >
+                    <Button variant="primary" onClick={() => deleteProduct(product.id)}>
                       Delete
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
 
-        {/* Add/Edit Product Modal */}
-        <Modal open={modalOpen} onClose={toggleModal}>
-          <div className="modal-content">
-            <h1>{selectedProduct ? "Edit Product" : "Add Product"}</h1>
+        <Modal open={modalOpen} onClose={toggleModal} title={selectedProduct ? "Edit Product" : "Add Product"} maxWidth="sm">
+          <div className="modal-form">
+            <Input label="Product Name" hasLabel value={productName} onChange={(e) => setProductName(e.target.value)} />
+            <Input label="Price" hasLabel type="number" value={productPrice === 0 ? "" : productPrice} onChange={(e) => setProductPrice(+e.target.value)} />
+            <Input label="Quantity" hasLabel type="number" value={productQuantity === 0 ? "" : productQuantity} onChange={(e) => setProductQuantity(+e.target.value)} />
             <div>
-              <TextField
-                label="Product Name"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-              />
-              <TextField
-                label="Price"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                type="number"
-                value={productPrice === 0 ? "" : productPrice}
-                onChange={(e) => setProductPrice(+e.target.value)}
-              />
-              <TextField
-                label="Quantity"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                type="number"
-                value={productQuantity === 0 ? "" : productQuantity}
-                onChange={(e) => setProductQuantity(+e.target.value)}
-              />
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={productCategory}
-                  onChange={(e) => setProductCategory(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Select a Collection</em>
-                  </MenuItem>
-                </Select>
-              </FormControl>
-              <div>
-                <label htmlFor="productImages">Images</label>
-                <br />
-                {!updatingProduct && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      document.getElementById("productImages").click();
-                    }}
-                  >
-                    Add Images
-                  </Button>
-                )}
-                <input
-                  type="file"
-                  name="productImages"
-                  id="productImages"
-                  multiple
-                  onChange={handleImageChange}
-                  style={{
-                    display: "none",
-                  }}
-                />
-                {imagePreview.map((preview, index) => (
-                  <img
-                    key={index}
-                    src={preview}
-                    alt={`Image ${index + 1}`}
-                    className="image-preview"
-                    width={50}
-                    height={50}
-                  />
-                ))}
-              </div>
+              <label htmlFor="category">Category</label>
+              <select id="category" value={productCategory} onChange={(e) => setProductCategory(e.target.value)}>
+                <option value="">Select a Collection</option>
+              </select>
             </div>
             <div>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={async () => {
-                  await saveProduct(uploadImagesToStorage);
-                  toggleModal();
-                }}
-              >
+              <label>Images</label>
+              {!updatingProduct && (
+                <Button variant="primary" onClick={() => document.getElementById("productImages").click()}>
+                  Add Images
+                </Button>
+              )}
+              <input type="file" id="productImages" multiple onChange={handleImageChange} style={{ display: "none" }} />
+              {imagePreview.map((preview, index) => (
+                <img key={index} src={preview} alt={`Image ${index + 1}`} className="image-preview" width={50} height={50} />
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+              <Button variant="primary" onClick={async () => { await saveProduct(uploadImagesToStorage); toggleModal(); }}>
                 Save
-              </Button>{" "}
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={toggleModal}
-              >
-                Cancel
               </Button>
+              <Button variant="outline" onClick={toggleModal}>Cancel</Button>
             </div>
           </div>
         </Modal>

@@ -1,26 +1,14 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
-const { composePlugins, withNx } = require('@nx/next');
 
 const nextConfig = {
-  // Nx configuration
-  nx: {
-    svgr: false,
-  },
-
   // Basic Next.js configuration
   reactStrictMode: true,
   swcMinify: true,
 
-  // Static export configuration for hosting providers like HostGator
-  output: 'export',
-  trailingSlash: true,
-  distDir: '../../dist/landing',
-
   // Asset and image configuration
   images: {
     domains: [],
-    unoptimized: true, // Required for static export
   },
 
   // Webpack configuration for aliases
@@ -44,14 +32,12 @@ const nextConfig = {
   // Experimental features
   experimental: {
     optimizePackageImports: [
-      '@mui/material',
-      '@mui/icons-material',
       'react-icons',
     ],
   },
 
   // Transpile packages if needed
-  transpilePackages: ['@voxire/shared'],
+  transpilePackages: ['@voxire/components', '@voxire/config', '@voxire/utils'],
 
   // Environment variables
   env: {
@@ -59,5 +45,4 @@ const nextConfig = {
   },
 };
 
-// Export configuration with Nx wrapper
-module.exports = composePlugins(withNx)(nextConfig);
+module.exports = nextConfig;

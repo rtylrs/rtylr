@@ -1,5 +1,6 @@
 import React from 'react';
-import { APP_URLS, Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
+import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import { FaArrowRight } from 'react-icons/fa';
 import { HiArrowUpRight } from 'react-icons/hi2';
