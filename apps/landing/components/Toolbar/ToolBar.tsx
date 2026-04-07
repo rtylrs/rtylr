@@ -1,38 +1,10 @@
+import { Switch } from '@voxire/components';
 import { HiMenu, HiHome, HiArrowPath, HiX, HiUserCircle } from "react-icons/hi2";
-import { Switch, styled } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from 'next/router';
 import { useUserStore } from '../../stores/userStore';
 import styles from "./ToolBar.module.scss";
 
-const CustomSwitch = styled(Switch)(({}) => ({
-  width: 34,
-  height: 20,
-  padding: 0,
-  "& .MuiSwitch-switchBase": {
-    padding: 2,
-    "&.Mui-checked": {
-      transform: "translateX(14px)",
-      color: "#fff",
-      "& + .MuiSwitch-track": {
-        backgroundColor: "#555",
-        opacity: 1,
-      },
-      "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
-      },
-    },
-  },
-  "& .MuiSwitch-thumb": {
-    width: 16,
-    height: 16,
-  },
-  "& .MuiSwitch-track": {
-    borderRadius: 10,
-    backgroundColor: "#555",
-    opacity: 1,
-  },
-}));
 
 const useFPS = (): number => {
   const [fps, setFps] = useState(0);
@@ -172,7 +144,7 @@ const ToolBarContent: React.FC = () => {
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
-          <CustomSwitch checked={mode === "dev"} onChange={handleModeChange} />
+          <Switch checked={mode === "dev"} onChange={handleModeChange} />
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWindowDimensions } from '@voxire/shared/utils';
+import { useWindowDimensions } from '@voxire/utils';
 import HeaderDesktop from './DesktopHeader/HeaderDesktop';
 import HeaderMobile from './MobileHeader/HeaderMobile';
 

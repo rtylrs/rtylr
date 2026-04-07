@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../../redux/store";
 

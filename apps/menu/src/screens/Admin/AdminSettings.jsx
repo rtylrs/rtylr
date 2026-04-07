@@ -1,7 +1,7 @@
+import { Button, Switch } from '@voxire/components';
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "../../services/i18next";
-import { Switch, Button } from "@mui/material";
 
 const AdminSettings = () => {
   const { t } = useTranslation();

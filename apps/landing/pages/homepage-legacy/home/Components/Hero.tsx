@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { HiArrowRight, HiStar } from 'react-icons/hi';
 import useColors from '../../../../hooks/useColors';
 import { useUserStore } from '../../../../stores/userStore';
 import { QRCode } from 'react-qrcode-logo';
-import { useWindowDimensions } from '@voxire/shared/utils';
+import { useWindowDimensions } from '@voxire/utils';
 import styles from '../Home.module.scss';
 
 const Hero: React.FC<{}> = () => {

@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-  Button,
-  Paper,
-} from "@mui/material";
+import { Button, Input } from "@voxire/components";
 import { FaCheck, FaTrash, FaTimes } from "react-icons/fa";
 
 function Users() {
@@ -30,10 +19,10 @@ function Users() {
   return (
     <div className="AdminUsersManagement">
       <div className="AdminUsersManagementInner">
-        <Typography variant="h3">Users</Typography>
+        <h3>Users</h3>
         <div id="vendorManAdmin">
           <div>
-            <TextField
+            <Input
               type="text"
               name="search"
               id="search"
@@ -48,58 +37,40 @@ function Users() {
           </div>
         </div>
         <div className="ResponsiveTable">
-          <TableContainer component={Paper}>
-            <Table className="UsersTable">
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Number of Purchased Items</TableCell>
-                  <TableCell>Flagged</TableCell>
-                  <TableCell>Delete</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="table-container">
+            <table className="UsersTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Number of Purchased Items</th>
+                  <th>Flagged</th>
+                  <th>Delete</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredItems.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.email}</TableCell>
-                    <TableCell>
-                      {item.NumberOfEvents ? item.NumberOfEvents : 0}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                          // Handle delete action
-                        }}
-                      >
-                        {item.flagged ? (
-                          <FaCheck size="lg" />
-                        ) : (
-                          <FaTimes size="lg" />
-                        )}
+                  <tr key={index}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>{item.email}</td>
+                    <td>{item.NumberOfEvents ? item.NumberOfEvents : 0}</td>
+                    <td>
+                      <Button variant="primary" onClick={() => {}}>
+                        {item.flagged ? <FaCheck /> : <FaTimes />}
                       </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                          // Handle delete action
-                        }}
-                      >
-                        <FaTrash size="lg" />
+                    </td>
+                    <td>
+                      <Button variant="primary" onClick={() => {}}>
+                        <FaTrash />
                       </Button>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

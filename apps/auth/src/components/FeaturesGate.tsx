@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from 'react';
-import { FullScreenLoader } from '@voxire/shared';
+import { FullScreenLoader } from '@voxire/components';
 import { useFeatures } from '../hooks/useFeatures';
 import { useFeaturesStore } from '../stores/featuresStore';
 

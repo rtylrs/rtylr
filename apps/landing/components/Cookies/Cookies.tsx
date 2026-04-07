@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HiCake } from 'react-icons/hi2';
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import styles from './Cookies.module.scss';
 
 const Cookies: React.FC = () => {

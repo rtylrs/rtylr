@@ -16,7 +16,7 @@ import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
 import { auth } from "../../firebase";
 import notify from "../../lib/notify/notify";
 import { FaGoogle } from "react-icons/fa";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();

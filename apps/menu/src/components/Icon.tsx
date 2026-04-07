@@ -1,5 +1,5 @@
 import React, { CSSProperties, useEffect, useState } from "react";
-import { LoadingSpinner } from "@voxire/shared";
+import { LoadingSpinner } from "@voxire/components";
 
 interface SvgIconProps {
   icon: string;

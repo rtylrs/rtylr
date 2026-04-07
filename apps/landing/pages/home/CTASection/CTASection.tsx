@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
 import styles from './CTASection.module.scss';
 

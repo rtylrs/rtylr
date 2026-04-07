@@ -7,7 +7,8 @@ import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FaGoogle } from 'react-icons/fa';
-import { Button, Input, HelmetContainer, APP_URLS } from '@voxire/shared';
+import { Button, Input, HelmetContainer } from '@voxire/components';
+import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
 const Register: React.FC = () => {

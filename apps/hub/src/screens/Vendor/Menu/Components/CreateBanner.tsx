@@ -1,0 +1,70 @@
+import React, { useState } from "react";
+import { useMenuStore } from "../../../../stores/menuStore";
+import { useUserStore } from "../../../../stores/userStore";
+import Dropzone from "../../../../components/Dropzone";
+
+const CreateBanner = (): JSX.Element => {
+  const { addBanner } = useMenuStore();
+  const { userId: restaurantId } = useUserStore();
+
+  const [formData, setFormData] = useState({
+    title: "",
+    image: null as File | null,
+  });
+
+  const handleFileSelected = (file: File) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      image: file,
+    }));
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!restaurantId) {
+      console.error("Restaurant ID is required");
+      return;
+    }
+    const bannerData = new FormData();
+    bannerData.append("title", formData.title);
+    bannerData.append("restaurantId", restaurantId);
+    if (formData.image) {
+      bannerData.append("bannerImage", formData.image);
+    }
+
+    addBanner(bannerData);
+  };
+
+  return (
+    <div>
+      <h1>Create Banner</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>
+            Title:
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
+        <Dropzone onFileSelected={handleFileSelected} />
+        {formData.image && <p>Selected file: {formData.image.name}</p>}
+        <button type="submit">Create Banner</button>
+      </form>
+    </div>
+  );
+};
+
+export default CreateBanner;

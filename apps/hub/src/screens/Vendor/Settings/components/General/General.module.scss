@@ -1,0 +1,100 @@
+.general {
+  width: 100%;
+  max-width: 1200px;
+
+  .header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e0e0e0;
+
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color, #040428);
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+
+  .formSection {
+    margin-bottom: 48px;
+
+    h3 {
+      margin: 0 0 20px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary-color, #040428);
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .formGroup {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 24px;
+      max-width: 600px;
+
+      label {
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        color: #333;
+      }
+
+      input,
+      select {
+        padding: 10px 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: var(--secondary-color, #4485c4);
+          box-shadow: 0 0 0 3px rgba(68, 133, 196, 0.1);
+        }
+      }
+
+      input[type="text"],
+      input[type="email"] {
+        width: 100%;
+      }
+    }
+  }
+
+  .formActions {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      padding: 10px 24px;
+      background-color: var(--primary-color, #040428);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background-color: #06063a;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

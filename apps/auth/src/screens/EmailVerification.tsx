@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingSpinner } from '@voxire/shared';
+import { LoadingSpinner } from '@voxire/components';
 import api from '../lib/api';
 
 const EmailVerification = () => {

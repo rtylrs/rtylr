@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import React from "react";
 import useColors from "../../../../hooks/useColors";
 

@@ -16,7 +16,10 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@voxire/*": ["libs/@voxire/*/src/index.ts"]
+      "@voxire/assets": ["packages/assets/src/index.ts"],
+      "@voxire/components": ["packages/components/src/index.ts"],
+      "@voxire/config": ["packages/config/src/index.ts"],
+      "@voxire/utils": ["packages/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

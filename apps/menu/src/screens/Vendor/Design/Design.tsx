@@ -8,7 +8,7 @@ import {
   selectError,
 } from "../../../redux/reducers/userSlice";
 import { AppDispatch } from "../../../redux/store";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 import Menu from "../../Public/Menu/Menu";
 
 const Design: React.FC = () => {

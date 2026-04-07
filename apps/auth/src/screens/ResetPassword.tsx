@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { Button, Input, HelmetContainer } from '@voxire/shared';
+import { Button, Input, HelmetContainer } from '@voxire/components';
 
 const ResetPassword: React.FC = () => {
   const [email, setEmail] = useState('');

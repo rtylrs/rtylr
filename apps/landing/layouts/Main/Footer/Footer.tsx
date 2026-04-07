@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ASSETS, APP_URLS, Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
+import { ASSETS, APP_URLS } from '@voxire/config';
 import React from 'react';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';

@@ -6,5 +6,4 @@ onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
   - esbuild
-  - nx
   - protobufjs

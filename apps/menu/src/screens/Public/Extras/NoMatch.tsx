@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button } from '@voxire/shared';
+import { Button } from '@voxire/components';
 
 const NoMatch = (): JSX.Element => {
   const navigate = useNavigate();

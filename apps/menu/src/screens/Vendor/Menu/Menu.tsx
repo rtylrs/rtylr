@@ -6,7 +6,7 @@ import CreateCategoryModal from "./Components/CreateCategoryModal";
 import { fetchMenu, deleteCategory } from "../../../redux/reducers/menuSlice";
 import { AppDispatch, RootState } from "../../../redux/store";
 import CreateParentCategoryModal from "./Components/CreateParentCategoryModal";
-import { LoadingSpinner } from "@voxire/shared";
+import { LoadingSpinner } from "@voxire/components";
 
 const Menu: React.FC<{}> = () => {
   const dispatch = useDispatch<AppDispatch>();

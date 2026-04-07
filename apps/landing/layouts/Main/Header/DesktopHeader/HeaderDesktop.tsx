@@ -3,7 +3,8 @@ import { HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { Button, APP_URLS, ASSETS } from '@voxire/shared';
+import { Button } from '@voxire/components';
+import { APP_URLS, ASSETS } from '@voxire/config';
 import { selectLanguage } from '../../../../services/i18next';
 import { getCookie } from '../../../../lib/cookies';
 import { navigateExternal } from '../../../../lib/navigation';
