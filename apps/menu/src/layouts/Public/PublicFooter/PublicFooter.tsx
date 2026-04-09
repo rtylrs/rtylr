@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import PackageJson from '@root/package.json';
 import { RootState } from '../../../redux/store';
 import React from 'react';
-import './PublicFooter.scss';
 
 const Footer: React.FC = () => {
   const config = useSelector((state: RootState) => state.config.contactInfo);
@@ -15,11 +14,7 @@ const Footer: React.FC = () => {
       links: [
         { to: '/about', label: 'About Us' },
         { to: '/contact', label: 'Contact Us' },
-        {
-          to: 'https://voxire.com/careers',
-          label: 'Careers',
-          external: true,
-        },
+        { to: 'https://voxire.com/careers', label: 'Careers', external: true },
       ],
     },
     {
@@ -40,120 +35,69 @@ const Footer: React.FC = () => {
     },
   ];
 
-  const socialLinks = [
-    {
-      href: 'https://www.instagram.com/voxire.tech',
-      label: 'Follow us on Instagram',
-      external: true,
-    },
-  ];
-
   return (
-    <footer className="footer" role="contentinfo">
-      <div className="footer-container">
-        <div className="footer-header">
-          <img src="/logo.png" alt="Rtylr Logo" className="footer-logo" />
+    <footer className="bg-gray-900 text-white" role="contentinfo">
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="mb-8">
+          <img src="/logo.png" alt="Rtylr Logo" className="h-8 w-auto" />
         </div>
 
-        <div className="footer-content">
-          <div className="footer-nav">
-            {footerSections.map((section, index) => (
-              <div key={index} className="footer-section">
-                <h3 className="footer-section-title">{section.title}</h3>
-                <nav aria-label={`${section.title} navigation`}>
-                  <ul className="footer-links">
-                    {section.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
-                        {link.external ? (
-                          <a
-                            href={link.to}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="footer-link"
-                          >
-                            {link.label}
-                          </a>
-                        ) : (
-                          <Link to={link.to} className="footer-link">
-                            {link.label}
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          {footerSections.map((section, index) => (
+            <div key={index}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">{section.title}</h3>
+              <nav aria-label={`${section.title} navigation`}>
+                <ul className="space-y-2">
+                  {section.links.map((link, linkIndex) => (
+                    <li key={linkIndex}>
+                      {link.external ? (
+                        <a href={link.to} target="_blank" rel="noopener noreferrer" className="text-sm text-white/70 hover:text-white transition-colors">
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link to={link.to} className="text-sm text-white/70 hover:text-white transition-colors">
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          ))}
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">Contact</h3>
+            <div className="space-y-2">
+              <div>
+                <span className="text-xs text-white/40 block">Email</span>
+                <a href={`mailto:${config?.contactEmail || 'info@rtylr.com'}`} className="text-sm text-white/70 hover:text-white transition-colors">
+                  {config?.contactEmail || 'info@rtylr.com'}
+                </a>
               </div>
-            ))}
-
-            <div className="footer-section">
-              <h3 className="footer-section-title">Contact</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <span className="contact-label">Email:</span>
-                  <a
-                    href={`mailto:${config?.contactEmail || 'info@rtylr.com'}`}
-                    className="contact-link"
-                    aria-label="Send us an email"
-                  >
-                    {config?.contactEmail || 'info@rtylr.com'}
-                  </a>
-                </div>
-
-                <div className="contact-item">
-                  <span className="contact-label">Follow us:</span>
-                  <div
-                    className="social-icons"
-                    role="group"
-                    aria-label="Social media links"
-                  >
-                    {socialLinks.map((social, index) => (
-                      <a
-                        key={index}
-                        href={social.href}
-                        target={social.external ? '_blank' : undefined}
-                        rel={
-                          social.external ? 'noopener noreferrer' : undefined
-                        }
-                        className="social-link"
-                        aria-label={social.label}
-                      >
-                        <FaInstagram />
-                      </a>
-                    ))}
-                  </div>
-                </div>
+              <div>
+                <span className="text-xs text-white/40 block mb-1">Follow us</span>
+                <a href="https://www.instagram.com/voxire.tech" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" aria-label="Follow us on Instagram">
+                  <FaInstagram size={18} />
+                </a>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <div className="footer-bottom-content">
-            <p className="copyright">
+        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-white/50">
               &copy; {new Date().getFullYear()}{' '}
-              <a
-                href="https://voxire.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="company-link"
-              >
-                Voxire
-              </a>{' '}
+              <a href="https://voxire.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Voxire</a>{' '}
               All rights reserved.
             </p>
-            <p className="disclaimer">
-              Unless otherwise noted, the use of third-party logos does not
-              imply endorsement, sponsorship, or affiliation with Rtylr.
+            <p className="text-xs text-white/30 mt-1">
+              Unless otherwise noted, the use of third-party logos does not imply endorsement, sponsorship, or affiliation with Rtylr.
             </p>
           </div>
-        </div>
-
-        <div className="footer-version">
-          <button
-            className="version-button"
-            aria-label={`Current version: ${PackageJson.version}`}
-          >
-            {PackageJson.version}
+          <button className="text-xs text-white/30 hover:text-white/50 transition-colors" aria-label={`Current version: ${PackageJson.version}`}>
+            v{PackageJson.version}
           </button>
         </div>
       </div>
