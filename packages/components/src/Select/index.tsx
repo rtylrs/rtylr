@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactSelect, { StylesConfig, components } from 'react-select';
 import classNames from 'classnames';
-import { SelectProps } from '../../types/common';
+import { SelectProps } from '@voxire/config';
 import './Select.scss';
 
 /**

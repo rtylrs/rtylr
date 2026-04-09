@@ -1,6 +1,6 @@
 import React from 'react';
 import LoadingSpinner from '../LoadingSpinner';
-import { LoadingSpinnerProps } from '../../types/common';
+import { LoadingSpinnerProps } from '@voxire/config';
 import './FullScreenLoader.scss';
 
 interface FullScreenLoaderProps extends Omit<LoadingSpinnerProps, 'className'> {
