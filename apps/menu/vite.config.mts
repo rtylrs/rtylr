@@ -55,7 +55,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: '../../dist/menu',
+    outDir: './dist',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
@@ -84,7 +84,7 @@ export default defineConfig(() => ({
             'framer-motion',
             'react-icons',
           ],
-          styles: ['@mui/material', 'slick-carousel'],
+          styles: ['slick-carousel'],
         },
       },
     },

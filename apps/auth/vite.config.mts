@@ -46,7 +46,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: '../../dist/auth',
+    outDir: './dist',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
@@ -75,7 +75,7 @@ export default defineConfig(() => ({
             'framer-motion',
             'react-icons',
           ],
-          styles: ['@mui/material', 'slick-carousel'],
+          styles: ['slick-carousel'],
         },
       },
     },
@@ -89,7 +89,9 @@ export default defineConfig(() => ({
       '@reduxjs/toolkit',
       'framer-motion',
       'react-icons',
-      '@voxire/shared',
+      '@voxire/components',
+      '@voxire/config',
+      '@voxire/utils',
     ],
   },
 }));
