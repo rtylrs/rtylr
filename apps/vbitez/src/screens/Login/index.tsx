@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useEmployeeSessionStore } from '../../stores/employeeSessionStore';
-import styles from './Login.module.scss';
 
 const PIN_LENGTH = 4;
 
@@ -67,34 +66,46 @@ const PinLogin: React.FC = () => {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <div className={styles.brand}>
-          <span className={styles.brand__icon}>⬡</span>
-          <h1 className={styles.brand__name}>Vbitez POS</h1>
-          <p className={styles.brand__sub}>Enter your employee PIN</p>
+    <div className="min-h-screen flex items-center justify-center bg-pos-bg">
+      <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <span className="text-3xl leading-none">⬡</span>
+          <h1 className="text-lg font-bold text-pos-text">Vbitez POS</h1>
+          <p className="text-xs text-pos-muted">Enter your employee PIN</p>
         </div>
 
         {/* PIN dots */}
-        <div className={`${styles.dots} ${shake ? styles.dots__shake : ''}`}>
+        <div className={`flex gap-3 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
           {Array.from({ length: PIN_LENGTH }).map((_, i) => (
             <span
               key={i}
-              className={`${styles.dot} ${i < pin.length ? styles.dot__filled : ''} ${error ? styles.dot__error : ''}`}
+              className={`w-3 h-3 rounded-full border-2 transition-colors ${
+                error
+                  ? 'border-destructive bg-destructive/30'
+                  : i < pin.length
+                  ? 'border-pos-text bg-pos-text'
+                  : 'border-pos-muted bg-transparent'
+              }`}
             />
           ))}
         </div>
 
-        {error && <p className={styles.errorMsg}>{error}</p>}
+        {error && <p className="text-xs text-destructive text-center">{error}</p>}
 
         {/* Numpad */}
-        <div className={styles.pad}>
+        <div className="flex flex-col gap-2 w-full">
           {KEYS.map((row, ri) => (
-            <div key={ri} className={styles.pad__row}>
+            <div key={ri} className="flex gap-2 justify-center">
               {row.map((key, ki) => (
                 <button
                   key={ki}
-                  className={`${styles.pad__key} ${key === '' ? styles.pad__key__empty : ''} ${key === '⌫' ? styles.pad__key__back : ''}`}
+                  className={`w-16 h-14 rounded-xl text-base font-semibold transition-colors ${
+                    key === ''
+                      ? 'invisible'
+                      : key === '⌫'
+                      ? 'bg-transparent text-pos-muted hover:bg-white/8'
+                      : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
+                  }`}
                   onClick={() => handleKey(key)}
                   disabled={loading || key === ''}
                   aria-label={key === '⌫' ? 'Delete' : key}
@@ -106,7 +117,7 @@ const PinLogin: React.FC = () => {
           ))}
         </div>
 
-        {loading && <p className={styles.loadingMsg}>Verifying…</p>}
+        {loading && <p className="text-xs text-pos-muted">Verifying…</p>}
       </div>
     </div>
   );

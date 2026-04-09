@@ -8,5 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@voxire/ui": "workspace:*",
+    "@voxire/tailwind-config": "workspace:*"
   }
 }

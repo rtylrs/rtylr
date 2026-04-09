@@ -1,11 +1,10 @@
 import React from 'react';
-import styles from './NoMatch.module.scss';
 
 const NoMatch: React.FC = () => {
   return (
-    <div className={styles.page}>
-      <h1 className={styles.code}>404</h1>
-      <p className={styles.msg}>Page not found</p>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white">
+      <span className="text-7xl font-black text-black/10">404</span>
+      <p className="text-sm text-gray-500">Page not found</p>
     </div>
   );
 };

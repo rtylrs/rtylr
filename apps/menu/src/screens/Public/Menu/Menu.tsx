@@ -4,7 +4,6 @@ import { FullScreenLoader } from '@voxire/components';
 import { GridLayout, ListLayout, MinimalLayout, MenuCategoryData, BusinessInfo, ChatMessage } from '@voxire/menu';
 import useAsync from '../../../hooks/useAsync';
 import { menuApi } from '../../../api';
-import styles from './Menu.module.scss';
 
 type LayoutType = 'grid' | 'list' | 'minimal';
 
@@ -109,10 +108,13 @@ const Menu: React.FC = () => {
 
   if (status === 'failed') {
     return (
-      <div className={styles.error}>
-        <h2>Failed to load menu</h2>
-        <p>Please try refreshing the page.</p>
-        <button onClick={() => { setStatus('loading'); getMenu.main({ id }); }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
+        <h2 className="text-lg font-semibold text-gray-800">Failed to load menu</h2>
+        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <button
+          className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:opacity-90 transition-opacity"
+          onClick={() => { setStatus('loading'); getMenu.main({ id }); }}
+        >
           Retry
         </button>
       </div>

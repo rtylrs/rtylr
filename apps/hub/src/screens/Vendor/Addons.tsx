@@ -7,7 +7,6 @@ import { Button } from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../../stores/userStore";
 import notify from "../../lib/notify/notify";
-import styles from "./Addons.module.scss";
 
 const ADDONS = [
   {
@@ -81,10 +80,10 @@ const Addons = () => {
   );
 
   return (
-    <div className={styles.addons}>
+    <div className="relative space-y-6">
       {planType === "free" && (
-        <div className={styles.overlay}>
-          <div className={styles.overlayMessage}>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 rounded-xl">
+          <div className="text-base font-semibold text-primary">
             Addons are not available in the free plan
           </div>
           <Button onClick={() => navigate("/app/business/billing")}>
@@ -92,14 +91,12 @@ const Addons = () => {
           </Button>
         </div>
       )}
-      <div className={styles.addonsHeader}>
-        <h1>Add-Ons</h1>
-        <div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-primary">Add-Ons</h1>
+        <div className="flex items-center gap-3">
           <Button
             onClick={() => setShowInstalled(!showInstalled)}
-            styles={{
-              height: "35px",
-            }}
+            styles={{ height: "35px" }}
           >
             {showInstalled ? "Show All" : "Installed"}
           </Button>
@@ -108,23 +105,28 @@ const Addons = () => {
             placeholder="Search for an add-on"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-black/10 rounded-lg px-3 py-1.5 text-sm bg-white"
           />
         </div>
       </div>
-      <div className={styles.addonsContent}>
-        <div className={styles.addonCategory}>
-          <h2>Power-Ups</h2>
-          <div className={styles.addonGrid}>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-base font-semibold text-primary mb-4">Power-Ups</h2>
+          <div className="grid grid-cols-3 gap-4">
             {filteredAddons.map((addon) => (
-              <div key={addon.key} className={styles.addonCard}>
-                <addon.icon size={24} className={styles.addonIcon} />
-                <h3>{addon.name}</h3>
-                <p>{addon.description}</p>
+              <div key={addon.key} className="bg-white rounded-xl p-5 border border-black/5 shadow-card flex flex-col gap-3">
+                <addon.icon size={24} className="text-accent" />
+                <h3 className="font-semibold text-primary">{addon.name}</h3>
+                <p className="text-sm text-muted">{addon.description}</p>
                 {keyLoading === (addon.key as string | null) ? (
                   <Spinner />
                 ) : (
                   <button
-                    className={userAddons?.[addon.key] ? styles.installed : ""}
+                    className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
+                      userAddons?.[addon.key]
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-accent text-white hover:opacity-90'
+                    }`}
                     onClick={() => handleToggleAddon(addon.key)}
                   >
                     {userAddons?.[addon.key] ? "Remove" : "Install (Free)"}
@@ -134,7 +136,7 @@ const Addons = () => {
             ))}
           </div>
         </div>
-        <div className={styles.moreAddons}>
+        <div className="text-center py-8 text-muted text-sm">
           <h3>More Addons Coming Soon!</h3>
         </div>
       </div>

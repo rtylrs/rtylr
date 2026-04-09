@@ -1,7 +1,0 @@
-@use "sass:meta";
-
-// Common styles
-@include meta.load-css("./scss/common.scss");
-
-// Public menu styles
-@include meta.load-css("./scss/Public/Menu.scss");

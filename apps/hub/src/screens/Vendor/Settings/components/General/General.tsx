@@ -1,11 +1,7 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import {
-  useBusinessStore,
-  BusinessType,
-} from "../../../../../stores/businessStore";
+import { useBusinessStore, BusinessType } from "../../../../../stores/businessStore";
 import { useUpdateBusiness } from "../../../../../hooks/queries/useBusiness";
 import { useUserStore } from "../../../../../stores/userStore";
-import styles from "./General.module.scss";
 
 const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
   { value: "restaurant", label: "Restaurant" },
@@ -24,215 +20,105 @@ const General: React.FC = () => {
   const updateBusiness = useUpdateBusiness();
 
   const [formData, setFormData] = useState({
-    storeName: "",
-    contactEmail: "",
-    senderEmail: "",
-    storeIndustry: businessType || "restaurant",
-    cuisineType: "",
-    companyName: "",
-    website: "",
-    telephone: "",
-    mapsUrl: "",
-    address: "",
-    city: "",
-    zipcode: "",
-    country: "Lebanon",
-    state: "",
+    storeName: "", contactEmail: "", senderEmail: "",
+    storeIndustry: businessType || "restaurant", cuisineType: "",
+    companyName: "", website: "", telephone: "", mapsUrl: "",
+    address: "", city: "", zipcode: "", country: "Lebanon", state: "",
     customBusinessType: "",
   });
 
   useEffect(() => {
-    if (businessType) {
-      setFormData((prev) => ({ ...prev, storeIndustry: businessType }));
-    }
+    if (businessType) setFormData((prev) => ({ ...prev, storeIndustry: businessType }));
   }, [businessType]);
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-
-    if (name === "storeIndustry") {
-      setBusinessType(value as BusinessType);
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "storeIndustry") setBusinessType(value as BusinessType);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
-
-    updateBusiness.mutate({
-      businessId: userId,
-      data: formData,
-    });
+    updateBusiness.mutate({ businessId: userId, data: formData });
   };
 
+  const inputCls = "w-full border border-black/10 rounded-lg px-3 py-2 text-sm text-primary bg-white focus:outline-none focus:border-accent transition-colors";
+  const labelCls = "block text-sm font-medium text-primary mb-1.5";
+
   return (
-    <div className={styles.general}>
-      <div className={styles.header}>
-        <h2>General</h2>
-        <p>View and update your store details and business information.</p>
+    <div className="max-w-2xl space-y-8">
+      <div>
+        <h2 className="text-xl font-bold text-primary">General</h2>
+        <p className="text-sm text-muted mt-1">View and update your store details and business information.</p>
       </div>
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formSection}>
-          <h3>Business details</h3>
-          <div className={styles.formGroup}>
-            <label>Store name</label>
-            <input
-              type="text"
-              name="storeName"
-              value={formData.storeName}
-              onChange={handleInputChange}
-            />
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Business details */}
+        <div className="bg-white rounded-xl border border-black/8 p-6 space-y-4">
+          <h3 className="text-base font-semibold text-primary">Business details</h3>
+          <div>
+            <label className={labelCls}>Store name</label>
+            <input type="text" name="storeName" value={formData.storeName} onChange={handleInputChange} className={inputCls} />
           </div>
-          <div className={styles.formGroup}>
-            <label>Store contact email</label>
-            <input
-              type="email"
-              name="contactEmail"
-              value={formData.contactEmail}
-              onChange={handleInputChange}
-            />
+          <div>
+            <label className={labelCls}>Store contact email</label>
+            <input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleInputChange} className={inputCls} />
           </div>
-          <div className={styles.formGroup}>
-            <label>Sender email</label>
-            <input
-              type="email"
-              name="senderEmail"
-              value={formData.senderEmail}
-              onChange={handleInputChange}
-            />
+          <div>
+            <label className={labelCls}>Sender email</label>
+            <input type="email" name="senderEmail" value={formData.senderEmail} onChange={handleInputChange} className={inputCls} />
           </div>
-          <div className={styles.formGroup}>
-            <label>Store industry</label>
-            <select
-              name="storeIndustry"
-              value={formData.storeIndustry}
-              onChange={handleInputChange}
-            >
+          <div>
+            <label className={labelCls}>Store industry</label>
+            <select name="storeIndustry" value={formData.storeIndustry} onChange={handleInputChange} className={inputCls}>
               {BUSINESS_TYPES.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
+                <option key={type.value} value={type.value}>{type.label}</option>
               ))}
             </select>
           </div>
           {formData.storeIndustry === "other" && (
-            <div className={styles.formGroup}>
-              <label>Custom business type</label>
-              <input
-                type="text"
-                name="customBusinessType"
-                value={formData.customBusinessType}
-                onChange={handleInputChange}
-                placeholder="Enter your business type"
-              />
+            <div>
+              <label className={labelCls}>Custom business type</label>
+              <input type="text" name="customBusinessType" value={formData.customBusinessType} onChange={handleInputChange} placeholder="Enter your business type" className={inputCls} />
             </div>
           )}
           {formData.storeIndustry === "restaurant" && (
-            <div className={styles.formGroup}>
-              <label>Cuisine type</label>
-              <input
-                type="text"
-                name="cuisineType"
-                value={formData.cuisineType}
-                onChange={handleInputChange}
-                placeholder="e.g., Italian, Mexican, Asian"
-              />
+            <div>
+              <label className={labelCls}>Cuisine type</label>
+              <input type="text" name="cuisineType" value={formData.cuisineType} onChange={handleInputChange} placeholder="e.g., Italian, Mexican, Asian" className={inputCls} />
             </div>
           )}
         </div>
-        <div className={styles.formSection}>
-          <h3>Business address</h3>
-          <div className={styles.formGroup}>
-            <label>Company Name</label>
-            <input
-              type="text"
-              name="companyName"
-              value={formData.companyName}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Website</label>
-            <input
-              type="text"
-              name="website"
-              value={formData.website}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Telephone</label>
-            <input
-              type="text"
-              name="telephone"
-              value={formData.telephone}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Maps url</label>
-            <input
-              type="text"
-              name="mapsUrl"
-              value={formData.mapsUrl}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Address</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>City</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Zipcode</label>
-            <input
-              type="text"
-              name="zipcode"
-              value={formData.zipcode}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Country</label>
-            <select
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-            >
+
+        {/* Business address */}
+        <div className="bg-white rounded-xl border border-black/8 p-6 space-y-4">
+          <h3 className="text-base font-semibold text-primary">Business address</h3>
+          {[
+            { label: "Company Name", name: "companyName" },
+            { label: "Website", name: "website" },
+            { label: "Telephone", name: "telephone" },
+            { label: "Maps URL", name: "mapsUrl" },
+            { label: "Address", name: "address" },
+            { label: "City", name: "city" },
+            { label: "Zipcode", name: "zipcode" },
+            { label: "State", name: "state" },
+          ].map((field) => (
+            <div key={field.name}>
+              <label className={labelCls}>{field.label}</label>
+              <input type="text" name={field.name} value={(formData as any)[field.name]} onChange={handleInputChange} className={inputCls} />
+            </div>
+          ))}
+          <div>
+            <label className={labelCls}>Country</label>
+            <select name="country" value={formData.country} onChange={handleInputChange} className={inputCls}>
               <option value="Lebanon">Lebanon</option>
             </select>
           </div>
-          <div className={styles.formGroup}>
-            <label>State</label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleInputChange}
-            />
-          </div>
         </div>
-        <div className={styles.formActions}>
-          <button type="submit" disabled={updateBusiness.isPending}>
+
+        <div className="flex justify-end">
+          <button type="submit" disabled={updateBusiness.isPending} className="px-5 py-2 text-sm font-medium rounded-lg bg-admin text-white hover:opacity-90 transition-opacity disabled:opacity-60">
             {updateBusiness.isPending ? "Saving..." : "Save Changes"}
           </button>
         </div>

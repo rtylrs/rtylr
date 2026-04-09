@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
 import i18next from "./services/i18next";
 import { Toaster } from "sonner";
-import './styles/index.scss';
+import './globals.css';
 
 injectTheme();
 

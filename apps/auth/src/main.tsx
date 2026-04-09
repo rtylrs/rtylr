@@ -12,9 +12,7 @@ import Modal from 'react-modal';
 import { queryClient } from './lib/queryClient';
 
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import '@voxire/components/styles';
-
-import './index.scss';
+import './globals.css';
 
 Modal.setAppElement('#root');
 

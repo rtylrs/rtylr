@@ -3,11 +3,8 @@ import POSLayout from '../../layouts/POSLayout';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
-import styles from './POS.module.scss';
 
-// Placeholder products — will be replaced by API data
 const DEMO_CATEGORIES = ['Burgers', 'Sides', 'Drinks', 'Desserts'];
-
 const DEMO_PRODUCTS = [
   { id: '1', name: 'Classic Burger', price: 12.99, category: 'Burgers' },
   { id: '2', name: 'Cheese Burger', price: 14.99, category: 'Burgers' },
@@ -23,16 +20,14 @@ const DEMO_PRODUCTS = [
   { id: '12', name: 'Ice Cream', price: 3.99, category: 'Desserts' },
 ];
 
-const POS: React.FC = () => {
-  return (
-    <POSLayout>
-      <div className={styles.pos}>
-        <ProductGrid products={DEMO_PRODUCTS} categories={DEMO_CATEGORIES} />
-        <OrderPanel />
-      </div>
-      <AiAssistant />
-    </POSLayout>
-  );
-};
+const POS: React.FC = () => (
+  <POSLayout>
+    <div className="flex h-full overflow-hidden">
+      <ProductGrid products={DEMO_PRODUCTS} categories={DEMO_CATEGORIES} />
+      <OrderPanel />
+    </div>
+    <AiAssistant />
+  </POSLayout>
+);
 
 export default POS;

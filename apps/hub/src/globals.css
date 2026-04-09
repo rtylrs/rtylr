@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; }
+  body { margin: 0; padding: 0; background: #eff0f1; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 9999px; }
+}
+
+/* CSS custom properties used by legacy @voxire/menu package SCSS */
+:root {
+  --admin-primary: #262626;
+  --admin-bg: #eff0f1;
+  --accent-color: #03aed2;
+  --primary-color: #040428;
+  --secondary-color: #4485c4;
+  --light-color: #ffffff;
+  --dark-color: #1a1a1a;
+  --background-color: #eff0f1;
+  --primary-font: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}

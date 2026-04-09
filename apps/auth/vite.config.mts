@@ -89,9 +89,13 @@ export default defineConfig(() => ({
       '@reduxjs/toolkit',
       'framer-motion',
       'react-icons',
-      '@voxire/components',
       '@voxire/config',
       '@voxire/utils',
+    ],
+    exclude: [
+      '@voxire/components',
+      '@voxire/ui',
+      '@voxire/tailwind-config',
     ],
   },
 }));

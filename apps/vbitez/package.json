@@ -21,6 +21,8 @@
     "@types/react-helmet": "^6.1.11",
     "@voxire/components": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/ui": "workspace:*",
+    "@voxire/tailwind-config": "workspace:*",
     "@voxire/menu": "workspace:*",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
