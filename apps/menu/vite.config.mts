@@ -98,6 +98,9 @@ export default defineConfig(() => ({
       '@reduxjs/toolkit',
       'framer-motion',
       'react-icons',
+      '@voxire/components',
+      '@voxire/config',
+      '@voxire/menu',
     ],
   },
 }));

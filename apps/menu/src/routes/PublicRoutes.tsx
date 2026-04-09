@@ -1,106 +1,26 @@
-import { AnimatedRoutes } from "@voxire/components";
-import Public from "../layouts/Public/public";
-import React from "react";
+import React from 'react';
 
-// Routes
-const Home = React.lazy(() => import("../screens/Public/Home/Home"));
-const About = React.lazy(() => import("../screens/Public/About"));
-const Pricing = React.lazy(() => import("../screens/Public/Pricing"));
-const Contact = React.lazy(() => import("../screens/Public/Contact"));
-const Faq = React.lazy(() => import("../screens/Public/FAQ"));
-const News = React.lazy(() => import("../screens/Public/News"));
-const Menu = React.lazy(() => import("../screens/Public/Menu/Menu"));
-const UseCases = React.lazy(() => import("../screens/Public/UseCases"));
-const Restaunrats = React.lazy(() => import("../screens/Public/Restaunrats"));
+const Menu = React.lazy(() => import('../screens/Public/Menu/Menu'));
+const NoMatch = React.lazy(() => import('../screens/Public/Extras/NoMatch'));
+const DevMenu = React.lazy(() => import('../screens/Dev/DevMenu'));
+
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1');
 
 const PublicRoutes = [
   {
-    path: "/",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Home />
-        </AnimatedRoutes>
-      </Public>
-    ),
+    path: '/:id',
+    element: <Menu />,
   },
+  // Dev preview — only available on localhost
+  ...(isLocalhost
+    ? [{ path: '/', element: <DevMenu /> }]
+    : [{ path: '/', element: <NoMatch /> }]),
   {
-    path: "/about",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <About />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/pricing",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Pricing />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/contact",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Contact />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/faqs",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Faq />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/news/:newsId",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <News />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/restaurant/:id",
-    element: (
-      <AnimatedRoutes>
-        <Menu />
-      </AnimatedRoutes>
-    ),
-  },
-  {
-    path: "/uses",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <UseCases />
-        </AnimatedRoutes>
-      </Public>
-    ),
-  },
-  {
-    path: "/restaurants",
-    element: (
-      <Public>
-        <AnimatedRoutes>
-          <Restaunrats />
-        </AnimatedRoutes>
-      </Public>
-    ),
+    path: '*',
+    element: <NoMatch />,
   },
 ];
 

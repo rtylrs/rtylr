@@ -1,46 +1,17 @@
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Button } from "../../components/Button";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './NoMatch.module.scss';
 
-const NoMatch = (): JSX.Element => {
+const NoMatch: React.FC = () => {
   const navigate = useNavigate();
-
-  const animation = {
-    hidden: { opacity: 0.2, y: 100 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
-    <motion.div
-      variants={animation}
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.5 }}
-    >
-      <div id="notfound">
-        <div className="notfound">
-          <div className="notfound-404">
-            <h1>Oops!</h1>
-            <h2>404 - The Page can't be found</h2>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Go Back
-            </Button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    <div className={styles.page}>
+      <h1 className={styles.code}>404</h1>
+      <p className={styles.msg}>Page not found</p>
+      <button className={styles.btn} onClick={() => navigate('/')}>
+        Back to POS
+      </button>
+    </div>
   );
 };
 

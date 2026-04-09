@@ -35,6 +35,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:packages/config
+      '@voxire/menu':
+        specifier: workspace:*
+        version: link:packages/menu
       '@voxire/utils':
         specifier: workspace:*
         version: link:packages/utils
@@ -486,7 +489,44 @@ importers:
 
   apps/landing: {}
 
-  apps/menu: {}
+  apps/menu:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: ^2.0.0
+        version: 2.10.1(react-redux@9.2.0(@types/react@19.2.5)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+      '@voxire/components':
+        specifier: workspace:*
+        version: link:../../packages/components
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@voxire/menu':
+        specifier: workspace:*
+        version: link:../../packages/menu
+      axios:
+        specifier: ^1.7.2
+        version: 1.13.2
+      framer-motion:
+        specifier: ^11.2.10
+        version: 11.18.2(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+      react-icons:
+        specifier: ^5.2.1
+        version: 5.5.0(react@18.3.1)
+      react-redux:
+        specifier: ^9.0.0
+        version: 9.2.0(@types/react@19.2.5)(react@18.3.1)(redux@5.0.1)
+      react-router-dom:
+        specifier: ^6.23.0
+        version: 6.29.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      redux-persist:
+        specifier: ^6.0.0
+        version: 6.0.0(react@18.3.1)(redux@5.0.1)
 
   apps/vbitez:
     dependencies:
@@ -505,6 +545,15 @@ importers:
       '@types/react-helmet':
         specifier: ^6.1.11
         version: 6.1.11
+      '@voxire/components':
+        specifier: workspace:*
+        version: link:../../packages/components
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@voxire/menu':
+        specifier: workspace:*
+        version: link:../../packages/menu
       axios:
         specifier: ^1.7.2
         version: 1.13.2
@@ -707,6 +756,9 @@ importers:
       vite-plugin-svgr:
         specifier: ^4.2.0
         version: 4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@6.4.1(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
+      vite-tsconfig-paths:
+        specifier: ^5.0.0
+        version: 5.1.4(typescript@5.5.4)(vite@6.4.1(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@20.19.25)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@22.1.0)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
@@ -766,6 +818,43 @@ importers:
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.5
+      typescript:
+        specifier: ~5.5.2
+        version: 5.5.4
+
+  packages/menu:
+    dependencies:
+      '@voxire/components':
+        specifier: workspace:*
+        version: link:../components
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../config
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
+      framer-motion:
+        specifier: ^11.2.10
+        version: 11.18.2(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: '>=18.0.0'
+        version: 18.3.1
+      react-dom:
+        specifier: '>=18.0.0'
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.5
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.5)
+      '@vitejs/plugin-react':
+        specifier: ^4.7.0
+        version: 4.7.0(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
+      sass:
+        specifier: ^1.55.0
+        version: 1.94.0
       typescript:
         specifier: ~5.5.2
         version: 5.5.4
@@ -6278,6 +6367,18 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
+  '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@19.2.5)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      '@standard-schema/utils': 0.3.0
+      immer: 10.2.0
+      redux: 5.0.1
+      redux-thunk: 3.1.0(redux@5.0.1)
+      reselect: 5.1.1
+    optionalDependencies:
+      react: 18.3.1
+      react-redux: 9.2.0(@types/react@19.2.5)(react@18.3.1)(redux@5.0.1)
+
   '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@19.2.5)(react@19.2.0)(redux@5.0.1))(react@19.2.0)':
     dependencies:
       '@standard-schema/spec': 1.0.0
@@ -7926,6 +8027,16 @@ snapshots:
       hasown: 2.0.2
       mime-types: 2.1.35
 
+  framer-motion@11.18.2(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      motion-dom: 11.18.1
+      motion-utils: 11.18.1
+      tslib: 2.8.1
+    optionalDependencies:
+      '@emotion/is-prop-valid': 1.4.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   framer-motion@11.18.2(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       motion-dom: 11.18.1
@@ -8926,6 +9037,15 @@ snapshots:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 
+  react-redux@9.2.0(@types/react@19.2.5)(react@18.3.1)(redux@5.0.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 19.2.5
+      redux: 5.0.1
+
   react-redux@9.2.0(@types/react@19.2.5)(react@19.2.0)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
@@ -9053,6 +9173,12 @@ snapshots:
       react-transition-group: 4.4.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
 
   readdirp@4.1.2: {}
+
+  redux-persist@6.0.0(react@18.3.1)(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
+    optionalDependencies:
+      react: 18.3.1
 
   redux-persist@6.0.0(react@19.2.0)(redux@5.0.1):
     dependencies:
@@ -9604,6 +9730,10 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
+  tsconfck@3.1.6(typescript@5.5.4):
+    optionalDependencies:
+      typescript: 5.5.4
+
   tsconfck@3.1.6(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
@@ -9733,7 +9863,6 @@ snapshots:
   use-sync-external-store@1.6.0(react@18.3.1):
     dependencies:
       react: 18.3.1
-    optional: true
 
   use-sync-external-store@1.6.0(react@19.2.0):
     dependencies:
@@ -9786,6 +9915,17 @@ snapshots:
       vite: 7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
     transitivePeerDependencies:
       - rollup
+      - supports-color
+      - typescript
+
+  vite-tsconfig-paths@5.1.4(typescript@5.5.4)(vite@6.4.1(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)):
+    dependencies:
+      debug: 4.4.3
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@5.5.4)
+    optionalDependencies:
+      vite: 6.4.1(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
+    transitivePeerDependencies:
       - supports-color
       - typescript
 

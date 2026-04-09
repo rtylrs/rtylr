@@ -1,0 +1,31 @@
+{
+  "name": "@voxire/menu",
+  "version": "0.0.1",
+  "description": "Reusable customer-facing menu components for Voxire apps",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles": "./src/index.scss"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --noEmit --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "@voxire/components": "workspace:*",
+    "@voxire/config": "workspace:*",
+    "classnames": "^2.5.1",
+    "framer-motion": "^11.2.10"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "sass": "^1.55.0",
+    "typescript": "~5.5.2"
+  }
+}

@@ -19,6 +19,7 @@
     "@voxire/assets": "workspace:*",
     "@voxire/components": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/menu": "workspace:*",
     "@voxire/utils": "workspace:*",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",

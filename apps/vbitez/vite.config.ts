@@ -2,45 +2,26 @@
 import { defineConfig } from "vite";
 import path from "path";
 import react from "@vitejs/plugin-react";
-import svgr from "vite-plugin-svgr";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: "./node_modules/.vite",
   base: "/",
-  plugins: [
-    react(),
-    svgr({
-      svgrOptions: {
-        ref: true,
-      },
-    }),
-  ],
+  plugins: [react(), tsconfigPaths()],
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "./src"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
-      "@components": path.resolve(__dirname, "./src/components"),
+      "@screens": path.resolve(__dirname, "./src/screens"),
+      "@stores": path.resolve(__dirname, "./src/stores"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
-      "@utils": path.resolve(__dirname, "./src/utils"),
+      "@layouts": path.resolve(__dirname, "./src/layouts"),
       "@styles": path.resolve(__dirname, "./src/styles"),
-      "@interfaces": path.resolve(__dirname, "./src/interfaces"),
-      "@scss": path.resolve(__dirname, "./src/scss/"),
-      "@root": path.resolve(__dirname, "./"),
     },
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `
-          @use "@app/styles/index.scss";
-        `,
-        api: "modern-compiler" as const,
-      },
-    },
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react-dom/client"],
   },
   server: {
-    port: 5175,
+    port: 5178,
     host: true,
     strictPort: true,
     hmr: {
@@ -48,7 +29,7 @@ export default defineConfig(() => ({
     },
   },
   preview: {
-    port: 5175,
+    port: 5178,
     host: "localhost",
     strictPort: true,
   },
@@ -79,9 +60,7 @@ export default defineConfig(() => ({
             "react-router-dom",
             "zustand",
             "framer-motion",
-            "lucide-react",
           ],
-          styles: ["slick-carousel"],
         },
       },
     },
@@ -93,7 +72,9 @@ export default defineConfig(() => ({
       "react-router-dom",
       "zustand",
       "framer-motion",
-      "lucide-react",
+      "@voxire/components",
+      "@voxire/config",
+      "@voxire/menu",
     ],
   },
 }));
