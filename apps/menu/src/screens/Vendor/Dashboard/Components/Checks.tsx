@@ -1,7 +1,5 @@
-import {
-  FaBomb,
-  FaTriangleExclamation,
-} from "react-icons/fa";
+import { FaBomb } from "react-icons/fa";
+import { FaTriangleExclamation } from "react-icons/fa6";
 import React from "react";
 
 const Checks: React.FC = () => {
