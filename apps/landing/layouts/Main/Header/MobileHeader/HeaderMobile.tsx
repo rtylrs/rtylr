@@ -188,38 +188,66 @@ const HeaderMobile: React.FC = () => {
                   <Link
                     href="/features/pos"
                     onClick={() => handleNavigation('/features/pos')}
+                    className={styles['mobile-feature-link']}
                   >
-                    POS
+                    <span className={styles['mobile-feature-title']}>POS</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Payments, tables, orders, and receipts in one register.
+                    </span>
                   </Link>
                   <Link
                     href="/features/erp"
                     onClick={() => handleNavigation('/features/erp')}
+                    className={styles['mobile-feature-link']}
                   >
-                    ERP
+                    <span className={styles['mobile-feature-title']}>ERP</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Inventory, suppliers, and purchasing that stay in sync.
+                    </span>
                   </Link>
                   <Link
                     href="/features/hr"
                     onClick={() => handleNavigation('/features/hr')}
+                    className={styles['mobile-feature-link']}
                   >
-                    HR
+                    <span className={styles['mobile-feature-title']}>HR</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Staff, schedules, time off, and payroll in one place.
+                    </span>
                   </Link>
                   <Link
                     href="/features/crm"
                     onClick={() => handleNavigation('/features/crm')}
+                    className={styles['mobile-feature-link']}
                   >
-                    CRM
+                    <span className={styles['mobile-feature-title']}>CRM</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Customer profiles, loyalty, segments, and campaigns.
+                    </span>
                   </Link>
                   <Link
                     href="/features/finance"
                     onClick={() => handleNavigation('/features/finance')}
+                    className={styles['mobile-feature-link']}
                   >
-                    Finance
+                    <span className={styles['mobile-feature-title']}>
+                      Finance
+                    </span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Invoices, expenses, tax, and a real P&L in seconds.
+                    </span>
                   </Link>
                   <Link
                     href="/features/flow"
                     onClick={() => handleNavigation('/features/flow')}
+                    className={styles['mobile-feature-link']}
                   >
-                    Flow
+                    <span className={styles['mobile-feature-title']}>
+                      Flow
+                    </span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Projects, tasks, and team workspaces for every department.
+                    </span>
                   </Link>
                 </div>
               )}

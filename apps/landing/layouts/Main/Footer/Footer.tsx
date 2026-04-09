@@ -20,14 +20,14 @@ const Footer: React.FC = () => {
 
   const footerSections = [
     {
-      title: 'FEATURES',
+      title: 'PRODUCT',
       links: [
-        { to: '/features/pos', label: 'POS & Payments' },
-        { to: '/features/inventory', label: 'Inventory Management' },
-        { to: '/features/ecommerce', label: 'eCommerce & Online Ordering' },
-        { to: '/features/kds', label: 'Kitchen Display (KDS)' },
-        { to: '/features/analytics', label: 'Analytics & AI' },
-        { to: '/features/offline', label: 'Offline Sync' },
+        { to: '/features/pos', label: 'POS' },
+        { to: '/features/erp', label: 'ERP' },
+        { to: '/features/hr', label: 'HR' },
+        { to: '/features/crm', label: 'CRM' },
+        { to: '/features/finance', label: 'Finance' },
+        { to: '/features/flow', label: 'Flow' },
       ],
     },
     {
