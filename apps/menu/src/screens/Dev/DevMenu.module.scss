@@ -1,0 +1,113 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  background: #1a1a1a;
+  color: #f0f0ee;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.toolbar__badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #ef4444;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(240, 240, 238, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 2px;
+}
+
+.toolbar__btn {
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: none;
+  color: rgba(240, 240, 238, 0.6);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all 0.12s ease;
+
+  &:hover {
+    color: #f0f0ee;
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f0f0ee;
+    border-color: rgba(255, 255, 255, 0.35);
+    font-weight: 700;
+  }
+}
+
+.toolbar__colorBtn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &--active {
+    border-color: #fff;
+    transform: scale(1.15);
+  }
+}
+
+.toolbar__toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: rgba(240, 240, 238, 0.7);
+  cursor: pointer;
+  user-select: none;
+
+  input[type='checkbox'] {
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+    accent-color: #f0f0ee;
+  }
+}
+
+.preview {
+  flex: 1;
+}

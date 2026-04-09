@@ -1,22 +1,4 @@
 @use "sass:meta";
 
-//Fonts and common styles
+// Common styles
 @include meta.load-css("./scss/common.scss");
-
-// Scss imports Components
-@include meta.load-css("./scss/Components/Alert.scss");
-@include meta.load-css("./scss/Components/ProductCard.scss");
-@include meta.load-css("./scss/Components/ProductsGrid.scss");
-@include meta.load-css("./scss/Components/Slider.scss");
-
-//Layout Imports
-@include meta.load-css("./scss/Layout/index.scss");
-
-//Vendor Imports
-@include meta.load-css("./scss/Vendor/Dashboard.scss");
-@include meta.load-css("./scss/Vendor/Menu.scss");
-@include meta.load-css("./scss/Vendor/Common.scss");
-@include meta.load-css("./scss/Vendor/Addons.scss");
-@include meta.load-css("./scss/Vendor/Settings/Settings.scss");
-@include meta.load-css("./scss/Vendor/Settings/General.scss");
-@include meta.load-css("./scss/Vendor/Design/QrCode.scss");
