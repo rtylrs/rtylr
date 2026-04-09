@@ -4,7 +4,7 @@ export type { AppId };
 
 const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
-export const APP_URLS: Record<AppId, string> = {
+export const APP_URLS: Record<AppId, string> & { api: string; status: string } = {
   hub:     IS_LOCAL ? 'http://localhost:5175' : 'https://hub.rtylr.com',
   auth:    IS_LOCAL ? 'http://localhost:5176' : 'https://auth.rtylr.com',
   menu:    IS_LOCAL ? 'http://localhost:5177' : 'https://menu.rtylr.com',
@@ -15,6 +15,8 @@ export const APP_URLS: Record<AppId, string> = {
   finance: IS_LOCAL ? 'http://localhost:5182' : 'https://finance.rtylr.com',
   flow:    IS_LOCAL ? 'http://localhost:5183' : 'https://flow.rtylr.com',
   landing: IS_LOCAL ? 'http://localhost:4200' : 'https://rtylr.com',
+  api:     'https://api.voxire.dev',
+  status:  'https://status.rtylr.com',
 };
 
 export const APP_CONFIG: Record<AppId, { name: string; devPort: number; allowedRoles: UserRole[] }> = {

@@ -36,4 +36,6 @@ const PROD_URLS = {
   status: 'https://status.rtylr.com',
 } as const;
 
-export const APP_URLS = isLocalhost ? LOCAL_URLS : PROD_URLS;
+// Note: APP_URLS is exported from apps.ts (typed by AppId).
+// This file exports only the platform service URLs (API, status).
+export const PLATFORM_URLS = isLocalhost ? LOCAL_URLS : PROD_URLS;
