@@ -1,39 +1,28 @@
-# syntax=docker/dockerfile:1.4
 # Build stage
 FROM golang:1.25.0-alpine AS builder
 
 WORKDIR /app
 
-# Install build tools (cached layer — only reruns if this line changes)
+# Layer 1: system tools — cached until this line changes
 RUN apk add --no-cache curl bash
 
-# Download sqlc pre-built binary instead of compiling from source (~30s → ~3s)
+# Layer 2: sqlc pre-built binary — cached until version changes (~3s vs 5min from source)
 RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/local/bin sqlc
 
-# Copy dependency manifests first for best cache hit
+# Layer 3: deps — only reruns when go.mod / go.sum change
 COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 
-# Download modules with cache mount — survives across builds
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download && go mod verify
-
-# Copy source
+# Layer 4: source — reruns on any code change but layers 1-3 are already cached
 COPY cmd ./cmd
 COPY internal ./internal
 COPY scripts ./scripts
 
 RUN chmod +x scripts/*.sh
+RUN bash scripts/generate_sqlc.sh
 
-# Generate SQLC with module cache mount
-RUN --mount=type=cache,target=/go/pkg/mod \
-    bash scripts/generate_sqlc.sh
-
-# Build binary with both module cache and Go build cache mounts
-# The build cache mount is the single biggest speedup — incremental recompilation
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags="-s -w" -o /app/api ./cmd/api
 
 # Final stage — minimal image
