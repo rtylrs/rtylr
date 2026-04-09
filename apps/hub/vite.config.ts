@@ -95,5 +95,6 @@ export default defineConfig(() => ({
       "framer-motion",
       "lucide-react",
     ],
+    exclude: ["@voxire/menu"],
   },
 }));
