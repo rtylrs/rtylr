@@ -26,7 +26,7 @@ const SidebarUser = () => {
   };
 
   return (
-    <div className="flex items-center gap-2.5 px-3 py-3 border-t border-white/10 bg-white/5 shrink-0 relative" ref={ref}>
+    <div className="flex items-center gap-2.5 px-3 py-3 border-t border-white/10 shrink-0 relative" ref={ref}>
       <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-bold text-base shrink-0">
         {initial}
       </div>
