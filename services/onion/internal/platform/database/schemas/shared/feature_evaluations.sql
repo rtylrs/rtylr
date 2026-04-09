@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS feature_evaluations (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id INTEGER NULL,
+    user_id BIGINT NULL,
     feature_key VARCHAR(100) NOT NULL,
     enabled BOOLEAN NOT NULL,
     reason TEXT NULL,
-    rule_id INTEGER NULL,
+    rule_id BIGINT NULL,
     user_context JSON NULL,
     evaluated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_feature_evaluations_rule_id

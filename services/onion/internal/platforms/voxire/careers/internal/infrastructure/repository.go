@@ -3,8 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"strings"
 
-	db "github.com/voxire/onion/internal/platform/database"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platforms/voxire/careers/internal/domain"
 	"github.com/voxire/onion/internal/platforms/voxire/careers/internal/infrastructure/persistence/sqlc"
@@ -25,5 +26,20 @@ func NewRepository(_ context.Context) *Repository {
 }
 
 func (r *Repository) GetActiveCareers(ctx context.Context) ([]domain.Career, error) {
-	return db.NewReadExecutor[domain.Career, sqlc.GetAllCareersRow](db.MainDatabase).FetchOrdered(ctx, r.queries.GetAllCareers)
+	rows, err := r.queries.GetAllCareers(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "doesn't exist") {
+			return []domain.Career{}, nil
+		}
+		return nil, err
+	}
+
+	careers := make([]domain.Career, 0, len(rows))
+	for _, row := range rows {
+		var career domain.Career
+		career.FromRows(row)
+		careers = append(careers, career)
+	}
+
+	return careers, nil
 }
