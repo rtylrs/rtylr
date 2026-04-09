@@ -15,7 +15,7 @@ func ConfigByOwnerRoutes() []string {
 	}
 }
 
-type ConfigByOwnerHandler struct {
+type GetConfigByOwnerHandler struct {
 	ConfigService *application.Service
 }
 
@@ -134,7 +134,7 @@ func newConfigPayload(config domain.Config) *ConfigPayload {
 	}
 }
 
-func (h *ConfigByOwnerHandler) Validate(_ context.Context, req *GetConfigByOwnerRequest) *errorModels.ServerError {
+func (h *GetConfigByOwnerHandler) Validate(_ context.Context, req *GetConfigByOwnerRequest) *errorModels.ServerError {
 	if req.Owner == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -145,7 +145,7 @@ func (h *ConfigByOwnerHandler) Validate(_ context.Context, req *GetConfigByOwner
 	return nil
 }
 
-func (h *ConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
+func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
 	config, err := h.ConfigService.GetConfig(ctx, req.Owner)
 	if err != nil {
 		return GetConfigByOwnerResponse{}, &errorModels.ServerError{

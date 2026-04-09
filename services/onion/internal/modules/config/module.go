@@ -34,7 +34,6 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
-		handlers.GetFeaturesRoutes(),
 		handlers.ConfigByOwnerRoutes(),
 	)
 }
