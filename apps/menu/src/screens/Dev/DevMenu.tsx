@@ -398,11 +398,11 @@ const DevMenu: React.FC = () => {
       />
 
       {/* Floating toolbar */}
-      <div ref={panelRef} className="fixed bottom-6 right-6 z-50">
+      <div ref={panelRef} className="fixed bottom-6 left-6 z-50">
         <AnimatePresence>
           {open && (
             <motion.div
-              className="absolute bottom-14 right-0 w-64 bg-white border border-black/10 rounded-2xl shadow-xl p-4 space-y-4 max-h-[80vh] overflow-y-auto"
+              className="absolute bottom-14 left-0 w-64 bg-white border border-black/10 rounded-2xl shadow-xl p-4 space-y-4 max-h-[80vh] overflow-y-auto"
               initial={{ opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 8 }}
