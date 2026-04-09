@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 
 function getCookie(name: string): string | null {
@@ -15,7 +16,7 @@ const ProtectedApp: React.FC = () => {
   useEffect(() => {
     const token = getCookie('token');
     if (!token) {
-      window.location.href = 'http://localhost:5176?redirect=erp';
+      window.location.href = `${APP_URLS.auth}?redirect=erp`;
     }
   }, []);
 

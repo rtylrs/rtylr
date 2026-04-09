@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Send, CheckCircle, Eye, X, FileText } from 'lucide-react';
-import { financeApi, Invoice } from '../../services/financeApi';
+import { Invoice } from '../../services/financeApi';
+import { useInvoices } from '../../hooks/useInvoices';
 
 const ACCENT = '#10b981';
 
@@ -132,15 +133,8 @@ const NewInvoiceModal: React.FC<ModalProps> = ({ onClose }) => {
 const Invoices: React.FC = () => {
   const [activeTab, setActiveTab] = useState<InvoiceStatus | 'All'>('All');
   const [showModal, setShowModal] = useState(false);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    financeApi.getInvoices()
-      .then((data) => { if (data?.length) setInvoices(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedInvoices, isLoading: loading } = useInvoices();
+  const invoices: Invoice[] = fetchedInvoices || [];
 
   const filtered = activeTab === 'All'
     ? invoices

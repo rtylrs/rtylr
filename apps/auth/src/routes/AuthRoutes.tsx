@@ -13,7 +13,7 @@ const AuthRoutes = [
   {
     path: '/',
     element: (
-      <Public>
+      <Public hasHeader={false} hasPadding={false}>
         <AnimatedRoutes>
           <Login />
         </AnimatedRoutes>
@@ -23,7 +23,7 @@ const AuthRoutes = [
   {
     path: '/register',
     element: (
-      <Public>
+      <Public hasHeader={false} hasPadding={false}>
         <AnimatedRoutes>
           <Register />
         </AnimatedRoutes>
@@ -33,7 +33,7 @@ const AuthRoutes = [
   {
     path: '/password-reset',
     element: (
-      <Public>
+      <Public hasHeader={false} hasPadding={false}>
         <AnimatedRoutes>
           <ResetPassword />
         </AnimatedRoutes>
@@ -43,7 +43,7 @@ const AuthRoutes = [
   {
     path: '/verify/:token',
     element: (
-      <Public>
+      <Public hasHeader={false} hasPadding={false}>
         <AnimatedRoutes>
           <EmailVerification />
         </AnimatedRoutes>

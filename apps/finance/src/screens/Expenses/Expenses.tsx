@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Paperclip, Check } from 'lucide-react';
-import { financeApi, Expense } from '../../services/financeApi';
+import { Expense } from '../../services/financeApi';
+import { useExpenses } from '../../hooks/useExpenses';
 
 const ACCENT = '#10b981';
 
@@ -79,15 +80,8 @@ const CategoryBar: React.FC<{ expenses: Expense[] }> = ({ expenses }) => {
 
 const Expenses: React.FC = () => {
   const [showAdd, setShowAdd] = useState(false);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    financeApi.getExpenses()
-      .then((data) => { if (data?.length) setExpenses(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedExpenses, isLoading: loading } = useExpenses();
+  const expenses: Expense[] = fetchedExpenses || [];
 
   const grandTotal = expenses.reduce((s, e) => s + e.amount, 0);
 

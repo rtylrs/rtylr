@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
+import { FaGoogle } from 'react-icons/fa';
+
 import { useUserStore } from '../stores/userStore';
 import { useLogin, useGoogleAuth } from '../hooks/useAuth';
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import notify from '../lib/notify/notify';
-import { FaGoogle } from 'react-icons/fa';
-import { Button, Input } from '@voxire/ui';
 import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
+
+import AuthShell from '../components/AuthShell';
+import AuthInput from '../components/AuthInput';
+import AuthButton from '../components/AuthButton';
 
 const REDIRECT_APP_URLS: Record<string, string> = {
   hub:     window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
@@ -30,10 +36,19 @@ const REDIRECT_APP_NAMES: Record<string, string> = {
   flow: 'Flow',
 };
 
+const fieldStagger = {
+  hidden: { opacity: 0, y: 12 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.2 + i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const { isAuthenticated, loading, error, role, clearError } = useUserStore();
+  const { isAuthenticated, loading, error, clearError } = useUserStore();
   const loginMutation = useLogin();
   const googleAuthMutation = useGoogleAuth();
 
@@ -55,8 +70,8 @@ const Login: React.FC = () => {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
       googleAuthMutation.mutate({ idToken });
-    } catch (error) {
-      notify.error((error as any).message);
+    } catch (err) {
+      notify.error((err as any).message);
     }
   };
 
@@ -72,100 +87,139 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, redirectParam]);
 
+  const errorMessage =
+    error && (typeof error === 'string' ? error : (error as any)?.message || 'An error occurred');
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8f8fb] p-6">
-      <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-card border border-black/5 p-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-primary mb-1.5">Welcome back.</h2>
-            <p className="text-sm text-muted">Log in to your account below.</p>
-          </div>
-
-          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="flex flex-col gap-5">
-            <Input
-              id="login-email"
-              type="email"
-              label="Email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              id="login-password"
-              type="password"
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-
-            {error && (
-              <p className="text-sm text-destructive text-center">
-                {typeof error === 'string' ? error : (error as any)?.message || 'An error occurred'}
-              </p>
-            )}
-
-            <button
-              type="button"
-              className="text-sm text-accent hover:underline self-start -mt-2"
-              onClick={() => navigate('/password-reset')}
-            >
-              Forgot password?
-            </button>
-
-            <Button variant="primary" size="md" fullWidth loading={loading} type="submit">
-              Sign In
-            </Button>
-
-            {showGoogle && (
-              <>
-                <div className="flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-black/8" />
-                  <span className="text-xs text-muted">or</span>
-                  <div className="flex-1 h-px bg-black/8" />
-                </div>
-                <Button variant="outline" size="md" fullWidth type="button" onClick={handleGoogle} prefix={<FaGoogle />}>
-                  Sign in with Google
-                </Button>
-              </>
-            )}
-          </form>
-
+    <AuthShell
+      title="Welcome back."
+      subtitle="Sign in to continue to your rtylr workspace."
+      footer={
+        <div className="space-y-3 text-center">
           {redirectAppName && (
-            <p className="mt-4 text-xs text-center text-muted">
-              You'll be redirected to <span className="font-medium">{redirectAppName}</span> after login.
+            <p className="text-xs text-white/45">
+              You'll be redirected to{' '}
+              <span className="text-white/80 font-medium">{redirectAppName}</span> after sign-in.
             </p>
           )}
-
-          <p className="mt-6 text-sm text-center text-muted">
+          <p className="text-sm text-white/55">
             Don't have an account?{' '}
-            <button className="text-accent hover:underline font-medium" onClick={() => navigate('/register')}>
+            <button
+              type="button"
+              className="text-[#64C5B9] font-medium hover:underline underline-offset-4"
+              onClick={() => navigate('/register')}
+            >
               Sign up
             </button>
           </p>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-xs text-muted">
-            Need help?{' '}
-            <button className="text-accent hover:underline" onClick={() => navigate('/password-reset')}>
-              Reset your password
-            </button>
-          </p>
-          <p className="text-xs text-muted/70">
-            By using Rtylr, you agree to our{' '}
-            <a href={`${APP_URLS.landing}/legal/privacy-policy`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+          <p className="text-[11px] text-white/35">
+            By signing in you agree to our{' '}
+            <a
+              href={`${APP_URLS.landing}/legal/privacy-policy`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/55 hover:text-white underline underline-offset-2"
+            >
               Privacy Policy
             </a>
             .
           </p>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <form
+        onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+        className="flex flex-col gap-5"
+      >
+        <motion.div custom={0} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="login-email"
+            type="email"
+            label="Email"
+            icon={Mail}
+            placeholder="you@company.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </motion.div>
+
+        <motion.div custom={1} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="login-password"
+            type="password"
+            label="Password"
+            icon={Lock}
+            placeholder="Enter your password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </motion.div>
+
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="show"
+          variants={fieldStagger}
+          className="flex justify-end -mt-1"
+        >
+          <button
+            type="button"
+            className="text-xs text-white/55 hover:text-[#64C5B9] transition-colors"
+            onClick={() => navigate('/password-reset')}
+          >
+            Forgot password?
+          </button>
+        </motion.div>
+
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-2 rounded-lg border border-red-400/25 bg-red-500/10 px-3.5 py-2.5"
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" />
+            <p className="text-xs text-red-200 leading-relaxed">{errorMessage}</p>
+          </motion.div>
+        )}
+
+        <motion.div custom={3} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthButton type="submit" loading={loading}>
+            <span className="inline-flex items-center justify-center gap-2">
+              Sign in
+              <ArrowRight className="h-[18px] w-[18px]" />
+            </span>
+          </AuthButton>
+        </motion.div>
+
+        {showGoogle && (
+          <motion.div
+            custom={4}
+            initial="hidden"
+            animate="show"
+            variants={fieldStagger}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-[11px] uppercase tracking-widest text-white/40">or</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+
+            <AuthButton type="button" variant="outline" onClick={handleGoogle}>
+              <span className="inline-flex items-center justify-center gap-2.5">
+                <FaGoogle className="text-white/85" />
+                Continue with Google
+              </span>
+            </AuthButton>
+          </motion.div>
+        )}
+      </form>
+    </AuthShell>
   );
 };
 

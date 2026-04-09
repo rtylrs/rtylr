@@ -242,7 +242,7 @@ const AppearanceSection: React.FC = () => {
             {ACCENT}
           </span>
           <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            (Flow teal — from Voxire logo)
+            (Flow teal, from Voxire logo)
           </span>
         </div>
       </div>

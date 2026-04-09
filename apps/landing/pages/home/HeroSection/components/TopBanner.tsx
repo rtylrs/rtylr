@@ -34,7 +34,7 @@ const TopBanner: React.FC = () => {
           >
             <span className={styles.alphaBadge}>ALPHA</span>
             <span className={styles.badgeText}>
-              The all-in-one POS that grows with you
+              The all-in-one platform for your business
             </span>
           </motion.div>
           <motion.h3
@@ -82,10 +82,10 @@ const TopBanner: React.FC = () => {
           <div className={styles.badgeTextContainer}>
             <div className={styles.badgeText}>
               <span className={styles.badgeTextContent}>
-                The all-in-one POS that grows with you&nbsp;&nbsp;&nbsp;&nbsp;
+                The all-in-one platform for your business&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
               <span className={styles.badgeTextContent} aria-hidden="true">
-                The all-in-one POS that grows with you&nbsp;&nbsp;&nbsp;&nbsp;
+                The all-in-one platform for your business&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
             </div>
           </div>

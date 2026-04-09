@@ -20,7 +20,7 @@ interface HelmetContainerProps {
 }
 
 function HelmetContainer({
-  title = 'Rtylr',
+  title = 'rtylr · Your entire business, one platform.',
   description = '',
   image = '',
   url = '',

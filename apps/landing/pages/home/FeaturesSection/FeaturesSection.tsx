@@ -20,7 +20,7 @@ const features: Feature[] = [
     category: 'POS',
     title: 'Complete Point of Sale & Payments',
     description:
-      'Floor and counter sales, table management, and kitchen display — all in one. Accept every payment type and keep the floor moving with a POS built for speed.',
+      'Floor and counter sales, table management, and kitchen display, all in one. Accept every payment type and keep the floor moving with a POS built for speed.',
     ctaText: 'EXPLORE POS',
     image: 'https://placehold.co/600x400',
   },
@@ -29,7 +29,7 @@ const features: Feature[] = [
     category: 'ERP',
     title: 'Inventory, Suppliers & Purchasing',
     description:
-      'Take full control of your supply chain. Manage stock levels, raise purchase orders, track suppliers, and monitor cost of goods — all synced in real time.',
+      'Take full control of your supply chain. Manage stock levels, raise purchase orders, track suppliers, and monitor cost of goods, all synced in real time.',
     ctaText: 'EXPLORE ERP',
     image: 'https://placehold.co/600x400',
   },
@@ -47,7 +47,7 @@ const features: Feature[] = [
     category: 'CRM',
     title: 'Customers, Loyalty & Campaigns',
     description:
-      'Build lasting relationships with rich customer profiles, points-based loyalty programs, and targeted marketing campaigns — all driven by your own sales data.',
+      'Build lasting relationships with rich customer profiles, points-based loyalty programs, and targeted marketing campaigns, all driven by your own sales data.',
     ctaText: 'EXPLORE CRM',
     image: 'https://placehold.co/600x400',
   },
@@ -56,7 +56,7 @@ const features: Feature[] = [
     category: 'Finance',
     title: 'Invoices, Expenses & P&L',
     description:
-      'Stay on top of your numbers with automated invoicing, expense tracking, profit & loss statements, and tax reporting — no separate accounting software needed.',
+      'Stay on top of your numbers with automated invoicing, expense tracking, profit & loss statements, and tax reporting. No separate accounting software needed.',
     ctaText: 'EXPLORE FINANCE',
     image: 'https://placehold.co/600x400',
   },
@@ -65,7 +65,7 @@ const features: Feature[] = [
     category: 'Flow',
     title: 'Projects, Tasks & Team Workspaces',
     description:
-      'Plan, assign, and ship work across every department. Flow brings projects, tasks, and team collaboration into one workspace — think Linear meets Asana, built into your business OS.',
+      'Plan, assign, and ship work across every department. Flow brings projects, tasks, and team collaboration into one workspace. Think Linear meets Asana, built into your business OS.',
     ctaText: 'EXPLORE FLOW',
     image: 'https://placehold.co/600x400',
   },

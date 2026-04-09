@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@voxire/components';
+import { APP_URLS } from '@voxire/config';
 import { useRouter } from 'next/router';
 import { fadeInUp, fadeIn, viewportOnce } from '../../../lib/animations';
+import { navigateExternal } from '../../../lib/navigation';
 import styles from './CTASection.module.scss';
 
 const CTASection: React.FC = () => {
@@ -13,20 +15,34 @@ const CTASection: React.FC = () => {
   };
 
   const handleGetStarted = () => {
-    router.push('/demo');
+    navigateExternal(`${APP_URLS.auth}/register`);
   };
 
   return (
     <section className={styles.ctaSection}>
-      {/* Animated background orbs */}
+      {/* Animated gradient background */}
+      <motion.div
+        className={styles.gradientBg}
+        animate={{
+          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+      />
+
+      {/* Floating orbs */}
       <motion.div
         className={styles.orbOne}
         animate={{
+          x: [0, 80, 0],
+          y: [0, -40, 0],
           scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
         }}
         transition={{
-          duration: 8,
+          duration: 14,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
@@ -34,11 +50,25 @@ const CTASection: React.FC = () => {
       <motion.div
         className={styles.orbTwo}
         animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2],
+          x: [0, -60, 0],
+          y: [0, 50, 0],
+          scale: [1.1, 1, 1.1],
         }}
         transition={{
-          duration: 10,
+          duration: 16,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+      <motion.div
+        className={styles.orbThree}
+        animate={{
+          x: [0, 40, 0],
+          y: [0, 30, 0],
+          scale: [1, 1.15, 1],
+        }}
+        transition={{
+          duration: 20,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
@@ -52,34 +82,30 @@ const CTASection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeIn}
         >
-          <motion.span className={styles.eyebrow} variants={fadeInUp}>
-            One platform. Every department.
-          </motion.span>
           <motion.h2 className={styles.ctaTitle} variants={fadeInUp}>
-            Buy rtylr,
+            Ready to run your entire
             <br />
-            buy a whole business.
+            business from one place?
           </motion.h2>
           <motion.p className={styles.ctaDescription} variants={fadeInUp}>
-            POS, ERP, HR, CRM, Finance, and Flow — all working together out of
-            the box. Powered by AI. Free to start, no credit card required.
+            Free forever for up to 5 members. No credit card required.
           </motion.p>
           <motion.div className={styles.ctaButtons} variants={fadeInUp}>
             <Button
               variant="primary"
               onClick={handleGetStarted}
-              width="200px"
-              height="52px"
+              width="220px"
+              height="56px"
             >
-              Get Started
+              Get started free
             </Button>
             <Button
               variant="dark-outline"
               onClick={handleBookDemo}
-              width="200px"
-              height="52px"
+              width="220px"
+              height="56px"
             >
-              Book a Demo
+              Book a demo
             </Button>
           </motion.div>
         </motion.div>

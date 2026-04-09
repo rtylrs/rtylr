@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarPlus, Clock, CheckCircle2, Play, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { hrApi, Shift } from '../../services/hrApi';
+import { Shift } from '../../services/hrApi';
+import { useShifts } from '../../hooks/useShifts';
 
 const ACCENT = '#8b5cf6';
 
@@ -23,15 +24,8 @@ const rowAnim   = { hidden: { opacity: 0, x: -8 }, show: { opacity: 1, x: 0, tra
 
 const Shifts: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState(todayIdx);
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    hrApi.listShifts()
-      .then((res) => { if (res.data?.length) setShifts(res.data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedShifts } = useShifts();
+  const shifts: Shift[] = fetchedShifts || [];
 
   const dayShifts = shifts.filter((s) => s.day === days[selectedDay]);
   const todayShifts = shifts.filter((s) => s.day === days[todayIdx]);
@@ -134,7 +128,7 @@ const Shifts: React.FC = () => {
       >
         <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--hr-border)' }}>
           <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>
-            {days[selectedDay]} — {dayShifts.length} shift{dayShifts.length !== 1 ? 's' : ''}
+            {days[selectedDay]}: {dayShifts.length} shift{dayShifts.length !== 1 ? 's' : ''}
           </h3>
         </div>
 

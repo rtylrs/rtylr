@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UserPlus, Mail, Search } from 'lucide-react';
-import { hrApi, StaffMember } from '../../services/hrApi';
+import { StaffMember } from '../../services/hrApi';
+import { useStaff } from '../../hooks/useStaff';
 
 const ACCENT = '#8b5cf6';
 
@@ -30,15 +31,8 @@ const cardAnim  = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, tra
 const Staff: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [search, setSearch] = useState('');
-  const [staffData, setStaffData] = useState<StaffMember[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    hrApi.listStaff()
-      .then((res) => { if (res.data?.length) setStaffData(res.data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedStaff, isLoading: loading } = useStaff();
+  const staffData: StaffMember[] = fetchedStaff || [];
 
   const filtered = staffData.filter((s) => {
     const matchesTab = activeTab === 'All' || s.employmentType === activeTab;

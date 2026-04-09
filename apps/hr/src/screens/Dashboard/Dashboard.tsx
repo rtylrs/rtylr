@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -13,7 +13,7 @@ import {
   LogIn,
   LogOut,
 } from 'lucide-react';
-import { hrApi } from '../../services/hrApi';
+import { useHRDashboard } from '../../hooks/useDashboard';
 
 const ACCENT = '#8b5cf6';
 
@@ -44,27 +44,16 @@ const item = {
 };
 
 const Dashboard: React.FC = () => {
-  const [dashData, setDashData] = useState(defaultStats);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [todayAtGlance, setTodayAtGlance] = useState({ shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 });
-  const [loading, setLoading] = useState(true);
+  const { data: dashboard, isLoading: loading } = useHRDashboard();
 
-  useEffect(() => {
-    hrApi.getDashboard()
-      .then((res) => {
-        const d = res.data;
-        setDashData({
-          totalStaff: d.totalStaff ?? 0,
-          onShiftToday: d.onShiftToday ?? 0,
-          openPositions: d.openPositions ?? 0,
-          monthlyPayroll: d.monthlyPayroll ?? 0,
-        });
-        if (d.recentActivity?.length) setRecentActivity(d.recentActivity);
-        if (d.todayAtGlance) setTodayAtGlance(d.todayAtGlance);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const dashData = {
+    totalStaff: dashboard?.totalStaff ?? defaultStats.totalStaff,
+    onShiftToday: dashboard?.onShiftToday ?? defaultStats.onShiftToday,
+    openPositions: dashboard?.openPositions ?? defaultStats.openPositions,
+    monthlyPayroll: dashboard?.monthlyPayroll ?? defaultStats.monthlyPayroll,
+  };
+  const recentActivity: any[] = dashboard?.recentActivity || [];
+  const todayAtGlance = dashboard?.todayAtGlance || { shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 };
 
   const stats = [
     {
@@ -78,7 +67,7 @@ const Dashboard: React.FC = () => {
     {
       label: 'On Shift Today',
       value: loading ? '…' : String(dashData.onShiftToday),
-      change: dashData.totalStaff > 0 ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}% of team` : '—',
+      change: dashData.totalStaff > 0 ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}% of team` : '-',
       trend: 'neutral',
       icon: Clock,
       color: '#10b981',

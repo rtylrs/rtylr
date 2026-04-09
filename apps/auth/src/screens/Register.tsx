@@ -1,18 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Mail, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
+import { FaGoogle } from 'react-icons/fa';
+
 import notify from '../lib/notify/notify';
 import { useUserStore } from '../stores/userStore';
 import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
-import { FaGoogle } from 'react-icons/fa';
-import { Button, Input } from '@voxire/ui';
 import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
+
+import AuthShell from '../components/AuthShell';
+import AuthInput from '../components/AuthInput';
+import AuthButton from '../components/AuthButton';
+
+const fieldStagger = {
+  hidden: { opacity: 0, y: 12 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.2 + i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,8 +38,16 @@ const Register: React.FC = () => {
   const showGoogle: boolean = useGoogleSignupVisible();
 
   const handleRegister = () => {
-    if (password !== confirmPassword) { notify.error('Passwords do not match'); return; }
-    registerMutation.mutate({ email, password, name: email.split('@')[0], referred: '' });
+    if (password !== confirmPassword) {
+      notify.error('Passwords do not match');
+      return;
+    }
+    registerMutation.mutate({
+      email,
+      password,
+      name: name.trim() || email.split('@')[0],
+      referred: '',
+    });
   };
 
   const handleGoogle = async () => {
@@ -31,58 +55,154 @@ const Register: React.FC = () => {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
       googleAuthMutation.mutate({ idToken });
-    } catch (error) { notify.error((error as any).message); }
+    } catch (err) {
+      notify.error((err as any).message);
+    }
   };
 
   useEffect(() => { clearError(); }, [clearError]);
   useEffect(() => {
     if (isAuthenticated) navigate(role === 'business' ? '/auth/questionnaire' : '/');
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, role]);
+
+  const errorMessage =
+    error && (typeof error === 'string' ? error : (error as any)?.message || 'An error occurred');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8f8fb] p-6">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-card border border-black/5 p-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-primary mb-1.5">Welcome to Rtylr.</h2>
-            <p className="text-sm text-muted">Sign up to start managing everything in one place.</p>
-          </div>
-
-          <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }} className="flex flex-col gap-5">
-            <Input id="register-email" type="email" label="Email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <Input id="register-password" type="password" label="Password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <Input id="register-confirm" type="password" label="Confirm Password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-
-            {error && <p className="text-sm text-destructive text-center">{typeof error === 'string' ? error : (error as any)?.message || 'An error occurred'}</p>}
-
-            <Button variant="primary" size="md" fullWidth loading={loading} type="submit">Sign Up</Button>
-
-            {showGoogle && (
-              <>
-                <div className="flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-black/8" />
-                  <span className="text-xs text-muted">or</span>
-                  <div className="flex-1 h-px bg-black/8" />
-                </div>
-                <Button variant="outline" size="md" fullWidth type="button" onClick={handleGoogle} prefix={<FaGoogle />}>Sign up with Google</Button>
-              </>
-            )}
-          </form>
-
-          <p className="mt-6 text-sm text-center text-muted">
+    <AuthShell
+      title="Create your account."
+      subtitle="Start running your entire business from one place."
+      footer={
+        <div className="space-y-3 text-center">
+          <p className="text-sm text-white/55">
             Already have an account?{' '}
-            <button className="text-accent hover:underline font-medium" onClick={() => navigate('/')}>Sign in</button>
+            <button
+              type="button"
+              className="text-[#64C5B9] font-medium hover:underline underline-offset-4"
+              onClick={() => navigate('/')}
+            >
+              Sign in
+            </button>
+          </p>
+          <p className="text-[11px] text-white/35">
+            By creating an account you agree to our{' '}
+            <a
+              href={`${APP_URLS.landing}/legal/privacy-policy`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/55 hover:text-white underline underline-offset-2"
+            >
+              Privacy Policy
+            </a>
+            .
           </p>
         </div>
+      }
+    >
+      <form
+        onSubmit={(e) => { e.preventDefault(); handleRegister(); }}
+        className="flex flex-col gap-5"
+      >
+        <motion.div custom={0} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="register-name"
+            type="text"
+            label="Full name"
+            icon={User}
+            placeholder="Jane Doe"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </motion.div>
 
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-xs text-muted/70">
-            By using Rtylr, you agree to our{' '}
-            <a href={`${APP_URLS.landing}/legal/privacy-policy`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Privacy Policy</a>.
-          </p>
-        </div>
-      </div>
-    </div>
+        <motion.div custom={1} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="register-email"
+            type="email"
+            label="Email"
+            icon={Mail}
+            placeholder="you@company.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </motion.div>
+
+        <motion.div custom={2} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="register-password"
+            type="password"
+            label="Password"
+            icon={Lock}
+            placeholder="At least 8 characters"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </motion.div>
+
+        <motion.div custom={3} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthInput
+            id="register-confirm"
+            type="password"
+            label="Confirm password"
+            icon={Lock}
+            placeholder="Repeat password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </motion.div>
+
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-2 rounded-lg border border-red-400/25 bg-red-500/10 px-3.5 py-2.5"
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" />
+            <p className="text-xs text-red-200 leading-relaxed">{errorMessage}</p>
+          </motion.div>
+        )}
+
+        <motion.div custom={4} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthButton type="submit" loading={loading}>
+            <span className="inline-flex items-center justify-center gap-2">
+              Create account
+              <ArrowRight className="h-[18px] w-[18px]" />
+            </span>
+          </AuthButton>
+        </motion.div>
+
+        {showGoogle && (
+          <motion.div
+            custom={5}
+            initial="hidden"
+            animate="show"
+            variants={fieldStagger}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-[11px] uppercase tracking-widest text-white/40">or</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+
+            <AuthButton type="button" variant="outline" onClick={handleGoogle}>
+              <span className="inline-flex items-center justify-center gap-2.5">
+                <FaGoogle className="text-white/85" />
+                Sign up with Google
+              </span>
+            </AuthButton>
+          </motion.div>
+        )}
+      </form>
+    </AuthShell>
   );
 };
 

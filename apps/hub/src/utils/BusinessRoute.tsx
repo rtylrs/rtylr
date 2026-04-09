@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
+import { APP_URLS } from '@voxire/config';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -8,14 +9,7 @@ const getTokenFromCookie = (): string | null =>
     .find((c) => c.startsWith('token='))
     ?.split('=')[1] ?? null;
 
-const getAuthUrl = (): string => {
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  return isLocalhost
-    ? 'http://localhost:5176?redirect=hub'
-    : 'https://auth.rtylr.com?redirect=hub';
-};
+const getAuthUrl = (): string => `${APP_URLS.auth}?redirect=hub`;
 
 function BusinessRoute() {
   const token = getTokenFromCookie();

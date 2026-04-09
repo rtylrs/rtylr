@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   DollarSign,
@@ -9,7 +9,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from 'lucide-react';
-import { financeApi, BarDataPoint, Transaction, OverdueInvoice } from '../../services/financeApi';
+import { BarDataPoint, Transaction, OverdueInvoice } from '../../services/financeApi';
+import { useFinanceDashboard } from '../../hooks/useDashboard';
 
 const ACCENT = '#10b981';
 
@@ -129,15 +130,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
 };
 
 const Dashboard: React.FC = () => {
-  const [dashData, setDashData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    financeApi.getDashboard()
-      .then((d) => setDashData(d))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: dashData, isLoading: loading } = useFinanceDashboard();
 
   const statsItems: StatCardProps[] = [
     {

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Download } from 'lucide-react';
-import { financeApi } from '../../services/financeApi';
+import { usePL } from '../../hooks/useTax';
 
 type Period = 'This Month' | 'Last Month' | 'This Quarter' | 'This Year';
 
@@ -98,30 +98,15 @@ const PERIOD_PARAMS: Record<Period, string> = {
 
 const ProfitLoss: React.FC = () => {
   const [period, setPeriod] = useState<Period>('This Month');
-  const [periodDataMap, setPeriodDataMap] = useState<Record<Period, PeriodData>>(defaultPeriodData);
-  const [loading, setLoading] = useState(true);
+  const { data: plData, isLoading: loading } = usePL(PERIOD_PARAMS[period]);
 
-  useEffect(() => {
-    const param = PERIOD_PARAMS[period];
-    setLoading(true);
-    financeApi.getPL(param)
-      .then((d) => {
-        if (d) {
-          setPeriodDataMap((prev) => ({
-            ...prev,
-            [period]: {
-              revenue: d.revenue ?? 0,
-              cogs: d.cogs ?? 0,
-              operatingExpenses: d.operatingExpenses ?? 0,
-            },
-          }));
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [period]);
-
-  const data = periodDataMap[period];
+  const data: PeriodData = plData
+    ? {
+        revenue: plData.revenue ?? 0,
+        cogs: plData.cogs ?? 0,
+        operatingExpenses: plData.operatingExpenses ?? 0,
+      }
+    : defaultPeriodData[period];
 
   const grossProfit = data.revenue - data.cogs;
   const grossMargin = pct(grossProfit, data.revenue);

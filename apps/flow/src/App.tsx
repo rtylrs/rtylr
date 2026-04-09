@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useRoutes, useNavigate } from 'react-router-dom';
+import { APP_URLS } from '@voxire/config';
 import { getCookie } from './lib/utils';
 import { useUserStore } from './stores/userStore';
 import appRoutes from './routes/AppRoutes';
 
 const AUTH_COOKIE_NAME = 'rtylr_token';
-const AUTH_HUB_URL = 'http://localhost:5176';
 
 const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, login } = useUserStore();
@@ -13,9 +13,9 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const token = getCookie(AUTH_COOKIE_NAME);
     if (!token && !isAuthenticated) {
-      // Redirect to hub auth with redirect_to=flow
+      // Redirect to auth with redirect_to=flow
       const redirectUrl = encodeURIComponent(window.location.href);
-      window.location.href = `${AUTH_HUB_URL}?redirect=${redirectUrl}`;
+      window.location.href = `${APP_URLS.auth}?redirect=${redirectUrl}`;
       return;
     }
 

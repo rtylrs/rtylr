@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@voxire/config": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/auth": "workspace:*",

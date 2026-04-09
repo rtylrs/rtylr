@@ -211,22 +211,22 @@ const HeaderDesktop: React.FC = () => {
             {featuresDropdown && (
               <div className={styles['header-dropdown']}>
                 <h6 onClick={() => handleNavigation('/features/pos')}>
-                  POS & Payments
+                  POS
                 </h6>
-                <h6 onClick={() => handleNavigation('/features/inventory')}>
-                  Inventory Management
+                <h6 onClick={() => handleNavigation('/features/erp')}>
+                  ERP
                 </h6>
-                <h6 onClick={() => handleNavigation('/features/ecommerce')}>
-                  eCommerce & Online Ordering
+                <h6 onClick={() => handleNavigation('/features/hr')}>
+                  HR
                 </h6>
-                <h6 onClick={() => handleNavigation('/features/kds')}>
-                  Kitchen Display (KDS)
+                <h6 onClick={() => handleNavigation('/features/crm')}>
+                  CRM
                 </h6>
-                <h6 onClick={() => handleNavigation('/features/analytics')}>
-                  Analytics & AI
+                <h6 onClick={() => handleNavigation('/features/finance')}>
+                  Finance
                 </h6>
-                <h6 onClick={() => handleNavigation('/features/offline')}>
-                  Offline Sync
+                <h6 onClick={() => handleNavigation('/features/flow')}>
+                  Flow
                 </h6>
               </div>
             )}
@@ -274,10 +274,6 @@ const HeaderDesktop: React.FC = () => {
             Pricing
           </LinkWithColor>
 
-          <LinkWithColor to="/hardware" className={styles['nav-link']}>
-            Hardware
-          </LinkWithColor>
-
           <div className={`${styles['nav-item']} resources-dropdown-container`}>
             <p className={styles['nav-link']} onClick={toggleResourcesDropdown}>
               Resources
@@ -292,6 +288,7 @@ const HeaderDesktop: React.FC = () => {
             </p>
             {resourcesDropdown && (
               <div className={styles['header-dropdown']}>
+                <h6 onClick={() => handleNavigation('/hardware')}>Hardware</h6>
                 <h6 onClick={() => handleNavigation('/blog')}>Blog</h6>
                 <h6
                   onClick={() => handleExternalLink('https://docs.rtylr.com')}

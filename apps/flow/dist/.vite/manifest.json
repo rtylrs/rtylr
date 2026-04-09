@@ -1,0 +1,97 @@
+{
+  "_flowApi-DMKrwooJ.js": {
+    "file": "assets/flowApi-DMKrwooJ.js",
+    "name": "flowApi",
+    "imports": [
+      "index.html",
+      "_vendor-BdvZhXrI.js"
+    ]
+  },
+  "_useTasks-CDuXjg0E.js": {
+    "file": "assets/useTasks-CDuXjg0E.js",
+    "name": "useTasks",
+    "imports": [
+      "_flowApi-DMKrwooJ.js",
+      "index.html",
+      "_vendor-BdvZhXrI.js"
+    ]
+  },
+  "_vendor-BdvZhXrI.js": {
+    "file": "assets/vendor-BdvZhXrI.js",
+    "name": "vendor"
+  },
+  "index.html": {
+    "file": "assets/index-C6B5Fzsf.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js"
+    ],
+    "dynamicImports": [
+      "src/screens/WorkspaceDashboard/WorkspaceDashboard.tsx",
+      "src/screens/ProjectBoard/ProjectBoard.tsx",
+      "src/screens/ProjectList/ProjectList.tsx",
+      "src/screens/Inbox/Inbox.tsx",
+      "src/screens/FlowSettings/FlowSettings.tsx"
+    ],
+    "css": [
+      "assets/index-GzRQKMRe.css"
+    ]
+  },
+  "src/screens/FlowSettings/FlowSettings.tsx": {
+    "file": "assets/FlowSettings-D2O4tCeQ.js",
+    "name": "FlowSettings",
+    "src": "src/screens/FlowSettings/FlowSettings.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js",
+      "index.html"
+    ]
+  },
+  "src/screens/Inbox/Inbox.tsx": {
+    "file": "assets/Inbox-B1dMOvES.js",
+    "name": "Inbox",
+    "src": "src/screens/Inbox/Inbox.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js",
+      "index.html"
+    ]
+  },
+  "src/screens/ProjectBoard/ProjectBoard.tsx": {
+    "file": "assets/ProjectBoard-n8iI2xv9.js",
+    "name": "ProjectBoard",
+    "src": "src/screens/ProjectBoard/ProjectBoard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js",
+      "index.html",
+      "_useTasks-CDuXjg0E.js",
+      "_flowApi-DMKrwooJ.js"
+    ]
+  },
+  "src/screens/ProjectList/ProjectList.tsx": {
+    "file": "assets/ProjectList-MbICZVpZ.js",
+    "name": "ProjectList",
+    "src": "src/screens/ProjectList/ProjectList.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js",
+      "index.html",
+      "_useTasks-CDuXjg0E.js",
+      "_flowApi-DMKrwooJ.js"
+    ]
+  },
+  "src/screens/WorkspaceDashboard/WorkspaceDashboard.tsx": {
+    "file": "assets/WorkspaceDashboard-DgyFA1ba.js",
+    "name": "WorkspaceDashboard",
+    "src": "src/screens/WorkspaceDashboard/WorkspaceDashboard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-BdvZhXrI.js",
+      "index.html",
+      "_flowApi-DMKrwooJ.js"
+    ]
+  }
+}

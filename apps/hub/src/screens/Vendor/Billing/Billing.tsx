@@ -62,7 +62,7 @@ const Billing: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-400">Next renewal</p>
-              <p className="text-sm font-medium text-primary mt-0.5">—</p>
+              <p className="text-sm font-medium text-primary mt-0.5">-</p>
             </div>
             <Button variant="accent" size="sm">
               <Zap size={14} />

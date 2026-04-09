@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 
 /** Read a cookie by name */
@@ -31,7 +32,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     } else {
       // Redirect to auth app with redirect param so it can return here after login
       const redirect = encodeURIComponent('hr');
-      window.location.href = `http://localhost:5176?redirect=${redirect}`;
+      window.location.href = `${APP_URLS.auth}?redirect=${redirect}`;
       return;
     }
     setChecking(false);

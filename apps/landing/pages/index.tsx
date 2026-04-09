@@ -15,8 +15,8 @@ import styles from './index.module.scss';
 const HomePage = (): JSX.Element => {
   const baseUrl = 'https://rtylr.com';
   const description =
-    'POS, ERP, HR, CRM, Finance & Flow — the all-in-one business OS built for modern restaurants and retail. Powered by AI.';
-  const title = 'Rtylr | Your entire business, one platform.';
+    'POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.';
+  const title = 'rtylr · Your entire business, one platform.';
   const ogImage = `${baseUrl}/images/home/hero-banner-top-bar-bg.webp`;
 
   return (

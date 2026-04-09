@@ -189,37 +189,37 @@ const HeaderMobile: React.FC = () => {
                     href="/features/pos"
                     onClick={() => handleNavigation('/features/pos')}
                   >
-                    POS & Payments
+                    POS
                   </Link>
                   <Link
-                    href="/features/inventory"
-                    onClick={() => handleNavigation('/features/inventory')}
+                    href="/features/erp"
+                    onClick={() => handleNavigation('/features/erp')}
                   >
-                    Inventory Management
+                    ERP
                   </Link>
                   <Link
-                    href="/features/ecommerce"
-                    onClick={() => handleNavigation('/features/ecommerce')}
+                    href="/features/hr"
+                    onClick={() => handleNavigation('/features/hr')}
                   >
-                    eCommerce & Online Ordering
+                    HR
                   </Link>
                   <Link
-                    href="/features/kds"
-                    onClick={() => handleNavigation('/features/kds')}
+                    href="/features/crm"
+                    onClick={() => handleNavigation('/features/crm')}
                   >
-                    Kitchen Display (KDS)
+                    CRM
                   </Link>
                   <Link
-                    href="/features/analytics"
-                    onClick={() => handleNavigation('/features/analytics')}
+                    href="/features/finance"
+                    onClick={() => handleNavigation('/features/finance')}
                   >
-                    Analytics & AI
+                    Finance
                   </Link>
                   <Link
-                    href="/features/offline"
-                    onClick={() => handleNavigation('/features/offline')}
+                    href="/features/flow"
+                    onClick={() => handleNavigation('/features/flow')}
                   >
-                    Offline Sync
+                    Flow
                   </Link>
                 </div>
               )}
@@ -288,14 +288,6 @@ const HeaderMobile: React.FC = () => {
               Pricing <HiChevronRight />
             </Link>
 
-            <Link
-              href="/hardware"
-              onClick={() => handleNavigation('/hardware')}
-              className={styles['mobile-nav-link']}
-            >
-              Hardware <HiChevronRight />
-            </Link>
-
             <div className={styles['mobile-nav-item']}>
               <p onClick={toggleResourcesDropdown}>
                 Resources
@@ -311,6 +303,12 @@ const HeaderMobile: React.FC = () => {
               </p>
               {resourcesDropdown && (
                 <div className={styles['mobile-dropdown']}>
+                  <Link
+                    href="/hardware"
+                    onClick={() => handleNavigation('/hardware')}
+                  >
+                    Hardware
+                  </Link>
                   <Link href="/blog" onClick={() => handleNavigation('/blog')}>
                     Blog
                   </Link>

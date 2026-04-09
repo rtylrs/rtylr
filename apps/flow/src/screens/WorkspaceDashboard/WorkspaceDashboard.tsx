@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -12,7 +12,8 @@ import {
 import { useUserStore } from '../../stores/userStore';
 import { useFlowStore } from '../../stores/flowStore';
 import { cn, formatDate } from '../../lib/utils';
-import { flowApi, type DashboardStats } from '../../services/flowApi';
+import { type DashboardStats } from '../../services/flowApi';
+import { useFlowDashboard } from '../../hooks/useDashboard';
 
 const ACCENT = '#64C5B9';
 
@@ -83,11 +84,7 @@ const WorkspaceDashboard: React.FC = () => {
   const { user } = useUserStore();
   const { tasks, projects, workspaces } = useFlowStore();
 
-  const [apiStats, setApiStats] = useState<DashboardStats | null>(null);
-
-  useEffect(() => {
-    flowApi.getDashboard(workspaceId).then(setApiStats).catch(() => {});
-  }, [workspaceId]);
+  const { data: apiStats } = useFlowDashboard(workspaceId);
 
   const workspace = workspaces.find((w) => w.id === workspaceId);
   const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId);

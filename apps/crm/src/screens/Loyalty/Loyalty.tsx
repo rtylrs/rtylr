@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useLoyaltyConfig, useLoyaltyTransactions } from '../../hooks/useLoyalty';
 import { motion } from 'framer-motion';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
-import { crmApi, type LoyaltyTransaction } from '../../services/crmApi';
+import { type LoyaltyTransaction } from '../../services/crmApi';
 
 const ACCENT = '#3b82f6';
 
@@ -70,22 +71,22 @@ const activityColor: Record<string, string> = {
 };
 
 const Loyalty: React.FC = () => {
+  const { data: config } = useLoyaltyConfig();
+  const { data: transactions } = useLoyaltyTransactions();
+
   const [programEnabled, setProgramEnabled] = useState(true);
   const [pointsPerDollar, setPointsPerDollar] = useState(1);
   const [pointsExpiry, setPointsExpiry] = useState(365);
-  const [activityLog, setActivityLog] = useState<LoyaltyTransaction[]>(defaultActivityLog);
 
   useEffect(() => {
-    crmApi.getLoyaltyConfig().then((config) => {
+    if (config) {
       if (config.programEnabled !== undefined) setProgramEnabled(config.programEnabled);
       if (config.pointsPerDollar !== undefined) setPointsPerDollar(config.pointsPerDollar);
       if (config.pointsExpiry !== undefined) setPointsExpiry(config.pointsExpiry);
-    }).catch(() => {/* keep defaults */});
+    }
+  }, [config]);
 
-    crmApi.getLoyaltyTransactions().then((data) => {
-      if (data?.length) setActivityLog(data);
-    }).catch(() => {/* keep mock data */});
-  }, []);
+  const activityLog: LoyaltyTransaction[] = transactions && transactions.length ? transactions : defaultActivityLog;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
@@ -304,7 +305,7 @@ const Loyalty: React.FC = () => {
             />
             <div style={{ flex: 1 }}>
               <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{entry.customer}</span>
-              <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}> — {entry.action}</span>
+              <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>: {entry.action}</span>
             </div>
             <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{entry.time}</span>
           </div>

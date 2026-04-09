@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@voxire/config": "workspace:*",
     "axios": "^1.7.2",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.544.0",

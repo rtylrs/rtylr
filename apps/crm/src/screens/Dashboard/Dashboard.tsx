@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, UserPlus, Gift, Megaphone, TrendingUp, TrendingDown } from 'lucide-react';
-import { crmApi, type DashboardStats } from '../../services/crmApi';
+import { type DashboardStats } from '../../services/crmApi';
+import { useCRMDashboard } from '../../hooks/useDashboard';
 
 const ACCENT = '#3b82f6';
 
@@ -137,22 +138,18 @@ function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
 }
 
 const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState(defaultStats);
-  const [topCustomers, setTopCustomers] = useState(defaultTopCustomers);
-  const [campaigns, setCampaigns] = useState(defaultCampaigns);
+  const { data: dashboardData } = useCRMDashboard();
 
-  useEffect(() => {
-    crmApi.getDashboard().then((data: DashboardStats) => {
-      setStats([
-        { label: 'Total Customers',       value: data.totalCustomers.toLocaleString(),       change: data.totalCustomersChange,       up: data.totalCustomersChange?.startsWith('+'),       icon: Users,    color: '#3b82f6' },
-        { label: 'New This Month',        value: data.newThisMonth.toLocaleString(),          change: data.newThisMonthChange,          up: data.newThisMonthChange?.startsWith('+'),          icon: UserPlus, color: '#10b981' },
-        { label: 'Active Loyalty Members',value: data.activeLoyaltyMembers.toLocaleString(), change: data.activeLoyaltyMembersChange, up: data.activeLoyaltyMembersChange?.startsWith('+'), icon: Gift,     color: '#f59e0b' },
-        { label: 'Campaign Reach',        value: data.campaignReach.toLocaleString(),         change: data.campaignReachChange,         up: data.campaignReachChange?.startsWith('+'),         icon: Megaphone,color: '#8b5cf6' },
-      ]);
-      if (data.topCustomers?.length) setTopCustomers(data.topCustomers);
-      if (data.recentCampaigns?.length) setCampaigns(data.recentCampaigns);
-    }).catch(() => {/* keep mock data */});
-  }, []);
+  const stats = dashboardData
+    ? [
+        { label: 'Total Customers',       value: (dashboardData as DashboardStats).totalCustomers.toLocaleString(),       change: dashboardData.totalCustomersChange,       up: dashboardData.totalCustomersChange?.startsWith('+'),       icon: Users,    color: '#3b82f6' },
+        { label: 'New This Month',        value: dashboardData.newThisMonth.toLocaleString(),          change: dashboardData.newThisMonthChange,          up: dashboardData.newThisMonthChange?.startsWith('+'),          icon: UserPlus, color: '#10b981' },
+        { label: 'Active Loyalty Members',value: dashboardData.activeLoyaltyMembers.toLocaleString(), change: dashboardData.activeLoyaltyMembersChange, up: dashboardData.activeLoyaltyMembersChange?.startsWith('+'), icon: Gift,     color: '#f59e0b' },
+        { label: 'Campaign Reach',        value: dashboardData.campaignReach.toLocaleString(),         change: dashboardData.campaignReachChange,         up: dashboardData.campaignReachChange?.startsWith('+'),         icon: Megaphone,color: '#8b5cf6' },
+      ]
+    : defaultStats;
+  const topCustomers = dashboardData?.topCustomers?.length ? dashboardData.topCustomers : defaultTopCustomers;
+  const campaigns = dashboardData?.recentCampaigns?.length ? dashboardData.recentCampaigns : defaultCampaigns;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>

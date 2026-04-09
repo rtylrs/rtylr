@@ -4,8 +4,19 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './globals.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Apply persisted theme before first render to prevent flash
 const saved = localStorage.getItem('crm-theme') || 'dark';
@@ -37,13 +48,15 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-    <CookiesProvider>
-      <Suspense fallback={<FullScreenLoader />}>
-        <BrowserRouter>
-          <App />
-          <Toaster expand={false} richColors />
-        </BrowserRouter>
-      </Suspense>
-    </CookiesProvider>
+    <QueryClientProvider client={queryClient}>
+      <CookiesProvider>
+        <Suspense fallback={<FullScreenLoader />}>
+          <BrowserRouter>
+            <App />
+            <Toaster expand={false} richColors />
+          </BrowserRouter>
+        </Suspense>
+      </CookiesProvider>
+    </QueryClientProvider>
   );
 }

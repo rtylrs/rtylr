@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
   FileText,
@@ -157,7 +158,7 @@ const DefaultLayout: React.FC = () => {
         {/* Hub back link */}
         <div style={{ padding: '10px 8px 4px' }}>
           <a
-            href="http://localhost:5176"
+            href={APP_URLS.hub}
             style={{
               display: 'flex',
               alignItems: 'center',
