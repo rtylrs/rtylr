@@ -22,7 +22,7 @@ const LOCAL_URLS = {
   hub: 'http://localhost:5175',
   menu: 'http://localhost:5177',
   pos: 'http://localhost:5178',
-  api: 'http://localhost:8080/api',
+  api: 'https://api.voxire.dev',
   status: 'https://status.rtylr.com',
 } as const;
 
@@ -32,7 +32,7 @@ const PROD_URLS = {
   hub: 'https://hub.rtylr.com',
   menu: 'https://menu.rtylr.com',
   pos: 'https://pos.rtylr.com',
-  api: 'https://api.rtylr.com',
+  api: 'https://api.voxire.dev',
   status: 'https://status.rtylr.com',
 } as const;
 

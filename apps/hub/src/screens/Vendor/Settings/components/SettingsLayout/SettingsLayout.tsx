@@ -1,20 +1,108 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import SettingsSidebar from "../SettingsSidebar";
-import SettingsNavbar from "../SettingsNavbar";
+import React from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import {
+  User, Building2, Globe, Mail, CreditCard, Puzzle,
+  ArrowLeft, Briefcase,
+} from 'lucide-react';
+import { cn } from '../../../../../lib/utils';
+
+type NavGroup = {
+  label: string;
+  items: { label: string; path: string; icon: React.ComponentType<{ size?: number }> }[];
+};
+
+const navGroups: NavGroup[] = [
+  {
+    label: 'Account',
+    items: [
+      { label: 'Account',  path: '/settings/account',  icon: User },
+      { label: 'General',  path: '/settings/general',  icon: Building2 },
+      { label: 'Industry', path: '/settings/industry', icon: Briefcase },
+    ],
+  },
+  {
+    label: 'Online Presence',
+    items: [
+      { label: 'Custom Domain', path: '/settings/domain', icon: Globe },
+      { label: 'Email',         path: '/settings/email',  icon: Mail },
+    ],
+  },
+  {
+    label: 'Plans & Addons',
+    items: [
+      { label: 'Billing', path: '/settings/billing', icon: CreditCard },
+      { label: 'Addons',  path: '/settings/addons',  icon: Puzzle },
+    ],
+  },
+];
 
 const SettingsLayout: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-admin-bg grid grid-rows-[auto_1fr] grid-cols-[220px_1fr]">
-      <div className="col-span-2 row-start-1">
-        <SettingsNavbar />
-      </div>
-      <div className="row-start-2 col-start-1 border-r border-black/8 bg-white">
-        <SettingsSidebar />
-      </div>
-      <div className="row-start-2 col-start-2 p-8 overflow-auto">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+      {/* Sidebar */}
+      <aside
+        className="w-56 flex flex-col shrink-0 overflow-y-auto"
+        style={{ background: 'var(--hub-surface)', borderRight: '1px solid var(--hub-border)' }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center gap-2 px-4 py-3.5 shrink-0"
+          style={{ borderBottom: '1px solid var(--hub-border)' }}
+        >
+          <button
+            onClick={() => navigate('/')}
+            className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--hub-hover)]"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <ArrowLeft size={14} />
+          </button>
+          <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Settings
+          </span>
+        </div>
+
+        {/* Nav groups */}
+        <nav className="flex-1 py-3 px-2 space-y-4">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <p
+                className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--hub-text-dim)' }}
+              >
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map(({ label, path, icon: Icon }) => (
+                  <NavLink
+                    key={path}
+                    to={path}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+                        isActive ? 'bg-[var(--hub-active)]' : 'hover:bg-[var(--hub-hover)]'
+                      )
+                    }
+                    style={({ isActive }) => ({
+                      color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                      fontWeight: isActive ? 500 : undefined,
+                    })}
+                  >
+                    <Icon size={14} className="shrink-0" />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Content */}
+      <main className="flex-1 overflow-y-auto p-8" style={{ color: 'var(--hub-text)' }}>
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };

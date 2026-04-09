@@ -2,9 +2,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  // In Vite dev server, proxy /api → https://onion.voxire.dev (avoids CORS)
-  if (import.meta.env.DEV) return '/api/';
-  return 'https://onion.voxire.dev/';
+  return 'https://api.voxire.dev/';
 };
 
 const api = axios.create({

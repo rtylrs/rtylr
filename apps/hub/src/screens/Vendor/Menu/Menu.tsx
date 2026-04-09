@@ -1,7 +1,6 @@
 import { Spinner } from '@voxire/components';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import MenuItem from "./Components/MenuItem";
 import CreateCategoryModal from "./Components/CreateCategoryModal";
 import { useMenuStore } from "../../../stores/menuStore";
 import { useUserStore } from "../../../stores/userStore";
@@ -38,7 +37,24 @@ const Menu: React.FC<{}> = () => {
   };
 
   const renderItems = (items: any) => {
-    return items.map((item: any) => <MenuItem key={item._id} item={item} />);
+    return items.map((item: any) => (
+      <div key={item._id} className="flex items-center justify-between p-3 border border-black/10 rounded-lg bg-white">
+        <div className="flex items-center gap-3">
+          {item?.details?.image && (
+            <img src={item.details.image} alt={item.details.name} className="w-12 h-12 rounded-lg object-cover" />
+          )}
+          <div>
+            <p className="text-sm font-medium text-primary">{item?.details?.name}</p>
+            {item?.details?.description && (
+              <p className="text-xs text-muted line-clamp-1">{item.details.description}</p>
+            )}
+          </div>
+        </div>
+        {item?.details?.price !== undefined && (
+          <span className="text-sm font-semibold text-primary">${(item.details.price / 100).toFixed(2)}</span>
+        )}
+      </div>
+    ));
   };
 
   const renderCategory = (category: any) => {

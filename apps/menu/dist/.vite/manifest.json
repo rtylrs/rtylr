@@ -1,0 +1,82 @@
+{
+  "_index-BB-AWZ07.css": {
+    "file": "assets/index-BB-AWZ07.css",
+    "src": "_index-BB-AWZ07.css"
+  },
+  "_index-Cp671uj8.js": {
+    "file": "assets/index-Cp671uj8.js",
+    "name": "index",
+    "imports": [
+      "_vendor-DEEwGpxA.js",
+      "index.html"
+    ],
+    "css": [
+      "assets/index-BB-AWZ07.css"
+    ]
+  },
+  "_styles-l0sNRNKZ.js": {
+    "file": "assets/styles-l0sNRNKZ.js",
+    "name": "styles"
+  },
+  "_vendor-DEEwGpxA.js": {
+    "file": "assets/vendor-DEEwGpxA.js",
+    "name": "vendor"
+  },
+  "index.html": {
+    "file": "assets/index-DB8mAjCo.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_vendor-DEEwGpxA.js"
+    ],
+    "dynamicImports": [
+      "src/screens/Public/Menu/Menu.tsx",
+      "src/screens/Public/Extras/NoMatch.tsx",
+      "src/screens/Dev/DevMenu.tsx"
+    ],
+    "css": [
+      "assets/index-Bfj7m4W-.css"
+    ]
+  },
+  "src/screens/Dev/DevMenu.tsx": {
+    "file": "assets/DevMenu-TEMGuuDd.js",
+    "name": "DevMenu",
+    "src": "src/screens/Dev/DevMenu.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-DEEwGpxA.js",
+      "_index-Cp671uj8.js",
+      "index.html"
+    ],
+    "css": [
+      "assets/DevMenu-BmudjzbS.css"
+    ]
+  },
+  "src/screens/Public/Extras/NoMatch.tsx": {
+    "file": "assets/NoMatch-CB8bvsG3.js",
+    "name": "NoMatch",
+    "src": "src/screens/Public/Extras/NoMatch.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-DEEwGpxA.js"
+    ],
+    "css": [
+      "assets/NoMatch-CfEvHR5a.css"
+    ]
+  },
+  "src/screens/Public/Menu/Menu.tsx": {
+    "file": "assets/Menu-BHAikfK6.js",
+    "name": "Menu",
+    "src": "src/screens/Public/Menu/Menu.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-DEEwGpxA.js",
+      "index.html",
+      "_index-Cp671uj8.js"
+    ],
+    "css": [
+      "assets/Menu-5GsvZsd1.css"
+    ]
+  }
+}

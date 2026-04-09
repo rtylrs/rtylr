@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Cookie } from "phosphor-react";
-import { Button } from "../Button";
+import { Button } from "../ui/button";
 
 const Cookies: React.FC = () => {
   const [showPopup, setShowPopup] = useState(true);
@@ -40,7 +40,7 @@ const Cookies: React.FC = () => {
         </p>
 
         <div className="flex gap-3">
-          <Button variant="primary" size="sm" onClick={handleAccept}>Accept All</Button>
+          <Button variant="default" size="sm" onClick={handleAccept}>Accept All</Button>
           <Button variant="outline" size="sm" onClick={handleDecline}>Decline</Button>
         </div>
 

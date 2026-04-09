@@ -398,7 +398,7 @@ const DevMenu: React.FC = () => {
       />
 
       {/* Floating toolbar */}
-      <div ref={panelRef} className="fixed bottom-6 left-6 z-50">
+      <div ref={panelRef} className="fixed bottom-6 left-6 z-[999]">
         <AnimatePresence>
           {open && (
             <motion.div

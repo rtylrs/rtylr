@@ -30,7 +30,10 @@ export const useLogin = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
+      const domain =
+        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -52,7 +55,10 @@ export const useRegister = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
+      const domain =
+        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -74,7 +80,10 @@ export const useGoogleAuth = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
+      const domain =
+        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -95,7 +104,10 @@ export const useGetUserInfo = () => {
       const response = await api.get('/business/me');
       return response.data;
     },
-    enabled: !!localStorage.getItem('token'),
+    enabled: !!document.cookie
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('token=')),
   });
 
   useEffect(() => {
@@ -107,6 +119,12 @@ export const useGetUserInfo = () => {
       setUser(user);
       setAddons(user.addons);
       setVisits(visits);
+      if (token) {
+        const domain =
+          window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+        const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+        document.cookie = `token=${token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
+      }
     }
   }, [query.data, setUser, setRole, setUserId, setToken, setAddons, setVisits]);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/userStore';
 import { useLogin, useGoogleAuth } from '../hooks/useAuth';
@@ -10,6 +10,26 @@ import { Button, Input } from '@voxire/ui';
 import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
+const REDIRECT_APP_URLS: Record<string, string> = {
+  hub:     window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
+  pos:     window.location.hostname === 'localhost' ? 'http://localhost:5178' : 'https://pos.rtylr.com',
+  erp:     window.location.hostname === 'localhost' ? 'http://localhost:5179' : 'https://erp.rtylr.com',
+  hr:      window.location.hostname === 'localhost' ? 'http://localhost:5180' : 'https://hr.rtylr.com',
+  crm:     window.location.hostname === 'localhost' ? 'http://localhost:5181' : 'https://crm.rtylr.com',
+  finance: window.location.hostname === 'localhost' ? 'http://localhost:5182' : 'https://finance.rtylr.com',
+  flow:    window.location.hostname === 'localhost' ? 'http://localhost:5183' : 'https://flow.rtylr.com',
+};
+
+const REDIRECT_APP_NAMES: Record<string, string> = {
+  hub: 'Hub',
+  pos: 'POS',
+  erp: 'ERP',
+  hr: 'HR',
+  crm: 'CRM',
+  finance: 'Finance',
+  flow: 'Flow',
+};
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
@@ -20,6 +40,13 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const showGoogle: boolean = useGoogleSignupVisible();
+
+  const redirectParam = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('redirect');
+  }, []);
+
+  const redirectAppName = redirectParam ? (REDIRECT_APP_NAMES[redirectParam] ?? null) : null;
 
   const handleSubmit = () => loginMutation.mutate({ email, password });
 
@@ -37,9 +64,13 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(role === 'business' ? '/app/business' : '/');
+      const destination =
+        (redirectParam && REDIRECT_APP_URLS[redirectParam])
+          ? REDIRECT_APP_URLS[redirectParam]
+          : REDIRECT_APP_URLS.hub;
+      window.location.href = destination;
     }
-  }, [isAuthenticated, navigate, role]);
+  }, [isAuthenticated, redirectParam]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f8fb] p-6">
@@ -102,6 +133,12 @@ const Login: React.FC = () => {
               </>
             )}
           </form>
+
+          {redirectAppName && (
+            <p className="mt-4 text-xs text-center text-muted">
+              You'll be redirected to <span className="font-medium">{redirectAppName}</span> after login.
+            </p>
+          )}
 
           <p className="mt-6 text-sm text-center text-muted">
             Don't have an account?{' '}
