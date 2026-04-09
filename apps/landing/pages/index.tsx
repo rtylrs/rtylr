@@ -15,8 +15,8 @@ import styles from './index.module.scss';
 const HomePage = (): JSX.Element => {
   const baseUrl = 'https://rtylr.com';
   const description =
-    'Your single source of truth for in-store, online, and back-office operations. POS · Inventory · eCommerce · Analytics works offline, scales globally.';
-  const title = 'Rtylr | Run your business with AI.';
+    'POS, ERP, HR, CRM, Finance & Flow — the all-in-one business OS built for modern restaurants and retail. Powered by AI.';
+  const title = 'Rtylr | Your entire business, one platform.';
   const ogImage = `${baseUrl}/images/home/hero-banner-top-bar-bg.webp`;
 
   return (
@@ -32,7 +32,7 @@ const HomePage = (): JSX.Element => {
           ogSiteName="Rtylr"
           ogDescription={description}
           twitterCard="summary_large_image"
-          keywords="POS, inventory management, eCommerce, analytics, business operations, retail software"
+          keywords="POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI"
         />
         <div className={styles.Homepage}>
           <HeroSection />

@@ -17,38 +17,56 @@ interface Feature {
 const features: Feature[] = [
   {
     id: 'pos',
-    category: 'Point of Sale',
-    title: 'Complete POS & Payment Processing',
+    category: 'POS',
+    title: 'Complete Point of Sale & Payments',
     description:
-      'Accept all major credit cards, mobile payments, and more. Process transactions seamlessly with integrated payment processing that keeps your business running smoothly.',
+      'Floor and counter sales, table management, and kitchen display — all in one. Accept every payment type and keep the floor moving with a POS built for speed.',
     ctaText: 'EXPLORE POS',
     image: 'https://placehold.co/600x400',
   },
   {
-    id: 'inventory',
-    category: 'Operations',
-    title: 'Real-time Inventory Management',
+    id: 'erp',
+    category: 'ERP',
+    title: 'Inventory, Suppliers & Purchasing',
     description:
-      'Track inventory in real-time with automated alerts and smart reordering. Never run out of stock again with intelligent inventory management that adapts to your business needs.',
-    ctaText: 'MANAGE INVENTORY',
+      'Take full control of your supply chain. Manage stock levels, raise purchase orders, track suppliers, and monitor cost of goods — all synced in real time.',
+    ctaText: 'EXPLORE ERP',
     image: 'https://placehold.co/600x400',
   },
   {
-    id: 'analytics',
-    category: 'Business Intelligence',
-    title: 'AI-Powered Analytics & Insights',
+    id: 'hr',
+    category: 'HR',
+    title: 'Staff, Shifts & Payroll',
     description:
-      'Make data-driven decisions with AI-powered insights. Understand your business better with predictive analytics, custom reports, and actionable intelligence.',
-    ctaText: 'VIEW ANALYTICS',
+      'Schedule shifts, track timesheets, and run payroll without leaving rtylr. Give your team the tools they need while keeping you in full control of labour costs.',
+    ctaText: 'EXPLORE HR',
     image: 'https://placehold.co/600x400',
   },
   {
-    id: 'ecommerce',
-    category: 'Online Sales',
-    title: 'eCommerce & Online Ordering',
+    id: 'crm',
+    category: 'CRM',
+    title: 'Customers, Loyalty & Campaigns',
     description:
-      'Seamless online ordering integration. Manage both in-store and online orders from one unified system that grows with your business.',
-    ctaText: 'GO ONLINE',
+      'Build lasting relationships with rich customer profiles, points-based loyalty programs, and targeted marketing campaigns — all driven by your own sales data.',
+    ctaText: 'EXPLORE CRM',
+    image: 'https://placehold.co/600x400',
+  },
+  {
+    id: 'finance',
+    category: 'Finance',
+    title: 'Invoices, Expenses & P&L',
+    description:
+      'Stay on top of your numbers with automated invoicing, expense tracking, profit & loss statements, and tax reporting — no separate accounting software needed.',
+    ctaText: 'EXPLORE FINANCE',
+    image: 'https://placehold.co/600x400',
+  },
+  {
+    id: 'flow',
+    category: 'Flow',
+    title: 'Projects, Tasks & Team Workspaces',
+    description:
+      'Plan, assign, and ship work across every department. Flow brings projects, tasks, and team collaboration into one workspace — think Linear meets Asana, built into your business OS.',
+    ctaText: 'EXPLORE FLOW',
     image: 'https://placehold.co/600x400',
   },
 ];

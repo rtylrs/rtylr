@@ -2,16 +2,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  // Only access window on client side
-  if (typeof window === 'undefined') {
-    // Server-side: use production URL
-    return 'https://onion.voxire.dev/';
-  }
-
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  return isLocalhost ? 'http://localhost:9999/' : 'https://onion.voxire.dev/';
+  return 'https://api.voxire.dev/';
 };
 
 const api = axios.create({
