@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Star, AlertTriangle, Clock, TrendingUp, Plus, ChevronRight, X, Filter } from 'lucide-react';
 import { useSegments } from '../../hooks/useSegments';
@@ -305,13 +306,14 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
   );
 }
 
-function SegmentCard({ segment, index }: { segment: Segment; index: number }) {
+function SegmentCard({ segment, index, onClick }: { segment: Segment; index: number; onClick?: () => void }) {
   const Icon = segment.icon;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.2 }}
+      onClick={onClick}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',
@@ -320,6 +322,7 @@ function SegmentCard({ segment, index }: { segment: Segment; index: number }) {
         display: 'flex',
         flexDirection: 'column',
         gap: '14px',
+        cursor: onClick ? 'pointer' : 'default',
       }}
     >
       {/* Header */}
@@ -410,6 +413,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const Segments: React.FC = () => {
+  const navigate = useNavigate();
   const { data: fetchedSegments } = useSegments();
   const [builderOpen, setBuilderOpen] = useState(false);
   const segments: Segment[] = useMemo(() => {
@@ -433,7 +437,7 @@ const Segments: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => setBuilderOpen(true)}
+          onClick={() => navigate('/segments/new')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -456,7 +460,7 @@ const Segments: React.FC = () => {
       {/* Segment grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
         {segments.map((segment, i) => (
-          <SegmentCard key={segment.id} segment={segment} index={i} />
+          <SegmentCard key={segment.id} segment={segment} index={i} onClick={() => navigate(`/segments/${segment.id}`)} />
         ))}
       </div>
 

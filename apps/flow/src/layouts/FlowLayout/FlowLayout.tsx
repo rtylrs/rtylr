@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Inbox,
-  CheckSquare,
   LayoutGrid,
   Plus,
   ChevronDown,
@@ -15,13 +14,27 @@ import {
   Monitor,
   ArrowLeft,
   Circle,
-  FolderKanban,
+  ListTodo,
+  Calendar,
+  Timer,
+  Milestone,
+  Map,
+  BarChart3,
+  Users,
+  Eye,
+  Archive,
+  Search,
+  Command,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { useUserStore } from '../../stores/userStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { useFlowStore } from '../../stores/flowStore';
 import { cn, getInitials } from '../../lib/utils';
+import CommandBar from '../../components/CommandBar';
+import QuickCreate from '../../components/QuickCreate';
+import BulkEditBar from '../../components/BulkEditBar';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 const ACCENT = '#64C5B9';
 
@@ -30,6 +43,7 @@ interface SidebarLinkProps {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   exact?: boolean;
+  badge?: number;
 }
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({
@@ -37,6 +51,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   icon: Icon,
   label,
   exact,
+  badge,
 }) => {
   const location = useLocation();
   const isActive = exact
@@ -47,7 +62,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
     <Link
       to={to}
       className={cn(
-        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-150',
+        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
       )}
       style={{ color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -60,8 +75,16 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
-      <Icon size={15} className="relative shrink-0" />
-      <span className="relative flex-1">{label}</span>
+      <Icon size={14} className="relative shrink-0" />
+      <span className="relative flex-1 truncate">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span
+          className="relative text-[10px] px-1.5 rounded-full font-semibold"
+          style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
+        >
+          {badge}
+        </span>
+      )}
       {isActive && (
         <span
           className="relative h-1.5 w-1.5 rounded-full shrink-0"
@@ -83,18 +106,32 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
-  const { workspaces, projects, activeWorkspaceId, setActiveWorkspace } =
-    useFlowStore();
+  const {
+    workspaces,
+    projects,
+    activeWorkspaceId,
+    setActiveWorkspace,
+    notifications,
+    tasks,
+    setCommandBarOpen,
+  } = useFlowStore();
 
   const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useKeyboardShortcuts();
 
   const currentWorkspaceId = workspaceId || activeWorkspaceId;
   const activeWorkspace =
     workspaces.find((w) => w.id === currentWorkspaceId) || workspaces[0];
   const workspaceProjects = projects.filter(
-    (p) => p.workspaceId === currentWorkspaceId
+    (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
+
+  const myIssuesCount = tasks.filter(
+    (t) => t.assigneeId === 'u1' && t.status !== 'done' && t.status !== 'cancelled' && !t.archived
+  ).length;
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   const userName = user?.name || 'User';
   const userEmail = user?.email || '';
@@ -104,20 +141,22 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     window.location.href = APP_URLS.auth;
   };
 
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
+  const modKey = isMac ? '⌘' : 'Ctrl';
+
   return (
     <div
       className="flex h-screen overflow-hidden"
       style={{ background: 'var(--flow-bg)' }}
     >
-      {/* ── Sidebar ── */}
       <aside
-        className="w-56 flex flex-col shrink-0 overflow-hidden"
+        className="w-60 flex flex-col shrink-0 overflow-hidden"
         style={{
           background: 'var(--flow-surface)',
           borderRight: '1px solid var(--flow-border)',
         }}
       >
-        {/* Top: Logo + Hub link */}
+        {/* Top logo */}
         <div
           className="flex items-center justify-between px-4 py-3.5"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -231,24 +270,67 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </AnimatePresence>
         </div>
 
-        {/* Main Nav */}
-        <nav className="px-2 py-1 space-y-0.5">
-          <SidebarLink
-            to="/inbox"
-            icon={Inbox}
-            label="Inbox"
-          />
-          <SidebarLink
-            to={`/w/${currentWorkspaceId}`}
-            icon={LayoutGrid}
-            label="My Tasks"
-            exact
-          />
-        </nav>
+        {/* Search trigger */}
+        <div className="px-2 pt-1 pb-2">
+          <button
+            onClick={() => setCommandBarOpen(true)}
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+            style={{
+              background: 'var(--flow-hover)',
+              color: 'var(--flow-text-dim)',
+            }}
+          >
+            <Search size={11} />
+            <span className="flex-1 text-left">Search…</span>
+            <span
+              className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              style={{ background: 'var(--flow-active)' }}
+            >
+              {modKey}K
+            </span>
+          </button>
+        </div>
 
-        {/* Projects Section */}
-        <div className="flex-1 overflow-y-auto px-2 pt-3 pb-2">
-          <div className="flex items-center justify-between px-3 mb-1.5">
+        <div className="flex-1 overflow-y-auto px-2 pb-2">
+          <nav className="space-y-0.5">
+            <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
+            <SidebarLink to="/my-issues" icon={ListTodo} label="My Issues" badge={myIssuesCount} />
+            <SidebarLink to={`/w/${currentWorkspaceId}`} icon={LayoutGrid} label="Dashboard" exact />
+            <SidebarLink to="/triage" icon={Eye} label="Triage" />
+          </nav>
+
+          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
+            <span
+              className="text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: 'var(--flow-text-dim)' }}
+            >
+              Plan
+            </span>
+          </div>
+          <nav className="space-y-0.5">
+            <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+            <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
+            <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
+            <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+            <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
+            <SidebarLink to="/views" icon={Eye} label="Views" />
+          </nav>
+
+          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
+            <span
+              className="text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: 'var(--flow-text-dim)' }}
+            >
+              Team
+            </span>
+          </div>
+          <nav className="space-y-0.5">
+            <SidebarLink to="/team" icon={Users} label="Workload" />
+            <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+            <SidebarLink to="/archive" icon={Archive} label="Archive" />
+          </nav>
+
+          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
             <span
               className="text-[10px] font-semibold uppercase tracking-widest"
               style={{ color: 'var(--flow-text-dim)' }}
@@ -263,7 +345,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <Plus size={12} />
             </button>
           </div>
-
           <div className="space-y-0.5">
             {workspaceProjects.map((project) => {
               const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
@@ -308,22 +389,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               );
             })}
           </div>
-
-          {/* Add Project Button */}
-          <button
-            className="w-full mt-2 flex items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-dim)' }}
-          >
-            <Plus size={13} />
-            Add Project
-          </button>
         </div>
 
         {/* Footer */}
         <div className="p-2" style={{ borderTop: '1px solid var(--flow-border)' }}>
           <SidebarLink to="/settings" icon={Settings} label="Settings" />
 
-          {/* User menu */}
           <div className="relative mt-0.5">
             <button
               onClick={() => setUserMenuOpen((o) => !o)}
@@ -375,7 +446,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     boxShadow: 'var(--flow-shadow)',
                   }}
                 >
-                  {/* Theme selector */}
                   <div className="px-3 py-2">
                     <p
                       className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
@@ -436,7 +506,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
       <div className="flex flex-col flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.main
@@ -451,6 +520,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </motion.main>
         </AnimatePresence>
       </div>
+
+      <CommandBar />
+      <QuickCreate />
+      <BulkEditBar />
     </div>
   );
 };

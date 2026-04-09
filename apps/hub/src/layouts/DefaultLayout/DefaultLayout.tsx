@@ -21,11 +21,20 @@ import {
   CreditCard,
   Layers,
   ExternalLink,
+  Users,
+  Grid3x3,
+  Activity as ActivityIcon,
+  Search,
+  Sparkles,
 } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { cn } from '../../lib/utils';
 import { Avatar, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '../../components/ui';
+import { SearchCommand } from '../../components/hub';
+import { useCommandPalette } from '../../stores/commandPaletteStore';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useNotifications } from '../../hooks/queries/useNotifications';
 
 interface NavItem {
   label: string;
@@ -35,6 +44,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/',          icon: LayoutDashboard },
+  { label: 'Team',      path: '/team',      icon: Users },
+  { label: 'Apps',      path: '/apps',      icon: Grid3x3 },
+  { label: 'Activity',  path: '/activity',  icon: ActivityIcon },
   { label: 'Menus',     path: '/menus',     icon: UtensilsCrossed },
   { label: 'Orders',    path: '/orders',    icon: ClipboardList },
   { label: 'QR Codes',  path: '/qr-codes',  icon: QrCode },
@@ -52,6 +64,28 @@ const routeLabels: Record<string, string> = {
   '/menu':                   'Menu',
   '/create-item':            'Create Item',
   '/create-banner':          'Create Banner',
+  '/team':                   'Team',
+  '/team/invite':            'Invite member',
+  '/permissions':            'Permissions',
+  '/roles':                  'Roles',
+  '/apps':                   'Apps',
+  '/activity':               'Activity',
+  '/audit':                  'Audit log',
+  '/notifications':          'Notifications',
+  '/account':                'Account',
+  '/billing':                'Billing',
+  '/integrations':           'Integrations',
+  '/api-keys':               'API Keys',
+  '/webhooks':               'Webhooks',
+  '/security':               'Security',
+  '/marketplace':            'Marketplace',
+  '/changelog':              "What's new",
+  '/flags':                  'Feature flags',
+  '/theme':                  'Theme',
+  '/referrals':              'Referrals',
+  '/help':                   'Help center',
+  '/export':                 'Export data',
+  '/import':                 'Import data',
   '/settings':               'Settings',
   '/settings/account':       'Account',
   '/settings/general':       'General',
@@ -118,7 +152,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
+  const { setOpen: setCommandPaletteOpen } = useCommandPalette();
+  const { data: notifications = [] } = useNotifications();
 
+  useKeyboardShortcuts();
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
   const pageTitle = getPageTitle(location.pathname);
   const userEmail = user?.email || user?.emailAddress || null;
   const userName = user?.name || user?.firstName || userEmail || 'User';
@@ -302,13 +341,45 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </h1>
           <div className="flex items-center gap-1">
             <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--hub-hover)]"
+              style={{ color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+              aria-label="Open command palette"
+            >
+              <Search size={12} />
+              <span className="text-[11px]">Search</span>
+              <kbd
+                className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+              >
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              onClick={() => navigate('/changelog')}
               className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--hub-hover)]"
               style={{ color: 'var(--hub-text-muted)' }}
+              aria-label="What's new"
+            >
+              <Sparkles size={14} />
+            </button>
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--hub-hover)]"
+              style={{ color: 'var(--hub-text-muted)' }}
+              aria-label="Notifications"
             >
               <Bell size={14} />
+              {unreadCount > 0 && (
+                <span
+                  className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
+                  style={{ background: '#ef4444' }}
+                />
+              )}
             </button>
           </div>
         </header>
+        <SearchCommand />
 
         {/* Page content */}
         <AnimatePresence mode="wait">

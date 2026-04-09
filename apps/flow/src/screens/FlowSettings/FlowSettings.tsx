@@ -250,10 +250,71 @@ const AppearanceSection: React.FC = () => {
   );
 };
 
+const ShortcutsSection: React.FC = () => {
+  const shortcuts = [
+    { keys: ['C'], desc: 'Create a new task' },
+    { keys: ['/'], desc: 'Open command bar / search' },
+    { keys: ['⌘', 'K'], desc: 'Open command bar' },
+    { keys: ['G', 'I'], desc: 'Go to Inbox' },
+    { keys: ['G', 'M'], desc: 'Go to My Issues' },
+    { keys: ['G', 'D'], desc: 'Go to Dashboard' },
+    { keys: ['G', 'C'], desc: 'Go to Calendar' },
+    { keys: ['G', 'T'], desc: 'Go to Timeline' },
+    { keys: ['G', 'R'], desc: 'Go to Roadmap' },
+    { keys: ['G', 'S'], desc: 'Go to Insights' },
+    { keys: ['G', 'Y'], desc: 'Go to Cycles' },
+    { keys: ['G', 'X'], desc: 'Go to Triage' },
+    { keys: ['Esc'], desc: 'Close any modal' },
+    { keys: ['⌘', '↵'], desc: 'Submit comment' },
+  ];
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Keyboard Shortcuts
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Move fast through Flow without touching the mouse.
+        </p>
+      </div>
+      <div className="space-y-1">
+        {shortcuts.map((s, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between py-2 px-3 rounded hover:bg-[var(--flow-hover)]"
+          >
+            <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
+              {s.desc}
+            </span>
+            <div className="flex items-center gap-1">
+              {s.keys.map((k, j) => (
+                <kbd
+                  key={j}
+                  className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold"
+                  style={{
+                    background: 'var(--flow-hover)',
+                    color: 'var(--flow-text)',
+                    border: '1px solid var(--flow-border)',
+                    minWidth: 22,
+                    textAlign: 'center',
+                  }}
+                >
+                  {k}
+                </kbd>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const SECTION_CONTENT: Record<string, React.FC> = {
   profile:       ProfileSection,
   notifications: NotificationsSection,
   appearance:    AppearanceSection,
+  shortcuts:     ShortcutsSection,
 };
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (

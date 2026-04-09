@@ -99,3 +99,10 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--flow-scrollbar); border-radius: 9999px; }
 }
+
+@keyframes flow-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.flow-shimmer { animation: flow-shimmer 1.4s infinite; }
+

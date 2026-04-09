@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Mail, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { UserPlus, Mail, Search, Users } from 'lucide-react';
 import { StaffMember } from '../../services/hrApi';
 import { useStaff } from '../../hooks/useStaff';
+import { EmptyState } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -31,8 +33,15 @@ const cardAnim  = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, tra
 const Staff: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
   const { data: fetchedStaff, isLoading: loading } = useStaff();
   const staffData: StaffMember[] = fetchedStaff || [];
+
+  useEffect(() => {
+    const handler = () => searchRef.current?.focus();
+    window.addEventListener('hr:focus-search', handler);
+    return () => window.removeEventListener('hr:focus-search', handler);
+  }, []);
 
   const filtered = staffData.filter((s) => {
     const matchesTab = activeTab === 'All' || s.employmentType === activeTab;
@@ -100,9 +109,10 @@ const Staff: React.FC = () => {
         <div style={{ position: 'relative', flex: 1, maxWidth: '280px' }}>
           <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--hr-text-dim)' }} />
           <input
+            ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search staff..."
+            placeholder="Search staff... (press /)"
             style={{
               width: '100%',
               padding: '8px 12px 8px 30px',
@@ -130,6 +140,10 @@ const Staff: React.FC = () => {
             <motion.div
               key={s.id}
               variants={cardAnim}
+              whileHover={{ scale: 1.015 }}
+            >
+            <Link to={`/staff/${s.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+            <div
               style={{
                 background: 'var(--hr-card)',
                 border: '1px solid var(--hr-border)',
@@ -141,7 +155,6 @@ const Staff: React.FC = () => {
                 cursor: 'pointer',
                 transition: 'border-color 0.15s',
               }}
-              whileHover={{ scale: 1.015 }}
             >
               {/* Top row */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -208,15 +221,19 @@ const Staff: React.FC = () => {
                   </span>
                 </div>
               </div>
+            </div>
+            </Link>
             </motion.div>
           );
         })}
       </motion.div>
 
-      {filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px', color: 'var(--hr-text-muted)' }}>
-          No staff members match your filter.
-        </div>
+      {filtered.length === 0 && !loading && (
+        <EmptyState
+          icon={<Users size={20} />}
+          title="No staff members"
+          description="Adjust filters or invite someone to your team."
+        />
       )}
     </div>
   );

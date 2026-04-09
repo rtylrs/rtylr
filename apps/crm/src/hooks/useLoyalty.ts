@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { crmApi, LoyaltyConfig } from '../services/crmApi';
+import { crmApi, LoyaltyConfig, LoyaltyTier } from '../services/crmApi';
 
 export function useLoyaltyTransactions() {
   return useQuery({
@@ -15,6 +15,36 @@ export function useLoyaltyConfig() {
   });
 }
 
+export function useLoyaltyMembers() {
+  return useQuery({
+    queryKey: ['loyalty-members'],
+    queryFn: () => crmApi.getLoyaltyMembers(),
+  });
+}
+
+export function useLoyaltyRewards() {
+  return useQuery({
+    queryKey: ['loyalty-rewards'],
+    queryFn: () => crmApi.getLoyaltyRewards(),
+  });
+}
+
+export function useLoyaltyTiers() {
+  return useQuery({
+    queryKey: ['loyalty-tiers'],
+    queryFn: () => crmApi.getLoyaltyTiers(),
+  });
+}
+
+export function useUpdateLoyaltyTier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<LoyaltyTier> }) =>
+      crmApi.updateLoyaltyTier(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['loyalty-tiers'] }),
+  });
+}
+
 export function useUpdateLoyaltyConfig() {
   const qc = useQueryClient();
   return useMutation({
@@ -26,8 +56,8 @@ export function useUpdateLoyaltyConfig() {
 export function useAwardPoints() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ customerId, points }: { customerId: number; points: number }) =>
-      crmApi.awardPoints(customerId, points),
+    mutationFn: ({ customerId, points, reason }: { customerId: number; points: number; reason?: string }) =>
+      crmApi.awardPoints(customerId, points, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });
@@ -38,8 +68,8 @@ export function useAwardPoints() {
 export function useRedeemPoints() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ customerId, points }: { customerId: number; points: number }) =>
-      crmApi.redeemPoints(customerId, points),
+    mutationFn: ({ customerId, points, reason }: { customerId: number; points: number; reason?: string }) =>
+      crmApi.redeemPoints(customerId, points, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });

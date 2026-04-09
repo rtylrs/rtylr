@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  Wand2,
+  Fingerprint,
+  Building2,
+} from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 
@@ -15,6 +23,10 @@ import { useGoogleSignupVisible } from '../hooks/useFeatures';
 import AuthShell from '../components/AuthShell';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
+import AuthDivider from '../components/AuthDivider';
+import RememberMe from '../components/RememberMe';
+import HelpLink from '../components/HelpLink';
+import { getEmailError } from '../lib/validation';
 
 const REDIRECT_APP_URLS: Record<string, string> = {
   hub:     window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
@@ -54,7 +66,9 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const showGoogle: boolean = useGoogleSignupVisible();
+  const emailError = getEmailError(email);
 
   const redirectParam = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -112,6 +126,9 @@ const Login: React.FC = () => {
               Sign up
             </button>
           </p>
+          <div className="flex justify-center">
+            <HelpLink />
+          </div>
           <p className="text-[11px] text-white/35">
             By signing in you agree to our{' '}
             <a
@@ -141,6 +158,8 @@ const Login: React.FC = () => {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={emailError}
+            autoFocus
             required
           />
         </motion.div>
@@ -164,8 +183,9 @@ const Login: React.FC = () => {
           initial="hidden"
           animate="show"
           variants={fieldStagger}
-          className="flex justify-end -mt-1"
+          className="flex items-center justify-between -mt-1"
         >
+          <RememberMe checked={rememberMe} onChange={setRememberMe} />
           <button
             type="button"
             className="text-xs text-white/55 hover:text-[#64C5B9] transition-colors"
@@ -196,28 +216,54 @@ const Login: React.FC = () => {
           </AuthButton>
         </motion.div>
 
-        {showGoogle && (
-          <motion.div
-            custom={4}
-            initial="hidden"
-            animate="show"
-            variants={fieldStagger}
-            className="space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[11px] uppercase tracking-widest text-white/40">or</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
+        <motion.div
+          custom={4}
+          initial="hidden"
+          animate="show"
+          variants={fieldStagger}
+          className="space-y-3"
+        >
+          <AuthDivider />
 
+          {showGoogle && (
             <AuthButton type="button" variant="outline" onClick={handleGoogle}>
               <span className="inline-flex items-center justify-center gap-2.5">
                 <FaGoogle className="text-white/85" />
                 Continue with Google
               </span>
             </AuthButton>
-          </motion.div>
-        )}
+          )}
+
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/magic-link')}
+              className="h-[46px] rounded-xl bg-white/[0.03] border border-white/12 hover:bg-white/[0.08] hover:border-white/20 text-white/80 hover:text-white transition-colors inline-flex items-center justify-center gap-1.5 text-xs font-medium"
+              aria-label="Magic link"
+            >
+              <Wand2 className="h-[15px] w-[15px]" />
+              Magic link
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/sso')}
+              className="h-[46px] rounded-xl bg-white/[0.03] border border-white/12 hover:bg-white/[0.08] hover:border-white/20 text-white/80 hover:text-white transition-colors inline-flex items-center justify-center gap-1.5 text-xs font-medium"
+              aria-label="SSO"
+            >
+              <Building2 className="h-[15px] w-[15px]" />
+              SSO
+            </button>
+            <button
+              type="button"
+              onClick={() => notify.info('Biometric login coming soon')}
+              className="h-[46px] rounded-xl bg-white/[0.03] border border-white/12 hover:bg-white/[0.08] hover:border-white/20 text-white/80 hover:text-white transition-colors inline-flex items-center justify-center gap-1.5 text-xs font-medium"
+              aria-label="Biometric login"
+            >
+              <Fingerprint className="h-[15px] w-[15px]" />
+              Biometric
+            </button>
+          </div>
+        </motion.div>
       </form>
     </AuthShell>
   );

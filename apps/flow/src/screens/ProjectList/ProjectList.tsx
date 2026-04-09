@@ -22,6 +22,7 @@ const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   high:   { color: '#f97316', label: 'High'   },
   medium: { color: '#3b82f6', label: 'Medium'  },
   low:    { color: '#6b7280', label: 'Low'     },
+  no_priority: { color: '#4b5563', label: 'No priority' },
 };
 
 const STATUS_GROUPS: { id: Task['status']; label: string; color: string }[] = [

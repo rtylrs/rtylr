@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { BarDataPoint, Transaction, OverdueInvoice } from '../../services/financeApi';
 import { useFinanceDashboard } from '../../hooks/useDashboard';
+import FinanceKpiWidgets from '../../components/FinanceKpiWidgets';
+import OverdueInvoicesWidget from '../../components/OverdueInvoicesWidget';
 
 const ACCENT = '#10b981';
 
@@ -210,16 +212,31 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Revenue vs Expenses chart */}
-      <div style={cardStyle}>
-        <h2 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
-          Revenue vs Expenses
-        </h2>
-        {barData.length > 0 ? <BarChart barData={barData} /> : (
-          <div style={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hub-text-dim)', fontSize: 13 }}>
-            {loading ? 'Loading chart…' : 'No chart data available'}
+      {/* KPI Widgets */}
+      <FinanceKpiWidgets />
+
+      {/* Overdue widget + chart grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+        {barData.length > 0 ? (
+          <div style={{ ...cardStyle, padding: 20 }}>
+            <h2 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
+              Revenue vs Expenses
+            </h2>
+            <BarChart barData={barData} />
+          </div>
+        ) : (
+          <div style={{ ...cardStyle, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hub-text-dim)', fontSize: 13, minHeight: 180 }}>
+            {loading ? 'Loading chart...' : 'No chart data available'}
           </div>
         )}
+        <OverdueInvoicesWidget
+          items={overdueInvoices.map((i) => ({
+            id: i.id,
+            client: i.client,
+            amount: i.amount,
+            daysOverdue: i.daysOverdue,
+          }))}
+        />
       </div>
 
       {/* Recent transactions */}

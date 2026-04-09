@@ -24,6 +24,33 @@ const Email         = React.lazy(() => import("../screens/Vendor/Settings/compon
 const Billing       = React.lazy(() => import("../screens/Vendor/Billing/Billing.tsx"));
 const Addons        = React.lazy(() => import("../screens/Vendor/Addons.tsx"));
 
+// New Hub screens
+const Team              = React.lazy(() => import("../screens/Vendor/Team/Team"));
+const InviteUser        = React.lazy(() => import("../screens/Vendor/Team/InviteUser"));
+const MemberDetail      = React.lazy(() => import("../screens/Vendor/Team/MemberDetail"));
+const Permissions       = React.lazy(() => import("../screens/Vendor/Permissions/Permissions"));
+const Roles             = React.lazy(() => import("../screens/Vendor/Permissions/Roles"));
+const AppsScreen        = React.lazy(() => import("../screens/Vendor/Apps/Apps"));
+const ActivityScreen    = React.lazy(() => import("../screens/Vendor/Activity/Activity"));
+const Audit             = React.lazy(() => import("../screens/Vendor/Activity/Audit"));
+const Notifications     = React.lazy(() => import("../screens/Vendor/Notifications/Notifications"));
+const AccountHome       = React.lazy(() => import("../screens/Vendor/Account/Account"));
+const BillingHome       = React.lazy(() => import("../screens/Vendor/Billing/BillingHome"));
+const Integrations      = React.lazy(() => import("../screens/Vendor/Integrations/Integrations"));
+const ApiKeys           = React.lazy(() => import("../screens/Vendor/Developer/ApiKeys"));
+const Webhooks          = React.lazy(() => import("../screens/Vendor/Developer/Webhooks"));
+const Security          = React.lazy(() => import("../screens/Vendor/Security/Security"));
+
+// Extras
+const Marketplace       = React.lazy(() => import("../screens/Vendor/Extras/Marketplace"));
+const Changelog         = React.lazy(() => import("../screens/Vendor/Extras/Changelog"));
+const FeatureFlags      = React.lazy(() => import("../screens/Vendor/Extras/FeatureFlags"));
+const ThemeCustomizer   = React.lazy(() => import("../screens/Vendor/Extras/Theme"));
+const Referrals         = React.lazy(() => import("../screens/Vendor/Extras/Referrals"));
+const HelpCenter        = React.lazy(() => import("../screens/Vendor/Extras/HelpCenter"));
+const DataExport        = React.lazy(() => import("../screens/Vendor/Extras/DataPorts").then((m) => ({ default: m.default })));
+const DataImport        = React.lazy(() => import("../screens/Vendor/Extras/DataPorts").then((m) => ({ default: m.DataImport })));
+
 const wrap = (children: React.ReactNode) => <AppLayout>{children}</AppLayout>;
 
 const AppRoutes: RouteObject[] = [
@@ -39,8 +66,34 @@ const AppRoutes: RouteObject[] = [
   { path: "/design",        element: wrap(<Design />) },
   { path: "/analytics",     element: wrap(<Analytics />) },
 
+  // New Hub screens
+  { path: "/team",            element: wrap(<Team />) },
+  { path: "/team/invite",     element: wrap(<InviteUser />) },
+  { path: "/team/:id",        element: wrap(<MemberDetail />) },
+  { path: "/permissions",     element: wrap(<Permissions />) },
+  { path: "/roles",           element: wrap(<Roles />) },
+  { path: "/apps",            element: wrap(<AppsScreen />) },
+  { path: "/activity",        element: wrap(<ActivityScreen />) },
+  { path: "/audit",           element: wrap(<Audit />) },
+  { path: "/notifications",   element: wrap(<Notifications />) },
+  { path: "/account",         element: wrap(<AccountHome />) },
+  { path: "/billing",         element: wrap(<BillingHome />) },
+  { path: "/integrations",    element: wrap(<Integrations />) },
+  { path: "/api-keys",        element: wrap(<ApiKeys />) },
+  { path: "/webhooks",        element: wrap(<Webhooks />) },
+  { path: "/security",        element: wrap(<Security />) },
+
+  // Extras
+  { path: "/marketplace",     element: wrap(<Marketplace />) },
+  { path: "/changelog",       element: wrap(<Changelog />) },
+  { path: "/flags",           element: wrap(<FeatureFlags />) },
+  { path: "/theme",           element: wrap(<ThemeCustomizer />) },
+  { path: "/referrals",       element: wrap(<Referrals />) },
+  { path: "/help",            element: wrap(<HelpCenter />) },
+  { path: "/export",          element: wrap(<DataExport />) },
+  { path: "/import",          element: wrap(<DataImport />) },
+
   // Legacy redirects
-  { path: "/billing",  element: <Navigate to="/settings/billing"  replace /> },
   { path: "/addons",   element: <Navigate to="/settings/addons"   replace /> },
   { path: "/app/business/menus",           element: <Navigate to="/menus"          replace /> },
   { path: "/app/business/menu",            element: <Navigate to="/menu"           replace /> },

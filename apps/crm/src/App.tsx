@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
+import { ShortcutsProvider } from './components/ShortcutsProvider';
 
 const AUTH_COOKIE = 'rtylr_session';
 
@@ -68,16 +69,18 @@ function NotFound() {
 const App: React.FC = () => {
   return (
     <AuthGuard>
-      <Routes>
-        {AppRoutes.map((route, i) => (
-          <Route key={i} path={route.path} element={route.element}>
-            {route.children?.map((child, j) => (
-              <Route key={j} index={child.index} path={child.path} element={child.element} />
-            ))}
-          </Route>
-        ))}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <ShortcutsProvider>
+        <Routes>
+          {AppRoutes.map((route, i) => (
+            <Route key={i} path={route.path} element={route.element}>
+              {route.children?.map((child, j) => (
+                <Route key={j} index={child.index} path={child.path} element={child.element} />
+              ))}
+            </Route>
+          ))}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ShortcutsProvider>
     </AuthGuard>
   );
 };

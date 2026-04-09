@@ -70,3 +70,13 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--hub-scrollbar); border-radius: 9999px; }
 }
+
+@keyframes crm-skeleton {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes crm-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
