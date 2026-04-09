@@ -31,16 +31,6 @@ export default defineConfig(() => ({
       '@root': path.resolve(__dirname, '../..'),
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `
-          @use "@app/styles/index.scss";
-        `,
-        api: 'modern-compiler' as const,
-      },
-    },
-  },
   server: {
     port: 5174,
     host: true,
@@ -107,7 +97,6 @@ export default defineConfig(() => ({
       'framer-motion',
       'react-icons',
     ],
-    // Workspace source packages — always load from source, never pre-bundle
-    exclude: ['@voxire/components', '@voxire/config', '@voxire/menu'],
+    exclude: ['@voxire/components', '@voxire/config', '@voxire/menu', '@voxire/ui', '@voxire/tailwind-config'],
   },
 }));

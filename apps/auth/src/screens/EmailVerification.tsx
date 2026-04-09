@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingSpinner } from '@voxire/components';
+import { Spinner } from '@voxire/ui';
 import api from '../lib/api';
 
 const EmailVerification = () => {
@@ -9,38 +9,18 @@ const EmailVerification = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        const response = await api.get(`/auth/verify/${token}`);
-        setMessage(response.data.message);
-        setLoading(false);
-      } catch (error) {
-        setMessage('Email verification failed. Please try again.');
-        setLoading(false);
-      }
-    };
-
-    verifyEmail();
+    api.get(`/auth/verify/${token}`)
+      .then((r) => setMessage(r.data.message))
+      .catch(() => setMessage('Email verification failed. Please try again.'))
+      .finally(() => setLoading(false));
   }, [token]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '60vh',
-        backgroundColor: '#f5f5f5',
-        textAlign: 'center',
-      }}
-    >
-      <h1>Email Verification</h1>
-      {loading ? (
-        <LoadingSpinner size="medium" color="primary" />
-      ) : (
-        <p>{message}</p>
-      )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f8fb] text-center p-6">
+      <div className="bg-white rounded-2xl shadow-card border border-black/5 p-8 max-w-sm w-full">
+        <h1 className="text-2xl font-bold text-primary mb-4">Email Verification</h1>
+        {loading ? <Spinner size="lg" className="text-accent mx-auto" /> : <p className="text-muted">{message}</p>}
+      </div>
     </div>
   );
 };

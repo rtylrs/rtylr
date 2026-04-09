@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Activity } from 'react';
 import { useNavigate } from 'react-router-dom';
 import notify from '../lib/notify/notify';
 import { useUserStore } from '../stores/userStore';
@@ -7,185 +6,83 @@ import { useRegisterRestaurant, useGoogleAuth } from '../hooks/useAuth';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FaGoogle } from 'react-icons/fa';
-import { Button, Input, HelmetContainer } from '@voxire/components';
+import { Button, Input } from '@voxire/ui';
 import { APP_URLS } from '@voxire/config';
 import { useGoogleSignupVisible } from '../hooks/useFeatures';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
   const showGoogle: boolean = useGoogleSignupVisible();
 
   const handleRegister = () => {
-    if (password === confirmPassword) {
-      registerMutation.mutate({
-        email,
-        password,
-        name: email.split('@')[0], // Use email prefix as name for now
-        referred: '',
-      });
-    } else {
-      notify.error('Password does not match');
-    }
+    if (password !== confirmPassword) { notify.error('Passwords do not match'); return; }
+    registerMutation.mutate({ email, password, name: email.split('@')[0], referred: '' });
   };
 
-  const handleRegisterWithGoogle = async () => {
+  const handleGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await getIdToken(user);
-
+      const idToken = await getIdToken(result.user);
       googleAuthMutation.mutate({ idToken });
-    } catch (error) {
-      notify.error((error as any).message);
-    }
+    } catch (error) { notify.error((error as any).message); }
   };
 
+  useEffect(() => { clearError(); }, [clearError]);
   useEffect(() => {
-    // Clear any existing errors when component mounts
-    clearError();
-  }, [clearError]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      if (role === 'business') {
-        navigate('/auth/questionnaire');
-      } else {
-        navigate('/');
-      }
-    }
+    if (isAuthenticated) navigate(role === 'business' ? '/auth/questionnaire' : '/');
   }, [isAuthenticated, navigate]);
 
   return (
-    <React.Fragment>
-      <HelmetContainer title="Register | Rtylr" />
-      <div className="auth-container">
-        <div className="auth-form-container">
-          <div className="auth-form">
-            <h2>Welcome to Rtylr.</h2>
-            <p>Sign up to start managing everything in one place.</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleRegister();
-              }}
-            >
-              <Input
-                id="register-email"
-                type="email"
-                label="Email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={{ marginBottom: 20 }}
-              />
-              <Input
-                id="register-password"
-                type="password"
-                label="Password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                style={{ marginBottom: 20 }}
-              />
-              <Input
-                id="register-confirm-password"
-                type="password"
-                label="Confirm Password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                style={{ marginBottom: 20 }}
-              />
-
-              {error && (
-                <p
-                  style={{
-                    color: '#dc2626',
-                    fontSize: 14,
-                    marginBottom: 16,
-                    textAlign: 'center',
-                  }}
-                >
-                  {typeof error === 'string'
-                    ? error
-                    : (error as any)?.message || 'An error occurred'}
-                </p>
-              )}
-
-              <Button
-                variant="primary"
-                size="md"
-                fullWidth
-                loading={loading}
-                type="submit"
-              >
-                Sign Up
-              </Button>
-
-              <Activity mode={showGoogle ? 'visible' : 'hidden'}>
-                <div className="auth-separator">
-                  <span>or</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="md"
-                  fullWidth
-                  type="button"
-                  onClick={handleRegisterWithGoogle}
-                  prefix={<FaGoogle />}
-                >
-                  Sign up with Google
-                </Button>
-              </Activity>
-            </form>
-
-            <div className="auth-footer" style={{ alignItems: 'flex-start' }}>
-              <p>
-                Already have an account?{' '}
-                <span className="auth-link" onClick={() => navigate('/')}>
-                  Sign in
-                </span>
-              </p>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#f8f8fb] p-6">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-card border border-black/5 p-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-primary mb-1.5">Welcome to Rtylr.</h2>
+            <p className="text-sm text-muted">Sign up to start managing everything in one place.</p>
           </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }} className="flex flex-col gap-5">
+            <Input id="register-email" type="email" label="Email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="register-password" type="password" label="Password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input id="register-confirm" type="password" label="Confirm Password" placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+
+            {error && <p className="text-sm text-destructive text-center">{typeof error === 'string' ? error : (error as any)?.message || 'An error occurred'}</p>}
+
+            <Button variant="primary" size="md" fullWidth loading={loading} type="submit">Sign Up</Button>
+
+            {showGoogle && (
+              <>
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-black/8" />
+                  <span className="text-xs text-muted">or</span>
+                  <div className="flex-1 h-px bg-black/8" />
+                </div>
+                <Button variant="outline" size="md" fullWidth type="button" onClick={handleGoogle} prefix={<FaGoogle />}>Sign up with Google</Button>
+              </>
+            )}
+          </form>
+
+          <p className="mt-6 text-sm text-center text-muted">
+            Already have an account?{' '}
+            <button className="text-accent hover:underline font-medium" onClick={() => navigate('/')}>Sign in</button>
+          </p>
         </div>
 
-        <div className="auth-page-footer">
-          <p>
-            Need help signing up?{' '}
-            <span
-              className="auth-link"
-              onClick={() => navigate('/password-reset')}
-            >
-              Reset your password
-            </span>
-          </p>
-          <p className="privacy-text">
-            By using Rtylr, you acknowledge that we collect and use your
-            personal information as described in our{' '}
-            <a
-              href={`${APP_URLS.landing}/legal/privacy-policy`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="auth-link"
-            >
-              Privacy Policy
-            </a>
-            .
+        <div className="mt-6 text-center space-y-2">
+          <p className="text-xs text-muted/70">
+            By using Rtylr, you agree to our{' '}
+            <a href={`${APP_URLS.landing}/legal/privacy-policy`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Privacy Policy</a>.
           </p>
         </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 

@@ -1,54 +1,40 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useCartStore } from '../../../../stores/cartStore';
-import styles from './ProductGrid.module.scss';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image?: string;
-  available?: boolean;
-}
+interface Product { id: string; name: string; price: number; category: string; image?: string; available?: boolean; }
+interface ProductGridProps { products: Product[]; categories: string[]; }
 
-interface ProductGridProps {
-  products: Product[];
-  categories: string[];
-}
+const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch] = useState('');
   const addItem = useCartStore((s) => s.addItem);
 
   const allCategories = ['All', ...categories];
-
   const filtered = products.filter((p) => {
     const matchCat = activeCategory === 'All' || p.category === activeCategory;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
-
   return (
-    <div className={styles.grid}>
-      {/* Search + Category Bar */}
-      <div className={styles.grid__toolbar}>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Toolbar */}
+      <div className="p-3 border-b border-pos-border space-y-2 shrink-0">
         <input
-          className={styles.grid__search}
+          className="w-full rounded-lg bg-white/6 border border-pos-border px-3.5 py-2 text-sm text-pos-text placeholder:text-pos-muted outline-none focus:border-white/20 transition-colors"
           type="search"
           placeholder="Search items…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <div className={styles.grid__categories}>
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
           {allCategories.map((cat) => (
             <button
               key={cat}
-              className={`${styles.grid__catBtn} ${activeCategory === cat ? styles['grid__catBtn--active'] : ''}`}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${activeCategory === cat ? 'bg-pos-text text-pos-bg' : 'bg-white/6 text-pos-muted hover:bg-white/10'}`}
               onClick={() => setActiveCategory(cat)}
             >
               {cat}
@@ -57,33 +43,27 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
         </div>
       </div>
 
-      {/* Products */}
-      <div className={styles.grid__items}>
+      {/* Grid */}
+      <div className="flex-1 overflow-y-auto p-3">
         {filtered.length === 0 ? (
-          <div className={styles.grid__empty}>No items found</div>
+          <div className="flex items-center justify-center h-40 text-pos-muted text-sm">No items found</div>
         ) : (
-          filtered.map((product) => (
-            <motion.button
-              key={product.id}
-              className={`${styles.grid__item} ${product.available === false ? styles['grid__item--unavailable'] : ''}`}
-              onClick={() => product.available !== false && addItem(product)}
-              whileTap={{ scale: 0.96 }}
-              disabled={product.available === false}
-            >
-              {product.image && (
-                <div className={styles.grid__itemImg}>
-                  <img src={product.image} alt={product.name} loading="lazy" />
-                </div>
-              )}
-              <div className={styles.grid__itemBody}>
-                <span className={styles.grid__itemName}>{product.name}</span>
-                <span className={styles.grid__itemPrice}>{formatPrice(product.price)}</span>
-              </div>
-              {product.available === false && (
-                <span className={styles.grid__itemTag}>Out of stock</span>
-              )}
-            </motion.button>
-          ))
+          <div className="grid grid-cols-3 gap-2.5">
+            {filtered.map((product) => (
+              <motion.button
+                key={product.id}
+                className={`flex flex-col p-3 rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${product.available === false ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => product.available !== false && addItem(product)}
+                whileTap={{ scale: 0.96 }}
+                disabled={product.available === false}
+              >
+                {product.image && <img src={product.image} alt={product.name} className="w-full aspect-square object-cover rounded-lg mb-2" loading="lazy" />}
+                <span className="text-sm font-medium text-pos-text leading-tight">{product.name}</span>
+                <span className="text-xs text-pos-muted mt-1">{fmt(product.price)}</span>
+                {product.available === false && <span className="mt-1 text-[10px] text-destructive font-semibold">Out of stock</span>}
+              </motion.button>
+            ))}
+          </div>
         )}
       </div>
     </div>

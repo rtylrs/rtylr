@@ -43,19 +43,17 @@ const Menu: React.FC<{}> = () => {
 
   const renderCategory = (category: any) => {
     return (
-      <div key={category._id} className={styles.categorySection}>
-        <div className={styles.categoryHeader}>
-          <div>
-            <span>{category?.details?.name}</span>
+      <div key={category._id} className="border border-black/10 rounded-xl p-4 bg-white mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-primary">{category?.details?.name}</span>
             {category?.details?.icon && (
-              <img
-                src={category?.details?.icon}
-                alt={category?.details?.name}
-              />
+              <img src={category?.details?.icon} alt={category?.details?.name} className="w-5 h-5 object-cover" />
             )}
           </div>
-          <div>
+          <div className="flex gap-2">
             <button
+              className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
                 navigate("/app/business/create-item", {
                   state: { categoryId: category.itemId },
@@ -64,12 +62,15 @@ const Menu: React.FC<{}> = () => {
             >
               Add a product
             </button>
-            <button onClick={() => handleDeleteCategory(category.itemId)}>
+            <button
+              className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+              onClick={() => handleDeleteCategory(category.itemId)}
+            >
               Delete
             </button>
           </div>
         </div>
-        <div className={styles.categoryItems}>
+        <div className="space-y-2">
           {renderItems(category.details.menuItems)}
         </div>
       </div>
@@ -78,20 +79,18 @@ const Menu: React.FC<{}> = () => {
 
   const renderParentCategory = (parentCategory: any, childCategories: any) => {
     return (
-      <div key={parentCategory._id} className={styles.parentCategorySection}>
-        <div className={styles.parentCategoryHeader}>
-          <div>
-            <span>{parentCategory?.details?.name}</span>
+      <div key={parentCategory._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-primary">{parentCategory?.details?.name}</span>
             {parentCategory?.details?.icon && (
-              <img
-                src={parentCategory?.details?.icon}
-                alt={parentCategory?.details?.name}
-              />
+              <img src={parentCategory?.details?.icon} alt={parentCategory?.details?.name} className="w-5 h-5 object-cover" />
             )}
           </div>
-          <div>
+          <div className="flex gap-2">
             {!parentCategory && (
               <button
+                className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90"
                 onClick={() => {
                   navigate("/app/business/create-item", {
                     state: { categoryId: parentCategory.itemId },
@@ -101,12 +100,15 @@ const Menu: React.FC<{}> = () => {
                 Add a product
               </button>
             )}
-            <button onClick={() => handleDeleteCategory(parentCategory.itemId)}>
+            <button
+              className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+              onClick={() => handleDeleteCategory(parentCategory.itemId)}
+            >
               Delete
             </button>
           </div>
         </div>
-        <div className={styles.childCategories}>
+        <div className="pl-4 space-y-2">
           {childCategories.map(renderCategory)}
         </div>
       </div>
@@ -135,12 +137,14 @@ const Menu: React.FC<{}> = () => {
     return items.map((item: any) => {
       if (item.type === "banner") {
         return (
-          <div key={item._id} className={styles.bannerSectionVendor}>
-            <div>
-              <p>{item?.details?.banner?.title}</p>
-
+          <div key={item._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-semibold text-primary">{item?.details?.banner?.title}</p>
               <div>
-                <button onClick={() => setCreateCategoryModalOpen(true)}>
+                <button
+                  className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                  onClick={() => setCreateCategoryModalOpen(true)}
+                >
                   Delete
                 </button>
               </div>
@@ -168,49 +172,38 @@ const Menu: React.FC<{}> = () => {
 
   if (status === "loading") {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "80vh",
-        }}
-      >
-        <CircularProgress size={60} color="primary" />
+      <div className="flex justify-center items-center h-[80vh]">
+        <Spinner />
       </div>
     );
   }
 
   return (
-    <div className={styles.menuContainerVendor}>
-      <div className={styles.menuHeader}>
-        <h1>Menu</h1>
-        <div className={styles.menuButtons}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-primary">Menu</h1>
+        <div className="flex gap-2">
           <button
             onClick={() => setCreateParentCategoryModalOpen(true)}
-            className={styles.menuButton}
+            className="px-4 py-2 text-sm font-medium bg-white border border-black/10 rounded-lg hover:bg-black/5 transition-colors"
           >
             Create Group
           </button>
           <button
-            onClick={() => {
-              setCreateCategoryModalOpen(true);
-            }}
-            className={styles.menuButton}
+            onClick={() => setCreateCategoryModalOpen(true)}
+            className="px-4 py-2 text-sm font-medium bg-white border border-black/10 rounded-lg hover:bg-black/5 transition-colors"
           >
             Create Category
           </button>
           <button
-            onClick={() => {
-              navigate("/app/business/create-banner");
-            }}
-            className={styles.menuButton}
+            onClick={() => navigate("/app/business/create-banner")}
+            className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
           >
             Create Banner
           </button>
         </div>
       </div>
-      <div className={styles.menuItems}>{renderSections(items)}</div>
+      <div>{renderSections(items)}</div>
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}

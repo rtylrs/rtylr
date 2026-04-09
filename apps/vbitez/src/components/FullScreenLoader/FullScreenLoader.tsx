@@ -1,12 +1,9 @@
 import React from "react";
-import "./FullScreenLoader.scss";
 
 export const FullScreenLoader: React.FC = () => {
   return (
-    <div className="fullscreen-loader">
-      <div className="loader-spinner">
-        <div className="spinner"></div>
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-pos-bg z-50">
+      <div className="w-10 h-10 border-4 border-white/20 border-t-pos-text rounded-full animate-spin" />
     </div>
   );
 };

@@ -15,7 +15,6 @@ import {
   ImageSize,
   CardRadius,
 } from '@voxire/menu';
-import styles from './DevMenu.module.scss';
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -278,7 +277,7 @@ const ACCENT_OPTIONS = [
 
 // ─── Helper components ─────────────────────────────────────────────────────────
 
-const BtnGroup = <T extends string>({
+const BtnGroup = <T extends string | number>({
   options,
   value,
   onChange,
@@ -287,11 +286,13 @@ const BtnGroup = <T extends string>({
   value: T;
   onChange: (v: T) => void;
 }) => (
-  <div className={styles.panel__btnGroup}>
+  <div className="flex rounded-lg overflow-hidden border border-black/10">
     {options.map((o) => (
       <button
-        key={o.value}
-        className={`${styles.panel__btn} ${value === o.value ? styles['panel__btn--active'] : ''}`}
+        key={String(o.value)}
+        className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+          value === o.value ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+        }`}
         onClick={() => onChange(o.value)}
       >
         {o.label}
@@ -309,10 +310,12 @@ const Toggle = ({
   onChange: (v: boolean) => void;
   label: string;
 }) => (
-  <label className={styles.panel__toggle}>
-    <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-    <span className={styles.panel__switch} />
-    <span className={styles.panel__toggleLabel}>{label}</span>
+  <label className="flex items-center justify-between cursor-pointer py-0.5">
+    <span className="text-xs text-gray-600">{label}</span>
+    <div className="relative">
+      <input type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-4" />
+    </div>
   </label>
 );
 
@@ -372,8 +375,19 @@ const DevMenu: React.FC = () => {
     return `[Dev mock] You asked: "${message}". Wire onAiMessage to a real endpoint for live responses.`;
   };
 
+  const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="space-y-2">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</span>
+      {children}
+    </div>
+  );
+
+  const SubLabel = ({ children }: { children: React.ReactNode }) => (
+    <span className="text-[10px] text-gray-400 mt-1">{children}</span>
+  );
+
   return (
-    <div className={styles.wrapper}>
+    <div className="relative">
       <MenuLayout
         business={MOCK_BUSINESS}
         categories={MOCK_CATEGORIES}
@@ -384,189 +398,142 @@ const DevMenu: React.FC = () => {
       />
 
       {/* Floating toolbar */}
-      <div ref={panelRef}>
+      <div ref={panelRef} className="fixed bottom-6 right-6 z-50">
         <AnimatePresence>
           {open && (
             <motion.div
-              className={styles.panel}
+              className="absolute bottom-14 right-0 w-64 bg-white border border-black/10 rounded-2xl shadow-xl p-4 space-y-4 max-h-[80vh] overflow-y-auto"
               initial={{ opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 8 }}
               transition={{ type: 'spring', damping: 24, stiffness: 320 }}
             >
-              {/* Pages */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Pages</span>
-                <div className={styles.panel__toggles}>
+              <Section label="Pages">
+                <div className="space-y-1">
                   <Toggle checked={!!cfg.pages.about} onChange={(v) => patchPages({ about: v })} label="About" />
                   <Toggle checked={!!cfg.pages.gallery} onChange={(v) => patchPages({ gallery: v })} label="Gallery" />
                   <Toggle checked={!!cfg.pages.reviews} onChange={(v) => patchPages({ reviews: v })} label="Reviews" />
                   <Toggle checked={!!cfg.pages.offers} onChange={(v) => patchPages({ offers: v })} label="Offers" />
                   <Toggle checked={!!cfg.pages.book} onChange={(v) => patchPages({ book: v })} label="Book" />
                 </div>
-              </div>
+              </Section>
 
-              <div className={styles.panel__divider} />
+              <div className="h-px bg-black/8" />
 
-              {/* Header */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Header</span>
-                <span className={styles.panel__sublabel}>Cover height</span>
+              <Section label="Header">
+                <SubLabel>Cover height</SubLabel>
                 <BtnGroup<CoverHeight>
-                  options={[
-                    { label: 'None', value: 'none' },
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
+                  options={[{ label: 'None', value: 'none' }, { label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
                   value={cfg.header.coverHeight}
                   onChange={(v) => patchHeader({ coverHeight: v })}
                 />
-                <div className={styles.panel__toggles}>
+                <div className="space-y-1 mt-1">
                   <Toggle checked={cfg.header.sticky} onChange={(v) => patchHeader({ sticky: v })} label="Sticky" />
                   <Toggle checked={cfg.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} label="Logo" />
                   <Toggle checked={cfg.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} label="Description" />
                   <Toggle checked={cfg.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} label="Address / Hours" />
                 </div>
-              </div>
+              </Section>
 
-              <div className={styles.panel__divider} />
+              <div className="h-px bg-black/8" />
 
-              {/* Nav */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Nav Tabs</span>
-                <span className={styles.panel__sublabel}>Style</span>
+              <Section label="Nav Tabs">
+                <SubLabel>Style</SubLabel>
                 <BtnGroup<NavStyle>
-                  options={[
-                    { label: 'Underline', value: 'underline' },
-                    { label: 'Pill', value: 'pill' },
-                    { label: 'Flat', value: 'flat' },
-                  ]}
+                  options={[{ label: 'Underline', value: 'underline' }, { label: 'Pill', value: 'pill' }, { label: 'Flat', value: 'flat' }]}
                   value={cfg.nav.style}
                   onChange={(v) => patchNav({ style: v })}
                 />
-                <span className={styles.panel__sublabel}>Size</span>
+                <SubLabel>Size</SubLabel>
                 <BtnGroup<NavSize>
-                  options={[
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
+                  options={[{ label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
                   value={cfg.nav.size}
                   onChange={(v) => patchNav({ size: v })}
                 />
-              </div>
+              </Section>
 
-              <div className={styles.panel__divider} />
+              <div className="h-px bg-black/8" />
 
-              {/* Cards */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Cards</span>
-                <span className={styles.panel__sublabel}>Layout</span>
+              <Section label="Cards">
+                <SubLabel>Layout</SubLabel>
                 <BtnGroup<ItemLayout>
-                  options={[
-                    { label: 'Grid', value: 'grid' },
-                    { label: 'List', value: 'list' },
-                    { label: 'Minimal', value: 'minimal' },
-                  ]}
+                  options={[{ label: 'Grid', value: 'grid' }, { label: 'List', value: 'list' }, { label: 'Minimal', value: 'minimal' }]}
                   value={cfg.items.layout}
                   onChange={(v) => patchItems({ layout: v })}
                 />
-
                 {cfg.items.layout === 'grid' && (
                   <>
-                    <span className={styles.panel__sublabel}>Columns</span>
-                    <BtnGroup<2 | 3 | 4>
-                      options={[
-                        { label: '2', value: 2 },
-                        { label: '3', value: 3 },
-                        { label: '4', value: 4 },
-                      ]}
+                    <SubLabel>Columns</SubLabel>
+                    <BtnGroup<number>
+                      options={[{ label: '2', value: 2 }, { label: '3', value: 3 }, { label: '4', value: 4 }]}
                       value={cfg.items.columns}
-                      onChange={(v) => patchItems({ columns: v })}
+                      onChange={(v) => patchItems({ columns: v as 2 | 3 | 4 })}
                     />
                   </>
                 )}
-
                 {cfg.items.layout !== 'minimal' && (
                   <>
-                    <span className={styles.panel__sublabel}>Image position</span>
+                    <SubLabel>Image position</SubLabel>
                     <BtnGroup<ImagePosition>
-                      options={[
-                        { label: 'Top', value: 'top' },
-                        { label: 'Right', value: 'right' },
-                        { label: 'Left', value: 'left' },
-                        { label: 'None', value: 'none' },
-                      ]}
+                      options={[{ label: 'Top', value: 'top' }, { label: 'Right', value: 'right' }, { label: 'Left', value: 'left' }, { label: 'None', value: 'none' }]}
                       value={cfg.items.imagePosition}
                       onChange={(v) => patchItems({ imagePosition: v })}
                     />
-                    <span className={styles.panel__sublabel}>Image size</span>
+                    <SubLabel>Image size</SubLabel>
                     <BtnGroup<ImageSize>
-                      options={[
-                        { label: 'S', value: 'sm' },
-                        { label: 'M', value: 'md' },
-                        { label: 'L', value: 'lg' },
-                      ]}
+                      options={[{ label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
                       value={cfg.items.imageSize}
                       onChange={(v) => patchItems({ imageSize: v })}
                     />
                   </>
                 )}
-
-                <span className={styles.panel__sublabel}>Corner radius</span>
+                <SubLabel>Corner radius</SubLabel>
                 <BtnGroup<CardRadius>
-                  options={[
-                    { label: '0', value: 'none' },
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
+                  options={[{ label: '0', value: 'none' }, { label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
                   value={cfg.items.cardRadius}
                   onChange={(v) => patchItems({ cardRadius: v })}
                 />
-
-                <div className={styles.panel__toggles}>
+                <div className="space-y-1 mt-1">
                   <Toggle checked={cfg.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} label="Description" />
                   <Toggle checked={cfg.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} label="Badges" />
                 </div>
-              </div>
+              </Section>
 
-              <div className={styles.panel__divider} />
+              <div className="h-px bg-black/8" />
 
-              {/* Accent */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Accent</span>
-                <div className={styles.panel__swatches}>
+              <Section label="Accent">
+                <div className="flex gap-2 flex-wrap">
                   {ACCENT_OPTIONS.map((a) => (
                     <button
                       key={a.value}
-                      className={`${styles.panel__colorBtn} ${accent.value === a.value ? styles['panel__colorBtn--active'] : ''}`}
+                      className={`w-7 h-7 rounded-full transition-all ${accent.value === a.value ? 'ring-2 ring-offset-1 ring-gray-900 scale-110' : 'hover:scale-105'}`}
                       style={{ background: a.value }}
                       onClick={() => setAccent(a)}
                       title={a.label}
                     />
                   ))}
                 </div>
-              </div>
+              </Section>
 
-              <div className={styles.panel__divider} />
+              <div className="h-px bg-black/8" />
 
-              {/* Features */}
-              <div className={styles.panel__section}>
-                <span className={styles.panel__label}>Features</span>
-                <div className={styles.panel__toggles}>
+              <Section label="Features">
+                <div className="space-y-1">
                   <Toggle checked={enableCart} onChange={setEnableCart} label="Cart" />
                   <Toggle checked={enableAi} onChange={setEnableAi} label="AI Chat" />
                 </div>
-              </div>
+              </Section>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <button className={styles.fab} onClick={() => setOpen((v) => !v)} aria-label="Toggle dev toolbar">
+        <button
+          className="w-12 h-12 rounded-full bg-gray-900 text-white shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg relative"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle dev toolbar"
+        >
           {open ? '✕' : '⚙'}
-          <span className={styles.fab__badge}>DEV</span>
+          <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-amber-400 text-gray-900 rounded-full px-1 py-0.5 leading-none">DEV</span>
         </button>
       </div>
     </div>

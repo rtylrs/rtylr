@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; }
+  body { margin: 0; padding: 0; }
+}

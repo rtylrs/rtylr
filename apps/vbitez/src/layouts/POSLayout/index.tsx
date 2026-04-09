@@ -1,46 +1,45 @@
 import React from 'react';
-import styles from './POSLayout.module.scss';
 import { useUserStore } from '../../stores/userStore';
 import { useThemeStore } from '../../stores/themeStore';
+import { useEmployeeSessionStore } from '../../stores/employeeSessionStore';
 
-interface POSLayoutProps {
-  children: React.ReactNode;
-}
+interface POSLayoutProps { children: React.ReactNode; }
 
 const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
-  const logout = useUserStore((s) => s.logout);
   const user = useUserStore((s) => s.user);
   const { theme, toggleTheme } = useThemeStore();
+  const endSession = useEmployeeSessionStore((s) => s.endSession);
+  const employee = useEmployeeSessionStore((s) => s.employee);
 
   return (
-    <div className={styles.layout} data-theme={theme}>
-      <header className={styles.header}>
-        <div className={styles.header__brand}>
-          <span className={styles.header__logo}>⬡</span>
-          <span className={styles.header__name}>
-            {user?.name ?? 'POS Terminal'}
-          </span>
+    <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
+      <header className="flex items-center justify-between px-5 py-3 bg-pos-card border-b border-pos-border shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl leading-none">⬡</span>
+          <span className="text-sm font-semibold">{user?.name ?? 'POS Terminal'}</span>
         </div>
-        <div className={styles.header__actions}>
+        <div className="flex items-center gap-1">
+          {employee && (
+            <span className="text-xs text-pos-muted mr-2">{employee.name}</span>
+          )}
           <button
-            className={styles.header__btn}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-pos-muted hover:bg-white/8 transition-colors"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title="Toggle theme"
           >
             {theme === 'dark' ? '☀︎' : '◑'}
           </button>
           <button
-            className={styles.header__btn}
-            onClick={logout}
-            aria-label="Log out"
-            title="Log out"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-pos-muted hover:bg-white/8 transition-colors"
+            onClick={endSession}
+            aria-label="End session"
+            title="End employee session"
           >
             ⏻
           </button>
         </div>
       </header>
-      <main className={styles.main}>{children}</main>
+      <main className="flex-1 overflow-hidden">{children}</main>
     </div>
   );
 };

@@ -5,7 +5,6 @@ import SidebarDropdown from "./SidebarDropdown";
 import { getMenuConfigByBusinessType, MenuItem } from "./menuConfig";
 import { useBusinessStore } from "../../../stores/businessStore";
 import { usePermissionsStore } from "../../../stores/permissionsStore";
-import styles from "../Sidebar.module.scss";
 
 const SidebarMenu = () => {
   const location = useLocation();
@@ -37,7 +36,7 @@ const SidebarMenu = () => {
   })).filter((section) => section.items.length > 0);
 
   return (
-    <div className={styles.menu}>
+    <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
       {/* Top menu items */}
       {filteredTopMenuItems.map((item, index) => (
         <SidebarMenuItem
@@ -62,8 +61,8 @@ const SidebarMenu = () => {
         }
 
         return (
-          <div key={sectionIndex} className={styles.section}>
-            <div className={styles.sectionHeader}>{section.header}</div>
+          <div key={sectionIndex} className="mt-4 first:mt-1.5">
+            <div className="text-[11px] font-semibold text-white/45 uppercase tracking-[0.8px] ml-1.5 mb-2">{section.header}</div>
 
             {/* Regular items in this section */}
             {filteredItems.map((item, index) => (

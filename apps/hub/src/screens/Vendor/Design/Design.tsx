@@ -14,7 +14,6 @@ import {
   CardRadius,
 } from '@voxire/menu';
 import { useLayoutPresetsStore } from '../../../stores/layoutPresetsStore';
-import styles from './Design.module.scss';
 
 // ─── Mock preview data ─────────────────────────────────────────────────────────
 
@@ -117,11 +116,15 @@ function BtnGroup<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className={styles.btnGroup}>
+    <div className="flex rounded-lg overflow-hidden border border-black/10">
       {options.map((o) => (
         <button
           key={o.value}
-          className={`${styles.btn} ${value === o.value ? styles.btnActive : ''}`}
+          className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+            value === o.value
+              ? 'bg-admin text-white'
+              : 'bg-white text-primary hover:bg-black/5'
+          }`}
           onClick={() => onChange(o.value)}
         >
           {o.label}
@@ -141,11 +144,16 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className={styles.switchRow}>
-      <span className={styles.switchLabel}>{label}</span>
-      <label className={styles.switch}>
-        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-        <span className={styles.switchTrack} />
+    <div className="flex items-center justify-between py-1.5">
+      <span className="text-sm text-primary">{label}</span>
+      <label className="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only peer"
+        />
+        <div className="w-9 h-5 bg-black/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent" />
       </label>
     </div>
   );
@@ -190,25 +198,31 @@ const Design: React.FC = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <div className="grid h-full overflow-hidden" style={{ gridTemplateColumns: '220px 1fr 380px' }}>
       {/* ── Left: Presets ──────────────────────────────────────────────────── */}
-      <aside className={styles.presets}>
-        <div className={styles.presetsHeader}>
-          <h3>Layouts</h3>
+      <aside className="bg-admin flex flex-col h-full overflow-hidden border-r border-white/8">
+        <div className="px-4 py-4 border-b border-white/10 shrink-0">
+          <h3 className="text-sm font-semibold text-white">Layouts</h3>
         </div>
 
-        <div className={styles.presetList}>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {presets.map((preset) => (
             <div
               key={preset.id}
-              className={`${styles.presetItem} ${preset.id === activePresetId ? styles.active : ''}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                preset.id === activePresetId
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/75 hover:bg-white/8'
+              }`}
               onClick={() => activatePreset(preset.id)}
             >
-              {preset.id === activePresetId && <span className={styles.presetActiveDot} />}
-              <span className={styles.presetName}>{preset.name}</span>
+              {preset.id === activePresetId && (
+                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+              )}
+              <span className="text-[13px] font-medium flex-1 truncate">{preset.name}</span>
               {presets.length > 1 && (
                 <button
-                  className={styles.presetDeleteBtn}
+                  className="p-0.5 text-white/40 hover:text-white transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     deletePreset(preset.id);
@@ -221,16 +235,16 @@ const Design: React.FC = () => {
           ))}
         </div>
 
-        <div className={styles.addPresetRow}>
+        <div className="flex gap-1.5 p-2 border-t border-white/10 shrink-0">
           <input
-            className={styles.addPresetInput}
+            className="flex-1 bg-white/10 text-white placeholder-white/40 text-sm rounded-lg px-3 py-1.5 outline-none focus:bg-white/15 transition-colors"
             placeholder="New layout name…"
             value={newPresetName}
             onChange={(e) => setNewPresetName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
           />
           <button
-            className={styles.addPresetBtn}
+            className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors disabled:opacity-40"
             onClick={handleAddPreset}
             disabled={!newPresetName.trim()}
           >
@@ -240,22 +254,25 @@ const Design: React.FC = () => {
       </aside>
 
       {/* ── Middle: Config controls ─────────────────────────────────────────── */}
-      <div className={styles.controls}>
+      <div className="overflow-y-auto p-5 flex flex-col gap-5 bg-admin-bg">
         {/* Save bar */}
-        <div className={styles.saveBar}>
-          <div className={styles.saveBarLeft}>
-            <h2>{activePreset?.name ?? 'Layout'}</h2>
-            <p>Customize every detail of your menu appearance</p>
+        <div className="flex items-center justify-between bg-white rounded-xl px-5 py-4 border border-black/5 shadow-card">
+          <div>
+            <h2 className="text-base font-semibold text-primary">{activePreset?.name ?? 'Layout'}</h2>
+            <p className="text-xs text-muted mt-0.5">Customize every detail of your menu appearance</p>
           </div>
-          <button className={styles.saveBtn} onClick={saveActivePreset}>
+          <button
+            className="px-4 py-2 bg-admin text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            onClick={saveActivePreset}
+          >
             Save
           </button>
         </div>
 
         {/* Pages */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>Pages</div>
-          <div className={styles.cardBody}>
+        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
+          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Pages</div>
+          <div className="px-5 py-3 space-y-1">
             {(
               [
                 ['About', 'about'],
@@ -276,11 +293,11 @@ const Design: React.FC = () => {
         </div>
 
         {/* Header */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>Header</div>
-          <div className={styles.cardBody}>
-            <div className={styles.row}>
-              <span className={styles.label}>Cover height</span>
+        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
+          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Header</div>
+          <div className="px-5 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Cover height</span>
               <BtnGroup<CoverHeight>
                 value={draftConfig.header.coverHeight}
                 options={[
@@ -292,35 +309,19 @@ const Design: React.FC = () => {
                 onChange={(v) => patchHeader({ coverHeight: v })}
               />
             </div>
-            <Toggle
-              label="Sticky header"
-              checked={draftConfig.header.sticky}
-              onChange={(v) => patchHeader({ sticky: v })}
-            />
-            <Toggle
-              label="Show logo"
-              checked={draftConfig.header.showLogo}
-              onChange={(v) => patchHeader({ showLogo: v })}
-            />
-            <Toggle
-              label="Show description"
-              checked={draftConfig.header.showDescription}
-              onChange={(v) => patchHeader({ showDescription: v })}
-            />
-            <Toggle
-              label="Show address / phone / hours"
-              checked={draftConfig.header.showMeta}
-              onChange={(v) => patchHeader({ showMeta: v })}
-            />
+            <Toggle label="Sticky header" checked={draftConfig.header.sticky} onChange={(v) => patchHeader({ sticky: v })} />
+            <Toggle label="Show logo" checked={draftConfig.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} />
+            <Toggle label="Show description" checked={draftConfig.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} />
+            <Toggle label="Show address / phone / hours" checked={draftConfig.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} />
           </div>
         </div>
 
         {/* Nav tabs */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>Nav Tabs</div>
-          <div className={styles.cardBody}>
-            <div className={styles.row}>
-              <span className={styles.label}>Style</span>
+        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
+          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Nav Tabs</div>
+          <div className="px-5 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Style</span>
               <BtnGroup<NavStyle>
                 value={draftConfig.nav.style}
                 options={[
@@ -331,8 +332,8 @@ const Design: React.FC = () => {
                 onChange={(v) => patchNav({ style: v })}
               />
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Size</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Size</span>
               <BtnGroup<NavSize>
                 value={draftConfig.nav.size}
                 options={[
@@ -347,11 +348,11 @@ const Design: React.FC = () => {
         </div>
 
         {/* Cards */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>Item Cards</div>
-          <div className={styles.cardBody}>
-            <div className={styles.row}>
-              <span className={styles.label}>Layout</span>
+        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
+          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Item Cards</div>
+          <div className="px-5 py-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Layout</span>
               <BtnGroup<ItemLayout>
                 value={draftConfig.items.layout}
                 options={[
@@ -362,8 +363,8 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ layout: v })}
               />
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Columns</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Columns</span>
               <BtnGroup<string>
                 value={String(draftConfig.items.columns)}
                 options={[
@@ -374,8 +375,8 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
               />
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Image position</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Image position</span>
               <BtnGroup<ImagePosition>
                 value={draftConfig.items.imagePosition}
                 options={[
@@ -387,8 +388,8 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ imagePosition: v })}
               />
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Image size</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Image size</span>
               <BtnGroup<ImageSize>
                 value={draftConfig.items.imageSize}
                 options={[
@@ -399,8 +400,8 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ imageSize: v })}
               />
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Card radius</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-primary">Card radius</span>
               <BtnGroup<CardRadius>
                 value={draftConfig.items.cardRadius}
                 options={[
@@ -412,27 +413,19 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ cardRadius: v })}
               />
             </div>
-            <Toggle
-              label="Show description"
-              checked={draftConfig.items.showDescription}
-              onChange={(v) => patchItems({ showDescription: v })}
-            />
-            <Toggle
-              label="Show badges"
-              checked={draftConfig.items.showBadges}
-              onChange={(v) => patchItems({ showBadges: v })}
-            />
+            <Toggle label="Show description" checked={draftConfig.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} />
+            <Toggle label="Show badges" checked={draftConfig.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} />
           </div>
         </div>
       </div>
 
       {/* ── Right: Live preview ─────────────────────────────────────────────── */}
-      <div className={styles.preview}>
-        <span className={styles.previewLabel}>Live Preview</span>
-        <div className={styles.phoneFrame}>
-          <div className={styles.phoneNotch} />
-          <div className={styles.phoneInner}>
-            <div className={styles.previewScaler}>
+      <div className="bg-[#e8e8eb] flex flex-col items-center py-6 px-5 overflow-y-auto border-l border-black/8 gap-4">
+        <span className="text-xs font-semibold text-black/40 uppercase tracking-widest">Live Preview</span>
+        <div className="w-[320px] rounded-[40px] overflow-hidden border-[10px] border-black/80 shadow-2xl bg-white relative">
+          <div className="w-24 h-5 bg-black/80 rounded-full absolute top-2 left-1/2 -translate-x-1/2 z-10" />
+          <div className="h-[600px] overflow-y-auto overflow-x-hidden">
+            <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', width: '117.6%', marginLeft: '-8.8%' }}>
               <MenuLayout
                 business={MOCK_BUSINESS}
                 categories={MOCK_CATEGORIES}

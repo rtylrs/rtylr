@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { Button, Input, HelmetContainer } from '@voxire/components';
+import { Button, Input } from '@voxire/ui';
 
 const ResetPassword: React.FC = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [requestSent, setRequestSent] = useState(false);
 
-  const handleResetPassword = async () => {
+  const handleReset = async () => {
     try {
       await auth.sendPasswordResetEmail(email);
       setRequestSent(true);
@@ -18,74 +18,28 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <React.Fragment>
-      <HelmetContainer title="Forgot Password | Rtylr" />
-      <div className="auth-container">
-        <div className="auth-form-container">
-          <div className="auth-form">
-            <h2>Forgot Password</h2>
-            <p>
-              Enter your email address, and we will send you a link to reset
-              your password.
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleResetPassword();
-              }}
-            >
-              <Input
-                id="reset-email"
-                type="email"
-                label="Email Address"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-                style={{ marginBottom: 16 }}
-              />
-
-              {message && (
-                <p
-                  style={{
-                    color: requestSent ? '#059669' : '#dc2626',
-                    fontSize: 14,
-                    marginBottom: 16,
-                    textAlign: 'center',
-                  }}
-                >
-                  {message}
-                </p>
-              )}
-
-              <Button
-                variant="primary"
-                size="md"
-                fullWidth
-                type="submit"
-                disabled={requestSent}
-              >
-                Reset Password
-              </Button>
-            </form>
-
-            <div className="auth-footer">
-              <p>
-                Remember your password?{' '}
-                <span
-                  className="auth-link"
-                  onClick={() => window.history.back()}
-                >
-                  Back to login
-                </span>
-              </p>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#f8f8fb] p-6">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-card border border-black/5 p-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-primary mb-1.5">Forgot Password</h2>
+            <p className="text-sm text-muted">We'll send you a link to reset your password.</p>
           </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); handleReset(); }} className="flex flex-col gap-5">
+            <Input id="reset-email" type="email" label="Email Address" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
+
+            {message && <p className={`text-sm text-center ${requestSent ? 'text-success' : 'text-destructive'}`}>{message}</p>}
+
+            <Button variant="primary" size="md" fullWidth type="submit" disabled={requestSent}>Reset Password</Button>
+          </form>
+
+          <p className="mt-6 text-sm text-center text-muted">
+            <button className="text-accent hover:underline" onClick={() => window.history.back()}>Back to login</button>
+          </p>
         </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 

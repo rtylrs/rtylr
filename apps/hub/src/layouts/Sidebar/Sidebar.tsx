@@ -1,18 +1,15 @@
-import {
-  SidebarHeader,
-  SidebarUser,
-  SidebarMenu,
-} from "./components";
-import styles from "./Sidebar.module.scss";
+import React from 'react';
+import { SidebarHeader, SidebarUser, SidebarMenu } from './components';
 
-const Sidebar = () => {
-  return (
-    <div className={styles.sidebar}>
-      <SidebarHeader />
-      <SidebarMenu />
-      <SidebarUser />
-    </div>
-  );
-};
+const Sidebar = () => (
+  <div
+    className="flex flex-col h-full bg-admin overflow-hidden"
+    style={{ gridArea: 'sidebar' }}
+  >
+    <SidebarHeader />
+    <SidebarMenu />
+    <SidebarUser />
+  </div>
+);
 
 export default Sidebar;

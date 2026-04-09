@@ -13,7 +13,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import styles from "./Analytics.module.scss";
 
 ChartJS.register(
   CategoryScale,
@@ -89,11 +88,15 @@ const Analytics: React.FC = () => {
   };
 
   return (
-    <div className={styles.analytics}>
-      <div className={styles.header}>
-        <h1>Analytics</h1>
-        <div className={styles.controls}>
-          <select onChange={handleDateRangeChange} defaultValue="">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-primary">Analytics</h1>
+        <div>
+          <select
+            onChange={handleDateRangeChange}
+            defaultValue=""
+            className="border border-black/10 rounded-lg px-3 py-1.5 text-sm bg-white"
+          >
             <option value="">All Time</option>
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
@@ -103,32 +106,32 @@ const Analytics: React.FC = () => {
       </div>
 
       {analyticsLoading ? (
-        <div className={styles.loading}>Loading analytics...</div>
+        <div className="text-sm text-muted">Loading analytics...</div>
       ) : (
         <>
-          <div className={styles.metricsGrid}>
-            <div className={styles.metricCard}>
-              <h3>Total Revenue</h3>
-              <p className={styles.metricValue}>${metrics.totalRevenue.toLocaleString()}</p>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Total Revenue</h3>
+              <p className="text-3xl font-bold text-primary">${metrics.totalRevenue.toLocaleString()}</p>
             </div>
-            <div className={styles.metricCard}>
-              <h3>Total Orders</h3>
-              <p className={styles.metricValue}>{metrics.totalOrders}</p>
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Total Orders</h3>
+              <p className="text-3xl font-bold text-primary">{metrics.totalOrders}</p>
             </div>
-            <div className={styles.metricCard}>
-              <h3>Average Order Value</h3>
-              <p className={styles.metricValue}>${metrics.averageOrderValue.toFixed(2)}</p>
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Average Order Value</h3>
+              <p className="text-3xl font-bold text-primary">${metrics.averageOrderValue.toFixed(2)}</p>
             </div>
-            <div className={styles.metricCard}>
-              <h3>Total Visits</h3>
-              <p className={styles.metricValue}>{metrics.totalVisits}</p>
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Total Visits</h3>
+              <p className="text-3xl font-bold text-primary">{metrics.totalVisits}</p>
             </div>
           </div>
 
-          <div className={styles.chartsGrid}>
-            <div className={styles.chartCard}>
-              <h2>Revenue Over Time</h2>
-              <div className={styles.chartContainer}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h2 className="text-base font-semibold text-primary mb-4">Revenue Over Time</h2>
+              <div className="h-64">
                 <Line
                   data={{
                     labels: revenueChartData.map((d) => d.date),
@@ -145,24 +148,16 @@ const Analytics: React.FC = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: true,
-                      },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                      },
-                    },
+                    plugins: { legend: { display: true } },
+                    scales: { y: { beginAtZero: true } },
                   }}
                 />
               </div>
             </div>
 
-            <div className={styles.chartCard}>
-              <h2>Orders Over Time</h2>
-              <div className={styles.chartContainer}>
+            <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card">
+              <h2 className="text-base font-semibold text-primary mb-4">Orders Over Time</h2>
+              <div className="h-64">
                 <Bar
                   data={{
                     labels: ordersChartData.map((d) => d.date),
@@ -177,16 +172,8 @@ const Analytics: React.FC = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: true,
-                      },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                      },
-                    },
+                    plugins: { legend: { display: true } },
+                    scales: { y: { beginAtZero: true } },
                   }}
                 />
               </div>
@@ -199,4 +186,3 @@ const Analytics: React.FC = () => {
 };
 
 export default Analytics;
-

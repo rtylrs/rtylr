@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./CustomSidebarLayout.module.scss";
 
 interface CustomSidebarLayoutProps {
   children?: React.ReactNode;
@@ -15,18 +14,18 @@ const CustomSidebarLayout: React.FC<CustomSidebarLayoutProps> = ({
   showNavbar = true,
 }) => {
   return (
-    <div className={styles.appLayoutCustomSidebar}>
+    <div className="flex min-h-screen bg-admin-bg">
       {showNavbar && navbar && (
-        <div className={styles.appLayoutCustomNavbar}>{navbar}</div>
+        <div className="fixed top-0 left-0 right-0 z-30">{navbar}</div>
       )}
       {sidebar && (
-        <div className={styles.appLayoutCustomSidebarInner}>{sidebar}</div>
+        <div className="w-60 shrink-0 fixed top-0 left-0 h-screen z-20">{sidebar}</div>
       )}
-      <div className={styles.appLayoutCustomContentInner}>{children}</div>
+      <div className={`flex-1 ${sidebar ? 'ml-60' : ''} ${showNavbar && navbar ? 'mt-14' : ''}`}>
+        {children}
+      </div>
     </div>
   );
 };
 
 export default CustomSidebarLayout;
-
-

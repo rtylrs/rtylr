@@ -1,17 +1,15 @@
-import { SearchBar } from "./components";
-import styles from "./Navbar.module.scss";
+import React from 'react';
+import { SearchBar } from './components';
 
-const Navbar = () => {
-  return (
-    <div className={styles.navbar}>
-      <div className={styles.navbarLeft} />
-
-      {/* Centered Global Search */}
-      <SearchBar />
-
-      <div className={styles.navbarRight} />
-    </div>
-  );
-};
+const Navbar = () => (
+  <div
+    className="flex items-center justify-between px-4 bg-white border-b border-black/6 z-10"
+    style={{ gridArea: 'nav' }}
+  >
+    <div />
+    <SearchBar />
+    <div />
+  </div>
+);
 
 export default Navbar;

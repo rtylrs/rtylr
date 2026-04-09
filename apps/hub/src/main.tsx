@@ -13,6 +13,7 @@ import Modal from "react-modal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
 
+import './globals.css';
 import "react-lazy-load-image-component/src/effects/blur.css";
 
 

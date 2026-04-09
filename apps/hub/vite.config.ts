@@ -29,16 +29,6 @@ export default defineConfig(() => ({
       "@root": path.resolve(__dirname, "./"),
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `
-          @use "@app/styles/index.scss";
-        `,
-        api: "modern-compiler" as const,
-      },
-    },
-  },
   server: {
     port: 5175,
     host: true,
@@ -95,6 +85,6 @@ export default defineConfig(() => ({
       "framer-motion",
       "lucide-react",
     ],
-    exclude: ["@voxire/menu"],
+    exclude: ["@voxire/menu", "@voxire/ui", "@voxire/tailwind-config"],
   },
 }));

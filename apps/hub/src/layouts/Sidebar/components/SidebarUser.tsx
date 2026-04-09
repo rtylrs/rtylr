@@ -1,125 +1,65 @@
-import { DotsThreeOutline, GearSix, SignOut } from "phosphor-react";
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import styles from "../Sidebar.module.scss";
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DotsThreeOutline, GearSix, SignOut } from 'phosphor-react';
 
 const SidebarUser = () => {
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const storedAuthUser = (() => {
-    try {
-      const raw = localStorage.getItem("authUser");
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+  const authUser = (() => {
+    try { return JSON.parse(localStorage.getItem('authUser') || 'null'); } catch { return null; }
   })();
+  const initial = String(authUser?.name || authUser?.email || '?').trim().charAt(0).toUpperCase();
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setUserMenuOpen(false);
-      }
-    };
+    if (!open) return;
+    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
-    if (userMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [userMenuOpen]);
-
-  const toggleUserMenu = () => {
-    setUserMenuOpen(!userMenuOpen);
-  };
-
-  const handleLogout = () => {
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("authUser");
-    } catch {
-      // Ignore errors
-    }
-    setUserMenuOpen(false);
-    navigate("/auth/login", { replace: true });
-  };
-
-  const handleProfile = () => {
-    navigate("/profile");
-    setUserMenuOpen(false);
-  };
-
-  const handleSettings = () => {
-    navigate("/settings");
-    setUserMenuOpen(false);
-  };
-
-  const handleDownload = () => {
-    window.open("https://github.com/your-repo/releases", "_blank");
-    setUserMenuOpen(false);
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('authUser');
+    navigate('/auth/login', { replace: true });
   };
 
   return (
-    <div className={styles.user}>
-      <div className={styles.userAvatar}>
-        {(() => {
-          const nameOrEmail =
-            storedAuthUser?.name || storedAuthUser?.email || "?";
-          const initial =
-            String(nameOrEmail).trim().charAt(0).toUpperCase() || "?";
-          return (
-            <div
-              className={styles.avatarCircle}
-              aria-label={`Avatar ${initial}`}
-            >
-              {initial}
-            </div>
-          );
-        })()}
+    <div className="flex items-center gap-2.5 px-3 py-3 border-t border-white/10 bg-white/5 shrink-0 relative" ref={ref}>
+      <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-bold text-base shrink-0">
+        {initial}
       </div>
-      <div className={styles.userInfo}>
-        <p className={styles.userName}>{storedAuthUser?.name || "User"}</p>
-        <p className={styles.userEmail}>
-          {storedAuthUser?.email || "user@rtylr.com"}
-        </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-semibold text-white truncate">{authUser?.name || 'User'}</p>
+        <p className="text-[11px] text-white/60 truncate">{authUser?.email || 'user@rtylr.com'}</p>
       </div>
-      <div
-        className={styles.userMenu}
-        onClick={toggleUserMenu}
-        ref={dropdownRef}
+      <button
+        className="p-1.5 rounded-md text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+        onClick={() => setOpen((v) => !v)}
       >
-        <DotsThreeOutline size={16} className={styles.menuIcon} />
+        <DotsThreeOutline size={16} />
+      </button>
 
-        {userMenuOpen && (
-          <div className={styles.userDropdown}>
-            <div className={styles.dropdownSection}>
-              <div className={styles.platformOption} onClick={handleSettings}>
-                <GearSix size={16} />
-                <span>Settings</span>
-              </div>
-            </div>
-            <div className={styles.dropdownSection}>
-              <div
-                className={styles.platformOption}
-                onClick={handleLogout}
-                style={{ color: "#ef4444", cursor: "pointer" }}
-              >
-                <SignOut size={16} />
-                <span>Log out</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {open && (
+        <div className="absolute bottom-full right-2 mb-2 w-48 bg-admin border border-white/10 rounded-xl shadow-dropdown overflow-hidden z-50 animate-dropdown-in">
+          <button
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-white/85 hover:bg-white/8 transition-colors"
+            onClick={() => { navigate('/settings'); setOpen(false); }}
+          >
+            <GearSix size={15} />
+            Settings
+          </button>
+          <div className="h-px bg-white/10" />
+          <button
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-400/10 transition-colors"
+            onClick={logout}
+          >
+            <SignOut size={15} />
+            Log out
+          </button>
+        </div>
+      )}
     </div>
   );
 };
