@@ -1,44 +1,50 @@
+# syntax=docker/dockerfile:1.4
 # Build stage
 FROM golang:1.25.0-alpine AS builder
 
 WORKDIR /app
 
-# Install build tools and sqlc
-RUN apk add --no-cache gcc musl-dev curl make bash
+# Install build tools (cached layer — only reruns if this line changes)
+RUN apk add --no-cache curl bash
 
-# Install sqlc via Go (architecture agnostic)
-RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0
+# Download sqlc pre-built binary instead of compiling from source (~30s → ~3s)
+RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+    | tar -xz -C /usr/local/bin sqlc
 
-# Copy go mod and sum files
+# Copy dependency manifests first for best cache hit
 COPY go.mod go.sum ./
 
-# Download dependencies
-RUN go mod download && go mod verify
+# Download modules with cache mount — survives across builds
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download && go mod verify
 
-# Copy only the source needed to generate SQLC and build the API binary.
+# Copy source
 COPY cmd ./cmd
 COPY internal ./internal
 COPY scripts ./scripts
 
-# Make scripts executable
 RUN chmod +x scripts/*.sh
 
-# Generate SQL code (run script directly with bash)
-RUN bash scripts/generate_sqlc.sh
+# Generate SQLC with module cache mount
+RUN --mount=type=cache,target=/go/pkg/mod \
+    bash scripts/generate_sqlc.sh
 
-# Build API binary with optimizations for the target platform
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /app/api ./cmd/api
+# Build binary with both module cache and Go build cache mounts
+# The build cache mount is the single biggest speedup — incremental recompilation
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o /app/api ./cmd/api
 
-# Final stage
+# Final stage — minimal image
 FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy API binary from builder
 COPY --from=builder /app/api /app/api
 
-# Expose API port
 EXPOSE 9999
 
-# Default to API service (backwards compatibility)
-CMD ["/app/api"] 
+CMD ["/app/api"]
