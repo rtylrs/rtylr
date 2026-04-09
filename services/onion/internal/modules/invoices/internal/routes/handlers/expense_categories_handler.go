@@ -1,0 +1,122 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/invoices/internal/application"
+	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ---------------------------------------------------------------------------
+// List Expense Categories
+// ---------------------------------------------------------------------------
+
+func ListExpenseCategoriesRoutes() []string {
+	return []string{"/finance/expense-categories"}
+}
+
+type ListExpenseCategoriesHandler struct {
+	FinanceService *application.Service
+}
+
+type ListExpenseCategoriesRequest struct{}
+
+type ExpenseCategoryPayload struct {
+	ID        int64     `json:"id"`
+	OwnerID   int64     `json:"ownerId"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	Icon      string    `json:"icon"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type ListExpenseCategoriesResponse struct {
+	Categories []ExpenseCategoryPayload `json:"categories"`
+}
+
+func newExpenseCategoryPayload(c domain.ExpenseCategory) ExpenseCategoryPayload {
+	return ExpenseCategoryPayload{
+		ID:        c.ID,
+		OwnerID:   c.OwnerID,
+		Name:      c.Name,
+		Color:     c.Color,
+		Icon:      c.Icon,
+		CreatedAt: c.CreatedAt,
+	}
+}
+
+func (h *ListExpenseCategoriesHandler) Serve(ctx context.Context, _ *ListExpenseCategoriesRequest) (ListExpenseCategoriesResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+
+	categories, err := h.FinanceService.ListExpenseCategories(ctx, device.User.UserID)
+	if err != nil {
+		return ListExpenseCategoriesResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to list expense categories",
+		}
+	}
+
+	payloads := make([]ExpenseCategoryPayload, 0, len(categories))
+	for _, c := range categories {
+		payloads = append(payloads, newExpenseCategoryPayload(c))
+	}
+
+	return ListExpenseCategoriesResponse{Categories: payloads}, nil
+}
+
+// ---------------------------------------------------------------------------
+// Create Expense Category
+// ---------------------------------------------------------------------------
+
+func CreateExpenseCategoryRoutes() []string {
+	return []string{"/finance/expense-categories"}
+}
+
+type CreateExpenseCategoryHandler struct {
+	FinanceService *application.Service
+}
+
+type CreateExpenseCategoryRequest struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+	Icon  string `json:"icon"`
+}
+
+type CreateExpenseCategoryResponse struct {
+	Category ExpenseCategoryPayload `json:"category"`
+}
+
+func (h *CreateExpenseCategoryHandler) Validate(_ context.Context, req *CreateExpenseCategoryRequest) *errorModels.ServerError {
+	if req.Name == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Category name is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *CreateExpenseCategoryHandler) Serve(ctx context.Context, req *CreateExpenseCategoryRequest) (CreateExpenseCategoryResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+
+	input := domain.ExpenseCategoryInput{
+		Name:  req.Name,
+		Color: req.Color,
+		Icon:  req.Icon,
+	}
+
+	c, err := h.FinanceService.CreateExpenseCategory(ctx, device.User.UserID, input)
+	if err != nil {
+		return CreateExpenseCategoryResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to create expense category",
+		}
+	}
+
+	return CreateExpenseCategoryResponse{Category: newExpenseCategoryPayload(*c)}, nil
+}

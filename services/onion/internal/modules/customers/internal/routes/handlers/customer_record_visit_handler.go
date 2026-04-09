@@ -1,0 +1,63 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+
+	"github.com/voxire/onion/internal/modules/customers/internal/application"
+	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+)
+
+func CustomerRecordVisitRoutes() []string {
+	return []string{"/crm/customers/record-visit"}
+}
+
+type RecordVisitHandler struct {
+	CRMService *application.Service
+}
+
+type RecordVisitRequest struct {
+	CustomerID  int64   `json:"customerId"`
+	Amount      float64 `json:"amount"`
+	AwardPoints bool    `json:"awardPoints"`
+}
+
+type RecordVisitResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *RecordVisitHandler) Validate(_ context.Context, req *RecordVisitRequest) *errorModels.ServerError {
+	if req.CustomerID == 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Customer ID is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest) (RecordVisitResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return RecordVisitResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	err := h.CRMService.RecordVisit(ctx, domain.RecordVisitInput{
+		OwnerID:     device.User.UserID,
+		CustomerID:  req.CustomerID,
+		Amount:      req.Amount,
+		AwardPoints: req.AwardPoints,
+	})
+	if err != nil {
+		return RecordVisitResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to record visit",
+		}
+	}
+
+	return RecordVisitResponse{Message: "Visit recorded successfully"}, nil
+}

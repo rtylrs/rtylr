@@ -1,0 +1,560 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ─── Shared payloads ──────────────────────────────────────────────────────────
+
+type OrderItemPayload struct {
+	ID             int64     `json:"id"`
+	OrderID        int64     `json:"orderId"`
+	MenuItemID     int64     `json:"menuItemId"`
+	Name           string    `json:"name"`
+	SKU            string    `json:"sku"`
+	Quantity       float64   `json:"quantity"`
+	UnitPrice      float64   `json:"unitPrice"`
+	DiscountPct    float64   `json:"discountPct"`
+	DiscountAmount float64   `json:"discountAmount"`
+	TaxRate        float64   `json:"taxRate"`
+	Total          float64   `json:"total"`
+	Notes          string    `json:"notes"`
+	Status         string    `json:"status"`
+	CreatedAt      time.Time `json:"createdAt"`
+}
+
+type OrderPayload struct {
+	ID             int64              `json:"id"`
+	OwnerID        int64              `json:"ownerId"`
+	SessionID      int64              `json:"sessionId"`
+	TableID        int64              `json:"tableId"`
+	LocationID     int64              `json:"locationId"`
+	OrderNumber    string             `json:"orderNumber"`
+	Type           string             `json:"type"`
+	Status         string             `json:"status"`
+	CustomerID     int64              `json:"customerId"`
+	CustomerName   string             `json:"customerName"`
+	StaffID        int64              `json:"staffId"`
+	Subtotal       float64            `json:"subtotal"`
+	DiscountAmount float64            `json:"discountAmount"`
+	TaxAmount      float64            `json:"taxAmount"`
+	Total          float64            `json:"total"`
+	PaymentMethod  string             `json:"paymentMethod"`
+	PaymentStatus  string             `json:"paymentStatus"`
+	AmountPaid     float64            `json:"amountPaid"`
+	ChangeDue      float64            `json:"changeDue"`
+	Notes          string             `json:"notes"`
+	KitchenNotes   string             `json:"kitchenNotes"`
+	CreatedAt      time.Time          `json:"createdAt"`
+	UpdatedAt      time.Time          `json:"updatedAt"`
+	PaidAt         *time.Time         `json:"paidAt"`
+	Items          []OrderItemPayload `json:"items,omitempty"`
+}
+
+func newOrderPayload(o domain.Order) OrderPayload {
+	p := OrderPayload{
+		ID:             o.ID,
+		OwnerID:        o.OwnerID,
+		SessionID:      o.SessionID,
+		TableID:        o.TableID,
+		LocationID:     o.LocationID,
+		OrderNumber:    o.OrderNumber,
+		Type:           string(o.Type),
+		Status:         string(o.Status),
+		CustomerID:     o.CustomerID,
+		CustomerName:   o.CustomerName,
+		StaffID:        o.StaffID,
+		Subtotal:       o.Subtotal,
+		DiscountAmount: o.DiscountAmount,
+		TaxAmount:      o.TaxAmount,
+		Total:          o.Total,
+		PaymentMethod:  string(o.PaymentMethod),
+		PaymentStatus:  string(o.PaymentStatus),
+		AmountPaid:     o.AmountPaid,
+		ChangeDue:      o.ChangeDue,
+		Notes:          o.Notes,
+		KitchenNotes:   o.KitchenNotes,
+		CreatedAt:      o.CreatedAt,
+		UpdatedAt:      o.UpdatedAt,
+		PaidAt:         o.PaidAt,
+	}
+
+	if len(o.Items) > 0 {
+		items := make([]OrderItemPayload, 0, len(o.Items))
+		for _, item := range o.Items {
+			items = append(items, OrderItemPayload{
+				ID:             item.ID,
+				OrderID:        item.OrderID,
+				MenuItemID:     item.MenuItemID,
+				Name:           item.Name,
+				SKU:            item.SKU,
+				Quantity:       item.Quantity,
+				UnitPrice:      item.UnitPrice,
+				DiscountPct:    item.DiscountPct,
+				DiscountAmount: item.DiscountAmount,
+				TaxRate:        item.TaxRate,
+				Total:          item.Total,
+				Notes:          item.Notes,
+				Status:         string(item.Status),
+				CreatedAt:      item.CreatedAt,
+			})
+		}
+
+		p.Items = items
+	}
+
+	return p
+}
+
+// ─── List Orders ──────────────────────────────────────────────────────────────
+
+func ListOrdersRoutes() []string { return []string{"/pos/orders"} }
+
+type ListOrdersHandler struct{ Service *application.Service }
+
+type ListOrdersRequest struct {
+	SessionID int64  `json:"sessionId"`
+	Status    string `json:"status"`
+	DateFrom  string `json:"dateFrom"`
+	DateTo    string `json:"dateTo"`
+}
+
+type ListOrdersResponse struct {
+	Orders []OrderPayload `json:"orders"`
+}
+
+func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+
+	orders, err := h.Service.ListOrders(ctx, ownerID, req.SessionID, req.Status, req.DateFrom, req.DateTo)
+	if err != nil {
+		return ListOrdersResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to list orders",
+		}
+	}
+
+	payloads := make([]OrderPayload, 0, len(orders))
+	for _, o := range orders {
+		payloads = append(payloads, newOrderPayload(o))
+	}
+
+	return ListOrdersResponse{Orders: payloads}, nil
+}
+
+// ─── Create Order ─────────────────────────────────────────────────────────────
+
+type CreateOrderHandler struct{ Service *application.Service }
+
+type CreateOrderItemInput struct {
+	MenuItemID  int64   `json:"menuItemId"`
+	Name        string  `json:"name"`
+	SKU         string  `json:"sku"`
+	Quantity    float64 `json:"quantity"`
+	UnitPrice   float64 `json:"unitPrice"`
+	DiscountPct float64 `json:"discountPct"`
+	TaxRate     float64 `json:"taxRate"`
+	Notes       string  `json:"notes"`
+}
+
+type CreateOrderRequest struct {
+	SessionID     int64                  `json:"sessionId"`
+	TableID       int64                  `json:"tableId"`
+	LocationID    int64                  `json:"locationId"`
+	Type          string                 `json:"type"`
+	CustomerID    int64                  `json:"customerId"`
+	CustomerName  string                 `json:"customerName"`
+	PaymentMethod string                 `json:"paymentMethod"`
+	Notes         string                 `json:"notes"`
+	KitchenNotes  string                 `json:"kitchenNotes"`
+	Items         []CreateOrderItemInput `json:"items"`
+}
+
+type CreateOrderResponse struct {
+	OrderID     int64  `json:"orderId"`
+	OrderNumber string `json:"orderNumber"`
+	Message     string `json:"message"`
+}
+
+func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest) *errorModels.ServerError {
+	if len(req.Items) == 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order must have at least one item",
+		}
+	}
+
+	for _, item := range req.Items {
+		if item.Name == "" {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Each item must have a name",
+			}
+		}
+
+		if item.Quantity <= 0 {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Item quantity must be positive",
+			}
+		}
+
+		if item.UnitPrice < 0 {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Item unit price cannot be negative",
+			}
+		}
+	}
+
+	return nil
+}
+
+func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest) (CreateOrderResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CreateOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+	staffID := device.User.UserID
+
+	items := make([]domain.OrderItemInput, 0, len(req.Items))
+	for _, item := range req.Items {
+		items = append(items, domain.OrderItemInput{
+			MenuItemID:  item.MenuItemID,
+			Name:        item.Name,
+			SKU:         item.SKU,
+			Quantity:    item.Quantity,
+			UnitPrice:   item.UnitPrice,
+			DiscountPct: item.DiscountPct,
+			TaxRate:     item.TaxRate,
+			Notes:       item.Notes,
+		})
+	}
+
+	orderID, err := h.Service.CreateOrder(ctx, ownerID, staffID, domain.OrderInput{
+		SessionID:     req.SessionID,
+		TableID:       req.TableID,
+		LocationID:    req.LocationID,
+		Type:          domain.OrderType(req.Type),
+		CustomerID:    req.CustomerID,
+		CustomerName:  req.CustomerName,
+		PaymentMethod: domain.PaymentMethod(req.PaymentMethod),
+		Notes:         req.Notes,
+		KitchenNotes:  req.KitchenNotes,
+		Items:         items,
+	})
+	if err != nil {
+		return CreateOrderResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to create order",
+		}
+	}
+
+	order, getErr := h.Service.GetOrder(ctx, ownerID, orderID)
+	if getErr != nil {
+		return CreateOrderResponse{OrderID: orderID, Message: "Order created"}, nil
+	}
+
+	return CreateOrderResponse{OrderID: orderID, OrderNumber: order.OrderNumber, Message: "Order created"}, nil
+}
+
+// ─── Get Order Detail ─────────────────────────────────────────────────────────
+
+func GetOrderDetailRoutes() []string { return []string{"/pos/orders/detail"} }
+
+type GetOrderDetailHandler struct{ Service *application.Service }
+
+type GetOrderDetailRequest struct {
+	OrderID int64 `json:"orderId"`
+}
+
+type GetOrderDetailResponse struct {
+	Order *OrderPayload `json:"order"`
+}
+
+func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetOrderDetailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+
+	order, err := h.Service.GetOrder(ctx, ownerID, req.OrderID)
+	if err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return GetOrderDetailResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Order not found",
+			}
+		}
+
+		return GetOrderDetailResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to get order",
+		}
+	}
+
+	payload := newOrderPayload(*order)
+
+	return GetOrderDetailResponse{Order: &payload}, nil
+}
+
+// ─── Update Order Status ──────────────────────────────────────────────────────
+
+func UpdateOrderStatusRoutes() []string { return []string{"/pos/orders/status"} }
+
+type UpdateOrderStatusHandler struct{ Service *application.Service }
+
+type UpdateOrderStatusRequest struct {
+	OrderID int64  `json:"orderId"`
+	Status  string `json:"status"`
+}
+
+type UpdateOrderStatusResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateOrderStatusHandler) Validate(_ context.Context, req *UpdateOrderStatusRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order id is required",
+		}
+	}
+
+	if req.Status == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Status is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderStatusRequest) (UpdateOrderStatusResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateOrderStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+
+	if err := h.Service.UpdateOrderStatus(ctx, ownerID, req.OrderID, domain.OrderStatus(req.Status)); err != nil {
+		return UpdateOrderStatusResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to update order status",
+		}
+	}
+
+	return UpdateOrderStatusResponse{Message: "Order status updated"}, nil
+}
+
+// ─── Update Order Item Status ─────────────────────────────────────────────────
+
+func UpdateOrderItemStatusRoutes() []string { return []string{"/pos/orders/item-status"} }
+
+type UpdateOrderItemStatusHandler struct{ Service *application.Service }
+
+type UpdateOrderItemStatusRequest struct {
+	OrderID int64  `json:"orderId"`
+	ItemID  int64  `json:"itemId"`
+	Status  string `json:"status"`
+}
+
+type UpdateOrderItemStatusResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateOrderItemStatusHandler) Validate(_ context.Context, req *UpdateOrderItemStatusRequest) *errorModels.ServerError {
+	if req.OrderID == 0 || req.ItemID == 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order id and item id are required",
+		}
+	}
+
+	if req.Status == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Status is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrderItemStatusRequest) (UpdateOrderItemStatusResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateOrderItemStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateOrderItemStatus(ctx, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
+		return UpdateOrderItemStatusResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to update item status",
+		}
+	}
+
+	return UpdateOrderItemStatusResponse{Message: "Item status updated"}, nil
+}
+
+// ─── Process Payment ──────────────────────────────────────────────────────────
+
+func ProcessPaymentRoutes() []string { return []string{"/pos/orders/payment"} }
+
+type ProcessPaymentHandler struct{ Service *application.Service }
+
+type ProcessPaymentRequest struct {
+	OrderID       int64   `json:"orderId"`
+	PaymentMethod string  `json:"paymentMethod"`
+	AmountPaid    float64 `json:"amountPaid"`
+}
+
+type ProcessPaymentResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *ProcessPaymentHandler) Validate(_ context.Context, req *ProcessPaymentRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order id is required",
+		}
+	}
+
+	if req.AmountPaid < 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Amount paid cannot be negative",
+		}
+	}
+
+	return nil
+}
+
+func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRequest) (ProcessPaymentResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ProcessPaymentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+
+	if err := h.Service.ProcessPayment(ctx, ownerID, domain.PaymentInput{
+		OrderID:       req.OrderID,
+		PaymentMethod: domain.PaymentMethod(req.PaymentMethod),
+		AmountPaid:    req.AmountPaid,
+	}); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return ProcessPaymentResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Order not found",
+			}
+		}
+
+		return ProcessPaymentResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to process payment",
+		}
+	}
+
+	return ProcessPaymentResponse{Message: "Payment processed"}, nil
+}
+
+// ─── Process Refund ───────────────────────────────────────────────────────────
+
+func ProcessRefundRoutes() []string { return []string{"/pos/orders/refund"} }
+
+type ProcessRefundHandler struct{ Service *application.Service }
+
+type ProcessRefundRequest struct {
+	OrderID int64   `json:"orderId"`
+	Amount  float64 `json:"amount"`
+	Reason  string  `json:"reason"`
+}
+
+type ProcessRefundResponse struct {
+	RefundID int64  `json:"refundId"`
+	Message  string `json:"message"`
+}
+
+func (h *ProcessRefundHandler) Validate(_ context.Context, req *ProcessRefundRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order id is required",
+		}
+	}
+
+	if req.Amount <= 0 {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Refund amount must be positive",
+		}
+	}
+
+	return nil
+}
+
+func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ProcessRefundResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := device.User.UserID
+	staffID := device.User.UserID
+
+	refundID, err := h.Service.ProcessRefund(ctx, ownerID, staffID, domain.RefundInput{
+		OrderID: req.OrderID,
+		Amount:  req.Amount,
+		Reason:  req.Reason,
+	})
+	if err != nil {
+		return ProcessRefundResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to process refund",
+		}
+	}
+
+	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil
+}

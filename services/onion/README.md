@@ -1,4 +1,4 @@
-<img src="https://cdn.voxire.dev/adminupload/onion.png" alt="Onion" width="200">
+
 
 # Onion 🧅
 
@@ -17,7 +17,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 
 - **Go 1.25.0+**
 - **MySQL 8+**
-- **`mysql` and `mysqladmin` available locally**
+- `**mysql` and `mysqladmin` available locally**
 
 ## 🛠️ Quick Start
 
@@ -121,3 +121,4 @@ make build
 # Run the binary
 ./bin/onionexec
 ```
+

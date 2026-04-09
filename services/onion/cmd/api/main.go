@@ -11,16 +11,41 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/voxire/onion/internal/modules/campaigns"
+	"github.com/voxire/onion/internal/modules/careers"
 	"github.com/voxire/onion/internal/modules/config"
+	"github.com/voxire/onion/internal/modules/customers"
+	timeoff "github.com/voxire/onion/internal/modules/time_off"
+	"github.com/voxire/onion/internal/modules/expenses"
+	"github.com/voxire/onion/internal/modules/invoices"
+	"github.com/voxire/onion/internal/modules/loyalty"
+	"github.com/voxire/onion/internal/modules/echo"
+	"github.com/voxire/onion/internal/modules/inventory"
+	"github.com/voxire/onion/internal/modules/memory"
+	poslocations "github.com/voxire/onion/internal/modules/pos_locations"
+	posorders "github.com/voxire/onion/internal/modules/pos_orders"
+	possessions "github.com/voxire/onion/internal/modules/pos_sessions"
+	postables "github.com/voxire/onion/internal/modules/pos_tables"
+	"github.com/voxire/onion/internal/modules/products"
+	"github.com/voxire/onion/internal/modules/projects"
+	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
+	"github.com/voxire/onion/internal/modules/segments"
+	"github.com/voxire/onion/internal/modules/departments"
+	"github.com/voxire/onion/internal/modules/payroll"
+	"github.com/voxire/onion/internal/modules/shifts"
+	"github.com/voxire/onion/internal/modules/staff"
+	"github.com/voxire/onion/internal/modules/suppliers"
+	"github.com/voxire/onion/internal/modules/tasks"
+	"github.com/voxire/onion/internal/modules/tax"
+	"github.com/voxire/onion/internal/modules/team"
 	"github.com/voxire/onion/internal/modules/user"
+	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
-	"github.com/voxire/onion/internal/platforms/rtylr"
-	"github.com/voxire/onion/internal/platforms/voxire"
 )
 
 func main() {
@@ -124,23 +149,70 @@ func run(ctx context.Context) {
 }
 
 type apiModules struct {
-	User   *user.Module
-	Config *config.Module
-	Rtylr  *rtylr.Platform
-	Voxire *voxire.Platform
+	User      *user.Module
+	Config    *config.Module
+	Careers   *careers.Module
+	Echo      *echo.Module
+	Memory    *memory.Module
+	Products       *products.Module
+	Inventory      *inventory.Module
+	Suppliers      *suppliers.Module
+	PurchaseOrders *purchaseorders.Module
+	Staff       *staff.Module
+	Departments *departments.Module
+	Shifts      *shifts.Module
+	Payroll     *payroll.Module
+	TimeOff     *timeoff.Module
+	Customers   *customers.Module
+	Loyalty     *loyalty.Module
+	Campaigns   *campaigns.Module
+	Segments    *segments.Module
+	Invoices    *invoices.Module
+	Expenses    *expenses.Module
+	Tax         *tax.Module
+	Workspaces  *workspaces.Module
+	Projects    *projects.Module
+	Tasks       *tasks.Module
+	PosOrders   *posorders.Module
+	PosTables   *postables.Module
+	PosSessions *possessions.Module
+	PosLocations *poslocations.Module
+	Team        *team.Module
 }
 
 func initializeModules(ctx context.Context) *apiModules {
-	userModule := user.NewModule(ctx)
-	configModule := config.NewModule(ctx)
-	rtylrPlatform := rtylr.NewPlatform(ctx)
-	voxirePlatform := voxire.NewPlatform(ctx)
+	memoryModule := memory.NewModule(ctx)
 
 	return &apiModules{
-		User:   userModule,
-		Config: configModule,
-		Rtylr:  rtylrPlatform,
-		Voxire: voxirePlatform,
+		User:      user.NewModule(ctx),
+		Config:    config.NewModule(ctx),
+		Careers:   careers.NewModule(ctx),
+		Echo:      echo.NewModule(ctx, memoryModule),
+		Memory:    memoryModule,
+		Products:       products.NewModule(ctx),
+		Inventory:      inventory.NewModule(ctx),
+		Suppliers:      suppliers.NewModule(ctx),
+		PurchaseOrders: purchaseorders.NewModule(ctx),
+		Staff:       staff.NewModule(ctx),
+		Departments: departments.NewModule(ctx),
+		Shifts:      shifts.NewModule(ctx),
+		Payroll:     payroll.NewModule(ctx),
+		TimeOff:     timeoff.NewModule(ctx),
+		Customers:   customers.NewModule(ctx),
+		Loyalty:     loyalty.NewModule(ctx),
+		Campaigns:   campaigns.NewModule(ctx),
+		Segments:    segments.NewModule(ctx),
+		Invoices:    invoices.NewModule(ctx),
+		Expenses:    expenses.NewModule(ctx),
+		Tax:         tax.NewModule(ctx),
+		Workspaces:  workspaces.NewModule(ctx),
+		Projects:    projects.NewModule(ctx),
+		Tasks:       tasks.NewModule(ctx),
+		PosOrders:   posorders.NewModule(ctx),
+		PosTables:   postables.NewModule(ctx),
+		PosSessions: possessions.NewModule(ctx),
+		PosLocations: poslocations.NewModule(ctx),
+		Team:        team.NewModule(ctx),
 	}
 }
 

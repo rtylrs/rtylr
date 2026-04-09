@@ -9,9 +9,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
-	db "github.com/voxire/onion/internal/platform/database"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/utils/convert"
 )
 
 type Repository struct {
@@ -36,20 +36,23 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 		return domain.Config{}, err
 	}
 
-	configs, err := db.NewReadExecutor[domain.Config, sqlc.GetConfigRow](db.MainDatabase).FetchOrdered(ctx, r.queries.GetConfig, int32(ownerIDInt))
+	rows, err := r.queries.GetConfig(ctx, int32(ownerIDInt))
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get config", logger.Error(err))
 
 		return domain.Config{}, err
 	}
 
-	if len(configs) == 0 {
+	if len(rows) == 0 {
 		logger.Ctx(ctx).Error("No config found for ownerID", logger.String("ownerID", ownerID))
 
-		return domain.Config{}, err
+		return domain.Config{}, domain.ErrConfigNotFound
 	}
 
-	return configs[0], nil
+	var config domain.Config
+	config.FromRows(rows[0])
+
+	return config, nil
 }
 
 func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (domain.Theme, error) {
@@ -60,7 +63,7 @@ func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (dom
 		return domain.Theme{}, err
 	}
 
-	theme, fetchErr := db.NewReadExecutor[domain.Theme, sqlc.Theme](db.MainDatabase).Fetch(ctx, r.queries.GetThemeByOwnerID, int32(ownerIDInt))
+	row, fetchErr := r.queries.GetThemeByOwnerID(ctx, int32(ownerIDInt))
 	if fetchErr != nil {
 		if errors.Is(fetchErr, sql.ErrNoRows) {
 			return domain.Theme{}, nil
@@ -69,6 +72,38 @@ func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (dom
 		logger.Ctx(ctx).Error("Failed to get theme by owner ID", logger.Error(fetchErr))
 
 		return domain.Theme{}, fetchErr
+	}
+
+	theme := domain.Theme{
+		ID:                    row.ID,
+		PrimaryColor:          convert.ToString(row.PrimaryColor),
+		SecondaryColor:        convert.ToString(row.SecondaryColor),
+		AccentColor:           convert.ToString(row.AccentColor),
+		DarkGreenColor:        convert.ToString(row.DarkGreenColor),
+		BackgroundColor:       convert.ToString(row.BackgroundColor),
+		BgColor:               convert.ToString(row.BgColor),
+		SurfaceColor:          convert.ToString(row.SurfaceColor),
+		LightColor:            convert.ToString(row.LightColor),
+		DarkColor:             convert.ToString(row.DarkColor),
+		ItemBackgroundColor:   convert.ToString(row.ItemBackgroundColor),
+		ErrorColor:            convert.ToString(row.ErrorColor),
+		SuccessColor:          convert.ToString(row.SuccessColor),
+		WarningColor:          convert.ToString(row.WarningColor),
+		InfoColor:             convert.ToString(row.InfoColor),
+		TextPrimaryColor:      convert.ToString(row.TextPrimaryColor),
+		TextSecondaryColor:    convert.ToString(row.TextSecondaryColor),
+		SubtextColor:          convert.ToString(row.SubtextColor),
+		LightGrayColor:        convert.ToString(row.LightGrayColor),
+		ActiveColor:           convert.ToString(row.ActiveColor),
+		AdminBackgroundColor:  convert.ToString(row.AdminBackgroundColor),
+		AdminPrimaryColor:     convert.ToString(row.AdminPrimaryColor),
+		VendorBackgroundColor: convert.ToString(row.VendorBackgroundColor),
+		BorderColor:           convert.ToString(row.BorderColor),
+		FontFamilyPrimary:     convert.ToString(row.FontFamilyPrimary),
+		FontFamilySecondary:   convert.ToString(row.FontFamilySecondary),
+		FontSizeBase:          convert.ToString(row.FontSizeBase),
+		FontSizeHeading:       convert.ToString(row.FontSizeHeading),
+		MobileBreakpoint:      convert.ToString(row.MobileBreakpoint),
 	}
 
 	return theme, nil

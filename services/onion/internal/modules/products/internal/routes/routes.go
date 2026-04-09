@@ -1,0 +1,40 @@
+package routes
+
+import (
+	"context"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/voxire/onion/internal/modules/products/internal/application"
+	"github.com/voxire/onion/internal/modules/products/internal/routes/handlers"
+	"github.com/voxire/onion/internal/platform/server/http"
+)
+
+func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+	http.RegisterGET[handlers.ListProductsRequest, handlers.ListProductsResponse](
+		ctx,
+		router,
+		handlers.ListProductsRoutes(),
+		&handlers.ListProductsHandler{Service: service},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateProductRequest, handlers.CreateProductResponse](
+		ctx,
+		router,
+		handlers.CreateProductRoutes(),
+		&handlers.CreateProductHandler{Service: service},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateProductRequest, handlers.UpdateProductResponse](
+		ctx,
+		router,
+		handlers.UpdateProductRoutes(),
+		&handlers.UpdateProductHandler{Service: service},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteProductRequest, handlers.DeleteProductResponse](
+		ctx,
+		router,
+		handlers.DeleteProductRoutes(),
+		&handlers.DeleteProductHandler{Service: service},
+	)
+}

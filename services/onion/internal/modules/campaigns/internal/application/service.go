@@ -1,0 +1,32 @@
+package application
+
+import (
+	"context"
+
+	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
+	"github.com/voxire/onion/internal/modules/campaigns/internal/infrastructure"
+)
+
+type Service struct {
+	repo *infrastructure.Repository
+}
+
+func NewService(ctx context.Context) *Service {
+	return &Service{repo: infrastructure.NewRepository(ctx)}
+}
+
+func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Campaign, error) {
+	return s.repo.List(ctx, ownerID)
+}
+
+func (s *Service) Create(ctx context.Context, input domain.CampaignInput) (int64, error) {
+	return s.repo.Create(ctx, input)
+}
+
+func (s *Service) Update(ctx context.Context, input domain.CampaignUpdateInput) error {
+	return s.repo.Update(ctx, input)
+}
+
+func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+	return s.repo.UpdateStatus(ctx, ownerID, id, status)
+}

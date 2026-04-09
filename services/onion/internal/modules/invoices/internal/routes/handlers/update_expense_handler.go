@@ -1,0 +1,105 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/invoices/internal/application"
+	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+func UpdateExpenseRoutes() []string {
+	return []string{"/finance/expenses"}
+}
+
+type UpdateExpenseHandler struct {
+	FinanceService *application.Service
+}
+
+type UpdateExpenseRequest struct {
+	ID              int64   `json:"id"`
+	CategoryID      int64   `json:"categoryId"`
+	Description     string  `json:"description"`
+	Amount          float64 `json:"amount"`
+	Currency        string  `json:"currency"`
+	ExpenseDate     string  `json:"expenseDate"`
+	Vendor          string  `json:"vendor"`
+	PaymentMethod   string  `json:"paymentMethod"`
+	ReceiptURL      string  `json:"receiptUrl"`
+	IsTaxDeductible bool    `json:"isTaxDeductible"`
+	TaxAmount       float64 `json:"taxAmount"`
+	Notes           string  `json:"notes"`
+}
+
+type UpdateExpenseResponse struct {
+	Expense ExpensePayload `json:"expense"`
+}
+
+func (h *UpdateExpenseHandler) Validate(_ context.Context, req *UpdateExpenseRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Expense ID is required",
+		}
+	}
+
+	if req.Description == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Description is required",
+		}
+	}
+
+	if req.Amount <= 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Amount must be greater than zero",
+		}
+	}
+
+	if req.ExpenseDate == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Expense date is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequest) (UpdateExpenseResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+
+	input := domain.ExpenseInput{
+		CategoryID:      req.CategoryID,
+		Description:     req.Description,
+		Amount:          req.Amount,
+		Currency:        req.Currency,
+		ExpenseDate:     req.ExpenseDate,
+		Vendor:          req.Vendor,
+		PaymentMethod:   req.PaymentMethod,
+		ReceiptURL:      req.ReceiptURL,
+		IsTaxDeductible: req.IsTaxDeductible,
+		TaxAmount:       req.TaxAmount,
+		Notes:           req.Notes,
+	}
+
+	e, err := h.FinanceService.UpdateExpense(ctx, device.User.UserID, req.ID, input)
+	if err != nil {
+		if err == domain.ErrExpenseNotFound {
+			return UpdateExpenseResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Expense not found",
+			}
+		}
+
+		return UpdateExpenseResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update expense",
+		}
+	}
+
+	return UpdateExpenseResponse{Expense: newExpensePayload(*e)}, nil
+}

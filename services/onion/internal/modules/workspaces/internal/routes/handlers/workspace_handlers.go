@@ -1,0 +1,346 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ─────────────────────────────────────────────
+// Route declarations
+// ─────────────────────────────────────────────
+
+func ListWorkspacesRoutes() []string  { return []string{"/flow/workspaces"} }
+func CreateWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
+func UpdateWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
+func DeleteWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
+func AddWorkspaceMemberRoutes() []string    { return []string{"/flow/workspaces/member"} }
+func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/member"} }
+
+// ─────────────────────────────────────────────
+// Shared payload types
+// ─────────────────────────────────────────────
+
+type WorkspacePayload struct {
+	ID          int64     `json:"id"`
+	OwnerID     int64     `json:"ownerId"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Icon        string    `json:"icon"`
+	Color       string    `json:"color"`
+	IsDefault   bool      `json:"isDefault"`
+	CreatedBy   int64     `json:"createdBy"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+}
+
+func toWorkspacePayload(w domain.Workspace) WorkspacePayload {
+	return WorkspacePayload{
+		ID:          w.ID,
+		OwnerID:     w.OwnerID,
+		Name:        w.Name,
+		Description: w.Description,
+		Icon:        w.Icon,
+		Color:       w.Color,
+		IsDefault:   w.IsDefault,
+		CreatedBy:   w.CreatedBy,
+		CreatedAt:   w.CreatedAt,
+		UpdatedAt:   w.UpdatedAt,
+	}
+}
+
+// ─────────────────────────────────────────────
+// GET /flow/workspaces
+// ─────────────────────────────────────────────
+
+type ListWorkspacesHandler struct {
+	FlowService *application.Service
+}
+
+type ListWorkspacesRequest struct{}
+
+type ListWorkspacesResponse struct {
+	Workspaces []WorkspacePayload `json:"workspaces"`
+}
+
+func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequest) (ListWorkspacesResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return ListWorkspacesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	workspaces, err := h.FlowService.ListWorkspaces(ctx, authUser.UserID)
+	if err != nil {
+		return ListWorkspacesResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to list workspaces",
+		}
+	}
+
+	payloads := make([]WorkspacePayload, 0, len(workspaces))
+	for _, w := range workspaces {
+		payloads = append(payloads, toWorkspacePayload(w))
+	}
+
+	return ListWorkspacesResponse{Workspaces: payloads}, nil
+}
+
+// ─────────────────────────────────────────────
+// POST /flow/workspaces
+// ─────────────────────────────────────────────
+
+type CreateWorkspaceHandler struct {
+	FlowService *application.Service
+}
+
+type CreateWorkspaceRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Color       string `json:"color"`
+}
+
+type CreateWorkspaceResponse struct {
+	Workspace WorkspacePayload `json:"workspace"`
+}
+
+func (h *CreateWorkspaceHandler) Validate(_ context.Context, req *CreateWorkspaceRequest) *errorModels.ServerError {
+	if req.Name == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Name is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *CreateWorkspaceHandler) Serve(ctx context.Context, req *CreateWorkspaceRequest) (CreateWorkspaceResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return CreateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.WorkspaceInput{
+		OwnerID:     authUser.UserID,
+		Name:        req.Name,
+		Description: req.Description,
+		Icon:        req.Icon,
+		Color:       req.Color,
+		CreatedBy:   authUser.UserID,
+	}
+
+	workspace, err := h.FlowService.CreateWorkspace(ctx, input)
+	if err != nil {
+		return CreateWorkspaceResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to create workspace",
+		}
+	}
+
+	return CreateWorkspaceResponse{Workspace: toWorkspacePayload(workspace)}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/workspaces
+// ─────────────────────────────────────────────
+
+type UpdateWorkspaceHandler struct {
+	FlowService *application.Service
+}
+
+type UpdateWorkspaceRequest struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Color       string `json:"color"`
+}
+
+type UpdateWorkspaceResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateWorkspaceHandler) Validate(_ context.Context, req *UpdateWorkspaceRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
+	}
+
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+
+	return nil
+}
+
+func (h *UpdateWorkspaceHandler) Serve(ctx context.Context, req *UpdateWorkspaceRequest) (UpdateWorkspaceResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.UpdateWorkspaceInput{
+		ID:          req.ID,
+		OwnerID:     authUser.UserID,
+		Name:        req.Name,
+		Description: req.Description,
+		Icon:        req.Icon,
+		Color:       req.Color,
+	}
+
+	if err := h.FlowService.UpdateWorkspace(ctx, input); err != nil {
+		return UpdateWorkspaceResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update workspace",
+		}
+	}
+
+	return UpdateWorkspaceResponse{Message: "Workspace updated successfully"}, nil
+}
+
+// ─────────────────────────────────────────────
+// DELETE /flow/workspaces
+// ─────────────────────────────────────────────
+
+type DeleteWorkspaceHandler struct {
+	FlowService *application.Service
+}
+
+type DeleteWorkspaceRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeleteWorkspaceResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteWorkspaceHandler) Validate(_ context.Context, req *DeleteWorkspaceRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
+	}
+
+	return nil
+}
+
+func (h *DeleteWorkspaceHandler) Serve(ctx context.Context, req *DeleteWorkspaceRequest) (DeleteWorkspaceResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return DeleteWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.DeleteWorkspace(ctx, req.ID, authUser.UserID); err != nil {
+		return DeleteWorkspaceResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete workspace",
+		}
+	}
+
+	return DeleteWorkspaceResponse{Message: "Workspace deleted successfully"}, nil
+}
+
+// ─────────────────────────────────────────────
+// POST /flow/workspaces/member
+// ─────────────────────────────────────────────
+
+type AddWorkspaceMemberHandler struct {
+	FlowService *application.Service
+}
+
+type AddWorkspaceMemberRequest struct {
+	WorkspaceID int64  `json:"workspaceId"`
+	UserID      int64  `json:"userId"`
+	Role        string `json:"role"`
+}
+
+type AddWorkspaceMemberResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *AddWorkspaceMemberHandler) Validate(_ context.Context, req *AddWorkspaceMemberRequest) *errorModels.ServerError {
+	if req.WorkspaceID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
+	}
+
+	if req.UserID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "User ID is required"}
+	}
+
+	return nil
+}
+
+func (h *AddWorkspaceMemberHandler) Serve(ctx context.Context, req *AddWorkspaceMemberRequest) (AddWorkspaceMemberResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return AddWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.AddWorkspaceMemberInput{
+		WorkspaceID: req.WorkspaceID,
+		UserID:      req.UserID,
+		Role:        req.Role,
+	}
+
+	if err := h.FlowService.AddWorkspaceMember(ctx, input); err != nil {
+		return AddWorkspaceMemberResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to add workspace member",
+		}
+	}
+
+	return AddWorkspaceMemberResponse{Message: "Member added successfully"}, nil
+}
+
+// ─────────────────────────────────────────────
+// DELETE /flow/workspaces/member
+// ─────────────────────────────────────────────
+
+type RemoveWorkspaceMemberHandler struct {
+	FlowService *application.Service
+}
+
+type RemoveWorkspaceMemberRequest struct {
+	WorkspaceID int64 `json:"workspaceId"`
+	UserID      int64 `json:"userId"`
+}
+
+type RemoveWorkspaceMemberResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *RemoveWorkspaceMemberHandler) Validate(_ context.Context, req *RemoveWorkspaceMemberRequest) *errorModels.ServerError {
+	if req.WorkspaceID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
+	}
+
+	if req.UserID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "User ID is required"}
+	}
+
+	return nil
+}
+
+func (h *RemoveWorkspaceMemberHandler) Serve(ctx context.Context, req *RemoveWorkspaceMemberRequest) (RemoveWorkspaceMemberResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return RemoveWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.RemoveWorkspaceMemberInput{
+		WorkspaceID: req.WorkspaceID,
+		UserID:      req.UserID,
+	}
+
+	if err := h.FlowService.RemoveWorkspaceMember(ctx, input); err != nil {
+		return RemoveWorkspaceMemberResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to remove workspace member",
+		}
+	}
+
+	return RemoveWorkspaceMemberResponse{Message: "Member removed successfully"}, nil
+}

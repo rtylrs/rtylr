@@ -1,0 +1,146 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/application"
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
+)
+
+type SessionPayload struct {
+	ID           int64   `json:"id"`
+	OwnerID      int64   `json:"ownerId"`
+	LocationID   *int64  `json:"locationId"`
+	StaffID      *int64  `json:"staffId"`
+	OpeningFloat float64 `json:"openingFloat"`
+	ClosingFloat float64 `json:"closingFloat"`
+	TotalSales   float64 `json:"totalSales"`
+	Status       string  `json:"status"`
+	OpenedAt     string  `json:"openedAt"`
+	ClosedAt     *string `json:"closedAt"`
+	CreatedAt    string  `json:"createdAt"`
+}
+
+func newSessionPayload(s domain.Session) SessionPayload {
+	p := SessionPayload{
+		ID:           s.ID,
+		OwnerID:      s.OwnerID,
+		LocationID:   s.LocationID,
+		StaffID:      s.StaffID,
+		OpeningFloat: s.OpeningFloat,
+		ClosingFloat: s.ClosingFloat,
+		TotalSales:   s.TotalSales,
+		Status:       s.Status,
+		OpenedAt:     s.OpenedAt.Format("2006-01-02T15:04:05Z"),
+		CreatedAt:    s.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if s.ClosedAt != nil {
+		t := s.ClosedAt.Format("2006-01-02T15:04:05Z")
+		p.ClosedAt = &t
+	}
+	return p
+}
+
+// ─── List ─────────────────────────────────────────────────────────────────────
+
+func SessionListRoutes() []string { return []string{"/pos/sessions"} }
+
+type ListSessionsHandler struct{ Service *application.Service }
+type ListSessionsRequest struct{}
+type ListSessionsResponse struct {
+	Sessions []SessionPayload `json:"sessions"`
+}
+
+func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListSessionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	sessions, err := h.Service.List(ctx, device.User.UserID)
+	if err != nil {
+		return ListSessionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list sessions"}
+	}
+	payloads := make([]SessionPayload, len(sessions))
+	for i, s := range sessions {
+		payloads[i] = newSessionPayload(s)
+	}
+	return ListSessionsResponse{Sessions: payloads}, nil
+}
+
+// ─── Open ─────────────────────────────────────────────────────────────────────
+
+func SessionOpenRoutes() []string { return []string{"/pos/sessions/open"} }
+
+type OpenSessionHandler struct{ Service *application.Service }
+
+type OpenSessionRequest struct {
+	LocationID   *int64  `json:"locationId"`
+	StaffID      *int64  `json:"staffId"`
+	OpeningFloat float64 `json:"openingFloat"`
+}
+
+type OpenSessionResponse struct {
+	SessionID int64  `json:"sessionId"`
+	Message   string `json:"message"`
+}
+
+func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest) (OpenSessionResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return OpenSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Open(ctx, domain.OpenSessionInput{
+		OwnerID:      device.User.UserID,
+		LocationID:   req.LocationID,
+		StaffID:      req.StaffID,
+		OpeningFloat: req.OpeningFloat,
+	})
+	if err != nil {
+		return OpenSessionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to open session"}
+	}
+	return OpenSessionResponse{SessionID: id, Message: "Session opened successfully"}, nil
+}
+
+// ─── Close ────────────────────────────────────────────────────────────────────
+
+func SessionCloseRoutes() []string { return []string{"/pos/sessions/{id}/close"} }
+
+type CloseSessionHandler struct{ Service *application.Service }
+
+type CloseSessionRequest struct {
+	ClosingFloat float64 `json:"closingFloat"`
+}
+
+type CloseSessionResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionRequest) (CloseSessionResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CloseSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return CloseSessionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid session ID"}
+	}
+	if closeErr := h.Service.Close(ctx, domain.CloseSessionInput{
+		ID:           id,
+		OwnerID:      device.User.UserID,
+		ClosingFloat: req.ClosingFloat,
+	}); closeErr != nil {
+		if errors.Is(closeErr, domain.ErrSessionNotFound) {
+			return CloseSessionResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Session not found or already closed"}
+		}
+		return CloseSessionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to close session"}
+	}
+	return CloseSessionResponse{Message: "Session closed successfully"}, nil
+}

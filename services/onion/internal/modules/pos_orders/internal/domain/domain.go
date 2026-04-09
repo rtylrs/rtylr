@@ -1,0 +1,264 @@
+package domain
+
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrSessionAlreadyOpen = errors.New("staff already has an open session")
+	ErrSessionNotFound    = errors.New("session not found")
+	ErrSessionNotOpen     = errors.New("session is not open")
+	ErrOrderNotFound      = errors.New("order not found")
+	ErrLocationNotFound   = errors.New("location not found")
+	ErrTableNotFound      = errors.New("table not found")
+)
+
+// ─── Location ────────────────────────────────────────────────────────────────
+
+type Location struct {
+	ID        int64
+	OwnerID   int64
+	Name      string
+	Address   string
+	Phone     string
+	IsActive  bool
+	CreatedAt time.Time
+}
+
+type LocationInput struct {
+	Name    string
+	Address string
+	Phone   string
+}
+
+// ─── Table ───────────────────────────────────────────────────────────────────
+
+type TableStatus string
+
+const (
+	TableStatusAvailable TableStatus = "available"
+	TableStatusOccupied  TableStatus = "occupied"
+	TableStatusReserved  TableStatus = "reserved"
+	TableStatusCleaning  TableStatus = "cleaning"
+)
+
+type Table struct {
+	ID                   int64
+	OwnerID              int64
+	LocationID           int64
+	Name                 string
+	Capacity             int
+	Status               TableStatus
+	CurrentSessionOrderID int64
+	QRCodeURL            string
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+type TableInput struct {
+	ID         int64
+	LocationID int64
+	Name       string
+	Capacity   int
+	QRCodeURL  string
+}
+
+// ─── Session ─────────────────────────────────────────────────────────────────
+
+type SessionStatus string
+
+const (
+	SessionStatusOpen   SessionStatus = "open"
+	SessionStatusClosed SessionStatus = "closed"
+)
+
+type Session struct {
+	ID               int64
+	OwnerID          int64
+	LocationID       int64
+	StaffID          int64
+	Status           SessionStatus
+	OpeningCash      float64
+	ClosingCash      float64
+	ExpectedCash     float64
+	CashDifference   float64
+	TotalSales       float64
+	TotalOrders      int
+	TotalCashSales   float64
+	TotalCardSales   float64
+	TotalOnlineSales float64
+	TotalRefunds     float64
+	OpenedAt         time.Time
+	ClosedAt         *time.Time
+	Notes            string
+}
+
+type OpenSessionInput struct {
+	LocationID  int64
+	OpeningCash float64
+}
+
+type CloseSessionInput struct {
+	SessionID   int64
+	ClosingCash float64
+	Notes       string
+}
+
+// ─── Order ───────────────────────────────────────────────────────────────────
+
+type OrderType string
+
+const (
+	OrderTypeDineIn   OrderType = "dine_in"
+	OrderTypeTakeaway OrderType = "takeaway"
+	OrderTypeDelivery OrderType = "delivery"
+	OrderTypeOnline   OrderType = "online"
+)
+
+type OrderStatus string
+
+const (
+	OrderStatusPending   OrderStatus = "pending"
+	OrderStatusConfirmed OrderStatus = "confirmed"
+	OrderStatusPreparing OrderStatus = "preparing"
+	OrderStatusReady     OrderStatus = "ready"
+	OrderStatusServed    OrderStatus = "served"
+	OrderStatusPaid      OrderStatus = "paid"
+	OrderStatusCancelled OrderStatus = "cancelled"
+	OrderStatusRefunded  OrderStatus = "refunded"
+)
+
+type PaymentMethod string
+
+const (
+	PaymentMethodCash   PaymentMethod = "cash"
+	PaymentMethodCard   PaymentMethod = "card"
+	PaymentMethodOnline PaymentMethod = "online"
+	PaymentMethodSplit  PaymentMethod = "split"
+)
+
+type PaymentStatus string
+
+const (
+	PaymentStatusUnpaid   PaymentStatus = "unpaid"
+	PaymentStatusPartial  PaymentStatus = "partial"
+	PaymentStatusPaid     PaymentStatus = "paid"
+	PaymentStatusRefunded PaymentStatus = "refunded"
+)
+
+type Order struct {
+	ID             int64
+	OwnerID        int64
+	SessionID      int64
+	TableID        int64
+	LocationID     int64
+	OrderNumber    string
+	Type           OrderType
+	Status         OrderStatus
+	CustomerID     int64
+	CustomerName   string
+	StaffID        int64
+	Subtotal       float64
+	DiscountAmount float64
+	TaxAmount      float64
+	Total          float64
+	PaymentMethod  PaymentMethod
+	PaymentStatus  PaymentStatus
+	AmountPaid     float64
+	ChangeDue      float64
+	Notes          string
+	KitchenNotes   string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	PaidAt         *time.Time
+	Items          []OrderItem
+}
+
+type OrderInput struct {
+	SessionID      int64
+	TableID        int64
+	LocationID     int64
+	Type           OrderType
+	CustomerID     int64
+	CustomerName   string
+	PaymentMethod  PaymentMethod
+	Notes          string
+	KitchenNotes   string
+	Items          []OrderItemInput
+}
+
+// ─── Order Item ──────────────────────────────────────────────────────────────
+
+type ItemStatus string
+
+const (
+	ItemStatusPending   ItemStatus = "pending"
+	ItemStatusPreparing ItemStatus = "preparing"
+	ItemStatusReady     ItemStatus = "ready"
+	ItemStatusServed    ItemStatus = "served"
+	ItemStatusCancelled ItemStatus = "cancelled"
+)
+
+type OrderItem struct {
+	ID             int64
+	OrderID        int64
+	MenuItemID     int64
+	Name           string
+	SKU            string
+	Quantity       float64
+	UnitPrice      float64
+	DiscountPct    float64
+	DiscountAmount float64
+	TaxRate        float64
+	Total          float64
+	Notes          string
+	Status         ItemStatus
+	CreatedAt      time.Time
+}
+
+type OrderItemInput struct {
+	MenuItemID     int64
+	Name           string
+	SKU            string
+	Quantity       float64
+	UnitPrice      float64
+	DiscountPct    float64
+	TaxRate        float64
+	Notes          string
+}
+
+// ─── Payment ─────────────────────────────────────────────────────────────────
+
+type PaymentInput struct {
+	OrderID       int64
+	PaymentMethod PaymentMethod
+	AmountPaid    float64
+}
+
+// ─── Refund ──────────────────────────────────────────────────────────────────
+
+type Refund struct {
+	ID          int64
+	OwnerID     int64
+	OrderID     int64
+	Amount      float64
+	Reason      string
+	RefundedBy  int64
+	RefundedAt  time.Time
+}
+
+type RefundInput struct {
+	OrderID int64
+	Amount  float64
+	Reason  string
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+
+type DashboardStats struct {
+	TotalSales    float64 `json:"totalSales"`
+	OrderCount    int     `json:"orderCount"`
+	AvgOrder      float64 `json:"avgOrder"`
+	TableTurnover float64 `json:"tableTurnover"`
+}

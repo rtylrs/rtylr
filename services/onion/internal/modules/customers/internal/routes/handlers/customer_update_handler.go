@@ -1,0 +1,106 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"time"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+
+	"github.com/voxire/onion/internal/modules/customers/internal/application"
+	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+)
+
+func CustomerUpdateRoutes() []string {
+	return []string{"/crm/customers"}
+}
+
+type UpdateCustomerHandler struct {
+	CRMService *application.Service
+}
+
+type UpdateCustomerRequest struct {
+	ID          int64    `json:"id"`
+	FirstName   string   `json:"firstName"`
+	LastName    string   `json:"lastName"`
+	Email       string   `json:"email"`
+	Phone       string   `json:"phone"`
+	DateOfBirth string   `json:"dateOfBirth"`
+	Gender      string   `json:"gender"`
+	Address     string   `json:"address"`
+	City        string   `json:"city"`
+	Country     string   `json:"country"`
+	Tags        []string `json:"tags"`
+	Notes       string   `json:"notes"`
+	IsActive    *bool    `json:"isActive"`
+}
+
+type UpdateCustomerResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateCustomerHandler) Validate(_ context.Context, req *UpdateCustomerRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Customer ID is required",
+		}
+	}
+
+	if req.FirstName == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "First name is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRequest) (UpdateCustomerResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.CustomerUpdateInput{
+		ID:        req.ID,
+		OwnerID:   device.User.UserID,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Phone:     req.Phone,
+		Gender:    req.Gender,
+		Address:   req.Address,
+		City:      req.City,
+		Country:   req.Country,
+		Tags:      req.Tags,
+		Notes:     req.Notes,
+		IsActive:  req.IsActive,
+	}
+
+	if req.DateOfBirth != "" {
+		t, err := time.Parse("2006-01-02", req.DateOfBirth)
+		if err == nil {
+			input.DateOfBirth = &t
+		}
+	}
+
+	if err := h.CRMService.UpdateCustomer(ctx, input); err != nil {
+		if errors.Is(err, domain.ErrCustomerNotFound) {
+			return UpdateCustomerResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Customer not found",
+			}
+		}
+
+		return UpdateCustomerResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update customer",
+		}
+	}
+
+	return UpdateCustomerResponse{Message: "Customer updated successfully"}, nil
+}
