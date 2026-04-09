@@ -72,6 +72,14 @@ export const restaurantMenuConfig: MenuConfig = {
     },
     {
       header: "BUILD",
+      items: [
+        {
+          icon: Palette,
+          text: "Design Studio",
+          path: "/app/business/design",
+          permissions: [],
+        },
+      ],
       dropdownSections: [
         {
           icon: List,
@@ -89,19 +97,6 @@ export const restaurantMenuConfig: MenuConfig = {
               text: "Menu Items",
               path: "/app/business/menu",
               permissions: [PERMISSIONS.MANAGE_MENU],
-            },
-          ],
-        },
-        {
-          icon: Palette,
-          title: "Design",
-          sectionKey: "design",
-          items: [
-            {
-              icon: Palette,
-              text: "Design Studio",
-              path: "/app/business/design",
-              permissions: [],
             },
           ],
         },
@@ -154,6 +149,14 @@ export const gymMenuConfig: MenuConfig = {
   sections: [
     {
       header: "BUILD",
+      items: [
+        {
+          icon: Palette,
+          text: "Design Studio",
+          path: "/app/business/design",
+          permissions: [],
+        },
+      ],
       dropdownSections: [
         {
           icon: Barbell,
@@ -171,19 +174,6 @@ export const gymMenuConfig: MenuConfig = {
               text: "Plans",
               path: "/app/business/plans",
               permissions: [PERMISSIONS.MANAGE_MENU],
-            },
-          ],
-        },
-        {
-          icon: Palette,
-          title: "Design",
-          sectionKey: "design",
-          items: [
-            {
-              icon: Palette,
-              text: "Design Studio",
-              path: "/app/business/design",
-              permissions: [],
             },
           ],
         },
@@ -242,6 +232,14 @@ export const retailMenuConfig: MenuConfig = {
   sections: [
     {
       header: "BUILD",
+      items: [
+        {
+          icon: Palette,
+          text: "Design Studio",
+          path: "/app/business/design",
+          permissions: [],
+        },
+      ],
       dropdownSections: [
         {
           icon: ShoppingBag,
@@ -259,19 +257,6 @@ export const retailMenuConfig: MenuConfig = {
               text: "Inventory",
               path: "/app/business/inventory",
               permissions: [PERMISSIONS.MANAGE_MENU],
-            },
-          ],
-        },
-        {
-          icon: Palette,
-          title: "Design",
-          sectionKey: "design",
-          items: [
-            {
-              icon: Palette,
-              text: "Design Studio",
-              path: "/app/business/design",
-              permissions: [],
             },
           ],
         },
@@ -330,6 +315,14 @@ export const defaultMenuConfig: MenuConfig = {
   sections: [
     {
       header: "BUILD",
+      items: [
+        {
+          icon: Palette,
+          text: "Design Studio",
+          path: "/app/business/design",
+          permissions: [],
+        },
+      ],
       dropdownSections: [
         {
           icon: Package,
@@ -341,19 +334,6 @@ export const defaultMenuConfig: MenuConfig = {
               text: "Products",
               path: "/app/business/products",
               permissions: [PERMISSIONS.MANAGE_MENU],
-            },
-          ],
-        },
-        {
-          icon: Palette,
-          title: "Design",
-          sectionKey: "design",
-          items: [
-            {
-              icon: Palette,
-              text: "Design Studio",
-              path: "/app/business/design",
-              permissions: [],
             },
           ],
         },

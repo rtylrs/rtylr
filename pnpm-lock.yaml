@@ -281,6 +281,9 @@ importers:
       '@types/react-helmet':
         specifier: ^6.1.11
         version: 6.1.11
+      '@voxire/menu':
+        specifier: workspace:*
+        version: link:../../packages/menu
       axios:
         specifier: ^1.7.2
         version: 1.13.2

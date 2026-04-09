@@ -93,9 +93,17 @@
   }
 
   &.active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.13);
     color: var(--light-color);
     font-weight: 600;
+
+    .text {
+      color: #fff;
+    }
+
+    .icon {
+      color: rgba(255, 255, 255, 0.95);
+    }
   }
 
   &.header {
@@ -113,7 +121,7 @@
 }
 
 .text {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
 }
