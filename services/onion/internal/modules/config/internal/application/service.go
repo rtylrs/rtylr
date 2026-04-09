@@ -43,17 +43,3 @@ func (s *Service) GetThemeByOwnerID(ctx context.Context, id string) (domain.Them
 	return s.repo.GetThemeByOwnerID(ctx, id)
 }
 
-func (s *Service) EvaluateAllFeaturesForUser(ctx context.Context) (*domain.Features, error) {
-	userContext := s.BuildFeatureContext(ctx)
-
-	featureFlags, err := s.EvaluateAllFeatures(ctx, userContext)
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.Features{
-		Flags:       featureFlags,
-		IsAnonymous: userContext.IsAnonymous,
-		SessionId:   userContext.SessionID,
-	}, nil
-}

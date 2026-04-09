@@ -10,18 +10,11 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, configService *application.Service) {
-	http.RegisterGET[handlers.GetFeaturesRequest, handlers.GetFeaturesResponse](
-		ctx,
-		router,
-		handlers.GetFeaturesRoutes(),
-		&handlers.GetFeaturesHandler{ConfigService: configService},
-	)
-
 	http.RegisterPOSTWithValidation[handlers.GetConfigByOwnerRequest, handlers.GetConfigByOwnerResponse](
 		ctx,
 		router,
 		handlers.ConfigByOwnerRoutes(),
-		&handlers.ConfigByOwnerHandler{ConfigService: configService},
+		&handlers.GetConfigByOwnerHandler{ConfigService: configService},
 	)
 
 	http.RegisterPOSTWithValidation[handlers.CreateConfigRequest, handlers.CreateConfigResponse](
