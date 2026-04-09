@@ -9,132 +9,154 @@
 
 .card {
   width: 100%;
-  max-width: 380px;
+  max-width: 340px;
   background: var(--pos-card-bg, #1e1e1e);
   border: 1px solid var(--pos-card-border, rgba(255, 255, 255, 0.06));
-  border-radius: 16px;
-  padding: 40px 36px;
+  border-radius: 20px;
+  padding: 40px 32px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
 }
+
+// ─── Brand ────────────────────────────────────────────────────────────────────
 
 .brand {
   text-align: center;
-  margin-bottom: 32px;
 }
 
 .brand__icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: var(--pos-accent, #f0f0ee);
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .brand__name {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--pos-text, #f0f0ee);
-  margin: 0 0 6px;
+  margin: 0 0 5px;
 }
 
 .brand__sub {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--pos-muted, rgba(240, 240, 238, 0.45));
   margin: 0;
 }
 
-.form {
+// ─── PIN dots ─────────────────────────────────────────────────────────────────
+
+.dots {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.dots__shake {
+  animation: shake 0.4s ease;
 }
 
-.field__label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--pos-muted, rgba(240, 240, 238, 0.6));
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(240, 240, 238, 0.25);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.field__inputWrap {
-  position: relative;
+.dot__filled {
+  background: var(--pos-accent, #f0f0ee);
+  border-color: var(--pos-accent, #f0f0ee);
+  transform: scale(1.1);
 }
 
-.field__input {
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--pos-input-bg, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--pos-input-border, rgba(255, 255, 255, 0.1));
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: var(--pos-text, #f0f0ee);
-  outline: none;
-  transition: border-color 0.15s ease;
-  box-sizing: border-box;
-
-  &::placeholder {
-    color: var(--pos-muted, rgba(240, 240, 238, 0.35));
-  }
-
-  &:focus {
-    border-color: var(--pos-accent, #f0f0ee);
-  }
+.dot__error {
+  border-color: rgba(248, 113, 113, 0.6);
+  background: rgba(248, 113, 113, 0.15);
 }
 
-.field__inputWrap .field__input {
-  padding-right: 42px;
-}
-
-.field__toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--pos-muted, rgba(240, 240, 238, 0.45));
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-
-  &:hover {
-    color: var(--pos-text, #f0f0ee);
-  }
-}
+// ─── Error / loading ──────────────────────────────────────────────────────────
 
 .errorMsg {
-  padding: 10px 14px;
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  border-radius: 8px;
-  font-size: 0.825rem;
+  font-size: 0.8rem;
   color: #f87171;
+  margin: -12px 0 -8px;
+  text-align: center;
 }
 
-.submitBtn {
-  padding: 13px;
-  background: var(--pos-accent, #f0f0ee);
-  color: var(--pos-accent-text, #111111);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  margin-top: 4px;
+.loadingMsg {
+  font-size: 0.8rem;
+  color: var(--pos-muted, rgba(240, 240, 238, 0.45));
+  margin: -12px 0 -8px;
+  text-align: center;
+}
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+// ─── Numpad ───────────────────────────────────────────────────────────────────
+
+.pad {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.pad__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pad__key {
+  height: 64px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--pos-text, #f0f0ee);
+  font-size: 1.35rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+
+  &:not(:disabled):active {
+    background: rgba(255, 255, 255, 0.14);
+    transform: scale(0.95);
   }
 
   &:not(:disabled):hover {
-    opacity: 0.88;
+    background: rgba(255, 255, 255, 0.09);
   }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.pad__key__empty {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.pad__key__back {
+  font-size: 1.1rem;
+  color: var(--pos-muted, rgba(240, 240, 238, 0.55));
+}
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
 }

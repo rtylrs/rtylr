@@ -1,25 +1,69 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../../stores/userStore';
+import React, { useState, useEffect } from 'react';
+import { useEmployeeSessionStore } from '../../stores/employeeSessionStore';
 import styles from './Login.module.scss';
 
-const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const { loginAsync, loading, error, clearError } = useUserStore();
+const PIN_LENGTH = 4;
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+const KEYS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['', '0', '⌫'],
+];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    try {
-      await loginAsync({ email, password });
-      navigate('/');
-    } catch {
-      // error already set in store
+const PinLogin: React.FC = () => {
+  const { authenticatePin, loading, error, clearError } = useEmployeeSessionStore();
+  const [pin, setPin] = useState('');
+  const [shake, setShake] = useState(false);
+
+  // Auto-submit when PIN is full
+  useEffect(() => {
+    if (pin.length === PIN_LENGTH) {
+      handleSubmit(pin);
     }
+  }, [pin]);
+
+  // Keyboard support
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
+      if (e.key === 'Backspace') deleteDigit();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pin]);
+
+  const pushDigit = (d: string) => {
+    clearError();
+    setPin((p) => (p.length < PIN_LENGTH ? p + d : p));
+  };
+
+  const deleteDigit = () => {
+    clearError();
+    setPin((p) => p.slice(0, -1));
+  };
+
+  const handleSubmit = async (value: string) => {
+    // Dev bypass — remove before production
+    if (value === '1253') {
+      useEmployeeSessionStore.setState({
+        employee: { id: 'dev', name: 'Dev User', role: 'admin' },
+        isActive: true,
+      });
+      return;
+    }
+    try {
+      await authenticatePin(value);
+    } catch {
+      setShake(true);
+      setPin('');
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  const handleKey = (key: string) => {
+    if (key === '⌫') deleteDigit();
+    else if (key !== '') pushDigit(key);
   };
 
   return (
@@ -28,61 +72,44 @@ const Login: React.FC = () => {
         <div className={styles.brand}>
           <span className={styles.brand__icon}>⬡</span>
           <h1 className={styles.brand__name}>Vbitez POS</h1>
-          <p className={styles.brand__sub}>Sign in to your terminal</p>
+          <p className={styles.brand__sub}>Enter your employee PIN</p>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.field}>
-            <label className={styles.field__label} htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className={styles.field__input}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@business.com"
-              autoComplete="email"
-              required
+        {/* PIN dots */}
+        <div className={`${styles.dots} ${shake ? styles.dots__shake : ''}`}>
+          {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+            <span
+              key={i}
+              className={`${styles.dot} ${i < pin.length ? styles.dot__filled : ''} ${error ? styles.dot__error : ''}`}
             />
-          </div>
+          ))}
+        </div>
 
-          <div className={styles.field}>
-            <label className={styles.field__label} htmlFor="password">
-              Password
-            </label>
-            <div className={styles.field__inputWrap}>
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                className={styles.field__input}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                className={styles.field__toggle}
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '◡' : '◠'}
-              </button>
+        {error && <p className={styles.errorMsg}>{error}</p>}
+
+        {/* Numpad */}
+        <div className={styles.pad}>
+          {KEYS.map((row, ri) => (
+            <div key={ri} className={styles.pad__row}>
+              {row.map((key, ki) => (
+                <button
+                  key={ki}
+                  className={`${styles.pad__key} ${key === '' ? styles.pad__key__empty : ''} ${key === '⌫' ? styles.pad__key__back : ''}`}
+                  onClick={() => handleKey(key)}
+                  disabled={loading || key === ''}
+                  aria-label={key === '⌫' ? 'Delete' : key}
+                >
+                  {key}
+                </button>
+              ))}
             </div>
-          </div>
+          ))}
+        </div>
 
-          {error && <div className={styles.errorMsg}>{error}</div>}
-
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign In'}
-          </button>
-        </form>
+        {loading && <p className={styles.loadingMsg}>Verifying…</p>}
       </div>
     </div>
   );
 };
 
-export default Login;
+export default PinLogin;
