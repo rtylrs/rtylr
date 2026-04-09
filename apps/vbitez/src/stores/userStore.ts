@@ -22,20 +22,10 @@ interface UserState {
 }
 
 interface UserActions {
-  login: (user: any) => void;
   logout: () => void;
   clearError: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
   setToken: (token: string) => void;
   setUser: (user: any) => void;
-  setRole: (role: string) => void;
-  setUserId: (userId: string) => void;
-  setAddons: (addons: Addons) => void;
-  setVisits: (visits: any[]) => void;
-  loginAsync: (payload: { email: string; password: string }) => Promise<void>;
-  registerRestaurantAsync: (payload: { email: string; password: string; name: string; referred: string }) => Promise<void>;
-  restaurantWithGoogleAsync: (payload: { idToken: string }) => Promise<void>;
   getUserInfo: () => Promise<void>;
   setThemeAsync: (payload: { id: string; themeData: any }) => Promise<void>;
 }
@@ -62,8 +52,6 @@ export const useUserStore = create<UserState & UserActions>()(
     (set, get) => ({
       ...initialState,
 
-      login: (user) => set({ user, isAuthenticated: true }),
-
       logout: () => {
         localStorage.removeItem('token');
         set({
@@ -79,84 +67,9 @@ export const useUserStore = create<UserState & UserActions>()(
 
       clearError: () => set({ error: null }),
 
-      setLoading: (loading) => set({ loading }),
-
-      setError: (error) => set({ error }),
-
       setToken: (token) => set({ token }),
 
       setUser: (user) => set({ user }),
-
-      setRole: (role) => set({ role }),
-
-      setUserId: (userId) => set({ userId }),
-
-      setAddons: (addons) => set({ addons }),
-
-      setVisits: (visits) => set({ visits }),
-
-      loginAsync: async (payload) => {
-        set({ loading: true, error: null });
-        try {
-          const response = await api.post('/auth/login', payload);
-          const data = response.data;
-          localStorage.setItem('token', data.token);
-          set({
-            token: data.token,
-            isAuthenticated: true,
-            loading: false,
-            error: null,
-          });
-        } catch (error: any) {
-          set({
-            loading: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Login failed',
-          });
-          throw error;
-        }
-      },
-
-      registerRestaurantAsync: async (payload) => {
-        set({ loading: true, error: null });
-        try {
-          const response = await api.post('/auth/create/business', payload);
-          const data = response.data;
-          localStorage.setItem('token', data.token);
-          set({
-            token: data.token,
-            isAuthenticated: true,
-            loading: false,
-            error: null,
-          });
-        } catch (error: any) {
-          set({
-            loading: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Registration failed',
-          });
-          throw error;
-        }
-      },
-
-      restaurantWithGoogleAsync: async (payload) => {
-        set({ loading: true, error: null });
-        try {
-          const response = await api.post('/auth/create/business/google', payload);
-          const data = response.data;
-          localStorage.setItem('token', data.token);
-          set({
-            token: data.token,
-            isAuthenticated: true,
-            loading: false,
-            error: null,
-          });
-        } catch (error: any) {
-          set({
-            loading: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Google login failed',
-          });
-          throw error;
-        }
-      },
 
       getUserInfo: async () => {
         set({ loading: true, error: null });
@@ -165,18 +78,18 @@ export const useUserStore = create<UserState & UserActions>()(
           const { userId, token, user, visits } = response.data;
           set({
             role: user.role,
-            userId: userId,
-            token: token,
-            user: user,
+            userId,
+            token,
+            user,
             isAuthenticated: true,
             loading: false,
             addons: user.addons,
-            visits: visits,
+            visits,
           });
         } catch (error: any) {
           set({
             loading: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Failed to get user info',
+            error: error.response?.data?.message || 'Failed to restore session',
           });
           throw error;
         }
@@ -197,7 +110,7 @@ export const useUserStore = create<UserState & UserActions>()(
         } catch (error: any) {
           set({
             loading: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Failed to update theme',
+            error: error.response?.data?.message || 'Failed to update theme',
           });
           throw error;
         }
