@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Mail, Phone, Package } from 'lucide-react';
-import { erpApi, Supplier } from '../../services/erpApi';
+import { Supplier } from '../../services/erpApi';
+import { useSuppliers } from '../../hooks/useSuppliers';
 
 const AMBER = '#f59e0b';
 
@@ -93,29 +94,8 @@ const SkeletonCard: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Suppliers: React.FC = () => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchSuppliers() {
-      setIsLoading(true);
-      try {
-        const res = await erpApi.listSuppliers();
-        if (!cancelled && res.data?.length) {
-          setSuppliers(res.data);
-        }
-      } catch {
-        // silently fall back to mock data
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    fetchSuppliers();
-    return () => { cancelled = true; };
-  }, []);
+  const { data: fetchedSuppliers, isLoading } = useSuppliers();
+  const suppliers: Supplier[] = fetchedSuppliers && fetchedSuppliers.length ? fetchedSuppliers : mockSuppliers;
 
   const activeCount = suppliers.filter((s) => s.status === 'Active').length;
 

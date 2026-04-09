@@ -1,0 +1,18 @@
+{
+  "_vendor-DWQHgg-w.js": {
+    "file": "assets/vendor-DWQHgg-w.js",
+    "name": "vendor"
+  },
+  "index.html": {
+    "file": "assets/index-zztWJWzq.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_vendor-DWQHgg-w.js"
+    ],
+    "css": [
+      "assets/index-D9-9PtZn.css"
+    ]
+  }
+}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, ChevronUp, Phone, Mail, Star } from 'lucide-react';
-import { crmApi } from '../../services/crmApi';
+import { useCustomers } from '../../hooks/useCustomers';
 
 const ACCENT = '#3b82f6';
 
@@ -125,16 +125,11 @@ function ExpandedDetail({ customer }: { customer: Customer }) {
 }
 
 const Customers: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const { data: fetchedCustomers } = useCustomers();
+  const customers: Customer[] = fetchedCustomers && fetchedCustomers.length ? (fetchedCustomers as Customer[]) : mockCustomers;
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<Tier | 'All'>('All');
   const [expandedId, setExpandedId] = useState<number | null>(null);
-
-  useEffect(() => {
-    crmApi.getCustomers().then((data) => {
-      if (data?.length) setCustomers(data);
-    }).catch(() => {/* keep mock data */});
-  }, []);
 
   const filtered = customers.filter((c) => {
     const matchSearch =

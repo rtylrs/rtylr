@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Mail, MessageSquare, Bell, Users, Send, Eye, TrendingUp } from 'lucide-react';
-import { crmApi } from '../../services/crmApi';
+import { useCampaigns } from '../../hooks/useCampaigns';
 
 const ACCENT = '#3b82f6';
 
@@ -70,9 +70,9 @@ const mockCampaigns: Campaign[] = [
     status: 'Draft',
     audience: 0,
     sent: 0,
-    openRate: '—',
-    clickRate: '—',
-    revenue: '—',
+    openRate: '-',
+    clickRate: '-',
+    revenue: '-',
     updatedAt: '5 days ago',
   },
 ];
@@ -171,8 +171,8 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {[
-          { label: 'Audience', value: campaign.audience ? campaign.audience.toLocaleString() : '—', icon: Users },
-          { label: 'Sent', value: campaign.sent ? campaign.sent.toLocaleString() : '—', icon: Send },
+          { label: 'Audience', value: campaign.audience ? campaign.audience.toLocaleString() : '-', icon: Users },
+          { label: 'Sent', value: campaign.sent ? campaign.sent.toLocaleString() : '-', icon: Send },
           { label: 'Open Rate', value: campaign.openRate, icon: Eye },
           { label: 'Click Rate', value: campaign.clickRate, icon: TrendingUp },
         ].map(({ label, value, icon: Icon }) => (
@@ -251,14 +251,9 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
 }
 
 const Campaigns: React.FC = () => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const { data: fetchedCampaigns } = useCampaigns();
+  const campaigns: Campaign[] = fetchedCampaigns && fetchedCampaigns.length ? (fetchedCampaigns as Campaign[]) : mockCampaigns;
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
-
-  useEffect(() => {
-    crmApi.getCampaigns().then((data) => {
-      if (data?.length) setCampaigns(data as Campaign[]);
-    }).catch(() => {/* keep mock data */});
-  }, []);
 
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
 

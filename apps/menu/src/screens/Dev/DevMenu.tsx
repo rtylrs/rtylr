@@ -76,7 +76,7 @@ const MOCK_BUSINESS: BusinessInfo = {
   offers: [
     {
       id: 'o1',
-      title: 'Happy Hour — 50% Off Drinks',
+      title: 'Happy Hour: 50% Off Drinks',
       description: 'Every weekday from 4–6pm. All house cocktails, wine, and draft beers half price.',
       image: PH(800, 350, 'c8a96e', 'Happy+Hour'),
       badge: 'Daily',
@@ -92,7 +92,7 @@ const MOCK_BUSINESS: BusinessInfo = {
     },
     {
       id: 'o3',
-      title: 'Loyalty Card — 10th Meal Free',
+      title: 'Loyalty Card: 10th Meal Free',
       description: 'Dine with us 9 times and your 10th main course is completely on the house.',
       badge: 'Ongoing',
     },

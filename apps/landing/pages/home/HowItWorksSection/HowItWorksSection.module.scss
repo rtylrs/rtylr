@@ -1,13 +1,51 @@
 .howItWorksSection {
   padding: 120px 0;
   background: var(--app-background);
+  position: relative;
+  overflow: hidden;
+}
+
+.bgOrbOne {
+  position: absolute;
+  top: 10%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(69, 131, 196, 0.12) 0%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgOrbTwo {
+  position: absolute;
+  bottom: 5%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(100, 197, 185, 0.1) 0%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 50px;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .sectionTitle {
@@ -25,24 +63,71 @@
   margin: 0 0 80px 0;
 }
 
-.stepsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 60px;
-  align-items: start;
+.timeline {
+  position: relative;
+  text-align: left;
+  padding-left: 0;
 }
 
-.stepItem {
-  text-align: left;
+.timelineLine {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  bottom: 40px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(69, 131, 196, 0.05) 0%,
+    rgba(69, 131, 196, 0.4) 20%,
+    rgba(100, 197, 185, 0.4) 80%,
+    rgba(100, 197, 185, 0.05) 100%
+  );
+  z-index: 0;
+}
+
+.timelineItem {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 32px 0;
+  z-index: 1;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.stepNumberWrap {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--app-background);
+  border: 2px solid rgba(69, 131, 196, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 40px rgba(69, 131, 196, 0.15);
 }
 
 .stepNumber {
-  font-size: 4rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.1);
+  color: white;
   line-height: 1;
-  margin-bottom: 24px;
   letter-spacing: -0.02em;
+}
+
+.stepContent {
+  flex: 1;
+  padding-top: 12px;
 }
 
 .stepTitle {
@@ -58,22 +143,7 @@
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.6;
   margin: 0;
-}
-
-@media (max-width: 1024px) {
-  .stepsGrid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  .sectionTitle {
-    font-size: 2.5rem;
-  }
-
-  .sectionDescription {
-    font-size: 1.1rem;
-    margin-bottom: 60px;
-  }
+  max-width: 600px;
 }
 
 @media (max-width: 768px) {
@@ -91,19 +161,38 @@
 
   .sectionDescription {
     font-size: 1rem;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
+  }
+
+  .timelineLine {
+    left: 28px;
+    top: 28px;
+    bottom: 28px;
+  }
+
+  .timelineItem {
+    gap: 24px;
+    padding: 24px 0;
+  }
+
+  .stepNumberWrap {
+    width: 56px;
+    height: 56px;
   }
 
   .stepNumber {
-    font-size: 3rem;
+    font-size: 1.25rem;
   }
 
   .stepTitle {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
   }
 
   .stepDescription {
     font-size: 1rem;
   }
-}
 
+  .stepContent {
+    padding-top: 6px;
+  }
+}

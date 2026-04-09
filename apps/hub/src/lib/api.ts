@@ -1,18 +1,12 @@
 import axios from 'axios';
 import i18next from 'i18next';
+import { APP_URLS } from '@voxire/config';
 
 const getBaseUrl = () => {
   return 'https://api.voxire.dev/';
 };
 
-const getAuthUrl = () => {
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  return isLocalhost
-    ? 'http://localhost:5176?redirect=hub'
-    : 'https://auth.rtylr.com?redirect=hub';
-};
+const getAuthUrl = () => `${APP_URLS.auth}?redirect=hub`;
 
 const getTokenFromCookie = (): string | null =>
   document.cookie

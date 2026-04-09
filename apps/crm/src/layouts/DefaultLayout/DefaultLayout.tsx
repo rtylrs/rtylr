@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
   Users,
@@ -135,7 +136,7 @@ const DefaultLayout: React.FC = () => {
 
   const handleLogout = () => {
     document.cookie = 'rtylr_session=; Max-Age=0; path=/';
-    window.location.href = 'http://localhost:5176?redirect=crm';
+    window.location.href = `${APP_URLS.auth}?redirect=crm`;
   };
 
   return (
@@ -195,7 +196,7 @@ const DefaultLayout: React.FC = () => {
         {/* Hub back link */}
         <div style={{ padding: '10px 8px 4px' }}>
           <a
-            href="http://localhost:5176"
+            href={APP_URLS.hub}
             style={{
               display: 'flex',
               alignItems: 'center',

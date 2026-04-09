@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, UserCheck, DollarSign, ChefHat, Coffee, Briefcase, Truck, Plus } from 'lucide-react';
-import { hrApi, Department } from '../../services/hrApi';
+import { Department } from '../../services/hrApi';
+import { useDepartments } from '../../hooks/useDepartments';
 
 const ACCENT = '#8b5cf6';
 
@@ -30,15 +31,8 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } 
 const cardAnim  = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } } };
 
 const Departments: React.FC = () => {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    hrApi.listDepartments()
-      .then((res) => { if (res.data?.length) setDepartments(res.data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedDepartments, isLoading: loading } = useDepartments();
+  const departments: Department[] = fetchedDepartments || [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

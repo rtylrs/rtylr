@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
   Package,
@@ -135,7 +136,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/';
-    window.location.href = 'http://localhost:5176?redirect=erp';
+    window.location.href = `${APP_URLS.auth}?redirect=erp`;
   };
 
   return (
@@ -167,7 +168,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Hub back-link */}
         <div className="px-3 pt-3">
           <a
-            href="http://localhost:5175"
+            href={APP_URLS.hub}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150 no-underline"
             style={{ color: 'var(--hub-text-muted)' }}
             onMouseEnter={(e) => {

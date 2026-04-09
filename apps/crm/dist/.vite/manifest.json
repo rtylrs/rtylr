@@ -1,0 +1,18 @@
+{
+  "_vendor-DmBBBQ7P.js": {
+    "file": "assets/vendor-DmBBBQ7P.js",
+    "name": "vendor"
+  },
+  "index.html": {
+    "file": "assets/index-CknMn1wi.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_vendor-DmBBBQ7P.js"
+    ],
+    "css": [
+      "assets/index-DxDIKH_9.css"
+    ]
+  }
+}

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 
 const AUTH_COOKIE = 'rtylr_session';
-const HUB_URL = 'http://localhost:5176';
 
 function useAuthGuard() {
   const [cookies] = useCookies([AUTH_COOKIE]);
@@ -15,9 +15,9 @@ function useAuthGuard() {
   useEffect(() => {
     const session = cookies[AUTH_COOKIE];
     if (!session) {
-      // Redirect to hub login with redirect param pointing back to finance
-      const redirectTarget = encodeURIComponent('http://localhost:5182');
-      window.location.href = `${HUB_URL}?redirect=${redirectTarget}`;
+      // Redirect to auth with redirect param pointing back to finance
+      const redirectTarget = encodeURIComponent(APP_URLS.finance);
+      window.location.href = `${APP_URLS.auth}?redirect=${redirectTarget}`;
     } else {
       setAuthed(true);
     }

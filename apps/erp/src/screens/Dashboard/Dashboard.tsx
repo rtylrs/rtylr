@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -8,7 +8,11 @@ import {
   TrendingDown,
   Clock,
 } from 'lucide-react';
-import { erpApi, LowStockItem, PurchaseOrder } from '../../services/erpApi';
+import { LowStockItem, PurchaseOrder } from '../../services/erpApi';
+import { useLowStock } from '../../hooks/useInventory';
+import { usePurchaseOrders } from '../../hooks/usePurchaseOrders';
+import { useProducts } from '../../hooks/useProducts';
+import { useSuppliers } from '../../hooks/useSuppliers';
 
 const AMBER = '#f59e0b';
 
@@ -84,61 +88,30 @@ const SkeletonRow: React.FC<{ cols: number }> = ({ cols }) => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
-  const [statsData, setStatsData] = useState(mockStats);
-  const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>(mockLowStockItems);
-  const [recentOrders, setRecentOrders] = useState<PurchaseOrder[]>(mockRecentOrders);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: lowStockData, isLoading: lowStockLoading } = useLowStock();
+  const { data: ordersData, isLoading: ordersLoading } = usePurchaseOrders();
+  const { data: productsData, isLoading: productsLoading } = useProducts();
+  const { data: suppliersData, isLoading: suppliersLoading } = useSuppliers();
 
-  useEffect(() => {
-    let cancelled = false;
+  const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;
 
-    async function fetchDashboard() {
-      setIsLoading(true);
-      try {
-        const [lowStockRes, ordersRes, productsRes, suppliersRes] = await Promise.allSettled([
-          erpApi.getLowStock(),
-          erpApi.listPurchaseOrders(),
-          erpApi.listProducts(),
-          erpApi.listSuppliers(),
-        ]);
+  const lowStockItems: LowStockItem[] = lowStockData && lowStockData.length ? lowStockData : mockLowStockItems;
+  const recentOrders: PurchaseOrder[] = ordersData && ordersData.length ? ordersData.slice(0, 3) : mockRecentOrders;
 
-        if (cancelled) return;
-
-        if (lowStockRes.status === 'fulfilled' && lowStockRes.value.data?.length) {
-          setLowStockItems(lowStockRes.value.data);
-        }
-
-        if (ordersRes.status === 'fulfilled' && ordersRes.value.data?.length) {
-          const orders = ordersRes.value.data;
-          const recent = orders.slice(0, 3);
-          setRecentOrders(recent);
-          const pending = orders.filter((o) => o.status === 'Sent' || o.status === 'Draft').length;
-          setStatsData((prev) => ({ ...prev, pendingOrders: pending }));
-        }
-
-        if (productsRes.status === 'fulfilled' && productsRes.value.data?.length) {
-          const products = productsRes.value.data;
-          const lowCount = lowStockRes.status === 'fulfilled' ? lowStockRes.value.data?.length ?? 0 : 0;
-          setStatsData((prev) => ({
-            ...prev,
-            totalProducts: products.length,
-            lowStockCount: lowCount || products.filter((p: any) => p.status === 'Low Stock').length,
-          }));
-        }
-
-        if (suppliersRes.status === 'fulfilled' && suppliersRes.value.data?.length) {
-          setStatsData((prev) => ({ ...prev, totalSuppliers: suppliersRes.value.data.length }));
-        }
-      } catch {
-        // silently fall back to mock data
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    fetchDashboard();
-    return () => { cancelled = true; };
-  }, []);
+  const statsData = {
+    totalProducts: productsData && productsData.length ? productsData.length : mockStats.totalProducts,
+    lowStockCount:
+      lowStockData && lowStockData.length
+        ? lowStockData.length
+        : productsData && productsData.length
+        ? productsData.filter((p: any) => p.status === 'Low Stock').length
+        : mockStats.lowStockCount,
+    pendingOrders:
+      ordersData && ordersData.length
+        ? ordersData.filter((o) => o.status === 'Sent' || o.status === 'Draft').length
+        : mockStats.pendingOrders,
+    totalSuppliers: suppliersData && suppliersData.length ? suppliersData.length : mockStats.totalSuppliers,
+  };
 
   const stats = [
     {

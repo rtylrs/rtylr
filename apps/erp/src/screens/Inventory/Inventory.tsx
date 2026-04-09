@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Plus } from 'lucide-react';
-import { erpApi, Product } from '../../services/erpApi';
+import { Product } from '../../services/erpApi';
+import { useProducts } from '../../hooks/useProducts';
 
 const AMBER = '#f59e0b';
 
@@ -59,29 +60,8 @@ const SkeletonTableRow: React.FC = () => (
 
 const Inventory: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchProducts() {
-      setIsLoading(true);
-      try {
-        const res = await erpApi.listProducts({ search: search || undefined });
-        if (!cancelled && res.data?.length) {
-          setProducts(res.data);
-        }
-      } catch {
-        // silently fall back to mock data
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    fetchProducts();
-    return () => { cancelled = true; };
-  }, []);
+  const { data: fetchedProducts, isLoading } = useProducts();
+  const products: Product[] = fetchedProducts && fetchedProducts.length ? fetchedProducts : mockProducts;
 
   // Client-side search filters mock data; real API uses search param on mount
   const filtered = isLoading

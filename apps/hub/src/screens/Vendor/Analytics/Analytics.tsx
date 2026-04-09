@@ -22,7 +22,7 @@ const statCards = [
   { label: 'Total Revenue', value: '$0.00', icon: DollarSign, iconClass: 'text-emerald-600 bg-emerald-500/15' },
   { label: 'Total Orders', value: '0', icon: ShoppingBag, iconClass: 'text-blue-600 bg-blue-500/15' },
   { label: 'Avg Order Value', value: '$0.00', icon: TrendingUp, iconClass: 'text-violet-600 bg-violet-500/15' },
-  { label: 'Top Item', value: '—', icon: Star, iconClass: 'text-amber-600 bg-amber-500/15' },
+  { label: 'Top Item', value: '-', icon: Star, iconClass: 'text-amber-600 bg-amber-500/15' },
 ];
 
 const Analytics: React.FC = () => {

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, FileText, Send, CheckCircle } from 'lucide-react';
-import { erpApi, PurchaseOrder } from '../../services/erpApi';
+import { PurchaseOrder } from '../../services/erpApi';
+import { usePurchaseOrders } from '../../hooks/usePurchaseOrders';
 
 const AMBER = '#f59e0b';
 
@@ -58,29 +59,8 @@ const SkeletonTableRow: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Purchasing: React.FC = () => {
-  const [orders, setOrders] = useState<PurchaseOrder[]>(mockOrders);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchOrders() {
-      setIsLoading(true);
-      try {
-        const res = await erpApi.listPurchaseOrders();
-        if (!cancelled && res.data?.length) {
-          setOrders(res.data);
-        }
-      } catch {
-        // silently fall back to mock data
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    fetchOrders();
-    return () => { cancelled = true; };
-  }, []);
+  const { data: fetchedOrders, isLoading } = usePurchaseOrders();
+  const orders: PurchaseOrder[] = fetchedOrders && fetchedOrders.length ? fetchedOrders : mockOrders;
 
   const statusCounts = {
     Draft:    orders.filter((o) => o.status === 'Draft').length,

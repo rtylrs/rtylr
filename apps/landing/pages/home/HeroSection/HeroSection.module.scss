@@ -1,3 +1,62 @@
+.heroOrbOne {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(100, 197, 185, 0.18) 0%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroOrbTwo {
+  position: absolute;
+  top: 20%;
+  right: -150px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(69, 131, 196, 0.15) 0%,
+    transparent 70%
+  );
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroOrbThree {
+  position: absolute;
+  bottom: 5%;
+  left: 30%;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(111, 206, 235, 0.1) 0%,
+    transparent 70%
+  );
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroContentWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .heroSection {
   background-color: var(--app-background);
   color: white;
@@ -5,6 +64,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 
   // Top Banner Section
   .topBanner {

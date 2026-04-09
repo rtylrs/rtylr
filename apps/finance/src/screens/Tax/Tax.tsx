@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import { financeApi, TaxPeriod, TaxConfig as ApiTaxConfig } from '../../services/financeApi';
+import { TaxPeriod, TaxConfig as ApiTaxConfig } from '../../services/financeApi';
+import { useTaxReport } from '../../hooks/useTax';
 
 const ACCENT = '#10b981';
 
@@ -38,15 +39,7 @@ const defaultRates: TaxConfig[] = [
 const Tax: React.FC = () => {
   const [showConfig, setShowConfig] = useState(false);
   const [rates, setRates] = useState<TaxConfig[]>(defaultRates);
-  const [taxReport, setTaxReport] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    financeApi.getTaxReport()
-      .then((d) => setTaxReport(d))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: taxReport, isLoading: loading } = useTaxReport();
 
   const vatSummary = taxReport?.vatSummary ?? { collected: 0, owed: 0, paid: 0 };
   const taxPeriods: TaxPeriod[] = taxReport?.periods ?? [];

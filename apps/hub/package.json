@@ -10,6 +10,7 @@
     "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
+    "@voxire/config": "workspace:*",
     "@voxire/menu": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",

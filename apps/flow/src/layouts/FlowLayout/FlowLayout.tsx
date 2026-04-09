@@ -17,6 +17,7 @@ import {
   Circle,
   FolderKanban,
 } from 'lucide-react';
+import { APP_URLS } from '@voxire/config';
 import { useUserStore } from '../../stores/userStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { useFlowStore } from '../../stores/flowStore';
@@ -100,7 +101,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    window.location.href = 'http://localhost:5176';
+    window.location.href = APP_URLS.auth;
   };
 
   return (
@@ -136,7 +137,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             </span>
           </div>
           <a
-            href="http://localhost:5175"
+            href={APP_URLS.hub}
             className="flex items-center gap-1 text-[11px] px-1.5 py-1 rounded transition-colors hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
             title="Back to Hub"

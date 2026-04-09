@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
   Users,
@@ -229,7 +230,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--hr-border)', margin: '4px 0' }} />
             <button
-              onClick={() => { window.location.href = 'http://localhost:5176'; }}
+              onClick={() => { window.location.href = APP_URLS.auth; }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

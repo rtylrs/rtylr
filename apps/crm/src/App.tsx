@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 
 const AUTH_COOKIE = 'rtylr_session';
-const HUB_URL = 'http://localhost:5176';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const [cookies] = useCookies([AUTH_COOKIE]);
@@ -15,7 +15,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = cookies[AUTH_COOKIE];
     if (!token) {
-      const redirectUrl = `${HUB_URL}?redirect=crm&next=${encodeURIComponent(location.pathname)}`;
+      const redirectUrl = `${APP_URLS.auth}?redirect=crm&next=${encodeURIComponent(location.pathname)}`;
       window.location.href = redirectUrl;
     } else {
       setChecked(true);

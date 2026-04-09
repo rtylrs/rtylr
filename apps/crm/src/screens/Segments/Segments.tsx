@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Star, AlertTriangle, Clock, TrendingUp, Plus, ChevronRight, X, Filter } from 'lucide-react';
-import { crmApi } from '../../services/crmApi';
+import { useSegments } from '../../hooks/useSegments';
 
 const ACCENT = '#3b82f6';
 
@@ -410,20 +410,17 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const Segments: React.FC = () => {
-  const [segments, setSegments] = useState<Segment[]>(mockSegments);
+  const { data: fetchedSegments } = useSegments();
   const [builderOpen, setBuilderOpen] = useState(false);
-
-  useEffect(() => {
-    crmApi.getSegments().then((data) => {
-      if (data?.length) {
-        const enriched = data.map((s: any) => ({
-          ...s,
-          icon: iconMap[s.icon] ?? Users,
-        }));
-        setSegments(enriched);
-      }
-    }).catch(() => {/* keep mock data */});
-  }, []);
+  const segments: Segment[] = useMemo(() => {
+    if (fetchedSegments && fetchedSegments.length) {
+      return fetchedSegments.map((s: any) => ({
+        ...s,
+        icon: iconMap[s.icon] ?? Users,
+      }));
+    }
+    return mockSegments;
+  }, [fetchedSegments]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>

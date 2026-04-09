@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, DollarSign, TrendingUp, Users, Download } from 'lucide-react';
-import { hrApi, PayrollRow } from '../../services/hrApi';
+import { PayrollRow } from '../../services/hrApi';
+import { usePayroll } from '../../hooks/usePayroll';
 
 const ACCENT = '#8b5cf6';
 
@@ -21,15 +22,8 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const rowAnim   = { hidden: { opacity: 0, x: -6 }, show: { opacity: 1, x: 0, transition: { duration: 0.18 } } };
 
 const Payroll: React.FC = () => {
-  const [payrollData, setPayrollData] = useState<PayrollRow[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    hrApi.listPayroll()
-      .then((res) => { if (res.data?.length) setPayrollData(res.data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: fetchedPayroll } = usePayroll();
+  const payrollData: PayrollRow[] = fetchedPayroll || [];
 
   const totalBase       = payrollData.reduce((s, r) => s + r.basePay, 0);
   const totalOvertime   = payrollData.reduce((s, r) => s + r.overtime, 0);
@@ -164,10 +158,10 @@ const Payroll: React.FC = () => {
             <span style={{ fontSize: '13px', color: 'var(--hr-text)' }}>{row.hoursWorked}h</span>
             <span style={{ fontSize: '13px', color: 'var(--hr-text)' }}>{fmt(row.basePay)}</span>
             <span style={{ fontSize: '13px', color: row.overtime > 0 ? '#f59e0b' : 'var(--hr-text-muted)' }}>
-              {row.overtime > 0 ? fmt(row.overtime) : '—'}
+              {row.overtime > 0 ? fmt(row.overtime) : '-'}
             </span>
             <span style={{ fontSize: '13px', color: row.deductions > 0 ? '#ef4444' : 'var(--hr-text-muted)' }}>
-              {row.deductions > 0 ? fmt(row.deductions) : '—'}
+              {row.deductions > 0 ? fmt(row.deductions) : '-'}
             </span>
             <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>{fmt(netPay(row))}</span>
           </motion.div>
