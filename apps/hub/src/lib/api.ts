@@ -2,11 +2,24 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
+  return 'https://api.voxire.dev/';
+};
+
+const getAuthUrl = () => {
   const isLocalhost =
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1';
-  return isLocalhost ? 'http://localhost:9999/' : 'http://api.voxire.dev/';
+  return isLocalhost
+    ? 'http://localhost:5176?redirect=hub'
+    : 'https://auth.rtylr.com?redirect=hub';
 };
+
+const getTokenFromCookie = (): string | null =>
+  document.cookie
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith('token='))
+    ?.split('=')[1] ?? null;
 
 const api = axios.create({
   baseURL: getBaseUrl(),
@@ -15,9 +28,9 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const user = localStorage.getItem('token');
-      if (user) {
-        config.headers['authorization'] = `Bearer ${user}`;
+      const token = getTokenFromCookie();
+      if (token) {
+        config.headers['authorization'] = `Bearer ${token}`;
       }
       config.headers['accept-language'] = i18next.language;
       return config;
@@ -35,6 +48,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (error.response?.status === 401) {
+      document.cookie =
+        'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = getAuthUrl();
+    }
     return Promise.reject(error);
   }
 );

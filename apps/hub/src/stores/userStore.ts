@@ -52,7 +52,8 @@ export const useUserStore = create<UserState & UserActions>()(
       login: (user) => set({ user, isAuthenticated: true }),
 
       logout: () => {
-        localStorage.removeItem('token');
+        document.cookie =
+          'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         set({
           user: null,
           isAuthenticated: false,
@@ -78,7 +79,6 @@ export const useUserStore = create<UserState & UserActions>()(
       name: 'user-store',
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
         role: state.role,
         userId: state.userId,

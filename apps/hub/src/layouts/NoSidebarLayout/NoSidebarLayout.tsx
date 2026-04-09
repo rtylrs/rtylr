@@ -1,5 +1,4 @@
 import React from "react";
-import Navbar from "../Navbar/Navbar";
 
 interface NoSidebarLayoutProps {
   children?: React.ReactNode;
@@ -7,8 +6,7 @@ interface NoSidebarLayoutProps {
 
 const NoSidebarLayout: React.FC<NoSidebarLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-admin-bg">
-      <Navbar />
+    <div className="flex flex-col min-h-screen" style={{ background: '#0a0a0a' }}>
       <div className="flex-1 p-6">{children}</div>
     </div>
   );

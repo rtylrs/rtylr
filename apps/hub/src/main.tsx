@@ -15,7 +15,10 @@ import { queryClient } from "./lib/react-query";
 
 import './globals.css';
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { initTheme } from './stores/themeStore';
 
+// Apply persisted theme before first render to prevent flash
+initTheme();
 
 Modal.setAppElement("#root");
 injectTheme();

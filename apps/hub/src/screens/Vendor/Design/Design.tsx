@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Plus } from 'phosphor-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Plus, CaretDown } from 'phosphor-react';
 import {
   MenuLayout,
   MenuLayoutConfig,
@@ -104,9 +105,9 @@ const MOCK_CATEGORIES: MenuCategoryData[] = [
   },
 ];
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// ─── Segment Button Group ──────────────────────────────────────────────────────
 
-function BtnGroup<T extends string>({
+function SegmentGroup<T extends string>({
   value,
   options,
   onChange,
@@ -116,16 +117,32 @@ function BtnGroup<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex rounded-lg overflow-hidden border border-black/10">
+    <div
+      style={{
+        display: 'flex',
+        gap: '3px',
+        background: 'var(--hub-input-bg)',
+        border: '1px solid var(--hub-border)',
+        borderRadius: '8px',
+        padding: '3px',
+      }}
+    >
       {options.map((o) => (
         <button
           key={o.value}
-          className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-            value === o.value
-              ? 'bg-admin text-white'
-              : 'bg-white text-primary hover:bg-black/5'
-          }`}
           onClick={() => onChange(o.value)}
+          style={{
+            padding: '4px 10px',
+            borderRadius: '5px',
+            fontSize: '12px',
+            fontWeight: 500,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            background: value === o.value ? '#4583C4' : 'transparent',
+            color: value === o.value ? '#fff' : 'var(--hub-text-muted)',
+            whiteSpace: 'nowrap',
+          }}
         >
           {o.label}
         </button>
@@ -134,7 +151,9 @@ function BtnGroup<T extends string>({
   );
 }
 
-function Toggle({
+// ─── Toggle Switch ─────────────────────────────────────────────────────────────
+
+function ToggleRow({
   label,
   checked,
   onChange,
@@ -144,22 +163,366 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-sm text-primary">{label}</span>
-      <label className="relative inline-flex items-center cursor-pointer">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only peer"
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
+      <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{label}</span>
+      <button
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        style={{
+          width: 36,
+          height: 20,
+          borderRadius: 999,
+          border: 'none',
+          cursor: 'pointer',
+          padding: 2,
+          background: checked ? '#4583C4' : 'var(--hub-active)',
+          transition: 'background 0.2s ease',
+          position: 'relative',
+          flexShrink: 0,
+        }}
+      >
+        <span
+          style={{
+            display: 'block',
+            width: 16,
+            height: 16,
+            borderRadius: '50%',
+            background: '#fff',
+            transform: checked ? 'translateX(16px)' : 'translateX(0)',
+            transition: 'transform 0.2s ease',
+          }}
         />
-        <div className="w-9 h-5 bg-black/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent" />
-      </label>
+      </button>
     </div>
   );
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
+// ─── Collapsible Section Card ──────────────────────────────────────────────────
+
+function SectionCard({
+  title,
+  children,
+  defaultOpen = true,
+  index = 0,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  index?: number;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: index * 0.04 }}
+      style={{
+        background: 'var(--hub-card)',
+        border: '1px solid var(--hub-border)',
+        borderRadius: '12px',
+        overflow: 'hidden',
+      }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          borderBottom: open ? '1px solid var(--hub-border)' : 'none',
+          transition: 'border-color 0.15s',
+        }}
+      >
+        <span
+          style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'var(--hub-text-dim)',
+          }}
+        >
+          {title}
+        </span>
+        <CaretDown
+          size={14}
+          weight="bold"
+          style={{
+            color: 'var(--hub-text-dim)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+          }}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─── Row with label + control ──────────────────────────────────────────────────
+
+function ControlRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)', flexShrink: 0 }}>{label}</span>
+      {children}
+    </div>
+  );
+}
+
+// ─── Color picker row ─────────────────────────────────────────────────────────
+
+function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)', fontFamily: 'monospace' }}>{value}</span>
+        <label
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 6,
+            overflow: 'hidden',
+            border: '2px solid var(--hub-border)',
+            cursor: 'pointer',
+            background: value,
+            display: 'block',
+            flexShrink: 0,
+          }}
+        >
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            style={{ opacity: 0, width: 1, height: 1, position: 'absolute' }}
+          />
+        </label>
+      </div>
+    </div>
+  );
+}
+
+// ─── Phone Frame ──────────────────────────────────────────────────────────────
+
+function PhoneFrame({ config }: { config: MenuLayoutConfig }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+
+  // Phone intrinsic dimensions
+  const PHONE_W = 390;
+  const PHONE_H = 844;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const { height } = el.getBoundingClientRect();
+      const availH = height - 64; // vertical padding
+      const availW = el.getBoundingClientRect().width - 48;
+      const byH = availH / PHONE_H;
+      const byW = availW / PHONE_W;
+      setScale(Math.min(byH, byW, 0.72));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {/* Outer phone shell */}
+      <div
+        style={{
+          width: PHONE_W * scale,
+          height: PHONE_H * scale,
+          borderRadius: 44 * scale,
+          background: '#18181b',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5)',
+          position: 'relative',
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}
+      >
+        {/* Side button indicators (decorative) */}
+        <div
+          style={{
+            position: 'absolute',
+            left: -3 * scale,
+            top: 120 * scale,
+            width: 3 * scale,
+            height: 32 * scale,
+            background: '#2a2a2e',
+            borderRadius: '2px 0 0 2px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: -3 * scale,
+            top: 162 * scale,
+            width: 3 * scale,
+            height: 64 * scale,
+            background: '#2a2a2e',
+            borderRadius: '2px 0 0 2px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: -3 * scale,
+            top: 236 * scale,
+            width: 3 * scale,
+            height: 64 * scale,
+            background: '#2a2a2e',
+            borderRadius: '2px 0 0 2px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            right: -3 * scale,
+            top: 160 * scale,
+            width: 3 * scale,
+            height: 80 * scale,
+            background: '#2a2a2e',
+            borderRadius: '0 2px 2px 0',
+          }}
+        />
+
+        {/* Screen bezel */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 6 * scale,
+            borderRadius: (44 - 6) * scale,
+            background: '#fff',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Dynamic island */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 10 * scale,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 120 * scale,
+              height: 34 * scale,
+              borderRadius: 20 * scale,
+              background: '#18181b',
+              zIndex: 20,
+            }}
+          />
+
+          {/* Status bar */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 54 * scale,
+              background: 'rgba(0,0,0,0.02)',
+              zIndex: 15,
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              padding: `0 ${16 * scale}px ${4 * scale}px`,
+              fontSize: 10 * scale,
+              fontWeight: 600,
+              color: '#000',
+            }}
+          >
+            <span>9:41</span>
+            <span style={{ display: 'flex', gap: 4 * scale, alignItems: 'center' }}>
+              <span>●●●</span>
+              <span>WiFi</span>
+              <span>⬛</span>
+            </span>
+          </div>
+
+          {/* Scrollable menu content */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              top: 54 * scale,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            <div
+              style={{
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+                width: `${100 / scale}%`,
+              }}
+            >
+              <MenuLayout
+                business={MOCK_BUSINESS}
+                categories={MOCK_CATEGORIES}
+                config={config}
+              />
+            </div>
+          </div>
+
+          {/* Home indicator */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 8 * scale,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 130 * scale,
+              height: 5 * scale,
+              borderRadius: 999,
+              background: 'rgba(0,0,0,0.2)',
+              zIndex: 20,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const Design: React.FC = () => {
   const {
@@ -174,6 +537,14 @@ const Design: React.FC = () => {
   } = useLayoutPresetsStore();
 
   const [newPresetName, setNewPresetName] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  // Local-only color/typography state (cosmetic, not yet wired to MenuLayoutConfig)
+  const [colorPrimary, setColorPrimary] = useState('#4583C4');
+  const [colorAccent, setColorAccent] = useState('#f59e0b');
+  const [colorBg, setColorBg] = useState('#ffffff');
+  const [fontFamily, setFontFamily] = useState('system');
+  const [fontSize, setFontSize] = useState('md');
 
   const activePreset = presets.find((p) => p.id === activePresetId);
 
@@ -197,82 +568,227 @@ const Design: React.FC = () => {
     setNewPresetName('');
   };
 
-  return (
-    <div className="grid h-full overflow-hidden" style={{ gridTemplateColumns: '220px 1fr 380px' }}>
-      {/* ── Left: Presets ──────────────────────────────────────────────────── */}
-      <aside className="bg-admin flex flex-col h-full overflow-hidden border-r border-white/8">
-        <div className="px-4 py-4 border-b border-white/10 shrink-0">
-          <h3 className="text-sm font-semibold text-white">Layouts</h3>
-        </div>
+  const handleSave = () => {
+    saveActivePreset();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+  };
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {presets.map((preset) => (
-            <div
-              key={preset.id}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                preset.id === activePresetId
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/75 hover:bg-white/8'
-              }`}
-              onClick={() => activatePreset(preset.id)}
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateRows: 'auto 1fr',
+        // Escape DefaultLayout's p-6 padding to fill edge-to-edge
+        margin: '-24px',
+        height: 'calc(100% + 48px)',
+        overflow: 'hidden',
+        background: 'var(--hub-bg)',
+      }}
+    >
+      {/* ── Header bar ─────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '0 16px',
+          height: 44,
+          borderBottom: '1px solid var(--hub-border)',
+          background: 'var(--hub-surface)',
+          flexShrink: 0,
+          gap: 12,
+        }}
+      >
+        {activePreset && (
+          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>
+            {activePreset.name}
+          </span>
+        )}
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={handleSave}
+          style={{
+            padding: '5px 14px',
+            borderRadius: 8,
+            background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
+            color: saved ? '#4583C4' : '#fff',
+            fontSize: 13,
+            fontWeight: 600,
+            border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {saved ? 'Saved!' : 'Save'}
+        </motion.button>
+      </div>
+
+      {/* ── Body ───────────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '200px 320px 1fr',
+          overflow: 'hidden',
+          height: '100%',
+        }}
+      >
+        {/* ── Presets sidebar ──────────────────────────────────────────────── */}
+        <aside
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflow: 'hidden',
+            borderRight: '1px solid var(--hub-border)',
+            background: 'var(--hub-surface)',
+          }}
+        >
+          <div
+            style={{
+              padding: '12px 14px 8px',
+              borderBottom: '1px solid var(--hub-border)',
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--hub-text-dim)',
+              }}
             >
-              {preset.id === activePresetId && (
-                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-              )}
-              <span className="text-[13px] font-medium flex-1 truncate">{preset.name}</span>
-              {presets.length > 1 && (
-                <button
-                  className="p-0.5 text-white/40 hover:text-white transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deletePreset(preset.id);
+              Layouts
+            </span>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '6px' }}>
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                onClick={() => activatePreset(preset.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 10px',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  background: preset.id === activePresetId ? 'var(--hub-active)' : 'transparent',
+                  marginBottom: 2,
+                  transition: 'background 0.15s',
+                }}
+              >
+                {preset.id === activePresetId && (
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: '#4583C4',
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: preset.id === activePresetId ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <X size={12} weight="bold" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-1.5 p-2 border-t border-white/10 shrink-0">
-          <input
-            className="flex-1 bg-white/10 text-white placeholder-white/40 text-sm rounded-lg px-3 py-1.5 outline-none focus:bg-white/15 transition-colors"
-            placeholder="New layout name…"
-            value={newPresetName}
-            onChange={(e) => setNewPresetName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
-          />
-          <button
-            className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors disabled:opacity-40"
-            onClick={handleAddPreset}
-            disabled={!newPresetName.trim()}
-          >
-            <Plus size={16} weight="bold" />
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Middle: Config controls ─────────────────────────────────────────── */}
-      <div className="overflow-y-auto p-5 flex flex-col gap-5 bg-admin-bg">
-        {/* Save bar */}
-        <div className="flex items-center justify-between bg-white rounded-xl px-5 py-4 border border-black/5 shadow-card">
-          <div>
-            <h2 className="text-base font-semibold text-primary">{activePreset?.name ?? 'Layout'}</h2>
-            <p className="text-xs text-muted mt-0.5">Customize every detail of your menu appearance</p>
+                  {preset.name}
+                </span>
+                {presets.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePreset(preset.id);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 2,
+                      borderRadius: 4,
+                      color: 'var(--hub-text-dim)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      opacity: 0.6,
+                      transition: 'opacity 0.15s',
+                    }}
+                  >
+                    <X size={12} weight="bold" />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-          <button
-            className="px-4 py-2 bg-admin text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-            onClick={saveActivePreset}
-          >
-            Save
-          </button>
-        </div>
 
-        {/* Pages */}
-        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
-          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Pages</div>
-          <div className="px-5 py-3 space-y-1">
+          <div
+            style={{
+              padding: '8px',
+              borderTop: '1px solid var(--hub-border)',
+              display: 'flex',
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <input
+              placeholder="New layout…"
+              value={newPresetName}
+              onChange={(e) => setNewPresetName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
+              style={{
+                flex: 1,
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                borderRadius: 7,
+                padding: '6px 10px',
+                fontSize: 12,
+                color: 'var(--hub-text)',
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={handleAddPreset}
+              disabled={!newPresetName.trim()}
+              style={{
+                padding: '6px 8px',
+                background: newPresetName.trim() ? '#4583C4' : 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                borderRadius: 7,
+                color: newPresetName.trim() ? '#fff' : 'var(--hub-text-dim)',
+                cursor: newPresetName.trim() ? 'pointer' : 'default',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Plus size={14} weight="bold" />
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Controls panel ───────────────────────────────────────────────── */}
+        <div
+          style={{
+            overflowY: 'auto',
+            padding: '16px 14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            borderRight: '1px solid var(--hub-border)',
+          }}
+        >
+          {/* Pages */}
+          <SectionCard title="Pages" index={0}>
             {(
               [
                 ['About', 'about'],
@@ -282,23 +798,19 @@ const Design: React.FC = () => {
                 ['Book', 'book'],
               ] as [string, keyof MenuLayoutConfig['pages']][]
             ).map(([label, key]) => (
-              <Toggle
+              <ToggleRow
                 key={key}
                 label={label}
                 checked={draftConfig.pages[key] === true}
                 onChange={(v) => patchPages({ [key]: v })}
               />
             ))}
-          </div>
-        </div>
+          </SectionCard>
 
-        {/* Header */}
-        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
-          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Header</div>
-          <div className="px-5 py-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Cover height</span>
-              <BtnGroup<CoverHeight>
+          {/* Header */}
+          <SectionCard title="Header" index={1}>
+            <ControlRow label="Cover height">
+              <SegmentGroup<CoverHeight>
                 value={draftConfig.header.coverHeight}
                 options={[
                   { label: 'None', value: 'none' },
@@ -308,21 +820,17 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchHeader({ coverHeight: v })}
               />
-            </div>
-            <Toggle label="Sticky header" checked={draftConfig.header.sticky} onChange={(v) => patchHeader({ sticky: v })} />
-            <Toggle label="Show logo" checked={draftConfig.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} />
-            <Toggle label="Show description" checked={draftConfig.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} />
-            <Toggle label="Show address / phone / hours" checked={draftConfig.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} />
-          </div>
-        </div>
+            </ControlRow>
+            <ToggleRow label="Sticky header" checked={draftConfig.header.sticky} onChange={(v) => patchHeader({ sticky: v })} />
+            <ToggleRow label="Show logo" checked={draftConfig.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} />
+            <ToggleRow label="Show description" checked={draftConfig.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} />
+            <ToggleRow label="Show meta (address, hours)" checked={draftConfig.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} />
+          </SectionCard>
 
-        {/* Nav tabs */}
-        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
-          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Nav Tabs</div>
-          <div className="px-5 py-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Style</span>
-              <BtnGroup<NavStyle>
+          {/* Nav Tabs */}
+          <SectionCard title="Nav Tabs" index={2}>
+            <ControlRow label="Style">
+              <SegmentGroup<NavStyle>
                 value={draftConfig.nav.style}
                 options={[
                   { label: 'Underline', value: 'underline' },
@@ -331,10 +839,9 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchNav({ style: v })}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Size</span>
-              <BtnGroup<NavSize>
+            </ControlRow>
+            <ControlRow label="Size">
+              <SegmentGroup<NavSize>
                 value={draftConfig.nav.size}
                 options={[
                   { label: 'S', value: 'sm' },
@@ -343,17 +850,13 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchNav({ size: v })}
               />
-            </div>
-          </div>
-        </div>
+            </ControlRow>
+          </SectionCard>
 
-        {/* Cards */}
-        <div className="bg-white rounded-xl border border-black/5 shadow-card overflow-hidden">
-          <div className="px-5 py-3 border-b border-black/5 text-sm font-semibold text-primary">Item Cards</div>
-          <div className="px-5 py-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Layout</span>
-              <BtnGroup<ItemLayout>
+          {/* Item Cards */}
+          <SectionCard title="Item Cards" index={3}>
+            <ControlRow label="Layout">
+              <SegmentGroup<ItemLayout>
                 value={draftConfig.items.layout}
                 options={[
                   { label: 'Grid', value: 'grid' },
@@ -362,10 +865,9 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchItems({ layout: v })}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Columns</span>
-              <BtnGroup<string>
+            </ControlRow>
+            <ControlRow label="Columns">
+              <SegmentGroup<string>
                 value={String(draftConfig.items.columns)}
                 options={[
                   { label: '2', value: '2' },
@@ -374,10 +876,9 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Image position</span>
-              <BtnGroup<ImagePosition>
+            </ControlRow>
+            <ControlRow label="Image position">
+              <SegmentGroup<ImagePosition>
                 value={draftConfig.items.imagePosition}
                 options={[
                   { label: 'Top', value: 'top' },
@@ -387,10 +888,9 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchItems({ imagePosition: v })}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Image size</span>
-              <BtnGroup<ImageSize>
+            </ControlRow>
+            <ControlRow label="Image size">
+              <SegmentGroup<ImageSize>
                 value={draftConfig.items.imageSize}
                 options={[
                   { label: 'S', value: 'sm' },
@@ -399,10 +899,9 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchItems({ imageSize: v })}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-primary">Card radius</span>
-              <BtnGroup<CardRadius>
+            </ControlRow>
+            <ControlRow label="Card radius">
+              <SegmentGroup<CardRadius>
                 value={draftConfig.items.cardRadius}
                 options={[
                   { label: 'None', value: 'none' },
@@ -412,26 +911,83 @@ const Design: React.FC = () => {
                 ]}
                 onChange={(v) => patchItems({ cardRadius: v })}
               />
-            </div>
-            <Toggle label="Show description" checked={draftConfig.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} />
-            <Toggle label="Show badges" checked={draftConfig.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} />
-          </div>
-        </div>
-      </div>
+            </ControlRow>
+            <ToggleRow label="Show description" checked={draftConfig.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} />
+            <ToggleRow label="Show badges" checked={draftConfig.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} />
+          </SectionCard>
 
-      {/* ── Right: Live preview ─────────────────────────────────────────────── */}
-      <div className="bg-[#e8e8eb] flex flex-col items-center py-6 px-5 overflow-y-auto border-l border-black/8 gap-4">
-        <span className="text-xs font-semibold text-black/40 uppercase tracking-widest">Live Preview</span>
-        <div className="w-[320px] rounded-[40px] overflow-hidden border-[10px] border-black/80 shadow-2xl bg-white relative">
-          <div className="w-24 h-5 bg-black/80 rounded-full absolute top-2 left-1/2 -translate-x-1/2 z-10" />
-          <div className="h-[600px] overflow-y-auto overflow-x-hidden">
-            <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', width: '117.6%', marginLeft: '-8.8%' }}>
-              <MenuLayout
-                business={MOCK_BUSINESS}
-                categories={MOCK_CATEGORIES}
-                config={draftConfig}
+          {/* Colors */}
+          <SectionCard title="Colors" index={4}>
+            <ColorRow label="Primary" value={colorPrimary} onChange={setColorPrimary} />
+            <ColorRow label="Accent" value={colorAccent} onChange={setColorAccent} />
+            <ColorRow label="Background" value={colorBg} onChange={setColorBg} />
+          </SectionCard>
+
+          {/* Typography */}
+          <SectionCard title="Typography" index={5}>
+            <ControlRow label="Font family">
+              <select
+                value={fontFamily}
+                onChange={(e) => setFontFamily(e.target.value)}
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  borderRadius: 7,
+                  padding: '5px 8px',
+                  fontSize: 12,
+                  color: 'var(--hub-text)',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="system">System UI</option>
+                <option value="inter">Inter</option>
+                <option value="jakarta">Plus Jakarta Sans</option>
+                <option value="merriweather">Merriweather</option>
+                <option value="poppins">Poppins</option>
+              </select>
+            </ControlRow>
+            <ControlRow label="Font size">
+              <SegmentGroup<string>
+                value={fontSize}
+                options={[
+                  { label: 'S', value: 'sm' },
+                  { label: 'M', value: 'md' },
+                  { label: 'L', value: 'lg' },
+                ]}
+                onChange={setFontSize}
               />
-            </div>
+            </ControlRow>
+          </SectionCard>
+        </div>
+
+        {/* ── Phone Preview ─────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '20px 0 12px',
+            background: 'var(--hub-bg)',
+            overflow: 'hidden',
+            height: '100%',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'var(--hub-text-dim)',
+              marginBottom: 16,
+              flexShrink: 0,
+            }}
+          >
+            Preview
+          </span>
+          <div style={{ flex: 1, width: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <PhoneFrame config={draftConfig} />
           </div>
         </div>
       </div>

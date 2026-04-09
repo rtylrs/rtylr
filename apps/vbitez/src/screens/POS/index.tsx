@@ -1,33 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import POSLayout from '../../layouts/POSLayout';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
+import { businessApi, menuApi } from '../../api';
 
-const DEMO_CATEGORIES = ['Burgers', 'Sides', 'Drinks', 'Desserts'];
-const DEMO_PRODUCTS = [
-  { id: '1', name: 'Classic Burger', price: 12.99, category: 'Burgers' },
-  { id: '2', name: 'Cheese Burger', price: 14.99, category: 'Burgers' },
-  { id: '3', name: 'Veggie Burger', price: 11.99, category: 'Burgers' },
-  { id: '4', name: 'BBQ Burger', price: 15.99, category: 'Burgers' },
-  { id: '5', name: 'French Fries', price: 4.99, category: 'Sides' },
-  { id: '6', name: 'Onion Rings', price: 5.99, category: 'Sides' },
-  { id: '7', name: 'Coleslaw', price: 3.99, category: 'Sides' },
-  { id: '8', name: 'Coca-Cola', price: 2.99, category: 'Drinks' },
-  { id: '9', name: 'Lemonade', price: 3.49, category: 'Drinks' },
-  { id: '10', name: 'Milkshake', price: 5.99, category: 'Drinks' },
-  { id: '11', name: 'Brownie', price: 4.49, category: 'Desserts' },
-  { id: '12', name: 'Ice Cream', price: 3.99, category: 'Desserts' },
-];
+interface Product { id: string; name: string; price: number; category: string; image?: string; available?: boolean }
 
-const POS: React.FC = () => (
-  <POSLayout>
-    <div className="flex h-full overflow-hidden">
-      <ProductGrid products={DEMO_PRODUCTS} categories={DEMO_CATEGORIES} />
-      <OrderPanel />
-    </div>
-    <AiAssistant />
-  </POSLayout>
-);
+const POS: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function loadMenu() {
+      try {
+        const businesses = await businessApi.getAll();
+        const businessId = Array.isArray(businesses) ? businesses[0]?.id : businesses?.id;
+        if (!businessId) return;
+
+        const menu = await menuApi.getMenu({ id: businessId });
+        const items: Product[] = [];
+        const cats = new Set<string>();
+
+        const sections = menu?.categories ?? menu?.sections ?? menu?.menus ?? [];
+        for (const section of sections) {
+          const catName = section.name ?? section.category ?? 'Other';
+          cats.add(catName);
+          const sectionItems = section.items ?? section.products ?? [];
+          for (const item of sectionItems) {
+            items.push({
+              id: String(item.id),
+              name: item.name,
+              price: item.price ?? item.salePrice ?? 0,
+              category: catName,
+              image: item.image ?? item.imageUrl,
+              available: item.available !== false,
+            });
+          }
+        }
+
+        if (items.length > 0) {
+          setProducts(items);
+          setCategories(Array.from(cats));
+        }
+      } catch {
+        // keep empty — ProductGrid handles empty state
+      }
+    }
+
+    loadMenu();
+  }, []);
+
+  return (
+    <POSLayout>
+      <div className="flex h-full overflow-hidden">
+        <ProductGrid products={products} categories={categories} />
+        <OrderPanel />
+      </div>
+      <AiAssistant />
+    </POSLayout>
+  );
+};
 
 export default POS;
