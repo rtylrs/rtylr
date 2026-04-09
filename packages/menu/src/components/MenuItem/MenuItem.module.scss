@@ -36,14 +36,26 @@
     align-items: stretch;
 
     .item__image {
-      width: 120px;
+      width: 80px;
       flex-shrink: 0;
       aspect-ratio: 1;
+
+      @media (min-width: 480px) {
+        width: 100px;
+      }
+
+      @media (min-width: 768px) {
+        width: 120px;
+      }
     }
 
     .item__content {
-      padding: 12px 14px;
+      padding: 10px 12px;
       flex: 1;
+
+      @media (min-width: 480px) {
+        padding: 12px 14px;
+      }
     }
   }
 
