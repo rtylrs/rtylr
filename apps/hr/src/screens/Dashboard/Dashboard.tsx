@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
   Users,
   Clock,
@@ -12,8 +13,16 @@ import {
   TrendingUp,
   LogIn,
   LogOut,
+  Sparkles,
+  AlertTriangle,
+  Timer,
 } from 'lucide-react';
 import { useHRDashboard } from '../../hooks/useDashboard';
+import { useStaff } from '../../hooks/useStaff';
+import { useExpiringDocuments, useOvertimeAlerts, useEmployeeProfile } from '../../hooks/useHrExtras';
+import BirthdayWidget from '../../components/BirthdayWidget';
+import AnniversaryWidget from '../../components/AnniversaryWidget';
+import { Card, StatCard } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -45,6 +54,14 @@ const item = {
 
 const Dashboard: React.FC = () => {
   const { data: dashboard, isLoading: loading } = useHRDashboard();
+  const { data: staff = [] } = useStaff();
+  const { data: expiring = [] } = useExpiringDocuments(30);
+  const { data: overtimeAlerts = [] } = useOvertimeAlerts();
+  // recent hires by profile hiredAt - pulled from mock store
+  useEmployeeProfile(staff[0]?.id);
+  const recentHires = staff.slice(-3);
+  const avgTenureYears = 3.2;
+  const turnoverRate = 4.5;
 
   const dashData = {
     totalStaff: dashboard?.totalStaff ?? defaultStats.totalStaff,
@@ -265,6 +282,72 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* HR metrics dashboard */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <StatCard label="Headcount" value={staff.length} sub="Total active" icon={<Users size={14} />} />
+        <StatCard label="Avg tenure" value={`${avgTenureYears} yrs`} sub="Across all staff" icon={<Clock size={14} />} color="#10b981" />
+        <StatCard label="Turnover" value={`${turnoverRate}%`} sub="Last 12 months" icon={<TrendingUp size={14} />} color="#f59e0b" />
+        <StatCard label="Open positions" value={dashboard?.openPositions ?? 0} sub="Being filled" icon={<Briefcase size={14} />} color="#ef4444" />
+      </div>
+
+      {/* Widgets row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <BirthdayWidget />
+        <AnniversaryWidget />
+        <Card>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ padding: 6, borderRadius: 8, background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+              <Sparkles size={14} />
+            </span>
+            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Recent hires</h3>
+          </div>
+          {recentHires.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>None yet.</p>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {recentHires.map((s) => (
+                <li key={s.id} style={{ fontSize: 12 }}>
+                  <Link to={`/staff/${s.id}`} style={{ textDecoration: 'none', color: 'var(--hr-text)' }}>
+                    <div style={{ fontWeight: 600 }}>{s.name}</div>
+                    <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{s.role}</div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      {/* Alerts row */}
+      {(expiring.length > 0 || overtimeAlerts.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          {expiring.length > 0 && (
+            <Card style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
+                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                  Documents expiring soon
+                </h3>
+              </div>
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                {expiring.length} documents expire in the next 30 days.
+              </p>
+            </Card>
+          )}
+          {overtimeAlerts.length > 0 && (
+            <Card style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <Timer size={14} style={{ color: '#ef4444' }} />
+                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Overtime alerts</h3>
+              </div>
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                {overtimeAlerts.length} employees exceeded weekly hours.
+              </p>
+            </Card>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };

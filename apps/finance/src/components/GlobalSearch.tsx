@@ -1,0 +1,154 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, FileText, Receipt, Users, LayoutDashboard, TrendingUp, Calculator } from 'lucide-react';
+import Modal from './Modal';
+import { inputStyle, ACCENT } from '../lib/tokens';
+import { MOCK_CLIENTS } from './ClientSelect';
+
+interface Result {
+  id: string;
+  label: string;
+  sub?: string;
+  to: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  group: string;
+}
+
+const PAGES: Result[] = [
+  { id: 'p-dashboard', label: 'Dashboard', to: '/', icon: LayoutDashboard, group: 'Pages' },
+  { id: 'p-invoices', label: 'Invoices', to: '/invoices', icon: FileText, group: 'Pages' },
+  { id: 'p-new-invoice', label: 'New invoice', to: '/invoices/new', icon: FileText, group: 'Pages' },
+  { id: 'p-recurring', label: 'Recurring invoices', to: '/invoices/recurring', icon: FileText, group: 'Pages' },
+  { id: 'p-quotes', label: 'Quotes', to: '/quotes', icon: FileText, group: 'Pages' },
+  { id: 'p-expenses', label: 'Expenses', to: '/expenses', icon: Receipt, group: 'Pages' },
+  { id: 'p-new-expense', label: 'New expense', to: '/expenses/new', icon: Receipt, group: 'Pages' },
+  { id: 'p-categories', label: 'Expense categories', to: '/categories', icon: Receipt, group: 'Pages' },
+  { id: 'p-bills', label: 'Bills', to: '/bills', icon: Receipt, group: 'Pages' },
+  { id: 'p-bank', label: 'Bank feeds', to: '/bank', icon: Receipt, group: 'Pages' },
+  { id: 'p-reconcile', label: 'Reconcile', to: '/reconcile', icon: Receipt, group: 'Pages' },
+  { id: 'p-pl', label: 'Profit & Loss', to: '/pl', icon: TrendingUp, group: 'Pages' },
+  { id: 'p-balance', label: 'Balance sheet', to: '/reports/balance-sheet', icon: TrendingUp, group: 'Pages' },
+  { id: 'p-cashflow', label: 'Cash flow', to: '/reports/cash-flow', icon: TrendingUp, group: 'Pages' },
+  { id: 'p-tax', label: 'Tax', to: '/tax', icon: Calculator, group: 'Pages' },
+  { id: 'p-taxreport', label: 'Tax summary', to: '/reports/tax', icon: Calculator, group: 'Pages' },
+  { id: 'p-journal', label: 'Journal', to: '/journal', icon: FileText, group: 'Pages' },
+  { id: 'p-accounts', label: 'Chart of accounts', to: '/accounts', icon: FileText, group: 'Pages' },
+  { id: 'p-settings', label: 'Settings', to: '/settings', icon: FileText, group: 'Pages' },
+];
+
+interface GlobalSearchProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
+  const [query, setQuery] = useState('');
+  const [index, setIndex] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (open) {
+      setQuery('');
+      setIndex(0);
+    }
+  }, [open]);
+
+  const results = useMemo(() => {
+    const q = query.toLowerCase();
+    const pages = PAGES.filter((p) => p.label.toLowerCase().includes(q));
+    const clients: Result[] = MOCK_CLIENTS.filter((c) => c.name.toLowerCase().includes(q)).map((c) => ({
+      id: `client-${c.id}`,
+      label: c.name,
+      sub: c.email,
+      to: `/invoices/new?client=${c.id}`,
+      icon: Users,
+      group: 'Clients',
+    }));
+    const invoices: Result[] = ['INV-001', 'INV-002', 'INV-003', 'INV-004', 'INV-005']
+      .filter((i) => i.toLowerCase().includes(q))
+      .map((i) => ({ id: i, label: i, sub: 'Invoice', to: `/invoices/${i}`, icon: FileText, group: 'Invoices' }));
+    return [...pages, ...invoices, ...clients].slice(0, 12);
+  }, [query]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setIndex((i) => Math.min(i + 1, results.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setIndex((i) => Math.max(i - 1, 0));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const r = results[index];
+        if (r) {
+          navigate(r.to);
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, results, index, navigate, onClose]);
+
+  return (
+    <Modal open={open} onClose={onClose} title="Search" width={560}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--hub-hover)', borderRadius: 10, marginBottom: 12 }}>
+        <Search size={14} style={{ color: 'var(--hub-text-dim)' }} />
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIndex(0);
+          }}
+          placeholder="Search invoices, expenses, clients, pages..."
+          style={{ ...inputStyle, background: 'transparent', border: 'none', padding: 0 }}
+        />
+      </div>
+      <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+        {results.length === 0 && (
+          <div style={{ padding: 30, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}>No results</div>
+        )}
+        {results.map((r, i) => {
+          const Icon = r.icon;
+          const active = i === index;
+          return (
+            <button
+              key={r.id}
+              onMouseEnter={() => setIndex(i)}
+              onClick={() => {
+                navigate(r.to);
+                onClose();
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                borderRadius: 8,
+                border: 'none',
+                background: active ? 'rgba(16,185,129,0.1)' : 'transparent',
+                color: 'var(--hub-text)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                marginBottom: 2,
+              }}
+            >
+              <Icon size={15} style={{ color: active ? ACCENT : 'var(--hub-text-dim)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{r.label}</div>
+                {r.sub && <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{r.sub}</div>}
+              </div>
+              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)', textTransform: 'uppercase' }}>{r.group}</span>
+            </button>
+          );
+        })}
+      </div>
+    </Modal>
+  );
+};
+
+export default GlobalSearch;

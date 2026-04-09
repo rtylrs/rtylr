@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Mail, MessageSquare, Bell, Users, Send, Eye, TrendingUp } from 'lucide-react';
 import { useCampaigns } from '../../hooks/useCampaigns';
@@ -120,7 +121,7 @@ function StatusBadge({ status }: { status: CampaignStatus }) {
   );
 }
 
-function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }) {
+function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index: number; onClick?: () => void }) {
   const ChannelIcon = channelIcon[campaign.channel];
 
   return (
@@ -129,6 +130,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
+      onClick={onClick}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',
@@ -137,6 +139,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
+        cursor: onClick ? 'pointer' : 'default',
       }}
     >
       {/* Card header */}
@@ -251,6 +254,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
 }
 
 const Campaigns: React.FC = () => {
+  const navigate = useNavigate();
   const { data: fetchedCampaigns } = useCampaigns();
   const campaigns: Campaign[] = fetchedCampaigns && fetchedCampaigns.length ? (fetchedCampaigns as Campaign[]) : mockCampaigns;
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
@@ -267,24 +271,20 @@ const Campaigns: React.FC = () => {
             {campaigns.filter(c => c.status === 'Active').length} active campaigns
           </p>
         </div>
-        <button
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: 600,
-            background: ACCENT,
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <Plus size={15} />
-          New Campaign
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => navigate('/campaigns/sms')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, background: 'transparent', color: 'var(--hub-text)', border: '1px solid var(--hub-border)', cursor: 'pointer' }}
+          >
+            <MessageSquare size={14} /> New SMS
+          </button>
+          <button
+            onClick={() => navigate('/campaigns/email')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, background: ACCENT, color: '#fff', border: 'none', cursor: 'pointer' }}
+          >
+            <Plus size={15} /> New email campaign
+          </button>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -337,7 +337,7 @@ const Campaigns: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <AnimatePresence mode="popLayout">
           {filtered.map((c, i) => (
-            <CampaignCard key={c.id} campaign={c} index={i} />
+            <CampaignCard key={c.id} campaign={c} index={i} onClick={() => navigate(`/campaigns/${c.id}`)} />
           ))}
         </AnimatePresence>
         {filtered.length === 0 && (

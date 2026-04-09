@@ -7,12 +7,20 @@ import {
   Users,
   TrendingDown,
   Clock,
+  TrendingUp,
+  Activity,
+  PackagePlus,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { LowStockItem, PurchaseOrder } from '../../services/erpApi';
 import { useLowStock } from '../../hooks/useInventory';
 import { usePurchaseOrders } from '../../hooks/usePurchaseOrders';
 import { useProducts } from '../../hooks/useProducts';
 import { useSuppliers } from '../../hooks/useSuppliers';
+import { useActivity } from '../../hooks/useActivity';
+import { mockLowStockItems, mockPurchaseOrders } from '../../lib/mockData';
+import { timeAgo, formatCurrency } from '../../lib/format';
+import { SkeletonRow } from '../../components/Skeleton';
 
 const AMBER = '#f59e0b';
 
@@ -23,44 +31,24 @@ const today = new Date().toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
-// ─── Mock / fallback data ─────────────────────────────────────────────────────
-
-const mockLowStockItems: LowStockItem[] = [
-  { name: 'Arabica Coffee Beans', sku: 'BEV-001', stock: 3, minStock: 20, unit: 'kg' },
-  { name: 'Whole Milk (2L)', sku: 'BEV-012', stock: 8, minStock: 50, unit: 'units' },
-  { name: 'Sourdough Bread', sku: 'FOOD-034', stock: 2, minStock: 15, unit: 'loaves' },
-];
-
-const mockRecentOrders: PurchaseOrder[] = [
-  { id: 89, supplier: 'Fresh Farms Co.', supplierId: 1, date: '2024-04-07', expectedDate: '2024-04-10', items: 12, total: '$1,240.00', status: 'Received' },
-  { id: 90, supplier: 'Global Beverages Ltd.', supplierId: 2, date: '2024-04-08', expectedDate: '2024-04-12', items: 20, total: '$3,560.00', status: 'Sent' },
-  { id: 91, supplier: 'Artisan Bakers Inc.', supplierId: 3, date: '2024-04-09', expectedDate: '2024-04-13', items: 4, total: '$890.00', status: 'Draft' },
-];
-
-const mockStats = {
-  totalProducts: 248,
-  lowStockCount: 14,
-  pendingOrders: 7,
-  totalSuppliers: 32,
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function getStatusColor(status: PurchaseOrder['status']): string {
   if (status === 'Received') return '#10b981';
-  if (status === 'Sent') return AMBER;
+  if (status === 'Sent' || status === 'Approved') return AMBER;
+  if (status === 'Pending Approval') return '#a78bfa';
   return 'var(--hub-text-dim)';
 }
 
-// ─── Animation variants ───────────────────────────────────────────────────────
+const activityIconFor = (type: string) => {
+  if (type === 'order') return ShoppingCart;
+  if (type === 'product') return Package;
+  if (type === 'transfer') return TrendingUp;
+  if (type === 'supplier') return Users;
+  return Activity;
+};
 
 const containerVariants = {
   hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.07,
-    },
-  },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
 const itemVariants = {
@@ -68,90 +56,65 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
-const SkeletonRow: React.FC<{ cols: number }> = ({ cols }) => (
-  <div
-    className="grid px-3 py-2.5 rounded-lg gap-2"
-    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, background: 'var(--hub-hover)' }}
-  >
-    {Array.from({ length: cols }).map((_, i) => (
-      <div
-        key={i}
-        className="h-3 rounded animate-pulse"
-        style={{ background: 'var(--hub-border)', opacity: 0.6 }}
-      />
-    ))}
-  </div>
-);
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 const Dashboard: React.FC = () => {
   const { data: lowStockData, isLoading: lowStockLoading } = useLowStock();
   const { data: ordersData, isLoading: ordersLoading } = usePurchaseOrders();
   const { data: productsData, isLoading: productsLoading } = useProducts();
   const { data: suppliersData, isLoading: suppliersLoading } = useSuppliers();
+  const { data: activityData = [] } = useActivity(8);
 
   const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;
 
-  const lowStockItems: LowStockItem[] = lowStockData && lowStockData.length ? lowStockData : mockLowStockItems;
-  const recentOrders: PurchaseOrder[] = ordersData && ordersData.length ? ordersData.slice(0, 3) : mockRecentOrders;
-
-  const statsData = {
-    totalProducts: productsData && productsData.length ? productsData.length : mockStats.totalProducts,
-    lowStockCount:
-      lowStockData && lowStockData.length
-        ? lowStockData.length
-        : productsData && productsData.length
-        ? productsData.filter((p: any) => p.status === 'Low Stock').length
-        : mockStats.lowStockCount,
-    pendingOrders:
-      ordersData && ordersData.length
-        ? ordersData.filter((o) => o.status === 'Sent' || o.status === 'Draft').length
-        : mockStats.pendingOrders,
-    totalSuppliers: suppliersData && suppliersData.length ? suppliersData.length : mockStats.totalSuppliers,
-  };
+  const lowStockItems: LowStockItem[] =
+    lowStockData && lowStockData.length ? lowStockData : mockLowStockItems;
+  const ordersForList: PurchaseOrder[] =
+    ordersData && ordersData.length ? ordersData : mockPurchaseOrders;
+  const recentOrders = ordersForList.slice(0, 3);
 
   const stats = [
     {
       label: 'Total Products',
-      value: isLoading ? '…' : String(statsData.totalProducts),
+      value: productsData && productsData.length ? productsData.length : 248,
       icon: Package,
       change: '+12 this month',
       changePositive: true,
+      to: '/products',
     },
     {
       label: 'Low Stock Items',
-      value: isLoading ? '…' : String(statsData.lowStockCount),
+      value: lowStockItems.length,
       icon: AlertTriangle,
-      change: '3 critical',
+      change: `${lowStockItems.filter((i) => i.stock <= 5).length} critical`,
       changePositive: false,
+      to: '/alerts',
     },
     {
       label: 'Pending Orders',
-      value: isLoading ? '…' : String(statsData.pendingOrders),
+      value: ordersForList.filter((o) => o.status === 'Sent' || o.status === 'Draft').length,
       icon: ShoppingCart,
       change: '2 awaiting approval',
       changePositive: true,
+      to: '/purchasing',
     },
     {
       label: 'Total Suppliers',
-      value: isLoading ? '…' : String(statsData.totalSuppliers),
+      value: suppliersData && suppliersData.length ? suppliersData.length : 32,
       icon: Users,
       change: '+2 this month',
       changePositive: true,
+      to: '/suppliers',
     },
   ];
+
+  const weeklyValue = (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * 3, 0);
 
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-6 max-w-6xl"
+      className="space-y-6 max-w-7xl"
     >
-      {/* Header */}
       <motion.div variants={itemVariants} className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -161,6 +124,14 @@ const Dashboard: React.FC = () => {
             {today}
           </p>
         </div>
+        <Link
+          to="/products"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
+          style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
+        >
+          <PackagePlus size={14} />
+          New Product
+        </Link>
       </motion.div>
 
       {/* Stat cards */}
@@ -168,50 +139,128 @@ const Dashboard: React.FC = () => {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div
-              key={stat.label}
-              variants={itemVariants}
-              className="rounded-xl p-4"
-              style={{
-                background: 'var(--hub-card)',
-                border: '1px solid var(--hub-border)',
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-                  {stat.label}
-                </span>
-                <span
-                  className="flex items-center justify-center h-7 w-7 rounded-lg"
-                  style={{ background: 'rgba(245,158,11,0.1)' }}
-                >
-                  <Icon size={14} style={{ color: AMBER }} />
-                </span>
-              </div>
-              <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-                {stat.value}
-              </p>
-              <p
-                className="text-xs mt-1"
-                style={{ color: stat.changePositive ? '#10b981' : '#f87171' }}
+            <motion.div key={stat.label} variants={itemVariants}>
+              <Link
+                to={stat.to}
+                className="block rounded-xl p-4 transition-all"
+                style={{
+                  background: 'var(--hub-card)',
+                  border: '1px solid var(--hub-border)',
+                  textDecoration: 'none',
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
               >
-                {stat.change}
-              </p>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+                    {stat.label}
+                  </span>
+                  <span
+                    className="flex items-center justify-center h-7 w-7 rounded-lg"
+                    style={{ background: 'rgba(245,158,11,0.1)' }}
+                  >
+                    <Icon size={14} style={{ color: AMBER }} />
+                  </span>
+                </div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+                  {isLoading ? '…' : stat.value}
+                </p>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: stat.changePositive ? '#10b981' : '#f87171' }}
+                >
+                  {stat.change}
+                </p>
+              </Link>
             </motion.div>
           );
         })}
       </motion.div>
 
-      {/* Two column grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Low Stock Alert */}
+      {/* Extra widgets row */}
+      <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div
           variants={itemVariants}
           className="rounded-xl p-5"
-          style={{
-            background: 'var(--hub-card)',
-            border: '1px solid var(--hub-border)',
-          }}
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp size={14} style={{ color: '#10b981' }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Sales This Week
+            </h3>
+          </div>
+          <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+            {formatCurrency(weeklyValue)}
+          </p>
+          <p className="text-[11px] mt-1" style={{ color: '#10b981' }}>
+            +18% vs last week
+          </p>
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Package size={14} style={{ color: AMBER }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Top 5 Items
+            </h3>
+          </div>
+          <div className="space-y-1.5">
+            {(productsData || []).slice(0, 5).map((p, i) => (
+              <div key={p.id} className="flex items-center gap-2">
+                <span className="text-[10px] w-4" style={{ color: 'var(--hub-text-dim)' }}>
+                  {i + 1}
+                </span>
+                <span className="text-xs flex-1 truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                  {p.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Activity size={14} style={{ color: '#60a5fa' }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Recent Activity
+            </h3>
+          </div>
+          <div className="space-y-2">
+            {activityData.slice(0, 5).map((a) => {
+              const Icon = activityIconFor(a.type);
+              return (
+                <div key={a.id} className="flex items-start gap-2">
+                  <Icon size={10} className="mt-1 shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                      {a.title}
+                    </p>
+                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      {timeAgo(a.timestamp)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Two column grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <motion.div
+          variants={itemVariants}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingDown size={15} style={{ color: '#f87171' }} />
@@ -225,56 +274,41 @@ const Dashboard: React.FC = () => {
               {isLoading ? '…' : `${lowStockItems.length} items`}
             </span>
           </div>
-
-          {/* Column headers */}
-          <div
-            className="grid grid-cols-3 px-3 py-1.5 rounded-lg mb-1 text-[10px] font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--hub-text-dim)' }}
-          >
-            <span>Product</span>
-            <span className="text-center">Stock</span>
-            <span className="text-right">Min. Required</span>
-          </div>
-
           <div className="space-y-1">
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={3} />)
-              : lowStockItems.map((item) => (
-                <div
-                  key={item.sku}
-                  className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {item.name}
+              : lowStockItems.slice(0, 5).map((item) => (
+                  <div
+                    key={item.sku}
+                    className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
+                    style={{ background: 'var(--hub-hover)' }}
+                  >
+                    <div>
+                      <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                        {item.name}
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                        {item.sku}
+                      </p>
+                    </div>
+                    <p
+                      className="text-sm font-bold text-center"
+                      style={{ color: item.stock <= 5 ? '#f87171' : AMBER }}
+                    >
+                      {item.stock} {item.unit}
                     </p>
-                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      {item.sku}
+                    <p className="text-xs text-right" style={{ color: 'var(--hub-text-muted)' }}>
+                      {item.minStock} {item.unit}
                     </p>
                   </div>
-                  <p
-                    className="text-sm font-bold text-center"
-                    style={{ color: item.stock <= 5 ? '#f87171' : AMBER }}
-                  >
-                    {item.stock} {item.unit}
-                  </p>
-                  <p className="text-xs text-right" style={{ color: 'var(--hub-text-muted)' }}>
-                    {item.minStock} {item.unit}
-                  </p>
-                </div>
-              ))}
+                ))}
           </div>
         </motion.div>
 
-        {/* Recent Purchase Orders */}
         <motion.div
           variants={itemVariants}
           className="rounded-xl p-5"
-          style={{
-            background: 'var(--hub-card)',
-            border: '1px solid var(--hub-border)',
-          }}
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-4">
             <Clock size={15} style={{ color: AMBER }} />
@@ -282,57 +316,42 @@ const Dashboard: React.FC = () => {
               Recent Purchase Orders
             </h3>
           </div>
-
-          {/* Column headers */}
-          <div
-            className="grid grid-cols-4 px-3 py-1.5 rounded-lg mb-1 text-[10px] font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--hub-text-dim)' }}
-          >
-            <span>Order</span>
-            <span>Supplier</span>
-            <span className="text-right">Total</span>
-            <span className="text-right">Status</span>
-          </div>
-
           <div className="space-y-1">
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
               : recentOrders.map((order) => {
-                const statusColor = getStatusColor(order.status);
-                return (
-                  <div
-                    key={order.id}
-                    className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
-                    style={{ background: 'var(--hub-hover)' }}
-                  >
-                    <div>
-                      <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {typeof order.id === 'number' ? `PO-${order.id}` : order.id}
+                  const statusColor = getStatusColor(order.status);
+                  return (
+                    <div
+                      key={order.id}
+                      className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
+                      style={{ background: 'var(--hub-hover)' }}
+                    >
+                      <div>
+                        <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                          PO-{order.id}
+                        </p>
+                        <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                          {order.date}
+                        </p>
+                      </div>
+                      <p className="text-xs truncate pr-2" style={{ color: 'var(--hub-text-muted)' }}>
+                        {order.supplier}
                       </p>
-                      <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                        {order.date}
+                      <p className="text-xs font-semibold text-right" style={{ color: 'var(--hub-text)' }}>
+                        {order.total}
                       </p>
+                      <div className="flex justify-end">
+                        <span
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                          style={{ background: `${statusColor}18`, color: statusColor }}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-xs truncate pr-2" style={{ color: 'var(--hub-text-muted)' }}>
-                      {order.supplier}
-                    </p>
-                    <p className="text-xs font-semibold text-right" style={{ color: 'var(--hub-text)' }}>
-                      {order.total}
-                    </p>
-                    <div className="flex justify-end">
-                      <span
-                        className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                        style={{
-                          background: `${statusColor}18`,
-                          color: statusColor,
-                        }}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
           </div>
         </motion.div>
       </div>

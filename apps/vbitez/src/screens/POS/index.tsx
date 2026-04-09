@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import POSLayout from '../../layouts/POSLayout';
+import QuickAccessSidebar from '../../components/QuickAccessSidebar';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
 import { businessApi, menuApi } from '../../api';
 
-interface Product { id: string; name: string; price: number; category: string; image?: string; available?: boolean }
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image?: string;
+  available?: boolean;
+}
 
 const POS: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -54,6 +62,7 @@ const POS: React.FC = () => {
   return (
     <POSLayout>
       <div className="flex h-full overflow-hidden">
+        <QuickAccessSidebar />
         <ProductGrid products={products} categories={categories} />
         <OrderPanel />
       </div>

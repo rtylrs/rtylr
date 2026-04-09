@@ -15,7 +15,13 @@ import {
   Monitor,
   ChevronRight,
   LogOut,
+  Zap,
+  FileText,
+  MessageSquare,
+  Settings as SettingsIcon,
+  Search,
 } from 'lucide-react';
+import { useShortcuts } from '../../components/ShortcutsProvider';
 
 const ACCENT = '#3b82f6';
 
@@ -26,19 +32,36 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard',  path: '/',           icon: LayoutDashboard },
-  { label: 'Customers',  path: '/customers',  icon: Users },
-  { label: 'Loyalty',    path: '/loyalty',    icon: Gift },
-  { label: 'Campaigns',  path: '/campaigns',  icon: Megaphone },
-  { label: 'Segments',   path: '/segments',   icon: PieChart },
+  { label: 'Dashboard',   path: '/',            icon: LayoutDashboard },
+  { label: 'Customers',   path: '/customers',   icon: Users },
+  { label: 'Loyalty',     path: '/loyalty',     icon: Gift },
+  { label: 'Campaigns',   path: '/campaigns',   icon: Megaphone },
+  { label: 'Segments',    path: '/segments',    icon: PieChart },
+  { label: 'Automations', path: '/automations', icon: Zap },
+  { label: 'Templates',   path: '/templates',   icon: FileText },
+  { label: 'Feedback',    path: '/feedback',    icon: MessageSquare },
+  { label: 'Settings',    path: '/settings',    icon: SettingsIcon },
 ];
 
 const routeLabels: Record<string, string> = {
-  '/':           'Dashboard',
-  '/customers':  'Customers',
-  '/loyalty':    'Loyalty',
-  '/campaigns':  'Campaigns',
-  '/segments':   'Segments',
+  '/':            'Dashboard',
+  '/customers':   'Customers',
+  '/customers/new': 'New customer',
+  '/customers/import': 'Import customers',
+  '/loyalty':     'Loyalty',
+  '/loyalty/members': 'Loyalty members',
+  '/loyalty/rewards': 'Rewards catalog',
+  '/loyalty/tiers': 'Loyalty tiers',
+  '/campaigns':   'Campaigns',
+  '/campaigns/email': 'New email campaign',
+  '/campaigns/sms': 'New SMS campaign',
+  '/segments':    'Segments',
+  '/segments/new': 'New segment',
+  '/automations': 'Automations',
+  '/automations/new': 'New automation',
+  '/templates':   'Templates',
+  '/feedback':    'Feedback & NPS',
+  '/settings':    'Settings',
 };
 
 function getPageTitle(pathname: string): string {
@@ -124,6 +147,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 const DefaultLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { openPalette } = useShortcuts();
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -382,7 +406,39 @@ const DefaultLayout: React.FC = () => {
           <h1 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
             {pageTitle}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={openPalette}
+              style={{
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                cursor: 'pointer',
+                color: 'var(--hub-text-muted)',
+                fontSize: '12px',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Search size={12} />
+              <span>Search...</span>
+              <kbd
+                style={{
+                  fontSize: '9px',
+                  padding: '1px 5px',
+                  borderRadius: '3px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-card)',
+                  color: 'var(--hub-text-dim)',
+                }}
+              >
+                ⌘K
+              </kbd>
+            </button>
             <button
               style={{
                 height: '28px',

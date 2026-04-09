@@ -15,6 +15,15 @@ import { useGoogleSignupVisible } from '../hooks/useFeatures';
 import AuthShell from '../components/AuthShell';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
+import PasswordStrengthMeter, {
+  scorePassword,
+} from '../components/PasswordStrengthMeter';
+import TermsCheckbox from '../components/TermsCheckbox';
+import AuthDivider from '../components/AuthDivider';
+import {
+  getEmailError,
+  getPasswordMatchError,
+} from '../lib/validation';
 
 const fieldStagger = {
   hidden: { opacity: 0, y: 12 },
@@ -32,6 +41,10 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agree, setAgree] = useState(false);
+  const emailError = getEmailError(email);
+  const matchError = getPasswordMatchError(password, confirmPassword);
+  const pwScore = scorePassword(password);
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
@@ -40,6 +53,10 @@ const Register: React.FC = () => {
   const handleRegister = () => {
     if (password !== confirmPassword) {
       notify.error('Passwords do not match');
+      return;
+    }
+    if (!agree) {
+      notify.error('Please accept the terms to continue');
       return;
     }
     registerMutation.mutate({
@@ -126,11 +143,18 @@ const Register: React.FC = () => {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={emailError}
             required
           />
         </motion.div>
 
-        <motion.div custom={2} initial="hidden" animate="show" variants={fieldStagger}>
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="show"
+          variants={fieldStagger}
+          className="flex flex-col gap-2"
+        >
           <AuthInput
             id="register-password"
             type="password"
@@ -142,6 +166,7 @@ const Register: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {password && <PasswordStrengthMeter password={password} />}
         </motion.div>
 
         <motion.div custom={3} initial="hidden" animate="show" variants={fieldStagger}>
@@ -154,8 +179,13 @@ const Register: React.FC = () => {
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            error={matchError}
             required
           />
+        </motion.div>
+
+        <motion.div custom={4} initial="hidden" animate="show" variants={fieldStagger}>
+          <TermsCheckbox checked={agree} onChange={setAgree} />
         </motion.div>
 
         {errorMessage && (
@@ -170,8 +200,18 @@ const Register: React.FC = () => {
           </motion.div>
         )}
 
-        <motion.div custom={4} initial="hidden" animate="show" variants={fieldStagger}>
-          <AuthButton type="submit" loading={loading}>
+        <motion.div custom={5} initial="hidden" animate="show" variants={fieldStagger}>
+          <AuthButton
+            type="submit"
+            loading={loading}
+            disabled={
+              !email ||
+              !!emailError ||
+              pwScore < 2 ||
+              !!matchError ||
+              !agree
+            }
+          >
             <span className="inline-flex items-center justify-center gap-2">
               Create account
               <ArrowRight className="h-[18px] w-[18px]" />
@@ -181,17 +221,13 @@ const Register: React.FC = () => {
 
         {showGoogle && (
           <motion.div
-            custom={5}
+            custom={6}
             initial="hidden"
             animate="show"
             variants={fieldStagger}
             className="space-y-4"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[11px] uppercase tracking-widest text-white/40">or</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
+            <AuthDivider />
 
             <AuthButton type="button" variant="outline" onClick={handleGoogle}>
               <span className="inline-flex items-center justify-center gap-2.5">

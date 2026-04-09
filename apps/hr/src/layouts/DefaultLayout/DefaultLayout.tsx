@@ -15,7 +15,22 @@ import {
   Monitor,
   LogOut,
   ChevronUp,
+  Calendar,
+  ClipboardList,
+  Rocket,
+  FileText,
+  Shield,
+  GraduationCap,
+  Network,
+  Settings,
+  MessageSquare,
+  CalendarDays,
+  Timer,
+  Search,
+  Command,
 } from 'lucide-react';
+import CommandPalette from '../../components/CommandPalette';
+import GlobalShortcuts from '../../components/GlobalShortcuts';
 
 /* ── Types ── */
 interface NavItem {
@@ -27,13 +42,54 @@ interface NavItem {
 /* ── Nav config ── */
 const ACCENT = '#8b5cf6';
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard',   path: '/',            icon: LayoutDashboard },
-  { label: 'Staff',       path: '/staff',       icon: Users           },
-  { label: 'Shifts',      path: '/shifts',      icon: Clock           },
-  { label: 'Payroll',     path: '/payroll',     icon: DollarSign      },
-  { label: 'Departments', path: '/departments', icon: Building2       },
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
+  {
+    title: 'Workspace',
+    items: [
+      { label: 'Dashboard',   path: '/',            icon: LayoutDashboard },
+      { label: 'Staff',       path: '/staff',       icon: Users           },
+      { label: 'Departments', path: '/departments', icon: Building2       },
+      { label: 'Org Chart',   path: '/org-chart',   icon: Network         },
+    ],
+  },
+  {
+    title: 'Time',
+    items: [
+      { label: 'Shifts',     path: '/shifts',     icon: Clock      },
+      { label: 'Schedule',   path: '/schedule',   icon: CalendarDays },
+      { label: 'Timesheets', path: '/timesheets', icon: Timer       },
+      { label: 'Time Off',   path: '/time-off',   icon: Calendar    },
+      { label: 'Calendar',   path: '/calendar',   icon: Calendar    },
+    ],
+  },
+  {
+    title: 'People',
+    items: [
+      { label: 'Reviews',      path: '/reviews',      icon: ClipboardList  },
+      { label: '1-on-1s',      path: '/one-on-ones',  icon: MessageSquare  },
+      { label: 'Onboarding',   path: '/onboarding',   icon: Rocket         },
+      { label: 'Offboarding',  path: '/offboarding',  icon: LogOut         },
+      { label: 'Training',     path: '/training',     icon: GraduationCap  },
+    ],
+  },
+  {
+    title: 'HR',
+    items: [
+      { label: 'Payroll',    path: '/payroll',    icon: DollarSign },
+      { label: 'Benefits',   path: '/benefits',   icon: Shield     },
+      { label: 'Documents',  path: '/documents',  icon: FileText   },
+      { label: 'Operations', path: '/operations', icon: Timer      },
+      { label: 'Settings',   path: '/settings',   icon: Settings   },
+    ],
+  },
 ];
+
+const navItems: NavItem[] = navSections.flatMap((s) => s.items);
 
 const routeLabels: Record<string, string> = {
   '/':            'Dashboard',
@@ -41,10 +97,30 @@ const routeLabels: Record<string, string> = {
   '/shifts':      'Shifts',
   '/payroll':     'Payroll',
   '/departments': 'Departments',
+  '/time-off':    'Time Off',
+  '/time-off/new':'Request Time Off',
+  '/calendar':    'Time Off Calendar',
+  '/schedule':    'Shift Schedule',
+  '/timesheets':  'Timesheets',
+  '/reviews':     'Performance Reviews',
+  '/reviews/new': 'New Review',
+  '/one-on-ones': '1-on-1s',
+  '/onboarding':  'Onboarding',
+  '/offboarding': 'Offboarding',
+  '/documents':   'Documents',
+  '/benefits':    'Benefits',
+  '/training':    'Training',
+  '/org-chart':   'Org Chart',
+  '/operations':  'Operations',
+  '/settings':    'Settings',
 };
 
 function getPageTitle(pathname: string): string {
-  return routeLabels[pathname] ?? 'HR';
+  if (routeLabels[pathname]) return routeLabels[pathname];
+  if (pathname.startsWith('/staff/')) return 'Employee Profile';
+  if (pathname.startsWith('/reviews/')) return 'Performance Reviews';
+  if (pathname.startsWith('/time-off/')) return 'Time Off';
+  return 'HR';
 }
 
 /* ── Theme helpers ── */
@@ -271,6 +347,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--hr-bg)' }}>
+      <CommandPalette />
+      <GlobalShortcuts />
       {/* Sidebar */}
       <aside
         style={{
@@ -346,20 +424,25 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             gap: '2px',
           }}
         >
-          <p
-            style={{
-              padding: '4px 12px 6px',
-              fontSize: '10px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              color: 'var(--hr-text-dim)',
-            }}
-          >
-            Workspace
-          </p>
-          {navItems.map((item) => (
-            <SidebarNavItem key={item.path} {...item} />
+          {navSections.map((section) => (
+            <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}>
+              <p
+                style={{
+                  padding: '6px 12px 4px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  color: 'var(--hr-text-dim)',
+                  margin: 0,
+                }}
+              >
+                {section.title}
+              </p>
+              {section.items.map((item) => (
+                <SidebarNavItem key={item.path} {...item} />
+              ))}
+            </div>
           ))}
         </nav>
 
@@ -387,7 +470,34 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           <h1 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
             {pageTitle}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('hr:open-palette'));
+              }}
+              style={{
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '0 10px',
+                borderRadius: '8px',
+                background: 'var(--hr-hover)',
+                border: '1px solid var(--hr-border)',
+                cursor: 'pointer',
+                color: 'var(--hr-text-muted)',
+                fontSize: 11,
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-active)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')}
+              aria-label="Open command palette"
+            >
+              <Search size={12} />
+              Search
+              <kbd style={{ display: 'inline-flex', alignItems: 'center', gap: 2, padding: '1px 4px', borderRadius: 4, border: '1px solid var(--hr-border)', fontSize: 9 }}>
+                <Command size={9} />K
+              </kbd>
+            </button>
             <button
               style={{
                 height: '28px',

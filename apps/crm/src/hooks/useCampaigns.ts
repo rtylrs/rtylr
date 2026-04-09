@@ -8,6 +8,22 @@ export function useCampaigns() {
   });
 }
 
+export function useCampaignById(id: number | undefined) {
+  return useQuery({
+    queryKey: ['campaign', id],
+    queryFn: () => crmApi.getCampaignById(id!),
+    enabled: !!id,
+  });
+}
+
+export function useCampaignStats(id: number | undefined) {
+  return useQuery({
+    queryKey: ['campaign-stats', id],
+    queryFn: () => crmApi.getCampaignStats(id!),
+    enabled: !!id,
+  });
+}
+
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({

@@ -1,8 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, UserPlus, Gift, Megaphone, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, UserPlus, Gift, Megaphone, TrendingUp, TrendingDown, AlertTriangle, DollarSign, PieChart, Activity, ArrowRight } from 'lucide-react';
 import { type DashboardStats } from '../../services/crmApi';
 import { useCRMDashboard } from '../../hooks/useDashboard';
+import { useCustomers } from '../../hooks/useCustomers';
+import { useSegments } from '../../hooks/useSegments';
+import { mockCustomers, mockSegments } from '../../lib/mockData';
+import { CustomerAvatar } from '../../components/crm';
 
 const ACCENT = '#3b82f6';
 
@@ -138,7 +143,17 @@ function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
 }
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { data: dashboardData } = useCRMDashboard();
+  const { data: fetchedCustomers } = useCustomers();
+  const { data: fetchedSegments } = useSegments();
+  const customersPool = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
+  const segmentsPool = fetchedSegments && fetchedSegments.length ? fetchedSegments : mockSegments;
+
+  const ltv = customersPool.length > 0 ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length) : 0;
+  const atRisk = customersPool.filter((c) => /month|weeks/.test(c.lastVisit)).slice(0, 4);
+  const churnRate = customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
+  const topSegment = segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0]);
 
   const stats = dashboardData
     ? [
@@ -159,6 +174,154 @@ const Dashboard: React.FC = () => {
           <StatCard key={stat.label} stat={stat} index={i} />
         ))}
       </div>
+
+      {/* Extended KPI widgets */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '12px',
+            padding: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Avg LTV</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(16,185,129,0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <DollarSign size={13} />
+            </div>
+          </div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>${ltv.toLocaleString()}</div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>per customer</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          onClick={() => navigate('/customers/new')}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '12px',
+            padding: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>New This Month</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(59,130,246,0.12)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UserPlus size={13} />
+            </div>
+          </div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>{dashboardData?.newThisMonth || 184}</div>
+          <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>+8% vs last month</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26 }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '12px',
+            padding: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Churn Rate</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(239,68,68,0.12)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Activity size={13} />
+            </div>
+          </div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>{churnRate}%</div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>customers at risk</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          onClick={() => topSegment && navigate(`/segments/${topSegment.id}`)}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '12px',
+            padding: '16px',
+            cursor: topSegment ? 'pointer' : 'default',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Top Segment</span>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(232,121,249,0.12)', color: '#e879f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PieChart size={13} />
+            </div>
+          </div>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)', marginTop: '2px' }}>{topSegment?.name || 'VIP Customers'}</div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{topSegment?.customerCount.toLocaleString() || 0} members</div>
+        </motion.div>
+      </div>
+
+      {/* At-risk customers widget */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.36 }}
+        style={{
+          background: 'var(--hub-card)',
+          border: '1px solid var(--hub-border)',
+          borderRadius: '12px',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--hub-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>At-risk customers</span>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>not visited in 30+ days</span>
+          </div>
+          <button
+            onClick={() => navigate('/campaigns/email?segment=atrisk')}
+            style={{
+              fontSize: '12px',
+              color: '#3b82f6',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            Send win-back <ArrowRight size={12} />
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px', padding: '14px 20px' }}>
+          {atRisk.slice(0, 4).map((c) => (
+            <div
+              key={c.id}
+              onClick={() => navigate(`/customers/${c.id}`)}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderRadius: '8px', cursor: 'pointer', background: 'var(--hub-hover)' }}
+            >
+              <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>{c.name}</div>
+                <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>Last: {c.lastVisit}</div>
+              </div>
+            </div>
+          ))}
+          {atRisk.length === 0 && (
+            <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', textAlign: 'center', padding: '10px' }}>
+              No at-risk customers right now.
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
         {/* Top customers */}

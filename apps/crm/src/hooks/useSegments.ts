@@ -8,6 +8,22 @@ export function useSegments() {
   });
 }
 
+export function useSegmentById(id: number | undefined) {
+  return useQuery({
+    queryKey: ['segment', id],
+    queryFn: () => crmApi.getSegmentById(id!),
+    enabled: !!id,
+  });
+}
+
+export function useSegmentCustomers(id: number | undefined) {
+  return useQuery({
+    queryKey: ['segment-customers', id],
+    queryFn: () => crmApi.getSegmentCustomers(id!),
+    enabled: !!id,
+  });
+}
+
 export function useCreateSegment() {
   const qc = useQueryClient();
   return useMutation({

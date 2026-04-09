@@ -5,24 +5,15 @@ import NoMatch from './screens/Extras/NoMatch';
 import { useUserStore } from './stores/userStore';
 import { useEmployeeSessionStore } from './stores/employeeSessionStore';
 import PinLogin from './screens/Login';
+import CommandPalette from './components/CommandPalette';
+import HelpOverlay from './components/HelpOverlay';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useAutoLogout } from './hooks/useAutoLogout';
 
-const App = (): JSX.Element => {
+const AppInner = (): JSX.Element => {
+  useKeyboardShortcuts();
+  useAutoLogout();
   const location = useLocation();
-  const { token, getUserInfo } = useUserStore();
-  const { isActive } = useEmployeeSessionStore();
-
-  // Restore business session on mount if token exists
-  useEffect(() => {
-    if (token) {
-      getUserInfo().catch(() => {});
-    }
-  }, []);
-
-  // Always require employee PIN — email/password login belongs in hub/auth
-  if (!isActive) {
-    return <PinLogin />;
-  }
-
   return (
     <Suspense fallback={null}>
       <Routes key={location.pathname} location={location}>
@@ -31,8 +22,28 @@ const App = (): JSX.Element => {
         ))}
         <Route path="*" element={<NoMatch />} />
       </Routes>
+      <CommandPalette />
+      <HelpOverlay />
     </Suspense>
   );
+};
+
+const App = (): JSX.Element => {
+  const { token, getUserInfo } = useUserStore();
+  const { isActive } = useEmployeeSessionStore();
+
+  useEffect(() => {
+    if (token) {
+      getUserInfo().catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!isActive) {
+    return <PinLogin />;
+  }
+
+  return <AppInner />;
 };
 
 export default App;

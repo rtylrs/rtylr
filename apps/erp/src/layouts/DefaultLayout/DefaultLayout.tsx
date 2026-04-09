@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { APP_URLS } from '@voxire/config';
 import {
@@ -14,7 +14,27 @@ import {
   Monitor,
   LogOut,
   ArrowLeft,
+  Warehouse,
+  Truck,
+  ClipboardList,
+  AlertTriangle,
+  PackageCheck,
+  Sparkles,
+  Tags,
+  Layers,
+  Barcode,
+  CalendarX,
+  DollarSign,
+  Settings as SettingsIcon,
+  Search as SearchIcon,
+  Keyboard,
+  Folder,
+  Tag,
 } from 'lucide-react';
+import { Toaster } from 'sonner';
+import CommandPalette from '../../components/CommandPalette';
+import KeyboardShortcutsModal from '../../components/KeyboardShortcutsModal';
+import QuickAddProductModal from '../../components/QuickAddProductModal';
 
 interface NavItem {
   label: string;
@@ -22,18 +42,77 @@ interface NavItem {
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard',  path: '/',           icon: LayoutDashboard },
-  { label: 'Inventory',  path: '/inventory',  icon: Package },
-  { label: 'Purchasing', path: '/purchasing', icon: ShoppingCart },
-  { label: 'Suppliers',  path: '/suppliers',  icon: Users },
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: 'Workspace',
+    items: [
+      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+      { label: 'Products', path: '/products', icon: Package },
+      { label: 'Inventory', path: '/inventory', icon: Package },
+    ],
+  },
+  {
+    label: 'Catalog',
+    items: [
+      { label: 'Categories', path: '/categories', icon: Folder },
+      { label: 'Brands', path: '/brands', icon: Tag },
+      { label: 'Variants', path: '/variants', icon: Layers },
+      { label: 'Price Lists', path: '/price-lists', icon: Tags },
+      { label: 'Barcodes', path: '/barcodes', icon: Barcode },
+    ],
+  },
+  {
+    label: 'Warehouse Ops',
+    items: [
+      { label: 'Warehouses', path: '/warehouses', icon: Warehouse },
+      { label: 'Stock Transfers', path: '/transfers', icon: Truck },
+      { label: 'Stock Takes', path: '/stock-takes', icon: ClipboardList },
+      { label: 'Receiving', path: '/receiving', icon: PackageCheck },
+      { label: 'Expiry', path: '/expiry', icon: CalendarX },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { label: 'Low Stock Alerts', path: '/alerts', icon: AlertTriangle },
+      { label: 'Reorder', path: '/reorder', icon: Sparkles },
+      { label: 'Valuation', path: '/valuation', icon: DollarSign },
+    ],
+  },
+  {
+    label: 'Purchasing',
+    items: [
+      { label: 'Purchase Orders', path: '/purchasing', icon: ShoppingCart },
+      { label: 'Suppliers', path: '/suppliers', icon: Users },
+    ],
+  },
 ];
 
 const routeLabels: Record<string, string> = {
-  '/':           'Dashboard',
-  '/inventory':  'Inventory',
+  '/': 'Dashboard',
+  '/products': 'Products',
+  '/inventory': 'Inventory',
   '/purchasing': 'Purchase Orders',
-  '/suppliers':  'Suppliers',
+  '/suppliers': 'Suppliers',
+  '/categories': 'Categories',
+  '/brands': 'Brands',
+  '/warehouses': 'Warehouses',
+  '/transfers': 'Stock Transfers',
+  '/stock-takes': 'Stock Takes',
+  '/alerts': 'Low Stock Alerts',
+  '/receiving': 'Goods Receiving',
+  '/reorder': 'Reorder Suggestions',
+  '/price-lists': 'Price Lists',
+  '/variants': 'Product Variants',
+  '/barcodes': 'Barcode Generator',
+  '/expiry': 'Expiry Tracking',
+  '/valuation': 'Inventory Valuation',
+  '/settings': 'Settings',
 };
 
 function getPageTitle(pathname: string): string {
@@ -74,7 +153,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   return (
     <Link
       to={path}
-      className="relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150"
+      className="relative flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150"
       style={{
         color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
         textDecoration: 'none',
@@ -94,7 +173,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
-      <Icon size={16} className="relative shrink-0" />
+      <Icon size={14} className="relative shrink-0" />
       <span className="relative">{label}</span>
       {isActive && (
         <span
@@ -112,12 +191,21 @@ interface DefaultLayoutProps {
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const navigate = useNavigate();
+  const [theme, setThemeState] = useState<Theme>(() => {
+    return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
+  });
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
 
-  // Read user from localStorage
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
   const rawUser = (() => {
     try {
       return JSON.parse(localStorage.getItem('rtylr:voxire:user') || 'null');
@@ -132,6 +220,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const handleSetTheme = (t: Theme) => {
     setThemeState(t);
     applyTheme(t);
+    localStorage.setItem('rtylr-erp-theme', t);
   };
 
   const handleLogout = () => {
@@ -139,9 +228,61 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     window.location.href = `${APP_URLS.auth}?redirect=erp`;
   };
 
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable;
+
+      // cmd+k or ctrl+k
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+        return;
+      }
+
+      if (isTyping) return;
+
+      // Single-key shortcuts
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        searchInput?.focus();
+      } else if (e.key === '?' && e.shiftKey) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      } else if (e.key === 'n') {
+        e.preventDefault();
+        setQuickAddOpen(true);
+      } else if (e.key === 'Escape') {
+        setPaletteOpen(false);
+        setShortcutsOpen(false);
+        setQuickAddOpen(false);
+      } else if (e.shiftKey) {
+        if (e.key === 'I' || e.key === 'i') {
+          e.preventDefault();
+          navigate('/inventory');
+        } else if (e.key === 'P' || e.key === 'p') {
+          e.preventDefault();
+          navigate('/purchasing');
+        } else if (e.key === 'S' || e.key === 's') {
+          e.preventDefault();
+          navigate('/suppliers');
+        } else if (e.key === 'D' || e.key === 'd') {
+          e.preventDefault();
+          navigate('/');
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate]);
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
-      {/* Sidebar */}
       <aside
         className="w-56 flex flex-col shrink-0 overflow-hidden"
         style={{
@@ -149,7 +290,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           borderRight: '1px solid var(--hub-border)',
         }}
       >
-        {/* Logo area */}
         <div
           className="flex items-center gap-2.5 px-4 py-4"
           style={{ borderBottom: '1px solid var(--hub-border)' }}
@@ -165,7 +305,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </span>
         </div>
 
-        {/* Hub back-link */}
         <div className="px-3 pt-3">
           <a
             href={APP_URLS.hub}
@@ -183,22 +322,34 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </a>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-          <p
-            className="px-3 mb-1.5 mt-1 text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: 'var(--hub-text-dim)' }}
-          >
-            Workspace
-          </p>
-          {navItems.map((item) => (
-            <SidebarNavItem key={item.path} {...item} />
+        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-3">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <p
+                className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--hub-text-dim)' }}
+              >
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <SidebarNavItem key={item.path} {...item} />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
-        {/* Footer */}
         <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
-          {/* User row */}
+          <Link
+            to="/settings"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
+            style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+          >
+            <SettingsIcon size={12} /> Settings
+          </Link>
           <div className="relative">
             <button
               onClick={() => setShowUserMenu((v) => !v)}
@@ -236,7 +387,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               <ChevronRight size={12} className="shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
             </button>
 
-            {/* Dropdown */}
             <AnimatePresence>
               {showUserMenu && (
                 <motion.div
@@ -251,7 +401,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     boxShadow: 'var(--hub-shadow)',
                   }}
                 >
-                  {/* Theme selector */}
                   <p
                     className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
                     style={{ color: 'var(--hub-text-dim)' }}
@@ -310,9 +459,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Topbar */}
         <header
           className="h-11 flex items-center justify-between px-6 shrink-0"
           style={{
@@ -324,6 +471,38 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {pageTitle}
           </h1>
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+            >
+              <SearchIcon size={11} />
+              <span>Search...</span>
+              <kbd
+                className="text-[9px] font-mono px-1 py-0.5 rounded"
+                style={{ background: 'var(--hub-active)', color: 'var(--hub-text-dim)' }}
+              >
+                cmd+k
+              </kbd>
+            </button>
+            <button
+              onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-7 w-7 rounded-lg flex items-center justify-center"
+              style={{ color: 'var(--hub-text-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+            <button
+              onClick={() => setShortcutsOpen(true)}
+              className="h-7 w-7 rounded-lg flex items-center justify-center"
+              style={{ color: 'var(--hub-text-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <Keyboard size={14} />
+            </button>
             <button
               className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -339,7 +518,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </div>
         </header>
 
-        {/* Page content */}
         <AnimatePresence mode="wait">
           <motion.main
             key={location.pathname}
@@ -353,6 +531,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </motion.main>
         </AnimatePresence>
       </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+
+      <Toaster theme={theme === 'light' ? 'light' : 'dark'} position="bottom-right" richColors closeButton />
     </div>
   );
 };

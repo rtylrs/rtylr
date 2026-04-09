@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Download } from 'lucide-react';
+import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePL } from '../../hooks/useTax';
+import PLByCategoryChart from '../../components/PLByCategoryChart';
+import PaymentReminderPanel from '../../components/PaymentReminderPanel';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 type Period = 'This Month' | 'Last Month' | 'This Quarter' | 'This Year';
 
@@ -96,8 +100,18 @@ const PERIOD_PARAMS: Record<Period, string> = {
   'This Year':    'year',
 };
 
+const CATEGORY_BREAKDOWN = [
+  { category: 'Rent',                    amount: 6800, color: '#3b82f6' },
+  { category: 'Marketing & Advertising', amount: 5200, color: '#ec4899' },
+  { category: 'Software & SaaS',         amount: 2820, color: '#8b5cf6' },
+  { category: 'Travel',                  amount: 1870, color: '#f59e0b' },
+  { category: 'Meals & Entertainment',   amount: 1240, color: '#ef4444' },
+  { category: 'Utilities',               amount: 720,  color: '#10b981' },
+];
+
 const ProfitLoss: React.FC = () => {
   const [period, setPeriod] = useState<Period>('This Month');
+  const [showClose, setShowClose] = useState(false);
   const { data: plData, isLoading: loading } = usePL(PERIOD_PARAMS[period]);
 
   const data: PeriodData = plData
@@ -146,9 +160,24 @@ const ProfitLoss: React.FC = () => {
               color: 'var(--hub-text-muted)',
               fontSize: 13, cursor: 'pointer',
             }}
+            onClick={() => toast.success('P&L exported')}
           >
             <Download size={14} />
             Export
+          </button>
+          <button
+            onClick={() => setShowClose(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 8,
+              border: '1px solid rgba(245,158,11,0.3)',
+              background: 'rgba(245,158,11,0.08)',
+              color: '#f59e0b',
+              fontSize: 13, cursor: 'pointer', fontWeight: 600,
+            }}
+          >
+            <Lock size={13} />
+            Close Fiscal Year
           </button>
         </div>
       </div>
@@ -263,6 +292,24 @@ const ProfitLoss: React.FC = () => {
           large
         />
       </div>
+
+      {/* By-category + reminders */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div style={{ ...cardStyle, padding: 20 }}>
+          <PLByCategoryChart data={CATEGORY_BREAKDOWN} />
+        </div>
+        <PaymentReminderPanel />
+      </div>
+
+      <ConfirmDialog
+        open={showClose}
+        onClose={() => setShowClose(false)}
+        onConfirm={() => toast.success('Fiscal year closed. Books are now read-only.')}
+        title="Close fiscal year"
+        message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
+        confirmLabel="Close year"
+        destructive
+      />
     </motion.div>
   );
 };

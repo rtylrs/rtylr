@@ -22,20 +22,25 @@ const PRIORITY_COLORS: Record<string, string> = {
   high: '#f97316',
   medium: '#3b82f6',
   low: '#6b7280',
+  no_priority: '#4b5563',
 };
 
 const STATUS_LABELS: Record<string, string> = {
+  backlog: 'Backlog',
   todo: 'Todo',
   in_progress: 'In Progress',
   in_review: 'In Review',
   done: 'Done',
+  cancelled: 'Cancelled',
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  todo: { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' },
+  backlog: { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' },
+  todo: { bg: 'rgba(156,163,175,0.15)', text: '#9ca3af' },
   in_progress: { bg: 'rgba(59,130,246,0.15)', text: '#3b82f6' },
   in_review: { bg: 'rgba(245,158,11,0.15)', text: '#f59e0b' },
   done: { bg: 'rgba(34,197,94,0.15)', text: '#22c55e' },
+  cancelled: { bg: 'rgba(239,68,68,0.15)', text: '#ef4444' },
 };
 
 const statCard = (

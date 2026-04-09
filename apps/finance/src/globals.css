@@ -70,3 +70,18 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--hub-scrollbar); border-radius: 9999px; }
 }
+
+@keyframes finance-skeleton {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes finance-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.finance-focus-ring:focus {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 1px;
+}

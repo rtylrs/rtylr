@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Mail, Phone, Package } from 'lucide-react';
+import { Plus, Mail, Phone, Package, BarChart3 } from 'lucide-react';
 import { Supplier } from '../../services/erpApi';
 import { useSuppliers } from '../../hooks/useSuppliers';
+import SupplierScorecard from '../../components/SupplierScorecard';
+import ExportButton from '../../components/ExportButton';
 
 const AMBER = '#f59e0b';
 
@@ -96,6 +98,7 @@ const SkeletonCard: React.FC = () => (
 const Suppliers: React.FC = () => {
   const { data: fetchedSuppliers, isLoading } = useSuppliers();
   const suppliers: Supplier[] = fetchedSuppliers && fetchedSuppliers.length ? fetchedSuppliers : mockSuppliers;
+  const [showScorecards, setShowScorecards] = useState(false);
 
   const activeCount = suppliers.filter((s) => s.status === 'Active').length;
 
@@ -104,7 +107,7 @@ const Suppliers: React.FC = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-5 max-w-4xl"
+      className="space-y-5 max-w-5xl"
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
@@ -116,16 +119,47 @@ const Suppliers: React.FC = () => {
             {isLoading ? '…' : `${activeCount} active supplier${activeCount !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
-          style={{ background: AMBER, color: '#000' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
-        >
-          <Plus size={14} />
-          Add Supplier
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowScorecards((v) => !v)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
+            style={{
+              background: showScorecards ? 'rgba(245,158,11,0.12)' : 'var(--hub-hover)',
+              color: showScorecards ? AMBER : 'var(--hub-text-muted)',
+              border: '1px solid var(--hub-border)',
+            }}
+          >
+            <BarChart3 size={12} /> Scorecards
+          </button>
+          <ExportButton
+            data={suppliers.map((s) => ({
+              id: s.id,
+              name: s.name,
+              contact: s.contactName,
+              email: s.email,
+              phone: s.phone,
+              products: s.productCount,
+              status: s.status,
+            }))}
+            filename="suppliers.csv"
+          />
+          <button
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
+            style={{ background: AMBER, color: '#000' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+          >
+            <Plus size={14} />
+            Add Supplier
+          </button>
+        </div>
       </motion.div>
+
+      {showScorecards && (
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {suppliers.map((s) => <SupplierScorecard key={s.id} supplier={s} />)}
+        </motion.div>
+      )}
 
       {/* Supplier cards grid */}
       <motion.div variants={containerVariants} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
