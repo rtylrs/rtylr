@@ -25,27 +25,22 @@ All frontend apps live in `rtylr/rtylr/apps/`. They are React + Vite SPAs (excep
 
 ## Cloudflare Pages Configuration (per app)
 
-Each app is its own Cloudflare Pages project. **All apps build from the monorepo root** (`rtylr/`) using pnpm workspace filters. This is required because apps depend on shared `packages/*` that only resolve correctly at the workspace root.
+Each app is its own Cloudflare Pages project. **The git repo root is already the monorepo root** (it contains `pnpm-workspace.yaml`, `apps/`, `packages/`), so the Cloudflare Pages "Root directory" setting must be **empty** (or `/`). Do NOT set Root directory to `rtylr` — there is no `rtylr/` subdirectory inside the repo.
 
 ### Common Settings (all projects)
-
-Cloudflare Pages has two path-related settings that are often confused:
-
-| Setting              | What it controls                                                 |
-|----------------------|------------------------------------------------------------------|
-| **Root directory**   | The cwd where the build command runs. Set this to `rtylr` so pnpm sees the monorepo workspace (where `pnpm-workspace.yaml` lives). |
-| **Build output directory** | Where Cloudflare looks for the built assets. This is relative to the **Root directory**, NOT the repo root. |
 
 | Setting              | Value               |
 |----------------------|---------------------|
 | Framework preset     | None (custom)       |
-| Root directory       | `rtylr`             |
+| Root directory       | *(leave empty)*     |
 | Node version         | `20`                |
 | Package manager      | pnpm                |
 
+> **Why Root directory must be empty:** The git repository's top-level directory (`voxire/rtylr` on GitHub) is already where `pnpm-workspace.yaml` lives, alongside `apps/` and `packages/`. Setting Root directory to anything else makes Cloudflare look in a subdirectory that doesn't exist, and the build is skipped because no files match the watch paths.
+
 ### Build Command and Output Directory (per app)
 
-Both the build command and output directory are relative to the Root directory (`rtylr`). The workspace filter name is the `name` field in the app's `package.json`.
+Paths are relative to the repo root (= the monorepo root).
 
 | Pages Project   | Build Command                                                              | Build Output Directory |
 |----------------|----------------------------------------------------------------------------|------------------------|
