@@ -12,19 +12,25 @@ const steps = [
     number: '01',
     title: 'Sign Up',
     description:
-      'Create your account in minutes. No credit card required to get started.',
+      'Create your account in minutes and get instant access to the full rtylr suite — no credit card required.',
   },
   {
     number: '02',
-    title: 'Configure',
+    title: 'Set Up Hub',
     description:
-      'Set up your menu, inventory, and payment methods. Our team is here to help.',
+      'Use Hub to configure your locations, menus, QR codes, and brand settings. Your command centre for everything.',
   },
   {
     number: '03',
-    title: 'Start Selling',
+    title: 'Assign Staff to Apps',
     description:
-      'Begin processing orders and managing your business from day one.',
+      'Give each team member access to the apps they need — POS for floor staff, HR for managers, Finance for your accountant.',
+  },
+  {
+    number: '04',
+    title: 'Launch',
+    description:
+      'Go live across every department at once. POS, ERP, HR, CRM, Finance, and Flow — all running together from day one.',
   },
 ];
 
@@ -40,7 +46,7 @@ const HowItWorksSection: React.FC = () => {
         >
           <h2 className={styles.sectionTitle}>How It Works</h2>
           <p className={styles.sectionDescription}>
-            Get started with Rtylr in three simple steps
+            From sign-up to full business operations in four simple steps
           </p>
         </motion.div>
 

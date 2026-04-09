@@ -53,16 +53,16 @@ const CTASection: React.FC = () => {
           variants={fadeIn}
         >
           <motion.span className={styles.eyebrow} variants={fadeInUp}>
-            Get started today
+            One platform. Every department.
           </motion.span>
           <motion.h2 className={styles.ctaTitle} variants={fadeInUp}>
-            Ready to transform
+            Buy rtylr,
             <br />
-            your business?
+            buy a whole business.
           </motion.h2>
           <motion.p className={styles.ctaDescription} variants={fadeInUp}>
-            Join thousands of businesses using Rtylr to streamline operations
-            and grow revenue. Free to start, no credit card required.
+            POS, ERP, HR, CRM, Finance, and Flow — all working together out of
+            the box. Powered by AI. Free to start, no credit card required.
           </motion.p>
           <motion.div className={styles.ctaButtons} variants={fadeInUp}>
             <Button
@@ -71,7 +71,7 @@ const CTASection: React.FC = () => {
               width="200px"
               height="52px"
             >
-              Get Started Free
+              Get Started
             </Button>
             <Button
               variant="dark-outline"

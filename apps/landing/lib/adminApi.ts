@@ -2,10 +2,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  const mode = localStorage.getItem('mode') || 'prod';
-  return mode === 'dev'
-    ? 'http://localhost:8080/'
-    : 'https://onion.voxire.dev/';
+  return 'https://api.voxire.dev/';
 };
 
 const api = axios.create({

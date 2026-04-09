@@ -24,9 +24,9 @@ const MainHero: React.FC = () => {
           }}
         >
           <h1 className={styles.heroTitle}>
-            Stop Juggling Systems.
+            Your entire business,
             <br />
-            Start Selling Smarter.
+            one platform.
           </h1>
         </motion.div>
         <motion.div
@@ -43,9 +43,8 @@ const MainHero: React.FC = () => {
             Book a Demo
           </button>
           <p className={styles.description}>
-            Your single source of truth for in-store, online, and back-office
-            operations. POS · Inventory · eCommerce · Analytics works offline,
-            scales globally.
+            POS · ERP · HR · CRM · Finance · Flow — built to work together from
+            day one. Buy rtylr, get a whole business powered by AI.
           </p>
         </motion.div>
       </div>
