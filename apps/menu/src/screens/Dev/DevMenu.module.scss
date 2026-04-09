@@ -1,53 +1,80 @@
 .wrapper {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
 }
 
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding: 8px 16px;
+// Floating trigger button
+.fab {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9998;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
   background: #1a1a1a;
   color: #f0f0ee;
-  font-size: 0.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+  }
 }
 
-.toolbar__badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 2px 8px;
-  border-radius: 4px;
+.fab__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
   background: #ef4444;
   color: #fff;
-  flex-shrink: 0;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
-.toolbar__group {
+// Floating panel
+.panel {
+  position: fixed;
+  bottom: 78px;
+  left: 24px;
+  z-index: 9999;
+  background: #1a1a1a;
+  color: #f0f0ee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  min-width: 240px;
+  transform-origin: bottom left;
+}
+
+.panel__group {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-left: 16px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.toolbar__label {
-  font-size: 0.7rem;
+.panel__label {
+  font-size: 0.68rem;
   font-weight: 600;
-  color: rgba(240, 240, 238, 0.5);
+  color: rgba(240, 240, 238, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-right: 2px;
+  letter-spacing: 0.06em;
+  width: 48px;
+  flex-shrink: 0;
 }
 
-.toolbar__btn {
+.panel__btn {
   padding: 4px 10px;
   border-radius: 5px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -72,14 +99,14 @@
   }
 }
 
-.toolbar__colorBtn {
+.panel__colorBtn {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: transform 0.12s ease, border-color 0.12s ease;
   flex-shrink: 0;
+  transition: transform 0.12s ease, border-color 0.12s ease;
 
   &:hover {
     transform: scale(1.2);
@@ -91,7 +118,7 @@
   }
 }
 
-.toolbar__toggle {
+.panel__toggle {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -108,6 +135,8 @@
   }
 }
 
-.preview {
-  flex: 1;
+.panel__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 -4px;
 }

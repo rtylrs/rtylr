@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   GridLayout,
   ListLayout,
@@ -128,7 +129,7 @@ const MOCK_CATEGORIES: MenuCategoryData[] = [
       {
         id: 'd2',
         name: 'Craft IPA',
-        description: 'Local brewery rotating tap. Ask your server for today's selection.',
+        description: 'Local brewery rotating tap. Ask your server for today\u2019s selection.',
         price: 7.0,
         currency: 'USD',
         available: true,
@@ -179,16 +180,29 @@ const ACCENT_OPTIONS = [
 ];
 
 const DevMenu: React.FC = () => {
+  const [open, setOpen] = useState(false);
   const [layout, setLayout] = useState<LayoutType>('grid');
   const [accent, setAccent] = useState(ACCENT_OPTIONS[0]);
   const [enableCart, setEnableCart] = useState(true);
   const [enableAi, setEnableAi] = useState(true);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Apply accent to CSS vars live
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.style.setProperty('--menu-accent', accent.value);
     document.documentElement.style.setProperty('--menu-accent-text', accent.text);
   }, [accent]);
+
+  // Close panel on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
   const handleAiMessage = async (message: string, _history: ChatMessage[]): Promise<string> => {
     await new Promise((r) => setTimeout(r, 700));
@@ -205,53 +219,76 @@ const DevMenu: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      {/* Dev toolbar */}
-      <div className={styles.toolbar}>
-        <span className={styles.toolbar__badge}>DEV</span>
+      {/* Menu preview */}
+      {layout === 'list' && <ListLayout {...layoutProps} />}
+      {layout === 'minimal' && <MinimalLayout {...layoutProps} enableCart={enableCart} />}
+      {layout === 'grid' && <GridLayout {...layoutProps} />}
 
-        <div className={styles.toolbar__group}>
-          <span className={styles.toolbar__label}>Layout</span>
-          {(['grid', 'list', 'minimal'] as LayoutType[]).map((l) => (
-            <button
-              key={l}
-              className={`${styles.toolbar__btn} ${layout === l ? styles['toolbar__btn--active'] : ''}`}
-              onClick={() => setLayout(l)}
+      {/* Floating panel */}
+      <div ref={panelRef}>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              className={styles.panel}
+              initial={{ opacity: 0, scale: 0.92, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 8 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 320 }}
             >
-              {l}
-            </button>
-          ))}
-        </div>
+              <div className={styles.panel__group}>
+                <span className={styles.panel__label}>Layout</span>
+                {(['grid', 'list', 'minimal'] as LayoutType[]).map((l) => (
+                  <button
+                    key={l}
+                    className={`${styles.panel__btn} ${layout === l ? styles['panel__btn--active'] : ''}`}
+                    onClick={() => setLayout(l)}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
 
-        <div className={styles.toolbar__group}>
-          <span className={styles.toolbar__label}>Accent</span>
-          {ACCENT_OPTIONS.map((a) => (
-            <button
-              key={a.value}
-              className={`${styles.toolbar__colorBtn} ${accent.value === a.value ? styles['toolbar__colorBtn--active'] : ''}`}
-              style={{ background: a.value }}
-              onClick={() => setAccent(a)}
-              title={a.label}
-            />
-          ))}
-        </div>
+              <div className={styles.panel__divider} />
 
-        <div className={styles.toolbar__group}>
-          <label className={styles.toolbar__toggle}>
-            <input type="checkbox" checked={enableCart} onChange={(e) => setEnableCart(e.target.checked)} />
-            Cart
-          </label>
-          <label className={styles.toolbar__toggle}>
-            <input type="checkbox" checked={enableAi} onChange={(e) => setEnableAi(e.target.checked)} />
-            AI Chat
-          </label>
-        </div>
-      </div>
+              <div className={styles.panel__group}>
+                <span className={styles.panel__label}>Accent</span>
+                {ACCENT_OPTIONS.map((a) => (
+                  <button
+                    key={a.value}
+                    className={`${styles.panel__colorBtn} ${accent.value === a.value ? styles['panel__colorBtn--active'] : ''}`}
+                    style={{ background: a.value }}
+                    onClick={() => setAccent(a)}
+                    title={a.label}
+                  />
+                ))}
+              </div>
 
-      {/* Menu */}
-      <div className={styles.preview}>
-        {layout === 'list' && <ListLayout {...layoutProps} />}
-        {layout === 'minimal' && <MinimalLayout {...layoutProps} enableCart={enableCart} />}
-        {layout === 'grid' && <GridLayout {...layoutProps} />}
+              <div className={styles.panel__divider} />
+
+              <div className={styles.panel__group}>
+                <span className={styles.panel__label}>Features</span>
+                <label className={styles.panel__toggle}>
+                  <input type="checkbox" checked={enableCart} onChange={(e) => setEnableCart(e.target.checked)} />
+                  Cart
+                </label>
+                <label className={styles.panel__toggle}>
+                  <input type="checkbox" checked={enableAi} onChange={(e) => setEnableAi(e.target.checked)} />
+                  AI Chat
+                </label>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* FAB */}
+        <button
+          className={styles.fab}
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle dev toolbar"
+        >
+          {open ? '✕' : '⚙'}
+          <span className={styles.fab__badge}>DEV</span>
+        </button>
       </div>
     </div>
   );
