@@ -1,9 +1,12 @@
 .header {
   background: var(--menu-header-bg, #ffffff);
   border-bottom: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
-  position: sticky;
-  top: 0;
   z-index: 100;
+
+  &--sticky {
+    position: sticky;
+    top: 0;
+  }
 }
 
 // ─── Cover ────────────────────────────────────────────────────────────────────

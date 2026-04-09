@@ -66,7 +66,7 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
     );
 
   return (
-    <header className={classNames(styles.header, className)}>
+    <header className={classNames(styles.header, { [styles['header--sticky']]: headerConfig.sticky }, className)}>
       {/* Cover image */}
       {headerConfig.coverHeight !== 'none' && business.coverImage && (
         <div className={styles.header__cover} style={{ height: coverH }}>
