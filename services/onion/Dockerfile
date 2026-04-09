@@ -27,7 +27,7 @@ RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
 
 # Build API binary with optimizations for the target platform
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o /app/api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /app/api ./cmd/api
 
 # Final stage
 FROM alpine:latest
