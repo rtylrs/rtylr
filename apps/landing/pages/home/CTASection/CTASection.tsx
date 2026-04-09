@@ -96,6 +96,7 @@ const CTASection: React.FC = () => {
               onClick={handleGetStarted}
               width="220px"
               height="56px"
+              color="#4583C4"
             >
               Get started free
             </Button>

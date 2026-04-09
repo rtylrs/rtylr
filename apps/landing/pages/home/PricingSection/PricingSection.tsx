@@ -53,10 +53,10 @@ const plans: Plan[] = [
     name: 'Scale',
     price: '$2.99',
     priceSuffix: '/member/month',
-    priceNote: 'billed monthly',
-    description: 'Growing teams that need flexibility',
+    priceNote: 'for every member beyond the first 20 (Pro price still applies for the first 20)',
+    description: 'Growing teams that outgrew Pro',
     features: [
-      'Unlimited team members',
+      'For teams of 20+ members',
       'All 6 apps + team analytics',
       'Dedicated support',
       'AI assistant',

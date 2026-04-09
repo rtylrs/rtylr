@@ -226,6 +226,31 @@
   }
 }
 
+.mobile-feature-link {
+  display: flex !important;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.mobile-feature-title {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mobile-feature-desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12.5px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
 .mobile-menu-footer {
   display: flex;
   flex-direction: column;
