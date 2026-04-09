@@ -56,8 +56,22 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  min-width: 220px;
+  min-width: 230px;
+  max-width: 260px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
   transform-origin: bottom left;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  }
 }
 
 // ─── Section (label + control row) ──────────────────────────────────────────
@@ -75,6 +89,13 @@
   color: rgba(240, 240, 238, 0.35);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.panel__sublabel {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(240, 240, 238, 0.45);
+  margin-top: 4px;
 }
 
 // ─── Layout buttons ──────────────────────────────────────────────────────────

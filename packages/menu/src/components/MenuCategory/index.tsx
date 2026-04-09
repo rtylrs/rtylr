@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import MenuItem, { MenuItemData } from '../MenuItem';
+import { ItemDisplayConfig } from '../../types';
 import styles from './MenuCategory.module.scss';
 
 export interface MenuCategoryData {
@@ -13,7 +14,7 @@ export interface MenuCategoryData {
 
 interface MenuCategoryProps {
   category: MenuCategoryData;
-  layout?: 'grid' | 'list' | 'minimal';
+  displayConfig: ItemDisplayConfig;
   onItemClick?: (item: MenuItemData) => void;
   onAddToCart?: (item: MenuItemData) => void;
   className?: string;
@@ -21,12 +22,17 @@ interface MenuCategoryProps {
 
 const MenuCategory: React.FC<MenuCategoryProps> = ({
   category,
-  layout = 'grid',
+  displayConfig,
   onItemClick,
   onAddToCart,
   className,
 }) => {
   if (!category.items || category.items.length === 0) return null;
+
+  const { layout, columns } = displayConfig;
+
+  const gridStyle: React.CSSProperties =
+    layout === 'grid' ? { gridTemplateColumns: `repeat(${columns}, 1fr)` } : {};
 
   return (
     <section className={classNames(styles.category, className)} id={`category-${category.id}`}>
@@ -37,12 +43,15 @@ const MenuCategory: React.FC<MenuCategoryProps> = ({
         )}
       </div>
 
-      <div className={classNames(styles.category__items, styles[`category__items--${layout}`])}>
+      <div
+        className={classNames(styles.category__items, styles[`category__items--${layout}`])}
+        style={gridStyle}
+      >
         {category.items.map((item) => (
           <MenuItem
             key={item.id}
             item={item}
-            layout={layout}
+            displayConfig={displayConfig}
             onClick={onItemClick}
             onAddToCart={onAddToCart}
           />
