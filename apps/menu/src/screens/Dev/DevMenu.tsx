@@ -329,7 +329,7 @@ const DevMenu: React.FC = () => {
   const [cfg, setCfg] = useState<MenuLayoutConfig>({
     ...DEFAULT_LAYOUT_CONFIG,
     pages: { menu: true, about: true, gallery: false, reviews: false, offers: false, book: false },
-    header: { coverHeight: 'md', showLogo: true, showDescription: true, showMeta: true },
+    header: { coverHeight: 'md', showLogo: true, showDescription: true, showMeta: true, sticky: true },
     nav: { style: 'underline', size: 'md' },
     items: {
       layout: 'grid',
@@ -423,6 +423,7 @@ const DevMenu: React.FC = () => {
                   onChange={(v) => patchHeader({ coverHeight: v })}
                 />
                 <div className={styles.panel__toggles}>
+                  <Toggle checked={cfg.header.sticky} onChange={(v) => patchHeader({ sticky: v })} label="Sticky" />
                   <Toggle checked={cfg.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} label="Logo" />
                   <Toggle checked={cfg.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} label="Description" />
                   <Toggle checked={cfg.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} label="Address / Hours" />

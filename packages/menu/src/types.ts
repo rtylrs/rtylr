@@ -76,6 +76,7 @@ export interface HeaderConfig {
   showLogo: boolean;
   showDescription: boolean;
   showMeta: boolean; // address / phone / hours
+  sticky: boolean;
 }
 
 export interface NavConfig {
@@ -114,6 +115,7 @@ export const DEFAULT_LAYOUT_CONFIG: MenuLayoutConfig = {
     showLogo: true,
     showDescription: true,
     showMeta: true,
+    sticky: true,
   },
   nav: {
     style: 'underline',
