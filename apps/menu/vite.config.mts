@@ -48,6 +48,14 @@ export default defineConfig(() => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api': {
+        target: 'https://onion.voxire.dev',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: true,
+      },
+    },
   },
   preview: {
     port: 5174,
@@ -98,9 +106,8 @@ export default defineConfig(() => ({
       '@reduxjs/toolkit',
       'framer-motion',
       'react-icons',
-      '@voxire/components',
-      '@voxire/config',
-      '@voxire/menu',
     ],
+    // Workspace source packages — always load from source, never pre-bundle
+    exclude: ['@voxire/components', '@voxire/config', '@voxire/menu'],
   },
 }));

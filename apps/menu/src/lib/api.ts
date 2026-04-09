@@ -2,10 +2,9 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  const mode = localStorage.getItem('mode') || 'prod';
-  return mode === 'dev'
-    ? 'http://localhost:9999/'
-    : 'https://onion.voxire.dev/';
+  // In Vite dev server, proxy /api → https://onion.voxire.dev (avoids CORS)
+  if (import.meta.env.DEV) return '/api/';
+  return 'https://onion.voxire.dev/';
 };
 
 const api = axios.create({
