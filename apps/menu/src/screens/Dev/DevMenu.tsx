@@ -235,46 +235,54 @@ const DevMenu: React.FC = () => {
               exit={{ opacity: 0, scale: 0.92, y: 8 }}
               transition={{ type: 'spring', damping: 24, stiffness: 320 }}
             >
-              <div className={styles.panel__group}>
+              <div className={styles.panel__section}>
                 <span className={styles.panel__label}>Layout</span>
-                {(['grid', 'list', 'minimal'] as LayoutType[]).map((l) => (
-                  <button
-                    key={l}
-                    className={`${styles.panel__btn} ${layout === l ? styles['panel__btn--active'] : ''}`}
-                    onClick={() => setLayout(l)}
-                  >
-                    {l}
-                  </button>
-                ))}
+                <div className={styles.panel__btnGroup}>
+                  {(['grid', 'list', 'minimal'] as LayoutType[]).map((l) => (
+                    <button
+                      key={l}
+                      className={`${styles.panel__btn} ${layout === l ? styles['panel__btn--active'] : ''}`}
+                      onClick={() => setLayout(l)}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.panel__divider} />
 
-              <div className={styles.panel__group}>
+              <div className={styles.panel__section}>
                 <span className={styles.panel__label}>Accent</span>
-                {ACCENT_OPTIONS.map((a) => (
-                  <button
-                    key={a.value}
-                    className={`${styles.panel__colorBtn} ${accent.value === a.value ? styles['panel__colorBtn--active'] : ''}`}
-                    style={{ background: a.value }}
-                    onClick={() => setAccent(a)}
-                    title={a.label}
-                  />
-                ))}
+                <div className={styles.panel__swatches}>
+                  {ACCENT_OPTIONS.map((a) => (
+                    <button
+                      key={a.value}
+                      className={`${styles.panel__colorBtn} ${accent.value === a.value ? styles['panel__colorBtn--active'] : ''}`}
+                      style={{ background: a.value }}
+                      onClick={() => setAccent(a)}
+                      title={a.label}
+                    />
+                  ))}
+                </div>
               </div>
 
               <div className={styles.panel__divider} />
 
-              <div className={styles.panel__group}>
+              <div className={styles.panel__section}>
                 <span className={styles.panel__label}>Features</span>
-                <label className={styles.panel__toggle}>
-                  <input type="checkbox" checked={enableCart} onChange={(e) => setEnableCart(e.target.checked)} />
-                  Cart
-                </label>
-                <label className={styles.panel__toggle}>
-                  <input type="checkbox" checked={enableAi} onChange={(e) => setEnableAi(e.target.checked)} />
-                  AI Chat
-                </label>
+                <div className={styles.panel__toggles}>
+                  <label className={styles.panel__toggle}>
+                    <input type="checkbox" checked={enableCart} onChange={(e) => setEnableCart(e.target.checked)} />
+                    <span className={styles.panel__switch} />
+                    <span className={styles.panel__toggleLabel}>Cart</span>
+                  </label>
+                  <label className={styles.panel__toggle}>
+                    <input type="checkbox" checked={enableAi} onChange={(e) => setEnableAi(e.target.checked)} />
+                    <span className={styles.panel__switch} />
+                    <span className={styles.panel__toggleLabel}>AI Chat</span>
+                  </label>
+                </div>
               </div>
             </motion.div>
           )}
