@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { LoadingSpinnerProps } from '../../types/common';
+import { LoadingSpinnerProps } from '@voxire/config';
 import './LoadingSpinner.scss';
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({

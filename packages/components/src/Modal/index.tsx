@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import classNames from 'classnames';
-import { ModalProps } from '../../types/common';
+import { ModalProps } from '@voxire/config';
 import './Modal.scss';
 
 const maxWidthMap: Record<string, string> = {
