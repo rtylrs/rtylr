@@ -35,3 +35,245 @@ jobs:
 
       - name: Build
         run: pnpm turbo build
+
+  # ── Detect which apps changed ──────────────────────────────────────
+  changes:
+    name: Detect changed apps
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      hub: ${{ steps.filter.outputs.hub }}
+      auth: ${{ steps.filter.outputs.auth }}
+      menu: ${{ steps.filter.outputs.menu }}
+      erp: ${{ steps.filter.outputs.erp }}
+      hr: ${{ steps.filter.outputs.hr }}
+      crm: ${{ steps.filter.outputs.crm }}
+      finance: ${{ steps.filter.outputs.finance }}
+      flow: ${{ steps.filter.outputs.flow }}
+      landing: ${{ steps.filter.outputs.landing }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            hub:
+              - 'apps/hub/**'
+              - 'packages/**'
+            auth:
+              - 'apps/auth/**'
+              - 'packages/**'
+            menu:
+              - 'apps/menu/**'
+              - 'packages/**'
+            erp:
+              - 'apps/erp/**'
+              - 'packages/**'
+            hr:
+              - 'apps/hr/**'
+              - 'packages/**'
+            crm:
+              - 'apps/crm/**'
+              - 'packages/**'
+            finance:
+              - 'apps/finance/**'
+              - 'packages/**'
+            flow:
+              - 'apps/flow/**'
+              - 'packages/**'
+            landing:
+              - 'apps/landing/**'
+              - 'packages/**'
+
+  # ── Deploy jobs (one per app, only runs if files changed) ──────────
+  deploy-hub:
+    name: Deploy Hub
+    needs: [check, changes]
+    if: needs.changes.outputs.hub == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter hub run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/hub/dist --project-name=rtylr-hub
+
+  deploy-auth:
+    name: Deploy Auth
+    needs: [check, changes]
+    if: needs.changes.outputs.auth == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/auth run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/auth/dist --project-name=rtylr-auth
+
+  deploy-menu:
+    name: Deploy Menu
+    needs: [check, changes]
+    if: needs.changes.outputs.menu == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/menu run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/menu/dist --project-name=rtylr-menu
+
+  deploy-erp:
+    name: Deploy ERP
+    needs: [check, changes]
+    if: needs.changes.outputs.erp == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/erp run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/erp/dist --project-name=rtylr-erp
+
+  deploy-hr:
+    name: Deploy HR
+    needs: [check, changes]
+    if: needs.changes.outputs.hr == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/hr run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/hr/dist --project-name=rtylr-hr
+
+  deploy-crm:
+    name: Deploy CRM
+    needs: [check, changes]
+    if: needs.changes.outputs.crm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/crm run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/crm/dist --project-name=rtylr-crm
+
+  deploy-finance:
+    name: Deploy Finance
+    needs: [check, changes]
+    if: needs.changes.outputs.finance == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/finance run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/finance/dist --project-name=rtylr-finance
+
+  deploy-flow:
+    name: Deploy Flow
+    needs: [check, changes]
+    if: needs.changes.outputs.flow == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/flow run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/flow/dist --project-name=rtylr-flow
+
+  deploy-landing:
+    name: Deploy Landing
+    needs: [check, changes]
+    if: needs.changes.outputs.landing == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/landing run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/landing/out --project-name=rtylr-landing
