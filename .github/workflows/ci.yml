@@ -104,11 +104,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter hub run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/hub/dist --project-name=rtylr-hub
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/hub/dist --project-name=rtylr-hub
 
   deploy-auth:
     name: Deploy Auth
@@ -125,11 +124,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/auth run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/auth/dist --project-name=rtylr-auth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/auth/dist --project-name=rtylr-auth
 
   deploy-menu:
     name: Deploy Menu
@@ -146,11 +144,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/menu run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/menu/dist --project-name=rtylr-menu
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/menu/dist --project-name=rtylr-menu
 
   deploy-erp:
     name: Deploy ERP
@@ -167,11 +164,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/erp run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/erp/dist --project-name=rtylr-erp
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/erp/dist --project-name=rtylr-erp
 
   deploy-hr:
     name: Deploy HR
@@ -188,11 +184,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/hr run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/hr/dist --project-name=rtylr-hr
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/hr/dist --project-name=rtylr-hr
 
   deploy-crm:
     name: Deploy CRM
@@ -209,11 +204,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/crm run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/crm/dist --project-name=rtylr-crm
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/crm/dist --project-name=rtylr-crm
 
   deploy-finance:
     name: Deploy Finance
@@ -230,11 +224,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/finance run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/finance/dist --project-name=rtylr-finance
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/finance/dist --project-name=rtylr-finance
 
   deploy-flow:
     name: Deploy Flow
@@ -251,11 +244,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/flow run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/flow/dist --project-name=rtylr-flow
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/flow/dist --project-name=rtylr-flow
 
   deploy-landing:
     name: Deploy Landing
@@ -272,8 +264,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @rtylr/landing run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/landing/out --project-name=rtylr-landing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy apps/landing/out --project-name=rtylr-landing
