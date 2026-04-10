@@ -243,13 +243,11 @@ func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (str
 // ─── Access Requests ────────────────────────────────────────────────────────
 
 func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID int64, app string) error {
-	pool := dbclient.Pool()
-	_, err := pool.ExecContext(ctx,
-		`INSERT INTO access_requests (business_id, user_id, app) VALUES (?, ?, ?)
-		 ON DUPLICATE KEY UPDATE status = 'pending', created_at = NOW()`,
-		businessID, userID, app,
-	)
-	return err
+	return r.queries.CreateAccessRequest(ctx, sqlc.CreateAccessRequestParams{
+		BusinessID: businessID,
+		UserID:     userID,
+		App:        app,
+	})
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

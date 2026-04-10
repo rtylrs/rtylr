@@ -61,3 +61,8 @@ UPDATE users SET password_hash = ? WHERE id = ?;
 
 -- name: GetBusinessByID :one
 SELECT name, owner_id FROM businesses WHERE id = ?;
+
+-- name: CreateAccessRequest :exec
+INSERT INTO access_requests (business_id, user_id, app)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE status = 'pending', created_at = NOW();
