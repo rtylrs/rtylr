@@ -67,7 +67,10 @@ const Login: React.FC = () => {
   useEffect(() => { clearError(); }, [clearError]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Only redirect if both the store says authenticated AND a token cookie exists.
+    // This prevents a loop when the user logs out (cookie cleared but store still persisted).
+    const tokenCookie = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
+    if (isAuthenticated && tokenCookie) {
       const destination =
         (redirectParam && REDIRECT_APP_URLS[redirectParam])
           ? REDIRECT_APP_URLS[redirectParam]
