@@ -71,6 +71,16 @@ const AdminDashboard: React.FC = () => {
     saveActiveWidgets(newActive);
   }, [layouts, activeWidgets]);
 
+  const resetLayout = useCallback(() => {
+    const { DEFAULT_LAYOUT } = require('./widgets/registry');
+    const defaultIds = DEFAULT_LAYOUT.map((l: any) => l.i);
+    setLayouts({ lg: DEFAULT_LAYOUT });
+    setActiveWidgets(defaultIds);
+    saveLayout(DEFAULT_LAYOUT);
+    saveActiveWidgets(defaultIds);
+    setEditing(false);
+  }, []);
+
   const availableToAdd = useMemo(() => {
     return WIDGET_CATALOG.filter((w) => !activeWidgets.includes(w.id));
   }, [activeWidgets]);
@@ -234,6 +244,17 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-3 flex justify-end" style={{ borderTop: '1px solid var(--hub-border)' }}>
+                <button
+                  onClick={resetLayout}
+                  className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
+                  style={{ color: 'var(--hub-text-muted)', background: 'var(--hub-hover)' }}
+                >
+                  Reset to default
+                </button>
               </div>
             </motion.div>
           </motion.div>
