@@ -119,3 +119,23 @@
   background: #fff !important;
 }
 
+
+/* react-grid-layout overrides */
+.react-grid-item.react-grid-placeholder {
+  background: rgba(69, 131, 196, 0.08) !important;
+  border: 2px dashed rgba(69, 131, 196, 0.3) !important;
+  border-radius: 12px !important;
+  opacity: 1 !important;
+}
+.react-resizable-handle {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.3;
+}
+.react-resizable-handle:hover {
+  opacity: 0.6;
+}
+.react-grid-item > .react-resizable-handle::after {
+  border-color: var(--hub-text-dim) !important;
+}
+
