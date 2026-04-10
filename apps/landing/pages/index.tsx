@@ -50,3 +50,4 @@ const HomePage = (): JSX.Element => {
 };
 
 export default HomePage;
+<!-- deployed via GitHub Actions -->
