@@ -75,7 +75,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...any) 
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
-		handlers.RegisterRoutes(),
 		handlers.LoginRoutes(),
+		handlers.RegisterRoutes(),
 	)
 }
