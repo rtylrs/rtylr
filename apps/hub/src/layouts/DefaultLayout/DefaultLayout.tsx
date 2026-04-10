@@ -283,11 +283,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="top" className="w-52">
-              <DropdownMenuItem onClick={() => navigate('/settings/account')}>
-                <Settings size={14} />
-                Account Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               {/* Theme selector */}
               <div className="px-2 py-1.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--hub-text-dim)' }}>
