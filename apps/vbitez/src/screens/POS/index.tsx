@@ -4,7 +4,7 @@ import QuickAccessSidebar from '../../components/QuickAccessSidebar';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
-import { businessApi, menuApi } from '../../api';
+import api from '../../lib/api';
 
 interface Product {
   id: string;
@@ -22,37 +22,28 @@ const POS: React.FC = () => {
   useEffect(() => {
     async function loadMenu() {
       try {
-        const businesses = await businessApi.getAll();
-        const businessId = Array.isArray(businesses) ? businesses[0]?.id : businesses?.id;
-        if (!businessId) return;
-
-        const menu = await menuApi.getMenu({ id: businessId });
-        const items: Product[] = [];
+        const res = await api.get('/pos/menu/items');
+        const items: any[] = res.data?.items ?? res.data ?? [];
         const cats = new Set<string>();
+        const mapped: Product[] = [];
 
-        const sections = menu?.categories ?? menu?.sections ?? menu?.menus ?? [];
-        for (const section of sections) {
-          const catName = section.name ?? section.category ?? 'Other';
-          cats.add(catName);
-          const sectionItems = section.items ?? section.products ?? [];
-          for (const item of sectionItems) {
-            items.push({
-              id: String(item.id),
-              name: item.name,
-              price: item.price ?? item.salePrice ?? 0,
-              category: catName,
-              image: item.image ?? item.imageUrl,
-              available: item.available !== false,
-            });
-          }
+        for (const item of items) {
+          const cat = item.category ?? item.categoryName ?? 'Other';
+          cats.add(cat);
+          mapped.push({
+            id: String(item.id),
+            name: item.name,
+            price: item.price ?? item.salePrice ?? 0,
+            category: cat,
+            image: item.image ?? item.imageUrl,
+            available: item.available !== false && item.isActive !== false,
+          });
         }
 
-        if (items.length > 0) {
-          setProducts(items);
-          setCategories(Array.from(cats));
-        }
+        setProducts(mapped);
+        setCategories(Array.from(cats));
       } catch {
-        // keep empty - ProductGrid handles empty state
+        // ProductGrid handles empty state
       }
     }
 

@@ -19,7 +19,7 @@ export const useTeam = () => {
     queryKey: ['team'],
     queryFn: async () => {
       const res = await api.get('/team/members');
-      return (res.data?.members ?? res.data) as TeamMember[];
+      return (res.data?.users ?? res.data?.members ?? res.data) as TeamMember[];
     },
     staleTime: 30_000,
   });

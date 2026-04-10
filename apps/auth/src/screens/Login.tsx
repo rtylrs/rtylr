@@ -52,13 +52,23 @@ const Login: React.FC = () => {
 
   const redirectAppName = redirectParam ? (REDIRECT_APP_NAMES[redirectParam] ?? null) : null;
 
-  const handleSubmit = () => loginMutation.mutate({ email, password });
+  const redirectTo = () => {
+    const destination =
+      (redirectParam && REDIRECT_APP_URLS[redirectParam])
+        ? REDIRECT_APP_URLS[redirectParam]
+        : REDIRECT_APP_URLS.hub;
+    window.location.href = destination;
+  };
+
+  const handleSubmit = () => loginMutation.mutate({ email, password }, {
+    onSuccess: () => redirectTo(),
+  });
 
   const handleGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
-      googleAuthMutation.mutate({ idToken });
+      googleAuthMutation.mutate({ idToken }, { onSuccess: () => redirectTo() });
     } catch (err) {
       notify.error((err as any).message);
     }

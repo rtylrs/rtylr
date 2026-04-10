@@ -1,43 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 import { ShortcutsProvider } from './components/ShortcutsProvider';
+import api from './lib/api';
 
+const APP_ID = 'crm';
 const AUTH_COOKIE = 'token';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const [cookies] = useCookies([AUTH_COOKIE]);
-  const navigate = useNavigate();
   const location = useLocation();
-  const [checked, setChecked] = useState(false);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const token = cookies[AUTH_COOKIE];
     if (!token) {
-      const redirectUrl = `${APP_URLS.auth}?redirect=crm&next=${encodeURIComponent(location.pathname)}`;
-      window.location.href = redirectUrl;
-    } else {
-      setChecked(true);
+      window.location.href = `${APP_URLS.auth}?redirect=${APP_ID}`;
+      return;
     }
+
+    api.get('/user/me')
+      .then((res: any) => {
+        const apps: string[] = res.data?.apps ?? [];
+        const role: string = res.data?.role ?? '';
+        if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes(APP_ID)) {
+          setAllowed(true);
+        } else {
+          setAllowed(false);
+        }
+      })
+      .catch(() => setAllowed(true));
   }, [cookies, location.pathname]);
 
-  if (!checked) {
+  if (allowed === null) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: '#0a0a0a',
-          color: 'rgba(240,240,238,0.5)',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '14px',
-        }}
-      >
-        Authenticating...
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff' }}>
+        <div style={{ width: 24, height: 24, border: '2px solid #e5e5e5', borderTopColor: '#4583C4', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /><style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', color: '#111', gap: '12px', fontSize: '14px' }}>
+        <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
+        <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
+        <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>Go to Hub</a>
       </div>
     );
   }
@@ -47,21 +57,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 function NotFound() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        background: '#0a0a0a',
-        color: 'rgba(240,240,238,0.92)',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        gap: '8px',
-      }}
-    >
-      <span style={{ fontSize: '48px', fontWeight: 700, color: '#3b82f6' }}>404</span>
-      <span style={{ fontSize: '16px', color: 'rgba(240,240,238,0.5)' }}>Page not found</span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', color: '#111', gap: '8px' }}>
+      <span style={{ fontSize: '48px', fontWeight: 700, color: '#4583C4' }}>404</span>
+      <span style={{ fontSize: '14px', color: '#999' }}>Page not found</span>
+      <a href="/" style={{ color: '#4583C4', fontSize: '13px', marginTop: 8 }}>Go home</a>
     </div>
   );
 }

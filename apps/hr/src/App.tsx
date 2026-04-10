@@ -40,17 +40,18 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (allowed === null) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hub-bg)' }}>
-        <p style={{ color: 'var(--hub-text-muted)', fontSize: '14px' }}>Loading...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff' }}>
+        <div style={{ width: 24, height: 24, border: '2px solid #e5e5e5', borderTopColor: '#4583C4', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+        <style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
       </div>
     );
   }
 
   if (!allowed) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--hub-bg)', color: 'var(--hub-text)', gap: '12px', fontSize: '14px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', color: '#111', gap: '12px', fontSize: '14px' }}>
         <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
-        <p style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>Contact your admin to get access.</p>
+        <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
         <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>Go to Hub</a>
       </div>
     );

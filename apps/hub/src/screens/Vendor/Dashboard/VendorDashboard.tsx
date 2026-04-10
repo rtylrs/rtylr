@@ -96,8 +96,6 @@ const AdminDashboard: React.FC = () => {
         <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{today}</p>
       </motion.div>
 
-      <WelcomeBanner onCta={() => navigate('/apps')} />
-
       {/* KPI Stats */}
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-4 gap-3">
         <motion.div variants={itemVariants}>
@@ -152,7 +150,26 @@ const AdminDashboard: React.FC = () => {
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, delay: 0.2 }}
           className="space-y-4"
         >
-          <OnboardingChecklist />
+          <div className="rounded-xl" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+            <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--hub-border)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>What's new</p>
+            </div>
+            <div className="p-4 space-y-2.5">
+              {[
+                { version: '0.2.0', date: 'Apr 10', text: 'Addon system, team invites with email, request access flow' },
+                { version: '0.1.5', date: 'Apr 9', text: 'All 75 backend modules migrated to sqlc, business/org model' },
+                { version: '0.1.0', date: 'Apr 9', text: 'Full platform launch: POS, ERP, HR, CRM, Finance, Flow' },
+              ].map((entry) => (
+                <div key={entry.version} className="flex items-start gap-3">
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5" style={{ background: 'rgba(69,131,196,0.1)', color: '#4583C4' }}>{entry.version}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--hub-text)' }}>{entry.text}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{entry.date}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="rounded-xl" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
             <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--hub-border)' }}>

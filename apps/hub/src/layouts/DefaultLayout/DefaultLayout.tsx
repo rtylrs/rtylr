@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import api from '../../lib/api';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -24,6 +26,7 @@ import {
   Users,
   Grid3x3,
   Store,
+  MessageSquare,
   Activity as ActivityIcon,
   Search,
   Sparkles,
@@ -35,6 +38,7 @@ import { Avatar, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, Dropdow
 import { SearchCommand } from '../../components/hub';
 import { useCommandPalette } from '../../stores/commandPaletteStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useOnboardingTour } from '../../hooks/useOnboardingTour';
 import { useNotifications } from '../../hooks/queries/useNotifications';
 
 interface NavItem {
@@ -60,6 +64,7 @@ const menuSubItems: NavItem[] = [
 
 const routeLabels: Record<string, string> = {
   '/':                       'Dashboard',
+  '/chat':                   '__caret__',
   '/menus':                  'Menus',
   '/orders':                 'Orders',
   '/qr-codes':               'QR Codes',
@@ -121,6 +126,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   return (
     <Link
       to={path}
+      data-tour={label.toLowerCase()}
       className={cn(
         'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--hub-hover)]'
@@ -188,10 +194,20 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { theme, setTheme } = useThemeStore();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { data: notifications = [] } = useNotifications();
+  const { data: addonsData } = useQuery({
+    queryKey: ['addons'],
+    queryFn: async () => {
+      const res = await api.get('/addons');
+      return res.data?.addons ?? [];
+    },
+    staleTime: 60_000,
+  });
+  const menuAddonEnabled = (addonsData ?? []).some((a: any) => a.id === 'menu' && a.isEnabled);
 
   useKeyboardShortcuts();
+  useOnboardingTour();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
   const pageTitle = getPageTitle(location.pathname);
   const userEmail = user?.email || user?.emailAddress || null;
   const userName = user?.name || user?.firstName || userEmail || 'User';
@@ -206,7 +222,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
       {/* Sidebar */}
       <aside
-        className="w-56 flex flex-col shrink-0 overflow-hidden"
+        className="w-64 flex flex-col shrink-0 overflow-hidden"
         style={{
           background: 'var(--hub-surface)',
           borderRight: '1px solid var(--hub-border)',
@@ -232,14 +248,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <SidebarNavItem key={item.path} {...item} />
           ))}
 
-          {/* Storefront section (expandable) */}
-          <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
+          {/* Storefront section - only shown when menu addon is enabled */}
+          {menuAddonEnabled && (
+            <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
+          )}
+
         </nav>
 
         {/* Footer */}
         <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
           <Link
             to="/settings/account"
+            data-tour="settings"
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 mb-0.5',
               location.pathname.startsWith('/settings') ? 'bg-[var(--hub-active)]' : 'hover:bg-[var(--hub-hover)]'
@@ -322,9 +342,19 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            {pageTitle}
-          </h1>
+          {pageTitle === '__caret__' ? (
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.1)' }}>
+                <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+              </div>
+              <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Caret</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}>AI</span>
+            </div>
+          ) : (
+            <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              {pageTitle}
+            </h1>
+          )}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCommandPaletteOpen(true)}
@@ -342,12 +372,16 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               </kbd>
             </button>
             <button
-              onClick={() => navigate('/changelog')}
-              className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--hub-hover)]"
-              style={{ color: 'var(--hub-text-muted)' }}
-              aria-label="What's new"
+              onClick={() => navigate('/chat')}
+              className="h-7 rounded-lg flex items-center gap-1.5 px-3 transition-all duration-150"
+              style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.2)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.18)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)'; }}
+              aria-label="Chat with Caret"
+              data-tour="caret"
             >
-              <Sparkles size={14} />
+              <Sparkles size={13} />
+              <span className="text-[11px] font-semibold">Caret AI</span>
             </button>
             <button
               onClick={() => navigate('/notifications')}
