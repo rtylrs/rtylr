@@ -51,7 +51,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.AcceptInviteHandler{Service: service},
 	)
 
-	serverHttp.RegisterPOST[handlers.MarkOnboardedRequest, handlers.MarkOnboardedResponse](
+	serverHttp.RegisterGET[handlers.MarkOnboardedRequest, handlers.MarkOnboardedResponse](
 		ctx, router, handlers.MarkOnboardedRoutes(),
 		&handlers.MarkOnboardedHandler{Service: service},
 	)
