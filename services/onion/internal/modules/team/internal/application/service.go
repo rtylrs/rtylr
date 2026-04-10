@@ -169,6 +169,14 @@ func (s *Service) GetUserInfo(ctx context.Context, userID int64) (string, string
 	return s.repo.GetUserByID(ctx, userID)
 }
 
+func (s *Service) IsOnboarded(ctx context.Context, userID int64) bool {
+	return s.repo.IsOnboarded(ctx, userID)
+}
+
+func (s *Service) MarkOnboarded(ctx context.Context, userID int64) error {
+	return s.repo.MarkOnboarded(ctx, userID)
+}
+
 // GetBusinessInfo returns the business name and whether the user is the owner.
 func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
 	if businessID == 0 {

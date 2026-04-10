@@ -288,6 +288,24 @@ func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID
 	})
 }
 
+// ─── Onboarding ─────────────────────────────────────────────────────────────
+
+func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
+	pool := dbclient.Pool()
+	var onboarded bool
+	err := pool.QueryRowContext(ctx, "SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?", userID).Scan(&onboarded)
+	if err != nil {
+		return false
+	}
+	return onboarded
+}
+
+func (r *Repository) MarkOnboarded(ctx context.Context, userID int64) error {
+	pool := dbclient.Pool()
+	_, err := pool.ExecContext(ctx, "UPDATE users SET onboarded = TRUE WHERE id = ?", userID)
+	return err
+}
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sqlc.NullUserAppPermissionsRole, isActive sql.NullBool, createdAt, updatedAt sql.NullTime) *domain.UserAppPermission {

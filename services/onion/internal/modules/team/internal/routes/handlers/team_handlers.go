@@ -387,6 +387,7 @@ type MeResponse struct {
 	BusinessID   int64    `json:"businessId"`
 	BusinessName string   `json:"businessName"`
 	IsOwner      bool     `json:"isOwner"`
+	Onboarded    bool     `json:"onboarded"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -437,7 +438,35 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		BusinessID:   businessID,
 		BusinessName: businessName,
 		IsOwner:      isOwner,
+		Onboarded:    h.Service.IsOnboarded(ctx, userID),
 	}, nil
+}
+
+// ─── Mark Onboarded ─────────────────────────────────────────────────────────
+
+func MarkOnboardedRoutes() []string { return []string{"/user/onboarded"} }
+
+type MarkOnboardedHandler struct{ Service *application.Service }
+type MarkOnboardedRequest struct{}
+type MarkOnboardedResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedRequest) (MarkOnboardedResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return MarkOnboardedResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.MarkOnboarded(ctx, device.User.UserID); err != nil {
+		return MarkOnboardedResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to update",
+		}
+	}
+
+	return MarkOnboardedResponse{Message: "Onboarding complete"}, nil
 }
 
 // ─── Request Access ─────────────────────────────────────────────────────────
