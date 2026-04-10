@@ -18,3 +18,12 @@ type ActiveSession struct {
 type TwoFactorInput struct {
 	Enabled bool `json:"enabled"`
 }
+
+type LoginEntry struct {
+	Email     string    `json:"email"`
+	Method    string    `json:"method"`
+	IP        string    `json:"ip"`
+	UserAgent string    `json:"userAgent"`
+	Success   bool      `json:"success"`
+	CreatedAt time.Time `json:"createdAt"`
+}

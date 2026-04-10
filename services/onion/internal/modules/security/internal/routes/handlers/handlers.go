@@ -10,8 +10,10 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-func SecurityRoutes() []string { return []string{"/security"} }
-func TwoFARoutes() []string    { return []string{"/security/2fa"} }
+func SecurityRoutes() []string       { return []string{"/security"} }
+func TwoFARoutes() []string          { return []string{"/security/2fa"} }
+func LoginHistoryRoutes() []string   { return []string{"/security/login-history"} }
+func InvalidateRoutes() []string     { return []string{"/security/invalidate-sessions"} }
 
 // -- Get Security Settings --
 
@@ -97,4 +99,77 @@ func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (To
 	}
 
 	return Toggle2FAResponse{Message: msg}, nil
+}
+
+// -- Login History --
+
+type LoginHistoryHandler struct{ Service *application.Service }
+type LoginHistoryRequest struct{}
+
+type LoginEntryPayload struct {
+	Email     string `json:"email"`
+	Method    string `json:"method"`
+	IP        string `json:"ip"`
+	UserAgent string `json:"userAgent"`
+	Success   bool   `json:"success"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type LoginHistoryResponse struct {
+	History []LoginEntryPayload `json:"history"`
+}
+
+func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest) (LoginHistoryResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return LoginHistoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	entries, err := h.Service.GetLoginHistory(ctx, device.User.UserID)
+	if err != nil {
+		return LoginHistoryResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to get login history",
+		}
+	}
+
+	payloads := make([]LoginEntryPayload, 0, len(entries))
+	for _, e := range entries {
+		payloads = append(payloads, LoginEntryPayload{
+			Email:     e.Email,
+			Method:    e.Method,
+			IP:        e.IP,
+			UserAgent: e.UserAgent,
+			Success:   e.Success,
+			CreatedAt: e.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+
+	return LoginHistoryResponse{History: payloads}, nil
+}
+
+// -- Invalidate All Sessions --
+
+type InvalidateSessionsHandler struct{ Service *application.Service }
+type InvalidateSessionsRequest struct{}
+type InvalidateSessionsResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *InvalidateSessionsHandler) Serve(ctx context.Context, _ *InvalidateSessionsRequest) (InvalidateSessionsResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return InvalidateSessionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.InvalidateAllSessions(ctx, device.User.UserID); err != nil {
+		return InvalidateSessionsResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to invalidate sessions",
+		}
+	}
+
+	return InvalidateSessionsResponse{Message: "All sessions invalidated"}, nil
 }

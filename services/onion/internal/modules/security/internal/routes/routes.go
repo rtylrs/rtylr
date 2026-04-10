@@ -19,4 +19,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.TwoFARoutes(),
 		&handlers.Toggle2FAHandler{Service: service},
 	)
+
+	serverHttp.RegisterGET[handlers.LoginHistoryRequest, handlers.LoginHistoryResponse](
+		ctx, router, handlers.LoginHistoryRoutes(),
+		&handlers.LoginHistoryHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOST[handlers.InvalidateSessionsRequest, handlers.InvalidateSessionsResponse](
+		ctx, router, handlers.InvalidateRoutes(),
+		&handlers.InvalidateSessionsHandler{Service: service},
+	)
 }

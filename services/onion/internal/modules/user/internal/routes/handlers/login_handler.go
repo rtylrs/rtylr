@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -94,6 +95,19 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 			Message: "Failed to retrieve user information",
 		}
 	}
+
+	// Record login in history (non-blocking)
+	go func() {
+		pool := dbclient.Pool()
+		ip := ""
+		if device := authPkg.DeviceCtx(ctx); device.User != nil {
+			ip = device.User.IP
+		}
+		_, _ = pool.Exec(
+			"INSERT INTO login_history (user_id, email, method, ip_address, success) VALUES (?, ?, 'email', ?, true)",
+			userId, req.Email, ip,
+		)
+	}()
 
 	return LoginResponse{
 		Token:   token,
