@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_CASH_FLOW, CashFlowMonth } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useCashFlow() {
-  return useQuery<CashFlowMonth[]>({
+  return useQuery({
     queryKey: ['cash-flow'],
-    queryFn: async () => MOCK_CASH_FLOW,
+    queryFn: () => financeApi.getCashFlow(),
   });
 }

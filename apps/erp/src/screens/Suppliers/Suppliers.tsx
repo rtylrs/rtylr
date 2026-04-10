@@ -8,41 +8,6 @@ import ExportButton from '../../components/ExportButton';
 
 const AMBER = '#f59e0b';
 
-// ─── Mock / fallback data ─────────────────────────────────────────────────────
-
-const mockSuppliers: Supplier[] = [
-  {
-    id: 1,
-    name: 'Fresh Farms Co.',
-    contactName: 'Maria Gonzalez',
-    email: 'maria@freshfarms.co',
-    phone: '+1 (555) 201-4430',
-    productCount: 38,
-    categories: ['Produce', 'Dairy', 'Pantry'],
-    status: 'Active',
-  },
-  {
-    id: 2,
-    name: 'Global Beverages Ltd.',
-    contactName: 'James Whitfield',
-    email: 'james@globalbev.com',
-    phone: '+1 (555) 389-7701',
-    productCount: 21,
-    categories: ['Beverages', 'Coffee', 'Tea'],
-    status: 'Active',
-  },
-  {
-    id: 3,
-    name: 'Artisan Bakers Inc.',
-    contactName: 'Sophie Chen',
-    email: 'sophie@artisanbakers.com',
-    phone: '+1 (555) 947-2215',
-    productCount: 14,
-    categories: ['Bakery', 'Pastry'],
-    status: 'Active',
-  },
-];
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const PALETTE = ['#10b981', AMBER, '#4583C4', '#8b5cf6', '#f87171', '#3b82f6'];
@@ -96,8 +61,7 @@ const SkeletonCard: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Suppliers: React.FC = () => {
-  const { data: fetchedSuppliers, isLoading } = useSuppliers();
-  const suppliers: Supplier[] = fetchedSuppliers && fetchedSuppliers.length ? fetchedSuppliers : mockSuppliers;
+  const { data: suppliers = [], isLoading } = useSuppliers();
   const [showScorecards, setShowScorecards] = useState(false);
 
   const activeCount = suppliers.filter((s) => s.status === 'Active').length;

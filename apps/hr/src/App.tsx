@@ -20,12 +20,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    // Check common session cookies used across rtylr apps
-    const token =
-      getCookie('rtylr_token') ||
-      getCookie('rtylr_session') ||
-      getCookie('auth_token') ||
-      getCookie('session');
+    const token = getCookie('token');
 
     if (token) {
       setAuthed(true);

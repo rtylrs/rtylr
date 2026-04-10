@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, Plus, Flame, Timer, CheckCircle2 } from 'lucide-react';
 import { useFlowStore, SavedView } from '../../stores/flowStore';
-import { useFilteredTasks } from '../../hooks/useViews';
+import { useViews, useFilteredTasks } from '../../hooks/useViews';
 import TaskRow from '../../components/TaskRow';
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -12,9 +12,11 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const Views: React.FC = () => {
-  const { views } = useFlowStore();
-  const [selected, setSelected] = useState<SavedView | null>(views[0] || null);
-  const tasks = useFilteredTasks(selected);
+  const { data: views = [] } = useViews();
+  const { tasks: allTasks } = useFlowStore();
+  const [selected, setSelected] = useState<SavedView | null>(null);
+  const displayView = selected || views[0] || null;
+  const tasks = useFilteredTasks(displayView, allTasks);
 
   return (
     <div className="flex h-full">

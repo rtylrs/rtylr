@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Check } from 'lucide-react';
 import { useSuppliers } from '../hooks/useSuppliers';
-import { mockSuppliers } from '../lib/mockData';
 
 interface SupplierSelectProps {
   value?: number | null;
@@ -12,8 +11,7 @@ interface SupplierSelectProps {
 const SupplierSelect: React.FC<SupplierSelectProps> = ({ value, onChange, placeholder = 'Select supplier…' }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
-  const { data } = useSuppliers();
-  const suppliers = data && data.length ? data : mockSuppliers;
+  const { data: suppliers = [] } = useSuppliers();
 
   const filtered = useMemo(
     () => suppliers.filter((s) => s.name.toLowerCase().includes(q.toLowerCase())),

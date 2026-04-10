@@ -14,9 +14,9 @@ export function useStaffById(id: number | undefined) {
   });
 }
 
-/* ── 32. useTimeOff ── */
+/* ── 32. useTimeOff (extras) ── */
 export function useTimeOff() {
-  return useQuery({ queryKey: ['time-off'], queryFn: () => hrExtras.listTimeOff() });
+  return useQuery({ queryKey: ['time-off-extras'], queryFn: () => hrExtras.listTimeOff() });
 }
 
 export function useSubmitTimeOff() {

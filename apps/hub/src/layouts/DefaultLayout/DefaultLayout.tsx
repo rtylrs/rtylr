@@ -227,7 +227,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               { label: 'ERP',     href: 'https://erp.rtylr.com',     icon: Package,        color: '#10b981' },
               { label: 'HR',      href: 'https://hr.rtylr.com',      icon: UserCheck,      color: '#f59e0b' },
               { label: 'Finance', href: 'https://finance.rtylr.com', icon: CreditCard,     color: '#ef4444' },
-              { label: 'Tracker', href: 'https://tracker.rtylr.com', icon: Layers,         color: '#64C5B9' },
+              { label: 'Flow', href: 'https://flow.rtylr.com', icon: Layers,         color: '#64C5B9' },
             ].map(({ label, href, icon: Icon, color }) => (
               <a
                 key={label}

@@ -294,15 +294,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           className="flex items-center gap-2.5 px-4 py-4"
           style={{ borderBottom: '1px solid var(--hub-border)' }}
         >
-          <span
-            className="flex items-center justify-center h-7 w-7 rounded-lg text-xs font-black"
-            style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
-          >
-            ERP
-          </span>
-          <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            rtylr ERP
-          </span>
+          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
         </div>
 
         <div className="px-3 pt-3">

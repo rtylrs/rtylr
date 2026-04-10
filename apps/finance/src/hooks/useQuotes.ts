@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_QUOTES, Quote } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useQuotes() {
-  return useQuery<Quote[]>({
+  return useQuery({
     queryKey: ['quotes'],
-    queryFn: async () => MOCK_QUOTES,
+    queryFn: () => financeApi.getQuotes(),
   });
 }

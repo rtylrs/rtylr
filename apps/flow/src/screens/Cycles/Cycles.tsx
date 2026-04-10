@@ -6,7 +6,10 @@ import { formatDate } from '../../lib/utils';
 import CycleBadge from '../../components/CycleBadge';
 
 const Cycles: React.FC = () => {
-  const cycles = useCycles();
+  const { data: cycles = [], isLoading } = useCycles();
+
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading cycles...</div>;
+
   const active = cycles.find((c) => c.status === 'active');
   const upcoming = cycles.filter((c) => c.status === 'upcoming');
   const completed = cycles.filter((c) => c.status === 'completed');

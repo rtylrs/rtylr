@@ -70,7 +70,8 @@ const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
 });
 
-function formatMoney(n: number) {
+function formatMoney(n: number | undefined | null) {
+  if (n == null) return '$0';
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 

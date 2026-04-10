@@ -4,12 +4,11 @@ import { useLoyaltyMembers } from '../../hooks/useLoyalty';
 import { PageHeader, Card, Input, EmptyState, SkeletonList } from '../../components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../components/crm';
 import { Users } from 'lucide-react';
-import { mockLoyaltyMembers } from '../../lib/mockData';
 
 const LoyaltyMembers: React.FC = () => {
   const { data: fetched, isLoading } = useLoyaltyMembers();
   const [search, setSearch] = useState('');
-  const members = (fetched && fetched.length ? fetched : mockLoyaltyMembers).sort((a, b) => b.points - a.points);
+  const members = (fetched ?? []).sort((a, b) => b.points - a.points);
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
 
   return (

@@ -13,6 +13,7 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useProjectOverview } from '../../hooks/useProjectOverview';
+import { useFlowStore } from '../../stores/flowStore';
 import { AvatarStack } from '../../components/AssigneeAvatar';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import { formatDate } from '../../lib/utils';
@@ -25,12 +26,18 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 
 const ProjectOverview: React.FC = () => {
   const { projectId } = useParams<{ projectId: string; workspaceId: string }>();
-  const data = useProjectOverview(projectId);
+  const { data, isLoading } = useProjectOverview(projectId);
+  const { projects, members } = useFlowStore();
+  const project = projects.find((p) => p.id === projectId);
 
-  if (!data) {
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading project...</div>;
+
+  if (!data || !project) {
     return <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>Project not found.</div>;
   }
-  const { project, stats, milestones, team, recentComments } = data;
+  const { stats, milestones } = data;
+  const team = members.filter((m) => project.memberAvatars.includes(m.initials));
+  const recentComments: { id: string; author: string; authorInitials: string; body: string; createdAt: string }[] = [];
   const health = HEALTH[project.health];
 
   return (

@@ -20,11 +20,11 @@ export const scorePassword = (pw: string): Strength => {
 
 const LABELS = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
 const COLORS = [
-  'bg-white/10',
-  'bg-red-400/80',
-  'bg-amber-400/80',
-  'bg-sky-400/80',
-  'bg-[#64C5B9]',
+  'bg-[#e5e5e5]',
+  'bg-red-400',
+  'bg-amber-400',
+  'bg-sky-400',
+  'bg-green-500',
 ];
 
 const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
@@ -34,25 +34,25 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
   const score = useMemo(() => scorePassword(password), [password]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <div className="flex gap-1.5">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
             className={[
-              'h-1.5 flex-1 rounded-full transition-colors duration-300',
-              i < score ? COLORS[score] : 'bg-white/5',
+              'h-1 flex-1 rounded-full transition-colors duration-300',
+              i < score ? COLORS[score] : 'bg-[#e5e5e5]',
             ].join(' ')}
           />
         ))}
       </div>
       {showLabel && (
-        <p className="text-[11px] text-white/45">
+        <p className="text-[11px] text-[#999]">
           Password strength:{' '}
           <span
             className={[
               'font-medium',
-              score >= 3 ? 'text-[#64C5B9]' : score === 2 ? 'text-amber-300' : 'text-white/60',
+              score >= 3 ? 'text-green-600' : score === 2 ? 'text-amber-600' : 'text-[#666]',
             ].join(' ')}
           >
             {LABELS[score]}

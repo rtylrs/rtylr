@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_RECURRING, RecurringInvoice } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useRecurringInvoices() {
-  return useQuery<RecurringInvoice[]>({
+  return useQuery({
     queryKey: ['recurring-invoices'],
-    queryFn: async () => MOCK_RECURRING,
+    queryFn: () => financeApi.getRecurringInvoices(),
   });
 }

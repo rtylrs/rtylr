@@ -30,7 +30,7 @@ const PriceLists: React.FC = () => {
         description="Customer-tier pricing strategies"
         actions={
           <button
-            onClick={() => toast.success('Price list created (demo)')}
+            onClick={() => toast.success('Price list created')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >

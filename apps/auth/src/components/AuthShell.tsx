@@ -36,25 +36,15 @@ const AuthShell: React.FC<AuthShellProps> = ({
   footer,
 }) => {
   return (
-    <div className="min-h-screen w-full flex bg-[#050617] text-white antialiased">
+    <div className="min-h-screen w-full flex antialiased">
       <AuthShowcase />
 
-      {/* Right: form panel */}
-      <main className="relative flex-1 lg:w-[40%] flex flex-col">
-        {/* Subtle ambient gradient on the form side */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(69,131,196,0.08) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 80% 40% at 50% 100%, rgba(126,68,150,0.06) 0%, transparent 60%)',
-          }}
-        />
-
+      {/* Right: form panel - white background */}
+      <main className="relative flex-1 lg:w-[40%] flex flex-col bg-white">
         {/* Mobile logo bar */}
         <div className="relative z-10 flex items-center justify-between px-6 pt-6 lg:hidden">
           <img
-            src={ASSETS.logos.light}
+            src={ASSETS.logos.dark}
             alt="rtylr"
             className="h-7 w-auto select-none"
             draggable={false}
@@ -75,11 +65,11 @@ const AuthShell: React.FC<AuthShellProps> = ({
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8"
             >
-              <h2 className="text-3xl sm:text-[32px] font-semibold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-[32px] font-semibold tracking-tight text-[#111]">
                 {title}
               </h2>
               {subtitle && (
-                <p className="mt-2 text-[15px] text-white/55">{subtitle}</p>
+                <p className="mt-2 text-[15px] text-[#666]">{subtitle}</p>
               )}
             </motion.div>
 

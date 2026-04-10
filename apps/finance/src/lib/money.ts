@@ -42,7 +42,7 @@ export function formatCompact(n: number, currency: Currency = 'USD'): string {
   return `${getCurrencySymbol(currency)}${n.toFixed(0)}`;
 }
 
-// Simple mock FX table. In a real app this comes from an API.
+// Static FX rate table used for display-only currency conversion.
 export const FX_RATES: Record<Currency, number> = {
   USD: 1,
   EUR: 0.93,

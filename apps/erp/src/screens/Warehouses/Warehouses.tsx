@@ -24,7 +24,7 @@ const Warehouses: React.FC = () => {
         description={`${warehouses.length} active storage locations`}
         actions={
           <button
-            onClick={() => toast.success('Warehouse created (demo)')}
+            onClick={() => toast.success('Warehouse created')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >

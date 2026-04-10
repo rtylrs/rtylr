@@ -6,14 +6,13 @@ import { useCustomers, useMergeCustomers } from '../../hooks/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader } from '../../components/ui';
 import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../components/crm';
 import { getTier } from '../../lib/tiers';
-import { mockCustomers } from '../../lib/mockData';
 
 const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const merge = useMergeCustomers();
   const { data: fetched } = useCustomers();
-  const customers = fetched && fetched.length ? fetched : mockCustomers;
+  const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(Number(searchParams.get('primary')) || null);
   const [secondaryId, setSecondaryId] = useState<number | null>(null);

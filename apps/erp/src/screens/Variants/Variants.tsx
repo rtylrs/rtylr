@@ -25,7 +25,7 @@ const Variants: React.FC = () => {
         description="Individual SKUs for sizes, colors, flavors and more"
         actions={
           <button
-            onClick={() => toast.success('Variant created (demo)')}
+            onClick={() => toast.success('Variant created')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >

@@ -7,15 +7,14 @@ import { useSegments } from '../../hooks/useSegments';
 import { useCustomers } from '../../hooks/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../components/ui';
 import { SMSComposer, CustomerAvatar } from '../../components/crm';
-import { mockSegments, mockCustomers } from '../../lib/mockData';
 
 const SMSCampaign: React.FC = () => {
   const navigate = useNavigate();
   const create = useCreateCampaign();
   const { data: fetchedSegments } = useSegments();
   const { data: fetchedCustomers } = useCustomers();
-  const segments = fetchedSegments && fetchedSegments.length ? fetchedSegments : mockSegments;
-  const customers = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
+  const segments = fetchedSegments ?? [];
+  const customers = fetchedCustomers ?? [];
 
   const [name, setName] = useState('');
   const [segmentId, setSegmentId] = useState<number>(segments[0]?.id || 0);

@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
 import { PurchaseOrder } from '../../services/erpApi';
 import { usePurchaseOrders } from '../../hooks/usePurchaseOrders';
-import { mockPurchaseOrders } from '../../lib/mockData';
 import PrintPOButton from '../../components/PrintPOButton';
 import ExportButton from '../../components/ExportButton';
 import { toast } from 'sonner';
@@ -46,8 +45,7 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const Purchasing: React.FC = () => {
-  const { data: fetchedOrders, isLoading } = usePurchaseOrders();
-  const orders: PurchaseOrder[] = fetchedOrders && fetchedOrders.length ? fetchedOrders : mockPurchaseOrders;
+  const { data: orders = [], isLoading } = usePurchaseOrders();
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
 
   const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);

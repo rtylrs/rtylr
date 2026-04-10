@@ -91,7 +91,7 @@ const OrdersTable: React.FC<{ orders: any[]; emptyLabel: string }> = ({ orders, 
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
 
-  // Empty mock data — real data would come from API
+  // TODO: fetch from /orders API
   const allOrders: any[] = [];
   const pendingOrders = allOrders.filter((o) => o.status === 'pending');
   const inProgressOrders = allOrders.filter((o) => o.status === 'in_progress');

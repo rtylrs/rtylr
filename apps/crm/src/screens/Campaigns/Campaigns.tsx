@@ -23,60 +23,6 @@ interface Campaign {
   updatedAt: string;
 }
 
-const mockCampaigns: Campaign[] = [
-  {
-    id: 1,
-    name: 'Summer Loyalty Blast',
-    description: 'Double points weekend for all loyalty members.',
-    channel: 'Email',
-    status: 'Active',
-    audience: 4200,
-    sent: 4120,
-    openRate: '42%',
-    clickRate: '18%',
-    revenue: '$8,400',
-    updatedAt: '2 hours ago',
-  },
-  {
-    id: 2,
-    name: 'Win-Back: 30-Day Inactive',
-    description: 'Re-engage customers who haven\'t visited in 30+ days.',
-    channel: 'SMS',
-    status: 'Active',
-    audience: 980,
-    sent: 980,
-    openRate: '61%',
-    clickRate: '24%',
-    revenue: '$2,100',
-    updatedAt: '1 day ago',
-  },
-  {
-    id: 3,
-    name: 'VIP Exclusive Preview',
-    description: 'Early access invite for Platinum and Gold members.',
-    channel: 'Push',
-    status: 'Completed',
-    audience: 540,
-    sent: 540,
-    openRate: '38%',
-    clickRate: '22%',
-    revenue: '$3,700',
-    updatedAt: '3 days ago',
-  },
-  {
-    id: 4,
-    name: 'New Customer Welcome Series',
-    description: 'Onboarding drip campaign for first-time customers.',
-    channel: 'Email',
-    status: 'Draft',
-    audience: 0,
-    sent: 0,
-    openRate: '-',
-    clickRate: '-',
-    revenue: '-',
-    updatedAt: '5 days ago',
-  },
-];
 
 const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: string }> = {
   Draft:     { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
@@ -256,7 +202,7 @@ function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index:
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedCampaigns } = useCampaigns();
-  const campaigns: Campaign[] = fetchedCampaigns && fetchedCampaigns.length ? (fetchedCampaigns as Campaign[]) : mockCampaigns;
+  const campaigns: Campaign[] = (fetchedCampaigns as Campaign[]) ?? [];
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
 
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);

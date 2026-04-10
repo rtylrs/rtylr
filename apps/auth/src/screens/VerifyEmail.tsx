@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-import AuthShell from '../components/AuthShell';
-import AuthButton from '../components/AuthButton';
-import BackLink from '../components/BackLink';
+import { ASSETS } from '@voxire/config';
+import { Button } from '@voxire/components';
 import {
   useEmailVerification,
   useResendVerificationEmail,
@@ -47,63 +45,84 @@ const VerifyEmail: React.FC = () => {
   };
 
   return (
-    <AuthShell
-      title="Verifying your email"
-      subtitle="This will only take a moment."
-      footer={
-        <div className="flex justify-center">
-          <BackLink label="Back to sign in" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
+      <div className="w-full max-w-sm text-center">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <img
+            src={ASSETS.logos.dark}
+            alt="rtylr"
+            className="h-8 w-auto select-none"
+            draggable={false}
+          />
         </div>
-      }
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center gap-5 text-center py-4"
-      >
+
         {status === 'loading' && (
           <>
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4583C4]/15 border border-[#4583C4]/25">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
               <Loader2 className="h-8 w-8 text-[#4583C4] animate-spin" />
             </div>
-            <p className="text-sm text-white/65">Checking your token...</p>
+            <p className="mt-4 text-sm text-[#666]">Checking your token...</p>
           </>
         )}
         {status === 'success' && (
           <>
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#64C5B9]/15 border border-[#64C5B9]/25">
-              <CheckCircle2 className="h-8 w-8 text-[#64C5B9]" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 border border-green-200 mx-auto">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="text-base font-semibold text-white">
+            <p className="mt-4 text-base font-semibold text-[#111]">
               Email verified
             </p>
-            <AuthButton onClick={() => navigate('/')}>
-              Continue to sign in
-            </AuthButton>
+            <div className="mt-6">
+              <Button
+                type="button"
+                variant="primary"
+                fullWidth
+                height={40}
+                onClick={() => navigate('/')}
+              >
+                Continue to sign in
+              </Button>
+            </div>
           </>
         )}
         {status === 'error' && (
           <>
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/10 border border-red-400/25">
-              <AlertCircle className="h-8 w-8 text-red-300" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 border border-red-200 mx-auto">
+              <AlertCircle className="h-8 w-8 text-red-500" />
             </div>
-            <p className="text-sm text-red-200">
+            <p className="mt-4 text-sm text-red-600">
               This verification link is invalid or has expired.
             </p>
-            <AuthButton
-              variant="outline"
-              onClick={handleResend}
-              loading={resendMutation.isPending}
-            >
-              <span className="inline-flex items-center justify-center gap-2">
-                <Mail className="h-[18px] w-[18px]" />
-                Resend verification email
-              </span>
-            </AuthButton>
+            <div className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                fullWidth
+                height={40}
+                onClick={handleResend}
+                loading={resendMutation.isPending}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Resend verification email
+                </span>
+              </Button>
+            </div>
           </>
         )}
-      </motion.div>
-    </AuthShell>
+
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -205,6 +205,20 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   const [open, setOpen] = useState(false);
 
+  const rawUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('rtylr:voxire:user') || 'null');
+    } catch {
+      return null;
+    }
+  })();
+  const userEmail = rawUser?.email || rawUser?.emailAddress || null;
+  const userName = rawUser?.name || rawUser?.firstName || userEmail || 'User';
+
+  function getInitials(name: string) {
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
   return (
     <div style={{ position: 'relative' }}>
       <button
@@ -240,11 +254,11 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             flexShrink: 0,
           }}
         >
-          HR
+          {getInitials(userName)}
         </span>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hr-text)', textAlign: 'left' }}>HR Admin</span>
-          <span style={{ fontSize: '10px', color: 'var(--hr-text-muted)', textAlign: 'left' }}>admin@rtylr.com</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hr-text)', textAlign: 'left' }}>{userName}</span>
+          {userEmail && <span style={{ fontSize: '10px', color: 'var(--hr-text-muted)', textAlign: 'left' }}>{userEmail}</span>}
         </div>
         <ChevronUp size={12} style={{ color: 'var(--hr-text-dim)', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
       </button>
@@ -372,29 +386,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 28,
-                width: 28,
-                borderRadius: '8px',
-                background: 'rgba(139,92,246,0.15)',
-                color: ACCENT,
-                fontSize: '12px',
-                fontWeight: 800,
-                flexShrink: 0,
-              }}
-            >
-              HR
-            </span>
-            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hr-text)' }}>
-              HR Portal
-            </span>
+            <img src="/logo.png" alt="rtylr" style={{ height: 24, width: 'auto' }} />
           </div>
           <a
-            href="http://localhost:5175"
+            href={APP_URLS.hub}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_BILLS, Bill } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useBills() {
-  return useQuery<Bill[]>({
+  return useQuery({
     queryKey: ['bills'],
-    queryFn: async () => MOCK_BILLS,
+    queryFn: () => financeApi.getBills(),
   });
 }

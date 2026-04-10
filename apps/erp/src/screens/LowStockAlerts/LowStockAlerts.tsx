@@ -5,14 +5,12 @@ import { useLowStock } from '../../hooks/useInventory';
 import PageHeader from '../../components/PageHeader';
 import { SkeletonRow } from '../../components/Skeleton';
 import EmptyState from '../../components/EmptyState';
-import { mockLowStockItems } from '../../lib/mockData';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
 const LowStockAlerts: React.FC = () => {
-  const { data, isLoading } = useLowStock();
-  const items = data && data.length ? data : mockLowStockItems;
+  const { data: items = [], isLoading } = useLowStock();
 
   const handleReorder = (name: string) => {
     toast.success(`Reorder triggered for ${name}`);

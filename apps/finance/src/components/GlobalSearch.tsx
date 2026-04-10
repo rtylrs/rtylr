@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, FileText, Receipt, Users, LayoutDashboard, TrendingUp, Calculator } from 'lucide-react';
 import Modal from './Modal';
 import { inputStyle, ACCENT } from '../lib/tokens';
-import { MOCK_CLIENTS } from './ClientSelect';
+import type { Client } from './ClientSelect';
+import api from '../lib/api';
 
 interface Result {
   id: string;
@@ -44,19 +45,21 @@ interface GlobalSearchProps {
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
+  const [clients, setClients] = useState<Client[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (open) {
       setQuery('');
       setIndex(0);
+      api.get<Client[]>('/crm/customers').then((r) => setClients(r.data ?? [])).catch(() => {});
     }
   }, [open]);
 
   const results = useMemo(() => {
     const q = query.toLowerCase();
     const pages = PAGES.filter((p) => p.label.toLowerCase().includes(q));
-    const clients: Result[] = MOCK_CLIENTS.filter((c) => c.name.toLowerCase().includes(q)).map((c) => ({
+    const clientResults: Result[] = clients.filter((c) => c.name.toLowerCase().includes(q)).map((c) => ({
       id: `client-${c.id}`,
       label: c.name,
       sub: c.email,
@@ -64,11 +67,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
       icon: Users,
       group: 'Clients',
     }));
-    const invoices: Result[] = ['INV-001', 'INV-002', 'INV-003', 'INV-004', 'INV-005']
-      .filter((i) => i.toLowerCase().includes(q))
-      .map((i) => ({ id: i, label: i, sub: 'Invoice', to: `/invoices/${i}`, icon: FileText, group: 'Invoices' }));
-    return [...pages, ...invoices, ...clients].slice(0, 12);
-  }, [query]);
+    return [...pages, ...clientResults].slice(0, 12);
+  }, [query, clients]);
 
   useEffect(() => {
     if (!open) return;

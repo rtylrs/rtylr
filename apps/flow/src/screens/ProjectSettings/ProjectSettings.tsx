@@ -137,7 +137,7 @@ const ProjectSettings: React.FC = () => {
             <button
               className="px-3 py-1 rounded text-[11px] font-semibold"
               style={{ background: '#ef4444', color: '#fff' }}
-              onClick={() => toast.error('Not implemented in mock data')}
+              onClick={() => toast.error('Delete project is not yet implemented')}
             >
               Delete
             </button>

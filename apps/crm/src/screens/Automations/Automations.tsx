@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Zap, Plus, Play, Pause, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
 import { useAutomations } from '../../hooks/useAutomations';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../components/ui';
-import { mockAutomations } from '../../lib/mockData';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetched, isLoading } = useAutomations();
-  const automations = fetched && fetched.length ? fetched : mockAutomations;
+  const automations = fetched ?? [];
 
   const icons: Record<string, React.ComponentType<{ size?: number }>> = {
     'Welcome Series': UserPlus,

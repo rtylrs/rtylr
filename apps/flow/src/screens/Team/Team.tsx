@@ -8,8 +8,10 @@ import StatusIcon from '../../components/StatusIcon';
 import { useNavigate } from 'react-router-dom';
 
 const Team: React.FC = () => {
-  const members = useTeamWorkload();
+  const { data: members = [], isLoading } = useTeamWorkload();
   const navigate = useNavigate();
+
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading team...</div>;
 
   return (
     <div className="flex flex-col h-full overflow-auto">

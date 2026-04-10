@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { erpApi, CreateProductInput, UpdateProductInput, Product } from '../services/erpApi';
-import { mockProducts } from '../lib/mockData';
 
 export interface ProductFilters {
   search?: string;
@@ -47,19 +46,13 @@ export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ['products', filters],
     queryFn: async () => {
-      try {
-        const r = await erpApi.listProducts({
-          search: filters?.search,
-          categoryId: filters?.categoryId,
-          limit: filters?.limit,
-          offset: filters?.offset,
-        });
-        const data = r.data;
-        if (data && data.length) return applyFilters(data, filters);
-        return applyFilters(mockProducts, filters);
-      } catch {
-        return applyFilters(mockProducts, filters);
-      }
+      const r = await erpApi.listProducts({
+        search: filters?.search,
+        categoryId: filters?.categoryId,
+        limit: filters?.limit,
+        offset: filters?.offset,
+      });
+      return applyFilters(r.data ?? [], filters);
     },
   });
 }
@@ -70,13 +63,8 @@ export function useProduct(id: number | undefined) {
     enabled: !!id,
     queryFn: async () => {
       if (!id) return null;
-      try {
-        const r = await erpApi.getProduct(id);
-        if (r.data) return r.data;
-      } catch {
-        // fall through
-      }
-      return mockProducts.find((p) => p.id === id) || null;
+      const r = await erpApi.getProduct(id);
+      return r.data ?? null;
     },
   });
 }

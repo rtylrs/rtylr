@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn, formatDate } from '../../lib/utils';
 import { useUserStore } from '../../stores/userStore';
+import { useFlowStore } from '../../stores/flowStore';
 
 const ACCENT = '#64C5B9';
 
@@ -30,99 +31,6 @@ interface Notification {
   taskTitle: string;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'n1',
-    type: 'assigned',
-    read: false,
-    title: 'Assigned to you',
-    description: 'Sara assigned you a new task',
-    project: 'Flow App',
-    projectColor: '#4583C4',
-    actor: 'Sara A',
-    actorInitials: 'SA',
-    timestamp: '2026-04-09T09:30:00',
-    taskTitle: 'Build task detail modal',
-  },
-  {
-    id: 'n2',
-    type: 'comment',
-    read: false,
-    title: 'New comment',
-    description: 'Lena commented on your task',
-    project: 'rtylr Platform',
-    projectColor: '#64C5B9',
-    actor: 'Lena K',
-    actorInitials: 'LK',
-    timestamp: '2026-04-09T08:15:00',
-    taskTitle: 'Fix auth redirect loop on refresh',
-  },
-  {
-    id: 'n3',
-    type: 'mention',
-    read: false,
-    title: 'You were mentioned',
-    description: 'Tarek mentioned you in a comment',
-    project: 'rtylr Platform',
-    projectColor: '#64C5B9',
-    actor: 'Tarek N',
-    actorInitials: 'TN',
-    timestamp: '2026-04-08T17:45:00',
-    taskTitle: 'Write API docs for task endpoints',
-  },
-  {
-    id: 'n4',
-    type: 'status_change',
-    read: true,
-    title: 'Task completed',
-    description: 'Lena marked a task as done',
-    project: 'Hub Dashboard',
-    projectColor: '#a855f7',
-    actor: 'Lena K',
-    actorInitials: 'LK',
-    timestamp: '2026-04-08T16:00:00',
-    taskTitle: 'Update dashboard analytics charts',
-  },
-  {
-    id: 'n5',
-    type: 'assigned',
-    read: true,
-    title: 'Assigned to you',
-    description: 'Mohamed assigned you to this task',
-    project: 'Flow App',
-    projectColor: '#4583C4',
-    actor: 'Mohamed H',
-    actorInitials: 'MH',
-    timestamp: '2026-04-08T14:22:00',
-    taskTitle: 'Timeline view implementation',
-  },
-  {
-    id: 'n6',
-    type: 'comment',
-    read: true,
-    title: 'New comment',
-    description: 'Sara replied to a thread you follow',
-    project: 'Flow App',
-    projectColor: '#4583C4',
-    actor: 'Sara A',
-    actorInitials: 'SA',
-    timestamp: '2026-04-08T11:10:00',
-    taskTitle: 'Design kanban board layout',
-  },
-  {
-    id: 'n7',
-    type: 'mention',
-    read: true,
-    title: 'You were mentioned',
-    description: 'Lena mentioned you in a task description',
-    project: 'Mobile App v2',
-    projectColor: '#ef4444',
-    actor: 'Lena K',
-    actorInitials: 'LK',
-    timestamp: '2026-04-07T09:05:00',
-    taskTitle: 'Define onboarding flow screens',
-  },
-];
 
 const TYPE_ICONS: Record<Notification['type'], React.ReactNode> = {
   assigned:      <CheckCircle2 size={14} style={{ color: ACCENT }} />,
@@ -232,17 +140,15 @@ const NotificationRow: React.FC<{
 
 const Inbox: React.FC = () => {
   const { user } = useUserStore();
+  const { notifications, markNotificationRead, markAllNotificationsRead } = useFlowStore();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
 
   const markRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    markNotificationRead(id);
   };
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllNotificationsRead();
   };
 
   const filtered = notifications.filter((n) => {

@@ -2,20 +2,31 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, MousePointerClick, MailOpen, UserMinus, DollarSign, Mail } from 'lucide-react';
 import { useCampaignById, useCampaignStats } from '../../hooks/useCampaigns';
-import { Breadcrumbs, Card } from '../../components/ui';
+import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../components/ui';
 import { CampaignStatsCard } from '../../components/crm';
-import { mockCampaigns, mockCampaignStats } from '../../lib/mockData';
 
 const CampaignDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const campaignId = Number(id);
-  const { data: fetched } = useCampaignById(campaignId);
+  const { data: fetched, isLoading: campaignLoading, error: campaignError } = useCampaignById(campaignId);
   const { data: fetchedStats } = useCampaignStats(campaignId);
-  const campaign = fetched || mockCampaigns.find((c) => c.id === campaignId) || mockCampaigns[0];
-  const stats = fetchedStats || mockCampaignStats;
+  const campaign = fetched;
+  const stats = fetchedStats;
 
   const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
+
+  if (campaignLoading) {
+    return <div style={{ maxWidth: '1200px' }}><SkeletonList count={6} /></div>;
+  }
+
+  if (campaignError || !campaign) {
+    return (
+      <div style={{ maxWidth: '1200px' }}>
+        <EmptyState icon={Mail} title="Campaign not found" description="This campaign could not be loaded." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '1200px' }}>
@@ -62,42 +73,46 @@ const CampaignDetail: React.FC = () => {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '20px' }}>
-        <CampaignStatsCard label="Sent" value={stats.sent.toLocaleString()} subValue={`${stats.delivered.toLocaleString()} delivered`} />
-        <CampaignStatsCard label="Delivered" value={`${pct(stats.delivered, stats.sent)}%`} subValue={`${stats.delivered.toLocaleString()}`} color="#10b981" />
-        <CampaignStatsCard label="Opened" value={`${pct(stats.opened, stats.delivered)}%`} subValue={`${stats.opened.toLocaleString()} opens`} sparkline={stats.timeline.map((t) => t.opens)} color="#3b82f6" />
-        <CampaignStatsCard label="Clicked" value={`${pct(stats.clicked, stats.delivered)}%`} subValue={`${stats.clicked.toLocaleString()} clicks`} sparkline={stats.timeline.map((t) => t.clicks)} color="#8b5cf6" />
-        <CampaignStatsCard label="Unsubscribed" value={stats.unsubscribed} subValue={`${pct(stats.unsubscribed, stats.delivered)}%`} color="#ef4444" />
-        <CampaignStatsCard label="Revenue" value={`$${stats.revenue.toLocaleString()}`} subValue="from campaign" color="#22c55e" />
-      </div>
+      {stats && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <CampaignStatsCard label="Sent" value={stats.sent.toLocaleString()} subValue={`${stats.delivered.toLocaleString()} delivered`} />
+            <CampaignStatsCard label="Delivered" value={`${pct(stats.delivered, stats.sent)}%`} subValue={`${stats.delivered.toLocaleString()}`} color="#10b981" />
+            <CampaignStatsCard label="Opened" value={`${pct(stats.opened, stats.delivered)}%`} subValue={`${stats.opened.toLocaleString()} opens`} sparkline={stats.timeline.map((t) => t.opens)} color="#3b82f6" />
+            <CampaignStatsCard label="Clicked" value={`${pct(stats.clicked, stats.delivered)}%`} subValue={`${stats.clicked.toLocaleString()} clicks`} sparkline={stats.timeline.map((t) => t.clicks)} color="#8b5cf6" />
+            <CampaignStatsCard label="Unsubscribed" value={stats.unsubscribed} subValue={`${pct(stats.unsubscribed, stats.delivered)}%`} color="#ef4444" />
+            <CampaignStatsCard label="Revenue" value={`$${stats.revenue.toLocaleString()}`} subValue="from campaign" color="#22c55e" />
+          </div>
 
-      <Card>
-        <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Engagement by day</h4>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}>
-          {stats.timeline.map((t) => {
-            const max = Math.max(...stats.timeline.map((x) => x.opens));
-            const openH = (t.opens / max) * 130;
-            const clickH = (t.clicks / max) * 130;
-            return (
-              <div key={t.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '130px' }}>
-                  <div style={{ width: '14px', height: `${openH}px`, background: '#3b82f6', borderRadius: '3px 3px 0 0' }} />
-                  <div style={{ width: '14px', height: `${clickH}px`, background: '#8b5cf6', borderRadius: '3px 3px 0 0' }} />
-                </div>
-                <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{t.day}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--hub-text-muted)' }}>
-            <span style={{ width: '10px', height: '10px', background: '#3b82f6', borderRadius: '2px', display: 'inline-block' }} /> Opens
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--hub-text-muted)' }}>
-            <span style={{ width: '10px', height: '10px', background: '#8b5cf6', borderRadius: '2px', display: 'inline-block' }} /> Clicks
-          </span>
-        </div>
-      </Card>
+          <Card>
+            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Engagement by day</h4>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}>
+              {stats.timeline.map((t) => {
+                const max = Math.max(...stats.timeline.map((x) => x.opens));
+                const openH = (t.opens / max) * 130;
+                const clickH = (t.clicks / max) * 130;
+                return (
+                  <div key={t.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '130px' }}>
+                      <div style={{ width: '14px', height: `${openH}px`, background: '#3b82f6', borderRadius: '3px 3px 0 0' }} />
+                      <div style={{ width: '14px', height: `${clickH}px`, background: '#8b5cf6', borderRadius: '3px 3px 0 0' }} />
+                    </div>
+                    <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{t.day}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--hub-text-muted)' }}>
+                <span style={{ width: '10px', height: '10px', background: '#3b82f6', borderRadius: '2px', display: 'inline-block' }} /> Opens
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--hub-text-muted)' }}>
+                <span style={{ width: '10px', height: '10px', background: '#8b5cf6', borderRadius: '2px', display: 'inline-block' }} /> Clicks
+              </span>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

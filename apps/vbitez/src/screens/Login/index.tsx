@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useEmployeeSessionStore } from '../../stores/employeeSessionStore';
+import { useThemeStore } from '../../stores/themeStore';
 
 const PIN_LENGTH = 4;
 
@@ -12,6 +13,7 @@ const KEYS = [
 
 const PinLogin: React.FC = () => {
   const { authenticatePin, loading, error, clearError } = useEmployeeSessionStore();
+  const theme = useThemeStore((s) => s.theme);
   const [pin, setPin] = useState('');
   const [shake, setShake] = useState(false);
 
@@ -43,14 +45,6 @@ const PinLogin: React.FC = () => {
   };
 
   const handleSubmit = async (value: string) => {
-    // Dev bypass — remove before production
-    if (value === '1253') {
-      useEmployeeSessionStore.setState({
-        employee: { id: 'dev', name: 'Dev User', role: 'admin' },
-        isActive: true,
-      });
-      return;
-    }
     try {
       await authenticatePin(value);
     } catch {
@@ -69,7 +63,13 @@ const PinLogin: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-pos-bg">
       <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
         <div className="flex flex-col items-center gap-1 text-center">
-          <span className="text-3xl leading-none">⬡</span>
+          <img
+            src={theme === 'dark'
+              ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
+              : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp'}
+            alt="rtylr"
+            className="h-8 w-auto"
+          />
           <h1 className="text-lg font-bold text-pos-text">Vbitez POS</h1>
           <p className="text-xs text-pos-muted">Enter your employee PIN</p>
         </div>

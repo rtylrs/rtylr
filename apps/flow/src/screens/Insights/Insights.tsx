@@ -6,8 +6,11 @@ import { useFlowStore } from '../../stores/flowStore';
 
 const Insights: React.FC = () => {
   const { activeWorkspaceId } = useFlowStore();
-  const data = useInsights(activeWorkspaceId);
-  const maxThroughput = Math.max(...data.throughput.map((t) => t.completed));
+  const { data, isLoading } = useInsights(activeWorkspaceId);
+
+  if (isLoading || !data) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading insights...</div>;
+
+  const maxThroughput = Math.max(...(data.throughput?.map((t) => t.completed) ?? [0]));
 
   return (
     <div className="flex flex-col h-full overflow-auto">

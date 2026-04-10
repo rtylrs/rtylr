@@ -5,7 +5,7 @@ import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 import { ShortcutsProvider } from './components/ShortcutsProvider';
 
-const AUTH_COOKIE = 'rtylr_session';
+const AUTH_COOKIE = 'token';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const [cookies] = useCookies([AUTH_COOKIE]);

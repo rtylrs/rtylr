@@ -5,7 +5,7 @@ import { getCookie } from './lib/utils';
 import { useUserStore } from './stores/userStore';
 import appRoutes from './routes/AppRoutes';
 
-const AUTH_COOKIE_NAME = 'rtylr_token';
+const AUTH_COOKIE_NAME = 'token';
 
 const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, login } = useUserStore();

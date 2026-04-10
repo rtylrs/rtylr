@@ -8,7 +8,9 @@ import { AvatarStack } from '../../components/AssigneeAvatar';
 import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Roadmap: React.FC = () => {
-  const projects = useRoadmap();
+  const { data: projects = [], isLoading } = useRoadmap();
+
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading roadmap...</div>;
 
   return (
     <div className="flex flex-col h-full">

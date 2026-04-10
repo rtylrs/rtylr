@@ -58,7 +58,7 @@ export const SearchCommand: React.FC = () => {
       { id: 'app-hr',      label: 'Launch HR',      group: 'Apps', icon: UserCheck,      action: launchApp('https://hr.rtylr.com') },
       { id: 'app-crm',     label: 'Launch CRM',     group: 'Apps', icon: Users,          action: launchApp('https://crm.rtylr.com') },
       { id: 'app-finance', label: 'Launch Finance', group: 'Apps', icon: CreditCard,     action: launchApp('https://finance.rtylr.com') },
-      { id: 'app-tracker', label: 'Launch Tracker', group: 'Apps', icon: Layers,         action: launchApp('https://tracker.rtylr.com') },
+      { id: 'app-flow', label: 'Launch Flow', group: 'Apps', icon: Layers,         action: launchApp('https://flow.rtylr.com') },
     ];
   }, [navigate, setOpen]);
 

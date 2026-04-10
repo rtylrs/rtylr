@@ -65,7 +65,7 @@ export const useRegisterRestaurant = () => {
 
   return useMutation({
     mutationFn: async (payload: RegisterPayload): Promise<AuthResponse> => {
-      const response = await api.post('/auth/create/business', payload);
+      const response = await api.post('/auth/register', payload);
       return response.data;
     },
     onMutate: () => {
@@ -98,7 +98,7 @@ export const useGoogleAuth = () => {
 
   return useMutation({
     mutationFn: async (payload: GoogleAuthPayload): Promise<AuthResponse> => {
-      const response = await api.post('/auth/create/business/google', payload);
+      const response = await api.post('/auth/register/google', payload);
       return response.data;
     },
     onMutate: () => {

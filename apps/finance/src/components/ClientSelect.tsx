@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
+import api from '../lib/api';
 
 export interface Client {
   id: string;
@@ -7,18 +8,6 @@ export interface Client {
   email?: string;
   company?: string;
 }
-
-// Mock client list. In a real app this reads from the CRM service.
-const MOCK_CLIENTS: Client[] = [
-  { id: 'c1', name: 'Acme Corporation', email: 'billing@acme.com', company: 'Acme' },
-  { id: 'c2', name: 'Globex Industries', email: 'ap@globex.com', company: 'Globex' },
-  { id: 'c3', name: 'Initech Ltd.', email: 'finance@initech.com', company: 'Initech' },
-  { id: 'c4', name: 'Umbrella LLC', email: 'pay@umbrella.com', company: 'Umbrella' },
-  { id: 'c5', name: 'Wayne Enterprises', email: 'ar@wayne.com', company: 'Wayne' },
-  { id: 'c6', name: 'Stark Industries', email: 'billing@stark.com', company: 'Stark' },
-  { id: 'c7', name: 'Wonka Inc', email: 'candy@wonka.com', company: 'Wonka' },
-  { id: 'c8', name: 'Pied Piper', email: 'richard@pp.com', company: 'Pied Piper' },
-];
 
 interface ClientSelectProps {
   value: Client | null;
@@ -28,10 +17,15 @@ interface ClientSelectProps {
 const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [clients, setClients] = useState<Client[]>([]);
+
+  useEffect(() => {
+    api.get<Client[]>('/crm/customers').then((r) => setClients(r.data ?? [])).catch(() => {});
+  }, []);
 
   const filtered = useMemo(
-    () => MOCK_CLIENTS.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())),
-    [query]
+    () => clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())),
+    [query, clients]
   );
 
   return (
@@ -118,4 +112,3 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
 };
 
 export default ClientSelect;
-export { MOCK_CLIENTS };

@@ -6,7 +6,6 @@ import {
   Zap, FileText, MessageSquare, Settings as SettingsIcon, Plus, Award,
 } from 'lucide-react';
 import { useCustomers } from '../hooks/useCustomers';
-import { mockCustomers } from '../lib/mockData';
 import { CustomerAvatar } from './crm';
 
 interface CommandItem {
@@ -23,7 +22,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
   const { data: fetchedCustomers } = useCustomers();
-  const customers = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
+  const customers = fetchedCustomers ?? [];
 
   useEffect(() => {
     if (!open) setQuery('');

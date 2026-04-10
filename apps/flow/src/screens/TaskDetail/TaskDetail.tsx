@@ -36,7 +36,7 @@ import { formatDate } from '../../lib/utils';
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const data = useTask(id);
+  const { data: task, isLoading } = useTask(id);
   const {
     updateTask,
     addComment,
@@ -49,11 +49,21 @@ const TaskDetail: React.FC = () => {
     deleteTask,
     archiveTask,
     logTime,
+    comments,
+    activity,
+    subtasks,
+    attachments,
+    timelogs,
+    projects,
   } = useFlowStore();
 
   const [tab, setTab] = useState<'activity' | 'comments'>('comments');
 
-  if (!data) {
+  if (isLoading) {
+    return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading task...</div>;
+  }
+
+  if (!task) {
     return (
       <div className="p-10 text-center">
         <p
@@ -66,11 +76,16 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const { task, project, comments, activity, subtasks, attachments, timelogs } = data;
-  const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
-  const cycle = cycles.find((c) => c.id === task.cycleId);
-  const milestone = milestones.find((m) => m.id === task.milestoneId);
-  const totalMinutes = timelogs.reduce((s, t) => s + t.minutes, 0);
+  const project = projects.find((p) => p.id === (task as any).projectId);
+  const taskComments = comments.filter((c) => c.taskId === task.id);
+  const taskActivity = activity.filter((a) => a.taskId === task.id);
+  const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);
+  const taskAttachments = attachments.filter((a) => a.taskId === task.id);
+  const taskTimelogs = timelogs.filter((t) => t.taskId === task.id);
+  const taskLabels = labels.filter((l) => (task as any).labels?.includes(l.id));
+  const cycle = cycles.find((c) => c.id === (task as any).cycleId);
+  const milestone = milestones.find((m) => m.id === (task as any).milestoneId);
+  const totalMinutes = taskTimelogs.reduce((s, t) => s + t.minutes, 0);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
   const statuses: Task['status'][] = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'];
@@ -175,7 +190,7 @@ const TaskDetail: React.FC = () => {
                 </h3>
               </div>
               <SubtaskList
-                subtasks={subtasks}
+                subtasks={taskSubtasks}
                 onToggle={toggleSubtask}
                 onAdd={(title) => addSubtask(task.id, title)}
               />
@@ -188,7 +203,7 @@ const TaskDetail: React.FC = () => {
               >
                 Attachments
               </h3>
-              <AttachmentUpload attachments={attachments} />
+              <AttachmentUpload attachments={taskAttachments} />
             </section>
 
             {/* Tabs */}
@@ -215,7 +230,7 @@ const TaskDetail: React.FC = () => {
                         color: 'var(--flow-text-dim)',
                       }}
                     >
-                      {comments.length}
+                      {taskComments.length}
                     </span>
                   )}
                 </button>
@@ -225,12 +240,12 @@ const TaskDetail: React.FC = () => {
             {tab === 'comments' && (
               <div>
                 <div className="mb-4">
-                  <CommentList comments={comments} />
+                  <CommentList comments={taskComments} />
                 </div>
                 <CommentInput onSubmit={(body) => addComment(task.id, body)} />
               </div>
             )}
-            {tab === 'activity' && <ActivityFeed entries={activity} />}
+            {tab === 'activity' && <ActivityFeed entries={taskActivity} />}
           </div>
         </motion.div>
       </div>

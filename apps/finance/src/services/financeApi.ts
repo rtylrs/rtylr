@@ -155,4 +155,70 @@ export const financeApi = {
 
   getTaxReport: () =>
     api.get<TaxReport>('/finance/tax/report').then((r) => r.data),
+
+  // Recurring Invoices
+  getRecurringInvoices: () =>
+    api.get('/finance/recurring-invoices').then((r) => r.data),
+
+  createRecurringInvoice: (data: any) =>
+    api.post('/finance/recurring-invoices', data).then((r) => r.data),
+
+  updateRecurringInvoice: (id: string, data: any) =>
+    api.post('/finance/recurring-invoices', { id, ...data }).then((r) => r.data),
+
+  // Quotes
+  getQuotes: () =>
+    api.get('/finance/quotes').then((r) => r.data),
+
+  createQuote: (data: any) =>
+    api.post('/finance/quotes', data).then((r) => r.data),
+
+  updateQuote: (id: string, data: any) =>
+    api.post('/finance/quotes', { id, ...data }).then((r) => r.data),
+
+  deleteQuote: (id: string) =>
+    api.post('/finance/quotes', { id, _action: 'delete' }).then((r) => r.data),
+
+  // Bills
+  getBills: () =>
+    api.get('/finance/bills').then((r) => r.data),
+
+  createBill: (data: any) =>
+    api.post('/finance/bills', data).then((r) => r.data),
+
+  updateBill: (id: string, data: any) =>
+    api.post('/finance/bills', { id, ...data }).then((r) => r.data),
+
+  // Bank Accounts
+  getBankAccounts: () =>
+    api.get('/finance/bank-accounts').then((r) => r.data),
+
+  createBankAccount: (data: any) =>
+    api.post('/finance/bank-accounts', data).then((r) => r.data),
+
+  // Balance Sheet
+  getBalanceSheet: () =>
+    api.get('/finance/balance-sheet').then((r) => r.data),
+
+  // Cash Flow
+  getCashFlow: () =>
+    api.get('/finance/cash-flow').then((r) => r.data),
+
+  // Chart of Accounts
+  getAccounts: () =>
+    api.get('/finance/accounts').then((r) => r.data),
+
+  createAccount: (data: any) =>
+    api.post('/finance/accounts', data).then((r) => r.data),
+
+  // Journal
+  getJournal: () =>
+    api.get('/finance/journal').then((r) => r.data),
+
+  createJournalEntry: (data: any) =>
+    api.post('/finance/journal', data).then((r) => r.data),
+
+  // Expense detail
+  getExpenseDetail: (id: string) =>
+    api.get('/finance/expenses', { params: { id } }).then((r) => r.data),
 };
