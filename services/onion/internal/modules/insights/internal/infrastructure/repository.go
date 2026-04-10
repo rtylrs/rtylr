@@ -3,75 +3,98 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 type InsightsData struct {
-	TotalTasks      int64
-	CompletedTasks  int64
-	InProgressTasks int64
-	OverdueTasks    int64
+	TotalTasks       int64
+	CompletedTasks   int64
+	InProgressTasks  int64
+	OverdueTasks     int64
 	AvgCycleTimeDays float64
-	TasksThisWeek   int64
-	TasksLastWeek   int64
+	TasksThisWeek    int64
+	TasksLastWeek    int64
 }
 
 func (r *Repository) GetInsights(ctx context.Context, ownerID int64, workspaceID *int64) (InsightsData, error) {
 	var data InsightsData
 
-	query := `SELECT
-		COUNT(*) as total_tasks,
-		COUNT(CASE WHEN status = 'done' THEN 1 END) as completed_tasks,
-		COUNT(CASE WHEN status = 'in_progress' THEN 1 END) as in_progress_tasks,
-		COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) as overdue_tasks,
-		COALESCE(AVG(CASE WHEN status = 'done' AND completed_at IS NOT NULL THEN TIMESTAMPDIFF(HOUR, created_at, completed_at) / 24.0 END), 0) as avg_cycle_time_days
-	FROM flow_tasks WHERE owner_id = ?`
-	args := []interface{}{ownerID}
-
 	if workspaceID != nil {
-		query += " AND workspace_id = ?"
-		args = append(args, *workspaceID)
-	}
-
-	err := r.pool.QueryRowContext(ctx, query, args...).Scan(
-		&data.TotalTasks, &data.CompletedTasks, &data.InProgressTasks,
-		&data.OverdueTasks, &data.AvgCycleTimeDays,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("GetInsights failed", logger.Error(err))
-		return InsightsData{}, err
+		row, err := r.queries.GetInsightsByWorkspace(ctx, sqlc.GetInsightsByWorkspaceParams{
+			OwnerID:     ownerID,
+			WorkspaceID: *workspaceID,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsights failed", logger.Error(err))
+			return InsightsData{}, err
+		}
+		data.TotalTasks = row.TotalTasks
+		data.CompletedTasks = row.CompletedTasks
+		data.InProgressTasks = row.InProgressTasks
+		data.OverdueTasks = row.OverdueTasks
+		data.AvgCycleTimeDays = interfaceToFloat(row.AvgCycleTimeDays)
+	} else {
+		row, err := r.queries.GetInsightsByOwner(ctx, ownerID)
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsights failed", logger.Error(err))
+			return InsightsData{}, err
+		}
+		data.TotalTasks = row.TotalTasks
+		data.CompletedTasks = row.CompletedTasks
+		data.InProgressTasks = row.InProgressTasks
+		data.OverdueTasks = row.OverdueTasks
+		data.AvgCycleTimeDays = interfaceToFloat(row.AvgCycleTimeDays)
 	}
 
 	weekStart := time.Now().AddDate(0, 0, -int(time.Now().Weekday()))
 	lastWeekStart := weekStart.AddDate(0, 0, -7)
 
-	throughputQuery := `SELECT
-		COUNT(CASE WHEN completed_at >= ? THEN 1 END),
-		COUNT(CASE WHEN completed_at >= ? AND completed_at < ? THEN 1 END)
-	FROM flow_tasks WHERE owner_id = ? AND status = 'done'`
-	throughputArgs := []interface{}{weekStart, lastWeekStart, weekStart, ownerID}
-
 	if workspaceID != nil {
-		throughputQuery += " AND workspace_id = ?"
-		throughputArgs = append(throughputArgs, *workspaceID)
-	}
-
-	err = r.pool.QueryRowContext(ctx, throughputQuery, throughputArgs...).Scan(
-		&data.TasksThisWeek, &data.TasksLastWeek,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("GetInsights throughput failed", logger.Error(err))
+		tp, err := r.queries.GetThroughputByWorkspace(ctx, sqlc.GetThroughputByWorkspaceParams{
+			CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
+			CompletedAt_2: sql.NullTime{Time: lastWeekStart, Valid: true},
+			CompletedAt_3: sql.NullTime{Time: weekStart, Valid: true},
+			OwnerID:       ownerID,
+			WorkspaceID:   *workspaceID,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsights throughput failed", logger.Error(err))
+		} else {
+			data.TasksThisWeek = tp.TasksThisWeek
+			data.TasksLastWeek = tp.TasksLastWeek
+		}
+	} else {
+		tp, err := r.queries.GetThroughputByOwner(ctx, sqlc.GetThroughputByOwnerParams{
+			CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
+			CompletedAt_2: sql.NullTime{Time: lastWeekStart, Valid: true},
+			CompletedAt_3: sql.NullTime{Time: weekStart, Valid: true},
+			OwnerID:       ownerID,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsights throughput failed", logger.Error(err))
+		} else {
+			data.TasksThisWeek = tp.TasksThisWeek
+			data.TasksLastWeek = tp.TasksLastWeek
+		}
 	}
 
 	return data, nil
@@ -86,40 +109,44 @@ type WorkloadEntry struct {
 }
 
 func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64, workspaceID *int64) ([]WorkloadEntry, error) {
-	query := `SELECT
-		assignee_id,
-		COUNT(CASE WHEN status = 'todo' THEN 1 END) as open_tasks,
-		COUNT(CASE WHEN status = 'in_progress' THEN 1 END) as in_progress_tasks,
-		COUNT(CASE WHEN status = 'done' THEN 1 END) as completed_tasks,
-		COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) as overdue_tasks
-	FROM flow_tasks
-	WHERE owner_id = ? AND assignee_id IS NOT NULL`
-	args := []interface{}{ownerID}
-
 	if workspaceID != nil {
-		query += " AND workspace_id = ?"
-		args = append(args, *workspaceID)
+		rows, err := r.queries.GetTeamWorkloadByWorkspace(ctx, sqlc.GetTeamWorkloadByWorkspaceParams{
+			OwnerID:     ownerID,
+			WorkspaceID: *workspaceID,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("GetTeamWorkload failed", logger.Error(err))
+			return nil, err
+		}
+		var entries []WorkloadEntry
+		for _, row := range rows {
+			entries = append(entries, WorkloadEntry{
+				UserID:          row.AssigneeID.Int64,
+				OpenTasks:       row.OpenTasks,
+				InProgressTasks: row.InProgressTasks,
+				CompletedTasks:  row.CompletedTasks,
+				OverdueTasks:    row.OverdueTasks,
+			})
+		}
+		return entries, nil
 	}
 
-	query += " GROUP BY assignee_id ORDER BY (open_tasks + in_progress_tasks) DESC"
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetTeamWorkloadByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetTeamWorkload failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
-
 	var entries []WorkloadEntry
-	for rows.Next() {
-		var e WorkloadEntry
-		if scanErr := rows.Scan(&e.UserID, &e.OpenTasks, &e.InProgressTasks, &e.CompletedTasks, &e.OverdueTasks); scanErr != nil {
-			logger.Ctx(ctx).Error("GetTeamWorkload scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-		entries = append(entries, e)
+	for _, row := range rows {
+		entries = append(entries, WorkloadEntry{
+			UserID:          row.AssigneeID.Int64,
+			OpenTasks:       row.OpenTasks,
+			InProgressTasks: row.InProgressTasks,
+			CompletedTasks:  row.CompletedTasks,
+			OverdueTasks:    row.OverdueTasks,
+		})
 	}
-	return entries, rows.Err()
+	return entries, nil
 }
 
 type RoadmapProject struct {
@@ -133,44 +160,83 @@ type RoadmapProject struct {
 }
 
 func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64, workspaceID *int64) ([]RoadmapProject, error) {
-	query := `SELECT
-		p.id, p.name, p.status, p.start_date, p.due_date,
-		COUNT(t.id) as total_tasks,
-		COUNT(CASE WHEN t.status = 'done' THEN 1 END) as completed_tasks
-	FROM flow_projects p
-	LEFT JOIN flow_tasks t ON t.project_id = p.id
-	WHERE p.owner_id = ? AND p.status != 'archived'`
-	args := []interface{}{ownerID}
-
 	if workspaceID != nil {
-		query += " AND p.workspace_id = ?"
-		args = append(args, *workspaceID)
+		rows, err := r.queries.GetRoadmapByWorkspace(ctx, sqlc.GetRoadmapByWorkspaceParams{
+			OwnerID:     ownerID,
+			WorkspaceID: *workspaceID,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("GetRoadmap failed", logger.Error(err))
+			return nil, err
+		}
+		return roadmapFromWorkspaceRows(rows), nil
 	}
 
-	query += " GROUP BY p.id, p.name, p.status, p.start_date, p.due_date ORDER BY p.start_date ASC, p.created_at ASC"
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetRoadmapByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetRoadmap failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
+	return roadmapFromOwnerRows(rows), nil
+}
 
+func roadmapFromOwnerRows(rows []sqlc.GetRoadmapByOwnerRow) []RoadmapProject {
 	var projects []RoadmapProject
-	for rows.Next() {
-		var rp RoadmapProject
-		var startDate, dueDate sql.NullTime
-		if scanErr := rows.Scan(&rp.ProjectID, &rp.ProjectName, &rp.Status, &startDate, &dueDate, &rp.TotalTasks, &rp.CompletedTasks); scanErr != nil {
-			logger.Ctx(ctx).Error("GetRoadmap scan failed", logger.Error(scanErr))
-			return nil, scanErr
+	for _, row := range rows {
+		rp := RoadmapProject{
+			ProjectID:      row.ID,
+			ProjectName:    row.Name,
+			Status:         string(row.Status.FlowProjectsStatus),
+			TotalTasks:     row.TotalTasks,
+			CompletedTasks: row.CompletedTasks,
 		}
-		if startDate.Valid {
-			rp.StartDate = &startDate.Time
+		if row.StartDate.Valid {
+			rp.StartDate = &row.StartDate.Time
 		}
-		if dueDate.Valid {
-			rp.DueDate = &dueDate.Time
+		if row.DueDate.Valid {
+			rp.DueDate = &row.DueDate.Time
 		}
 		projects = append(projects, rp)
 	}
-	return projects, rows.Err()
+	return projects
+}
+
+func roadmapFromWorkspaceRows(rows []sqlc.GetRoadmapByWorkspaceRow) []RoadmapProject {
+	var projects []RoadmapProject
+	for _, row := range rows {
+		rp := RoadmapProject{
+			ProjectID:      row.ID,
+			ProjectName:    row.Name,
+			Status:         string(row.Status.FlowProjectsStatus),
+			TotalTasks:     row.TotalTasks,
+			CompletedTasks: row.CompletedTasks,
+		}
+		if row.StartDate.Valid {
+			rp.StartDate = &row.StartDate.Time
+		}
+		if row.DueDate.Valid {
+			rp.DueDate = &row.DueDate.Time
+		}
+		projects = append(projects, rp)
+	}
+	return projects
+}
+
+func interfaceToFloat(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case []byte:
+		f, _ := strconv.ParseFloat(string(val), 64)
+		return f
+	case string:
+		f, _ := strconv.ParseFloat(val, 64)
+		return f
+	case float64:
+		return val
+	default:
+		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
+		return f
+	}
 }

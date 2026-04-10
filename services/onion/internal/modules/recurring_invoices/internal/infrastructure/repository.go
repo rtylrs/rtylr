@@ -3,61 +3,60 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
+	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	return &Repository{queries: sqlc.New(dbclient.Pool())}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.RecurringInvoice, error) {
-	query := `
-		SELECT id, owner_id, template_invoice_id, frequency, next_invoice_date, end_date, is_active, created_at
-		FROM finance_recurring_invoices
-		WHERE owner_id = ?
-		ORDER BY next_invoice_date ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListRecurringInvoices(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list recurring invoices", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []domain.RecurringInvoice
-	for rows.Next() {
-		var item domain.RecurringInvoice
-		if err := item.FromRow(rows); err != nil {
-			return nil, err
+	items := make([]domain.RecurringInvoice, 0, len(rows))
+	for _, row := range rows {
+		ri := domain.RecurringInvoice{
+			ID:                row.ID,
+			OwnerID:           row.OwnerID,
+			TemplateInvoiceID: row.TemplateInvoiceID,
+			Frequency:         string(row.Frequency),
+			NextInvoiceDate:   row.NextInvoiceDate,
+			IsActive:          nullBool(row.IsActive),
+			CreatedAt:         nullTime(row.CreatedAt),
 		}
-		items = append(items, item)
+		if row.EndDate.Valid {
+			ri.EndDate = row.EndDate.Time
+		}
+		items = append(items, ri)
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.RecurringInvoiceInput) (int64, error) {
-	query := `
-		INSERT INTO finance_recurring_invoices
-		(owner_id, template_invoice_id, frequency, next_invoice_date, end_date, is_active)
-		VALUES (?, ?, ?, ?, ?, ?)`
+	nextDate, _ := time.Parse("2006-01-02", input.NextInvoiceDate)
 
-	var endDate sql.NullString
-	if input.EndDate != "" {
-		endDate = sql.NullString{String: input.EndDate, Valid: true}
-	}
-
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID, input.TemplateInvoiceID, input.Frequency,
-		input.NextInvoiceDate, endDate, input.IsActive,
-	)
+	res, err := r.queries.CreateRecurringInvoice(ctx, sqlc.CreateRecurringInvoiceParams{
+		OwnerID:           ownerID,
+		TemplateInvoiceID: input.TemplateInvoiceID,
+		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
+		NextInvoiceDate:   nextDate,
+		EndDate:           nullTimeStr(input.EndDate),
+		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create recurring invoice", logger.Error(err))
 		return 0, err
@@ -67,24 +66,50 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rec
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error {
-	query := `
-		UPDATE finance_recurring_invoices
-		SET template_invoice_id = ?, frequency = ?, next_invoice_date = ?, end_date = ?, is_active = ?
-		WHERE id = ? AND owner_id = ?`
+	nextDate, _ := time.Parse("2006-01-02", input.NextInvoiceDate)
 
-	var endDate sql.NullString
-	if input.EndDate != "" {
-		endDate = sql.NullString{String: input.EndDate, Valid: true}
-	}
-
-	_, err := r.pool.ExecContext(ctx, query,
-		input.TemplateInvoiceID, input.Frequency, input.NextInvoiceDate,
-		endDate, input.IsActive, id, ownerID,
-	)
+	err := r.queries.UpdateRecurringInvoice(ctx, sqlc.UpdateRecurringInvoiceParams{
+		TemplateInvoiceID: input.TemplateInvoiceID,
+		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
+		NextInvoiceDate:   nextDate,
+		EndDate:           nullTimeStr(input.EndDate),
+		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:                id,
+		OwnerID:           ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update recurring invoice", logger.Error(err))
 		return err
 	}
 
 	return nil
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
+
+func nullBool(b sql.NullBool) bool {
+	if b.Valid {
+		return b.Bool
+	}
+	return false
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
+func nullTimeStr(s string) sql.NullTime {
+	if s == "" {
+		return sql.NullTime{}
+	}
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: t, Valid: true}
 }

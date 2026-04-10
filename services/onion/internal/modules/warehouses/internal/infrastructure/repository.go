@@ -5,78 +5,102 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
+	"github.com/voxire/onion/internal/modules/warehouses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
 	pool := dbclient.Pool()
 
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
 func (r *Repository) ListWarehouses(ctx context.Context, ownerID int64) ([]domain.Warehouse, error) {
-	query := `
-		SELECT id, owner_id, name, address, city, country, manager_name,
-		       capacity, is_default, is_active, created_at, updated_at
-		FROM erp_warehouses
-		WHERE owner_id = ?
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListWarehouses(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list warehouses", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var warehouses []domain.Warehouse
 
-	for rows.Next() {
+	for _, row := range rows {
 		var w domain.Warehouse
-		if err := w.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan warehouse row", logger.Error(err))
+		w.ID = row.ID
+		w.OwnerID = row.OwnerID
+		w.Name = row.Name
 
-			return nil, err
+		if row.Address.Valid {
+			w.Address = row.Address.String
+		}
+
+		if row.City.Valid {
+			w.City = row.City.String
+		}
+
+		if row.Country.Valid {
+			w.Country = row.Country.String
+		}
+
+		if row.ManagerName.Valid {
+			w.ManagerName = row.ManagerName.String
+		}
+
+		if row.Capacity.Valid {
+			w.Capacity = row.Capacity.Int64
+		}
+
+		if row.IsDefault.Valid {
+			w.IsDefault = row.IsDefault.Bool
+		}
+
+		if row.IsActive.Valid {
+			w.IsActive = row.IsActive.Bool
+		}
+
+		if row.CreatedAt.Valid {
+			w.CreatedAt = row.CreatedAt.Time
+		}
+
+		if row.UpdatedAt.Valid {
+			w.UpdatedAt = row.UpdatedAt.Time
 		}
 
 		warehouses = append(warehouses, w)
 	}
 
-	return warehouses, rows.Err()
+	return warehouses, nil
 }
 
 func (r *Repository) CreateWarehouse(ctx context.Context, ownerID int64, input domain.WarehouseInput) (int64, error) {
-	query := `
-		INSERT INTO erp_warehouses (owner_id, name, address, city, country, manager_name, capacity, is_default, is_active)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		input.Name,
-		nullString(input.Address),
-		nullString(input.City),
-		nullString(input.Country),
-		nullString(input.ManagerName),
-		nullInt64(input.Capacity),
-		input.IsDefault,
-		input.IsActive,
-	)
+	result, err := r.queries.CreateWarehouse(ctx, sqlc.CreateWarehouseParams{
+		OwnerID:     ownerID,
+		Name:        input.Name,
+		Address:     nullString(input.Address),
+		City:        nullString(input.City),
+		Country:     nullString(input.Country),
+		ManagerName: nullString(input.ManagerName),
+		Capacity:    nullInt64(input.Capacity),
+		IsDefault:   sql.NullBool{Bool: input.IsDefault, Valid: true},
+		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create warehouse", logger.Error(err))
 
 		return 0, err
 	}
 
-	id, err := res.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
@@ -85,24 +109,18 @@ func (r *Repository) CreateWarehouse(ctx context.Context, ownerID int64, input d
 }
 
 func (r *Repository) UpdateWarehouse(ctx context.Context, ownerID, id int64, input domain.WarehouseInput) error {
-	query := `
-		UPDATE erp_warehouses
-		SET name = ?, address = ?, city = ?, country = ?, manager_name = ?,
-		    capacity = ?, is_default = ?, is_active = ?
-		WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query,
-		input.Name,
-		nullString(input.Address),
-		nullString(input.City),
-		nullString(input.Country),
-		nullString(input.ManagerName),
-		nullInt64(input.Capacity),
-		input.IsDefault,
-		input.IsActive,
-		ownerID,
-		id,
-	)
+	err := r.queries.UpdateWarehouse(ctx, sqlc.UpdateWarehouseParams{
+		Name:        input.Name,
+		Address:     nullString(input.Address),
+		City:        nullString(input.City),
+		Country:     nullString(input.Country),
+		ManagerName: nullString(input.ManagerName),
+		Capacity:    nullInt64(input.Capacity),
+		IsDefault:   sql.NullBool{Bool: input.IsDefault, Valid: true},
+		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
+		OwnerID:     ownerID,
+		ID:          id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update warehouse", logger.Error(err))
 
@@ -113,9 +131,10 @@ func (r *Repository) UpdateWarehouse(ctx context.Context, ownerID, id int64, inp
 }
 
 func (r *Repository) DeleteWarehouse(ctx context.Context, ownerID, id int64) error {
-	query := `DELETE FROM erp_warehouses WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, ownerID, id)
+	err := r.queries.DeleteWarehouse(ctx, sqlc.DeleteWarehouseParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete warehouse", logger.Error(err))
 

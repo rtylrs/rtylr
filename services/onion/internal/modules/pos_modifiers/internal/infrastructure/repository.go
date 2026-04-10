@@ -3,49 +3,58 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Modifier, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, price_delta, COALESCE(group_name,''), is_required, created_at, updated_at
-		 FROM pos_modifiers WHERE owner_id = ? ORDER BY group_name, name`, ownerID,
-	)
+	rows, err := r.queries.ListModifiersByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list modifiers", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.Modifier, 0)
-	for rows.Next() {
-		var m domain.Modifier
-		if err := rows.Scan(&m.ID, &m.OwnerID, &m.Name, &m.PriceDelta, &m.GroupName, &m.IsRequired, &m.CreatedAt, &m.UpdatedAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan modifier", logger.Error(err))
-			return nil, err
-		}
-		items = append(items, m)
+	items := make([]domain.Modifier, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, domain.Modifier{
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			Name:       row.Name,
+			PriceDelta: decimalToFloat(row.PriceDelta),
+			GroupName:  row.GroupName.String,
+			IsRequired: row.IsRequired.Bool,
+			CreatedAt:  row.CreatedAt.Time,
+			UpdatedAt:  row.UpdatedAt.Time,
+		})
 	}
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ModifierInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO pos_modifiers (owner_id, name, price_delta, group_name, is_required)
-		 VALUES (?, ?, ?, ?, ?)`,
-		ownerID, input.Name, input.PriceDelta, nullString(input.GroupName), input.IsRequired,
-	)
+	result, err := r.queries.CreateModifier(ctx, sqlc.CreateModifierParams{
+		OwnerID:    ownerID,
+		Name:       input.Name,
+		PriceDelta: floatToDecimal(input.PriceDelta),
+		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
+		IsRequired: sql.NullBool{Bool: input.IsRequired, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create modifier", logger.Error(err))
 		return 0, err
@@ -54,11 +63,14 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Mod
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ModifierInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE pos_modifiers SET name = ?, price_delta = ?, group_name = ?, is_required = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, input.PriceDelta, nullString(input.GroupName), input.IsRequired, id, ownerID,
-	)
+	result, err := r.queries.UpdateModifier(ctx, sqlc.UpdateModifierParams{
+		Name:       input.Name,
+		PriceDelta: floatToDecimal(input.PriceDelta),
+		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
+		IsRequired: sql.NullBool{Bool: input.IsRequired, Valid: true},
+		ID:         id,
+		OwnerID:    ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update modifier", logger.Error(err))
 		return err
@@ -74,9 +86,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM pos_modifiers WHERE id = ? AND owner_id = ?", id, ownerID,
-	)
+	result, err := r.queries.DeleteModifier(ctx, sqlc.DeleteModifierParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete modifier", logger.Error(err))
 		return err
@@ -91,6 +104,14 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
+func decimalToFloat(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func floatToDecimal(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
 }

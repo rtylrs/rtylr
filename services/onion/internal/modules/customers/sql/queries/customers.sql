@@ -1,0 +1,190 @@
+-- name: GetCustomerByID :one
+SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+       loyalty_tier, tags, notes, is_active, created_at, updated_at
+FROM crm_customers WHERE id = ? AND owner_id = ?;
+
+-- name: CreateCustomer :execresult
+INSERT INTO crm_customers
+  (owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+   address, city, country, tags, notes, loyalty_tier, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', TRUE);
+
+-- name: UpdateCustomer :execresult
+UPDATE crm_customers
+SET first_name = ?, last_name = ?, email = ?, phone = ?, date_of_birth = ?,
+    gender = ?, address = ?, city = ?, country = ?, tags = ?, notes = ?, is_active = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteCustomer :execresult
+DELETE FROM crm_customers WHERE id = ? AND owner_id = ?;
+
+-- name: UpdateCustomerLoyalty :exec
+UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ?;
+
+-- name: RecordVisit :exec
+UPDATE crm_customers
+SET visit_count = visit_count + 1,
+    last_visit_at = NOW(),
+    total_spent = total_spent + ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: CountCustomers :one
+SELECT COUNT(*) FROM crm_customers WHERE owner_id = ?;
+
+-- name: ListCustomers :many
+SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+       loyalty_tier, tags, notes, is_active, created_at, updated_at
+FROM crm_customers WHERE owner_id = ?
+ORDER BY created_at DESC LIMIT ? OFFSET ?;
+
+-- name: CountActiveCustomers :one
+SELECT COUNT(*) FROM crm_customers WHERE owner_id = ? AND is_active = TRUE;
+
+-- name: CountNewCustomersThisMonth :one
+SELECT COUNT(*) FROM crm_customers
+WHERE owner_id = ? AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW());
+
+-- name: CountActiveLoyaltyMembers :one
+SELECT COUNT(*) FROM crm_customers WHERE owner_id = ? AND loyalty_points > 0 AND is_active = TRUE;
+
+-- name: ListTopCustomers :many
+SELECT id, first_name, last_name, email, total_spent, loyalty_points, loyalty_tier
+FROM crm_customers WHERE owner_id = ? AND is_active = TRUE
+ORDER BY total_spent DESC LIMIT 10;
+
+-- name: ListActiveCustomers :many
+SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+       loyalty_tier, tags, notes, is_active, created_at, updated_at
+FROM crm_customers WHERE owner_id = ? AND is_active = TRUE
+ORDER BY created_at DESC LIMIT ? OFFSET ?;
+
+-- name: UpdateCustomerMergeStats :exec
+UPDATE crm_customers
+SET loyalty_points = ?, total_spent = ?, visit_count = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: MigrateLoyaltyTransactions :exec
+UPDATE crm_loyalty_transactions SET customer_id = ? WHERE customer_id = ? AND owner_id = ?;
+
+-- name: MigrateTimeline :exec
+UPDATE crm_customer_timeline SET customer_id = ? WHERE customer_id = ? AND owner_id = ?;
+
+-- name: CountLoyaltyTransactions :one
+SELECT COUNT(*) FROM crm_loyalty_transactions WHERE owner_id = ? AND customer_id = ?;
+
+-- name: ListLoyaltyTransactions :many
+SELECT id, owner_id, customer_id, type, points, balance_before, balance_after,
+       description, reference_id, reference_type, created_at
+FROM crm_loyalty_transactions
+WHERE owner_id = ? AND customer_id = ?
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CreateLoyaltyTransaction :exec
+INSERT INTO crm_loyalty_transactions
+  (owner_id, customer_id, type, points, balance_before, balance_after,
+   description, reference_id, reference_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetLoyaltyConfig :one
+SELECT id, owner_id, is_enabled, points_per_currency_unit, currency_per_point,
+       bronze_min, silver_min, gold_min, platinum_min,
+       bronze_discount_pct, silver_discount_pct, gold_discount_pct, platinum_discount_pct,
+       points_expiry_days, updated_at
+FROM crm_loyalty_config WHERE owner_id = ?;
+
+-- name: UpsertLoyaltyConfig :exec
+INSERT INTO crm_loyalty_config
+  (owner_id, is_enabled, points_per_currency_unit, currency_per_point,
+   bronze_min, silver_min, gold_min, platinum_min,
+   bronze_discount_pct, silver_discount_pct, gold_discount_pct, platinum_discount_pct,
+   points_expiry_days)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  is_enabled = VALUES(is_enabled),
+  points_per_currency_unit = VALUES(points_per_currency_unit),
+  currency_per_point = VALUES(currency_per_point),
+  bronze_min = VALUES(bronze_min),
+  silver_min = VALUES(silver_min),
+  gold_min = VALUES(gold_min),
+  platinum_min = VALUES(platinum_min),
+  bronze_discount_pct = VALUES(bronze_discount_pct),
+  silver_discount_pct = VALUES(silver_discount_pct),
+  gold_discount_pct = VALUES(gold_discount_pct),
+  platinum_discount_pct = VALUES(platinum_discount_pct),
+  points_expiry_days = VALUES(points_expiry_days);
+
+-- name: ListSegments :many
+SELECT id, owner_id, name, description, rules, customer_count, last_calculated_at, created_at, updated_at
+FROM crm_segments WHERE owner_id = ? ORDER BY created_at DESC;
+
+-- name: GetSegmentByID :one
+SELECT id, owner_id, name, description, rules, customer_count, last_calculated_at, created_at, updated_at
+FROM crm_segments WHERE id = ? AND owner_id = ?;
+
+-- name: CreateSegment :execresult
+INSERT INTO crm_segments (owner_id, name, description, rules) VALUES (?, ?, ?, ?);
+
+-- name: UpdateSegment :execresult
+UPDATE crm_segments SET name = ?, description = ?, rules = ? WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteSegment :execresult
+DELETE FROM crm_segments WHERE id = ? AND owner_id = ?;
+
+-- name: ListCampaigns :many
+SELECT id, owner_id, name, description, channel, status, segment_id, subject,
+       content, scheduled_at, sent_at, audience_count, sent_count, delivered_count,
+       opened_count, clicked_count, created_at, updated_at
+FROM crm_campaigns WHERE owner_id = ? ORDER BY created_at DESC;
+
+-- name: GetCampaignByID :one
+SELECT id, owner_id, name, description, channel, status, segment_id, subject,
+       content, scheduled_at, sent_at, audience_count, sent_count, delivered_count,
+       opened_count, clicked_count, created_at, updated_at
+FROM crm_campaigns WHERE id = ? AND owner_id = ?;
+
+-- name: CreateCampaign :execresult
+INSERT INTO crm_campaigns
+  (owner_id, name, description, channel, segment_id, subject, content, scheduled_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateCampaign :execresult
+UPDATE crm_campaigns
+SET name = ?, description = ?, channel = ?, segment_id = ?, subject = ?,
+    content = ?, scheduled_at = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: UpdateCampaignStatus :execresult
+UPDATE crm_campaigns SET status = ? WHERE id = ? AND owner_id = ?;
+
+-- name: GetCampaignSendStats :one
+SELECT
+    COALESCE(SUM(CASE WHEN status = 'bounced' THEN 1 ELSE 0 END), 0) AS bounced_count,
+    COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) AS failed_count
+FROM crm_campaign_sends WHERE campaign_id = ?;
+
+-- name: GetCustomerTimeline :many
+SELECT id, owner_id, customer_id, type, description, metadata, created_at
+FROM crm_customer_timeline
+WHERE owner_id = ? AND customer_id = ?
+ORDER BY created_at DESC
+LIMIT 100;
+
+-- name: InsertTimelineEntry :exec
+INSERT INTO crm_customer_timeline (owner_id, customer_id, type, description, metadata)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: ListLoyaltyTiers :many
+SELECT id, owner_id, name, min_points, discount_pct, perks, sort_order, created_at, updated_at
+FROM crm_loyalty_tiers WHERE owner_id = ? ORDER BY sort_order ASC;
+
+-- name: CreateLoyaltyTier :execresult
+INSERT INTO crm_loyalty_tiers (owner_id, name, min_points, discount_pct, perks, sort_order)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: UpdateLoyaltyTier :execresult
+UPDATE crm_loyalty_tiers SET name = ?, min_points = ?, discount_pct = ?, perks = ?, sort_order = ?
+WHERE id = ? AND owner_id = ?;

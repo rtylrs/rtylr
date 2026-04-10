@@ -6,55 +6,71 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/cycles/internal/domain"
+	"github.com/voxire/onion/internal/modules/cycles/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64, workspaceID *int64) ([]domain.Cycle, error) {
-	query := `SELECT id, owner_id, workspace_id, name, start_date, end_date, status, created_at, updated_at
-	          FROM flow_cycles WHERE owner_id = ?`
-	args := []interface{}{ownerID}
+	var rows []sqlc.FlowCycle
+	var err error
 
 	if workspaceID != nil {
-		query += " AND workspace_id = ?"
-		args = append(args, *workspaceID)
+		rows, err = r.queries.ListCyclesByWorkspace(ctx, sqlc.ListCyclesByWorkspaceParams{
+			OwnerID:     ownerID,
+			WorkspaceID: *workspaceID,
+		})
+	} else {
+		rows, err = r.queries.ListCyclesByOwner(ctx, ownerID)
 	}
-
-	query += " ORDER BY start_date ASC, created_at ASC"
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list cycles", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	cycles := make([]domain.Cycle, 0)
-	for rows.Next() {
-		c, scanErr := scanCycle(rows)
-		if scanErr != nil {
-			return nil, scanErr
+	cycles := make([]domain.Cycle, 0, len(rows))
+	for _, row := range rows {
+		c := domain.Cycle{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			WorkspaceID: row.WorkspaceID,
+			Name:        row.Name,
+			Status:      string(row.Status.FlowCyclesStatus),
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+		}
+		if row.StartDate.Valid {
+			c.StartDate = &row.StartDate.Time
+		}
+		if row.EndDate.Valid {
+			c.EndDate = &row.EndDate.Time
 		}
 		cycles = append(cycles, c)
 	}
-	return cycles, rows.Err()
+	return cycles, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.CycleInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_cycles (owner_id, workspace_id, name, start_date, end_date)
-		 VALUES (?, ?, ?, ?, ?)`,
-		input.OwnerID, input.WorkspaceID, input.Name,
-		nullableTime(input.StartDate), nullableTime(input.EndDate),
-	)
+	result, err := r.queries.CreateCycle(ctx, sqlc.CreateCycleParams{
+		OwnerID:     input.OwnerID,
+		WorkspaceID: input.WorkspaceID,
+		Name:        input.Name,
+		StartDate:   nullTimePtrToSql(input.StartDate),
+		EndDate:     nullTimePtrToSql(input.EndDate),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create cycle", logger.Error(err))
 		return 0, err
@@ -67,12 +83,14 @@ func (r *Repository) Update(ctx context.Context, input domain.CycleUpdateInput) 
 	if status == "" {
 		status = "upcoming"
 	}
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_cycles SET name = ?, start_date = ?, end_date = ?, status = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, nullableTime(input.StartDate), nullableTime(input.EndDate),
-		status, input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateCycle(ctx, sqlc.UpdateCycleParams{
+		Name:      input.Name,
+		StartDate: nullTimePtrToSql(input.StartDate),
+		EndDate:   nullTimePtrToSql(input.EndDate),
+		Status:    sqlc.NullFlowCyclesStatus{FlowCyclesStatus: sqlc.FlowCyclesStatus(status), Valid: true},
+		ID:        input.ID,
+		OwnerID:   input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update cycle", logger.Error(err))
 		return err
@@ -87,30 +105,9 @@ func (r *Repository) Update(ctx context.Context, input domain.CycleUpdateInput) 
 	return nil
 }
 
-type cycleScanner interface {
-	Scan(dest ...any) error
-}
-
-func scanCycle(row cycleScanner) (domain.Cycle, error) {
-	var c domain.Cycle
-	var startDate, endDate sql.NullTime
-
-	err := row.Scan(&c.ID, &c.OwnerID, &c.WorkspaceID, &c.Name, &startDate, &endDate, &c.Status, &c.CreatedAt, &c.UpdatedAt)
-	if err != nil {
-		return domain.Cycle{}, err
+func nullTimePtrToSql(v *time.Time) sql.NullTime {
+	if v == nil {
+		return sql.NullTime{}
 	}
-	if startDate.Valid {
-		c.StartDate = &startDate.Time
-	}
-	if endDate.Valid {
-		c.EndDate = &endDate.Time
-	}
-	return c, nil
-}
-
-func nullableTime(t *time.Time) interface{} {
-	if t == nil {
-		return nil
-	}
-	return *t
+	return sql.NullTime{Time: *v, Valid: true}
 }

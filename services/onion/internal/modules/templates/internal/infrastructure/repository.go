@@ -3,57 +3,51 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"encoding/json"
 
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
+	"github.com/voxire/onion/internal/modules/templates/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Template, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, type, subject, body, variables, is_active, created_at, updated_at
-		 FROM crm_templates WHERE owner_id = ? ORDER BY created_at DESC`, ownerID,
-	)
+	rows, err := r.queries.ListTemplates(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list templates", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.Template, 0)
+	items := make([]domain.Template, 0, len(rows))
 
-	for rows.Next() {
-		t, scanErr := scanTemplate(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-
-		items = append(items, t)
+	for _, row := range rows {
+		items = append(items, templateFromRow(row))
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.TemplateInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_templates
-		   (owner_id, name, type, subject, body, variables, is_active)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		input.OwnerID, input.Name, input.Type, input.Subject,
-		input.Body, string(input.Variables), input.IsActive,
-	)
+	result, err := r.queries.CreateTemplate(ctx, sqlc.CreateTemplateParams{
+		OwnerID:   input.OwnerID,
+		Name:      input.Name,
+		Type:      sqlc.CrmTemplatesType(input.Type),
+		Subject:   sql.NullString{String: input.Subject, Valid: input.Subject != ""},
+		Body:      input.Body,
+		Variables: json.RawMessage(input.Variables),
+		IsActive:  sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create template", logger.Error(err))
 
@@ -64,14 +58,16 @@ func (r *Repository) Create(ctx context.Context, input domain.TemplateInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TemplateUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE crm_templates
-		 SET name = ?, type = ?, subject = ?, body = ?, variables = ?, is_active = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, input.Type, input.Subject, input.Body,
-		string(input.Variables), input.IsActive,
-		input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateTemplate(ctx, sqlc.UpdateTemplateParams{
+		Name:      input.Name,
+		Type:      sqlc.CrmTemplatesType(input.Type),
+		Subject:   sql.NullString{String: input.Subject, Valid: input.Subject != ""},
+		Body:      input.Body,
+		Variables: json.RawMessage(input.Variables),
+		IsActive:  sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:        input.ID,
+		OwnerID:   input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update template", logger.Error(err))
 
@@ -91,10 +87,10 @@ func (r *Repository) Update(ctx context.Context, input domain.TemplateUpdateInpu
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, templateID int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM crm_templates WHERE id = ? AND owner_id = ?",
-		templateID, ownerID,
-	)
+	result, err := r.queries.DeleteTemplate(ctx, sqlc.DeleteTemplateParams{
+		ID:      templateID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete template", logger.Error(err))
 
@@ -113,32 +109,24 @@ func (r *Repository) Delete(ctx context.Context, ownerID, templateID int64) erro
 	return nil
 }
 
-type templateScanner interface {
-	Scan(dest ...interface{}) error
-}
-
-func scanTemplate(s templateScanner) (domain.Template, error) {
-	var t domain.Template
-	var subject, variables sql.NullString
-
-	if err := s.Scan(
-		&t.ID, &t.OwnerID, &t.Name, &t.Type, &subject, &t.Body,
-		&variables, &t.IsActive, &t.CreatedAt, &t.UpdatedAt,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Template{}, domain.ErrTemplateNotFound
-		}
-
-		return domain.Template{}, err
+func templateFromRow(row sqlc.CrmTemplate) domain.Template {
+	t := domain.Template{
+		ID:        row.ID,
+		OwnerID:   row.OwnerID,
+		Name:      row.Name,
+		Type:      string(row.Type),
+		Subject:   row.Subject.String,
+		Body:      row.Body,
+		IsActive:  row.IsActive.Bool,
+		CreatedAt: row.CreatedAt.Time,
+		UpdatedAt: row.UpdatedAt.Time,
 	}
 
-	t.Subject = subject.String
-
-	if variables.Valid {
-		t.Variables = []byte(variables.String)
+	if row.Variables != nil {
+		t.Variables = []byte(row.Variables)
 	} else {
 		t.Variables = []byte("[]")
 	}
 
-	return t, nil
+	return t
 }

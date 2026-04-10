@@ -3,54 +3,103 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_receipts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
-	query := `SELECT id, order_number, COALESCE(customer_name,''), total, payment_method, paid_at
-		 FROM pos_orders
-		 WHERE owner_id = ? AND payment_status = 'paid'`
+	var receipts []domain.Receipt
 
-	args := []interface{}{ownerID}
-
-	if dateFrom != "" {
-		query += ` AND paid_at >= ?`
-		args = append(args, dateFrom)
-	}
-
-	if dateTo != "" {
-		query += ` AND paid_at <= ?`
-		args = append(args, dateTo)
-	}
-
-	query += ` ORDER BY paid_at DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	receipts := make([]domain.Receipt, 0)
-	for rows.Next() {
-		var rc domain.Receipt
-		if err := rows.Scan(&rc.ID, &rc.OrderNumber, &rc.CustomerName, &rc.Total, &rc.PaymentMethod, &rc.PaidAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan receipt", logger.Error(err))
+	if dateFrom != "" && dateTo != "" {
+		rows, err := r.queries.ListReceiptsWithDateRange(ctx, sqlc.ListReceiptsWithDateRangeParams{
+			OwnerID: ownerID,
+			PaidAt:  sql.NullTime{Time: parseTime(dateFrom), Valid: true},
+			PaidAt_2: sql.NullTime{Time: parseTime(dateTo), Valid: true},
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
 			return nil, err
 		}
-		receipts = append(receipts, rc)
+		for _, row := range rows {
+			receipts = append(receipts, domain.Receipt{
+				ID:            row.ID,
+				OrderNumber:   row.OrderNumber,
+				CustomerName:  row.CustomerName.String,
+				Total:         decimalToFloat(row.Total.String),
+				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
+				PaidAt:        row.PaidAt.Time,
+			})
+		}
+	} else if dateFrom != "" {
+		rows, err := r.queries.ListReceiptsWithDateFrom(ctx, sqlc.ListReceiptsWithDateFromParams{
+			OwnerID: ownerID,
+			PaidAt:  sql.NullTime{Time: parseTime(dateFrom), Valid: true},
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
+			return nil, err
+		}
+		for _, row := range rows {
+			receipts = append(receipts, domain.Receipt{
+				ID:            row.ID,
+				OrderNumber:   row.OrderNumber,
+				CustomerName:  row.CustomerName.String,
+				Total:         decimalToFloat(row.Total.String),
+				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
+				PaidAt:        row.PaidAt.Time,
+			})
+		}
+	} else {
+		rows, err := r.queries.ListReceipts(ctx, ownerID)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
+			return nil, err
+		}
+		for _, row := range rows {
+			receipts = append(receipts, domain.Receipt{
+				ID:            row.ID,
+				OrderNumber:   row.OrderNumber,
+				CustomerName:  row.CustomerName.String,
+				Total:         decimalToFloat(row.Total.String),
+				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
+				PaidAt:        row.PaidAt.Time,
+			})
+		}
 	}
-	return receipts, rows.Err()
+
+	if receipts == nil {
+		receipts = make([]domain.Receipt, 0)
+	}
+	return receipts, nil
+}
+
+func decimalToFloat(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func parseTime(s string) (t time.Time) {
+	t, _ = time.Parse("2006-01-02", s)
+	return
 }

@@ -5,20 +5,25 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
+	pool := dbclient.Pool()
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
@@ -27,15 +32,11 @@ func NewRepository(_ context.Context) *Repository {
 // ─────────────────────────────────────────────
 
 func (r *Repository) CountWorkspacesByOwner(ctx context.Context, ownerID int64) (int64, error) {
-	var count int64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM flow_workspaces WHERE owner_id = ?`, ownerID,
-	).Scan(&count)
+	count, err := r.queries.CountWorkspacesByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("CountWorkspacesByOwner failed", logger.Error(err))
 		return 0, err
 	}
-
 	return count, nil
 }
 
@@ -44,84 +45,77 @@ func (r *Repository) CreateWorkspace(ctx context.Context, input domain.Workspace
 	if icon == "" {
 		icon = "🚀"
 	}
-
 	color := input.Color
 	if color == "" {
 		color = "#4583C4"
 	}
 
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_workspaces (owner_id, name, description, icon, color, is_default, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		input.OwnerID, input.Name, input.Description, icon, color, isDefault, input.CreatedBy,
-	)
+	res, err := r.queries.CreateWorkspace(ctx, sqlc.CreateWorkspaceParams{
+		OwnerID:     input.OwnerID,
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Icon:        sql.NullString{String: icon, Valid: true},
+		Color:       sql.NullString{String: color, Valid: true},
+		IsDefault:   sql.NullBool{Bool: isDefault, Valid: true},
+		CreatedBy:   input.CreatedBy,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateWorkspace failed", logger.Error(err))
 		return 0, err
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) GetWorkspacesByOwner(ctx context.Context, ownerID int64) ([]domain.Workspace, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, description, icon, color, is_default, created_by, created_at, updated_at
-		 FROM flow_workspaces WHERE owner_id = ? ORDER BY is_default DESC, created_at ASC`,
-		ownerID,
-	)
+	rows, err := r.queries.GetWorkspacesByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetWorkspacesByOwner failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var workspaces []domain.Workspace
-	for rows.Next() {
-		var w domain.Workspace
-		var desc sql.NullString
-
-		if scanErr := rows.Scan(
-			&w.ID, &w.OwnerID, &w.Name, &desc, &w.Icon, &w.Color, &w.IsDefault, &w.CreatedBy, &w.CreatedAt, &w.UpdatedAt,
-		); scanErr != nil {
-			logger.Ctx(ctx).Error("GetWorkspacesByOwner scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-
-		w.Description = desc.String
-		workspaces = append(workspaces, w)
+	for _, row := range rows {
+		workspaces = append(workspaces, domain.Workspace{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			Name:        row.Name,
+			Description: row.Description.String,
+			Icon:        row.Icon.String,
+			Color:       row.Color.String,
+			IsDefault:   row.IsDefault.Bool,
+			CreatedBy:   row.CreatedBy,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+		})
 	}
-
-	return workspaces, rows.Err()
+	return workspaces, nil
 }
 
 func (r *Repository) UpdateWorkspace(ctx context.Context, input domain.UpdateWorkspaceInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_workspaces SET name = ?, description = ?, icon = ?, color = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, input.Description, input.Icon, input.Color, input.ID, input.OwnerID,
-	)
+	err := r.queries.UpdateWorkspace(ctx, sqlc.UpdateWorkspaceParams{
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Icon:        sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+		ID:          input.ID,
+		OwnerID:     input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateWorkspace failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) DeleteWorkspace(ctx context.Context, id, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_workspaces WHERE id = ? AND owner_id = ?`, id, ownerID,
-	)
+	err := r.queries.DeleteWorkspace(ctx, sqlc.DeleteWorkspaceParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteWorkspace failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -131,29 +125,27 @@ func (r *Repository) AddWorkspaceMember(ctx context.Context, input domain.AddWor
 		role = "member"
 	}
 
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)
-		 ON DUPLICATE KEY UPDATE role = VALUES(role)`,
-		input.WorkspaceID, input.UserID, role,
-	)
+	err := r.queries.AddWorkspaceMember(ctx, sqlc.AddWorkspaceMemberParams{
+		WorkspaceID: input.WorkspaceID,
+		UserID:      input.UserID,
+		Role:        sqlc.NullFlowWorkspaceMembersRole{FlowWorkspaceMembersRole: sqlc.FlowWorkspaceMembersRole(role), Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("AddWorkspaceMember failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) RemoveWorkspaceMember(ctx context.Context, input domain.RemoveWorkspaceMemberInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?`,
-		input.WorkspaceID, input.UserID,
-	)
+	err := r.queries.RemoveWorkspaceMember(ctx, sqlc.RemoveWorkspaceMemberParams{
+		WorkspaceID: input.WorkspaceID,
+		UserID:      input.UserID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("RemoveWorkspaceMember failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -166,98 +158,93 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 	if icon == "" {
 		icon = "📋"
 	}
-
 	color := input.Color
 	if color == "" {
 		color = "#4583C4"
 	}
 
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_projects (workspace_id, owner_id, name, description, icon, color, start_date, due_date, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		input.WorkspaceID, input.OwnerID, input.Name, input.Description, icon, color,
-		nullTime(input.StartDate), nullTime(input.DueDate), input.CreatedBy,
-	)
+	res, err := r.queries.CreateProject(ctx, sqlc.CreateProjectParams{
+		WorkspaceID: input.WorkspaceID,
+		OwnerID:     input.OwnerID,
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Icon:        sql.NullString{String: icon, Valid: true},
+		Color:       sql.NullString{String: color, Valid: true},
+		StartDate:   nullTimePtrToSql(input.StartDate),
+		DueDate:     nullTimePtrToSql(input.DueDate),
+		CreatedBy:   input.CreatedBy,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateProject failed", logger.Error(err))
 		return 0, err
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ownerID int64) ([]domain.Project, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, workspace_id, owner_id, name, description, icon, color, status, start_date, due_date, created_by, created_at, updated_at
-		 FROM flow_projects WHERE workspace_id = ? AND owner_id = ? AND status != 'archived' ORDER BY created_at ASC`,
-		workspaceID, ownerID,
-	)
+	rows, err := r.queries.GetProjectsByWorkspace(ctx, sqlc.GetProjectsByWorkspaceParams{
+		WorkspaceID: workspaceID,
+		OwnerID:     ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetProjectsByWorkspace failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var projects []domain.Project
-	for rows.Next() {
-		var p domain.Project
-		var desc sql.NullString
-		var startDate, dueDate sql.NullTime
-
-		if scanErr := rows.Scan(
-			&p.ID, &p.WorkspaceID, &p.OwnerID, &p.Name, &desc, &p.Icon, &p.Color, &p.Status,
-			&startDate, &dueDate, &p.CreatedBy, &p.CreatedAt, &p.UpdatedAt,
-		); scanErr != nil {
-			logger.Ctx(ctx).Error("GetProjectsByWorkspace scan failed", logger.Error(scanErr))
-			return nil, scanErr
+	for _, row := range rows {
+		p := domain.Project{
+			ID:          row.ID,
+			WorkspaceID: row.WorkspaceID,
+			OwnerID:     row.OwnerID,
+			Name:        row.Name,
+			Description: row.Description.String,
+			Icon:        row.Icon.String,
+			Color:       row.Color.String,
+			Status:      string(row.Status.FlowProjectsStatus),
+			CreatedBy:   row.CreatedBy,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
 		}
-
-		p.Description = desc.String
-
-		if startDate.Valid {
-			p.StartDate = &startDate.Time
+		if row.StartDate.Valid {
+			p.StartDate = &row.StartDate.Time
 		}
-
-		if dueDate.Valid {
-			p.DueDate = &dueDate.Time
+		if row.DueDate.Valid {
+			p.DueDate = &row.DueDate.Time
 		}
-
 		projects = append(projects, p)
 	}
-
-	return projects, rows.Err()
+	return projects, nil
 }
 
 func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, input.Description, input.Icon, input.Color, input.Status,
-		nullTime(input.StartDate), nullTime(input.DueDate),
-		input.ID, input.OwnerID,
-	)
+	err := r.queries.UpdateProject(ctx, sqlc.UpdateProjectParams{
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Icon:        sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+		Status:      sqlc.NullFlowProjectsStatus{FlowProjectsStatus: sqlc.FlowProjectsStatus(input.Status), Valid: input.Status != ""},
+		StartDate:   nullTimePtrToSql(input.StartDate),
+		DueDate:     nullTimePtrToSql(input.DueDate),
+		ID:          input.ID,
+		OwnerID:     input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateProject failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) ArchiveProject(ctx context.Context, id, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET status = 'archived' WHERE id = ? AND owner_id = ?`, id, ownerID,
-	)
+	err := r.queries.ArchiveProject(ctx, sqlc.ArchiveProjectParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ArchiveProject failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -276,31 +263,49 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		priority = "none"
 	}
 
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_tasks
-		 (project_id, workspace_id, owner_id, parent_task_id, title, description, priority,
-		  assignee_id, reporter_id, due_date, start_date, estimated_hours, labels)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		input.ProjectID, input.WorkspaceID, input.OwnerID, nullInt64(input.ParentTaskID),
-		input.Title, input.Description, priority,
-		nullInt64(input.AssigneeID), input.ReporterID,
-		nullTime(input.DueDate), nullTime(input.StartDate),
-		nullFloat64(input.EstimatedHours), labelsJSON,
-	)
+	var estHours sql.NullString
+	if input.EstimatedHours != nil {
+		estHours = sql.NullString{String: strconv.FormatFloat(*input.EstimatedHours, 'f', 2, 64), Valid: true}
+	}
+
+	res, err := r.queries.CreateTask(ctx, sqlc.CreateTaskParams{
+		ProjectID:      input.ProjectID,
+		WorkspaceID:    input.WorkspaceID,
+		OwnerID:        input.OwnerID,
+		ParentTaskID:   nullInt64Ptr(input.ParentTaskID),
+		Title:          input.Title,
+		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Priority:       sqlc.NullFlowTasksPriority{FlowTasksPriority: sqlc.FlowTasksPriority(priority), Valid: true},
+		AssigneeID:     nullInt64Ptr(input.AssigneeID),
+		ReporterID:     input.ReporterID,
+		DueDate:        nullTimePtrToSql(input.DueDate),
+		StartDate:      nullTimePtrToSql(input.StartDate),
+		EstimatedHours: estHours,
+		Labels:         labelsJSON,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateTask failed", logger.Error(err))
 		return 0, err
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
+	// sqlc query doesn't support optional filters, so for complex cases
+	// we use the basic query and filter in-memory, or keep raw SQL for status/assignee/priority.
+	if filter.Status != "" || filter.AssigneeID != nil || filter.Priority != "" {
+		return r.getTasksByProjectFiltered(ctx, filter)
+	}
+
+	rows, err := r.queries.GetTasksByProject(ctx, filter.ProjectID)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetTasksByProject failed", logger.Error(err))
+		return nil, err
+	}
+	return tasksFromRows(rows), nil
+}
+
+func (r *Repository) getTasksByProjectFiltered(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
@@ -311,12 +316,10 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 		query += " AND status = ?"
 		args = append(args, filter.Status)
 	}
-
 	if filter.AssigneeID != nil {
 		query += " AND assignee_id = ?"
 		args = append(args, *filter.AssigneeID)
 	}
-
 	if filter.Priority != "" {
 		query += " AND priority = ?"
 		args = append(args, filter.Priority)
@@ -326,61 +329,38 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		logger.Ctx(ctx).Error("GetTasksByProject failed", logger.Error(err))
+		logger.Ctx(ctx).Error("GetTasksByProject filtered failed", logger.Error(err))
 		return nil, err
 	}
 	defer rows.Close()
 
-	return scanTasks(ctx, rows)
+	return scanTasksRaw(ctx, rows)
 }
 
 func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-		  status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-		  estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-		 FROM flow_tasks WHERE id = ?`, taskID,
-	)
-
-	return scanTask(row)
+	row, err := r.queries.GetTaskByID(ctx, taskID)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	return taskFromFlowTask(row), nil
 }
 
 func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]domain.Task, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-		  status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-		  estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-		 FROM flow_tasks WHERE parent_task_id = ? ORDER BY sort_order ASC, created_at ASC`,
-		parentTaskID,
-	)
+	rows, err := r.queries.GetSubtasks(ctx, sql.NullInt64{Int64: parentTaskID, Valid: true})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetSubtasks failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
-
-	return scanTasks(ctx, rows)
+	return tasksFromRows(rows), nil
 }
 
 func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-		  status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-		  estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-		 FROM flow_tasks
-		 WHERE assignee_id = ? AND status NOT IN ('done','cancelled')
-		 ORDER BY
-		   FIELD(priority,'urgent','high','medium','low','none'),
-		   due_date ASC`,
-		userID,
-	)
+	rows, err := r.queries.GetMyTasks(ctx, sql.NullInt64{Int64: userID, Valid: true})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetMyTasks failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
-
-	return scanTasks(ctx, rows)
+	return tasksFromRows(rows), nil
 }
 
 func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInput) error {
@@ -389,56 +369,51 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		return err
 	}
 
-	completedAt := "NULL"
-	_ = completedAt
-
-	query := `UPDATE flow_tasks
-	          SET title = ?, description = ?, status = ?, priority = ?, assignee_id = ?,
-	              due_date = ?, start_date = ?, labels = ?,
-	              completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
-	          WHERE id = ? AND owner_id = ?`
-
-	_, err = r.pool.ExecContext(ctx, query,
-		input.Title, input.Description, input.Status, input.Priority,
-		nullInt64(input.AssigneeID),
-		nullTime(input.DueDate), nullTime(input.StartDate),
-		labelsJSON,
-		input.Status, input.Status,
-		input.ID, input.OwnerID,
-	)
+	err = r.queries.UpdateTask(ctx, sqlc.UpdateTaskParams{
+		Title:       input.Title,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Status:      sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: input.Status != ""},
+		Priority:    sqlc.NullFlowTasksPriority{FlowTasksPriority: sqlc.FlowTasksPriority(input.Priority), Valid: input.Priority != ""},
+		AssigneeID:  nullInt64Ptr(input.AssigneeID),
+		DueDate:     nullTimePtrToSql(input.DueDate),
+		StartDate:   nullTimePtrToSql(input.StartDate),
+		Labels:      labelsJSON,
+		Column9:     input.Status,
+		Column10:    input.Status,
+		ID:          input.ID,
+		OwnerID:     input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTask failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskStatusInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_tasks
-		 SET status = ?,
-		     completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
-		 WHERE id = ? AND owner_id = ?`,
-		input.Status, input.Status, input.Status, input.ID, input.OwnerID,
-	)
+	err := r.queries.UpdateTaskStatus(ctx, sqlc.UpdateTaskStatusParams{
+		Status:  sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: true},
+		Column2: input.Status,
+		Column3: input.Status,
+		ID:      input.ID,
+		OwnerID: input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTaskStatus failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) DeleteTask(ctx context.Context, taskID, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_tasks WHERE id = ? AND owner_id = ?`, taskID, ownerID,
-	)
+	err := r.queries.DeleteTask(ctx, sqlc.DeleteTaskParams{
+		ID:      taskID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteTask failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -447,58 +422,49 @@ func (r *Repository) DeleteTask(ctx context.Context, taskID, ownerID int64) erro
 // ─────────────────────────────────────────────
 
 func (r *Repository) CreateComment(ctx context.Context, taskID, userID int64, content string) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?)`,
-		taskID, userID, content,
-	)
+	res, err := r.queries.CreateComment(ctx, sqlc.CreateCommentParams{
+		TaskID:  taskID,
+		UserID:  userID,
+		Content: content,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateComment failed", logger.Error(err))
 		return 0, err
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) GetCommentsByTask(ctx context.Context, taskID int64) ([]domain.TaskComment, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
-		 FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC`,
-		taskID,
-	)
+	rows, err := r.queries.GetCommentsByTask(ctx, taskID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetCommentsByTask failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var comments []domain.TaskComment
-	for rows.Next() {
-		var c domain.TaskComment
-		if scanErr := rows.Scan(&c.ID, &c.TaskID, &c.UserID, &c.Content, &c.IsEdited, &c.CreatedAt, &c.UpdatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("GetCommentsByTask scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-
-		comments = append(comments, c)
+	for _, row := range rows {
+		comments = append(comments, domain.TaskComment{
+			ID:        row.ID,
+			TaskID:    row.TaskID,
+			UserID:    row.UserID,
+			Content:   row.Content,
+			IsEdited:  row.IsEdited.Bool,
+			CreatedAt: row.CreatedAt.Time,
+			UpdatedAt: row.UpdatedAt.Time,
+		})
 	}
-
-	return comments, rows.Err()
+	return comments, nil
 }
 
 func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?`, commentID, userID,
-	)
+	err := r.queries.DeleteComment(ctx, sqlc.DeleteCommentParams{
+		ID:     commentID,
+		UserID: userID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteComment failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -507,42 +473,43 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 // ─────────────────────────────────────────────
 
 func (r *Repository) LogActivity(ctx context.Context, taskID, userID int64, action, oldValue, newValue string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_task_activity (task_id, user_id, action, old_value, new_value) VALUES (?, ?, ?, ?, ?)`,
-		taskID, userID, action, oldValue, newValue,
-	)
+	err := r.queries.LogActivity(ctx, sqlc.LogActivityParams{
+		TaskID:   taskID,
+		UserID:   userID,
+		Action:   action,
+		OldValue: sql.NullString{String: oldValue, Valid: oldValue != ""},
+		NewValue: sql.NullString{String: newValue, Valid: newValue != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("LogActivity failed", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
 func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit int) ([]domain.TaskActivity, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, task_id, user_id, action, COALESCE(old_value,''), COALESCE(new_value,''), created_at
-		 FROM flow_task_activity WHERE task_id = ? ORDER BY created_at DESC LIMIT ?`,
-		taskID, limit,
-	)
+	rows, err := r.queries.GetActivityByTask(ctx, sqlc.GetActivityByTaskParams{
+		TaskID: taskID,
+		Limit:  int32(limit),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetActivityByTask failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var activities []domain.TaskActivity
-	for rows.Next() {
-		var a domain.TaskActivity
-		if scanErr := rows.Scan(&a.ID, &a.TaskID, &a.UserID, &a.Action, &a.OldValue, &a.NewValue, &a.CreatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("GetActivityByTask scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-
-		activities = append(activities, a)
+	for _, row := range rows {
+		activities = append(activities, domain.TaskActivity{
+			ID:        row.ID,
+			TaskID:    row.TaskID,
+			UserID:    row.UserID,
+			Action:    row.Action,
+			OldValue:  row.OldValue.String,
+			NewValue:  row.NewValue.String,
+			CreatedAt: row.CreatedAt.Time,
+		})
 	}
-
-	return activities, rows.Err()
+	return activities, nil
 }
 
 // ─────────────────────────────────────────────
@@ -550,11 +517,14 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 // ─────────────────────────────────────────────
 
 func (r *Repository) CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_task_attachments (task_id, owner_id, name, url, size, uploaded_by)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		input.TaskID, input.OwnerID, input.Name, input.URL, input.Size, input.UploadedBy,
-	)
+	res, err := r.queries.CreateAttachment(ctx, sqlc.CreateAttachmentParams{
+		TaskID:     input.TaskID,
+		OwnerID:    input.OwnerID,
+		Name:       input.Name,
+		Url:        input.URL,
+		Size:       sql.NullInt64{Int64: input.Size, Valid: true},
+		UploadedBy: input.UploadedBy,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateAttachment failed", logger.Error(err))
 		return 0, err
@@ -563,33 +533,33 @@ func (r *Repository) CreateAttachment(ctx context.Context, input domain.TaskAtta
 }
 
 func (r *Repository) GetAttachmentsByTask(ctx context.Context, taskID int64) ([]domain.TaskAttachment, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, task_id, owner_id, name, url, size, uploaded_by, created_at
-		 FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC`,
-		taskID,
-	)
+	rows, err := r.queries.GetAttachmentsByTask(ctx, taskID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetAttachmentsByTask failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var attachments []domain.TaskAttachment
-	for rows.Next() {
-		var a domain.TaskAttachment
-		if scanErr := rows.Scan(&a.ID, &a.TaskID, &a.OwnerID, &a.Name, &a.URL, &a.Size, &a.UploadedBy, &a.CreatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("GetAttachmentsByTask scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-		attachments = append(attachments, a)
+	for _, row := range rows {
+		attachments = append(attachments, domain.TaskAttachment{
+			ID:         row.ID,
+			TaskID:     row.TaskID,
+			OwnerID:    row.OwnerID,
+			Name:       row.Name,
+			URL:        row.Url,
+			Size:       row.Size.Int64,
+			UploadedBy: row.UploadedBy,
+			CreatedAt:  row.CreatedAt.Time,
+		})
 	}
-	return attachments, rows.Err()
+	return attachments, nil
 }
 
 func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_task_attachments WHERE id = ? AND owner_id = ?`, attachmentID, ownerID,
-	)
+	err := r.queries.DeleteAttachment(ctx, sqlc.DeleteAttachmentParams{
+		ID:      attachmentID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteAttachment failed", logger.Error(err))
 		return err
@@ -602,12 +572,13 @@ func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, ownerID
 // ─────────────────────────────────────────────
 
 func (r *Repository) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_time_logs (owner_id, task_id, user_id, duration_minutes, description)
-		 VALUES (?, ?, ?, ?, ?)`,
-		input.OwnerID, input.TaskID, input.UserID, input.DurationMinutes,
-		nullableString(input.Description),
-	)
+	res, err := r.queries.CreateTimeLog(ctx, sqlc.CreateTimeLogParams{
+		OwnerID:         input.OwnerID,
+		TaskID:          input.TaskID,
+		UserID:          input.UserID,
+		DurationMinutes: int32(input.DurationMinutes),
+		Description:     sql.NullString{String: input.Description, Valid: input.Description != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateTimeLog failed", logger.Error(err))
 		return 0, err
@@ -616,31 +587,26 @@ func (r *Repository) CreateTimeLog(ctx context.Context, input domain.TimeLogInpu
 }
 
 func (r *Repository) GetTimeLogsByTask(ctx context.Context, taskID int64) ([]domain.TimeLog, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, task_id, user_id, duration_minutes, COALESCE(description,''), logged_at, created_at
-		 FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC`,
-		taskID,
-	)
+	rows, err := r.queries.GetTimeLogsByTask(ctx, taskID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetTimeLogsByTask failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var logs []domain.TimeLog
-	for rows.Next() {
-		var l domain.TimeLog
-		if scanErr := rows.Scan(&l.ID, &l.OwnerID, &l.TaskID, &l.UserID, &l.DurationMinutes, &l.Description, &l.LoggedAt, &l.CreatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("GetTimeLogsByTask scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-		logs = append(logs, l)
+	for _, row := range rows {
+		logs = append(logs, domain.TimeLog{
+			ID:              row.ID,
+			OwnerID:         row.OwnerID,
+			TaskID:          row.TaskID,
+			UserID:          row.UserID,
+			DurationMinutes: int(row.DurationMinutes),
+			Description:     row.Description.String,
+			LoggedAt:        row.LoggedAt.Time,
+			CreatedAt:       row.CreatedAt.Time,
+		})
 	}
-	return logs, rows.Err()
-}
-
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
+	return logs, nil
 }
 
 // ─────────────────────────────────────────────
@@ -653,47 +619,36 @@ func (r *Repository) CreateLabel(ctx context.Context, input domain.LabelInput) (
 		color = "#6366f1"
 	}
 
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_labels (workspace_id, name, color) VALUES (?, ?, ?)`,
-		input.WorkspaceID, input.Name, color,
-	)
+	res, err := r.queries.CreateLabel(ctx, sqlc.CreateLabelParams{
+		WorkspaceID: input.WorkspaceID,
+		Name:        input.Name,
+		Color:       color,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateLabel failed", logger.Error(err))
 		return 0, err
 	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64) ([]domain.Label, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, workspace_id, name, color, created_at
-		 FROM flow_labels WHERE workspace_id = ? ORDER BY name ASC`,
-		workspaceID,
-	)
+	rows, err := r.queries.GetLabelsByWorkspace(ctx, workspaceID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetLabelsByWorkspace failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var labels []domain.Label
-	for rows.Next() {
-		var l domain.Label
-		if scanErr := rows.Scan(&l.ID, &l.WorkspaceID, &l.Name, &l.Color, &l.CreatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("GetLabelsByWorkspace scan failed", logger.Error(scanErr))
-			return nil, scanErr
-		}
-
-		labels = append(labels, l)
+	for _, row := range rows {
+		labels = append(labels, domain.Label{
+			ID:          row.ID,
+			WorkspaceID: row.WorkspaceID,
+			Name:        row.Name,
+			Color:       row.Color,
+			CreatedAt:   row.CreatedAt.Time,
+		})
 	}
-
-	return labels, rows.Err()
+	return labels, nil
 }
 
 // ─────────────────────────────────────────────
@@ -706,19 +661,21 @@ func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, ownerID
 	weekStart := time.Now().AddDate(0, 0, -int(time.Now().Weekday()))
 	weekEnd := weekStart.AddDate(0, 0, 7)
 
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT
-		   COUNT(CASE WHEN status = 'todo' THEN 1 END),
-		   COUNT(CASE WHEN status = 'in_progress' THEN 1 END),
-		   COUNT(CASE WHEN status = 'done' AND completed_at >= ? AND completed_at < ? THEN 1 END),
-		   COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END)
-		 FROM flow_tasks WHERE workspace_id = ? AND owner_id = ?`,
-		weekStart, weekEnd, workspaceID, ownerID,
-	).Scan(&stats.OpenTasks, &stats.InProgressTasks, &stats.CompletedThisWeek, &stats.OverdueTasks)
+	row, err := r.queries.GetDashboardStats(ctx, sqlc.GetDashboardStatsParams{
+		CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
+		CompletedAt_2: sql.NullTime{Time: weekEnd, Valid: true},
+		WorkspaceID:   workspaceID,
+		OwnerID:       ownerID,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetDashboardStats failed", logger.Error(err))
 		return domain.DashboardStats{}, err
 	}
+
+	stats.OpenTasks = row.OpenTasks
+	stats.InProgressTasks = row.InProgressTasks
+	stats.CompletedThisWeek = row.CompletedThisWeek
+	stats.OverdueTasks = row.OverdueTasks
 
 	return stats, nil
 }
@@ -727,111 +684,130 @@ func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, ownerID
 // Helpers
 // ─────────────────────────────────────────────
 
-func nullInt64(v *int64) interface{} {
+func nullInt64Ptr(v *int64) sql.NullInt64 {
 	if v == nil {
-		return nil
+		return sql.NullInt64{}
 	}
-
-	return *v
+	return sql.NullInt64{Int64: *v, Valid: true}
 }
 
-func nullFloat64(v *float64) interface{} {
+func nullTimePtrToSql(v *time.Time) sql.NullTime {
 	if v == nil {
-		return nil
+		return sql.NullTime{}
 	}
-
-	return *v
+	return sql.NullTime{Time: *v, Valid: true}
 }
 
-func nullTime(v *time.Time) interface{} {
-	if v == nil {
-		return nil
-	}
-
-	return *v
-}
-
-func marshalLabels(labels []int64) ([]byte, error) {
+func marshalLabels(labels []int64) (json.RawMessage, error) {
 	if labels == nil {
-		return []byte("[]"), nil
+		return json.RawMessage("[]"), nil
 	}
-
 	return json.Marshal(labels)
 }
 
-type taskScanner interface {
-	Scan(dest ...any) error
+func taskFromFlowTask(row sqlc.FlowTask) domain.Task {
+	t := domain.Task{
+		ID:          row.ID,
+		ProjectID:   row.ProjectID,
+		WorkspaceID: row.WorkspaceID,
+		OwnerID:     row.OwnerID,
+		Title:       row.Title,
+		Description: row.Description.String,
+		Status:      string(row.Status.FlowTasksStatus),
+		Priority:    string(row.Priority.FlowTasksPriority),
+		ReporterID:  row.ReporterID,
+		SortOrder:   int(row.SortOrder.Int32),
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+	}
+
+	if row.ParentTaskID.Valid {
+		t.ParentTaskID = &row.ParentTaskID.Int64
+	}
+	if row.AssigneeID.Valid {
+		t.AssigneeID = &row.AssigneeID.Int64
+	}
+	if row.DueDate.Valid {
+		t.DueDate = &row.DueDate.Time
+	}
+	if row.StartDate.Valid {
+		t.StartDate = &row.StartDate.Time
+	}
+	if row.CompletedAt.Valid {
+		t.CompletedAt = &row.CompletedAt.Time
+	}
+	if row.EstimatedHours.Valid {
+		f, _ := strconv.ParseFloat(row.EstimatedHours.String, 64)
+		t.EstimatedHours = &f
+	}
+	if row.ActualHours.Valid {
+		f, _ := strconv.ParseFloat(row.ActualHours.String, 64)
+		t.ActualHours = &f
+	}
+	if len(row.Labels) > 0 {
+		_ = json.Unmarshal(row.Labels, &t.Labels)
+	}
+
+	return t
 }
 
-func scanTask(row taskScanner) (domain.Task, error) {
-	var t domain.Task
-	var desc sql.NullString
-	var parentID sql.NullInt64
-	var assigneeID sql.NullInt64
-	var dueDate, startDate, completedAt sql.NullTime
-	var estHours, actHours sql.NullFloat64
-	var labelsRaw []byte
-
-	err := row.Scan(
-		&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID,
-		&t.Title, &desc, &t.Status, &t.Priority,
-		&assigneeID, &t.ReporterID,
-		&dueDate, &startDate, &completedAt,
-		&estHours, &actHours, &t.SortOrder, &labelsRaw,
-		&t.CreatedAt, &t.UpdatedAt,
-	)
-	if err != nil {
-		return domain.Task{}, err
+func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
+	var tasks []domain.Task
+	for _, row := range rows {
+		tasks = append(tasks, taskFromFlowTask(row))
 	}
-
-	t.Description = desc.String
-
-	if parentID.Valid {
-		t.ParentTaskID = &parentID.Int64
-	}
-
-	if assigneeID.Valid {
-		t.AssigneeID = &assigneeID.Int64
-	}
-
-	if dueDate.Valid {
-		t.DueDate = &dueDate.Time
-	}
-
-	if startDate.Valid {
-		t.StartDate = &startDate.Time
-	}
-
-	if completedAt.Valid {
-		t.CompletedAt = &completedAt.Time
-	}
-
-	if estHours.Valid {
-		t.EstimatedHours = &estHours.Float64
-	}
-
-	if actHours.Valid {
-		t.ActualHours = &actHours.Float64
-	}
-
-	if len(labelsRaw) > 0 {
-		_ = json.Unmarshal(labelsRaw, &t.Labels)
-	}
-
-	return t, nil
+	return tasks
 }
 
-func scanTasks(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
+func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 	var tasks []domain.Task
 	for rows.Next() {
-		t, err := scanTask(rows)
+		var t domain.Task
+		var desc sql.NullString
+		var parentID, assigneeID sql.NullInt64
+		var dueDate, startDate, completedAt sql.NullTime
+		var estHours, actHours sql.NullFloat64
+		var labelsRaw []byte
+
+		err := rows.Scan(
+			&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID,
+			&t.Title, &desc, &t.Status, &t.Priority,
+			&assigneeID, &t.ReporterID,
+			&dueDate, &startDate, &completedAt,
+			&estHours, &actHours, &t.SortOrder, &labelsRaw,
+			&t.CreatedAt, &t.UpdatedAt,
+		)
 		if err != nil {
-			logger.Ctx(ctx).Error("scanTasks row scan failed", logger.Error(err))
+			logger.Ctx(ctx).Error("scanTasksRaw row scan failed", logger.Error(err))
 			return nil, err
 		}
 
+		t.Description = desc.String
+		if parentID.Valid {
+			t.ParentTaskID = &parentID.Int64
+		}
+		if assigneeID.Valid {
+			t.AssigneeID = &assigneeID.Int64
+		}
+		if dueDate.Valid {
+			t.DueDate = &dueDate.Time
+		}
+		if startDate.Valid {
+			t.StartDate = &startDate.Time
+		}
+		if completedAt.Valid {
+			t.CompletedAt = &completedAt.Time
+		}
+		if estHours.Valid {
+			t.EstimatedHours = &estHours.Float64
+		}
+		if actHours.Valid {
+			t.ActualHours = &actHours.Float64
+		}
+		if len(labelsRaw) > 0 {
+			_ = json.Unmarshal(labelsRaw, &t.Labels)
+		}
 		tasks = append(tasks, t)
 	}
-
 	return tasks, rows.Err()
 }

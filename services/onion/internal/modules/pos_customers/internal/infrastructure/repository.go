@@ -5,42 +5,48 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) Search(ctx context.Context, ownerID int64, query string) ([]domain.Customer, error) {
 	searchTerm := "%" + query + "%"
 
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, first_name, COALESCE(last_name,''), COALESCE(email,''), COALESCE(phone,'')
-		 FROM crm_customers
-		 WHERE owner_id = ? AND (phone LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?)
-		 ORDER BY first_name LIMIT 20`,
-		ownerID, searchTerm, searchTerm, searchTerm, searchTerm,
-	)
+	rows, err := r.queries.SearchPOSCustomers(ctx, sqlc.SearchPOSCustomersParams{
+		OwnerID:   ownerID,
+		Phone:     sql.NullString{String: searchTerm, Valid: true},
+		Email:     sql.NullString{String: searchTerm, Valid: true},
+		FirstName: searchTerm,
+		LastName:  sql.NullString{String: searchTerm, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	customers := make([]domain.Customer, 0)
-	for rows.Next() {
-		var c domain.Customer
-		if err := rows.Scan(&c.ID, &c.FirstName, &c.LastName, &c.Email, &c.Phone); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan POS customer", logger.Error(err))
-			return nil, err
-		}
-		customers = append(customers, c)
+	customers := make([]domain.Customer, 0, len(rows))
+	for _, row := range rows {
+		customers = append(customers, domain.Customer{
+			ID:        row.ID,
+			FirstName: row.FirstName,
+			LastName:  row.LastName.String,
+			Email:     row.Email.String,
+			Phone:     row.Phone.String,
+		})
 	}
-	return customers, rows.Err()
+	return customers, nil
 }

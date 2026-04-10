@@ -3,21 +3,94 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
+	"github.com/voxire/onion/internal/modules/staff/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
+}
+
+// staffFromRow maps an sqlc HrStaff model to the domain Staff type.
+func staffFromRow(row sqlc.HrStaff) domain.Staff {
+	var s domain.Staff
+	s.ID = row.ID
+	s.OwnerID = row.OwnerID
+	if row.UserID.Valid {
+		s.UserID = row.UserID.Int64
+	}
+	if row.DepartmentID.Valid {
+		s.DepartmentID = row.DepartmentID.Int64
+	}
+	s.FirstName = row.FirstName
+	s.LastName = row.LastName
+	s.Email = row.Email
+	if row.Phone.Valid {
+		s.Phone = row.Phone.String
+	}
+	s.Role = row.Role
+	if row.EmploymentType.Valid {
+		s.EmploymentType = string(row.EmploymentType.HrStaffEmploymentType)
+	}
+	if row.Status.Valid {
+		s.Status = string(row.Status.HrStaffStatus)
+	}
+	if row.Salary.Valid {
+		s.Salary, _ = strconv.ParseFloat(row.Salary.String, 64)
+	}
+	if row.HourlyRate.Valid {
+		s.HourlyRate, _ = strconv.ParseFloat(row.HourlyRate.String, 64)
+	}
+	if row.OvertimeRate.Valid {
+		s.OvertimeRate, _ = strconv.ParseFloat(row.OvertimeRate.String, 64)
+	}
+	s.StartDate = row.StartDate
+	if row.EndDate.Valid {
+		s.EndDate = row.EndDate.Time
+	}
+	if row.Address.Valid {
+		s.Address = row.Address.String
+	}
+	if row.EmergencyContactName.Valid {
+		s.EmergencyContactName = row.EmergencyContactName.String
+	}
+	if row.EmergencyContactPhone.Valid {
+		s.EmergencyContactPhone = row.EmergencyContactPhone.String
+	}
+	if row.Apps != nil {
+		s.Apps = string(row.Apps)
+	}
+	if row.Notes.Valid {
+		s.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		s.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		s.UpdatedAt = row.UpdatedAt.Time
+	}
+	return s
 }
 
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
+	// Dynamic WHERE clauses - keep on pool
 	query := `
 		SELECT id, owner_id, user_id, department_id, first_name, last_name, email, phone,
 		       role, employment_type, status, salary, hourly_rate, overtime_rate,
@@ -64,68 +137,22 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 }
 
 func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
-	query := `
-		SELECT id, owner_id, user_id, department_id, first_name, last_name, email, phone,
-		       role, employment_type, status, salary, hourly_rate, overtime_rate,
-		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
-		       apps, notes, created_at, updated_at
-		FROM hr_staff
-		WHERE id = ? AND owner_id = ?`
-
-	rows, err := r.pool.QueryContext(ctx, query, staffID, ownerID)
+	row, err := r.queries.GetStaffByID(ctx, sqlc.GetStaffByIDParams{
+		ID:      staffID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, domain.ErrStaffNotFound
-	}
-
-	var s domain.Staff
-	if err := s.FromRow(rows); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrStaffNotFound
+		}
 		return nil, err
 	}
 
+	s := staffFromRow(row)
 	return &s, nil
 }
 
 func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error) {
-	query := `
-		INSERT INTO hr_staff
-		(owner_id, user_id, department_id, first_name, last_name, email, phone, role,
-		 employment_type, status, salary, hourly_rate, overtime_rate, start_date, end_date,
-		 address, emergency_contact_name, emergency_contact_phone, apps, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	var (
-		userID       sql.NullInt64
-		departmentID sql.NullInt64
-		salary       sql.NullFloat64
-		hourlyRate   sql.NullFloat64
-		overtimeRate sql.NullFloat64
-		endDate      sql.NullString
-	)
-
-	if input.UserID != 0 {
-		userID = sql.NullInt64{Int64: input.UserID, Valid: true}
-	}
-	if input.DepartmentID != 0 {
-		departmentID = sql.NullInt64{Int64: input.DepartmentID, Valid: true}
-	}
-	if input.Salary != 0 {
-		salary = sql.NullFloat64{Float64: input.Salary, Valid: true}
-	}
-	if input.HourlyRate != 0 {
-		hourlyRate = sql.NullFloat64{Float64: input.HourlyRate, Valid: true}
-	}
-	if input.OvertimeRate != 0 {
-		overtimeRate = sql.NullFloat64{Float64: input.OvertimeRate, Valid: true}
-	}
-	if input.EndDate != "" {
-		endDate = sql.NullString{String: input.EndDate, Valid: true}
-	}
-
 	employmentType := input.EmploymentType
 	if employmentType == "" {
 		employmentType = "full_time"
@@ -136,17 +163,33 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 		staffStatus = "active"
 	}
 
-	result, err := r.pool.ExecContext(ctx, query,
-		input.OwnerID, userID, departmentID, input.FirstName, input.LastName, input.Email,
-		sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		input.Role, employmentType, staffStatus, salary, hourlyRate, overtimeRate,
-		input.StartDate, endDate,
-		sql.NullString{String: input.Address, Valid: input.Address != ""},
-		sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
-		sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
-		sql.NullString{String: input.Apps, Valid: input.Apps != ""},
-		sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-	)
+	var appsJSON json.RawMessage
+	if input.Apps != "" {
+		appsJSON = json.RawMessage(input.Apps)
+	}
+
+	result, err := r.queries.CreateStaff(ctx, sqlc.CreateStaffParams{
+		OwnerID:               input.OwnerID,
+		UserID:                sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
+		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		FirstName:             input.FirstName,
+		LastName:              input.LastName,
+		Email:                 input.Email,
+		Phone:                 sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		Role:                  input.Role,
+		EmploymentType:        sqlc.NullHrStaffEmploymentType{HrStaffEmploymentType: sqlc.HrStaffEmploymentType(employmentType), Valid: true},
+		Status:                sqlc.NullHrStaffStatus{HrStaffStatus: sqlc.HrStaffStatus(staffStatus), Valid: true},
+		Salary:                nullDecimal(input.Salary),
+		HourlyRate:            nullDecimal(input.HourlyRate),
+		OvertimeRate:          nullDecimal(input.OvertimeRate),
+		StartDate:             parseDate(input.StartDate),
+		EndDate:               parseNullDate(input.EndDate),
+		Address:               sql.NullString{String: input.Address, Valid: input.Address != ""},
+		EmergencyContactName:  sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
+		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
+		Apps:                  appsJSON,
+		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create staff", logger.Error(err))
 		return 0, err
@@ -156,49 +199,32 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 }
 
 func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
-	query := `
-		UPDATE hr_staff
-		SET department_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
-		    role = ?, employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
-		    overtime_rate = ?, end_date = ?, address = ?, emergency_contact_name = ?,
-		    emergency_contact_phone = ?, apps = ?, notes = ?, updated_at = NOW()
-		WHERE id = ? AND owner_id = ?`
-
-	var (
-		departmentID sql.NullInt64
-		salary       sql.NullFloat64
-		hourlyRate   sql.NullFloat64
-		overtimeRate sql.NullFloat64
-		endDate      sql.NullString
-	)
-
-	if input.DepartmentID != 0 {
-		departmentID = sql.NullInt64{Int64: input.DepartmentID, Valid: true}
-	}
-	if input.Salary != 0 {
-		salary = sql.NullFloat64{Float64: input.Salary, Valid: true}
-	}
-	if input.HourlyRate != 0 {
-		hourlyRate = sql.NullFloat64{Float64: input.HourlyRate, Valid: true}
-	}
-	if input.OvertimeRate != 0 {
-		overtimeRate = sql.NullFloat64{Float64: input.OvertimeRate, Valid: true}
-	}
-	if input.EndDate != "" {
-		endDate = sql.NullString{String: input.EndDate, Valid: true}
+	var appsJSON json.RawMessage
+	if input.Apps != "" {
+		appsJSON = json.RawMessage(input.Apps)
 	}
 
-	_, err := r.pool.ExecContext(ctx, query,
-		departmentID, input.FirstName, input.LastName, input.Email,
-		sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		input.Role, input.EmploymentType, input.Status, salary, hourlyRate, overtimeRate, endDate,
-		sql.NullString{String: input.Address, Valid: input.Address != ""},
-		sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
-		sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
-		sql.NullString{String: input.Apps, Valid: input.Apps != ""},
-		sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-		input.ID, ownerID,
-	)
+	err := r.queries.UpdateStaff(ctx, sqlc.UpdateStaffParams{
+		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		FirstName:             input.FirstName,
+		LastName:              input.LastName,
+		Email:                 input.Email,
+		Phone:                 sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		Role:                  input.Role,
+		EmploymentType:        sqlc.NullHrStaffEmploymentType{HrStaffEmploymentType: sqlc.HrStaffEmploymentType(input.EmploymentType), Valid: input.EmploymentType != ""},
+		Status:                sqlc.NullHrStaffStatus{HrStaffStatus: sqlc.HrStaffStatus(input.Status), Valid: input.Status != ""},
+		Salary:                nullDecimal(input.Salary),
+		HourlyRate:            nullDecimal(input.HourlyRate),
+		OvertimeRate:          nullDecimal(input.OvertimeRate),
+		EndDate:               parseNullDate(input.EndDate),
+		Address:               sql.NullString{String: input.Address, Valid: input.Address != ""},
+		EmergencyContactName:  sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
+		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
+		Apps:                  appsJSON,
+		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		ID:                    input.ID,
+		OwnerID:               ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update staff", logger.Error(err))
 		return err
@@ -208,10 +234,10 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 }
 
 func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE hr_staff SET status = 'terminated', updated_at = NOW() WHERE id = ? AND owner_id = ?`,
-		staffID, ownerID,
-	)
+	err := r.queries.TerminateStaff(ctx, sqlc.TerminateStaffParams{
+		ID:      staffID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to terminate staff", logger.Error(err))
 		return err
@@ -220,12 +246,10 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 }
 
 func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE hr_shifts SET clock_in_at = NOW(), status = 'in_progress', updated_at = NOW()
-		 WHERE owner_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NULL
-		 ORDER BY start_time ASC LIMIT 1`,
-		ownerID, staffID,
-	)
+	err := r.queries.ClockIn(ctx, sqlc.ClockInParams{
+		OwnerID: ownerID,
+		StaffID: staffID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock in", logger.Error(err))
 		return err
@@ -234,13 +258,10 @@ func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error 
 }
 
 func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE hr_shifts SET clock_out_at = NOW(), status = 'completed',
-		        hours_worked = TIMESTAMPDIFF(MINUTE, clock_in_at, NOW()) / 60.0, updated_at = NOW()
-		 WHERE owner_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
-		 ORDER BY start_time ASC LIMIT 1`,
-		ownerID, staffID,
-	)
+	err := r.queries.ClockOut(ctx, sqlc.ClockOutParams{
+		OwnerID: ownerID,
+		StaffID: staffID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock out", logger.Error(err))
 		return err
@@ -249,42 +270,57 @@ func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error
 }
 
 func (r *Repository) CountActiveStaff(ctx context.Context, ownerID int64) (int, error) {
-	var count int
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_staff WHERE owner_id = ? AND status = 'active'`, ownerID,
-	).Scan(&count); err != nil {
+	count, err := r.queries.CountActiveStaff(ctx, ownerID)
+	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return int(count), nil
 }
 
 func (r *Repository) CountOnShiftToday(ctx context.Context, ownerID int64) (int, error) {
-	var count int
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_shifts WHERE owner_id = ? AND date = CURDATE() AND status IN ('scheduled','in_progress')`, ownerID,
-	).Scan(&count); err != nil {
+	count, err := r.queries.CountOnShiftToday(ctx, ownerID)
+	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return int(count), nil
 }
 
 func (r *Repository) CountPendingTimeOff(ctx context.Context, ownerID int64) (int, error) {
-	var count int
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_time_off_requests WHERE owner_id = ? AND status = 'pending'`, ownerID,
-	).Scan(&count); err != nil {
+	count, err := r.queries.CountPendingTimeOff(ctx, ownerID)
+	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return int(count), nil
 }
 
 func (r *Repository) CountDraftPayroll(ctx context.Context, ownerID int64) (int, error) {
-	var count int
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_payroll_records WHERE owner_id = ? AND status = 'draft'`, ownerID,
-	).Scan(&count); err != nil {
+	count, err := r.queries.CountDraftPayroll(ctx, ownerID)
+	if err != nil {
 		return 0, err
 	}
-	return count, nil
+	return int(count), nil
 }
 
+func nullDecimal(v float64) sql.NullString {
+	if v == 0 {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: fmt.Sprintf("%g", v), Valid: true}
+}
+
+func parseDate(s string) time.Time {
+	if p, err := time.Parse("2006-01-02", s); err == nil {
+		return p
+	}
+	return time.Time{}
+}
+
+func parseNullDate(s string) sql.NullTime {
+	if s == "" {
+		return sql.NullTime{}
+	}
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return sql.NullTime{Time: t, Valid: true}
+	}
+	return sql.NullTime{}
+}

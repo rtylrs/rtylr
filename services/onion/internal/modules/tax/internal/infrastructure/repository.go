@@ -4,27 +4,26 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/tax/internal/domain"
+	"github.com/voxire/onion/internal/modules/tax/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	return &Repository{queries: sqlc.New(dbclient.Pool())}
 }
 
 func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.TaxConfig, error) {
-	var cfg domain.TaxConfig
-	var taxName sql.NullString
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT id, owner_id, tax_name, tax_rate, is_inclusive, is_active, created_at, updated_at
-		 FROM finance_tax_config WHERE owner_id = ?`, ownerID,
-	).Scan(&cfg.ID, &cfg.OwnerID, &taxName, &cfg.TaxRate, &cfg.IsInclusive, &cfg.IsActive, &cfg.CreatedAt, &cfg.UpdatedAt)
+	row, err := r.queries.GetTaxConfig(ctx, ownerID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.TaxConfig{}, domain.ErrTaxConfigNotFound
@@ -32,21 +31,27 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.TaxCo
 		logger.Ctx(ctx).Error("Failed to get tax config", logger.Error(err))
 		return domain.TaxConfig{}, err
 	}
-	cfg.TaxName = taxName.String
-	return cfg, nil
+
+	return domain.TaxConfig{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		TaxName:     nullStr(row.TaxName),
+		TaxRate:     parseFloatNull(row.TaxRate),
+		IsInclusive: nullBool(row.IsInclusive),
+		IsActive:    nullBool(row.IsActive),
+		CreatedAt:   nullTime(row.CreatedAt),
+		UpdatedAt:   nullTime(row.UpdatedAt),
+	}, nil
 }
 
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO finance_tax_config (owner_id, tax_name, tax_rate, is_inclusive, is_active)
-		 VALUES (?, ?, ?, ?, ?)
-		 ON DUPLICATE KEY UPDATE
-		   tax_name = VALUES(tax_name),
-		   tax_rate = VALUES(tax_rate),
-		   is_inclusive = VALUES(is_inclusive),
-		   is_active = VALUES(is_active)`,
-		input.OwnerID, nullableString(input.TaxName), input.TaxRate, input.IsInclusive, input.IsActive,
-	)
+	err := r.queries.UpsertTaxConfig(ctx, sqlc.UpsertTaxConfigParams{
+		OwnerID:     input.OwnerID,
+		TaxName:     nullableString(input.TaxName),
+		TaxRate:     nullableString(fmtFloat(input.TaxRate)),
+		IsInclusive: sql.NullBool{Bool: input.IsInclusive, Valid: true},
+		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert tax config", logger.Error(err))
 	}
@@ -56,29 +61,85 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInp
 func (r *Repository) GetPLReport(ctx context.Context, ownerID int64) (domain.PLReport, error) {
 	var report domain.PLReport
 
-	var totalRevenue sql.NullFloat64
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(total), 0) FROM finance_invoices WHERE owner_id = ? AND status = 'paid'`, ownerID,
-	).Scan(&totalRevenue); err != nil {
+	totalRevenue, err := r.queries.SumPaidInvoicesTotal(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total revenue", logger.Error(err))
 		return domain.PLReport{}, err
 	}
-	report.TotalRevenue = totalRevenue.Float64
+	report.TotalRevenue = toFloat64FromInterface(totalRevenue)
 
-	var totalExpenses sql.NullFloat64
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(amount), 0) FROM finance_expenses WHERE owner_id = ?`, ownerID,
-	).Scan(&totalExpenses); err != nil {
+	totalExpenses, err := r.queries.SumAllExpensesAmount(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total expenses", logger.Error(err))
 		return domain.PLReport{}, err
 	}
-	report.TotalExpenses = totalExpenses.Float64
+	report.TotalExpenses = toFloat64FromInterface(totalExpenses)
 	report.GrossProfit = report.TotalRevenue - report.TotalExpenses
 	report.NetProfit = report.GrossProfit
 
 	return report, nil
 }
 
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
+
 func nullableString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func nullStr(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
+func nullBool(b sql.NullBool) bool {
+	if b.Valid {
+		return b.Bool
+	}
+	return false
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+	v, _ := strconv.ParseFloat(s.String, 64)
+	return v
+}
+
+func toFloat64FromInterface(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		f, _ := strconv.ParseFloat(string(val), 64)
+		return f
+	case string:
+		f, _ := strconv.ParseFloat(val, 64)
+		return f
+	default:
+		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
+		return f
+	}
 }

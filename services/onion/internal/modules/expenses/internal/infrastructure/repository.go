@@ -4,75 +4,69 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
+	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Expense, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
-		 FROM finance_expenses WHERE owner_id = ? ORDER BY expense_date DESC`, ownerID,
-	)
+	rows, err := r.queries.ListExpenses(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expenses", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	expenses := make([]domain.Expense, 0)
-	for rows.Next() {
-		e, scanErr := scanExpense(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		expenses = append(expenses, e)
+	expenses := make([]domain.Expense, 0, len(rows))
+	for _, row := range rows {
+		expenses = append(expenses, expenseFromRow(row))
 	}
-	return expenses, rows.Err()
+	return expenses, nil
 }
 
 func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Expense, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, owner_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
-		 FROM finance_expenses WHERE id = ? AND owner_id = ?`, id, ownerID,
-	)
-	var e domain.Expense
-	var catID sql.NullInt64
-	var currency, desc, vendor, receipt, status sql.NullString
-	if err := row.Scan(&e.ID, &e.OwnerID, &catID, &e.Amount, &currency, &desc, &vendor, &receipt, &e.ExpenseDate, &status, &e.CreatedAt, &e.UpdatedAt); err != nil {
+	row, err := r.queries.GetExpenseByID(ctx, sqlc.GetExpenseByIDParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Expense{}, domain.ErrExpenseNotFound
 		}
 		return domain.Expense{}, err
 	}
-	if catID.Valid {
-		e.CategoryID = &catID.Int64
-	}
-	e.Currency = currency.String
-	e.Description = desc.String
-	e.Vendor = vendor.String
-	e.ReceiptURL = receipt.String
-	e.Status = status.String
-	return e, nil
+	return expenseFromGetRow(row), nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO finance_expenses (owner_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
-		input.OwnerID, input.CategoryID, input.Amount,
-		nullableString(input.Currency), nullableString(input.Description),
-		nullableString(input.Vendor), nullableString(input.ReceiptURL), input.ExpenseDate,
-	)
+	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
+		OwnerID:     input.OwnerID,
+		CategoryID:  nullableInt64Ptr(input.CategoryID),
+		Amount:      fmtFloat(input.Amount),
+		Currency:    nullableString(input.Currency),
+		Description: input.Description,
+		Vendor:      nullableString(input.Vendor),
+		ReceiptUrl:  nullableString(input.ReceiptURL),
+		ExpenseDate: input.ExpenseDate,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense", logger.Error(err))
 		return 0, err
@@ -81,14 +75,17 @@ func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE finance_expenses SET category_id = ?, amount = ?, currency = ?, description = ?, vendor = ?, receipt_url = ?, expense_date = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.CategoryID, input.Amount,
-		nullableString(input.Currency), nullableString(input.Description),
-		nullableString(input.Vendor), nullableString(input.ReceiptURL), input.ExpenseDate,
-		input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
+		CategoryID:  nullableInt64Ptr(input.CategoryID),
+		Amount:      fmtFloat(input.Amount),
+		Currency:    nullableString(input.Currency),
+		Description: input.Description,
+		Vendor:      nullableString(input.Vendor),
+		ReceiptUrl:  nullableString(input.ReceiptURL),
+		ExpenseDate: input.ExpenseDate,
+		ID:          input.ID,
+		OwnerID:     input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense", logger.Error(err))
 		return err
@@ -104,9 +101,10 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM finance_expenses WHERE id = ? AND owner_id = ?", id, ownerID,
-	)
+	result, err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete expense", logger.Error(err))
 		return err
@@ -122,46 +120,106 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, color, created_at FROM finance_expense_categories WHERE owner_id = ? ORDER BY name`, ownerID,
-	)
+	rows, err := r.queries.ListExpenseCategories(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expense categories", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	cats := make([]domain.ExpenseCategory, 0)
-	for rows.Next() {
-		var cat domain.ExpenseCategory
-		var color sql.NullString
-		if scanErr := rows.Scan(&cat.ID, &cat.OwnerID, &cat.Name, &color, &cat.CreatedAt); scanErr != nil {
-			return nil, scanErr
-		}
-		cat.Color = color.String
-		cats = append(cats, cat)
+	cats := make([]domain.ExpenseCategory, 0, len(rows))
+	for _, row := range rows {
+		cats = append(cats, domain.ExpenseCategory{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Name:      row.Name,
+			Color:     nullStr(row.Color),
+			CreatedAt: nullTime(row.CreatedAt),
+		})
 	}
-	return cats, rows.Err()
+	return cats, nil
 }
 
-func scanExpense(rows *sql.Rows) (domain.Expense, error) {
-	var e domain.Expense
-	var catID sql.NullInt64
-	var currency, desc, vendor, receipt, status sql.NullString
-	if err := rows.Scan(&e.ID, &e.OwnerID, &catID, &e.Amount, &currency, &desc, &vendor, &receipt, &e.ExpenseDate, &status, &e.CreatedAt, &e.UpdatedAt); err != nil {
-		return domain.Expense{}, err
+// ---------------------------------------------------------------------------
+// Mapping helpers
+// ---------------------------------------------------------------------------
+
+func expenseFromRow(row sqlc.ListExpensesRow) domain.Expense {
+	e := domain.Expense{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Amount:      parseFloat(row.Amount),
+		Currency:    nullStr(row.Currency),
+		Description: row.Description,
+		Vendor:      nullStr(row.Vendor),
+		ReceiptURL:  nullStr(row.ReceiptUrl),
+		ExpenseDate: row.ExpenseDate,
+		Status:      nullStr(row.Status),
+		CreatedAt:   nullTime(row.CreatedAt),
+		UpdatedAt:   nullTime(row.UpdatedAt),
 	}
-	if catID.Valid {
-		e.CategoryID = &catID.Int64
+	if row.CategoryID.Valid {
+		e.CategoryID = &row.CategoryID.Int64
 	}
-	e.Currency = currency.String
-	e.Description = desc.String
-	e.Vendor = vendor.String
-	e.ReceiptURL = receipt.String
-	e.Status = status.String
-	return e, nil
+	return e
 }
+
+func expenseFromGetRow(row sqlc.GetExpenseByIDRow) domain.Expense {
+	e := domain.Expense{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Amount:      parseFloat(row.Amount),
+		Currency:    nullStr(row.Currency),
+		Description: row.Description,
+		Vendor:      nullStr(row.Vendor),
+		ReceiptURL:  nullStr(row.ReceiptUrl),
+		ExpenseDate: row.ExpenseDate,
+		Status:      nullStr(row.Status),
+		CreatedAt:   nullTime(row.CreatedAt),
+		UpdatedAt:   nullTime(row.UpdatedAt),
+	}
+	if row.CategoryID.Valid {
+		e.CategoryID = &row.CategoryID.Int64
+	}
+	return e
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
 
 func nullableString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
+
+func nullableInt64Ptr(p *int64) sql.NullInt64 {
+	if p == nil || *p == 0 {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *p, Valid: true}
+}
+
+func nullStr(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func parseFloat(s string) float64 {
+	v, _ := strconv.ParseFloat(s, 64)
+	return v
+}
+
+// Ensure these are used.
+var _ = fmt.Sprintf

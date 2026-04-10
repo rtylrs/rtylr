@@ -3,55 +3,66 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/training/internal/domain"
+	"github.com/voxire/onion/internal/modules/training/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.TrainingCourse, error) {
-	query := `
-		SELECT id, owner_id, name, description, duration_hours, is_required, created_at
-		FROM hr_training_courses
-		WHERE owner_id = ?
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListTrainingCourses(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list training courses", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []domain.TrainingCourse
-	for rows.Next() {
+	items := make([]domain.TrainingCourse, 0, len(rows))
+	for _, row := range rows {
 		var item domain.TrainingCourse
-		if err := item.FromRow(rows); err != nil {
-			return nil, err
+		item.ID = row.ID
+		item.OwnerID = row.OwnerID
+		item.Name = row.Name
+		if row.Description.Valid {
+			item.Description = row.Description.String
+		}
+		if row.DurationHours.Valid {
+			item.DurationHours, _ = strconv.ParseFloat(row.DurationHours.String, 64)
+		}
+		if row.IsRequired.Valid {
+			item.IsRequired = row.IsRequired.Bool
+		}
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
 		}
 		items = append(items, item)
 	}
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.TrainingCourseInput) (int64, error) {
-	query := `
-		INSERT INTO hr_training_courses (owner_id, name, description, duration_hours, is_required)
-		VALUES (?, ?, ?, ?, ?)`
-
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID, input.Name,
-		sql.NullString{String: input.Description, Valid: input.Description != ""},
-		input.DurationHours, input.IsRequired,
-	)
+	res, err := r.queries.CreateTrainingCourse(ctx, sqlc.CreateTrainingCourseParams{
+		OwnerID:       ownerID,
+		Name:          input.Name,
+		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
+		DurationHours: sql.NullString{String: strconv.FormatFloat(input.DurationHours, 'f', 1, 64), Valid: true},
+		IsRequired:    sql.NullBool{Bool: input.IsRequired, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create training course", logger.Error(err))
 		return 0, err

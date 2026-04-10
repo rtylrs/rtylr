@@ -1,0 +1,139 @@
+-- name: CountWorkspacesByOwner :one
+SELECT COUNT(*) AS cnt FROM flow_workspaces WHERE owner_id = ?;
+
+-- name: CreateWorkspace :execresult
+INSERT INTO flow_workspaces (owner_id, name, description, icon, color, is_default, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetWorkspacesByOwner :many
+SELECT id, owner_id, name, description, icon, color, is_default, created_by, created_at, updated_at
+FROM flow_workspaces WHERE owner_id = ? ORDER BY is_default DESC, created_at ASC;
+
+-- name: UpdateWorkspace :exec
+UPDATE flow_workspaces SET name = ?, description = ?, icon = ?, color = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteWorkspace :exec
+DELETE FROM flow_workspaces WHERE id = ? AND owner_id = ?;
+
+-- name: AddWorkspaceMember :exec
+INSERT INTO flow_workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE role = VALUES(role);
+
+-- name: RemoveWorkspaceMember :exec
+DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?;
+
+-- name: CreateProject :execresult
+INSERT INTO flow_projects (workspace_id, owner_id, name, description, icon, color, start_date, due_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetProjectsByWorkspace :many
+SELECT id, workspace_id, owner_id, name, description, icon, color, status, start_date, due_date, created_by, created_at, updated_at
+FROM flow_projects WHERE workspace_id = ? AND owner_id = ? AND status != 'archived' ORDER BY created_at ASC;
+
+-- name: UpdateProject :exec
+UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: ArchiveProject :exec
+UPDATE flow_projects SET status = 'archived' WHERE id = ? AND owner_id = ?;
+
+-- name: CreateTask :execresult
+INSERT INTO flow_tasks
+(project_id, workspace_id, owner_id, parent_task_id, title, description, priority,
+ assignee_id, reporter_id, due_date, start_date, estimated_hours, labels)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetTasksByProject :many
+SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
+       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+FROM flow_tasks WHERE project_id = ? AND parent_task_id IS NULL
+ORDER BY sort_order ASC, created_at ASC;
+
+-- name: GetTaskByID :one
+SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
+       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+FROM flow_tasks WHERE id = ?;
+
+-- name: GetSubtasks :many
+SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
+       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+FROM flow_tasks WHERE parent_task_id = ? ORDER BY sort_order ASC, created_at ASC;
+
+-- name: GetMyTasks :many
+SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
+       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+FROM flow_tasks
+WHERE assignee_id = ? AND status NOT IN ('done','cancelled')
+ORDER BY FIELD(priority,'urgent','high','medium','low','none'), due_date ASC;
+
+-- name: UpdateTask :exec
+UPDATE flow_tasks
+SET title = ?, description = ?, status = ?, priority = ?, assignee_id = ?,
+    due_date = ?, start_date = ?, labels = ?,
+    completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
+WHERE id = ? AND owner_id = ?;
+
+-- name: UpdateTaskStatus :exec
+UPDATE flow_tasks
+SET status = ?,
+    completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
+WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteTask :exec
+DELETE FROM flow_tasks WHERE id = ? AND owner_id = ?;
+
+-- name: CreateComment :execresult
+INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?);
+
+-- name: GetCommentsByTask :many
+SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
+FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC;
+
+-- name: DeleteComment :exec
+DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
+
+-- name: LogActivity :exec
+INSERT INTO flow_task_activity (task_id, user_id, action, old_value, new_value) VALUES (?, ?, ?, ?, ?);
+
+-- name: GetActivityByTask :many
+SELECT id, task_id, user_id, action, old_value, new_value, created_at
+FROM flow_task_activity WHERE task_id = ? ORDER BY created_at DESC LIMIT ?;
+
+-- name: CreateAttachment :execresult
+INSERT INTO flow_task_attachments (task_id, owner_id, name, url, size, uploaded_by)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: GetAttachmentsByTask :many
+SELECT id, task_id, owner_id, name, url, size, uploaded_by, created_at
+FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC;
+
+-- name: DeleteAttachment :exec
+DELETE FROM flow_task_attachments WHERE id = ? AND owner_id = ?;
+
+-- name: CreateTimeLog :execresult
+INSERT INTO flow_time_logs (owner_id, task_id, user_id, duration_minutes, description)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: GetTimeLogsByTask :many
+SELECT id, owner_id, task_id, user_id, duration_minutes, description, logged_at, created_at
+FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC;
+
+-- name: CreateLabel :execresult
+INSERT INTO flow_labels (workspace_id, name, color) VALUES (?, ?, ?);
+
+-- name: GetLabelsByWorkspace :many
+SELECT id, workspace_id, name, color, created_at
+FROM flow_labels WHERE workspace_id = ? ORDER BY name ASC;
+
+-- name: GetDashboardStats :one
+SELECT
+    COUNT(CASE WHEN status = 'todo' THEN 1 END) AS open_tasks,
+    COUNT(CASE WHEN status = 'in_progress' THEN 1 END) AS in_progress_tasks,
+    COUNT(CASE WHEN status = 'done' AND completed_at >= ? AND completed_at < ? THEN 1 END) AS completed_this_week,
+    COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) AS overdue_tasks
+FROM flow_tasks WHERE workspace_id = ? AND owner_id = ?;

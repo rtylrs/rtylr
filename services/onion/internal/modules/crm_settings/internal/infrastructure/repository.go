@@ -6,29 +6,23 @@ import (
 	"errors"
 
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/domain"
+	"github.com/voxire/onion/internal/modules/crm_settings/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
 func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, error) {
-	var s domain.Settings
-	var fromEmail, fromName, smsSenderID, timezone sql.NullString
-
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT id, owner_id, default_consent, from_email, from_name, sms_sender_id, timezone, created_at, updated_at
-		 FROM crm_settings WHERE owner_id = ?`, ownerID,
-	).Scan(&s.ID, &s.OwnerID, &s.DefaultConsent, &fromEmail, &fromName, &smsSenderID, &timezone, &s.CreatedAt, &s.UpdatedAt)
-
+	row, err := r.queries.GetSettings(ctx, ownerID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Settings{
@@ -43,10 +37,17 @@ func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, e
 		return domain.Settings{}, err
 	}
 
-	s.FromEmail = fromEmail.String
-	s.FromName = fromName.String
-	s.SmsSenderID = smsSenderID.String
-	s.Timezone = timezone.String
+	s := domain.Settings{
+		ID:             row.ID,
+		OwnerID:        row.OwnerID,
+		DefaultConsent: row.DefaultConsent.Bool,
+		FromEmail:      row.FromEmail.String,
+		FromName:       row.FromName.String,
+		SmsSenderID:    row.SmsSenderID.String,
+		Timezone:       row.Timezone.String,
+		CreatedAt:      row.CreatedAt.Time,
+		UpdatedAt:      row.UpdatedAt.Time,
+	}
 
 	if s.Timezone == "" {
 		s.Timezone = "UTC"
@@ -56,19 +57,14 @@ func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, e
 }
 
 func (r *Repository) Upsert(ctx context.Context, input domain.SettingsInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_settings
-		   (owner_id, default_consent, from_email, from_name, sms_sender_id, timezone)
-		 VALUES (?, ?, ?, ?, ?, ?)
-		 ON DUPLICATE KEY UPDATE
-		   default_consent = VALUES(default_consent),
-		   from_email = VALUES(from_email),
-		   from_name = VALUES(from_name),
-		   sms_sender_id = VALUES(sms_sender_id),
-		   timezone = VALUES(timezone)`,
-		input.OwnerID, input.DefaultConsent, input.FromEmail,
-		input.FromName, input.SmsSenderID, input.Timezone,
-	)
+	err := r.queries.UpsertSettings(ctx, sqlc.UpsertSettingsParams{
+		OwnerID:        input.OwnerID,
+		DefaultConsent: sql.NullBool{Bool: input.DefaultConsent, Valid: true},
+		FromEmail:      sql.NullString{String: input.FromEmail, Valid: input.FromEmail != ""},
+		FromName:       sql.NullString{String: input.FromName, Valid: input.FromName != ""},
+		SmsSenderID:    sql.NullString{String: input.SmsSenderID, Valid: input.SmsSenderID != ""},
+		Timezone:       sql.NullString{String: input.Timezone, Valid: input.Timezone != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert CRM settings", logger.Error(err))
 	}

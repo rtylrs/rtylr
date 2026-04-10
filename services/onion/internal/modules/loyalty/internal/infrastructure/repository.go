@@ -4,19 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
+	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
@@ -29,109 +31,166 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID int64, custom
 	}
 	offset := (page - 1) * pageSize
 
-	var total int
-	countQuery := "SELECT COUNT(*) FROM crm_loyalty_transactions WHERE owner_id = ?"
-	args := []interface{}{ownerID}
+	var total int64
+	var err error
+
 	if customerID > 0 {
-		countQuery += " AND customer_id = ?"
-		args = append(args, customerID)
+		total, err = r.queries.CountTransactionsByCustomer(ctx, sqlc.CountTransactionsByCustomerParams{
+			OwnerID:    ownerID,
+			CustomerID: customerID,
+		})
+	} else {
+		total, err = r.queries.CountTransactions(ctx, ownerID)
 	}
-	if err := r.pool.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
+
+	if err != nil {
 		return nil, 0, err
 	}
 
-	query := "SELECT id, owner_id, customer_id, points, type, description, reference_id, reference_type, created_at FROM crm_loyalty_transactions WHERE owner_id = ?"
 	if customerID > 0 {
-		query += " AND customer_id = ?"
-	}
-	query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+		rows, qErr := r.queries.ListTransactionsByCustomer(ctx, sqlc.ListTransactionsByCustomerParams{
+			OwnerID:    ownerID,
+			CustomerID: customerID,
+			Limit:      int32(pageSize),
+			Offset:     int32(offset),
+		})
+		if qErr != nil {
+			logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(qErr))
 
-	queryArgs := append(args, pageSize, offset)
-	rows, err := r.pool.QueryContext(ctx, query, queryArgs...)
+			return nil, 0, qErr
+		}
+
+		txs := make([]domain.LoyaltyTransaction, 0, len(rows))
+		for _, row := range rows {
+			txs = append(txs, domain.LoyaltyTransaction{
+				ID:            row.ID,
+				OwnerID:       row.OwnerID,
+				CustomerID:    row.CustomerID,
+				Points:        int(row.Points),
+				Type:          string(row.Type),
+				Description:   row.Description.String,
+				ReferenceID:   nullInt64Ptr(row.ReferenceID),
+				ReferenceType: row.ReferenceType.String,
+				CreatedAt:     row.CreatedAt.Time,
+			})
+		}
+
+		return txs, int(total), nil
+	}
+
+	rows, err := r.queries.ListTransactions(ctx, sqlc.ListTransactionsParams{
+		OwnerID: ownerID,
+		Limit:   int32(pageSize),
+		Offset:  int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(err))
+
 		return nil, 0, err
 	}
-	defer rows.Close()
 
-	txs := make([]domain.LoyaltyTransaction, 0)
-	for rows.Next() {
-		var tx domain.LoyaltyTransaction
-		var desc sql.NullString
-		var refID sql.NullInt64
-		var refType sql.NullString
-		if err := rows.Scan(&tx.ID, &tx.OwnerID, &tx.CustomerID, &tx.Points, &tx.Type, &desc, &refID, &refType, &tx.CreatedAt); err != nil {
-			return nil, 0, err
-		}
-		tx.Description = desc.String
-		if refID.Valid {
-			tx.ReferenceID = &refID.Int64
-		}
-		tx.ReferenceType = refType.String
-		txs = append(txs, tx)
+	txs := make([]domain.LoyaltyTransaction, 0, len(rows))
+	for _, row := range rows {
+		txs = append(txs, domain.LoyaltyTransaction{
+			ID:            row.ID,
+			OwnerID:       row.OwnerID,
+			CustomerID:    row.CustomerID,
+			Points:        int(row.Points),
+			Type:          string(row.Type),
+			Description:   row.Description.String,
+			ReferenceID:   nullInt64Ptr(row.ReferenceID),
+			ReferenceType: row.ReferenceType.String,
+			CreatedAt:     row.CreatedAt.Time,
+		})
 	}
-	return txs, total, rows.Err()
+
+	return txs, int(total), nil
 }
 
 func (r *Repository) CreateTransaction(ctx context.Context, input domain.AwardInput, txType string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_loyalty_transactions (owner_id, customer_id, points, type, description, reference_id, reference_type)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		input.OwnerID, input.CustomerID, input.Points, txType,
-		nullableString(input.Description), input.ReferenceID, nullableString(input.ReferenceType),
-	)
+	err := r.queries.CreateTransaction(ctx, sqlc.CreateTransactionParams{
+		OwnerID:       input.OwnerID,
+		CustomerID:    input.CustomerID,
+		Points:        int32(input.Points),
+		Type:          sqlc.CrmLoyaltyTransactionsType(txType),
+		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
+		ReferenceID:   nullInt64FromPtr(input.ReferenceID),
+		ReferenceType: sql.NullString{String: input.ReferenceType, Valid: input.ReferenceType != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create loyalty transaction", logger.Error(err))
 	}
+
 	return err
 }
 
 func (r *Repository) CreateRedeemTransaction(ctx context.Context, input domain.RedeemInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_loyalty_transactions (owner_id, customer_id, points, type, description, reference_id, reference_type)
-		 VALUES (?, ?, ?, 'redeem', ?, ?, ?)`,
-		input.OwnerID, input.CustomerID, input.Points,
-		nullableString(input.Description), input.ReferenceID, nullableString(input.ReferenceType),
-	)
+	err := r.queries.CreateRedeemTransaction(ctx, sqlc.CreateRedeemTransactionParams{
+		OwnerID:       input.OwnerID,
+		CustomerID:    input.CustomerID,
+		Points:        int32(input.Points),
+		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
+		ReferenceID:   nullInt64FromPtr(input.ReferenceID),
+		ReferenceType: sql.NullString{String: input.ReferenceType, Valid: input.ReferenceType != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create redeem transaction", logger.Error(err))
 	}
+
 	return err
 }
 
 func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
-	var cfg domain.LoyaltyConfig
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT id, owner_id, points_per_dollar, min_redemption_points, points_value, is_active, created_at, updated_at
-		 FROM crm_loyalty_config WHERE owner_id = ?`, ownerID,
-	).Scan(&cfg.ID, &cfg.OwnerID, &cfg.PointsPerDollar, &cfg.MinRedemptionPoints, &cfg.PointsValue, &cfg.IsActive, &cfg.CreatedAt, &cfg.UpdatedAt)
+	row, err := r.queries.GetConfig(ctx, ownerID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.LoyaltyConfig{}, domain.ErrLoyaltyConfigNotFound
 		}
+
 		logger.Ctx(ctx).Error("Failed to get loyalty config", logger.Error(err))
+
 		return domain.LoyaltyConfig{}, err
 	}
-	return cfg, nil
+
+	ppd, _ := strconv.ParseFloat(row.PointsPerCurrencyUnit.String, 64)
+	pv, _ := strconv.ParseFloat(row.CurrencyPerPoint.String, 64)
+
+	return domain.LoyaltyConfig{
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		PointsPerDollar: ppd,
+		PointsValue:     pv,
+		IsActive:        row.IsEnabled.Bool,
+		UpdatedAt:       row.UpdatedAt.Time,
+	}, nil
 }
 
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_loyalty_config (owner_id, points_per_dollar, min_redemption_points, points_value, is_active)
-		 VALUES (?, ?, ?, ?, ?)
-		 ON DUPLICATE KEY UPDATE
-		   points_per_dollar = VALUES(points_per_dollar),
-		   min_redemption_points = VALUES(min_redemption_points),
-		   points_value = VALUES(points_value),
-		   is_active = VALUES(is_active)`,
-		input.OwnerID, input.PointsPerDollar, input.MinRedemptionPoints, input.PointsValue, input.IsActive,
-	)
+	err := r.queries.UpsertConfig(ctx, sqlc.UpsertConfigParams{
+		OwnerID:               input.OwnerID,
+		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerDollar, 'f', 2, 64), Valid: true},
+		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.PointsValue, 'f', 4, 64), Valid: true},
+		IsEnabled:             sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert loyalty config", logger.Error(err))
 	}
+
 	return err
 }
 
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
+func nullInt64Ptr(v sql.NullInt64) *int64 {
+	if v.Valid {
+		return &v.Int64
+	}
+
+	return nil
+}
+
+func nullInt64FromPtr(p *int64) sql.NullInt64 {
+	if p != nil {
+		return sql.NullInt64{Int64: *p, Valid: true}
+	}
+
+	return sql.NullInt64{}
 }

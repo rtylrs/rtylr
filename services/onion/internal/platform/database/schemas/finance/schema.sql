@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS finance_expenses (
     is_tax_deductible BOOLEAN DEFAULT FALSE,
     tax_amount DECIMAL(10,2) DEFAULT 0,
     notes TEXT,
+    status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -98,7 +99,11 @@ CREATE TABLE IF NOT EXISTS finance_tax_config (
     type ENUM('vat','sales_tax','gst','other') DEFAULT 'vat',
     is_default BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    tax_name VARCHAR(100),
+    tax_rate DECIMAL(5,2) DEFAULT 0,
+    is_inclusive BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS finance_recurring_invoices (

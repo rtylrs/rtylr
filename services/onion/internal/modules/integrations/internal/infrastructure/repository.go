@@ -2,61 +2,57 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/domain"
+	"github.com/voxire/onion/internal/modules/integrations/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Integration, error) {
-	query := `
-		SELECT id, owner_id, provider, status, config, connected_at, created_at
-		FROM hub_integrations
-		WHERE owner_id = ?
-		ORDER BY created_at DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListIntegrations(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list integrations", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var integrations []domain.Integration
-	for rows.Next() {
+	for _, row := range rows {
 		var i domain.Integration
-		var status string
-		var configJSON []byte
-		if err := rows.Scan(&i.ID, &i.OwnerID, &i.Provider, &status, &configJSON, &i.ConnectedAt, &i.CreatedAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan integration row", logger.Error(err))
-			return nil, err
+		i.ID = row.ID
+		i.OwnerID = row.OwnerID
+		i.Provider = row.Provider
+		i.Status = domain.IntegrationStatus(row.Status)
+		i.Config = json.RawMessage(row.Config)
+		if row.ConnectedAt.Valid {
+			i.ConnectedAt = &row.ConnectedAt.Time
 		}
-		i.Status = domain.IntegrationStatus(status)
-		i.Config = json.RawMessage(configJSON)
+		if row.CreatedAt.Valid {
+			i.CreatedAt = row.CreatedAt.Time
+		}
 		integrations = append(integrations, i)
 	}
 
-	return integrations, rows.Err()
+	return integrations, nil
 }
 
 func (r *Repository) Connect(ctx context.Context, ownerID int64, provider string, config json.RawMessage) (int64, error) {
-	query := `
-		INSERT INTO hub_integrations (owner_id, provider, status, config, connected_at)
-		VALUES (?, ?, 'connected', ?, NOW())`
-
-	res, err := r.pool.ExecContext(ctx, query, ownerID, provider, config)
+	res, err := r.queries.ConnectIntegration(ctx, sqlc.ConnectIntegrationParams{
+		OwnerID:  ownerID,
+		Provider: provider,
+		Config:   config,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to connect integration", logger.Error(err))
 		return 0, err
@@ -66,9 +62,10 @@ func (r *Repository) Connect(ctx context.Context, ownerID int64, provider string
 }
 
 func (r *Repository) Disconnect(ctx context.Context, ownerID, integrationID int64) error {
-	query := `DELETE FROM hub_integrations WHERE id = ? AND owner_id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, integrationID, ownerID)
+	err := r.queries.DisconnectIntegration(ctx, sqlc.DisconnectIntegrationParams{
+		ID:      integrationID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to disconnect integration", logger.Error(err))
 		return err

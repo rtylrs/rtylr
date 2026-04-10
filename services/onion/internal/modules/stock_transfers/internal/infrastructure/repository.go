@@ -3,55 +3,40 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
 	pool := dbclient.Pool()
 
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
 func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64) ([]domain.StockTransfer, error) {
-	query := `
-		SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
-		FROM erp_stock_transfers
-		WHERE owner_id = ?
-		ORDER BY created_at DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListStockTransfers(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock transfers", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var transfers []domain.StockTransfer
 
-	for rows.Next() {
-		var t domain.StockTransfer
-		if err := t.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan stock transfer row", logger.Error(err))
-
-			return nil, err
-		}
-
-		transfers = append(transfers, t)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
+	for _, row := range rows {
+		transfers = append(transfers, stockTransferFromRow(row))
 	}
 
 	for i := range transfers {
@@ -67,35 +52,30 @@ func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64) ([]d
 }
 
 func (r *Repository) getTransferItems(ctx context.Context, transferID int64) ([]domain.StockTransferItem, error) {
-	query := `
-		SELECT id, transfer_id, product_id, quantity, created_at
-		FROM erp_stock_transfer_items
-		WHERE transfer_id = ?
-		ORDER BY id ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, transferID)
+	rows, err := r.queries.GetTransferItems(ctx, transferID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get transfer items", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var items []domain.StockTransferItem
 
-	for rows.Next() {
+	for _, row := range rows {
 		var item domain.StockTransferItem
-		if err := item.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan transfer item row", logger.Error(err))
+		item.ID = row.ID
+		item.TransferID = row.TransferID
+		item.ProductID = row.ProductID
+		item.Quantity, _ = strconv.ParseFloat(row.Quantity, 64)
 
-			return nil, err
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
 		}
 
 		items = append(items, item)
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, input domain.StockTransferInput) (int64, error) {
@@ -112,16 +92,14 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 		}
 	}()
 
-	query := `
-		INSERT INTO erp_stock_transfers (owner_id, from_warehouse_id, to_warehouse_id, status, notes)
-		VALUES (?, ?, ?, 'draft', ?)`
+	qtx := r.queries.WithTx(tx)
 
-	res, err := tx.ExecContext(ctx, query,
-		ownerID,
-		input.FromWarehouseID,
-		input.ToWarehouseID,
-		nullString(input.Notes),
-	)
+	res, err := qtx.InsertStockTransfer(ctx, sqlc.InsertStockTransferParams{
+		OwnerID:         ownerID,
+		FromWarehouseID: input.FromWarehouseID,
+		ToWarehouseID:   input.ToWarehouseID,
+		Notes:           nullString(input.Notes),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock transfer", logger.Error(err))
 
@@ -133,12 +111,12 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 		return 0, err
 	}
 
-	itemQuery := `
-		INSERT INTO erp_stock_transfer_items (transfer_id, product_id, quantity)
-		VALUES (?, ?, ?)`
-
 	for _, item := range input.Items {
-		_, err = tx.ExecContext(ctx, itemQuery, transferID, item.ProductID, item.Quantity)
+		_, err = qtx.InsertStockTransferItem(ctx, sqlc.InsertStockTransferItemParams{
+			TransferID: transferID,
+			ProductID:  item.ProductID,
+			Quantity:   strconv.FormatFloat(item.Quantity, 'f', -1, 64),
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to create stock transfer item", logger.Error(err))
 
@@ -156,12 +134,14 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 }
 
 func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id int64, status domain.StockTransferStatus) error {
-	query := `
-		UPDATE erp_stock_transfers
-		SET status = ?
-		WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, string(status), ownerID, id)
+	err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+		Status: sqlc.NullErpStockTransfersStatus{
+			ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status),
+			Valid:                   true,
+		},
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
 
@@ -169,6 +149,32 @@ func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id 
 	}
 
 	return nil
+}
+
+func stockTransferFromRow(row sqlc.ErpStockTransfer) domain.StockTransfer {
+	var t domain.StockTransfer
+	t.ID = row.ID
+	t.OwnerID = row.OwnerID
+	t.FromWarehouseID = row.FromWarehouseID
+	t.ToWarehouseID = row.ToWarehouseID
+
+	if row.Status.Valid {
+		t.Status = domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
+	}
+
+	if row.Notes.Valid {
+		t.Notes = row.Notes.String
+	}
+
+	if row.CreatedAt.Valid {
+		t.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.UpdatedAt.Valid {
+		t.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return t
 }
 
 func nullString(s string) sql.NullString {

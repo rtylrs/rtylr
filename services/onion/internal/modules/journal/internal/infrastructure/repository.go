@@ -3,39 +3,44 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
+	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.JournalEntry, error) {
-	query := `
-		SELECT id, owner_id, date, description, created_at
-		FROM finance_journal_entries
-		WHERE owner_id = ?
-		ORDER BY date DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListJournalEntries(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list journal entries", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var entries []domain.JournalEntry
-	for rows.Next() {
-		var entry domain.JournalEntry
-		if err := entry.FromRow(rows); err != nil {
-			return nil, err
+	for _, row := range rows {
+		entry := domain.JournalEntry{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			Date:        row.Date,
+			Description: nullStr(row.Description),
+			CreatedAt:   nullTime(row.CreatedAt),
 		}
 
 		lines, err := r.GetLines(ctx, entry.ID)
@@ -47,43 +52,37 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.JournalE
 		entries = append(entries, entry)
 	}
 
-	return entries, rows.Err()
+	return entries, nil
 }
 
 func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.JournalLine, error) {
-	query := `
-		SELECT id, entry_id, account_id, debit, credit
-		FROM finance_journal_lines
-		WHERE entry_id = ?
-		ORDER BY id ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, entryID)
+	rows, err := r.queries.GetJournalLines(ctx, entryID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var lines []domain.JournalLine
-	for rows.Next() {
-		var line domain.JournalLine
-		if err := line.FromRow(rows); err != nil {
-			return nil, err
-		}
-		lines = append(lines, line)
+	lines := make([]domain.JournalLine, 0, len(rows))
+	for _, row := range rows {
+		lines = append(lines, domain.JournalLine{
+			ID:        row.ID,
+			EntryID:   row.EntryID,
+			AccountID: row.AccountID,
+			Debit:     parseFloatNull(row.Debit),
+			Credit:    parseFloatNull(row.Credit),
+		})
 	}
 
-	return lines, rows.Err()
+	return lines, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error) {
-	query := `
-		INSERT INTO finance_journal_entries (owner_id, date, description)
-		VALUES (?, ?, ?)`
+	entryDate, _ := time.Parse("2006-01-02", input.Date)
 
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID, input.Date,
-		sql.NullString{String: input.Description, Valid: input.Description != ""},
-	)
+	res, err := r.queries.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
+		OwnerID:     ownerID,
+		Date:        entryDate,
+		Description: nullableString(input.Description),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create journal entry", logger.Error(err))
 		return 0, err
@@ -95,10 +94,12 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 	}
 
 	for _, line := range input.Lines {
-		_, err := r.pool.ExecContext(ctx,
-			`INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit) VALUES (?, ?, ?, ?)`,
-			entryID, line.AccountID, line.Debit, line.Credit,
-		)
+		err := r.queries.CreateJournalLine(ctx, sqlc.CreateJournalLineParams{
+			EntryID:   entryID,
+			AccountID: line.AccountID,
+			Debit:     nullableString(fmtFloat(line.Debit)),
+			Credit:    nullableString(fmtFloat(line.Credit)),
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to create journal line", logger.Error(err))
 			return 0, err
@@ -106,4 +107,38 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 	}
 
 	return entryID, nil
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
+
+func nullableString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func nullStr(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+	v, _ := strconv.ParseFloat(s.String, 64)
+	return v
 }

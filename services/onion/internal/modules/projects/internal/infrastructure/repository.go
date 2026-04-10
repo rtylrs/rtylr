@@ -5,47 +5,59 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/projects/internal/domain"
+	"github.com/voxire/onion/internal/modules/projects/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Project, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, workspace_id, name, description, status, color, created_at, updated_at
-		 FROM flow_projects WHERE owner_id = ? ORDER BY created_at DESC`, ownerID,
-	)
+	rows, err := r.queries.ListProjectsByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list projects", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	projects := make([]domain.Project, 0)
-	for rows.Next() {
-		p, scanErr := scanProject(rows)
-		if scanErr != nil {
-			return nil, scanErr
+	projects := make([]domain.Project, 0, len(rows))
+	for _, row := range rows {
+		p := domain.Project{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			Name:        row.Name,
+			Description: row.Description.String,
+			Status:      string(row.Status.FlowProjectsStatus),
+			Color:       row.Color.String,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+		}
+		if row.WorkspaceID != 0 {
+			p.WorkspaceID = &row.WorkspaceID
 		}
 		projects = append(projects, p)
 	}
-	return projects, rows.Err()
+	return projects, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.ProjectInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_projects (owner_id, workspace_id, name, description, status, color)
-		 VALUES (?, ?, ?, ?, 'active', ?)`,
-		input.OwnerID, input.WorkspaceID, input.Name,
-		nullableString(input.Description), nullableString(input.Color),
-	)
+	result, err := r.queries.CreateProject(ctx, sqlc.CreateProjectParams{
+		OwnerID:     input.OwnerID,
+		WorkspaceID: derefInt64(input.WorkspaceID),
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create project", logger.Error(err))
 		return 0, err
@@ -54,12 +66,15 @@ func (r *Repository) Create(ctx context.Context, input domain.ProjectInput) (int
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.ProjectUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET workspace_id = ?, name = ?, description = ?, status = ?, color = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.WorkspaceID, input.Name, nullableString(input.Description),
-		input.Status, nullableString(input.Color), input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateProject(ctx, sqlc.UpdateProjectParams{
+		WorkspaceID: derefInt64(input.WorkspaceID),
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Status:      sqlc.NullFlowProjectsStatus{FlowProjectsStatus: sqlc.FlowProjectsStatus(input.Status), Valid: input.Status != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+		ID:          input.ID,
+		OwnerID:     input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update project", logger.Error(err))
 		return err
@@ -74,10 +89,18 @@ func (r *Repository) Update(ctx context.Context, input domain.ProjectUpdateInput
 	return nil
 }
 
+func derefInt64(v *int64) int64 {
+	if v == nil {
+		return 0
+	}
+	return *v
+}
+
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM flow_projects WHERE id = ? AND owner_id = ?", id, ownerID,
-	)
+	result, err := r.queries.DeleteProject(ctx, sqlc.DeleteProjectParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete project", logger.Error(err))
 		return err
@@ -90,23 +113,4 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 		return domain.ErrProjectNotFound
 	}
 	return nil
-}
-
-func scanProject(rows *sql.Rows) (domain.Project, error) {
-	var p domain.Project
-	var workspaceID sql.NullInt64
-	var desc, color sql.NullString
-	if err := rows.Scan(&p.ID, &p.OwnerID, &workspaceID, &p.Name, &desc, &p.Status, &color, &p.CreatedAt, &p.UpdatedAt); err != nil {
-		return domain.Project{}, err
-	}
-	if workspaceID.Valid {
-		p.WorkspaceID = &workspaceID.Int64
-	}
-	p.Description = desc.String
-	p.Color = color.String
-	return p, nil
-}
-
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

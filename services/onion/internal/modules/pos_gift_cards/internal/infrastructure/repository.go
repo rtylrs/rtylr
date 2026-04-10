@@ -3,43 +3,56 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.GiftCard, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, code, initial_amount, current_balance,
-		        COALESCE(customer_name,''), COALESCE(customer_email,''),
-		        is_active, expires_at, created_at, updated_at
-		 FROM pos_gift_cards WHERE owner_id = ? ORDER BY created_at DESC`, ownerID,
-	)
+	rows, err := r.queries.ListGiftCardsByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list gift cards", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.GiftCard, 0)
-	for rows.Next() {
-		gc, scanErr := scanGiftCard(rows)
-		if scanErr != nil {
-			return nil, scanErr
+	items := make([]domain.GiftCard, 0, len(rows))
+	for _, row := range rows {
+		gc := domain.GiftCard{
+			ID:             row.ID,
+			OwnerID:        row.OwnerID,
+			Code:           row.Code,
+			InitialAmount:  decimalToFloat(row.InitialAmount),
+			CurrentBalance: decimalToFloat(row.CurrentBalance),
+			CustomerName:   row.CustomerName.String,
+			CustomerEmail:  row.CustomerEmail.String,
+			IsActive:       row.IsActive.Bool,
+			CreatedAt:      row.CreatedAt.Time,
+			UpdatedAt:      row.UpdatedAt.Time,
+		}
+		if row.ExpiresAt.Valid {
+			t := row.ExpiresAt.Time
+			gc.ExpiresAt = &t
 		}
 		items = append(items, gc)
 	}
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error) {
@@ -51,12 +64,17 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 		}
 	}
 
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO pos_gift_cards (owner_id, code, initial_amount, current_balance, customer_name, customer_email, expires_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		ownerID, input.Code, input.InitialAmount, input.InitialAmount,
-		nullString(input.CustomerName), nullString(input.CustomerEmail), expiresAt,
-	)
+	amountStr := floatToDecimal(input.InitialAmount)
+
+	result, err := r.queries.CreateGiftCard(ctx, sqlc.CreateGiftCardParams{
+		OwnerID:        ownerID,
+		Code:           input.Code,
+		InitialAmount:  amountStr,
+		CurrentBalance: amountStr,
+		CustomerName:   sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
+		CustomerEmail:  sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
+		ExpiresAt:      expiresAt,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create gift card", logger.Error(err))
 		return 0, err
@@ -65,21 +83,11 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 }
 
 func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, owner_id, code, initial_amount, current_balance,
-		        COALESCE(customer_name,''), COALESCE(customer_email,''),
-		        is_active, expires_at, created_at, updated_at
-		 FROM pos_gift_cards WHERE owner_id = ? AND code = ?`, ownerID, code,
-	)
-
-	var gc domain.GiftCard
-	var expiresAt sql.NullTime
-
-	if err := row.Scan(
-		&gc.ID, &gc.OwnerID, &gc.Code, &gc.InitialAmount, &gc.CurrentBalance,
-		&gc.CustomerName, &gc.CustomerEmail, &gc.IsActive, &expiresAt,
-		&gc.CreatedAt, &gc.UpdatedAt,
-	); err != nil {
+	row, err := r.queries.GetGiftCardByCode(ctx, sqlc.GetGiftCardByCodeParams{
+		OwnerID: ownerID,
+		Code:    code,
+	})
+	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrGiftCardNotFound
 		}
@@ -87,10 +95,23 @@ func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) 
 		return nil, err
 	}
 
-	if expiresAt.Valid {
-		gc.ExpiresAt = &expiresAt.Time
+	gc := &domain.GiftCard{
+		ID:             row.ID,
+		OwnerID:        row.OwnerID,
+		Code:           row.Code,
+		InitialAmount:  decimalToFloat(row.InitialAmount),
+		CurrentBalance: decimalToFloat(row.CurrentBalance),
+		CustomerName:   row.CustomerName.String,
+		CustomerEmail:  row.CustomerEmail.String,
+		IsActive:       row.IsActive.Bool,
+		CreatedAt:      row.CreatedAt.Time,
+		UpdatedAt:      row.UpdatedAt.Time,
 	}
-	return &gc, nil
+	if row.ExpiresAt.Valid {
+		t := row.ExpiresAt.Time
+		gc.ExpiresAt = &t
+	}
+	return gc, nil
 }
 
 func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
@@ -109,10 +130,12 @@ func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.Red
 	}
 
 	newBalance := gc.CurrentBalance - input.Amount
-	_, err = r.pool.ExecContext(ctx,
-		`UPDATE pos_gift_cards SET current_balance = ? WHERE id = ? AND owner_id = ?`,
-		newBalance, gc.ID, ownerID,
-	)
+
+	err = r.queries.UpdateGiftCardBalance(ctx, sqlc.UpdateGiftCardBalanceParams{
+		CurrentBalance: floatToDecimal(newBalance),
+		ID:             gc.ID,
+		OwnerID:        ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to redeem gift card", logger.Error(err))
 		return nil, err
@@ -122,22 +145,14 @@ func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.Red
 	return gc, nil
 }
 
-func scanGiftCard(rows *sql.Rows) (domain.GiftCard, error) {
-	var gc domain.GiftCard
-	var expiresAt sql.NullTime
-	if err := rows.Scan(
-		&gc.ID, &gc.OwnerID, &gc.Code, &gc.InitialAmount, &gc.CurrentBalance,
-		&gc.CustomerName, &gc.CustomerEmail, &gc.IsActive, &expiresAt,
-		&gc.CreatedAt, &gc.UpdatedAt,
-	); err != nil {
-		return domain.GiftCard{}, err
+func decimalToFloat(s string) float64 {
+	if s == "" {
+		return 0
 	}
-	if expiresAt.Valid {
-		gc.ExpiresAt = &expiresAt.Time
-	}
-	return gc, nil
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
+func floatToDecimal(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
 }

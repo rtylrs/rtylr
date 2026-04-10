@@ -3,21 +3,25 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
+	"github.com/voxire/onion/internal/modules/inventory/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
 	pool := dbclient.Pool()
 
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
@@ -35,42 +39,41 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 		}
 	}()
 
-	var currentQty float64
+	qtx := r.queries.WithTx(tx)
 
-	err = tx.QueryRowContext(ctx,
-		`SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE`,
-		ownerID, productID,
-	).Scan(&currentQty)
+	stockQtyStr, err := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
+		OwnerID: ownerID,
+		ID:      productID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get current stock quantity", logger.Error(err))
 
 		return err
 	}
 
+	currentQty, _ := strconv.ParseFloat(stockQtyStr, 64)
 	newQty := currentQty + change
 
-	_, err = tx.ExecContext(ctx,
-		`UPDATE erp_products SET stock_quantity = ? WHERE owner_id = ? AND id = ?`,
-		newQty, ownerID, productID,
-	)
+	err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
+		StockQuantity: strconv.FormatFloat(newQty, 'f', -1, 64),
+		OwnerID:       ownerID,
+		ID:            productID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update stock quantity", logger.Error(err))
 
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `
-		INSERT INTO erp_inventory_transactions
-		(owner_id, product_id, type, quantity_change, quantity_before, quantity_after, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		ownerID,
-		productID,
-		string(txType),
-		change,
-		currentQty,
-		newQty,
-		nullString(notes),
-	)
+	_, err = qtx.InsertInventoryTransaction(ctx, sqlc.InsertInventoryTransactionParams{
+		OwnerID:        ownerID,
+		ProductID:      productID,
+		Type:           sqlc.ErpInventoryTransactionsType(txType),
+		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),
+		QuantityBefore: strconv.FormatFloat(currentQty, 'f', -1, 64),
+		QuantityAfter:  strconv.FormatFloat(newQty, 'f', -1, 64),
+		Notes:          nullString(notes),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert inventory transaction", logger.Error(err))
 
@@ -87,157 +90,129 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 }
 
 func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	query := `
-		SELECT id, name, sku, unit, stock_quantity, low_stock_threshold,
-		       reorder_quantity, cost_price, sale_price,
-		       (stock_quantity * cost_price) AS stock_value,
-		       (stock_quantity <= low_stock_threshold) AS is_low_stock
-		FROM erp_products
-		WHERE owner_id = ? AND track_inventory = TRUE AND is_active = TRUE
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.GetInventoryReport(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get inventory report", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
+	var report []domain.InventoryReportItem
 
-	return scanInventoryReportRows(ctx, rows)
+	for _, row := range rows {
+		var item domain.InventoryReportItem
+		item.ProductID = row.ID
+		item.ProductName = row.Name
+
+		if row.Sku.Valid {
+			item.SKU = row.Sku.String
+		}
+
+		if row.Unit.Valid {
+			item.Unit = row.Unit.String
+		}
+
+		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
+		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
+		item.StockValue = float64(row.StockValue)
+		item.IsLowStock = row.IsLowStock
+
+		if row.LowStockThreshold.Valid {
+			item.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+		}
+
+		if row.ReorderQuantity.Valid {
+			item.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+		}
+
+		report = append(report, item)
+	}
+
+	return report, nil
 }
 
 func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	query := `
-		SELECT id, name, sku, unit, stock_quantity, low_stock_threshold,
-		       reorder_quantity, cost_price, sale_price,
-		       (stock_quantity * cost_price) AS stock_value,
-		       1 AS is_low_stock
-		FROM erp_products
-		WHERE owner_id = ? AND track_inventory = TRUE AND is_active = TRUE
-		  AND stock_quantity <= low_stock_threshold
-		ORDER BY stock_quantity ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.GetLowStockProducts(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get low stock products", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
+	var report []domain.InventoryReportItem
 
-	return scanInventoryReportRows(ctx, rows)
+	for _, row := range rows {
+		var item domain.InventoryReportItem
+		item.ProductID = row.ID
+		item.ProductName = row.Name
+
+		if row.Sku.Valid {
+			item.SKU = row.Sku.String
+		}
+
+		if row.Unit.Valid {
+			item.Unit = row.Unit.String
+		}
+
+		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
+		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
+		item.StockValue = float64(row.StockValue)
+		item.IsLowStock = row.IsLowStock != 0
+
+		if row.LowStockThreshold.Valid {
+			item.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+		}
+
+		if row.ReorderQuantity.Valid {
+			item.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+		}
+
+		report = append(report, item)
+	}
+
+	return report, nil
 }
 
 func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
-	query := `
-		SELECT
-			COALESCE(c.name, 'Uncategorized') AS category_name,
-			'' AS warehouse_name,
-			COUNT(*) AS total_items,
-			SUM(p.stock_quantity * p.sale_price) AS total_value,
-			SUM(p.stock_quantity * p.cost_price) AS total_cost
-		FROM erp_products p
-		LEFT JOIN erp_categories c ON c.id = p.category_id AND c.owner_id = p.owner_id
-		WHERE p.owner_id = ? AND p.is_active = TRUE AND p.track_inventory = TRUE
-		GROUP BY c.name
-		ORDER BY total_value DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.GetValuation(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get inventory valuation", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var items []domain.ValuationItem
 
-	for rows.Next() {
+	for _, row := range rows {
 		var item domain.ValuationItem
-		var totalValue sql.NullFloat64
-		var totalCost sql.NullFloat64
+		item.CategoryName = row.CategoryName
+		item.WarehouseName = row.WarehouseName
+		item.TotalItems = row.TotalItems
 
-		if err := rows.Scan(
-			&item.CategoryName,
-			&item.WarehouseName,
-			&item.TotalItems,
-			&totalValue,
-			&totalCost,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan valuation row", logger.Error(err))
-
-			return nil, err
+		if row.TotalValue != nil {
+			switch v := row.TotalValue.(type) {
+			case float64:
+				item.TotalValue = v
+			case []byte:
+				item.TotalValue, _ = strconv.ParseFloat(string(v), 64)
+			}
 		}
 
-		if totalValue.Valid {
-			item.TotalValue = totalValue.Float64
-		}
-
-		if totalCost.Valid {
-			item.TotalCost = totalCost.Float64
+		if row.TotalCost != nil {
+			switch v := row.TotalCost.(type) {
+			case float64:
+				item.TotalCost = v
+			case []byte:
+				item.TotalCost, _ = strconv.ParseFloat(string(v), 64)
+			}
 		}
 
 		items = append(items, item)
 	}
 
-	return items, rows.Err()
-}
-
-func scanInventoryReportRows(ctx context.Context, rows *sql.Rows) ([]domain.InventoryReportItem, error) {
-	var report []domain.InventoryReportItem
-
-	for rows.Next() {
-		var item domain.InventoryReportItem
-		var sku sql.NullString
-		var unit sql.NullString
-		var lowStockThreshold sql.NullFloat64
-		var reorderQty sql.NullFloat64
-		var isLowStock int
-
-		if err := rows.Scan(
-			&item.ProductID,
-			&item.ProductName,
-			&sku,
-			&unit,
-			&item.StockQuantity,
-			&lowStockThreshold,
-			&reorderQty,
-			&item.CostPrice,
-			&item.SalePrice,
-			&item.StockValue,
-			&isLowStock,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan inventory report row", logger.Error(err))
-
-			return nil, err
-		}
-
-		if sku.Valid {
-			item.SKU = sku.String
-		}
-
-		if unit.Valid {
-			item.Unit = unit.String
-		}
-
-		if lowStockThreshold.Valid {
-			item.LowStockThreshold = lowStockThreshold.Float64
-		}
-
-		if reorderQty.Valid {
-			item.ReorderQuantity = reorderQty.Float64
-		}
-
-		item.IsLowStock = isLowStock == 1
-
-		report = append(report, item)
-	}
-
-	return report, rows.Err()
+	return items, nil
 }
 
 func nullString(s string) sql.NullString {

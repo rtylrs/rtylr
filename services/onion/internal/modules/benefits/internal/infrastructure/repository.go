@@ -3,60 +3,79 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
+	"github.com/voxire/onion/internal/modules/benefits/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BenefitPlan, error) {
-	query := `
-		SELECT id, owner_id, name, type, provider, cost_employer, cost_employee, is_active, created_at
-		FROM hr_benefit_plans
-		WHERE owner_id = ?
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListBenefitPlans(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list benefit plans", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []domain.BenefitPlan
-	for rows.Next() {
+	items := make([]domain.BenefitPlan, 0, len(rows))
+	for _, row := range rows {
 		var item domain.BenefitPlan
-		if err := item.FromRow(rows); err != nil {
-			return nil, err
+		item.ID = row.ID
+		item.OwnerID = row.OwnerID
+		item.Name = row.Name
+		if row.Type.Valid {
+			item.Type = string(row.Type.HrBenefitPlansType)
+		}
+		if row.Provider.Valid {
+			item.Provider = row.Provider.String
+		}
+		if row.CostEmployer.Valid {
+			item.CostEmployer, _ = strconv.ParseFloat(row.CostEmployer.String, 64)
+		}
+		if row.CostEmployee.Valid {
+			item.CostEmployee, _ = strconv.ParseFloat(row.CostEmployee.String, 64)
+		}
+		if row.IsActive.Valid {
+			item.IsActive = row.IsActive.Bool
+		}
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
 		}
 		items = append(items, item)
 	}
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.BenefitPlanInput) (int64, error) {
-	query := `
-		INSERT INTO hr_benefit_plans (owner_id, name, type, provider, cost_employer, cost_employee, is_active)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
-
 	benefitType := input.Type
 	if benefitType == "" {
 		benefitType = "other"
 	}
 
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID, input.Name, benefitType,
-		sql.NullString{String: input.Provider, Valid: input.Provider != ""},
-		input.CostEmployer, input.CostEmployee, input.IsActive,
-	)
+	res, err := r.queries.CreateBenefitPlan(ctx, sqlc.CreateBenefitPlanParams{
+		OwnerID:      ownerID,
+		Name:         input.Name,
+		Type:         sqlc.NullHrBenefitPlansType{HrBenefitPlansType: sqlc.HrBenefitPlansType(benefitType), Valid: true},
+		Provider:     sql.NullString{String: input.Provider, Valid: input.Provider != ""},
+		CostEmployer: sql.NullString{String: strconv.FormatFloat(input.CostEmployer, 'f', 2, 64), Valid: true},
+		CostEmployee: sql.NullString{String: strconv.FormatFloat(input.CostEmployee, 'f', 2, 64), Valid: true},
+		IsActive:     sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create benefit plan", logger.Error(err))
 		return 0, err

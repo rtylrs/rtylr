@@ -5,45 +5,55 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_locations/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Location, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, address, phone, is_active, created_at, updated_at
-		 FROM pos_locations WHERE owner_id = ? ORDER BY name`, ownerID,
-	)
+	rows, err := r.queries.ListLocationsByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list locations", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	locations := make([]domain.Location, 0)
-	for rows.Next() {
-		l, scanErr := scanLocation(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		locations = append(locations, l)
+	locations := make([]domain.Location, 0, len(rows))
+	for _, row := range rows {
+		locations = append(locations, domain.Location{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Name:      row.Name,
+			Address:   row.Address.String,
+			Phone:     row.Phone.String,
+			IsActive:  row.IsActive.Bool,
+			CreatedAt: row.CreatedAt.Time,
+			UpdatedAt: row.CreatedAt.Time,
+		})
 	}
-	return locations, rows.Err()
+	return locations, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO pos_locations (owner_id, name, address, phone, is_active) VALUES (?, ?, ?, ?, ?)`,
-		input.OwnerID, input.Name, nullableString(input.Address), nullableString(input.Phone), input.IsActive,
-	)
+	result, err := r.queries.CreateLocation(ctx, sqlc.CreateLocationParams{
+		OwnerID:  input.OwnerID,
+		Name:     input.Name,
+		Address:  sql.NullString{String: input.Address, Valid: input.Address != ""},
+		Phone:    sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create location", logger.Error(err))
 		return 0, err
@@ -52,10 +62,14 @@ func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE pos_locations SET name = ?, address = ?, phone = ?, is_active = ? WHERE id = ? AND owner_id = ?`,
-		input.Name, nullableString(input.Address), nullableString(input.Phone), input.IsActive, input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
+		Name:     input.Name,
+		Address:  sql.NullString{String: input.Address, Valid: input.Address != ""},
+		Phone:    sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:       input.ID,
+		OwnerID:  input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update location", logger.Error(err))
 		return err
@@ -68,19 +82,4 @@ func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInpu
 		return domain.ErrLocationNotFound
 	}
 	return nil
-}
-
-func scanLocation(rows *sql.Rows) (domain.Location, error) {
-	var l domain.Location
-	var address, phone sql.NullString
-	if err := rows.Scan(&l.ID, &l.OwnerID, &l.Name, &address, &phone, &l.IsActive, &l.CreatedAt, &l.UpdatedAt); err != nil {
-		return domain.Location{}, err
-	}
-	l.Address = address.String
-	l.Phone = phone.String
-	return l, nil
-}
-
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

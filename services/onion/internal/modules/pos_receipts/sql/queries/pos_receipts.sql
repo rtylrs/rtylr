@@ -1,0 +1,17 @@
+-- name: ListReceipts :many
+SELECT id, order_number, customer_name, total, payment_method, paid_at
+FROM pos_orders
+WHERE owner_id = ? AND payment_status = 'paid'
+ORDER BY paid_at DESC;
+
+-- name: ListReceiptsWithDateFrom :many
+SELECT id, order_number, customer_name, total, payment_method, paid_at
+FROM pos_orders
+WHERE owner_id = ? AND payment_status = 'paid' AND paid_at >= ?
+ORDER BY paid_at DESC;
+
+-- name: ListReceiptsWithDateRange :many
+SELECT id, order_number, customer_name, total, payment_method, paid_at
+FROM pos_orders
+WHERE owner_id = ? AND payment_status = 'paid' AND paid_at >= ? AND paid_at <= ?
+ORDER BY paid_at DESC;

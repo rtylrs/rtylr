@@ -3,40 +3,45 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, order_number, type, status, COALESCE(table_id,0),
-		        COALESCE(customer_name,''), COALESCE(kitchen_notes,''), created_at
-		 FROM pos_orders
-		 WHERE owner_id = ? AND status IN ('confirmed','preparing','ready')
-		 ORDER BY created_at ASC`, ownerID,
-	)
+	rows, err := r.queries.ListActiveKDSOrders(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list KDS orders", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	orders := make([]domain.KDSOrder, 0)
-	for rows.Next() {
-		var o domain.KDSOrder
-		if err := rows.Scan(&o.ID, &o.OrderNumber, &o.Type, &o.Status, &o.TableID, &o.CustomerName, &o.KitchenNotes, &o.CreatedAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan KDS order", logger.Error(err))
-			return nil, err
+	orders := make([]domain.KDSOrder, 0, len(rows))
+	for _, row := range rows {
+		o := domain.KDSOrder{
+			ID:           row.ID,
+			OrderNumber:  row.OrderNumber,
+			Type:         string(row.Type.PosOrdersType),
+			Status:       string(row.Status.PosOrdersStatus),
+			TableID:      row.TableID.Int64,
+			CustomerName: row.CustomerName.String,
+			KitchenNotes: row.KitchenNotes.String,
+			CreatedAt:    row.CreatedAt.Time,
 		}
 
 		items, itemErr := r.getOrderItems(ctx, o.ID)
@@ -46,38 +51,46 @@ func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]dom
 		o.Items = items
 		orders = append(orders, o)
 	}
-	return orders, rows.Err()
+	return orders, nil
 }
 
 func (r *Repository) getOrderItems(ctx context.Context, orderID int64) ([]domain.KDSItem, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, order_id, name, quantity, COALESCE(notes,''), status
-		 FROM pos_order_items WHERE order_id = ? ORDER BY id`, orderID,
-	)
+	rows, err := r.queries.GetKDSOrderItems(ctx, orderID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.KDSItem, 0)
-	for rows.Next() {
-		var item domain.KDSItem
-		if err := rows.Scan(&item.ID, &item.OrderID, &item.Name, &item.Quantity, &item.Notes, &item.Status); err != nil {
-			return nil, err
-		}
-		items = append(items, item)
+	items := make([]domain.KDSItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, domain.KDSItem{
+			ID:       row.ID,
+			OrderID:  row.OrderID,
+			Name:     row.Name,
+			Quantity: decimalToFloat(row.Quantity),
+			Notes:    row.Notes.String,
+			Status:   string(row.Status.PosOrderItemsStatus),
+		})
 	}
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?`,
-		input.Status, input.OrderID, input.ItemID,
-	)
+	err := r.queries.UpdateKDSItemStatus(ctx, sqlc.UpdateKDSItemStatusParams{
+		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(input.Status), Valid: true},
+		OrderID: input.OrderID,
+		ID:      input.ItemID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update KDS item status", logger.Error(err))
 		return err
 	}
 	return nil
+}
+
+func decimalToFloat(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
 }

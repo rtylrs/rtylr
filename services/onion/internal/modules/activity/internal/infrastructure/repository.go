@@ -2,22 +2,20 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/activity/internal/domain"
+	"github.com/voxire/onion/internal/modules/activity/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
-
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
@@ -30,35 +28,48 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int)
 		limit = 200
 	}
 
-	query := `
-		SELECT a.id, a.owner_id, a.app, a.entity_type, a.entity_id, a.action, a.description, a.user_id, u.full_name, a.created_at
-		FROM activity_log a
-		LEFT JOIN users u ON u.id = a.user_id
-		WHERE a.owner_id = ?
-		ORDER BY a.created_at DESC
-		LIMIT ?`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID, limit)
+	rows, err := r.queries.ListActivity(ctx, sqlc.ListActivityParams{
+		OwnerID: ownerID,
+		Limit:   int32(limit),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list activity", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var activities []domain.ActivityLog
 
-	for rows.Next() {
+	for _, row := range rows {
 		var a domain.ActivityLog
-		if err := a.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan activity row", logger.Error(err))
+		a.ID = row.ID
+		a.OwnerID = row.OwnerID
+		a.App = row.App
+		a.EntityType = row.EntityType
+		a.Action = row.Action
 
-			return nil, err
+		if row.EntityID.Valid {
+			a.EntityID = row.EntityID.Int64
+		}
+
+		if row.Description.Valid {
+			a.Description = row.Description.String
+		}
+
+		if row.UserID.Valid {
+			a.UserID = row.UserID.Int64
+		}
+
+		if row.UserName.Valid {
+			a.UserName = row.UserName.String
+		}
+
+		if row.CreatedAt.Valid {
+			a.CreatedAt = row.CreatedAt.Time
 		}
 
 		activities = append(activities, a)
 	}
 
-	return activities, rows.Err()
+	return activities, nil
 }

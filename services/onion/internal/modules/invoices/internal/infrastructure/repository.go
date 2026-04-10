@@ -3,20 +3,27 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
+	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
+	pool := dbclient.Pool()
+
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
@@ -25,6 +32,7 @@ func NewRepository(_ context.Context) *Repository {
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, error) {
+	// Dynamic filters require raw SQL since sqlc cannot handle optional WHERE clauses.
 	query := `
 		SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
 		       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
@@ -83,67 +91,48 @@ func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, se
 }
 
 func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error) {
-	query := `
-		SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-		       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
-		       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
-		       notes, terms, created_at, updated_at
-		FROM finance_invoices
-		WHERE id = ? AND owner_id = ?`
-
-	rows, err := r.pool.QueryContext(ctx, query, invoiceID, ownerID)
+	row, err := r.queries.GetInvoiceByID(ctx, sqlc.GetInvoiceByIDParams{
+		ID:      invoiceID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrInvoiceNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to get invoice by ID", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	if !rows.Next() {
-		return nil, domain.ErrInvoiceNotFound
-	}
+	inv := invoiceFromSqlc(row)
 
-	var inv domain.Invoice
-	if err := inv.FromRow(rows); err != nil {
-		logger.Ctx(ctx).Error("Failed to scan invoice", logger.Error(err))
-
-		return nil, err
-	}
-
-	return &inv, rows.Err()
+	return &inv, nil
 }
 
 func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) (int64, error) {
-	query := `
-		INSERT INTO finance_invoices
-		  (owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-		   status, issue_date, due_date, currency, subtotal, discount_type, discount_value,
-		   discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due, notes, terms)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-
-	result, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		inv.InvoiceNumber,
-		inv.ClientName,
-		sqlNullString(inv.ClientEmail),
-		sqlNullString(inv.ClientAddress),
-		sqlNullString(inv.ClientTaxID),
-		inv.Status,
-		inv.IssueDate.Format("2006-01-02"),
-		inv.DueDate.Format("2006-01-02"),
-		inv.Currency,
-		inv.Subtotal,
-		inv.DiscountType,
-		inv.DiscountValue,
-		inv.DiscountAmount,
-		inv.TaxRate,
-		inv.TaxAmount,
-		inv.Total,
-		inv.AmountPaid,
-		inv.AmountDue,
-		sqlNullString(inv.Notes),
-		sqlNullString(inv.Terms),
-	)
+	result, err := r.queries.CreateInvoice(ctx, sqlc.CreateInvoiceParams{
+		OwnerID:        ownerID,
+		InvoiceNumber:  inv.InvoiceNumber,
+		ClientName:     inv.ClientName,
+		ClientEmail:    sqlNullString(inv.ClientEmail),
+		ClientAddress:  sqlNullString(inv.ClientAddress),
+		ClientTaxID:    sqlNullString(inv.ClientTaxID),
+		Status:         sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(inv.Status), Valid: inv.Status != ""},
+		IssueDate:      inv.IssueDate,
+		DueDate:        inv.DueDate,
+		Currency:       sqlNullString(inv.Currency),
+		Subtotal:       sqlNullString(fmtFloat(inv.Subtotal)),
+		DiscountType:   sqlc.NullFinanceInvoicesDiscountType{FinanceInvoicesDiscountType: sqlc.FinanceInvoicesDiscountType(inv.DiscountType), Valid: inv.DiscountType != ""},
+		DiscountValue:  sqlNullString(fmtFloat(inv.DiscountValue)),
+		DiscountAmount: sqlNullString(fmtFloat(inv.DiscountAmount)),
+		TaxRate:        sqlNullString(fmtFloat(inv.TaxRate)),
+		TaxAmount:      sqlNullString(fmtFloat(inv.TaxAmount)),
+		Total:          sqlNullString(fmtFloat(inv.Total)),
+		AmountPaid:     sqlNullString(fmtFloat(inv.AmountPaid)),
+		AmountDue:      sqlNullString(fmtFloat(inv.AmountDue)),
+		Notes:          sqlNullString(inv.Notes),
+		Terms:          sqlNullString(inv.Terms),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create invoice", logger.Error(err))
 
@@ -161,23 +150,18 @@ func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domai
 }
 
 func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error {
-	query := `
-		INSERT INTO finance_invoice_items
-		  (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
-		VALUES (?,?,?,?,?,?,?,?,?)`
-
 	for _, item := range items {
-		_, err := r.pool.ExecContext(ctx, query,
-			invoiceID,
-			item.Description,
-			item.Quantity,
-			sqlNullString(item.Unit),
-			item.UnitPrice,
-			item.TaxRate,
-			item.DiscountPct,
-			item.Total,
-			item.SortOrder,
-		)
+		err := r.queries.CreateInvoiceItem(ctx, sqlc.CreateInvoiceItemParams{
+			InvoiceID:   invoiceID,
+			Description: item.Description,
+			Quantity:    fmtFloat(item.Quantity),
+			Unit:        sqlNullString(item.Unit),
+			UnitPrice:   fmtFloat(item.UnitPrice),
+			TaxRate:     sqlNullString(fmtFloat(item.TaxRate)),
+			DiscountPct: sqlNullString(fmtFloat(item.DiscountPct)),
+			Total:       fmtFloat(item.Total),
+			SortOrder:   sql.NullInt32{Int32: int32(item.SortOrder), Valid: true},
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to create invoice item", logger.Error(err))
 
@@ -189,38 +173,34 @@ func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, it
 }
 
 func (r *Repository) GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error) {
-	query := `
-		SELECT id, invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order
-		FROM finance_invoice_items
-		WHERE invoice_id = ?
-		ORDER BY sort_order ASC, id ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, invoiceID)
+	rows, err := r.queries.GetInvoiceItems(ctx, invoiceID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get invoice items", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []domain.InvoiceItem
-
-	for rows.Next() {
-		var item domain.InvoiceItem
-		if scanErr := item.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan invoice item row", logger.Error(scanErr))
-
-			return nil, scanErr
-		}
-
-		items = append(items, item)
+	items := make([]domain.InvoiceItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, domain.InvoiceItem{
+			ID:          row.ID,
+			InvoiceID:   row.InvoiceID,
+			Description: row.Description,
+			Quantity:    parseFloat(row.Quantity),
+			Unit:        nullStr(row.Unit, "unit"),
+			UnitPrice:   parseFloat(row.UnitPrice),
+			TaxRate:     parseFloatNull(row.TaxRate),
+			DiscountPct: parseFloatNull(row.DiscountPct),
+			Total:       parseFloat(row.Total),
+			SortOrder:   int(toInt32(row.SortOrder)),
+		})
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) error {
-	_, err := r.pool.ExecContext(ctx, "DELETE FROM finance_invoice_items WHERE invoice_id = ?", invoiceID)
+	err := r.queries.DeleteInvoiceItems(ctx, invoiceID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete invoice items", logger.Error(err))
 	}
@@ -229,35 +209,27 @@ func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) er
 }
 
 func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error {
-	query := `
-		UPDATE finance_invoices SET
-		  client_name = ?, client_email = ?, client_address = ?, client_tax_id = ?,
-		  issue_date = ?, due_date = ?, currency = ?, subtotal = ?, discount_type = ?,
-		  discount_value = ?, discount_amount = ?, tax_rate = ?, tax_amount = ?,
-		  total = ?, amount_due = ?, notes = ?, terms = ?
-		WHERE id = ? AND owner_id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query,
-		inv.ClientName,
-		sqlNullString(inv.ClientEmail),
-		sqlNullString(inv.ClientAddress),
-		sqlNullString(inv.ClientTaxID),
-		inv.IssueDate.Format("2006-01-02"),
-		inv.DueDate.Format("2006-01-02"),
-		inv.Currency,
-		inv.Subtotal,
-		inv.DiscountType,
-		inv.DiscountValue,
-		inv.DiscountAmount,
-		inv.TaxRate,
-		inv.TaxAmount,
-		inv.Total,
-		inv.AmountDue,
-		sqlNullString(inv.Notes),
-		sqlNullString(inv.Terms),
-		inv.ID,
-		ownerID,
-	)
+	err := r.queries.UpdateInvoice(ctx, sqlc.UpdateInvoiceParams{
+		ClientName:     inv.ClientName,
+		ClientEmail:    sqlNullString(inv.ClientEmail),
+		ClientAddress:  sqlNullString(inv.ClientAddress),
+		ClientTaxID:    sqlNullString(inv.ClientTaxID),
+		IssueDate:      inv.IssueDate,
+		DueDate:        inv.DueDate,
+		Currency:       sqlNullString(inv.Currency),
+		Subtotal:       sqlNullString(fmtFloat(inv.Subtotal)),
+		DiscountType:   sqlc.NullFinanceInvoicesDiscountType{FinanceInvoicesDiscountType: sqlc.FinanceInvoicesDiscountType(inv.DiscountType), Valid: inv.DiscountType != ""},
+		DiscountValue:  sqlNullString(fmtFloat(inv.DiscountValue)),
+		DiscountAmount: sqlNullString(fmtFloat(inv.DiscountAmount)),
+		TaxRate:        sqlNullString(fmtFloat(inv.TaxRate)),
+		TaxAmount:      sqlNullString(fmtFloat(inv.TaxAmount)),
+		Total:          sqlNullString(fmtFloat(inv.Total)),
+		AmountDue:      sqlNullString(fmtFloat(inv.AmountDue)),
+		Notes:          sqlNullString(inv.Notes),
+		Terms:          sqlNullString(inv.Terms),
+		ID:             inv.ID,
+		OwnerID:        ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice", logger.Error(err))
 	}
@@ -266,10 +238,11 @@ func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domai
 }
 
 func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {
-	_, err := r.pool.ExecContext(ctx,
-		"UPDATE finance_invoices SET status = ? WHERE id = ? AND owner_id = ?",
-		status, invoiceID, ownerID,
-	)
+	err := r.queries.UpdateInvoiceStatus(ctx, sqlc.UpdateInvoiceStatusParams{
+		Status:  sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
+		ID:      invoiceID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice status", logger.Error(err))
 	}
@@ -279,10 +252,13 @@ func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID
 
 func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
 	if paidDate != nil {
-		_, err := r.pool.ExecContext(ctx,
-			"UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ?, paid_date = ? WHERE id = ?",
-			amountPaid, amountDue, status, paidDate.Format("2006-01-02"), invoiceID,
-		)
+		err := r.queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
+			AmountPaid: sqlNullString(fmtFloat(amountPaid)),
+			AmountDue:  sqlNullString(fmtFloat(amountDue)),
+			Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
+			PaidDate:   sql.NullTime{Time: *paidDate, Valid: true},
+			ID:         invoiceID,
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))
 		}
@@ -290,10 +266,12 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID i
 		return err
 	}
 
-	_, err := r.pool.ExecContext(ctx,
-		"UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ? WHERE id = ?",
-		amountPaid, amountDue, status, invoiceID,
-	)
+	err := r.queries.UpdateInvoicePaymentTotals(ctx, sqlc.UpdateInvoicePaymentTotalsParams{
+		AmountPaid: sqlNullString(fmtFloat(amountPaid)),
+		AmountDue:  sqlNullString(fmtFloat(amountDue)),
+		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
+		ID:         invoiceID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))
 	}
@@ -302,10 +280,10 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID i
 }
 
 func (r *Repository) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		"DELETE FROM finance_invoices WHERE id = ? AND owner_id = ? AND status = 'draft'",
-		invoiceID, ownerID,
-	)
+	err := r.queries.DeleteInvoice(ctx, sqlc.DeleteInvoiceParams{
+		ID:      invoiceID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete invoice", logger.Error(err))
 	}
@@ -314,12 +292,10 @@ func (r *Repository) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64
 }
 
 func (r *Repository) CountInvoiceSequence(ctx context.Context, ownerID int64, year int) (int64, error) {
-	var count int64
-
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM finance_invoices WHERE owner_id = ? AND YEAR(created_at) = ?",
-		ownerID, year,
-	).Scan(&count)
+	count, err := r.queries.CountInvoiceSequence(ctx, sqlc.CountInvoiceSequenceParams{
+		OwnerID:   ownerID,
+		CreatedAt: sql.NullTime{Time: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count invoice sequence", logger.Error(err))
 
@@ -334,21 +310,16 @@ func (r *Repository) CountInvoiceSequence(ctx context.Context, ownerID int64, ye
 // ---------------------------------------------------------------------------
 
 func (r *Repository) CreatePayment(ctx context.Context, ownerID int64, p domain.Payment) (int64, error) {
-	query := `
-		INSERT INTO finance_payments
-		  (owner_id, invoice_id, amount, currency, payment_date, method, reference, notes)
-		VALUES (?,?,?,?,?,?,?,?)`
-
-	result, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		p.InvoiceID,
-		p.Amount,
-		p.Currency,
-		p.PaymentDate.Format("2006-01-02"),
-		p.Method,
-		sqlNullString(p.Reference),
-		sqlNullString(p.Notes),
-	)
+	result, err := r.queries.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		OwnerID:     ownerID,
+		InvoiceID:   p.InvoiceID,
+		Amount:      fmtFloat(p.Amount),
+		Currency:    sqlNullString(p.Currency),
+		PaymentDate: p.PaymentDate,
+		Method:      sqlc.FinancePaymentsMethod(p.Method),
+		Reference:   sqlNullString(p.Reference),
+		Notes:       sqlNullString(p.Notes),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create payment", logger.Error(err))
 
@@ -366,34 +337,30 @@ func (r *Repository) CreatePayment(ctx context.Context, ownerID int64, p domain.
 }
 
 func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error) {
-	query := `
-		SELECT id, owner_id, invoice_id, amount, currency, payment_date, method, reference, notes, created_at
-		FROM finance_payments
-		WHERE invoice_id = ?
-		ORDER BY payment_date ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, invoiceID)
+	rows, err := r.queries.GetPaymentsByInvoice(ctx, invoiceID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get payments by invoice", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	var payments []domain.Payment
-
-	for rows.Next() {
-		var p domain.Payment
-		if scanErr := p.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan payment row", logger.Error(scanErr))
-
-			return nil, scanErr
-		}
-
-		payments = append(payments, p)
+	payments := make([]domain.Payment, 0, len(rows))
+	for _, row := range rows {
+		payments = append(payments, domain.Payment{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			InvoiceID:   row.InvoiceID,
+			Amount:      parseFloat(row.Amount),
+			Currency:    nullStr(row.Currency, "USD"),
+			PaymentDate: row.PaymentDate,
+			Method:      string(row.Method),
+			Reference:   nullStr(row.Reference, ""),
+			Notes:       nullStr(row.Notes, ""),
+			CreatedAt:   nullTime(row.CreatedAt),
+		})
 	}
 
-	return payments, rows.Err()
+	return payments, nil
 }
 
 // ---------------------------------------------------------------------------
@@ -401,6 +368,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListExpenses(ctx context.Context, ownerID int64, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+	// Dynamic filters require raw SQL.
 	query := `
 		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
 		       payment_method, receipt_url, is_tax_deductible, tax_amount, notes, created_at, updated_at
@@ -457,55 +425,39 @@ func (r *Repository) ListExpenses(ctx context.Context, ownerID int64, categoryID
 }
 
 func (r *Repository) GetExpenseByID(ctx context.Context, ownerID, expenseID int64) (*domain.Expense, error) {
-	query := `
-		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
-		       payment_method, receipt_url, is_tax_deductible, tax_amount, notes, created_at, updated_at
-		FROM finance_expenses
-		WHERE id = ? AND owner_id = ?`
-
-	rows, err := r.pool.QueryContext(ctx, query, expenseID, ownerID)
+	row, err := r.queries.GetExpenseByID(ctx, sqlc.GetExpenseByIDParams{
+		ID:      expenseID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrExpenseNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to get expense by ID", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	if !rows.Next() {
-		return nil, domain.ErrExpenseNotFound
-	}
+	e := expenseFromSqlc(row)
 
-	var e domain.Expense
-	if err := e.FromRow(rows); err != nil {
-		logger.Ctx(ctx).Error("Failed to scan expense", logger.Error(err))
-
-		return nil, err
-	}
-
-	return &e, rows.Err()
+	return &e, nil
 }
 
 func (r *Repository) CreateExpense(ctx context.Context, ownerID int64, e domain.Expense) (int64, error) {
-	query := `
-		INSERT INTO finance_expenses
-		  (owner_id, category_id, description, amount, currency, expense_date, vendor,
-		   payment_method, receipt_url, is_tax_deductible, tax_amount, notes)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
-
-	result, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		sqlNullInt64(e.CategoryID),
-		e.Description,
-		e.Amount,
-		e.Currency,
-		e.ExpenseDate.Format("2006-01-02"),
-		sqlNullString(e.Vendor),
-		e.PaymentMethod,
-		sqlNullString(e.ReceiptURL),
-		e.IsTaxDeductible,
-		e.TaxAmount,
-		sqlNullString(e.Notes),
-	)
+	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
+		OwnerID:         ownerID,
+		CategoryID:      sqlNullInt64(e.CategoryID),
+		Description:     e.Description,
+		Amount:          fmtFloat(e.Amount),
+		Currency:        sqlNullString(e.Currency),
+		ExpenseDate:     e.ExpenseDate,
+		Vendor:          sqlNullString(e.Vendor),
+		PaymentMethod:   sqlc.NullFinanceExpensesPaymentMethod{FinanceExpensesPaymentMethod: sqlc.FinanceExpensesPaymentMethod(e.PaymentMethod), Valid: e.PaymentMethod != ""},
+		ReceiptUrl:      sqlNullString(e.ReceiptURL),
+		IsTaxDeductible: sql.NullBool{Bool: e.IsTaxDeductible, Valid: true},
+		TaxAmount:       sqlNullString(fmtFloat(e.TaxAmount)),
+		Notes:           sqlNullString(e.Notes),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense", logger.Error(err))
 
@@ -523,28 +475,21 @@ func (r *Repository) CreateExpense(ctx context.Context, ownerID int64, e domain.
 }
 
 func (r *Repository) UpdateExpense(ctx context.Context, ownerID int64, e domain.Expense) error {
-	query := `
-		UPDATE finance_expenses SET
-		  category_id = ?, description = ?, amount = ?, currency = ?, expense_date = ?,
-		  vendor = ?, payment_method = ?, receipt_url = ?, is_tax_deductible = ?,
-		  tax_amount = ?, notes = ?
-		WHERE id = ? AND owner_id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query,
-		sqlNullInt64(e.CategoryID),
-		e.Description,
-		e.Amount,
-		e.Currency,
-		e.ExpenseDate.Format("2006-01-02"),
-		sqlNullString(e.Vendor),
-		e.PaymentMethod,
-		sqlNullString(e.ReceiptURL),
-		e.IsTaxDeductible,
-		e.TaxAmount,
-		sqlNullString(e.Notes),
-		e.ID,
-		ownerID,
-	)
+	err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
+		CategoryID:      sqlNullInt64(e.CategoryID),
+		Description:     e.Description,
+		Amount:          fmtFloat(e.Amount),
+		Currency:        sqlNullString(e.Currency),
+		ExpenseDate:     e.ExpenseDate,
+		Vendor:          sqlNullString(e.Vendor),
+		PaymentMethod:   sqlc.NullFinanceExpensesPaymentMethod{FinanceExpensesPaymentMethod: sqlc.FinanceExpensesPaymentMethod(e.PaymentMethod), Valid: e.PaymentMethod != ""},
+		ReceiptUrl:      sqlNullString(e.ReceiptURL),
+		IsTaxDeductible: sql.NullBool{Bool: e.IsTaxDeductible, Valid: true},
+		TaxAmount:       sqlNullString(fmtFloat(e.TaxAmount)),
+		Notes:           sqlNullString(e.Notes),
+		ID:              e.ID,
+		OwnerID:         ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense", logger.Error(err))
 	}
@@ -553,10 +498,10 @@ func (r *Repository) UpdateExpense(ctx context.Context, ownerID int64, e domain.
 }
 
 func (r *Repository) DeleteExpense(ctx context.Context, ownerID, expenseID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		"DELETE FROM finance_expenses WHERE id = ? AND owner_id = ?",
-		expenseID, ownerID,
-	)
+	err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
+		ID:      expenseID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete expense", logger.Error(err))
 	}
@@ -569,47 +514,35 @@ func (r *Repository) DeleteExpense(ctx context.Context, ownerID, expenseID int64
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	query := `
-		SELECT id, owner_id, name, color, icon, created_at
-		FROM finance_expense_categories
-		WHERE owner_id = ?
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListExpenseCategories(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expense categories", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	var categories []domain.ExpenseCategory
-
-	for rows.Next() {
-		var c domain.ExpenseCategory
-		if scanErr := c.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan expense category row", logger.Error(scanErr))
-
-			return nil, scanErr
-		}
-
-		categories = append(categories, c)
+	categories := make([]domain.ExpenseCategory, 0, len(rows))
+	for _, row := range rows {
+		categories = append(categories, domain.ExpenseCategory{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Name:      row.Name,
+			Color:     nullStr(row.Color, ""),
+			Icon:      nullStr(row.Icon, ""),
+			CreatedAt: nullTime(row.CreatedAt),
+		})
 	}
 
-	return categories, rows.Err()
+	return categories, nil
 }
 
 func (r *Repository) CreateExpenseCategory(ctx context.Context, ownerID int64, c domain.ExpenseCategory) (int64, error) {
-	query := `
-		INSERT INTO finance_expense_categories (owner_id, name, color, icon)
-		VALUES (?,?,?,?)`
-
-	result, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		c.Name,
-		sqlNullString(c.Color),
-		sqlNullString(c.Icon),
-	)
+	result, err := r.queries.CreateExpenseCategory(ctx, sqlc.CreateExpenseCategoryParams{
+		OwnerID: ownerID,
+		Name:    c.Name,
+		Color:   sqlNullString(c.Color),
+		Icon:    sqlNullString(c.Icon),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense category", logger.Error(err))
 
@@ -631,49 +564,39 @@ func (r *Repository) CreateExpenseCategory(ctx context.Context, ownerID int64, c
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListTaxConfigs(ctx context.Context, ownerID int64) ([]domain.TaxConfig, error) {
-	query := `
-		SELECT id, owner_id, name, rate, type, is_default, is_active, created_at
-		FROM finance_tax_config
-		WHERE owner_id = ?
-		ORDER BY is_default DESC, name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListTaxConfigs(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list tax configs", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	var configs []domain.TaxConfig
-
-	for rows.Next() {
-		var t domain.TaxConfig
-		if scanErr := t.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan tax config row", logger.Error(scanErr))
-
-			return nil, scanErr
-		}
-
-		configs = append(configs, t)
+	configs := make([]domain.TaxConfig, 0, len(rows))
+	for _, row := range rows {
+		configs = append(configs, domain.TaxConfig{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Name:      row.Name,
+			Rate:      parseFloat(row.Rate),
+			Type:      nullEnumStr(row.Type.FinanceTaxConfigType, row.Type.Valid, "vat"),
+			IsDefault: nullBool(row.IsDefault),
+			IsActive:  nullBool(row.IsActive),
+			CreatedAt: nullTime(row.CreatedAt),
+		})
 	}
 
-	return configs, rows.Err()
+	return configs, nil
 }
 
 func (r *Repository) CreateTaxConfig(ctx context.Context, ownerID int64, t domain.TaxConfig) (int64, error) {
-	query := `
-		INSERT INTO finance_tax_config (owner_id, name, rate, type, is_default, is_active)
-		VALUES (?,?,?,?,?,?)`
-
-	result, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		t.Name,
-		t.Rate,
-		t.Type,
-		t.IsDefault,
-		true,
-	)
+	result, err := r.queries.CreateTaxConfig(ctx, sqlc.CreateTaxConfigParams{
+		OwnerID:   ownerID,
+		Name:      t.Name,
+		Rate:      fmtFloat(t.Rate),
+		Type:      sqlc.NullFinanceTaxConfigType{FinanceTaxConfigType: sqlc.FinanceTaxConfigType(t.Type), Valid: t.Type != ""},
+		IsDefault: sql.NullBool{Bool: t.IsDefault, Valid: true},
+		IsActive:  sql.NullBool{Bool: true, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create tax config", logger.Error(err))
 
@@ -695,103 +618,155 @@ func (r *Repository) CreateTaxConfig(ctx context.Context, ownerID int64, t domai
 // ---------------------------------------------------------------------------
 
 func (r *Repository) SumPaidInvoices(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
-
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(total),0) FROM finance_invoices WHERE owner_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?",
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	result, err := r.queries.SumPaidInvoices(ctx, sqlc.SumPaidInvoicesParams{
+		OwnerID:      ownerID,
+		FromPaidDate: sqlNullTimeStr(dateFrom),
+		ToPaidDate:   sqlNullTimeStr(dateTo),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum paid invoices", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumExpenses(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
+	dfTime, _ := time.Parse("2006-01-02", dateFrom)
+	dtTime, _ := time.Parse("2006-01-02", dateTo)
 
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(amount),0) FROM finance_expenses WHERE owner_id = ? AND expense_date BETWEEN ? AND ?",
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	result, err := r.queries.SumExpenses(ctx, sqlc.SumExpensesParams{
+		OwnerID:         ownerID,
+		FromExpenseDate: dfTime,
+		ToExpenseDate:   dtTime,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumTotalReceivable(ctx context.Context, ownerID int64) (float64, error) {
-	var total sql.NullFloat64
-
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE owner_id = ? AND status IN ('sent','viewed','partial','overdue')",
-		ownerID,
-	).Scan(&total)
+	result, err := r.queries.SumTotalReceivable(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum total receivable", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumOverdueAmount(ctx context.Context, ownerID int64) (float64, error) {
-	var total sql.NullFloat64
-
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE owner_id = ? AND status = 'overdue'",
-		ownerID,
-	).Scan(&total)
+	result, err := r.queries.SumOverdueAmount(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum overdue amount", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumTaxCollected(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
-
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(tax_amount),0) FROM finance_invoices WHERE owner_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?",
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	result, err := r.queries.SumTaxCollected(ctx, sqlc.SumTaxCollectedParams{
+		OwnerID:      ownerID,
+		FromPaidDate: sqlNullTimeStr(dateFrom),
+		ToPaidDate:   sqlNullTimeStr(dateTo),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum tax collected", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
+	dfTime, _ := time.Parse("2006-01-02", dateFrom)
+	dtTime, _ := time.Parse("2006-01-02", dateTo)
 
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE owner_id = ? AND is_tax_deductible = TRUE AND expense_date BETWEEN ? AND ?",
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	result, err := r.queries.SumTaxOwed(ctx, sqlc.SumTaxOwedParams{
+		OwnerID:         ownerID,
+		FromExpenseDate: dfTime,
+		ToExpenseDate:   dtTime,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum tax owed", logger.Error(err))
 
 		return 0, err
 	}
 
-	return total.Float64, nil
+	return toFloat64FromInterface(result), nil
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Mapping helpers
+// ---------------------------------------------------------------------------
+
+func invoiceFromSqlc(row sqlc.FinanceInvoice) domain.Invoice {
+	inv := domain.Invoice{
+		ID:             row.ID,
+		OwnerID:        row.OwnerID,
+		InvoiceNumber:  row.InvoiceNumber,
+		ClientName:     row.ClientName,
+		ClientEmail:    nullStr(row.ClientEmail, ""),
+		ClientAddress:  nullStr(row.ClientAddress, ""),
+		ClientTaxID:    nullStr(row.ClientTaxID, ""),
+		Status:         string(row.Status.FinanceInvoicesStatus),
+		IssueDate:      row.IssueDate,
+		DueDate:        row.DueDate,
+		Currency:       nullStr(row.Currency, "USD"),
+		Subtotal:       parseFloatNull(row.Subtotal),
+		DiscountType:   nullEnumStr(row.DiscountType.FinanceInvoicesDiscountType, row.DiscountType.Valid, "fixed"),
+		DiscountValue:  parseFloatNull(row.DiscountValue),
+		DiscountAmount: parseFloatNull(row.DiscountAmount),
+		TaxRate:        parseFloatNull(row.TaxRate),
+		TaxAmount:      parseFloatNull(row.TaxAmount),
+		Total:          parseFloatNull(row.Total),
+		AmountPaid:     parseFloatNull(row.AmountPaid),
+		AmountDue:      parseFloatNull(row.AmountDue),
+		Notes:          nullStr(row.Notes, ""),
+		Terms:          nullStr(row.Terms, ""),
+		CreatedAt:      nullTime(row.CreatedAt),
+		UpdatedAt:      nullTime(row.UpdatedAt),
+	}
+
+	if row.PaidDate.Valid {
+		t := row.PaidDate.Time
+		inv.PaidDate = &t
+	}
+
+	return inv
+}
+
+func expenseFromSqlc(row sqlc.FinanceExpense) domain.Expense {
+	return domain.Expense{
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		CategoryID:      toInt64(row.CategoryID),
+		Description:     row.Description,
+		Amount:          parseFloat(row.Amount),
+		Currency:        nullStr(row.Currency, "USD"),
+		ExpenseDate:     row.ExpenseDate,
+		Vendor:          nullStr(row.Vendor, ""),
+		PaymentMethod:   nullEnumStr(row.PaymentMethod.FinanceExpensesPaymentMethod, row.PaymentMethod.Valid, "cash"),
+		ReceiptURL:      nullStr(row.ReceiptUrl, ""),
+		IsTaxDeductible: nullBool(row.IsTaxDeductible),
+		TaxAmount:       parseFloatNull(row.TaxAmount),
+		Notes:           nullStr(row.Notes, ""),
+		CreatedAt:       nullTime(row.CreatedAt),
+		UpdatedAt:       nullTime(row.UpdatedAt),
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
 // ---------------------------------------------------------------------------
 
 func sqlNullString(s string) sql.NullString {
@@ -800,4 +775,112 @@ func sqlNullString(s string) sql.NullString {
 
 func sqlNullInt64(i int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: i, Valid: i != 0}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func parseFloat(s string) float64 {
+	v, _ := strconv.ParseFloat(s, 64)
+
+	return v
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+
+	v, _ := strconv.ParseFloat(s.String, 64)
+
+	return v
+}
+
+func nullStr(s sql.NullString, def string) string {
+	if s.Valid {
+		return s.String
+	}
+
+	return def
+}
+
+func nullBool(b sql.NullBool) bool {
+	if b.Valid {
+		return b.Bool
+	}
+
+	return false
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+
+	return time.Time{}
+}
+
+func toInt64(i sql.NullInt64) int64 {
+	if i.Valid {
+		return i.Int64
+	}
+
+	return 0
+}
+
+func toInt32(i sql.NullInt32) int32 {
+	if i.Valid {
+		return i.Int32
+	}
+
+	return 0
+}
+
+func nullEnumStr[T ~string](val T, valid bool, def string) string {
+	if valid {
+		return string(val)
+	}
+
+	return def
+}
+
+func sqlNullTimeStr(s string) sql.NullTime {
+	if s == "" {
+		return sql.NullTime{}
+	}
+
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return sql.NullTime{}
+	}
+
+	return sql.NullTime{Time: t, Valid: true}
+}
+
+func toFloat64FromInterface(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		f, _ := strconv.ParseFloat(string(val), 64)
+
+		return f
+	case string:
+		f, _ := strconv.ParseFloat(val, 64)
+
+		return f
+	default:
+		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
+
+		return f
+	}
 }

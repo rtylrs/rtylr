@@ -1,0 +1,9 @@
+-- name: ListAccounts :many
+SELECT id, owner_id, name, type, currency, balance, is_active, created_at
+FROM finance_accounts
+WHERE owner_id = ?
+ORDER BY type ASC, name ASC;
+
+-- name: CreateAccount :execresult
+INSERT INTO finance_accounts (owner_id, name, type, currency, balance, is_active)
+VALUES (?, ?, ?, ?, ?, ?);

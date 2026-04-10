@@ -5,45 +5,57 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_tables/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Table, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, location_id, label, seats, status, created_at, updated_at
-		 FROM pos_tables WHERE owner_id = ? ORDER BY label`, ownerID,
-	)
+	rows, err := r.queries.ListTablesByOwner(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list tables", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	tables := make([]domain.Table, 0)
-	for rows.Next() {
-		t, scanErr := scanTable(rows)
-		if scanErr != nil {
-			return nil, scanErr
+	tables := make([]domain.Table, 0, len(rows))
+	for _, row := range rows {
+		t := domain.Table{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Label:     row.Name,
+			Seats:     int(row.Capacity.Int32),
+			Status:    string(row.Status.PosTablesStatus),
+			CreatedAt: row.CreatedAt.Time,
+			UpdatedAt: row.UpdatedAt.Time,
+		}
+		if row.LocationID.Valid {
+			t.LocationID = &row.LocationID.Int64
 		}
 		tables = append(tables, t)
 	}
-	return tables, rows.Err()
+	return tables, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.TableInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO pos_tables (owner_id, location_id, label, seats, status) VALUES (?, ?, ?, ?, 'available')`,
-		input.OwnerID, input.LocationID, input.Label, input.Seats,
-	)
+	result, err := r.queries.CreateTable(ctx, sqlc.CreateTableParams{
+		OwnerID:    input.OwnerID,
+		LocationID: nullInt64Ptr(input.LocationID),
+		Name:       input.Label,
+		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create table", logger.Error(err))
 		return 0, err
@@ -52,28 +64,26 @@ func (r *Repository) Create(ctx context.Context, input domain.TableInput) (int64
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE pos_tables SET location_id = ?, label = ?, seats = ?, status = ? WHERE id = ? AND owner_id = ?`,
-		input.LocationID, input.Label, input.Seats, input.Status, input.ID, input.OwnerID,
-	)
+	err := r.queries.UpdateTable(ctx, sqlc.UpdateTableParams{
+		LocationID: nullInt64Ptr(input.LocationID),
+		Name:       input.Label,
+		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
+		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(input.Status), Valid: input.Status != ""},
+		ID:         input.ID,
+		OwnerID:    input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update table", logger.Error(err))
 		return err
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return domain.ErrTableNotFound
 	}
 	return nil
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM pos_tables WHERE id = ? AND owner_id = ?", id, ownerID,
-	)
+	result, err := r.queries.DeleteTable(ctx, sqlc.DeleteTableParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete table", logger.Error(err))
 		return err
@@ -88,16 +98,9 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func scanTable(rows *sql.Rows) (domain.Table, error) {
-	var t domain.Table
-	var locID sql.NullInt64
-	var status sql.NullString
-	if err := rows.Scan(&t.ID, &t.OwnerID, &locID, &t.Label, &t.Seats, &status, &t.CreatedAt, &t.UpdatedAt); err != nil {
-		return domain.Table{}, err
+func nullInt64Ptr(v *int64) sql.NullInt64 {
+	if v == nil {
+		return sql.NullInt64{}
 	}
-	if locID.Valid {
-		t.LocationID = &locID.Int64
-	}
-	t.Status = status.String
-	return t, nil
+	return sql.NullInt64{Int64: *v, Valid: true}
 }

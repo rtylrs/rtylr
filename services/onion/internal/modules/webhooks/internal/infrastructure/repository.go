@@ -2,53 +2,54 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
+	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Webhook, error) {
-	query := `
-		SELECT id, owner_id, url, events, is_active, last_triggered_at, created_at, updated_at
-		FROM hub_webhooks
-		WHERE owner_id = ?
-		ORDER BY created_at DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListWebhooks(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list webhooks", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var webhooks []domain.Webhook
-	for rows.Next() {
+	for _, row := range rows {
 		var w domain.Webhook
-		var eventsJSON []byte
-		if err := rows.Scan(&w.ID, &w.OwnerID, &w.URL, &eventsJSON, &w.IsActive, &w.LastTriggeredAt, &w.CreatedAt, &w.UpdatedAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan webhook row", logger.Error(err))
-			return nil, err
+		w.ID = row.ID
+		w.OwnerID = row.OwnerID
+		w.URL = row.Url
+		w.IsActive = row.IsActive
+		if row.LastTriggeredAt.Valid {
+			w.LastTriggeredAt = &row.LastTriggeredAt.Time
 		}
-		if err := json.Unmarshal(eventsJSON, &w.Events); err != nil {
+		if row.CreatedAt.Valid {
+			w.CreatedAt = row.CreatedAt.Time
+		}
+		if row.UpdatedAt.Valid {
+			w.UpdatedAt = row.UpdatedAt.Time
+		}
+		if err := json.Unmarshal(row.Events, &w.Events); err != nil {
 			w.Events = []string{}
 		}
 		webhooks = append(webhooks, w)
 	}
 
-	return webhooks, rows.Err()
+	return webhooks, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, url, secret string, events []string) (int64, error) {
@@ -57,11 +58,12 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, url, secret stri
 		return 0, err
 	}
 
-	query := `
-		INSERT INTO hub_webhooks (owner_id, url, events, secret)
-		VALUES (?, ?, ?, ?)`
-
-	res, err := r.pool.ExecContext(ctx, query, ownerID, url, eventsJSON, secret)
+	res, err := r.queries.CreateWebhook(ctx, sqlc.CreateWebhookParams{
+		OwnerID: ownerID,
+		Url:     url,
+		Events:  eventsJSON,
+		Secret:  secret,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create webhook", logger.Error(err))
 		return 0, err
@@ -71,9 +73,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, url, secret stri
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, webhookID int64) error {
-	query := `DELETE FROM hub_webhooks WHERE id = ? AND owner_id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, webhookID, ownerID)
+	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
+		ID:      webhookID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete webhook", logger.Error(err))
 		return err

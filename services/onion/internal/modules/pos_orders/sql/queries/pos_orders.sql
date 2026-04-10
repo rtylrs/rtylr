@@ -1,0 +1,184 @@
+-- name: ListLocationsByOwner :many
+SELECT id, owner_id, name, address, phone, is_active, created_at
+FROM pos_locations WHERE owner_id = ? ORDER BY name ASC;
+
+-- name: CreateLocation :execresult
+INSERT INTO pos_locations (owner_id, name, address, phone) VALUES (?, ?, ?, ?);
+
+-- name: ListTablesByOwner :many
+SELECT id, owner_id, location_id, name, capacity, status,
+       current_session_order_id, qr_code_url, created_at, updated_at
+FROM pos_tables WHERE owner_id = ? ORDER BY name ASC;
+
+-- name: CreatePosTable :execresult
+INSERT INTO pos_tables (owner_id, location_id, name, capacity, qr_code_url)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: UpdatePosTable :exec
+UPDATE pos_tables SET location_id = ?, name = ?, capacity = ?, qr_code_url = ?
+WHERE owner_id = ? AND id = ?;
+
+-- name: UpdateTableStatus :exec
+UPDATE pos_tables SET status = ? WHERE owner_id = ? AND id = ?;
+
+-- name: DeletePosTable :exec
+DELETE FROM pos_tables WHERE owner_id = ? AND id = ?;
+
+-- name: SetTableOccupied :exec
+UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE id = ?;
+
+-- name: FreeTable :exec
+UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHERE id = ?;
+
+-- name: GetCurrentOpenSession :one
+SELECT id, owner_id, location_id, staff_id, status,
+       opening_cash, closing_cash, expected_cash, cash_difference,
+       total_sales, total_orders, total_cash_sales, total_card_sales,
+       total_online_sales, total_refunds, opened_at, closed_at, notes
+FROM pos_sessions
+WHERE owner_id = ? AND staff_id = ? AND status = 'open'
+LIMIT 1;
+
+-- name: OpenSession :execresult
+INSERT INTO pos_sessions (owner_id, location_id, staff_id, status, opening_cash)
+VALUES (?, ?, ?, 'open', ?);
+
+-- name: CloseSession :exec
+UPDATE pos_sessions
+SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?,
+    closed_at = NOW(), notes = ?
+WHERE owner_id = ? AND id = ? AND status = 'open';
+
+-- name: GetSessionTotals :one
+SELECT
+    COALESCE(SUM(total), 0) AS total_sales,
+    COALESCE(SUM(CASE WHEN payment_method = 'cash' THEN total ELSE 0 END), 0) AS cash_sales,
+    COALESCE(SUM(CASE WHEN payment_method = 'card' THEN total ELSE 0 END), 0) AS card_sales,
+    COALESCE(SUM(CASE WHEN payment_method = 'online' THEN total ELSE 0 END), 0) AS online_sales,
+    COUNT(*) AS total_orders
+FROM pos_orders
+WHERE session_id = ? AND payment_status = 'paid';
+
+-- name: UpdateSessionTotals :exec
+UPDATE pos_sessions
+SET total_sales = ?, total_cash_sales = ?, total_card_sales = ?,
+    total_online_sales = ?, total_orders = ?
+WHERE id = ?;
+
+-- name: GetSessionByID :one
+SELECT id, owner_id, location_id, staff_id, status,
+       opening_cash, closing_cash, expected_cash, cash_difference,
+       total_sales, total_orders, total_cash_sales, total_card_sales,
+       total_online_sales, total_refunds, opened_at, closed_at, notes
+FROM pos_sessions
+WHERE owner_id = ? AND id = ?;
+
+-- name: UpdateSessionRefundTotals :exec
+UPDATE pos_sessions SET total_refunds = total_refunds + ? WHERE id = ?;
+
+-- name: ListOrdersByOwner :many
+SELECT id, owner_id, session_id, table_id, location_id,
+       order_number, type, status, customer_id, customer_name,
+       staff_id, subtotal, discount_amount, tax_amount, total,
+       payment_method, payment_status, amount_paid, change_due,
+       notes, kitchen_notes, created_at, updated_at, paid_at
+FROM pos_orders
+WHERE owner_id = ?
+ORDER BY created_at DESC;
+
+-- name: GetOrder :one
+SELECT id, owner_id, session_id, table_id, location_id,
+       order_number, type, status, customer_id, customer_name,
+       staff_id, subtotal, discount_amount, tax_amount, total,
+       payment_method, payment_status, amount_paid, change_due,
+       notes, kitchen_notes, created_at, updated_at, paid_at
+FROM pos_orders
+WHERE owner_id = ? AND id = ?;
+
+-- name: CreateOrder :execresult
+INSERT INTO pos_orders
+(owner_id, session_id, table_id, location_id, order_number, type, status,
+ customer_id, customer_name, staff_id, subtotal, total, payment_method, notes, kitchen_notes)
+VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: CreateOrderItem :execresult
+INSERT INTO pos_order_items
+(order_id, menu_item_id, name, sku, quantity, unit_price,
+ discount_pct, discount_amount, tax_rate, total, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateOrderStatus :exec
+UPDATE pos_orders SET status = ? WHERE owner_id = ? AND id = ?;
+
+-- name: UpdateOrderItemStatus :exec
+UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
+
+-- name: GetOrderItems :many
+SELECT id, order_id, menu_item_id, name, sku,
+       quantity, unit_price, discount_pct, discount_amount, tax_rate, total,
+       notes, status, created_at
+FROM pos_order_items
+WHERE order_id = ?;
+
+-- name: MarkOrderPaid :exec
+UPDATE pos_orders
+SET status = 'paid', payment_status = 'paid', payment_method = ?,
+    amount_paid = ?, change_due = ?, paid_at = ?
+WHERE owner_id = ? AND id = ?;
+
+-- name: GetOrderForPayment :one
+SELECT total, table_id, type FROM pos_orders WHERE owner_id = ? AND id = ?;
+
+-- name: CreateRefund :execresult
+INSERT INTO pos_refunds (owner_id, order_id, amount, reason, refunded_by)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: MarkOrderRefunded :exec
+UPDATE pos_orders SET status = 'refunded', payment_status = 'refunded'
+WHERE owner_id = ? AND id = ?;
+
+-- name: GetDashboardSalesToday :one
+SELECT
+    COALESCE(SUM(total), 0) AS total_sales,
+    COUNT(*) AS order_count,
+    COALESCE(AVG(total), 0) AS avg_order
+FROM pos_orders
+WHERE owner_id = ? AND payment_status = 'paid' AND DATE(paid_at) = CURDATE();
+
+-- name: GetTableTurnover :one
+SELECT COUNT(*) AS table_count,
+       COALESCE(SUM(CASE WHEN status != 'available' THEN 1 ELSE 0 END), 0) AS turned_tables
+FROM pos_tables WHERE owner_id = ?;
+
+-- name: GetOrderSessionID :one
+SELECT session_id FROM pos_orders WHERE id = ?;
+
+-- name: CountTodaysOrders :one
+SELECT COUNT(*) AS cnt FROM pos_orders WHERE owner_id = ? AND DATE(created_at) = CURDATE();
+
+-- name: MoveOrderItems :exec
+UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;
+
+-- name: RecalcOrderTotals :exec
+UPDATE pos_orders SET
+    subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id),
+    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id)
+WHERE pos_orders.id = ?;
+
+-- name: CancelOrder :exec
+UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND owner_id = ?;
+
+-- name: GetOrderSubtotal :one
+SELECT subtotal FROM pos_orders WHERE owner_id = ? AND id = ?;
+
+-- name: ApplyDiscount :exec
+UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)
+WHERE id = ? AND owner_id = ?;
+
+-- name: VoidOrder :execresult
+UPDATE pos_orders SET status = 'voided', notes = CONCAT(COALESCE(notes,''), ?)
+WHERE id = ? AND owner_id = ?;
+
+-- name: HoldOrder :execresult
+UPDATE pos_orders SET status = 'held', notes = CONCAT(COALESCE(notes,''), ?)
+WHERE id = ? AND owner_id = ?;

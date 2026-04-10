@@ -3,113 +3,125 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
+	"time"
 
+	"github.com/voxire/onion/internal/modules/finance_reports/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	return &Repository{queries: sqlc.New(dbclient.Pool())}
 }
 
 func (r *Repository) SumAccountsByType(ctx context.Context, ownerID int64, accountType string) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(balance), 0) FROM finance_accounts WHERE owner_id = ? AND type = ? AND is_active = TRUE`,
-		ownerID, accountType,
-	).Scan(&total)
+	result, err := r.queries.SumAccountsByType(ctx, sqlc.SumAccountsByTypeParams{
+		OwnerID: ownerID,
+		Type:    sqlc.FinanceAccountsType(accountType),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum accounts by type", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
-	}
-	return 0, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumBankBalances(ctx context.Context, ownerID int64) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(balance), 0) FROM finance_bank_accounts WHERE owner_id = ?`,
-		ownerID,
-	).Scan(&total)
+	result, err := r.queries.SumBankBalances(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank balances", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
-	}
-	return 0, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumReceivables(ctx context.Context, ownerID int64) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(amount_due), 0) FROM finance_invoices WHERE owner_id = ? AND status NOT IN ('paid','cancelled','void')`,
-		ownerID,
-	).Scan(&total)
+	result, err := r.queries.SumReceivables(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum receivables", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
-	}
-	return 0, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumPayables(ctx context.Context, ownerID int64) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(amount), 0) FROM finance_bills WHERE owner_id = ? AND status = 'pending'`,
-		ownerID,
-	).Scan(&total)
+	result, err := r.queries.SumPayables(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum payables", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
-	}
-	return 0, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(total), 0) FROM finance_invoices
-		 WHERE owner_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?`,
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	result, err := r.queries.SumPaidInvoicesInRange(ctx, sqlc.SumPaidInvoicesInRangeParams{
+		OwnerID:      ownerID,
+		FromPaidDate: sqlNullTimeStr(dateFrom),
+		ToPaidDate:   sqlNullTimeStr(dateTo),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum paid invoices in range", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
-	}
-	return 0, nil
+	return toFloat64FromInterface(result), nil
 }
 
 func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	var total sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(amount), 0) FROM finance_expenses
-		 WHERE owner_id = ? AND expense_date BETWEEN ? AND ?`,
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	dfTime, _ := time.Parse("2006-01-02", dateFrom)
+	dtTime, _ := time.Parse("2006-01-02", dateTo)
+
+	result, err := r.queries.SumExpensesInRange(ctx, sqlc.SumExpensesInRangeParams{
+		OwnerID:         ownerID,
+		FromExpenseDate: dfTime,
+		ToExpenseDate:   dtTime,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum expenses in range", logger.Error(err))
 		return 0, err
 	}
-	if total.Valid {
-		return total.Float64, nil
+	return toFloat64FromInterface(result), nil
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
+
+func sqlNullTimeStr(s string) sql.NullTime {
+	if s == "" {
+		return sql.NullTime{}
 	}
-	return 0, nil
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: t, Valid: true}
+}
+
+func toFloat64FromInterface(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		f, _ := strconv.ParseFloat(string(val), 64)
+		return f
+	case string:
+		f, _ := strconv.ParseFloat(val, 64)
+		return f
+	default:
+		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
+		return f
+	}
 }

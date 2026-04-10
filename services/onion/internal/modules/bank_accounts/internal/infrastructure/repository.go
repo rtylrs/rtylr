@@ -3,66 +3,120 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
+	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	return &Repository{queries: sqlc.New(dbclient.Pool())}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error) {
-	query := `
-		SELECT id, owner_id, name, institution, account_type, balance, currency, is_connected, last_synced_at, created_at
-		FROM finance_bank_accounts
-		WHERE owner_id = ?
-		ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListBankAccounts(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bank accounts", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []domain.BankAccount
-	for rows.Next() {
-		var item domain.BankAccount
-		if err := item.FromRow(rows); err != nil {
-			return nil, err
-		}
-		items = append(items, item)
+	items := make([]domain.BankAccount, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, bankAccountFromSqlc(row))
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error) {
-	query := `
-		INSERT INTO finance_bank_accounts (owner_id, name, institution, account_type, balance, currency, is_connected)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`
-
 	currency := input.Currency
 	if currency == "" {
 		currency = "USD"
 	}
 
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID, input.Name,
-		sql.NullString{String: input.Institution, Valid: input.Institution != ""},
-		sql.NullString{String: input.AccountType, Valid: input.AccountType != ""},
-		input.Balance, currency, input.IsConnected,
-	)
+	res, err := r.queries.CreateBankAccount(ctx, sqlc.CreateBankAccountParams{
+		OwnerID:     ownerID,
+		Name:        input.Name,
+		Institution: nullableString(input.Institution),
+		AccountType: nullableString(input.AccountType),
+		Balance:     nullableString(fmtFloat(input.Balance)),
+		Currency:    nullableString(currency),
+		IsConnected: sql.NullBool{Bool: input.IsConnected, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create bank account", logger.Error(err))
 		return 0, err
 	}
 
 	return res.LastInsertId()
+}
+
+// ---------------------------------------------------------------------------
+// Mapping helpers
+// ---------------------------------------------------------------------------
+
+func bankAccountFromSqlc(row sqlc.FinanceBankAccount) domain.BankAccount {
+	ba := domain.BankAccount{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Name:        row.Name,
+		Institution: nullStr(row.Institution),
+		AccountType: nullStr(row.AccountType),
+		Balance:     parseFloatNull(row.Balance),
+		Currency:    nullStr(row.Currency),
+		IsConnected: nullBool(row.IsConnected),
+		CreatedAt:   nullTime(row.CreatedAt),
+	}
+	if row.LastSyncedAt.Valid {
+		ba.LastSyncedAt = row.LastSyncedAt.Time
+	}
+	return ba
+}
+
+// ---------------------------------------------------------------------------
+// Conversion helpers
+// ---------------------------------------------------------------------------
+
+func nullableString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func nullStr(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
+func nullBool(b sql.NullBool) bool {
+	if b.Valid {
+		return b.Bool
+	}
+	return false
+}
+
+func nullTime(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+	v, _ := strconv.ParseFloat(s.String, 64)
+	return v
 }

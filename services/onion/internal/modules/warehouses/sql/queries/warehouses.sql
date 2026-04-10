@@ -1,0 +1,19 @@
+-- name: ListWarehouses :many
+SELECT id, owner_id, name, address, city, country, manager_name,
+       capacity, is_default, is_active, created_at, updated_at
+FROM erp_warehouses
+WHERE owner_id = ?
+ORDER BY name ASC;
+
+-- name: CreateWarehouse :execresult
+INSERT INTO erp_warehouses (owner_id, name, address, city, country, manager_name, capacity, is_default, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateWarehouse :exec
+UPDATE erp_warehouses
+SET name = ?, address = ?, city = ?, country = ?, manager_name = ?,
+    capacity = ?, is_default = ?, is_active = ?
+WHERE owner_id = ? AND id = ?;
+
+-- name: DeleteWarehouse :exec
+DELETE FROM erp_warehouses WHERE owner_id = ? AND id = ?;

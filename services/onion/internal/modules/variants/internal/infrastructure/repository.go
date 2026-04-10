@@ -3,91 +3,77 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
+	"github.com/voxire/onion/internal/modules/variants/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
 	pool := dbclient.Pool()
 
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
 func (r *Repository) ListVariants(ctx context.Context, ownerID, productID int64) ([]domain.Variant, error) {
-	query := `
-		SELECT id, owner_id, product_id, name, sku, barcode,
-		       cost_price, sale_price, stock_quantity, attributes, is_active,
-		       created_at, updated_at
-		FROM erp_product_variants
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	var rows []sqlc.ErpProductVariant
+	var err error
 
 	if productID > 0 {
-		query += ` AND product_id = ?`
-		args = append(args, productID)
+		rows, err = r.queries.ListVariantsByProduct(ctx, sqlc.ListVariantsByProductParams{
+			OwnerID:   ownerID,
+			ProductID: productID,
+		})
+	} else {
+		rows, err = r.queries.ListVariantsByOwner(ctx, ownerID)
 	}
 
-	query += ` ORDER BY name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list variants", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var variants []domain.Variant
 
-	for rows.Next() {
-		var v domain.Variant
-		if err := v.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan variant row", logger.Error(err))
-
-			return nil, err
-		}
-
-		variants = append(variants, v)
+	for _, row := range rows {
+		variants = append(variants, variantFromRow(row))
 	}
 
-	return variants, rows.Err()
+	return variants, nil
 }
 
 func (r *Repository) CreateVariant(ctx context.Context, ownerID int64, input domain.VariantInput) (int64, error) {
-	query := `
-		INSERT INTO erp_product_variants
-		(owner_id, product_id, name, sku, barcode, cost_price, sale_price, stock_quantity, attributes, is_active)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		input.ProductID,
-		input.Name,
-		nullString(input.SKU),
-		nullString(input.Barcode),
-		input.CostPrice,
-		input.SalePrice,
-		input.StockQuantity,
-		nullString(input.Attributes),
-		input.IsActive,
-	)
+	result, err := r.queries.CreateVariant(ctx, sqlc.CreateVariantParams{
+		OwnerID:       ownerID,
+		ProductID:     input.ProductID,
+		Name:          input.Name,
+		Sku:           nullString(input.SKU),
+		Barcode:       nullString(input.Barcode),
+		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
+		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
+		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
+		Attributes:    nullJSON(input.Attributes),
+		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create variant", logger.Error(err))
 
 		return 0, err
 	}
 
-	id, err := res.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
@@ -96,25 +82,19 @@ func (r *Repository) CreateVariant(ctx context.Context, ownerID int64, input dom
 }
 
 func (r *Repository) UpdateVariant(ctx context.Context, ownerID, id int64, input domain.VariantInput) error {
-	query := `
-		UPDATE erp_product_variants
-		SET product_id = ?, name = ?, sku = ?, barcode = ?,
-		    cost_price = ?, sale_price = ?, stock_quantity = ?, attributes = ?, is_active = ?
-		WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query,
-		input.ProductID,
-		input.Name,
-		nullString(input.SKU),
-		nullString(input.Barcode),
-		input.CostPrice,
-		input.SalePrice,
-		input.StockQuantity,
-		nullString(input.Attributes),
-		input.IsActive,
-		ownerID,
-		id,
-	)
+	err := r.queries.UpdateVariant(ctx, sqlc.UpdateVariantParams{
+		ProductID:     input.ProductID,
+		Name:          input.Name,
+		Sku:           nullString(input.SKU),
+		Barcode:       nullString(input.Barcode),
+		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
+		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
+		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
+		Attributes:    nullJSON(input.Attributes),
+		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+		OwnerID:       ownerID,
+		ID:            id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update variant", logger.Error(err))
 
@@ -125,9 +105,10 @@ func (r *Repository) UpdateVariant(ctx context.Context, ownerID, id int64, input
 }
 
 func (r *Repository) DeleteVariant(ctx context.Context, ownerID, id int64) error {
-	query := `DELETE FROM erp_product_variants WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, ownerID, id)
+	err := r.queries.DeleteVariant(ctx, sqlc.DeleteVariantParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete variant", logger.Error(err))
 
@@ -137,6 +118,52 @@ func (r *Repository) DeleteVariant(ctx context.Context, ownerID, id int64) error
 	return nil
 }
 
+func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
+	var v domain.Variant
+	v.ID = row.ID
+	v.OwnerID = row.OwnerID
+	v.ProductID = row.ProductID
+	v.Name = row.Name
+
+	if row.Sku.Valid {
+		v.SKU = row.Sku.String
+	}
+
+	if row.Barcode.Valid {
+		v.Barcode = row.Barcode.String
+	}
+
+	v.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
+	v.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
+	v.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+
+	if row.Attributes != nil {
+		v.Attributes = string(row.Attributes)
+	}
+
+	if row.IsActive.Valid {
+		v.IsActive = row.IsActive.Bool
+	}
+
+	if row.CreatedAt.Valid {
+		v.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.UpdatedAt.Valid {
+		v.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return v
+}
+
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func nullJSON(s string) json.RawMessage {
+	if s == "" {
+		return nil
+	}
+
+	return json.RawMessage(s)
 }

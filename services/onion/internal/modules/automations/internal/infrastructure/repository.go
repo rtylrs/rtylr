@@ -3,58 +3,50 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"encoding/json"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
+	"github.com/voxire/onion/internal/modules/automations/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Automation, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, trigger_type, trigger_config, actions, is_active,
-		        last_run_at, run_count, created_at, updated_at
-		 FROM crm_automations WHERE owner_id = ? ORDER BY created_at DESC`, ownerID,
-	)
+	rows, err := r.queries.ListAutomations(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list automations", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.Automation, 0)
+	items := make([]domain.Automation, 0, len(rows))
 
-	for rows.Next() {
-		a, scanErr := scanAutomation(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-
-		items = append(items, a)
+	for _, row := range rows {
+		items = append(items, automationFromRow(row))
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.AutomationInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_automations
-		   (owner_id, name, trigger_type, trigger_config, actions, is_active)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		input.OwnerID, input.Name, input.TriggerType,
-		string(input.TriggerConfig), string(input.Actions), input.IsActive,
-	)
+	result, err := r.queries.CreateAutomation(ctx, sqlc.CreateAutomationParams{
+		OwnerID:       input.OwnerID,
+		Name:          input.Name,
+		TriggerType:   input.TriggerType,
+		TriggerConfig: json.RawMessage(input.TriggerConfig),
+		Actions:       json.RawMessage(input.Actions),
+		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create automation", logger.Error(err))
 
@@ -65,14 +57,15 @@ func (r *Repository) Create(ctx context.Context, input domain.AutomationInput) (
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateInput) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE crm_automations
-		 SET name = ?, trigger_type = ?, trigger_config = ?, actions = ?, is_active = ?
-		 WHERE id = ? AND owner_id = ?`,
-		input.Name, input.TriggerType,
-		string(input.TriggerConfig), string(input.Actions), input.IsActive,
-		input.ID, input.OwnerID,
-	)
+	result, err := r.queries.UpdateAutomation(ctx, sqlc.UpdateAutomationParams{
+		Name:          input.Name,
+		TriggerType:   input.TriggerType,
+		TriggerConfig: json.RawMessage(input.TriggerConfig),
+		Actions:       json.RawMessage(input.Actions),
+		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:            input.ID,
+		OwnerID:       input.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update automation", logger.Error(err))
 
@@ -92,10 +85,10 @@ func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateIn
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, automationID int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		"DELETE FROM crm_automations WHERE id = ? AND owner_id = ?",
-		automationID, ownerID,
-	)
+	result, err := r.queries.DeleteAutomation(ctx, sqlc.DeleteAutomationParams{
+		ID:      automationID,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete automation", logger.Error(err))
 
@@ -114,42 +107,34 @@ func (r *Repository) Delete(ctx context.Context, ownerID, automationID int64) er
 	return nil
 }
 
-type automationScanner interface {
-	Scan(dest ...interface{}) error
-}
-
-func scanAutomation(s automationScanner) (domain.Automation, error) {
-	var a domain.Automation
-	var triggerConfig, actions sql.NullString
-	var lastRunAt sql.NullTime
-
-	if err := s.Scan(
-		&a.ID, &a.OwnerID, &a.Name, &a.TriggerType, &triggerConfig, &actions,
-		&a.IsActive, &lastRunAt, &a.RunCount, &a.CreatedAt, &a.UpdatedAt,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Automation{}, domain.ErrAutomationNotFound
-		}
-
-		return domain.Automation{}, err
+func automationFromRow(row sqlc.CrmAutomation) domain.Automation {
+	a := domain.Automation{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Name:        row.Name,
+		TriggerType: row.TriggerType,
+		IsActive:    row.IsActive.Bool,
+		RunCount:    int(row.RunCount.Int32),
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
 	}
 
-	if triggerConfig.Valid {
-		a.TriggerConfig = []byte(triggerConfig.String)
+	if row.TriggerConfig != nil {
+		a.TriggerConfig = []byte(row.TriggerConfig)
 	} else {
 		a.TriggerConfig = []byte("{}")
 	}
 
-	if actions.Valid {
-		a.Actions = []byte(actions.String)
+	if row.Actions != nil {
+		a.Actions = []byte(row.Actions)
 	} else {
 		a.Actions = []byte("[]")
 	}
 
-	if lastRunAt.Valid {
-		t := lastRunAt.Time
+	if row.LastRunAt.Valid {
+		t := row.LastRunAt.Time
 		a.LastRunAt = &t
 	}
 
-	return a, nil
+	return a
 }

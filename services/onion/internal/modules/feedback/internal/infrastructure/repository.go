@@ -5,17 +5,18 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/feedback/internal/domain"
+	"github.com/voxire/onion/internal/modules/feedback/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(_ context.Context) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		queries: sqlc.New(dbclient.Pool()),
 	}
 }
 
@@ -30,67 +31,74 @@ func (r *Repository) List(ctx context.Context, ownerID int64, feedbackType strin
 
 	offset := (page - 1) * pageSize
 
-	countQuery := "SELECT COUNT(*) FROM crm_feedback WHERE owner_id = ?"
-	args := []interface{}{ownerID}
+	var total int64
+	var err error
 
 	if feedbackType != "" {
-		countQuery += " AND type = ?"
-		args = append(args, feedbackType)
+		total, err = r.queries.CountFeedbackByType(ctx, sqlc.CountFeedbackByTypeParams{
+			OwnerID: ownerID,
+			Type:    sqlc.CrmFeedbackType(feedbackType),
+		})
+	} else {
+		total, err = r.queries.CountFeedback(ctx, ownerID)
 	}
 
-	var total int
-
-	if err := r.pool.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count feedback", logger.Error(err))
 
 		return nil, 0, err
 	}
 
-	listQuery := `SELECT id, owner_id, customer_id, type, score, comment, source, created_at
-		 FROM crm_feedback WHERE owner_id = ?`
-	listArgs := []interface{}{ownerID}
+	var rows []sqlc.CrmFeedback
 
 	if feedbackType != "" {
-		listQuery += " AND type = ?"
-		listArgs = append(listArgs, feedbackType)
+		rows, err = r.queries.ListFeedbackByType(ctx, sqlc.ListFeedbackByTypeParams{
+			OwnerID: ownerID,
+			Type:    sqlc.CrmFeedbackType(feedbackType),
+			Limit:   int32(pageSize),
+			Offset:  int32(offset),
+		})
+	} else {
+		rows, err = r.queries.ListFeedback(ctx, sqlc.ListFeedbackParams{
+			OwnerID: ownerID,
+			Limit:   int32(pageSize),
+			Offset:  int32(offset),
+		})
 	}
 
-	listQuery += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-	listArgs = append(listArgs, pageSize, offset)
-
-	rows, err := r.pool.QueryContext(ctx, listQuery, listArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list feedback", logger.Error(err))
 
 		return nil, 0, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.Feedback, 0)
+	items := make([]domain.Feedback, 0, len(rows))
 
-	for rows.Next() {
-		var f domain.Feedback
-		var comment, source sql.NullString
-
-		if scanErr := rows.Scan(&f.ID, &f.OwnerID, &f.CustomerID, &f.Type, &f.Score, &comment, &source, &f.CreatedAt); scanErr != nil {
-			return nil, 0, scanErr
-		}
-
-		f.Comment = comment.String
-		f.Source = source.String
-		items = append(items, f)
+	for _, row := range rows {
+		items = append(items, domain.Feedback{
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			CustomerID: row.CustomerID,
+			Type:       string(row.Type),
+			Score:      int(row.Score.Int32),
+			Comment:    row.Comment.String,
+			Source:     row.Source.String,
+			CreatedAt:  row.CreatedAt.Time,
+		})
 	}
 
-	return items, total, rows.Err()
+	return items, int(total), nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.FeedbackInput) (int64, error) {
-	result, err := r.pool.ExecContext(ctx,
-		`INSERT INTO crm_feedback (owner_id, customer_id, type, score, comment, source)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		input.OwnerID, input.CustomerID, input.Type, input.Score,
-		nullableString(input.Comment), nullableString(input.Source),
-	)
+	result, err := r.queries.CreateFeedback(ctx, sqlc.CreateFeedbackParams{
+		OwnerID:    input.OwnerID,
+		CustomerID: input.CustomerID,
+		Type:       sqlc.CrmFeedbackType(input.Type),
+		Score:      sql.NullInt32{Int32: int32(input.Score), Valid: true},
+		Comment:    sql.NullString{String: input.Comment, Valid: input.Comment != ""},
+		Source:     sql.NullString{String: input.Source, Valid: input.Source != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create feedback", logger.Error(err))
 
@@ -98,8 +106,4 @@ func (r *Repository) Create(ctx context.Context, input domain.FeedbackInput) (in
 	}
 
 	return result.LastInsertId()
-}
-
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

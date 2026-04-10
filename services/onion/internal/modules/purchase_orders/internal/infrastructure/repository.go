@@ -3,80 +3,80 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+	pool := dbclient.Pool()
+
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
 }
 
 func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, status string) ([]domain.PurchaseOrder, error) {
-	query := `
-		SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-		       expected_delivery, received_at, notes, created_by, created_at, updated_at
-		FROM erp_purchase_orders
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	var rows []sqlc.ErpPurchaseOrder
+	var err error
 
 	if status != "" {
-		query += ` AND status = ?`
-		args = append(args, status)
+		rows, err = r.queries.ListPurchaseOrdersByStatus(ctx, sqlc.ListPurchaseOrdersByStatusParams{
+			OwnerID: ownerID,
+			Status:  sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true},
+		})
+	} else {
+		rows, err = r.queries.ListPurchaseOrders(ctx, ownerID)
 	}
 
-	query += ` ORDER BY created_at DESC`
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list purchase orders", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var orders []domain.PurchaseOrder
-	for rows.Next() {
-		var po domain.PurchaseOrder
-		if err := po.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan purchase order row", logger.Error(err))
-			return nil, err
-		}
-		orders = append(orders, po)
+	for _, row := range rows {
+		orders = append(orders, purchaseOrderFromRow(row))
 	}
 
-	return orders, rows.Err()
+	return orders, nil
 }
 
 func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID int64) ([]domain.PurchaseOrderItem, error) {
-	query := `
-		SELECT id, purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost
-		FROM erp_purchase_order_items
-		WHERE purchase_order_id = ?`
-
-	rows, err := r.pool.QueryContext(ctx, query, purchaseOrderID)
+	rows, err := r.queries.GetPurchaseOrderItems(ctx, purchaseOrderID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get purchase order items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	var items []domain.PurchaseOrderItem
-	for rows.Next() {
+	for _, row := range rows {
 		var item domain.PurchaseOrderItem
-		if err := item.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan purchase order item row", logger.Error(err))
-			return nil, err
+		item.ID = row.ID
+		item.PurchaseOrderID = row.PurchaseOrderID
+		item.ProductID = row.ProductID
+		item.QuantityOrdered, _ = strconv.ParseFloat(row.QuantityOrdered, 64)
+		item.UnitCost, _ = strconv.ParseFloat(row.UnitCost, 64)
+		item.TotalCost, _ = strconv.ParseFloat(row.TotalCost, 64)
+
+		if row.QuantityReceived.Valid {
+			item.QuantityReceived, _ = strconv.ParseFloat(row.QuantityReceived.String, 64)
 		}
+
 		items = append(items, item)
 	}
 
-	return items, rows.Err()
+	return items, nil
 }
 
 func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
@@ -92,6 +92,8 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 		}
 	}()
 
+	qtx := r.queries.WithTx(tx)
+
 	var subtotal float64
 	for _, item := range input.Items {
 		subtotal += item.QuantityOrdered * item.UnitCost
@@ -99,26 +101,25 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 
 	total := subtotal + input.TaxAmount
 
-	var expectedDelivery interface{}
+	var expectedDelivery sql.NullTime
 	if input.ExpectedDelivery != "" {
-		expectedDelivery = input.ExpectedDelivery
+		t, parseErr := time.Parse("2006-01-02", input.ExpectedDelivery)
+		if parseErr == nil {
+			expectedDelivery = sql.NullTime{Time: t, Valid: true}
+		}
 	}
 
-	res, err := tx.ExecContext(ctx, `
-		INSERT INTO erp_purchase_orders
-		(owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-		 expected_delivery, notes, created_by)
-		VALUES (?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?)`,
-		ownerID,
-		input.SupplierID,
-		input.PONumber,
-		subtotal,
-		input.TaxAmount,
-		total,
-		expectedDelivery,
-		nullString(input.Notes),
-		nullInt64(createdBy),
-	)
+	res, err := qtx.InsertPurchaseOrder(ctx, sqlc.InsertPurchaseOrderParams{
+		OwnerID:          ownerID,
+		SupplierID:       input.SupplierID,
+		PoNumber:         input.PONumber,
+		Subtotal:         sql.NullString{String: strconv.FormatFloat(subtotal, 'f', 2, 64), Valid: true},
+		TaxAmount:        sql.NullString{String: strconv.FormatFloat(input.TaxAmount, 'f', 2, 64), Valid: true},
+		Total:            sql.NullString{String: strconv.FormatFloat(total, 'f', 2, 64), Valid: true},
+		ExpectedDelivery: expectedDelivery,
+		Notes:            nullString(input.Notes),
+		CreatedBy:        nullInt64(createdBy),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert purchase order", logger.Error(err))
 		return 0, err
@@ -132,16 +133,13 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 	for _, item := range input.Items {
 		itemTotal := item.QuantityOrdered * item.UnitCost
 
-		_, err = tx.ExecContext(ctx, `
-			INSERT INTO erp_purchase_order_items
-			(purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost)
-			VALUES (?, ?, ?, 0, ?, ?)`,
-			poID,
-			item.ProductID,
-			item.QuantityOrdered,
-			item.UnitCost,
-			itemTotal,
-		)
+		_, err = qtx.InsertPurchaseOrderItem(ctx, sqlc.InsertPurchaseOrderItemParams{
+			PurchaseOrderID: poID,
+			ProductID:       item.ProductID,
+			QuantityOrdered: strconv.FormatFloat(item.QuantityOrdered, 'f', -1, 64),
+			UnitCost:        strconv.FormatFloat(item.UnitCost, 'f', -1, 64),
+			TotalCost:       strconv.FormatFloat(itemTotal, 'f', -1, 64),
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to insert purchase order item", logger.Error(err))
 			return 0, err
@@ -157,13 +155,27 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 }
 
 func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
-	query := `UPDATE erp_purchase_orders SET status = ? WHERE owner_id = ? AND id = ?`
+	var err error
 
-	if status == string(domain.POStatusReceived) {
-		query = `UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE owner_id = ? AND id = ?`
+	statusVal := sqlc.NullErpPurchaseOrdersStatus{
+		ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status),
+		Valid:                   true,
 	}
 
-	_, err := r.pool.ExecContext(ctx, query, status, ownerID, id)
+	if status == string(domain.POStatusReceived) {
+		err = r.queries.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
+			Status:  statusVal,
+			OwnerID: ownerID,
+			ID:      id,
+		})
+	} else {
+		err = r.queries.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{
+			Status:  statusVal,
+			OwnerID: ownerID,
+			ID:      id,
+		})
+	}
+
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update purchase order status", logger.Error(err))
 		return err
@@ -184,42 +196,92 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 		}
 	}()
 
-	var currentQty float64
-	err = tx.QueryRowContext(ctx,
-		`SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE`,
-		ownerID, productID,
-	).Scan(&currentQty)
+	qtx := r.queries.WithTx(tx)
+
+	stockQtyStr, err := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
+		OwnerID: ownerID,
+		ID:      productID,
+	})
 	if err != nil {
 		return err
 	}
 
+	currentQty, _ := strconv.ParseFloat(stockQtyStr, 64)
 	newQty := currentQty + change
 
-	_, err = tx.ExecContext(ctx,
-		`UPDATE erp_products SET stock_quantity = ? WHERE owner_id = ? AND id = ?`,
-		newQty, ownerID, productID,
-	)
+	err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
+		StockQuantity: strconv.FormatFloat(newQty, 'f', -1, 64),
+		OwnerID:       ownerID,
+		ID:            productID,
+	})
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `
-		INSERT INTO erp_inventory_transactions
-		(owner_id, product_id, type, quantity_change, quantity_before, quantity_after, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		ownerID,
-		productID,
-		string(txType),
-		change,
-		currentQty,
-		newQty,
-		nullString(notes),
-	)
+	_, err = qtx.InsertInventoryTransaction(ctx, sqlc.InsertInventoryTransactionParams{
+		OwnerID:        ownerID,
+		ProductID:      productID,
+		Type:           sqlc.ErpInventoryTransactionsType(txType),
+		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),
+		QuantityBefore: strconv.FormatFloat(currentQty, 'f', -1, 64),
+		QuantityAfter:  strconv.FormatFloat(newQty, 'f', -1, 64),
+		Notes:          nullString(notes),
+	})
 	if err != nil {
 		return err
 	}
 
 	return tx.Commit()
+}
+
+func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
+	var po domain.PurchaseOrder
+	po.ID = row.ID
+	po.OwnerID = row.OwnerID
+	po.SupplierID = row.SupplierID
+	po.PONumber = row.PoNumber
+
+	if row.Status.Valid {
+		po.Status = domain.PurchaseOrderStatus(row.Status.ErpPurchaseOrdersStatus)
+	}
+
+	if row.Subtotal.Valid {
+		po.Subtotal, _ = strconv.ParseFloat(row.Subtotal.String, 64)
+	}
+
+	if row.TaxAmount.Valid {
+		po.TaxAmount, _ = strconv.ParseFloat(row.TaxAmount.String, 64)
+	}
+
+	if row.Total.Valid {
+		po.Total, _ = strconv.ParseFloat(row.Total.String, 64)
+	}
+
+	if row.ExpectedDelivery.Valid {
+		po.ExpectedDelivery = &row.ExpectedDelivery.Time
+	}
+
+	if row.ReceivedAt.Valid {
+		po.ReceivedAt = &row.ReceivedAt.Time
+	}
+
+	if row.Notes.Valid {
+		po.Notes = row.Notes.String
+	}
+
+	if row.CreatedBy.Valid {
+		po.CreatedBy = row.CreatedBy.Int64
+	}
+
+	if row.CreatedAt.Valid {
+		po.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.UpdatedAt.Valid {
+		po.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return po
 }
 
 func nullString(s string) sql.NullString {

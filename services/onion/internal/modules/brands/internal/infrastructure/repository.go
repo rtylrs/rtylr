@@ -5,74 +5,78 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
+	"github.com/voxire/onion/internal/modules/brands/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(_ context.Context) *Repository {
 	pool := dbclient.Pool()
 
 	return &Repository{
-		pool: pool,
+		queries: sqlc.New(pool),
+		pool:    pool,
 	}
 }
 
 func (r *Repository) ListBrands(ctx context.Context, ownerID int64) ([]domain.Brand, error) {
-	query := `
-		SELECT b.id, b.owner_id, b.name, b.logo_url, b.description,
-		       (SELECT COUNT(*) FROM erp_products p WHERE p.owner_id = b.owner_id AND p.brand_id = b.id) AS product_count,
-		       b.created_at, b.updated_at
-		FROM erp_brands b
-		WHERE b.owner_id = ?
-		ORDER BY b.name ASC`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	rows, err := r.queries.ListBrands(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands", logger.Error(err))
 
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var brands []domain.Brand
 
-	for rows.Next() {
+	for _, row := range rows {
 		var b domain.Brand
-		if err := b.FromRow(rows); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan brand row", logger.Error(err))
+		b.ID = row.ID
+		b.OwnerID = row.OwnerID
+		b.Name = row.Name
+		b.ProductCount = row.ProductCount
 
-			return nil, err
+		if row.LogoUrl.Valid {
+			b.LogoURL = row.LogoUrl.String
+		}
+
+		if row.Description.Valid {
+			b.Description = row.Description.String
+		}
+
+		if row.CreatedAt.Valid {
+			b.CreatedAt = row.CreatedAt.Time
+		}
+
+		if row.UpdatedAt.Valid {
+			b.UpdatedAt = row.UpdatedAt.Time
 		}
 
 		brands = append(brands, b)
 	}
 
-	return brands, rows.Err()
+	return brands, nil
 }
 
 func (r *Repository) CreateBrand(ctx context.Context, ownerID int64, input domain.BrandInput) (int64, error) {
-	query := `
-		INSERT INTO erp_brands (owner_id, name, logo_url, description)
-		VALUES (?, ?, ?, ?)`
-
-	res, err := r.pool.ExecContext(ctx, query,
-		ownerID,
-		input.Name,
-		nullString(input.LogoURL),
-		nullString(input.Description),
-	)
+	result, err := r.queries.CreateBrand(ctx, sqlc.CreateBrandParams{
+		OwnerID:     ownerID,
+		Name:        input.Name,
+		LogoUrl:     nullString(input.LogoURL),
+		Description: nullString(input.Description),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create brand", logger.Error(err))
 
 		return 0, err
 	}
 
-	id, err := res.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
@@ -81,18 +85,13 @@ func (r *Repository) CreateBrand(ctx context.Context, ownerID int64, input domai
 }
 
 func (r *Repository) UpdateBrand(ctx context.Context, ownerID, id int64, input domain.BrandInput) error {
-	query := `
-		UPDATE erp_brands
-		SET name = ?, logo_url = ?, description = ?
-		WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query,
-		input.Name,
-		nullString(input.LogoURL),
-		nullString(input.Description),
-		ownerID,
-		id,
-	)
+	err := r.queries.UpdateBrand(ctx, sqlc.UpdateBrandParams{
+		Name:        input.Name,
+		LogoUrl:     nullString(input.LogoURL),
+		Description: nullString(input.Description),
+		OwnerID:     ownerID,
+		ID:          id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update brand", logger.Error(err))
 
@@ -103,9 +102,10 @@ func (r *Repository) UpdateBrand(ctx context.Context, ownerID, id int64, input d
 }
 
 func (r *Repository) DeleteBrand(ctx context.Context, ownerID, id int64) error {
-	query := `DELETE FROM erp_brands WHERE owner_id = ? AND id = ?`
-
-	_, err := r.pool.ExecContext(ctx, query, ownerID, id)
+	err := r.queries.DeleteBrand(ctx, sqlc.DeleteBrandParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete brand", logger.Error(err))
 
