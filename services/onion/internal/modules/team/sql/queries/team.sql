@@ -47,6 +47,16 @@ JOIN users u ON u.id = p.user_id
 WHERE p.owner_id = ?
 ORDER BY u.created_at DESC;
 
+-- name: GetStaffUserByID :one
+SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
+       p.apps, p.role, p.is_active
+FROM user_app_permissions p
+JOIN users u ON u.id = p.user_id
+WHERE p.owner_id = ?
+  AND p.business_id = ?
+  AND p.user_id = ?
+LIMIT 1;
+
 -- name: CreateInviteToken :exec
 INSERT INTO invite_tokens (user_id, owner_id, token, expires_at) VALUES (?, ?, ?, ?);
 

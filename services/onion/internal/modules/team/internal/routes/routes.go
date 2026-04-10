@@ -15,6 +15,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.ListUsersHandler{Service: service},
 	)
 
+	serverHttp.RegisterGET[handlers.GetMemberByIDRequest, handlers.GetMemberByIDResponse](
+		ctx, router, handlers.GetMemberByIDRoutes(),
+		&handlers.GetMemberByIDHandler{Service: service},
+	)
+
 	serverHttp.RegisterPOSTWithValidation[handlers.InviteUserRequest, handlers.InviteUserResponse](
 		ctx, router, handlers.InviteUserRoutes(),
 		&handlers.InviteUserHandler{Service: service},
