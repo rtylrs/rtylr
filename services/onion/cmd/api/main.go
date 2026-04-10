@@ -89,6 +89,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
+	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -182,6 +183,8 @@ func run(ctx context.Context) {
 	}
 
 	ctx = jwtutils.InitializeJWT(ctx)
+
+	emailPkg.Initialize()
 
 	readyTime := time.Now()
 	startupDuration := readyTime.Sub(startTime)
