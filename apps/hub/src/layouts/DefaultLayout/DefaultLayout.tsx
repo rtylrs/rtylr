@@ -199,7 +199,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth/login', { replace: true });
+    window.location.href = APP_URLS.auth;
   };
 
   return (
