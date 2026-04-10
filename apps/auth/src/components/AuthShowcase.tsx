@@ -20,9 +20,9 @@ const AuthShowcase: React.FC = () => {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 80% 60% at 20% 15%, rgba(69,131,196,0.25) 0%, transparent 60%),' +
-            'radial-gradient(ellipse 70% 50% at 85% 85%, rgba(126,68,150,0.28) 0%, transparent 55%),' +
-            'radial-gradient(ellipse 60% 40% at 60% 50%, rgba(100,197,185,0.12) 0%, transparent 65%),' +
+            'radial-gradient(ellipse 80% 60% at 20% 15%, rgba(69,131,196,0.10) 0%, transparent 60%),' +
+            'radial-gradient(ellipse 70% 50% at 85% 85%, rgba(126,68,150,0.12) 0%, transparent 55%),' +
+            'radial-gradient(ellipse 60% 40% at 60% 50%, rgba(100,197,185,0.06) 0%, transparent 65%),' +
             'linear-gradient(135deg, #101010 0%, #141414 50%, #101010 100%)',
         }}
       />
@@ -46,7 +46,7 @@ const AuthShowcase: React.FC = () => {
           top: '-80px',
           left: '-60px',
           background:
-            'radial-gradient(circle, rgba(69,131,196,0.55) 0%, rgba(69,131,196,0) 70%)',
+            'radial-gradient(circle, rgba(69,131,196,0.18) 0%, rgba(69,131,196,0) 70%)',
         }}
         animate={{
           x: [0, 60, -30, 0],
@@ -63,7 +63,7 @@ const AuthShowcase: React.FC = () => {
           bottom: '-100px',
           right: '-40px',
           background:
-            'radial-gradient(circle, rgba(126,68,150,0.55) 0%, rgba(126,68,150,0) 70%)',
+            'radial-gradient(circle, rgba(126,68,150,0.15) 0%, rgba(126,68,150,0) 70%)',
         }}
         animate={{
           x: [0, -50, 30, 0],
@@ -80,7 +80,7 @@ const AuthShowcase: React.FC = () => {
           top: '40%',
           right: '15%',
           background:
-            'radial-gradient(circle, rgba(100,197,185,0.35) 0%, rgba(100,197,185,0) 70%)',
+            'radial-gradient(circle, rgba(100,197,185,0.10) 0%, rgba(100,197,185,0) 70%)',
         }}
         animate={{
           x: [0, 30, -40, 0],
@@ -97,7 +97,7 @@ const AuthShowcase: React.FC = () => {
           top: '15%',
           right: '25%',
           background:
-            'radial-gradient(circle, rgba(111,206,235,0.3) 0%, rgba(111,206,235,0) 70%)',
+            'radial-gradient(circle, rgba(111,206,235,0.08) 0%, rgba(111,206,235,0) 70%)',
         }}
         animate={{
           x: [0, -40, 50, 0],
