@@ -92,21 +92,6 @@ const integrations: Integration[] = [
 const IntegrationsSection: React.FC = () => {
   return (
     <section className={styles.integrationsSection}>
-      {/* Animated background orbs */}
-      <motion.div
-        className={styles.bgOrb}
-        animate={{
-          x: [0, 60, 0],
-          y: [0, 40, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-
       <div className={styles.container}>
         <motion.div
           className={styles.header}

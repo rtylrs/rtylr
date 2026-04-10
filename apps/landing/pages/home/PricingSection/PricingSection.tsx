@@ -84,20 +84,6 @@ const PricingSection = (): JSX.Element => {
 
   return (
     <section className={styles.pricingSection}>
-      {/* Background animated orbs */}
-      <motion.div
-        className={styles.bgGlow}
-        animate={{
-          opacity: [0.3, 0.5, 0.3],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-
       <div className={styles.container}>
         <motion.div
           className={styles.header}
