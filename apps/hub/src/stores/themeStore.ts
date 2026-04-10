@@ -18,13 +18,13 @@ function resolveTheme(theme: Theme): 'dark' | 'light' {
 export function applyTheme(theme: Theme) {
   const resolved = resolveTheme(theme);
   document.documentElement.setAttribute('data-theme', resolved);
-  document.body.style.background = resolved === 'dark' ? '#0a0a0a' : '#f4f4f5';
+  document.body.style.background = resolved === 'dark' ? '#101010' : '#f4f4f5';
 }
 
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: 'dark',
+      theme: 'light',
       setTheme: (theme) => {
         applyTheme(theme);
         set({ theme });
@@ -38,16 +38,15 @@ export const useThemeStore = create<ThemeStore>()(
 export function initTheme() {
   try {
     const raw = localStorage.getItem('hub-theme');
-    const theme: Theme = raw ? (JSON.parse(raw).state?.theme ?? 'dark') : 'dark';
+    const theme: Theme = raw ? (JSON.parse(raw).state?.theme ?? 'light') : 'light';
     applyTheme(theme);
 
-    // If system, listen for OS preference changes
     if (theme === 'system') {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         applyTheme('system');
       });
     }
   } catch {
-    applyTheme('dark');
+    applyTheme('light');
   }
 }

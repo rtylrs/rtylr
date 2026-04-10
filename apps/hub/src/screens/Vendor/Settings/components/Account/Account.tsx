@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../../../../../stores/userStore';
+
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = now - then;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w ago`;
+}
 import {
   Card,
   CardContent,
@@ -28,17 +43,32 @@ const Account: React.FC = () => {
   const { user } = useUserStore();
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
-  const [loginHistory] = useState<LoginHistoryItem[]>([
-    { email: user?.email || '', method: 'Logged in via Google', ip: 'from 141.105.87.0', timeAgo: '3 days ago' },
-    { email: user?.email || '', method: 'Logged in via Google', ip: 'from 141.105.87.0', timeAgo: '2 weeks ago' },
-  ]);
+  const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
+
+  useEffect(() => {
+    import('../../../../../lib/api').then(({ default: api }) => {
+      api.get('/security/login-history')
+        .then((res: any) => {
+          const history = res.data?.history ?? [];
+          setLoginHistory(history.map((h: any) => ({
+            email: h.email,
+            method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
+            ip: h.ip ? `from ${h.ip}` : '',
+            timeAgo: formatTimeAgo(h.createdAt),
+          })));
+        })
+        .catch(() => {});
+    });
+  }, []);
 
   useEffect(() => {
     if (user) {
+      const fullName = user.fullName || user.name || '';
+      const parts = fullName.split(' ');
       setFormData({
-        firstName: user.firstName || user.name?.split(' ')[0] || '',
-        lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
-        email: user.email || '',
+        firstName: user.firstName || parts[0] || '',
+        lastName: user.lastName || parts.slice(1).join(' ') || '',
+        email: user.email || user.emailAddress || '',
       });
     }
   }, [user]);
@@ -110,7 +140,14 @@ const Account: React.FC = () => {
           <p className="text-sm text-gray-500 mb-3">
             Invalidate all sessions for your account. This will log you out everywhere.
           </p>
-          <Button variant="destructive" size="sm">Invalidate all sessions</Button>
+          <Button variant="destructive" size="sm" onClick={async () => {
+            try {
+              const { default: api } = await import('../../../../../lib/api');
+              await api.post('/security/invalidate-sessions');
+              document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+              window.location.href = '/';
+            } catch {}
+          }}>Invalidate all sessions</Button>
         </CardContent>
       </Card>
 

@@ -14,6 +14,7 @@ const QrCodes       = React.lazy(() => import("../screens/Vendor/QrCode/QrCodes.
 const QrCode        = React.lazy(() => import("../screens/Vendor/QrCode/QrCode.tsx"));
 const Design        = React.lazy(() => import("../screens/Vendor/Design/Design.tsx"));
 const Analytics     = React.lazy(() => import("../screens/Vendor/Analytics/Analytics.tsx"));
+const Chat          = React.lazy(() => import("../screens/Vendor/Chat/Chat"));
 
 // Settings children
 const Account       = React.lazy(() => import("../screens/Vendor/Settings/components/Account"));
@@ -65,6 +66,7 @@ const AppRoutes: RouteObject[] = [
   { path: '/qr-codes/create', element: wrap(<QrCode />) },
   { path: '/design', element: wrap(<Design />) },
   { path: '/analytics', element: wrap(<Analytics />) },
+  { path: '/chat',      element: wrap(<Chat />) },
 
   // New Hub screens
   { path: '/team', element: wrap(<Team />) },
@@ -76,21 +78,15 @@ const AppRoutes: RouteObject[] = [
   { path: '/activity', element: wrap(<ActivityScreen />) },
   { path: '/audit', element: wrap(<Audit />) },
   { path: '/notifications', element: wrap(<Notifications />) },
-  { path: '/account', element: wrap(<AccountHome />) },
-  { path: '/billing', element: wrap(<BillingHome />) },
+  { path: '/account', element: <Navigate to="/settings/account" replace /> },
+  { path: '/billing', element: <Navigate to="/settings/billing" replace /> },
   { path: '/api-keys', element: wrap(<ApiKeys />) },
   { path: '/webhooks', element: wrap(<Webhooks />) },
   { path: '/security', element: wrap(<Security />) },
 
   // Extras
-  { path: '/marketplace', element: wrap(<Marketplace />) },
-  { path: '/changelog', element: wrap(<Changelog />) },
-  { path: '/flags', element: wrap(<FeatureFlags />) },
   { path: '/theme', element: wrap(<ThemeCustomizer />) },
-  { path: '/referrals', element: wrap(<Referrals />) },
   { path: '/help', element: wrap(<HelpCenter />) },
-  { path: '/export', element: wrap(<DataExport />) },
-  { path: '/import', element: wrap(<DataImport />) },
   {
     path: '/settings',
     element: <SettingsLayout />,

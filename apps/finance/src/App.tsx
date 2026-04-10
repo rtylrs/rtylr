@@ -1,60 +1,73 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
+import api from './lib/api';
 
+const APP_ID = 'finance';
 const AUTH_COOKIE = 'token';
 
-function useAuthGuard() {
+function AuthGuard({ children }: { children: React.ReactNode }) {
   const [cookies] = useCookies([AUTH_COOKIE]);
-  const navigate = useNavigate();
-  const [checked, setChecked] = useState(false);
-  const [authed, setAuthed] = useState(false);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const session = cookies[AUTH_COOKIE];
-    if (!session) {
-      // Redirect to auth with redirect param pointing back to finance
-      const redirectTarget = encodeURIComponent(APP_URLS.finance);
-      window.location.href = `${APP_URLS.auth}?redirect=${redirectTarget}`;
-    } else {
-      setAuthed(true);
+    const token = cookies[AUTH_COOKIE];
+    if (!token) {
+      window.location.href = `${APP_URLS.auth}?redirect=${APP_ID}`;
+      return;
     }
-    setChecked(true);
+
+    api.get('/user/me')
+      .then((res: any) => {
+        const apps: string[] = res.data?.apps ?? [];
+        const role: string = res.data?.role ?? '';
+        if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes(APP_ID)) {
+          setAllowed(true);
+        } else {
+          setAllowed(false);
+        }
+      })
+      .catch(() => setAllowed(true));
   }, [cookies]);
 
-  return { checked, authed };
-}
-
-const App: React.FC = () => {
-  const location = useLocation();
-  const { checked, authed } = useAuthGuard();
-
-  if (!checked) {
+  if (allowed === null) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 32, height: 32, border: '2px solid rgba(16,185,129,0.3)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: 'rgba(240,240,238,0.5)', fontSize: 13, margin: 0 }}>Verifying session…</p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff' }}>
+        <div style={{ width: 24, height: 24, border: '2px solid #e5e5e5', borderTopColor: '#4583C4', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /><style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
       </div>
     );
   }
 
-  if (!authed) return null;
+  if (!allowed) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', color: '#111', gap: '12px', fontSize: '14px' }}>
+        <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
+        <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
+        <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>Go to Hub</a>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+const App: React.FC = () => {
+  const location = useLocation();
 
   return (
-    <Routes key={location.pathname} location={location}>
-      {AppRoutes.map((route, i) => (
-        <Route key={i} path={route.path} element={route.element}>
-          {route.children?.map((child, j) => (
-            <Route key={j} index={child.index} path={child.path} element={child.element} />
-          ))}
-        </Route>
-      ))}
-    </Routes>
+    <AuthGuard>
+      <Routes key={location.pathname} location={location}>
+        {AppRoutes.map((route, i) => (
+          <Route key={i} path={route.path} element={route.element}>
+            {route.children?.map((child, j) => (
+              <Route key={j} index={child.index} path={child.path} element={child.element} />
+            ))}
+          </Route>
+        ))}
+      </Routes>
+    </AuthGuard>
   );
 };
 

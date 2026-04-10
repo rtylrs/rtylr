@@ -1,153 +1,94 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  MessageSquare, Heart, BarChart2, Paintbrush, Search,
-  Bell, Globe, ShieldCheck, Smartphone, Zap,
+  MonitorSpeaker, Heart, BarChart2, Paintbrush, Globe,
+  MessageSquare, Search, Loader2, AlertTriangle,
 } from 'lucide-react';
-import { useUserStore } from '../../stores/userStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '../../components/ui';
-import { cn } from '../../lib/utils';
+import api from '../../lib/api';
 
-type Addon = {
-  key: string;
-  name: string;
-  description: string;
-  price: string | null; // null = free
-  icon: React.ComponentType<{ size?: number }>;
-  iconBg: string;
-  iconColor: string;
-  badge: string | null;
-  free: boolean;
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
+  'utensils-crossed': MonitorSpeaker,
+  'heart': Heart,
+  'bar-chart-2': BarChart2,
+  'paintbrush': Paintbrush,
+  'globe': Globe,
+  'message-square': MessageSquare,
 };
 
-const ADDONS: Addon[] = [
-  {
-    key: 'ai_chat',
-    name: 'AI Chat',
-    description: 'Add an AI-powered chat assistant to help customers with menu questions and recommendations.',
-    price: null,
-    icon: MessageSquare,
-    iconBg: 'rgba(139,92,246,0.12)',
-    iconColor: '#8b5cf6',
-    badge: 'Free',
-    free: true,
+const COLOR_MAP: Record<string, { bg: string; color: string }> = {
+  menu:             { bg: 'rgba(69,131,196,0.12)',  color: '#4583C4' },
+  loyalty:          { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+  ai_chat:          { bg: 'rgba(139,92,246,0.12)',  color: '#8b5cf6' },
+  analytics:        { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6' },
+  custom_branding:  { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+  multi_language:   { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+};
+
+interface AddonData {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  price: number;
+  isFree: boolean;
+  isEnabled: boolean;
+}
+
+const useAddons = () => useQuery<AddonData[]>({
+  queryKey: ['addons'],
+  queryFn: async () => {
+    const res = await api.get('/addons');
+    return res.data?.addons ?? [];
   },
-  {
-    key: 'loyalty',
-    name: 'Loyalty Program',
-    description: 'Reward repeat customers with points and exclusive discounts to boost retention.',
-    price: '$12',
-    icon: Heart,
-    iconBg: 'rgba(239,68,68,0.12)',
-    iconColor: '#ef4444',
-    badge: null,
-    free: false,
-  },
-  {
-    key: 'advanced_analytics',
-    name: 'Advanced Analytics',
-    description: 'Deep insights into your sales, customer behavior, and menu performance over time.',
-    price: '$19',
-    icon: BarChart2,
-    iconBg: 'rgba(59,130,246,0.12)',
-    iconColor: '#3b82f6',
-    badge: 'New',
-    free: false,
-  },
-  {
-    key: 'custom_branding',
-    name: 'Custom Branding',
-    description: 'Fully customize your customer-facing menus and QR codes with your brand identity.',
-    price: '$7',
-    icon: Paintbrush,
-    iconBg: 'rgba(245,158,11,0.12)',
-    iconColor: '#f59e0b',
-    badge: null,
-    free: false,
-  },
-  {
-    key: 'push_notifications',
-    name: 'Push Notifications',
-    description: 'Send order updates and promotional messages directly to your customers\' devices.',
-    price: '$9',
-    icon: Bell,
-    iconBg: 'rgba(16,185,129,0.12)',
-    iconColor: '#10b981',
-    badge: 'Coming Soon',
-    free: false,
-  },
-  {
-    key: 'multi_language',
-    name: 'Multi-Language Menu',
-    description: 'Serve your menu in multiple languages to reach a wider audience.',
-    price: '$14',
-    icon: Globe,
-    iconBg: 'rgba(69,131,196,0.12)',
-    iconColor: '#4583C4',
-    badge: 'Coming Soon',
-    free: false,
-  },
-  {
-    key: 'fraud_protection',
-    name: 'Fraud Protection',
-    description: 'Advanced order verification and fraud detection to protect your revenue.',
-    price: '$6',
-    icon: ShieldCheck,
-    iconBg: 'rgba(139,92,246,0.12)',
-    iconColor: '#8b5cf6',
-    badge: 'Coming Soon',
-    free: false,
-  },
-  {
-    key: 'mobile_app',
-    name: 'Branded Mobile App',
-    description: 'Your own white-labeled mobile app with your brand, on iOS and Android.',
-    price: '$49',
-    icon: Smartphone,
-    iconBg: 'rgba(245,158,11,0.12)',
-    iconColor: '#f59e0b',
-    badge: 'Coming Soon',
-    free: false,
-  },
-  {
-    key: 'instant_payouts',
-    name: 'Instant Payouts',
-    description: 'Get your earnings deposited instantly instead of waiting for standard payout cycles.',
-    price: '$5',
-    icon: Zap,
-    iconBg: 'rgba(16,185,129,0.12)',
-    iconColor: '#10b981',
-    badge: 'Coming Soon',
-    free: false,
-  },
-];
+});
 
 const Addons: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useUserStore();
+  const qc = useQueryClient();
+  const { data: addons = [], isLoading } = useAddons();
   const [searchTerm, setSearchTerm] = useState('');
-  // AI Chat is free but disabled by default
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({});
-  const planType = user?.planType;
+  const [enablingId, setEnablingId] = useState<string | null>(null);
+  const [disableTarget, setDisableTarget] = useState<AddonData | null>(null);
+  const [confirmText, setConfirmText] = useState('');
+  const [showEnableSuccess, setShowEnableSuccess] = useState<string | null>(null);
 
-  const filtered = ADDONS.filter(
-    (a) =>
-      a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const enableMutation = useMutation({
+    mutationFn: async (addonId: string) => {
+      setEnablingId(addonId);
+      await api.post('/addons/enable', { addonId });
+    },
+    onSuccess: (_, addonId) => {
+      setShowEnableSuccess(addonId);
+      setTimeout(() => {
+        setShowEnableSuccess(null);
+        setEnablingId(null);
+        qc.invalidateQueries({ queryKey: ['addons'] });
+      }, 2000);
+    },
+    onError: () => setEnablingId(null),
+  });
+
+  const disableMutation = useMutation({
+    mutationFn: async (addonId: string) => {
+      await api.post('/addons/disable', { addonId });
+    },
+    onSuccess: () => {
+      setDisableTarget(null);
+      setConfirmText('');
+      qc.invalidateQueries({ queryKey: ['addons'] });
+    },
+  });
+
+  const filtered = addons.filter(
+    (a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           a.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleAddon = (addon: Addon) => {
-    if (!addon.free && planType === 'free') {
-      navigate('/settings/billing');
-      return;
-    }
-    if (addon.badge === 'Coming Soon') return;
-    setEnabled((prev) => ({ ...prev, [addon.key]: !prev[addon.key] }));
-  };
+  const CONFIRM_PHRASE = 'disable this addon';
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>Addons</h1>
@@ -157,130 +98,166 @@ const Addons: React.FC = () => {
         </div>
         <div className="relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--hub-text-dim)' }} />
-          <Input
-            className="pl-9 w-56"
-            placeholder="Search addons..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <Input className="pl-9 w-56" placeholder="Search addons..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
       </div>
 
-      {/* Upgrade Banner */}
-      {planType === 'free' && (
-        <div
-          className="rounded-xl p-4 flex items-center justify-between"
-          style={{ background: 'rgba(69,131,196,0.08)', border: '1px solid rgba(69,131,196,0.2)' }}
-        >
-          <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Upgrade to unlock paid add-ons
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-              Free add-ons like AI Chat are available on all plans
-            </p>
-          </div>
-          <button
-            onClick={() => navigate('/settings/billing')}
-            className="px-4 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: '#4583C4', color: '#fff' }}
-          >
-            Upgrade
-          </button>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-44 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {filtered.map((addon) => {
+            const colors = COLOR_MAP[addon.id] ?? { bg: 'var(--hub-hover)', color: 'var(--hub-text-muted)' };
+            const Icon = ICON_MAP[addon.icon] ?? MessageSquare;
+            const isEnabling = enablingId === addon.id;
+            const justEnabled = showEnableSuccess === addon.id;
+
+            return (
+              <motion.div
+                key={addon.id}
+                layout
+                className="rounded-xl p-5 flex flex-col gap-4"
+                style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: colors.bg }}>
+                    <Icon size={19} style={{ color: colors.color }} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {addon.isFree && (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}>Free</span>
+                    )}
+                    {addon.isEnabled && (
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}>Enabled</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{addon.name}</p>
+                  <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--hub-text-muted)' }}>{addon.description}</p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold" style={{ color: addon.isFree ? '#10b981' : 'var(--hub-text)' }}>
+                    {addon.isFree ? 'Free' : `$${addon.price}`}
+                    {!addon.isFree && addon.price > 0 && <span className="text-xs font-normal" style={{ color: 'var(--hub-text-dim)' }}>/mo</span>}
+                  </span>
+
+                  {isEnabling ? (
+                    <div className="flex items-center gap-2 px-3 py-1.5">
+                      {justEnabled ? (
+                        <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-xs font-semibold" style={{ color: '#10b981' }}>
+                          Enabled!
+                        </motion.span>
+                      ) : (
+                        <>
+                          <Loader2 size={14} className="animate-spin" style={{ color: '#4583C4' }} />
+                          <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Setting up...</span>
+                        </>
+                      )}
+                    </div>
+                  ) : addon.isEnabled ? (
+                    <button
+                      onClick={() => setDisableTarget(addon)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+                    >
+                      Disable
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => enableMutation.mutate(addon.id)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                      style={{ background: '#4583C4', color: '#fff' }}
+                    >
+                      Enable
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
-      {/* Addons Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {filtered.map((addon) => {
-          const Icon = addon.icon;
-          const isEnabled = !!enabled[addon.key];
-          const isComingSoon = addon.badge === 'Coming Soon';
+      {filtered.length === 0 && !isLoading && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>No addons match your search</p>
+        </div>
+      )}
 
-          return (
-            <div
-              key={addon.key}
-              className="rounded-xl p-5 flex flex-col gap-4"
-              style={{
-                background: 'var(--hub-card)',
-                border: '1px solid var(--hub-border)',
-                opacity: isComingSoon ? 0.6 : 1,
-              }}
+      {/* Disable confirmation modal */}
+      <AnimatePresence>
+        {disableTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+            onClick={() => { setDisableTarget(null); setConfirmText(''); }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-xl p-6 w-full max-w-md"
+              style={{ background: 'var(--hub-surface)', border: '1px solid var(--hub-border)' }}
             >
-              <div className="flex items-start justify-between">
-                <div
-                  className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: addon.iconBg }}
-                >
-                  <Icon size={19} style={{ color: addon.iconColor }} />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.12)' }}>
+                  <AlertTriangle size={20} style={{ color: '#ef4444' }} />
                 </div>
-                <div className="flex items-center gap-2">
-                  {addon.badge && (
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                      style={
-                        addon.badge === 'Free'
-                          ? { background: 'rgba(16,185,129,0.12)', color: '#10b981' }
-                          : addon.badge === 'New'
-                          ? { background: 'rgba(69,131,196,0.12)', color: '#4583C4' }
-                          : { background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }
-                      }
-                    >
-                      {addon.badge}
-                    </span>
-                  )}
-                  {isEnabled && !isComingSoon && (
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
-                    >
-                      Enabled
-                    </span>
-                  )}
+                <div>
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--hub-text)' }}>Disable {disableTarget.name}?</h3>
+                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Your data will be preserved but the feature will be hidden.</p>
                 </div>
               </div>
 
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{addon.name}</p>
-                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--hub-text-muted)' }}>
-                  {addon.description}
-                </p>
-              </div>
+              <p className="text-xs mb-2" style={{ color: 'var(--hub-text-muted)' }}>
+                Type <strong style={{ color: 'var(--hub-text)' }}>{CONFIRM_PHRASE}</strong> to confirm:
+              </p>
+              <input
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder={CONFIRM_PHRASE}
+                autoFocus
+                className="w-full h-10 rounded-lg px-3 text-sm outline-none mb-4"
+                style={{ background: 'var(--hub-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              />
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold" style={{ color: addon.free ? '#10b981' : 'var(--hub-text)' }}>
-                  {addon.free ? 'Free' : addon.price}
-                  {!addon.free && addon.price && (
-                    <span className="text-xs font-normal" style={{ color: 'var(--hub-text-dim)' }}>/mo</span>
-                  )}
-                </span>
+              <div className="flex gap-2 justify-end">
                 <button
-                  onClick={() => toggleAddon(addon)}
-                  disabled={isComingSoon}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                  style={
-                    isComingSoon
-                      ? { background: 'var(--hub-hover)', color: 'var(--hub-text-dim)', cursor: 'default' }
-                      : isEnabled
-                      ? { background: 'var(--hub-hover)', color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }
-                      : { background: '#4583C4', color: '#fff' }
-                  }
+                  onClick={() => { setDisableTarget(null); setConfirmText(''); }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
                 >
-                  {isComingSoon ? 'Soon' : isEnabled ? 'Disable' : 'Enable'}
+                  Cancel
+                </button>
+                <button
+                  onClick={() => disableMutation.mutate(disableTarget.id)}
+                  disabled={confirmText.toLowerCase() !== CONFIRM_PHRASE}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
+                  style={{
+                    background: confirmText.toLowerCase() === CONFIRM_PHRASE ? '#ef4444' : 'var(--hub-hover)',
+                    color: confirmText.toLowerCase() === CONFIRM_PHRASE ? '#fff' : 'var(--hub-text-dim)',
+                    opacity: confirmText.toLowerCase() === CONFIRM_PHRASE ? 1 : 0.5,
+                    cursor: confirmText.toLowerCase() === CONFIRM_PHRASE ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  {disableMutation.isPending ? 'Disabling...' : 'Disable'}
                 </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-            No addons match your search
-          </p>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

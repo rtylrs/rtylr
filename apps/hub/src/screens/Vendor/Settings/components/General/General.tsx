@@ -27,7 +27,7 @@ const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
 
 const General: React.FC = () => {
   const { businessType, setBusinessType } = useBusinessStore();
-  const { userId } = useUserStore();
+  const { user, userId } = useUserStore();
   const updateBusiness = useUpdateBusiness();
 
   const [formData, setFormData] = useState({
@@ -37,6 +37,17 @@ const General: React.FC = () => {
     address: '', city: '', zipcode: '', country: 'Lebanon', state: '',
     customBusinessType: '',
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        storeName: user.businessName || prev.storeName,
+        contactEmail: user.email || prev.contactEmail,
+        companyName: user.businessName || prev.companyName,
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (businessType) setFormData((prev) => ({ ...prev, storeIndustry: businessType }));
