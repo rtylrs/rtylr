@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
@@ -424,18 +425,29 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 		}
 	}
 
+	// Get requesting user's name for the email
+	requesterEmail, requesterName, _ := h.Service.GetUserInfo(ctx, device.User.UserID)
+	if requesterName == "" {
+		requesterName = requesterEmail
+	}
+
 	// Send email to business owner (non-blocking)
 	go func() {
 		ownerEmail := h.Service.GetBusinessOwnerEmail(context.Background(), device.User.BusinessID)
 		if ownerEmail != "" {
-			userName := ""
-			if device.User != nil {
-				userName = "A team member"
-			}
+			appUpper := strings.ToUpper(req.App)
 			emailPkg.Send(context.Background(), emailPkg.SendParams{
 				To:      []string{ownerEmail},
-				Subject: userName + " requested access to " + req.App + " on rtylr",
-				HTML:    "<p>" + userName + " is requesting access to <strong>" + req.App + "</strong>. Go to Hub > Team to approve.</p>",
+				Subject: requesterName + " requested access to " + appUpper,
+				HTML: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
+					<h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 8px 0;">Access request</h2>
+					<p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 24px 0;">
+						<strong>` + requesterName + `</strong> (` + requesterEmail + `) is requesting access to <strong>` + appUpper + `</strong>.
+					</p>
+					<a href="https://hub.rtylr.com/team" style="display:inline-block;background:#4583C4;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
+						Go to Team
+					</a>
+				</div>`,
 			})
 		}
 	}()

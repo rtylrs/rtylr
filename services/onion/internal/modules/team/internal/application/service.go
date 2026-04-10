@@ -156,6 +156,11 @@ func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) s
 	return email
 }
 
+// GetUserInfo returns email and full name for a user.
+func (s *Service) GetUserInfo(ctx context.Context, userID int64) (string, string, error) {
+	return s.repo.GetUserByID(ctx, userID)
+}
+
 // GetBusinessInfo returns the business name and whether the user is the owner.
 func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
 	if businessID == 0 {
