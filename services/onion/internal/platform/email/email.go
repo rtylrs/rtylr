@@ -31,7 +31,7 @@ type SendParams struct {
 	Subject string
 	HTML    string
 	Text    string
-	From    string // optional, defaults to noreply@rtylr.com
+	From    string // optional, defaults to noreply@voxire.com
 	ReplyTo string // optional
 }
 
@@ -43,7 +43,7 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 
 	from := params.From
 	if from == "" {
-		from = "rtylr <noreply@rtylr.com>"
+		from = "rtylr <noreply@voxire.com>"
 	}
 
 	req := &resend.SendEmailRequest{
