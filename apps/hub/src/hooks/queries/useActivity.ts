@@ -18,7 +18,8 @@ export const useActivity = (limit = 100) => {
     queryKey: ['activity', limit],
     queryFn: async () => {
       const res = await api.get(`/activity?limit=${limit}`);
-      return (res.data?.entries ?? res.data) as ActivityEntry[];
+      const raw = res.data?.activities ?? res.data?.entries ?? res.data;
+      return Array.isArray(raw) ? raw : [];
     },
     staleTime: 20_000,
   });

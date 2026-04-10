@@ -85,7 +85,8 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { data: kpis } = useKpis();
   const { data: apps = [] } = useApps();
-  const { data: activity = [] } = useActivity(5);
+  const { data: activityRaw = [] } = useActivity(5);
+  const activity = Array.isArray(activityRaw) ? activityRaw : [];
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -100,55 +101,16 @@ const AdminDashboard: React.FC = () => {
       {/* KPI Stats */}
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-4 gap-3">
         <motion.div variants={itemVariants}>
-          <StatCard
-            label="Revenue today"
-            value={kpis ? formatMoney(kpis.revenueToday) : '$0'}
-            icon={DollarSign}
-            accent="#4583C4"
-            trendPct={kpis?.revenueTrendPct}
-            sub="vs yesterday"
-          />
+          <StatCard label="Revenue today" value={kpis ? formatMoney(kpis.revenueToday) : '$0'} icon={DollarSign} accent="#4583C4" trendPct={kpis?.revenueTrendPct} sub="vs yesterday" />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatCard
-            label="Orders today"
-            value={kpis?.ordersToday ?? 0}
-            icon={ShoppingBag}
-            accent="#8b5cf6"
-            trendPct={kpis?.ordersTrendPct}
-            sub="vs yesterday"
-          />
+          <StatCard label="Orders today" value={kpis?.ordersToday ?? 0} icon={ShoppingBag} accent="#8b5cf6" trendPct={kpis?.ordersTrendPct} sub="vs yesterday" />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatCard
-            label="Active staff"
-            value={`${kpis?.activeStaff ?? 0}/${kpis?.headcount ?? 0}`}
-            icon={Users}
-            accent="#f59e0b"
-            sub="on shift"
-          />
+          <StatCard label="Team" value={`${kpis?.activeStaff ?? 0}/${kpis?.headcount ?? 0}`} icon={Users} accent="#f59e0b" sub="on shift" />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <StatCard
-            label="Low stock"
-            value={kpis?.lowStockItems ?? 0}
-            icon={Package}
-            accent="#ef4444"
-            sub="items need reorder"
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* Second row KPIs */}
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-3 gap-3">
-        <motion.div variants={itemVariants}>
-          <StatCard label="Open invoices"  value={kpis?.openInvoices ?? 0}   icon={TrendingUp}  accent="#10b981" />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard label="New customers"  value={kpis?.newCustomers ?? 0}   icon={Users}       accent="#ec4899" sub="last 7 days" />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard label="API uptime"     value={`${kpis?.apiHealthPct ?? 0}%`} icon={Gauge}    accent="#06b6d4" sub="30d average" />
+          <StatCard label="Open invoices" value={kpis?.openInvoices ?? 0} icon={TrendingUp} accent="#10b981" sub="unpaid" />
         </motion.div>
       </motion.div>
 
