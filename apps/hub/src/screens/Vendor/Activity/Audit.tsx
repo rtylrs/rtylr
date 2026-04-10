@@ -40,8 +40,8 @@ const Audit: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-5xl">
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)' }}>

@@ -27,8 +27,8 @@ const Apps: React.FC = () => {
   }, [apps, query, category]);
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-6xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
           <Grid3x3 size={16} style={{ color: '#4583C4' }} />

@@ -62,16 +62,16 @@ const Security: React.FC = () => {
 
   if (isLoading || !data) {
     return (
-      <div className="space-y-5 max-w-3xl mx-auto">
-        <Breadcrumbs />
+      <div className="space-y-5 max-w-3xl">
+        
         <SkeletonList rows={4} withAvatar={false} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-3xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)' }}>
           <Shield size={16} style={{ color: '#ef4444' }} />

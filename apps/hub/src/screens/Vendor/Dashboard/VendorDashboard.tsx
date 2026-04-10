@@ -89,7 +89,7 @@ const AdminDashboard: React.FC = () => {
   const activity = Array.isArray(activityRaw) ? activityRaw : [];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
         <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Good to see you</h1>
@@ -178,24 +178,6 @@ const AdminDashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Your apps row */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, delay: 0.3 }}>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Your apps</p>
-          <button
-            onClick={() => navigate('/apps')}
-            className="flex items-center gap-1 text-xs font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#4583C4' }}
-          >
-            All apps <ArrowUpRight size={12} />
-          </button>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          {apps.slice(0, 6).map((app) => (
-            <AppCard key={app.key} app={app} />
-          ))}
-        </div>
-      </motion.div>
     </div>
   );
 };

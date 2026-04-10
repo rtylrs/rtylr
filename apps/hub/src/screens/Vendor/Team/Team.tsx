@@ -14,7 +14,8 @@ import { useTeam, useDeactivateMember, type TeamMember } from '../../../hooks/qu
 
 const Team: React.FC = () => {
   const navigate = useNavigate();
-  const { data: members = [], isLoading } = useTeam();
+  const { data: membersRaw = [], isLoading } = useTeam();
+  const members = Array.isArray(membersRaw) ? membersRaw : [];
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -32,8 +33,8 @@ const Team: React.FC = () => {
   }, [members, query, roleFilter]);
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-6xl">
+      
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Team</h1>

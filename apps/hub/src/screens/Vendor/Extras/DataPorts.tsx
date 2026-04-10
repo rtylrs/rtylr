@@ -18,8 +18,8 @@ const DataExport: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-3xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
           <FileJson size={16} style={{ color: '#4583C4' }} />
@@ -53,8 +53,8 @@ const DataExport: React.FC = () => {
 
 export const DataImport: React.FC = () => {
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-3xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
           <Upload size={16} style={{ color: '#10b981' }} />

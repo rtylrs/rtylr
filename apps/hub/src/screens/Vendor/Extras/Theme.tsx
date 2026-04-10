@@ -12,8 +12,8 @@ const ThemeCustomizer: React.FC = () => {
   const [logoUrl, setLogoUrl] = useState('');
 
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-3xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.15)' }}>
           <Palette size={16} style={{ color: '#8b5cf6' }} />

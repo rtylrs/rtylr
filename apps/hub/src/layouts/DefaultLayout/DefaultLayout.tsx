@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Users,
   Grid3x3,
+  Store,
   Activity as ActivityIcon,
   Search,
   Sparkles,
@@ -43,14 +44,18 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard',     path: '/',              icon: LayoutDashboard },
-  { label: 'Team',          path: '/team',          icon: Users },
-  { label: 'Apps',          path: '/apps',          icon: Grid3x3 },
-  { label: 'Activity',      path: '/activity',      icon: ActivityIcon },
-  { label: 'Analytics',     path: '/analytics',     icon: BarChart3 },
-  { label: 'Billing',       path: '/billing',       icon: CreditCard },
-  { label: 'Integrations',  path: '/integrations',  icon: Layers },
-  { label: 'Settings',      path: '/account',       icon: Settings },
+  { label: 'Dashboard',     path: '/',                  icon: LayoutDashboard },
+  { label: 'Team',          path: '/team',              icon: Users },
+  { label: 'Apps',          path: '/apps',              icon: Grid3x3 },
+  { label: 'Activity',      path: '/activity',          icon: ActivityIcon },
+  { label: 'Analytics',     path: '/analytics',         icon: BarChart3 },
+];
+
+const menuSubItems: NavItem[] = [
+  { label: 'Menus',         path: '/menus',             icon: UtensilsCrossed },
+  { label: 'Orders',        path: '/orders',            icon: ClipboardList },
+  { label: 'QR Codes',      path: '/qr-codes',          icon: QrCode },
+  { label: 'Design',        path: '/design',            icon: Palette },
 ];
 
 const routeLabels: Record<string, string> = {
@@ -142,6 +147,36 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   );
 };
 
+const SidebarSection: React.FC<{ label: string; icon: React.ComponentType<{ size?: number; className?: string }>; items: NavItem[] }> = ({ label, icon: Icon, items }) => {
+  const location = useLocation();
+  const isActive = items.some((item) => location.pathname.startsWith(item.path));
+  const [open, setOpen] = React.useState(isActive);
+
+  return (
+    <div className="pt-1">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150',
+          isActive ? '' : 'hover:bg-[var(--hub-hover)]'
+        )}
+        style={{ color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)' }}
+      >
+        <Icon size={16} className="shrink-0" />
+        <span className="flex-1 text-left">{label}</span>
+        <ChevronRight size={12} className={cn('shrink-0 transition-transform', open && 'rotate-90')} style={{ color: 'var(--hub-text-dim)' }} />
+      </button>
+      {open && (
+        <div className="ml-5 pl-2 mt-0.5 space-y-0.5" style={{ borderLeft: '1px solid var(--hub-border)' }}>
+          {items.map((item) => (
+            <SidebarNavItem key={item.path} {...item} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface DefaultLayoutProps {
   children?: React.ReactNode;
 }
@@ -191,63 +226,20 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           />
         </div>
 
-        {/* Business context pill */}
-        <div
-          className="mx-3 mt-3 mb-1 px-3 py-2 rounded-lg flex items-center gap-2"
-          style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
-        >
-          <span
-            className="flex items-center justify-center h-5 w-5 rounded text-[10px] font-bold shrink-0"
-            style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
-          >
-            {businessName.charAt(0).toUpperCase()}
-          </span>
-          <span className="text-xs font-medium truncate" style={{ color: 'var(--hub-text-muted)' }}>
-            {businessName}
-          </span>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-          <p className="px-3 mb-1.5 mt-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--hub-text-dim)' }}>
-            Workspace
-          </p>
           {navItems.map((item) => (
             <SidebarNavItem key={item.path} {...item} />
           ))}
 
-          {/* Apps quick-jump */}
-          <div className="pt-3 pb-1">
-            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--hub-text-dim)' }}>
-              Apps
-            </p>
-            {[
-              { label: 'POS',     href: 'https://pos.rtylr.com',     icon: MonitorSpeaker, color: '#4583C4' },
-              { label: 'ERP',     href: 'https://erp.rtylr.com',     icon: Package,        color: '#10b981' },
-              { label: 'HR',      href: 'https://hr.rtylr.com',      icon: UserCheck,      color: '#f59e0b' },
-              { label: 'Finance', href: 'https://finance.rtylr.com', icon: CreditCard,     color: '#ef4444' },
-              { label: 'Flow', href: 'https://flow.rtylr.com', icon: Layers,         color: '#64C5B9' },
-            ].map(({ label, href, icon: Icon, color }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 no-underline hover:bg-[var(--hub-hover)]"
-                style={{ color: 'var(--hub-text-muted)' }}
-              >
-                <Icon size={15} style={{ color }} />
-                <span className="flex-1 truncate">{label}</span>
-                <ExternalLink size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--hub-text-dim)' }} />
-              </a>
-            ))}
-          </div>
+          {/* Storefront section (expandable) */}
+          <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
         </nav>
 
         {/* Footer */}
         <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
           <Link
-            to="/settings"
+            to="/settings/account"
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 mb-0.5',
               location.pathname.startsWith('/settings') ? 'bg-[var(--hub-active)]' : 'hover:bg-[var(--hub-hover)]'

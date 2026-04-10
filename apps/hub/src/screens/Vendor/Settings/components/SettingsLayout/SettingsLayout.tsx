@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   User, Building2, Globe, Mail, CreditCard, Puzzle,
-  ArrowLeft, Briefcase,
+  ArrowLeft, Briefcase, Layers,
 } from 'lucide-react';
 import { cn } from '../../../../../lib/utils';
 
@@ -30,8 +30,9 @@ const navGroups: NavGroup[] = [
   {
     label: 'Plans & Addons',
     items: [
-      { label: 'Billing', path: '/settings/billing', icon: CreditCard },
-      { label: 'Addons',  path: '/settings/addons',  icon: Puzzle },
+      { label: 'Billing',      path: '/settings/billing',      icon: CreditCard },
+      { label: 'Addons',       path: '/settings/addons',       icon: Puzzle },
+      { label: 'Integrations', path: '/settings/integrations', icon: Layers },
     ],
   },
 ];

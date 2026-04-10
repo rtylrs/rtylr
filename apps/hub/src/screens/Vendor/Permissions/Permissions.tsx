@@ -9,8 +9,8 @@ const Permissions: React.FC = () => {
 
   if (isLoading || !data) {
     return (
-      <div className="space-y-5 max-w-5xl mx-auto">
-        <Breadcrumbs />
+      <div className="space-y-5 max-w-5xl">
+        
         <SkeletonList rows={6} withAvatar={false} />
       </div>
     );
@@ -22,8 +22,8 @@ const Permissions: React.FC = () => {
   }, {});
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-5xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
           <Shield size={16} style={{ color: '#4583C4' }} />
