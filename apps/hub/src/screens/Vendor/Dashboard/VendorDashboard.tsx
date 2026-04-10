@@ -83,16 +83,18 @@ const quickActions = [
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUserStore();
   const { data: kpis } = useKpis();
   const { data: apps = [] } = useApps();
   const { data: activityRaw = [] } = useActivity(5);
   const activity = Array.isArray(activityRaw) ? activityRaw : [];
+  const businessName = (user as any)?.businessName || '';
 
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-        <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Good to see you</h1>
+        <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>{businessName || 'Dashboard'}</h1>
         <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{today}</p>
       </motion.div>
 
