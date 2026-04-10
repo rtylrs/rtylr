@@ -9,6 +9,7 @@ const EmailVerification = React.lazy(
   () => import('../screens/EmailVerification')
 );
 const VerifyEmail = React.lazy(() => import('../screens/VerifyEmail'));
+const InviteAccept = React.lazy(() => import('../screens/InviteAccept'));
 
 const wrap = (node: React.ReactNode) => (
   <Public hasHeader={false} hasPadding={false}>
@@ -22,6 +23,7 @@ const AuthRoutes = [
   { path: '/password-reset', element: wrap(<ResetPassword />) },
   { path: '/verify/:token', element: wrap(<EmailVerification />) },
   { path: '/verify', element: wrap(<VerifyEmail />) },
+  { path: '/invite/:token', element: wrap(<InviteAccept />) },
 ];
 
 export default AuthRoutes;

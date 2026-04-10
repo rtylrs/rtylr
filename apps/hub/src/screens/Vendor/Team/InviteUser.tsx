@@ -28,23 +28,13 @@ const InviteUser: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-2xl mx-auto">
-      <Breadcrumbs />
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate('/team')}
-          className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--hub-hover)]"
-          style={{ color: 'var(--hub-text-muted)' }}
-          aria-label="Back to team"
-        >
-          <ArrowLeft size={14} />
-        </button>
-        <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Invite member</h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
-            We will email an invitation link. They can join by setting a password.
-          </p>
-        </div>
+    <div className="space-y-5 max-w-4xl">
+
+      <div>
+        <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Invite member</h1>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          We will email an invitation link. They can join by setting a password.
+        </p>
       </div>
 
       <form onSubmit={submit} className="space-y-5">

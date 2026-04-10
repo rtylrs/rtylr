@@ -32,8 +32,8 @@ const HelpCenter: React.FC = () => {
   }, [query]);
 
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-3xl">
+      
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(100,197,185,0.15)' }}>
           <LifeBuoy size={16} style={{ color: '#64C5B9' }} />

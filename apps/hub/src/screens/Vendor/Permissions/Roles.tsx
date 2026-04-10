@@ -9,8 +9,8 @@ const Roles: React.FC = () => {
   const { data = [], isLoading } = useCustomRoles();
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
-      <Breadcrumbs />
+    <div className="space-y-5 max-w-5xl">
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Custom roles</h1>

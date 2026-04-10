@@ -30,7 +30,7 @@ const MemberDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl">
         <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>Loading member...</p>
       </div>
     );
@@ -38,8 +38,8 @@ const MemberDetail: React.FC = () => {
 
   if (!member) {
     return (
-      <div className="max-w-3xl mx-auto space-y-4">
-        <Breadcrumbs />
+      <div className="max-w-3xl space-y-4">
+        
         <EmptyState
           icon={UserX}
           title="Member not found"
@@ -54,17 +54,9 @@ const MemberDetail: React.FC = () => {
   const memberActivity = activity.filter((a) => a.actor === member.name);
 
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      <Breadcrumbs />
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate('/team')}
-          className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--hub-hover)]"
-          style={{ color: 'var(--hub-text-muted)' }}
-        >
-          <ArrowLeft size={14} />
-        </button>
-        <div className="flex items-center gap-4 flex-1">
+    <div className="space-y-5 max-w-4xl">
+
+      <div className="flex items-center gap-4">
           <Avatar
             initials={getInitials(member.name)}
             size="lg"
