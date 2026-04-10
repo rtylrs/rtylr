@@ -116,7 +116,7 @@ func buildLocalDSN() string {
 	user := getEnvOrDefault("DB_USER", DefaultDBUser)
 	password := getEnvOrDefault("DB_PASSWORD", DefaultDBPassword)
 
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
 		user,
 		password,
 		host,
@@ -132,10 +132,10 @@ func normalizeDSN(dsn string) string {
 		}
 
 		if strings.Contains(dsn, "?") {
-			return dsn + "&parseTime=true"
+			return dsn + "&parseTime=true&loc=UTC"
 		}
 
-		return dsn + "?parseTime=true"
+		return dsn + "?parseTime=true&loc=UTC"
 	}
 
 	parsed, err := url.Parse(dsn)
