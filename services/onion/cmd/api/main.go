@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
+	"github.com/voxire/onion/internal/modules/addons"
 	apikeys "github.com/voxire/onion/internal/modules/api_keys"
 	"github.com/voxire/onion/internal/modules/apps"
 	"github.com/voxire/onion/internal/modules/automations"
@@ -199,6 +200,7 @@ func run(ctx context.Context) {
 type apiModules struct {
 	Accounts             *accounts.Module
 	Activity             *activity.Module
+	Addons               *addons.Module
 	APIKeys              *apikeys.Module
 	Apps                 *apps.Module
 	Automations          *automations.Module
@@ -281,6 +283,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	return &apiModules{
 		Accounts:             accounts.NewModule(ctx),
 		Activity:             activity.NewModule(ctx),
+		Addons:               addons.NewModule(ctx),
 		APIKeys:              apikeys.NewModule(ctx),
 		Apps:                 apps.NewModule(ctx),
 		Automations:          automations.NewModule(ctx),

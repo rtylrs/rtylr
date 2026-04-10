@@ -1,0 +1,30 @@
+-- name: ListAllAddons :many
+SELECT id, name, description, icon, price, is_free, is_default_enabled, sort_order
+FROM addons
+ORDER BY sort_order ASC;
+
+-- name: GetAddonByID :one
+SELECT id, name, description, icon, price, is_free, is_default_enabled, sort_order
+FROM addons
+WHERE id = ?;
+
+-- name: ListBusinessAddons :many
+SELECT ba.addon_id, ba.is_enabled, ba.enabled_at, ba.disabled_at,
+       a.name, a.description, a.icon, a.price, a.is_free
+FROM business_addons ba
+JOIN addons a ON a.id = ba.addon_id
+WHERE ba.business_id = ?;
+
+-- name: GetBusinessAddon :one
+SELECT ba.addon_id, ba.is_enabled, ba.enabled_at, ba.disabled_at
+FROM business_addons ba
+WHERE ba.business_id = ? AND ba.addon_id = ?;
+
+-- name: EnableAddon :exec
+INSERT INTO business_addons (business_id, addon_id, is_enabled, enabled_at)
+VALUES (?, ?, true, NOW())
+ON DUPLICATE KEY UPDATE is_enabled = true, enabled_at = NOW(), disabled_at = NULL;
+
+-- name: DisableAddon :exec
+UPDATE business_addons SET is_enabled = false, disabled_at = NOW()
+WHERE business_id = ? AND addon_id = ?;
