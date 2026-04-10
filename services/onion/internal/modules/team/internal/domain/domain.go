@@ -8,6 +8,8 @@ import (
 var (
 	ErrPermissionNotFound = errors.New("user app permission not found")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrTokenAlreadyUsed   = errors.New("invite token already used")
+	ErrTokenExpired       = errors.New("invite token expired")
 )
 
 // ValidApps is the set of recognized app identifiers.
@@ -54,7 +56,6 @@ type StaffUser struct {
 
 type InviteUserInput struct {
 	Email    string
-	Password string
 	FullName string
 	Apps     []string
 	Role     Role

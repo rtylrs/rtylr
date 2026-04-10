@@ -34,4 +34,15 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.MeRoutes(),
 		&handlers.MeHandler{Service: service},
 	)
+
+	// Invite verification and acceptance (anonymous - no auth required)
+	serverHttp.RegisterGET[handlers.VerifyInviteRequest, handlers.VerifyInviteResponse](
+		ctx, router, handlers.VerifyInviteRoutes(),
+		&handlers.VerifyInviteHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.AcceptInviteRequest, handlers.AcceptInviteResponse](
+		ctx, router, handlers.AcceptInviteRoutes(),
+		&handlers.AcceptInviteHandler{Service: service},
+	)
 }

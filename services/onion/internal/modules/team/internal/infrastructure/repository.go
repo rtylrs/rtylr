@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
@@ -258,4 +259,57 @@ func scanPermissionRow(rows *sql.Rows) (domain.UserAppPermission, error) {
 	}
 
 	return p, nil
+}
+
+// ─── Invite Tokens ──────────────────────────────────────────────────────────
+
+func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID int64, token string, expiresAt time.Time) error {
+	_, err := r.pool.ExecContext(ctx,
+		`INSERT INTO invite_tokens (user_id, owner_id, token, expires_at) VALUES (?, ?, ?, ?)`,
+		userID, ownerID, token, expiresAt,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create invite token", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) GetInviteToken(ctx context.Context, token string) (int64, int64, time.Time, error) {
+	var userID, ownerID int64
+	var expiresAt time.Time
+	var usedAt sql.NullTime
+
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT user_id, owner_id, expires_at, used_at FROM invite_tokens WHERE token = ?`,
+		token,
+	).Scan(&userID, &ownerID, &expiresAt, &usedAt)
+	if err != nil {
+		return 0, 0, time.Time{}, err
+	}
+
+	if usedAt.Valid {
+		return 0, 0, time.Time{}, domain.ErrTokenAlreadyUsed
+	}
+
+	if time.Now().After(expiresAt) {
+		return 0, 0, time.Time{}, domain.ErrTokenExpired
+	}
+
+	return userID, ownerID, expiresAt, nil
+}
+
+func (r *Repository) MarkInviteTokenUsed(ctx context.Context, token string) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE invite_tokens SET used_at = NOW() WHERE token = ?`,
+		token,
+	)
+	return err
+}
+
+func (r *Repository) SetPassword(ctx context.Context, userID int64, passwordHash string) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE users SET password_hash = ? WHERE id = ?`,
+		passwordHash, userID,
+	)
+	return err
 }

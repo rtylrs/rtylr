@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -84,7 +85,6 @@ type InviteUserHandler struct{ Service *application.Service }
 
 type InviteUserRequest struct {
 	Email    string   `json:"email"`
-	Password string   `json:"password"`
 	FullName string   `json:"fullName"`
 	Apps     []string `json:"apps"`
 	Role     string   `json:"role"`
@@ -101,14 +101,6 @@ func (h *InviteUserHandler) Validate(_ context.Context, req *InviteUserRequest) 
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
 			Message:  "Email is required",
-		}
-	}
-
-	if req.Password == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Password is required",
 		}
 	}
 
@@ -133,9 +125,8 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		role = domain.RoleStaff
 	}
 
-	userID, err := h.Service.InviteUser(ctx, ownerID, domain.InviteUserInput{
+	userID, token, err := h.Service.InviteUser(ctx, ownerID, domain.InviteUserInput{
 		Email:    req.Email,
-		Password: req.Password,
 		FullName: req.FullName,
 		Apps:     apps,
 		Role:     role,
@@ -148,7 +139,82 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		}
 	}
 
-	return InviteUserResponse{UserID: userID, Message: "User invited"}, nil
+	// Send invitation email with the invite token link
+	go func() {
+		inviteLink := "https://auth.rtylr.com/invite/" + token
+		emailPkg.SendInvitation(ctx, req.Email, "Your team", "rtylr", inviteLink)
+	}()
+
+	return InviteUserResponse{UserID: userID, Message: "Invitation sent"}, nil
+}
+
+// ─── Verify Invite Token ────────────────────────────────────────────────────
+
+func VerifyInviteRoutes() []string { return []string{"/auth/invite/verify"} }
+
+type VerifyInviteHandler struct{ Service *application.Service }
+
+type VerifyInviteRequest struct {
+	Token string `json:"token"`
+}
+
+type VerifyInviteResponse struct {
+	Email    string `json:"email"`
+	FullName string `json:"fullName"`
+	Valid    bool   `json:"valid"`
+}
+
+func (h *VerifyInviteHandler) Serve(_ context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {
+	_, email, fullName, err := h.Service.VerifyInviteToken(context.Background(), req.Token)
+	if err != nil {
+		return VerifyInviteResponse{Valid: false}, nil
+	}
+
+	return VerifyInviteResponse{Email: email, FullName: fullName, Valid: true}, nil
+}
+
+// ─── Accept Invite ──────────────────────────────────────────────────────────
+
+func AcceptInviteRoutes() []string { return []string{"/auth/invite/accept"} }
+
+type AcceptInviteHandler struct{ Service *application.Service }
+
+type AcceptInviteRequest struct {
+	Token    string `json:"token"`
+	Password string `json:"password"`
+}
+
+type AcceptInviteResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteRequest) *errorModels.ServerError {
+	if req.Token == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Token is required"}
+	}
+	if len(req.Password) < 6 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Password must be at least 6 characters"}
+	}
+	return nil
+}
+
+func (h *AcceptInviteHandler) Serve(_ context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, *errorModels.ServerError) {
+	_, err := h.Service.AcceptInvite(context.Background(), req.Token, req.Password)
+	if err != nil {
+		msg := "Invalid or expired invitation"
+		if errors.Is(err, domain.ErrTokenAlreadyUsed) {
+			msg = "This invitation has already been accepted"
+		} else if errors.Is(err, domain.ErrTokenExpired) {
+			msg = "This invitation has expired"
+		}
+		return AcceptInviteResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  msg,
+		}
+	}
+
+	return AcceptInviteResponse{Message: "Password set successfully. You can now sign in."}, nil
 }
 
 // ─── Update Permissions ───────────────────────────────────────────────────────
