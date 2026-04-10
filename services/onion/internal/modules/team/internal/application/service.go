@@ -119,6 +119,25 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	return userID, nil
 }
 
+// GetMeByBusiness returns user info with permissions looked up by business_id.
+func (s *Service) GetMeByBusiness(ctx context.Context, businessID, userID int64) (string, string, []string, domain.Role, error) {
+	email, fullName, err := s.repo.GetUserByID(ctx, userID)
+	if err != nil {
+		return "", "", nil, "", err
+	}
+
+	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, userID)
+	if err != nil {
+		return email, fullName, []string{}, "", nil
+	}
+
+	if perm == nil {
+		return email, fullName, []string{}, "", nil
+	}
+
+	return email, fullName, perm.Apps, perm.Role, nil
+}
+
 // GetBusinessInfo returns the business name and whether the user is the owner.
 func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
 	if businessID == 0 {

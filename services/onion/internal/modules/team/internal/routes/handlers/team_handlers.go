@@ -346,13 +346,7 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 	userID := device.User.UserID
 	businessID := device.User.BusinessID
 
-	// Use businessID from JWT to scope the query
-	ownerID := req.OwnerID
-	if ownerID == 0 {
-		ownerID = userID
-	}
-
-	email, fullName, apps, role, err := h.Service.GetMe(ctx, ownerID, userID)
+	email, fullName, apps, role, err := h.Service.GetMeByBusiness(ctx, businessID, userID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return MeResponse{}, &errorModels.ServerError{

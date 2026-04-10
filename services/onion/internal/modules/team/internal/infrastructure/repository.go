@@ -34,6 +34,17 @@ func (r *Repository) GetPermission(ctx context.Context, ownerID, userID int64) (
 	return scanPermission(row)
 }
 
+func (r *Repository) GetPermissionByBusiness(ctx context.Context, businessID, userID int64) (*domain.UserAppPermission, error) {
+	query := `
+		SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
+		FROM user_app_permissions
+		WHERE business_id = ? AND user_id = ?`
+
+	row := r.pool.QueryRowContext(ctx, query, businessID, userID)
+
+	return scanPermission(row)
+}
+
 func (r *Repository) GetPermissionByUserID(ctx context.Context, userID int64) (*domain.UserAppPermission, error) {
 	query := `
 		SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
