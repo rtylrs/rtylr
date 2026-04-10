@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import { useRouter } from 'next/router';
+import { ArrowRight } from 'lucide-react';
 import { fadeInUp, fadeIn, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './CTASection.module.scss';
@@ -60,19 +60,6 @@ const CTASection: React.FC = () => {
           ease: 'easeInOut',
         }}
       />
-      <motion.div
-        className={styles.orbThree}
-        animate={{
-          x: [0, 40, 0],
-          y: [0, 30, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
 
       <div className={styles.container}>
         <motion.div
@@ -91,23 +78,23 @@ const CTASection: React.FC = () => {
             Free forever for up to 5 members. No credit card required.
           </motion.p>
           <motion.div className={styles.ctaButtons} variants={fadeInUp}>
-            <Button
-              variant="primary"
+            <motion.button
+              className={styles.primaryBtn}
               onClick={handleGetStarted}
-              width="220px"
-              height="56px"
-              color="#4583C4"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
             >
               Get started free
-            </Button>
-            <Button
-              variant="dark-outline"
+              <ArrowRight size={18} />
+            </motion.button>
+            <motion.button
+              className={styles.outlineBtn}
               onClick={handleBookDemo}
-              width="220px"
-              height="56px"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
             >
               Book a demo
-            </Button>
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>
