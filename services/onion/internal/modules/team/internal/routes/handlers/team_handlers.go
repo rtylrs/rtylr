@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -76,6 +78,55 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 	}
 
 	return ListUsersResponse{Users: payloads}, nil
+}
+
+func GetMemberByIDRoutes() []string { return []string{"/team/members/{id}"} }
+
+type GetMemberByIDHandler struct{ Service *application.Service }
+
+type GetMemberByIDRequest struct{}
+
+type GetMemberByIDResponse struct {
+	User StaffUserPayload `json:"user"`
+}
+
+func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDRequest) (GetMemberByIDResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetMemberByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	memberIDRaw := chi.URLParamFromCtx(ctx, "id")
+	memberID, err := strconv.ParseInt(memberIDRaw, 10, 64)
+	if err != nil || memberID <= 0 {
+		return GetMemberByIDResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Invalid member id",
+		}
+	}
+
+	ownerID := device.User.UserID
+	businessID := device.User.BusinessID
+
+	member, err := h.Service.GetStaffUserByID(ctx, ownerID, businessID, memberID)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return GetMemberByIDResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Member not found",
+			}
+		}
+
+		return GetMemberByIDResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to get member",
+		}
+	}
+
+	return GetMemberByIDResponse{User: newStaffUserPayload(*member)}, nil
 }
 
 // ─── Invite User ──────────────────────────────────────────────────────────────

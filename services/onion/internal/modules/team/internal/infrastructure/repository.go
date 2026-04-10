@@ -188,6 +188,44 @@ func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64) ([]domai
 	return users, nil
 }
 
+func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
+	row, err := r.queries.GetStaffUserByID(ctx, sqlc.GetStaffUserByIDParams{
+		OwnerID:    ownerID,
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
+		UserID:     userID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrUserNotFound
+		}
+
+		logger.Ctx(ctx).Error("Failed to get staff user by id", logger.Error(err))
+
+		return nil, err
+	}
+
+	su := &domain.StaffUser{
+		ID:       row.ID,
+		Email:    row.Email,
+		FullName: row.FullName,
+		Role:     domain.Role(row.Role.UserAppPermissionsRole),
+	}
+
+	if row.CreatedAt.Valid {
+		su.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.IsActive.Valid {
+		su.IsActive = row.IsActive.Bool
+	}
+
+	if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
+		su.Apps = []string{}
+	}
+
+	return su, nil
+}
+
 // ─── Invite Tokens ──────────────────────────────────────────────────────────
 
 func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID int64, token string, expiresAt time.Time) error {

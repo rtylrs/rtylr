@@ -28,6 +28,14 @@ func (s *Service) ListStaffUsers(ctx context.Context, ownerID int64) ([]domain.S
 	return s.repo.ListStaffUsers(ctx, ownerID)
 }
 
+func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
+	if userID == 0 {
+		return nil, domain.ErrUserNotFound
+	}
+
+	return s.repo.GetStaffUserByID(ctx, ownerID, businessID, userID)
+}
+
 // InviteUser creates a user account (no password) and generates an invite token.
 // Returns userID and invite token string.
 func (s *Service) InviteUser(ctx context.Context, ownerID int64, input domain.InviteUserInput) (int64, string, error) {
