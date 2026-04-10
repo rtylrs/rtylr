@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { ResponsiveGridLayout, useContainerWidth } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pencil, X, Plus, GripVertical, Check } from 'lucide-react';
+import { Settings2, X, Plus, GripVertical, Check } from 'lucide-react';
 import { useUserStore } from '../../../stores/userStore';
 import {
   getWidgetComponent,
@@ -15,12 +15,11 @@ import {
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
 });
 
-// ─── Admin Dashboard (customizable) ─────────────────────────────────────────
+// ─── Admin Dashboard ────────────────────────────────────────────────────────
 
 const AdminDashboard: React.FC = () => {
   const { user } = useUserStore();
@@ -43,39 +42,29 @@ const AdminDashboard: React.FC = () => {
     if (!config) return;
 
     const currentLayout = layouts.lg || [];
-    // Find the lowest y position to place new widget at bottom
     let maxY = 0;
     for (const item of currentLayout) {
       const bottom = item.y + item.h;
       if (bottom > maxY) maxY = bottom;
     }
 
-    const newItem = {
-      i: widgetId,
-      x: 0,
-      y: maxY,
-      w: config.defaultW,
-      h: config.defaultH,
-      minW: config.minW,
-      minH: config.minH,
-      maxW: config.maxW,
-      maxH: config.maxH,
-    };
-
-    const newLayout = [...currentLayout, newItem];
+    const newLayout = [...currentLayout, {
+      i: widgetId, x: 0, y: maxY,
+      w: config.defaultW, h: config.defaultH,
+      minW: config.minW, minH: config.minH,
+      maxW: config.maxW, maxH: config.maxH,
+    }];
     const newActive = [...activeWidgets, widgetId];
 
     setLayouts({ lg: newLayout });
     setActiveWidgets(newActive);
     saveLayout(newLayout);
     saveActiveWidgets(newActive);
-    setShowCatalog(false);
   }, [layouts, activeWidgets]);
 
   const removeWidget = useCallback((widgetId: string) => {
     const newLayout = (layouts.lg || []).filter((l: any) => l.i !== widgetId);
     const newActive = activeWidgets.filter((id) => id !== widgetId);
-
     setLayouts({ lg: newLayout });
     setActiveWidgets(newActive);
     saveLayout(newLayout);
@@ -87,7 +76,7 @@ const AdminDashboard: React.FC = () => {
   }, [activeWidgets]);
 
   return (
-    <div ref={containerRef} className="space-y-4">
+    <div ref={containerRef} className="space-y-4 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -95,117 +84,158 @@ const AdminDashboard: React.FC = () => {
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{today}</p>
         </div>
         <button
-          onClick={() => { setEditing(!editing); if (editing) setShowCatalog(false); }}
-          className="flex items-center gap-2 px-3 h-8 rounded-lg text-xs font-medium transition-colors"
-          style={{
-            background: editing ? '#4583C4' : 'var(--hub-hover)',
-            color: editing ? '#fff' : 'var(--hub-text-muted)',
-            border: editing ? 'none' : '1px solid var(--hub-border)',
+          onClick={() => {
+            if (editing) { setEditing(false); setShowCatalog(false); }
+            else setShowCatalog(true);
           }}
+          className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
+          style={{ color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+          title="Customize dashboard"
         >
-          {editing ? <><Check size={13} /> Done</> : <><Pencil size={13} /> Edit</>}
+          <Settings2 size={15} />
         </button>
       </div>
 
       {/* Grid */}
-      <ResponsiveGridLayout
-        className="layout"
-        layouts={layouts}
-        breakpoints={{ lg: 0 }}
-        cols={{ lg: 4 }}
-        rowHeight={80}
-        width={containerWidth || 800}
-        onLayoutChange={handleLayoutChange}
-        isDraggable={editing}
-        isResizable={editing}
-        draggableHandle=".widget-drag-handle"
-        containerPadding={[0, 0]}
-        margin={[12, 12]}
-      >
-        {activeWidgets.map((widgetId) => {
-          const Widget = getWidgetComponent(widgetId);
-          if (!Widget) return <div key={widgetId} />;
+      {containerWidth > 0 && (
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={layouts}
+          breakpoints={{ lg: 0 }}
+          cols={{ lg: 4 }}
+          rowHeight={80}
+          width={containerWidth}
+          onLayoutChange={handleLayoutChange}
+          isDraggable={editing}
+          isResizable={editing}
+          draggableHandle=".widget-drag-handle"
+          containerPadding={[0, 0]}
+          margin={[12, 12]}
+        >
+          {activeWidgets.map((widgetId) => {
+            const Widget = getWidgetComponent(widgetId);
+            if (!Widget) return <div key={widgetId} />;
 
-          return (
-            <div
-              key={widgetId}
-              className="rounded-xl overflow-hidden"
-              style={{
-                background: 'var(--hub-card)',
-                border: editing ? '2px dashed var(--hub-border)' : '1px solid var(--hub-border)',
-              }}
-            >
-              {editing && (
-                <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-2 py-1" style={{ background: 'var(--hub-surface)' }}>
-                  <div className="widget-drag-handle cursor-grab flex items-center gap-1 text-[10px] font-medium" style={{ color: 'var(--hub-text-dim)' }}>
-                    <GripVertical size={12} /> Drag
+            return (
+              <div
+                key={widgetId}
+                className="rounded-xl overflow-hidden relative"
+                style={{
+                  background: 'var(--hub-card)',
+                  border: editing ? '1px dashed rgba(69,131,196,0.4)' : '1px solid var(--hub-border)',
+                }}
+              >
+                {editing && (
+                  <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
+                    <div className="widget-drag-handle cursor-grab h-6 w-6 rounded-md flex items-center justify-center" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
+                      <GripVertical size={12} />
+                    </div>
+                    <button
+                      onClick={() => removeWidget(widgetId)}
+                      className="h-6 w-6 rounded-md flex items-center justify-center"
+                      style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => removeWidget(widgetId)}
-                    className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--hub-hover)]"
-                    style={{ color: '#ef4444' }}
-                  >
-                    <X size={12} />
-                  </button>
+                )}
+                <div className="h-full">
+                  <Widget />
                 </div>
-              )}
-              <div className={editing ? 'pt-6 h-full' : 'h-full'}>
-                <Widget />
               </div>
-            </div>
-          );
-        })}
-      </ResponsiveGridLayout>
-
-      {/* Add widget button (only in edit mode) */}
-      {editing && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <button
-            onClick={() => setShowCatalog(!showCatalog)}
-            className="flex items-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors"
-            style={{
-              background: 'var(--hub-card)',
-              border: '2px dashed var(--hub-border)',
-              color: 'var(--hub-text-muted)',
-            }}
-          >
-            <Plus size={16} />
-            Add widget
-          </button>
-        </motion.div>
+            );
+          })}
+        </ResponsiveGridLayout>
       )}
 
-      {/* Widget catalog */}
+      {/* Widget catalog modal */}
       <AnimatePresence>
         {showCatalog && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="rounded-xl p-4"
-            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+            onClick={() => setShowCatalog(false)}
           >
-            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>Available widgets</p>
-            {availableToAdd.length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>All widgets are already on your dashboard</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {availableToAdd.map((w) => (
-                  <button
-                    key={w.id}
-                    onClick={() => addWidget(w.id)}
-                    className="flex items-start gap-3 p-3 rounded-lg text-left transition-colors hover:bg-[var(--hub-hover)]"
-                    style={{ border: '1px solid var(--hub-border)' }}
-                  >
-                    <Plus size={14} className="mt-0.5 shrink-0" style={{ color: '#4583C4' }} />
-                    <div>
-                      <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>{w.label}</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{w.description}</p>
-                    </div>
-                  </button>
-                ))}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
+              style={{ background: 'var(--hub-surface)', border: '1px solid var(--hub-border)' }}
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                <div>
+                  <h2 className="text-base font-semibold" style={{ color: 'var(--hub-text)' }}>Customize dashboard</h2>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>Add, remove, or rearrange widgets</p>
+                </div>
+                <button
+                  onClick={() => setShowCatalog(false)}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--hub-hover)]"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  <X size={16} />
+                </button>
               </div>
-            )}
+
+              {/* Toggle edit mode */}
+              <div className="px-6 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                <button
+                  onClick={() => { setEditing(!editing); if (!editing) setShowCatalog(false); }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full transition-colors"
+                  style={{
+                    background: editing ? 'rgba(69,131,196,0.1)' : 'var(--hub-hover)',
+                    color: editing ? '#4583C4' : 'var(--hub-text-muted)',
+                    border: editing ? '1px solid rgba(69,131,196,0.3)' : '1px solid var(--hub-border)',
+                  }}
+                >
+                  {editing ? <><Check size={14} /> Done rearranging</> : <><GripVertical size={14} /> Drag to rearrange</>}
+                </button>
+              </div>
+
+              {/* Widget list */}
+              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--hub-text-dim)' }}>Widgets</p>
+                {WIDGET_CATALOG.map((w) => {
+                  const isActive = activeWidgets.includes(w.id);
+                  return (
+                    <div
+                      key={w.id}
+                      className="flex items-center justify-between py-2.5 px-3 rounded-lg"
+                      style={{ background: isActive ? 'rgba(69,131,196,0.05)' : 'transparent' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>{w.label}</p>
+                        <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>{w.description}</p>
+                      </div>
+                      {isActive ? (
+                        <button
+                          onClick={() => removeWidget(w.id)}
+                          className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
+                          style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => addWidget(w.id)}
+                          className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
+                          style={{ color: '#4583C4', background: 'rgba(69,131,196,0.08)' }}
+                        >
+                          <Plus size={12} className="inline mr-1" />Add
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -213,17 +243,13 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-// ─── Staff Dashboard ────────────────────────────────────────────────────────
-// Staff users don't see this — they get StaffView from BusinessRoute.
-// This is here as a fallback.
+// ─── Staff (fallback) ───────────────────────────────────────────────────────
 
-const StaffDashboard: React.FC<{ userApps: string[] }> = () => {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>Redirecting...</p>
-    </div>
-  );
-};
+const StaffDashboard: React.FC<{ userApps: string[] }> = () => (
+  <div className="flex items-center justify-center h-64">
+    <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>Redirecting...</p>
+  </div>
+);
 
 // ─── Root ───────────────────────────────────────────────────────────────────
 
@@ -231,7 +257,6 @@ const VendorDashboard: React.FC = () => {
   const { user, role } = useUserStore();
   const isAdmin = role === 'admin' || role === 'owner' || !role;
   const userApps: string[] = (user as any)?.apps ?? [];
-
   if (!isAdmin) return <StaffDashboard userApps={userApps} />;
   return <AdminDashboard />;
 };
