@@ -9,8 +9,9 @@ export interface AppCardProps {
 }
 
 export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
+  if (!app) return null;
   const Icon = app.icon;
-  const isExternal = app.href.startsWith('http');
+  const isExternal = (app.href ?? '').startsWith('http');
   const isComingSoon = app.status === 'coming_soon';
 
   const content = (

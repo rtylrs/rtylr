@@ -43,15 +43,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/',          icon: LayoutDashboard },
-  { label: 'Team',      path: '/team',      icon: Users },
-  { label: 'Apps',      path: '/apps',      icon: Grid3x3 },
-  { label: 'Activity',  path: '/activity',  icon: ActivityIcon },
-  { label: 'Menus',     path: '/menus',     icon: UtensilsCrossed },
-  { label: 'Orders',    path: '/orders',    icon: ClipboardList },
-  { label: 'QR Codes',  path: '/qr-codes',  icon: QrCode },
-  { label: 'Design',    path: '/design',    icon: Palette },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { label: 'Dashboard',     path: '/',              icon: LayoutDashboard },
+  { label: 'Team',          path: '/team',          icon: Users },
+  { label: 'Apps',          path: '/apps',          icon: Grid3x3 },
+  { label: 'Activity',      path: '/activity',      icon: ActivityIcon },
+  { label: 'Analytics',     path: '/analytics',     icon: BarChart3 },
+  { label: 'Billing',       path: '/billing',       icon: CreditCard },
+  { label: 'Integrations',  path: '/integrations',  icon: Layers },
+  { label: 'Settings',      path: '/account',       icon: Settings },
 ];
 
 const routeLabels: Record<string, string> = {
