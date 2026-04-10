@@ -58,12 +58,7 @@ const App = (): JSX.Element => {
   // Initialize fullscreen (will default to fullscreen on first run)
   useFullscreen();
 
-  // Zustand stores
-  const config = useConfigStore();
   const role = useUserStore((state) => state.role);
-
-  // Fetch config data
-  useGetConfig();
 
   useEffect(() => {
     const language = getCookie("language");
@@ -74,9 +69,7 @@ const App = (): JSX.Element => {
 
   return (
     <React.Fragment>
-      {config && <HelmetContainer title={"Rtylr"} favicon={"/favicon.ico"} />}
-
-      {config.maintanance && <Maintanance />}
+      <HelmetContainer title={"Rtylr"} favicon={"/favicon.ico"} />
 
       <Cookies />
 

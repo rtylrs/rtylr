@@ -3,6 +3,7 @@ import { Search, Grid3x3 } from 'lucide-react';
 import { Input } from '../../../components/ui';
 import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from '../../../components/hub';
 import { useApps } from '../../../hooks/queries/useApps';
+import { useUserStore } from '../../../stores/userStore';
 
 const CATEGORIES: { key: 'all' | 'core' | 'sales' | 'operations' | 'finance' | 'growth'; label: string }[] = [
   { key: 'all',        label: 'All' },
@@ -15,16 +16,23 @@ const CATEGORIES: { key: 'all' | 'core' | 'sales' | 'operations' | 'finance' | '
 
 const Apps: React.FC = () => {
   const { data: apps = [], isLoading } = useApps();
+  const { user } = useUserStore();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
 
+  // Owner (user.id === 1 or no permissions set) sees all apps.
+  // Staff/invited users only see their allowed apps.
+  const userApps: string[] = user?.apps ?? [];
+  const isOwner = !userApps.length || user?.role === 'owner' || user?.role === 'admin';
+
   const filtered = useMemo(() => {
     return apps.filter((a) => {
+      if (!isOwner && !userApps.includes(a.key)) return false;
       const matchesQuery = !query.trim() || a.label.toLowerCase().includes(query.toLowerCase()) || a.description.toLowerCase().includes(query.toLowerCase());
       const matchesCat = category === 'all' || a.category === category;
       return matchesQuery && matchesCat;
     });
-  }, [apps, query, category]);
+  }, [apps, query, category, isOwner, userApps]);
 
   return (
     <div className="space-y-5 max-w-6xl">

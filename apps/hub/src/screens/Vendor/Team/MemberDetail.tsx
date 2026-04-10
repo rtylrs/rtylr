@@ -57,19 +57,18 @@ const MemberDetail: React.FC = () => {
     <div className="space-y-5 max-w-4xl">
 
       <div className="flex items-center gap-4">
-          <Avatar
-            initials={getInitials(member.name)}
-            size="lg"
-            className="shrink-0"
-            style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>{member.name}</h1>
-              <RoleBadge role={member.role} />
-            </div>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{member.email}</p>
+        <Avatar
+          initials={getInitials(member.name)}
+          size="lg"
+          className="shrink-0"
+          style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+        />
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>{member.name}</h1>
+            <RoleBadge role={member.role} />
           </div>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{member.email}</p>
         </div>
       </div>
 

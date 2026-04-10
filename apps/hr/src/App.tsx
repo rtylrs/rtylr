@@ -13,53 +13,48 @@ function getCookie(name: string): string | null {
   return null;
 }
 
-/** Auth guard — checks for session cookie, redirects to auth app if missing */
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const [checking, setChecking] = useState(true);
-  const [authed, setAuthed] = useState(false);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const token = getCookie('token');
-
-    if (token) {
-      setAuthed(true);
-    } else {
-      // Redirect to auth app with redirect param so it can return here after login
-      const redirect = encodeURIComponent('hr');
-      window.location.href = `${APP_URLS.auth}?redirect=${redirect}`;
+    if (!token) {
+      window.location.href = `${APP_URLS.auth}?redirect=hr`;
       return;
     }
-    setChecking(false);
+
+    import('./lib/api').then(({ default: api }) => {
+      api.get('/user/me')
+        .then((res: any) => {
+          const apps: string[] = res.data?.apps ?? [];
+          const role: string = res.data?.role ?? '';
+          if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes('hr')) {
+            setAllowed(true);
+          } else {
+            setAllowed(false);
+          }
+        })
+        .catch(() => setAllowed(true));
+    });
   }, []);
 
-  if (checking && !authed) {
+  if (allowed === null) {
     return (
-      <div
-        style={{
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--hr-bg)',
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            border: '2px solid rgba(139,92,246,0.2)',
-            borderTopColor: '#8b5cf6',
-            animation: 'spin 0.7s linear infinite',
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hub-bg)' }}>
+        <p style={{ color: 'var(--hub-text-muted)', fontSize: '14px' }}>Loading...</p>
       </div>
     );
   }
 
-  if (!authed) return null;
+  if (!allowed) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--hub-bg)', color: 'var(--hub-text)', gap: '12px', fontSize: '14px' }}>
+        <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
+        <p style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>Contact your admin to get access.</p>
+        <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>Go to Hub</a>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

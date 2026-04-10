@@ -23,6 +23,7 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const [name, setName] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,6 +45,7 @@ const Register: React.FC = () => {
       email,
       password,
       name: name.trim() || email.split('@')[0],
+      businessName: businessName.trim(),
       referred: '',
     });
   };
@@ -101,6 +103,21 @@ const Register: React.FC = () => {
               autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+            />
+          </div>
+
+          {/* Business name */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
+              Business name
+            </label>
+            <input
+              id="register-business"
+              type="text"
+              placeholder="My Coffee Shop"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
               className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
           </div>
