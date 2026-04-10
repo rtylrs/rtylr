@@ -23,7 +23,7 @@ const AuthShowcase: React.FC = () => {
             'radial-gradient(ellipse 80% 60% at 20% 15%, rgba(69,131,196,0.25) 0%, transparent 60%),' +
             'radial-gradient(ellipse 70% 50% at 85% 85%, rgba(126,68,150,0.28) 0%, transparent 55%),' +
             'radial-gradient(ellipse 60% 40% at 60% 50%, rgba(100,197,185,0.12) 0%, transparent 65%),' +
-            'linear-gradient(135deg, #05061a 0%, #0a0b2e 50%, #06071f 100%)',
+            'linear-gradient(135deg, #101010 0%, #141414 50%, #101010 100%)',
         }}
       />
 
