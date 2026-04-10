@@ -40,7 +40,7 @@ export const useMember = (id: string | undefined) => {
 export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { email: string; name: string; role: TeamMember['role']; apps: string[] }) => {
+    mutationFn: async (payload: { email: string; fullName: string; role: TeamMember['role']; apps: string[] }) => {
       const res = await api.post('/team/invite', payload);
       return res.data;
     },

@@ -23,7 +23,7 @@ const InviteUser: React.FC = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !name.trim()) return;
-    await invite.mutateAsync({ email, name, role, apps: selectedApps });
+    await invite.mutateAsync({ email, fullName: name, role, apps: selectedApps });
     navigate('/team');
   };
 
