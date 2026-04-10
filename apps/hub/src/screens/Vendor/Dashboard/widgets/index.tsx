@@ -1,5 +1,5 @@
 import React from 'react';
-import KpisWidget from './KpisWidget';
+import { KpiRevenue, KpiOrders, KpiTeam, KpiInvoices } from './KpisWidget';
 import ActivityWidget from './ActivityWidget';
 import ChangelogWidget from './ChangelogWidget';
 import QuickActionsWidget from './QuickActionsWidget';
@@ -11,7 +11,10 @@ import PendingWidget from './PendingWidget';
 import AppsWidget from './AppsWidget';
 
 const WIDGET_COMPONENTS: Record<string, React.FC> = {
-  'kpis':          KpisWidget,
+  'kpi-revenue':   KpiRevenue,
+  'kpi-orders':    KpiOrders,
+  'kpi-team':      KpiTeam,
+  'kpi-invoices':  KpiInvoices,
   'activity':      ActivityWidget,
   'changelog':     ChangelogWidget,
   'quick-actions': QuickActionsWidget,
