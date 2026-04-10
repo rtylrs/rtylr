@@ -13,7 +13,6 @@ import {
   ConsentBanner, LoyaltyPointsInput,
 } from '../../components/crm';
 import { getTier, pointsToNextTier } from '../../lib/tiers';
-import { mockCustomers, mockTimeline } from '../../lib/mockData';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,13 +28,21 @@ const CustomerProfile: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newTag, setNewTag] = useState('');
 
-  const customer = fetched || mockCustomers.find((c) => c.id === customerId) || mockCustomers[0];
-  const timeline = fetchedTimeline && fetchedTimeline.length ? fetchedTimeline : mockTimeline;
+  const customer = fetched;
+  const timeline = fetchedTimeline ?? [];
 
-  if (isLoading && !customer) {
+  if (isLoading) {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <SkeletonList count={6} />
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>Customer not found.</p>
       </div>
     );
   }

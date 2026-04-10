@@ -2,11 +2,10 @@ import React from 'react';
 import { Award, Check } from 'lucide-react';
 import { useLoyaltyTiers } from '../../hooks/useLoyalty';
 import { PageHeader, Card, SkeletonList } from '../../components/ui';
-import { mockLoyaltyTiers } from '../../lib/mockData';
 
 const LoyaltyTiers: React.FC = () => {
   const { data: fetched, isLoading } = useLoyaltyTiers();
-  const tiers = (fetched && fetched.length ? fetched : mockLoyaltyTiers).sort((a, b) => a.threshold - b.threshold);
+  const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
 
   return (
     <div style={{ maxWidth: '1100px' }}>

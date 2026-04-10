@@ -233,29 +233,7 @@ const DefaultLayout: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: 28,
-              width: 28,
-              borderRadius: 8,
-              background: 'rgba(16,185,129,0.15)',
-              color: ACCENT,
-              flexShrink: 0,
-            }}
-          >
-            <TrendingUp size={14} />
-          </span>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', lineHeight: 1.2 }}>
-              Finance
-            </span>
-            <span style={{ fontSize: 10, color: 'var(--hub-text-dim)', letterSpacing: '0.04em' }}>
-              rtylr
-            </span>
-          </div>
+          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
         </div>
 
         <div style={{ padding: '10px 8px 4px' }}>

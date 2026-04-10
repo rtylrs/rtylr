@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_BALANCE_SHEET, BalanceSheet } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useBalanceSheet() {
-  return useQuery<BalanceSheet>({
+  return useQuery({
     queryKey: ['balance-sheet'],
-    queryFn: async () => MOCK_BALANCE_SHEET,
+    queryFn: () => financeApi.getBalanceSheet(),
   });
 }

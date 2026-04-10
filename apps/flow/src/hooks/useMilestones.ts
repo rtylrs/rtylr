@@ -1,25 +1,26 @@
-import { useMemo } from 'react';
-import { useFlowStore } from '../stores/flowStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { flowApi, ApiMilestone } from '../services/flowApi';
 
 export function useMilestones(projectId?: string) {
-  const { milestones, tasks, projects } = useFlowStore();
-  return useMemo(() => {
-    const filtered = projectId
-      ? milestones.filter((m) => m.projectId === projectId)
-      : milestones;
-    return filtered.map((m) => {
-      const mTasks = tasks.filter((t) => t.milestoneId === m.id);
-      const done = mTasks.filter((t) => t.status === 'done').length;
-      const project = projects.find((p) => p.id === m.projectId);
-      return {
-        ...m,
-        project,
-        taskCount: mTasks.length,
-        doneCount: done,
-        computedProgress: mTasks.length
-          ? Math.round((done / mTasks.length) * 100)
-          : m.progress,
-      };
-    });
-  }, [milestones, tasks, projects, projectId]);
+  return useQuery({
+    queryKey: ['milestones', projectId],
+    queryFn: () => flowApi.getMilestones(projectId),
+  });
+}
+
+export function useCreateMilestone() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<ApiMilestone>) => flowApi.createMilestone(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['milestones'] }),
+  });
+}
+
+export function useUpdateMilestone() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ApiMilestone> }) =>
+      flowApi.updateMilestone(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['milestones'] }),
+  });
 }

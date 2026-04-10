@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { MOCK_ACCOUNTS, MOCK_JOURNAL, Account, JournalEntry } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useChartOfAccounts() {
-  return useQuery<Account[]>({
+  return useQuery({
     queryKey: ['chart-of-accounts'],
-    queryFn: async () => MOCK_ACCOUNTS,
+    queryFn: () => financeApi.getAccounts(),
   });
 }
 
 export function useJournal() {
-  return useQuery<JournalEntry[]>({
+  return useQuery({
     queryKey: ['journal'],
-    queryFn: async () => MOCK_JOURNAL,
+    queryFn: () => financeApi.getJournal(),
   });
 }

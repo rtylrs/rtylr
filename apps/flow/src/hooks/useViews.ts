@@ -1,13 +1,32 @@
 import { useMemo } from 'react';
-import { useFlowStore, SavedView, Task, PRIORITY_ORDER } from '../stores/flowStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { flowApi } from '../services/flowApi';
+import { SavedView, Task, PRIORITY_ORDER } from '../stores/flowStore';
 
 export function useViews() {
-  const { views } = useFlowStore();
-  return views;
+  return useQuery<SavedView[]>({
+    queryKey: ['views'],
+    queryFn: () => flowApi.getViews() as Promise<SavedView[]>,
+  });
 }
 
-export function useFilteredTasks(view: SavedView | null) {
-  const { tasks } = useFlowStore();
+export function useCreateView() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<SavedView>) => flowApi.createView(data as any),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+  });
+}
+
+export function useDeleteView() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => flowApi.deleteView(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+  });
+}
+
+export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
   return useMemo(() => {
     if (!view) return tasks;
     let filtered = [...tasks];

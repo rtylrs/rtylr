@@ -7,7 +7,6 @@ import { useSegments } from '../../hooks/useSegments';
 import { useTemplates } from '../../hooks/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../components/ui';
 import { EmailEditor } from '../../components/crm';
-import { mockSegments, mockTemplates } from '../../lib/mockData';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
@@ -15,8 +14,8 @@ const EmailCampaign: React.FC = () => {
   const create = useCreateCampaign();
   const { data: fetchedSegments } = useSegments();
   const { data: fetchedTemplates } = useTemplates();
-  const segments = fetchedSegments && fetchedSegments.length ? fetchedSegments : mockSegments;
-  const templates = (fetchedTemplates && fetchedTemplates.length ? fetchedTemplates : mockTemplates).filter((t) => t.channel === 'email');
+  const segments = fetchedSegments ?? [];
+  const templates = (fetchedTemplates ?? []).filter((t) => t.channel === 'email');
 
   const [name, setName] = useState(searchParams.get('name') || '');
   const [segmentId, setSegmentId] = useState<number>(segments[0]?.id || 0);

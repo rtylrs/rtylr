@@ -159,7 +159,7 @@ const DefaultLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
-    document.cookie = 'rtylr_session=; Max-Age=0; path=/';
+    document.cookie = 'token=; Max-Age=0; path=/';
     window.location.href = `${APP_URLS.auth}?redirect=crm`;
   };
 
@@ -194,27 +194,7 @@ const DefaultLayout: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '28px',
-              height: '28px',
-              borderRadius: '8px',
-              background: `rgba(59,130,246,0.15)`,
-              color: ACCENT,
-              fontWeight: 700,
-              fontSize: '13px',
-              flexShrink: 0,
-            }}
-          >
-            C
-          </div>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--hub-text)' }}>CRM</div>
-            <div style={{ fontSize: '10px', color: 'var(--hub-text-dim)' }}>rtylr</div>
-          </div>
+          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
         </div>
 
         {/* Hub back link */}

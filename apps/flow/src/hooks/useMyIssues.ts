@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { useFlowStore } from '../stores/flowStore';
+import { useQuery } from '@tanstack/react-query';
+import { flowApi } from '../services/flowApi';
 
-export function useMyIssues(userId: string = 'u1') {
-  const { tasks } = useFlowStore();
-  return useMemo(() => {
-    return tasks.filter((t) => t.assigneeId === userId && !t.archived);
-  }, [tasks, userId]);
+export function useMyIssues() {
+  return useQuery({
+    queryKey: ['my-tasks'],
+    queryFn: () => flowApi.getMyTasks(),
+  });
 }

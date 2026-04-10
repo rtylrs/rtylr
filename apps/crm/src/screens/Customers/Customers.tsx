@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useCustomers, useUpdateCustomer } from '../../hooks/useCustomers';
 import { getTier, Tier, tierColor } from '../../lib/tiers';
-import { mockCustomers } from '../../lib/mockData';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../components/crm';
 
@@ -73,7 +72,7 @@ const Customers: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedCustomers, isLoading } = useCustomers();
   const update = useUpdateCustomer();
-  const customers = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
+  const customers = fetchedCustomers ?? [];
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<Tier | 'All'>('All');
   const [expandedId, setExpandedId] = useState<number | null>(null);

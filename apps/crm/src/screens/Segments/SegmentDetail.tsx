@@ -5,16 +5,27 @@ import { useSegmentById, useSegmentCustomers } from '../../hooks/useSegments';
 import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../components/ui';
 import { CustomerAvatar, TierBadge } from '../../components/crm';
 import { getTier } from '../../lib/tiers';
-import { mockSegments, mockCustomers } from '../../lib/mockData';
 
 const SegmentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const segmentId = Number(id);
-  const { data: fetched } = useSegmentById(segmentId);
+  const { data: fetched, isLoading: segmentLoading, error: segmentError } = useSegmentById(segmentId);
   const { data: fetchedCustomers, isLoading } = useSegmentCustomers(segmentId);
-  const segment = fetched || mockSegments.find((s) => s.id === segmentId) || mockSegments[0];
-  const customers = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
+  const segment = fetched;
+  const customers = fetchedCustomers ?? [];
+
+  if (segmentLoading) {
+    return <div style={{ maxWidth: '1100px' }}><SkeletonList count={6} /></div>;
+  }
+
+  if (segmentError || !segment) {
+    return (
+      <div style={{ maxWidth: '1100px' }}>
+        <EmptyState icon={PieChart} title="Segment not found" description="This segment could not be loaded." />
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '1100px' }}>

@@ -18,7 +18,6 @@ import { usePurchaseOrders } from '../../hooks/usePurchaseOrders';
 import { useProducts } from '../../hooks/useProducts';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { useActivity } from '../../hooks/useActivity';
-import { mockLowStockItems, mockPurchaseOrders } from '../../lib/mockData';
 import { timeAgo, formatCurrency } from '../../lib/format';
 import { SkeletonRow } from '../../components/Skeleton';
 
@@ -65,16 +64,14 @@ const Dashboard: React.FC = () => {
 
   const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;
 
-  const lowStockItems: LowStockItem[] =
-    lowStockData && lowStockData.length ? lowStockData : mockLowStockItems;
-  const ordersForList: PurchaseOrder[] =
-    ordersData && ordersData.length ? ordersData : mockPurchaseOrders;
+  const lowStockItems: LowStockItem[] = lowStockData ?? [];
+  const ordersForList: PurchaseOrder[] = ordersData ?? [];
   const recentOrders = ordersForList.slice(0, 3);
 
   const stats = [
     {
       label: 'Total Products',
-      value: productsData && productsData.length ? productsData.length : 248,
+      value: productsData?.length ?? 0,
       icon: Package,
       change: '+12 this month',
       changePositive: true,
@@ -98,7 +95,7 @@ const Dashboard: React.FC = () => {
     },
     {
       label: 'Total Suppliers',
-      value: suppliersData && suppliersData.length ? suppliersData.length : 32,
+      value: suppliersData?.length ?? 0,
       icon: Users,
       change: '+2 this month',
       changePositive: true,

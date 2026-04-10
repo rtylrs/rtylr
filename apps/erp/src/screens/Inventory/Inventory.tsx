@@ -6,17 +6,6 @@ import { useProducts } from '../../hooks/useProducts';
 
 const AMBER = '#f59e0b';
 
-// ─── Mock / fallback data ─────────────────────────────────────────────────────
-
-const mockProducts: Product[] = [
-  { id: 1, name: 'Arabica Coffee Beans',       sku: 'BEV-001',  category: 'Beverages', stock: 3,   lowStock: 20, costPrice: 18.5, salePrice: 29.99, status: 'Low Stock'    },
-  { id: 2, name: 'Whole Milk (2L)',             sku: 'BEV-012',  category: 'Beverages', stock: 8,   lowStock: 50, costPrice: 2.1,  salePrice: 3.5,   status: 'Low Stock'    },
-  { id: 3, name: 'Sourdough Bread',             sku: 'FOOD-034', category: 'Bakery',    stock: 0,   lowStock: 15, costPrice: 3.0,  salePrice: 5.5,   status: 'Out of Stock' },
-  { id: 4, name: 'Extra Virgin Olive Oil (1L)', sku: 'FOOD-055', category: 'Pantry',    stock: 42,  lowStock: 10, costPrice: 7.8,  salePrice: 14.99, status: 'In Stock'     },
-  { id: 5, name: 'Sparkling Water (500ml)',     sku: 'BEV-028',  category: 'Beverages', stock: 120, lowStock: 30, costPrice: 0.6,  salePrice: 1.5,   status: 'In Stock'     },
-  { id: 6, name: 'Cheddar Cheese (500g)',       sku: 'DAIRY-007',category: 'Dairy',     stock: 18,  lowStock: 15, costPrice: 5.2,  salePrice: 9.99,  status: 'In Stock'     },
-];
-
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const statusConfig: Record<Product['status'], { color: string; bg: string }> = {
@@ -60,8 +49,7 @@ const SkeletonTableRow: React.FC = () => (
 
 const Inventory: React.FC = () => {
   const [search, setSearch] = useState('');
-  const { data: fetchedProducts, isLoading } = useProducts();
-  const products: Product[] = fetchedProducts && fetchedProducts.length ? fetchedProducts : mockProducts;
+  const { data: products = [], isLoading } = useProducts();
 
   // Client-side search filters mock data; real API uses search param on mount
   const filtered = isLoading

@@ -6,7 +6,6 @@ import { type DashboardStats } from '../../services/crmApi';
 import { useCRMDashboard } from '../../hooks/useDashboard';
 import { useCustomers } from '../../hooks/useCustomers';
 import { useSegments } from '../../hooks/useSegments';
-import { mockCustomers, mockSegments } from '../../lib/mockData';
 import { CustomerAvatar } from '../../components/crm';
 
 const ACCENT = '#3b82f6';
@@ -147,13 +146,13 @@ const Dashboard: React.FC = () => {
   const { data: dashboardData } = useCRMDashboard();
   const { data: fetchedCustomers } = useCustomers();
   const { data: fetchedSegments } = useSegments();
-  const customersPool = fetchedCustomers && fetchedCustomers.length ? fetchedCustomers : mockCustomers;
-  const segmentsPool = fetchedSegments && fetchedSegments.length ? fetchedSegments : mockSegments;
+  const customersPool = fetchedCustomers ?? [];
+  const segmentsPool = fetchedSegments ?? [];
 
   const ltv = customersPool.length > 0 ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length) : 0;
   const atRisk = customersPool.filter((c) => /month|weeks/.test(c.lastVisit)).slice(0, 4);
   const churnRate = customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
-  const topSegment = segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0]);
+  const topSegment = segmentsPool.length > 0 ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0]) : null;
 
   const stats = dashboardData
     ? [

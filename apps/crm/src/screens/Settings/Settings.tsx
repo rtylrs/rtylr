@@ -3,12 +3,22 @@ import { toast } from 'sonner';
 import { Save } from 'lucide-react';
 import { useSettings, useUpdateSettings } from '../../hooks/useSettings';
 import { PageHeader, Card, Input, Select, Button } from '../../components/ui';
-import { mockSettings } from '../../lib/mockData';
+import type { Settings } from '../../services/crmApi';
 
 const SettingsScreen: React.FC = () => {
   const { data: fetched } = useSettings();
   const update = useUpdateSettings();
-  const [form, setForm] = useState(mockSettings);
+  const defaultSettings: Settings = {
+    defaultConsent: true,
+    timezone: 'America/Los_Angeles',
+    fromEmail: '',
+    fromName: '',
+    smsSenderId: '',
+    businessName: '',
+    atRiskDays: 60,
+    currency: 'USD',
+  };
+  const [form, setForm] = useState<Settings>(defaultSettings);
 
   useEffect(() => {
     if (fetched) setForm(fetched);

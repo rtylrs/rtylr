@@ -14,9 +14,9 @@ import { formatCurrency } from '../../lib/format';
 
 const AMBER = '#f59e0b';
 
-// Mock sales / stock history series
-const mockStockHistory = [42, 40, 38, 35, 30, 28, 22, 18, 14, 10, 6, 3];
-const mockSalesHistory = [12, 18, 14, 22, 16, 20, 24];
+// Placeholder chart data - will be replaced with real API data
+const stockHistory: number[] = [];
+const salesHistory: number[] = [];
 
 const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }> = ({
   data,
@@ -227,7 +227,11 @@ const ProductDetail: React.FC = () => {
                 Stock History (12 weeks)
               </h3>
             </div>
-            <MiniLineChart data={mockStockHistory} color={AMBER} height={80} />
+            {stockHistory.length > 0 ? (
+              <MiniLineChart data={stockHistory} color={AMBER} height={80} />
+            ) : (
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>No stock history data yet.</p>
+            )}
           </div>
 
           <div
@@ -240,7 +244,11 @@ const ProductDetail: React.FC = () => {
                 Sales History (7 days)
               </h3>
             </div>
-            <MiniLineChart data={mockSalesHistory} color="#10b981" height={80} />
+            {salesHistory.length > 0 ? (
+              <MiniLineChart data={salesHistory} color="#10b981" height={80} />
+            ) : (
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>No sales history data yet.</p>
+            )}
           </div>
 
           {variants.length > 0 && (

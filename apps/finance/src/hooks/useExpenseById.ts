@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { buildMockExpense, ExpenseDetail } from '../lib/mockData';
+import { financeApi } from '../services/financeApi';
 
 export function useExpenseById(id: string | undefined) {
-  return useQuery<ExpenseDetail>({
+  return useQuery({
     queryKey: ['expense-detail', id],
-    queryFn: async () => buildMockExpense(id!),
+    queryFn: () => financeApi.getExpenseDetail(id!),
     enabled: !!id,
   });
 }

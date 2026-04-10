@@ -1,28 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  Mail,
   AlertCircle,
   ArrowLeft,
-  ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
 
 import { auth } from '../firebase';
-
-import AuthShell from '../components/AuthShell';
-import AuthInput from '../components/AuthInput';
-import AuthButton from '../components/AuthButton';
-
-const fieldStagger = {
-  hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.2 + i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-  }),
-};
+import { ASSETS } from '@voxire/config';
+import { Button } from '@voxire/components';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -45,80 +31,95 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <AuthShell
-      title="Forgot password?"
-      subtitle="Enter your email and we'll send you a secure reset link."
-      footer={
-        <p className="text-sm text-center text-white/55">
+    <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <img
+            src={ASSETS.logos.dark}
+            alt="rtylr"
+            className="h-8 w-auto select-none"
+            draggable={false}
+          />
+        </div>
+
+        <h2 className="text-xl font-semibold text-[#111] mb-1">Forgot password?</h2>
+        <p className="text-sm text-[#666] mb-6">
+          Enter your email and we'll send you a reset link.
+        </p>
+
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleReset(); }}
+          className="flex flex-col gap-4"
+        >
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="reset-email" className="text-sm font-medium text-[#111]">
+              Email
+            </label>
+            <input
+              id="reset-email"
+              type="email"
+              placeholder="you@company.com"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              disabled={requestSent}
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20 disabled:bg-[#f5f5f5] disabled:text-[#999]"
+            />
+          </div>
+
+          {message && (
+            <div
+              className={[
+                'flex items-start gap-2 rounded-lg px-3 py-2.5 border',
+                requestSent
+                  ? 'border-green-200 bg-green-50'
+                  : 'border-red-200 bg-red-50',
+              ].join(' ')}
+              role="alert"
+            >
+              {requestSent ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              )}
+              <p
+                className={[
+                  'text-xs leading-relaxed',
+                  requestSent ? 'text-green-700' : 'text-red-600',
+                ].join(' ')}
+              >
+                {message}
+              </p>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            loading={loading}
+            disabled={requestSent}
+            height={40}
+          >
+            {requestSent ? 'Email sent' : 'Send reset link'}
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-[#64C5B9] font-medium hover:underline underline-offset-4"
+            className="inline-flex items-center gap-1.5 text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to sign in
           </button>
-        </p>
-      }
-    >
-      <form
-        onSubmit={(e) => { e.preventDefault(); handleReset(); }}
-        className="flex flex-col gap-5"
-      >
-        <motion.div custom={0} initial="hidden" animate="show" variants={fieldStagger}>
-          <AuthInput
-            id="reset-email"
-            type="email"
-            label="Email"
-            icon={Mail}
-            placeholder="you@company.com"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoFocus
-            disabled={requestSent}
-          />
-        </motion.div>
-
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={[
-              'flex items-start gap-2 rounded-lg px-3.5 py-2.5 border',
-              requestSent
-                ? 'border-[#64C5B9]/30 bg-[#64C5B9]/10'
-                : 'border-red-400/25 bg-red-500/10',
-            ].join(' ')}
-            role="alert"
-          >
-            {requestSent ? (
-              <CheckCircle2 className="h-4 w-4 text-[#64C5B9] mt-0.5 shrink-0" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-300 mt-0.5 shrink-0" />
-            )}
-            <p
-              className={[
-                'text-xs leading-relaxed',
-                requestSent ? 'text-[#c3ede7]' : 'text-red-200',
-              ].join(' ')}
-            >
-              {message}
-            </p>
-          </motion.div>
-        )}
-
-        <motion.div custom={1} initial="hidden" animate="show" variants={fieldStagger}>
-          <AuthButton type="submit" loading={loading} disabled={requestSent}>
-            <span className="inline-flex items-center justify-center gap-2">
-              {requestSent ? 'Email sent' : 'Send reset link'}
-              {!requestSent && <ArrowRight className="h-[18px] w-[18px]" />}
-            </span>
-          </AuthButton>
-        </motion.div>
-      </form>
-    </AuthShell>
+        </div>
+      </div>
+    </div>
   );
 };
 

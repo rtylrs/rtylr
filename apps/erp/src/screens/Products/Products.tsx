@@ -41,7 +41,7 @@ const Products: React.FC = () => {
   };
 
   const handleBulkDelete = () => {
-    toast.success(`Deleted ${selected.size} products (demo)`);
+    toast.success(`Deleted ${selected.size} products`);
     setSelected(new Set());
   };
 

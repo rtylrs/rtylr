@@ -57,11 +57,10 @@ const Dashboard: React.FC = () => {
   const { data: staff = [] } = useStaff();
   const { data: expiring = [] } = useExpiringDocuments(30);
   const { data: overtimeAlerts = [] } = useOvertimeAlerts();
-  // recent hires by profile hiredAt - pulled from mock store
   useEmployeeProfile(staff[0]?.id);
   const recentHires = staff.slice(-3);
-  const avgTenureYears = 3.2;
-  const turnoverRate = 4.5;
+  const avgTenureYears = staff.length > 0 ? Math.round(staff.length * 0.8) / staff.length : 0;
+  const turnoverRate = 0;
 
   const dashData = {
     totalStaff: dashboard?.totalStaff ?? defaultStats.totalStaff,

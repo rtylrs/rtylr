@@ -52,7 +52,7 @@ const POS: React.FC = () => {
           setCategories(Array.from(cats));
         }
       } catch {
-        // keep empty — ProductGrid handles empty state
+        // keep empty - ProductGrid handles empty state
       }
     }
 

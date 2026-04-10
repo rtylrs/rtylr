@@ -4,12 +4,11 @@ import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
 import { useTemplates } from '../../hooks/useTemplates';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../components/ui';
-import { mockTemplates } from '../../lib/mockData';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetched, isLoading } = useTemplates();
-  const templates = fetched && fetched.length ? fetched : mockTemplates;
+  const templates = fetched ?? [];
 
   const [filter, setFilter] = useState<'all' | 'email' | 'sms'>('all');
   const filtered = filter === 'all' ? templates : templates.filter((t) => t.channel === filter);

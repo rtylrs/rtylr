@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -35,6 +35,8 @@ import CommandBar from '../../components/CommandBar';
 import QuickCreate from '../../components/QuickCreate';
 import BulkEditBar from '../../components/BulkEditBar';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useWorkspaces } from '../../hooks/useWorkspaces';
+import { useProjects } from '../../hooks/useProjects';
 
 const ACCENT = '#64C5B9';
 
@@ -111,19 +113,37 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     projects,
     activeWorkspaceId,
     setActiveWorkspace,
+    setWorkspaces,
+    setProjects,
     notifications,
     tasks,
     setCommandBarOpen,
   } = useFlowStore();
+
+  // Fetch workspaces and projects from API and populate store
+  const { data: apiWorkspaces } = useWorkspaces();
+  const currentWorkspaceId = workspaceId || activeWorkspaceId || workspaces[0]?.id || '';
+  const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
+
+  useEffect(() => {
+    if (apiWorkspaces && apiWorkspaces.length > 0) {
+      setWorkspaces(apiWorkspaces as any);
+    }
+  }, [apiWorkspaces, setWorkspaces]);
+
+  useEffect(() => {
+    if (apiProjects && apiProjects.length > 0) {
+      setProjects(apiProjects as any);
+    }
+  }, [apiProjects, setProjects]);
 
   const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useKeyboardShortcuts();
 
-  const currentWorkspaceId = workspaceId || activeWorkspaceId;
   const activeWorkspace =
-    workspaces.find((w) => w.id === currentWorkspaceId) || workspaces[0];
+    workspaces.find((w) => w.id === currentWorkspaceId) || workspaces[0] || { id: '', name: 'Loading...', color: '#6b7280' };
   const workspaceProjects = projects.filter(
     (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
@@ -162,18 +182,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div className="flex items-center gap-2">
-            <div
-              className="h-6 w-6 rounded-md flex items-center justify-center text-[11px] font-bold"
-              style={{ background: ACCENT, color: '#0a0a0a' }}
-            >
-              F
-            </div>
-            <span
-              className="text-[13px] font-semibold"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              Flow
-            </span>
+            <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
           </div>
           <a
             href={APP_URLS.hub}

@@ -10,7 +10,7 @@ type GroupBy = 'status' | 'priority' | 'project' | 'none';
 type SortBy = 'priority' | 'dueDate' | 'updated';
 
 const MyIssues: React.FC = () => {
-  const tasks = useMyIssues();
+  const { data: tasks = [], isLoading } = useMyIssues();
   const { projects } = useFlowStore();
   const [groupBy, setGroupBy] = useState<GroupBy>('status');
   const [sortBy, setSortBy] = useState<SortBy>('priority');

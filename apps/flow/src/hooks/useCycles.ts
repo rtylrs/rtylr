@@ -1,37 +1,31 @@
-import { useMemo } from 'react';
-import { useFlowStore } from '../stores/flowStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { flowApi, ApiCycle } from '../services/flowApi';
 
 export function useCycles(workspaceId?: string) {
-  const { cycles, tasks } = useFlowStore();
-  return useMemo(() => {
-    const ws = workspaceId;
-    const filtered = ws ? cycles.filter((c) => c.workspaceId === ws) : cycles;
-    return filtered.map((c) => {
-      const cTasks = tasks.filter((t) => t.cycleId === c.id);
-      const done = cTasks.filter((t) => t.status === 'done').length;
-      return {
-        ...c,
-        scope: cTasks.length || c.scope,
-        completed: done || c.completed,
-        tasks: cTasks,
-      };
-    });
-  }, [cycles, tasks, workspaceId]);
+  return useQuery({
+    queryKey: ['cycles', workspaceId],
+    queryFn: () => flowApi.getCycles(workspaceId),
+  });
 }
 
 export function useCycleById(id: string | undefined) {
-  const { cycles, tasks } = useFlowStore();
-  return useMemo(() => {
-    if (!id) return null;
-    const cycle = cycles.find((c) => c.id === id);
-    if (!cycle) return null;
-    const cycleTasks = tasks.filter((t) => t.cycleId === id);
-    const done = cycleTasks.filter((t) => t.status === 'done').length;
-    return {
-      ...cycle,
-      tasks: cycleTasks,
-      scope: cycleTasks.length,
-      completed: done,
-    };
-  }, [cycles, tasks, id]);
+  const { data: cycles } = useCycles();
+  return cycles?.find((c) => c.id === id) ?? null;
+}
+
+export function useCreateCycle() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<ApiCycle>) => flowApi.createCycle(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
+  });
+}
+
+export function useUpdateCycle() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ApiCycle> }) =>
+      flowApi.updateCycle(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
+  });
 }

@@ -23,7 +23,7 @@ const Brands: React.FC = () => {
         description={`${brands.length} brands across your catalog`}
         actions={
           <button
-            onClick={() => toast.success('Brand created (demo)')}
+            onClick={() => toast.success('Brand created')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >

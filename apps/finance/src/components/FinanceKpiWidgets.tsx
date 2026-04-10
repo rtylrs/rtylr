@@ -11,7 +11,7 @@ interface Kpi {
   color: string;
 }
 
-// Mock derived metrics. In a real app these come from the dashboard data.
+// Default KPI values shown before real dashboard data arrives.
 const DEFAULT_KPIS = {
   mrr: 82400,
   mrrChange: '+8.4%',

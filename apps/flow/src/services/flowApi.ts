@@ -1,6 +1,6 @@
 import api from '../lib/api';
 
-// ── Types ──────────────────────────────────────────────────────
+// -- Types ----------------------------------------------------------------
 
 export interface DashboardStats {
   openTasks: number;
@@ -48,14 +48,76 @@ export interface ApiLabel {
   color: string;
 }
 
-// ── Dashboard ──────────────────────────────────────────────────
+export interface ApiMilestone {
+  id: string;
+  projectId: string;
+  name: string;
+  targetDate: string;
+  progress: number;
+  status: 'planning' | 'active' | 'at_risk' | 'completed';
+  description?: string;
+}
+
+export interface ApiCycle {
+  id: string;
+  workspaceId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: 'upcoming' | 'active' | 'completed';
+  scope: number;
+  completed: number;
+}
+
+export interface ApiView {
+  id: string;
+  name: string;
+  icon: string;
+  filters: Record<string, any>;
+  groupBy?: string;
+  sortBy?: string;
+  sortDir?: string;
+}
+
+export interface ApiInsights {
+  velocity: { cycle: string; completed: number; total: number; completionRate: number }[];
+  burndown: { day: number; ideal: number; actual: number }[];
+  cycleTime: number;
+  timeByMember: { id: string; name: string; hours: number }[];
+  throughput: { week: string; completed: number }[];
+  totalTasks: number;
+  doneTasks: number;
+}
+
+export interface ApiTeamWorkload {
+  id: string;
+  name: string;
+  initials: string;
+  capacity: number;
+  assignedHours: number;
+  load: number;
+  tasks: ApiTask[];
+}
+
+export interface ApiRoadmap {
+  id: string;
+  name: string;
+  color: string;
+  startDate: string;
+  targetDate: string;
+  progress: number;
+  tasks: ApiTask[];
+  doneCount: number;
+}
+
+// -- API ------------------------------------------------------------------
 
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
     api.get<DashboardStats>('/flow/dashboard', { params: workspaceId ? { workspaceId } : undefined })
       .then((r) => r.data),
 
-  // ── Workspaces ───────────────────────────────────────────────
+  // -- Workspaces ---------------------------------------------------------
 
   getWorkspaces: () =>
     api.get<ApiWorkspace[]>('/flow/workspaces').then((r) => r.data),
@@ -75,7 +137,7 @@ export const flowApi = {
   removeWorkspaceMember: (userId: string, workspaceId: string) =>
     api.post(`/flow/workspaces/member/${userId}`, { workspaceId }).then((r) => r.data),
 
-  // ── Projects ─────────────────────────────────────────────────
+  // -- Projects -----------------------------------------------------------
 
   getProjects: (workspaceId: string) =>
     api.get<ApiProject[]>('/flow/projects', { params: { workspaceId } }).then((r) => r.data),
@@ -89,7 +151,7 @@ export const flowApi = {
   deleteProject: (id: string) =>
     api.post(`/flow/projects/${id}/delete`).then((r) => r.data),
 
-  // ── Tasks ─────────────────────────────────────────────────────
+  // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
     api.get<ApiTask[]>('/flow/tasks', { params }).then((r) => r.data),
@@ -123,11 +185,65 @@ export const flowApi = {
   addComment: (data: { taskId: string; content: string }) =>
     api.post('/flow/tasks/comment', data).then((r) => r.data),
 
-  // ── Labels ────────────────────────────────────────────────────
+  deleteComment: (id: string) =>
+    api.delete(`/flow/tasks/comment/${id}`).then((r) => r.data),
+
+  // -- Labels -------------------------------------------------------------
 
   getLabels: () =>
     api.get<ApiLabel[]>('/flow/labels').then((r) => r.data),
 
   createLabel: (data: { name: string; color: string }) =>
     api.post<ApiLabel>('/flow/labels', data).then((r) => r.data),
+
+  // -- Milestones ---------------------------------------------------------
+
+  getMilestones: (projectId?: string) =>
+    api.get<ApiMilestone[]>('/flow/milestones', { params: projectId ? { projectId } : undefined }).then((r) => r.data),
+
+  createMilestone: (data: Partial<ApiMilestone>) =>
+    api.post<ApiMilestone>('/flow/milestones', data).then((r) => r.data),
+
+  updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
+    api.put<ApiMilestone>(`/flow/milestones/${id}`, data).then((r) => r.data),
+
+  // -- Cycles -------------------------------------------------------------
+
+  getCycles: (workspaceId?: string) =>
+    api.get<ApiCycle[]>('/flow/cycles', { params: workspaceId ? { workspaceId } : undefined }).then((r) => r.data),
+
+  createCycle: (data: Partial<ApiCycle>) =>
+    api.post<ApiCycle>('/flow/cycles', data).then((r) => r.data),
+
+  updateCycle: (id: string, data: Partial<ApiCycle>) =>
+    api.put<ApiCycle>(`/flow/cycles/${id}`, data).then((r) => r.data),
+
+  // -- Views --------------------------------------------------------------
+
+  getViews: () =>
+    api.get<ApiView[]>('/flow/views').then((r) => r.data),
+
+  createView: (data: Partial<ApiView>) =>
+    api.post<ApiView>('/flow/views', data).then((r) => r.data),
+
+  updateView: (id: string, data: Partial<ApiView>) =>
+    api.put<ApiView>(`/flow/views/${id}`, data).then((r) => r.data),
+
+  deleteView: (id: string) =>
+    api.delete(`/flow/views/${id}`).then((r) => r.data),
+
+  // -- Insights -----------------------------------------------------------
+
+  getInsights: (workspaceId?: string) =>
+    api.get<ApiInsights>('/flow/insights', { params: workspaceId ? { workspaceId } : undefined }).then((r) => r.data),
+
+  // -- Team workload ------------------------------------------------------
+
+  getTeamWorkload: () =>
+    api.get<ApiTeamWorkload[]>('/flow/team/workload').then((r) => r.data),
+
+  // -- Roadmap ------------------------------------------------------------
+
+  getRoadmap: () =>
+    api.get<ApiRoadmap[]>('/flow/roadmap').then((r) => r.data),
 };

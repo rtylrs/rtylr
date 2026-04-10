@@ -15,95 +15,27 @@ import {
   CardRadius,
 } from '@voxire/menu';
 import { useLayoutPresetsStore } from '../../../stores/layoutPresetsStore';
+import { useUserStore } from '../../../stores/userStore';
+import { useMenuStore } from '../../../stores/menuStore';
 
-// ─── Mock preview data ─────────────────────────────────────────────────────────
+// -- Placeholder image helper ------------------------------------------------
 
 const PH = (w: number, h: number, bg: string, text: string) =>
   `https://placehold.co/${w}x${h}/${bg}/ffffff?text=${encodeURIComponent(text)}`;
 
-const MOCK_BUSINESS: BusinessInfo = {
-  name: 'The Golden Fork',
-  description: 'Contemporary bistro with a seasonal menu and craft cocktails.',
-  coverImage: PH(800, 300, '1a1a1a', 'The+Golden+Fork'),
-  logo: PH(120, 120, 'c8a96e', 'GF'),
-  address: '12 Maple Street, Downtown',
-  phone: '+1 (555) 012-3456',
-  hours: 'Mon–Sat 11am–11pm',
-  averageRating: 4.6,
-  reviewCount: 124,
+const DEFAULT_BUSINESS: BusinessInfo = {
+  name: 'Your Business',
+  description: 'Add your business description in settings.',
+  coverImage: PH(800, 300, '1a1a1a', 'Cover'),
+  logo: PH(120, 120, 'c8a96e', 'Logo'),
+  address: '',
+  phone: '',
+  hours: '',
+  averageRating: 0,
+  reviewCount: 0,
 };
 
-const MOCK_CATEGORIES: MenuCategoryData[] = [
-  {
-    id: 'starters',
-    name: 'Starters',
-    items: [
-      {
-        id: 's1',
-        name: 'Truffle Fries',
-        description: 'Crispy fries tossed in truffle oil and parmesan.',
-        price: 9.99,
-        currency: 'USD',
-        badges: ['V'],
-        available: true,
-        image: PH(400, 300, '3d2b1f', 'Truffle+Fries'),
-      },
-      {
-        id: 's2',
-        name: 'Burrata & Tomato',
-        description: 'Fresh burrata, heirloom tomatoes, basil oil.',
-        price: 14.5,
-        currency: 'USD',
-        badges: ['V', 'GF'],
-        available: true,
-        image: PH(400, 300, '4a3728', 'Burrata'),
-      },
-      {
-        id: 's3',
-        name: 'Crispy Calamari',
-        description: 'Lightly battered with lemon aioli.',
-        price: 12.99,
-        currency: 'USD',
-        available: true,
-        image: PH(400, 300, '2d3d4a', 'Calamari'),
-      },
-      {
-        id: 's4',
-        name: 'Chicken Wings',
-        description: 'Eight wings, choice of sauce.',
-        price: 13.99,
-        currency: 'USD',
-        available: true,
-        image: PH(400, 300, '4a2d2d', 'Wings'),
-      },
-    ],
-  },
-  {
-    id: 'mains',
-    name: 'Mains',
-    items: [
-      {
-        id: 'm1',
-        name: 'Grilled Salmon',
-        description: 'Atlantic salmon, lemon butter, seasonal vegetables.',
-        price: 26.0,
-        currency: 'USD',
-        badges: ['GF'],
-        available: true,
-        image: PH(400, 300, '1e3a2f', 'Salmon'),
-      },
-      {
-        id: 'm2',
-        name: 'Classic Burger',
-        description: 'Angus beef, cheddar, pickles, house sauce.',
-        price: 18.0,
-        currency: 'USD',
-        available: true,
-        image: PH(400, 300, '4a2d1a', 'Burger'),
-      },
-    ],
-  },
-];
+const DEFAULT_CATEGORIES: MenuCategoryData[] = [];
 
 // ─── Segment Button Group ──────────────────────────────────────────────────────
 
@@ -328,7 +260,7 @@ function ColorRow({ label, value, onChange }: { label: string; value: string; on
 
 // ─── Phone Frame ──────────────────────────────────────────────────────────────
 
-function PhoneFrame({ config }: { config: MenuLayoutConfig }) {
+function PhoneFrame({ config, businessInfo, menuCategories }: { config: MenuLayoutConfig; businessInfo: BusinessInfo; menuCategories: MenuCategoryData[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
@@ -495,8 +427,8 @@ function PhoneFrame({ config }: { config: MenuLayoutConfig }) {
               }}
             >
               <MenuLayout
-                business={MOCK_BUSINESS}
-                categories={MOCK_CATEGORIES}
+                business={businessInfo}
+                categories={menuCategories}
                 config={config}
               />
             </div>
@@ -535,6 +467,44 @@ const Design: React.FC = () => {
     patchDraftConfig,
     saveActivePreset,
   } = useLayoutPresetsStore();
+
+  const { user } = useUserStore();
+  const { items: menuItems } = useMenuStore();
+
+  // Build business info and menu categories from real data
+  const businessInfo: BusinessInfo = user
+    ? {
+        name: user.businessName || user.name || DEFAULT_BUSINESS.name,
+        description: user.businessDescription || DEFAULT_BUSINESS.description,
+        coverImage: user.coverImage || DEFAULT_BUSINESS.coverImage,
+        logo: user.logo || DEFAULT_BUSINESS.logo,
+        address: user.address || DEFAULT_BUSINESS.address,
+        phone: user.phone || DEFAULT_BUSINESS.phone,
+        hours: user.hours || DEFAULT_BUSINESS.hours,
+        averageRating: user.averageRating ?? DEFAULT_BUSINESS.averageRating,
+        reviewCount: user.reviewCount ?? DEFAULT_BUSINESS.reviewCount,
+      }
+    : DEFAULT_BUSINESS;
+
+  const menuCategories: MenuCategoryData[] =
+    menuItems && menuItems.length > 0
+      ? (menuItems
+          .filter((item: any) => item.type === 'category')
+          .map((cat: any) => ({
+            id: cat._id,
+            name: cat.name,
+            items: (cat.menuItems || []).map((mi: any) => ({
+              id: mi._id,
+              name: mi.name,
+              description: mi.description || '',
+              price: mi.price ?? 0,
+              currency: mi.currency || 'USD',
+              available: mi.available !== false,
+              image: mi.image || '',
+              badges: mi.badges || [],
+            })),
+          })) as MenuCategoryData[])
+      : DEFAULT_CATEGORIES;
 
   const [newPresetName, setNewPresetName] = useState('');
   const [saved, setSaved] = useState(false);
@@ -987,7 +957,7 @@ const Design: React.FC = () => {
             Preview
           </span>
           <div style={{ flex: 1, width: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <PhoneFrame config={draftConfig} />
+            <PhoneFrame config={draftConfig} businessInfo={businessInfo} menuCategories={menuCategories} />
           </div>
         </div>
       </div>

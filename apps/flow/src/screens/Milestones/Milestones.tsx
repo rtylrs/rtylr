@@ -13,7 +13,9 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 };
 
 const Milestones: React.FC = () => {
-  const milestones = useMilestones();
+  const { data: milestones = [], isLoading } = useMilestones();
+
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading milestones...</div>;
 
   if (milestones.length === 0) {
     return (

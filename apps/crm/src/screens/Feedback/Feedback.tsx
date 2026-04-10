@@ -2,11 +2,10 @@ import React from 'react';
 import { MessageSquare, Star } from 'lucide-react';
 import { useFeedback } from '../../hooks/useFeedback';
 import { PageHeader, Card, EmptyState, SkeletonList } from '../../components/ui';
-import { mockFeedback } from '../../lib/mockData';
 
 const Feedback: React.FC = () => {
   const { data: fetched, isLoading } = useFeedback();
-  const feedback = fetched && fetched.length ? fetched : mockFeedback;
+  const feedback = fetched ?? [];
 
   const promoters = feedback.filter((f) => f.nps >= 9).length;
   const passives = feedback.filter((f) => f.nps >= 7 && f.nps < 9).length;

@@ -18,63 +18,6 @@ interface Segment {
   trendUp: boolean;
 }
 
-const mockSegments: Segment[] = [
-  {
-    id: 1,
-    name: 'VIP Customers',
-    description: 'High-value customers with Platinum or Gold loyalty tier.',
-    customerCount: 408,
-    icon: Star,
-    color: '#f59e0b',
-    rules: ['Loyalty tier = Gold OR Platinum', 'Total spend > $1,000'],
-    trend: '+12 this month',
-    trendUp: true,
-  },
-  {
-    id: 2,
-    name: 'New Customers',
-    description: 'Customers who made their first purchase in the last 30 days.',
-    customerCount: 184,
-    icon: Users,
-    color: '#10b981',
-    rules: ['First purchase within 30 days', 'Visit count < 3'],
-    trend: '+184 this month',
-    trendUp: true,
-  },
-  {
-    id: 3,
-    name: 'At-Risk',
-    description: 'Customers who used to visit regularly but haven\'t returned in 15–30 days.',
-    customerCount: 312,
-    icon: AlertTriangle,
-    color: '#f59e0b',
-    rules: ['Last visit 15–30 days ago', 'Previous visit frequency > 2x/month'],
-    trend: '+28 this week',
-    trendUp: false,
-  },
-  {
-    id: 4,
-    name: 'Inactive (30d+)',
-    description: 'Customers with no visit or purchase in over 30 days.',
-    customerCount: 947,
-    icon: Clock,
-    color: '#ef4444',
-    rules: ['Last visit > 30 days ago', 'No purchase in 30 days'],
-    trend: '-64 vs last month',
-    trendUp: false,
-  },
-  {
-    id: 5,
-    name: 'High Spenders',
-    description: 'Customers with lifetime spend above $500, regardless of tier.',
-    customerCount: 623,
-    icon: TrendingUp,
-    color: ACCENT,
-    rules: ['Lifetime spend > $500', 'At least 5 visits'],
-    trend: '+35 this month',
-    trendUp: true,
-  },
-];
 
 // Static rule builder options
 const ruleFields = ['Loyalty Tier', 'Total Spend', 'Visit Count', 'Last Visit', 'First Purchase', 'Points Balance'];
@@ -414,16 +357,14 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Segments: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedSegments } = useSegments();
+  const { data: fetchedSegments, isLoading } = useSegments();
   const [builderOpen, setBuilderOpen] = useState(false);
   const segments: Segment[] = useMemo(() => {
-    if (fetchedSegments && fetchedSegments.length) {
-      return fetchedSegments.map((s: any) => ({
-        ...s,
-        icon: iconMap[s.icon] ?? Users,
-      }));
-    }
-    return mockSegments;
+    if (!fetchedSegments) return [];
+    return fetchedSegments.map((s: any) => ({
+      ...s,
+      icon: iconMap[s.icon] ?? Users,
+    }));
   }, [fetchedSegments]);
 
   return (

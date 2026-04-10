@@ -2,11 +2,10 @@ import React from 'react';
 import { Gift, Package } from 'lucide-react';
 import { useLoyaltyRewards } from '../../hooks/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../components/ui';
-import { mockLoyaltyRewards } from '../../lib/mockData';
 
 const LoyaltyRewards: React.FC = () => {
   const { data: fetched, isLoading } = useLoyaltyRewards();
-  const rewards = fetched && fetched.length ? fetched : mockLoyaltyRewards;
+  const rewards = fetched ?? [];
 
   return (
     <div style={{ maxWidth: '1100px' }}>

@@ -11,7 +11,7 @@ const APP_META: Record<string, { label: string; color: string; bg: string; icon:
   hr:         { label: 'HR',         color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  icon: UserCheck },
   crm:        { label: 'CRM',        color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',  icon: Users },
   finance:    { label: 'Finance',    color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   icon: CreditCard },
-  tracker:    { label: 'Tracker',    color: '#64C5B9', bg: 'rgba(100,197,185,0.1)', icon: Layers },
+  flow:       { label: 'Flow',       color: '#64C5B9', bg: 'rgba(100,197,185,0.1)', icon: Layers },
   storefront: { label: 'Storefront', color: '#ec4899', bg: 'rgba(236,72,153,0.1)',  icon: Store },
   analytics:  { label: 'Analytics',  color: '#06b6d4', bg: 'rgba(6,182,212,0.1)',   icon: BarChart3 },
   market:     { label: 'Marketplace',color: '#a855f7', bg: 'rgba(168,85,247,0.1)',  icon: ShoppingBag },
