@@ -261,6 +261,118 @@ func (h *DeleteStaffHandler) Serve(ctx context.Context, req *DeleteStaffRequest)
 	return DeleteStaffResponse{Success: true}, nil
 }
 
+// ─── Get Staff By ID ─────────────────────────────────────────────────────────
+
+func GetStaffRoutes() []string { return []string{"/hr/staff/detail"} }
+
+type GetStaffHandler struct {
+	Service *application.Service
+}
+
+type GetStaffRequest struct {
+	ID int64 `json:"id"`
+}
+
+type GetStaffResponse struct {
+	Staff StaffPayload `json:"staff"`
+}
+
+func (h *GetStaffHandler) Validate(_ context.Context, req *GetStaffRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	return nil
+}
+
+func (h *GetStaffHandler) Serve(ctx context.Context, req *GetStaffRequest) (GetStaffResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return GetStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	s, err := h.Service.GetStaffByID(ctx, device.User.UserID, req.ID)
+	if err != nil {
+		if err == domain.ErrStaffNotFound {
+			return GetStaffResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Staff member not found"}
+		}
+		return GetStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get staff member"}
+	}
+
+	return GetStaffResponse{Staff: newStaffPayload(*s)}, nil
+}
+
+// ─── Clock In ────────────────────────────────────────────────────────────────
+
+func ClockInRoutes() []string { return []string{"/hr/staff/clock-in"} }
+
+type ClockInHandler struct {
+	Service *application.Service
+}
+
+type ClockInRequest struct {
+	StaffID int64 `json:"staffId"`
+}
+
+type ClockInResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *ClockInHandler) Validate(_ context.Context, req *ClockInRequest) *errorModels.ServerError {
+	if req.StaffID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "staffId is required"}
+	}
+	return nil
+}
+
+func (h *ClockInHandler) Serve(ctx context.Context, req *ClockInRequest) (ClockInResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return ClockInResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ClockIn(ctx, device.User.UserID, req.StaffID); err != nil {
+		return ClockInResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to clock in"}
+	}
+
+	return ClockInResponse{Success: true}, nil
+}
+
+// ─── Clock Out ───────────────────────────────────────────────────────────────
+
+func ClockOutRoutes() []string { return []string{"/hr/staff/clock-out"} }
+
+type ClockOutHandler struct {
+	Service *application.Service
+}
+
+type ClockOutRequest struct {
+	StaffID int64 `json:"staffId"`
+}
+
+type ClockOutResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *ClockOutHandler) Validate(_ context.Context, req *ClockOutRequest) *errorModels.ServerError {
+	if req.StaffID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "staffId is required"}
+	}
+	return nil
+}
+
+func (h *ClockOutHandler) Serve(ctx context.Context, req *ClockOutRequest) (ClockOutResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return ClockOutResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ClockOut(ctx, device.User.UserID, req.StaffID); err != nil {
+		return ClockOutResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to clock out"}
+	}
+
+	return ClockOutResponse{Success: true}, nil
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 func DashboardRoutes() []string { return []string{"/hr/dashboard"} }

@@ -14,7 +14,7 @@ import (
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
 
-func ListUsersRoutes() []string { return []string{"/team/users"} }
+func ListUsersRoutes() []string { return []string{"/team/users", "/team/members"} }
 
 type ListUsersHandler struct{ Service *application.Service }
 
@@ -78,7 +78,7 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 
 // ─── Invite User ──────────────────────────────────────────────────────────────
 
-func InviteUserRoutes() []string { return []string{"/team/users/invite"} }
+func InviteUserRoutes() []string { return []string{"/team/users/invite", "/team/invite"} }
 
 type InviteUserHandler struct{ Service *application.Service }
 

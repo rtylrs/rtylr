@@ -109,4 +109,30 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.DashboardRoutes(),
 		&handlers.DashboardHandler{Service: service},
 	)
+
+	// Order extensions
+	serverHttp.RegisterPOSTWithValidation[handlers.SplitOrderRequest, handlers.SplitOrderResponse](
+		ctx, router, handlers.SplitOrderRoutes(),
+		&handlers.SplitOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.DiscountOrderRequest, handlers.DiscountOrderResponse](
+		ctx, router, handlers.DiscountOrderRoutes(),
+		&handlers.DiscountOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.VoidOrderRequest, handlers.VoidOrderResponse](
+		ctx, router, handlers.VoidOrderRoutes(),
+		&handlers.VoidOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.HoldOrderRequest, handlers.HoldOrderResponse](
+		ctx, router, handlers.HoldOrderRoutes(),
+		&handlers.HoldOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterGET[handlers.ListHeldOrdersRequest, handlers.ListHeldOrdersResponse](
+		ctx, router, handlers.ListHeldOrdersRoutes(),
+		&handlers.ListHeldOrdersHandler{Service: service},
+	)
 }

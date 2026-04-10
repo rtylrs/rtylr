@@ -1,0 +1,243 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/application"
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// --- List Stock Transfers ----------------------------------------------------
+
+func ListStockTransfersRoutes() []string {
+	return []string{"/erp/stock-transfers"}
+}
+
+type ListStockTransfersHandler struct {
+	Service *application.Service
+}
+
+type ListStockTransfersRequest struct{}
+
+type StockTransferItemPayload struct {
+	ID         int64   `json:"id"`
+	TransferID int64   `json:"transferId"`
+	ProductID  int64   `json:"productId"`
+	Quantity   float64 `json:"quantity"`
+	CreatedAt  string  `json:"createdAt"`
+}
+
+type StockTransferPayload struct {
+	ID              int64                      `json:"id"`
+	OwnerID         int64                      `json:"ownerId"`
+	FromWarehouseID int64                      `json:"fromWarehouseId"`
+	ToWarehouseID   int64                      `json:"toWarehouseId"`
+	Status          string                     `json:"status"`
+	Notes           string                     `json:"notes"`
+	Items           []StockTransferItemPayload `json:"items"`
+	CreatedAt       string                     `json:"createdAt"`
+	UpdatedAt       string                     `json:"updatedAt"`
+}
+
+type ListStockTransfersResponse struct {
+	StockTransfers []StockTransferPayload `json:"stockTransfers"`
+}
+
+func newStockTransferPayload(t domain.StockTransfer) StockTransferPayload {
+	items := make([]StockTransferItemPayload, 0, len(t.Items))
+	for _, item := range t.Items {
+		items = append(items, StockTransferItemPayload{
+			ID:         item.ID,
+			TransferID: item.TransferID,
+			ProductID:  item.ProductID,
+			Quantity:   item.Quantity,
+			CreatedAt:  item.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		})
+	}
+
+	return StockTransferPayload{
+		ID:              t.ID,
+		OwnerID:         t.OwnerID,
+		FromWarehouseID: t.FromWarehouseID,
+		ToWarehouseID:   t.ToWarehouseID,
+		Status:          string(t.Status),
+		Notes:           t.Notes,
+		Items:           items,
+		CreatedAt:       t.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:       t.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
+}
+
+func (h *ListStockTransfersHandler) Serve(ctx context.Context, _ *ListStockTransfersRequest) (ListStockTransfersResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return ListStockTransfersResponse{}, &errorModels.ServerError{
+			Code:     http.StatusUnauthorized,
+			HTTPCode: http.StatusUnauthorized,
+			Message:  "unauthorized",
+		}
+	}
+
+	transfers, err := h.Service.ListStockTransfers(ctx, authUser.UserID)
+	if err != nil {
+		return ListStockTransfersResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to list stock transfers",
+		}
+	}
+
+	payloads := make([]StockTransferPayload, 0, len(transfers))
+	for _, t := range transfers {
+		payloads = append(payloads, newStockTransferPayload(t))
+	}
+
+	return ListStockTransfersResponse{StockTransfers: payloads}, nil
+}
+
+// --- Create Stock Transfer ---------------------------------------------------
+
+func CreateStockTransferRoutes() []string {
+	return []string{"/erp/stock-transfers"}
+}
+
+type CreateStockTransferHandler struct {
+	Service *application.Service
+}
+
+type CreateStockTransferItemInput struct {
+	ProductID int64   `json:"productId"`
+	Quantity  float64 `json:"quantity"`
+}
+
+type CreateStockTransferRequest struct {
+	FromWarehouseID int64                          `json:"fromWarehouseId"`
+	ToWarehouseID   int64                          `json:"toWarehouseId"`
+	Notes           string                         `json:"notes"`
+	Items           []CreateStockTransferItemInput `json:"items"`
+}
+
+type CreateStockTransferResponse struct {
+	TransferID int64  `json:"transferId"`
+	Message    string `json:"message"`
+}
+
+func (h *CreateStockTransferHandler) Validate(_ context.Context, req *CreateStockTransferRequest) *errorModels.ServerError {
+	if req.FromWarehouseID == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Source warehouse is required",
+		}
+	}
+
+	if req.ToWarehouseID == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Destination warehouse is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *CreateStockTransferHandler) Serve(ctx context.Context, req *CreateStockTransferRequest) (CreateStockTransferResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return CreateStockTransferResponse{}, &errorModels.ServerError{
+			Code:     http.StatusUnauthorized,
+			HTTPCode: http.StatusUnauthorized,
+			Message:  "unauthorized",
+		}
+	}
+
+	items := make([]domain.StockTransferItemInput, 0, len(req.Items))
+	for _, item := range req.Items {
+		items = append(items, domain.StockTransferItemInput{
+			ProductID: item.ProductID,
+			Quantity:  item.Quantity,
+		})
+	}
+
+	input := domain.StockTransferInput{
+		FromWarehouseID: req.FromWarehouseID,
+		ToWarehouseID:   req.ToWarehouseID,
+		Notes:           req.Notes,
+		Items:           items,
+	}
+
+	id, err := h.Service.CreateStockTransfer(ctx, authUser.UserID, input)
+	if err != nil {
+		return CreateStockTransferResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to create stock transfer",
+		}
+	}
+
+	return CreateStockTransferResponse{TransferID: id, Message: "Stock transfer created successfully"}, nil
+}
+
+// --- Update Stock Transfer Status --------------------------------------------
+
+func UpdateStockTransferStatusRoutes() []string {
+	return []string{"/erp/stock-transfers"}
+}
+
+type UpdateStockTransferStatusHandler struct {
+	Service *application.Service
+}
+
+type UpdateStockTransferStatusRequest struct {
+	ID     int64  `json:"id"`
+	Status string `json:"status"`
+}
+
+type UpdateStockTransferStatusResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateStockTransferStatusHandler) Validate(_ context.Context, req *UpdateStockTransferStatusRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Transfer ID is required",
+		}
+	}
+
+	if req.Status == "" {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Status is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateStockTransferStatusHandler) Serve(ctx context.Context, req *UpdateStockTransferStatusRequest) (UpdateStockTransferStatusResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateStockTransferStatusResponse{}, &errorModels.ServerError{
+			Code:     http.StatusUnauthorized,
+			HTTPCode: http.StatusUnauthorized,
+			Message:  "unauthorized",
+		}
+	}
+
+	if err := h.Service.UpdateStockTransferStatus(ctx, authUser.UserID, req.ID, domain.StockTransferStatus(req.Status)); err != nil {
+		return UpdateStockTransferStatusResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to update stock transfer status",
+		}
+	}
+
+	return UpdateStockTransferStatusResponse{Message: "Stock transfer status updated successfully"}, nil
+}

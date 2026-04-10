@@ -900,6 +900,197 @@ func (r *Repository) GetOrderSessionID(ctx context.Context, orderID int64) (int6
 	return 0, nil
 }
 
+// ─── Split Order ────────────────────────────────────────────────────────────
+
+func (r *Repository) SplitOrder(ctx context.Context, ownerID, orderID int64, splits [][]int64) ([]int64, error) {
+	order, err := r.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, txErr := r.pool.BeginTx(ctx, nil)
+	if txErr != nil {
+		logger.Ctx(ctx).Error("Failed to begin split order tx", logger.Error(txErr))
+		return nil, txErr
+	}
+
+	defer func() {
+		if txErr != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var newOrderIDs []int64
+
+	for _, splitItemIDs := range splits {
+		orderNum, genErr := r.GenerateOrderNumber(ctx, ownerID)
+		if genErr != nil {
+			txErr = genErr
+			return nil, genErr
+		}
+
+		res, insertErr := tx.ExecContext(ctx, `
+			INSERT INTO pos_orders
+			(owner_id, session_id, table_id, location_id, order_number, type, status,
+			 customer_id, customer_name, staff_id, subtotal, total, payment_method, notes, kitchen_notes)
+			VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, 0, 0, ?, ?, ?)`,
+			ownerID,
+			nullInt64(order.SessionID),
+			nullInt64(order.TableID),
+			nullInt64(order.LocationID),
+			orderNum,
+			string(order.Type),
+			nullInt64(order.CustomerID),
+			nullString(order.CustomerName),
+			nullInt64(order.StaffID),
+			string(order.PaymentMethod),
+			nullString(order.Notes),
+			nullString(order.KitchenNotes),
+		)
+		if insertErr != nil {
+			txErr = insertErr
+			logger.Ctx(ctx).Error("Failed to insert split order", logger.Error(insertErr))
+			return nil, insertErr
+		}
+
+		newID, _ := res.LastInsertId()
+		newOrderIDs = append(newOrderIDs, newID)
+
+		for _, itemID := range splitItemIDs {
+			_, moveErr := tx.ExecContext(ctx,
+				`UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?`,
+				newID, itemID, orderID,
+			)
+			if moveErr != nil {
+				txErr = moveErr
+				return nil, moveErr
+			}
+		}
+
+		// Recalculate new order totals
+		_, recalcErr := tx.ExecContext(ctx, `
+			UPDATE pos_orders o SET
+				subtotal = (SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id = o.id),
+				total = (SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id = o.id)
+			WHERE id = ?`, newID)
+		if recalcErr != nil {
+			txErr = recalcErr
+			return nil, recalcErr
+		}
+	}
+
+	// Cancel original order
+	_, cancelErr := tx.ExecContext(ctx,
+		`UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND owner_id = ?`,
+		orderID, ownerID,
+	)
+	if cancelErr != nil {
+		txErr = cancelErr
+		return nil, cancelErr
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		txErr = commitErr
+		logger.Ctx(ctx).Error("Failed to commit split order tx", logger.Error(commitErr))
+		return nil, commitErr
+	}
+
+	return newOrderIDs, nil
+}
+
+// ─── Apply Discount ─────────────────────────────────────────────────────────
+
+func (r *Repository) ApplyDiscount(ctx context.Context, ownerID int64, input domain.DiscountInput) error {
+	var total float64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT subtotal FROM pos_orders WHERE owner_id = ? AND id = ?`,
+		ownerID, input.OrderID,
+	).Scan(&total)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.ErrOrderNotFound
+		}
+		return err
+	}
+
+	var discountAmount float64
+	if input.DiscountType == "percentage" {
+		discountAmount = total * input.DiscountValue / 100
+	} else {
+		discountAmount = input.DiscountValue
+	}
+
+	newTotal := total - discountAmount
+	if newTotal < 0 {
+		newTotal = 0
+	}
+
+	_, err = r.pool.ExecContext(ctx,
+		`UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)
+		 WHERE id = ? AND owner_id = ?`,
+		discountAmount, newTotal,
+		fmt.Sprintf(" [Discount: %s]", input.Reason),
+		input.OrderID, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to apply discount", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
+// ─── Void Order ─────────────────────────────────────────────────────────────
+
+func (r *Repository) VoidOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
+	result, err := r.pool.ExecContext(ctx,
+		`UPDATE pos_orders SET status = 'voided', notes = CONCAT(COALESCE(notes,''), ?)
+		 WHERE id = ? AND owner_id = ?`,
+		fmt.Sprintf(" [Voided: %s]", reason),
+		orderID, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to void order", logger.Error(err))
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrOrderNotFound
+	}
+	return nil
+}
+
+// ─── Hold Order ─────────────────────────────────────────────────────────────
+
+func (r *Repository) HoldOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
+	result, err := r.pool.ExecContext(ctx,
+		`UPDATE pos_orders SET status = 'held', notes = CONCAT(COALESCE(notes,''), ?)
+		 WHERE id = ? AND owner_id = ?`,
+		fmt.Sprintf(" [Held: %s]", reason),
+		orderID, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to hold order", logger.Error(err))
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrOrderNotFound
+	}
+	return nil
+}
+
+// ─── List Held Orders ───────────────────────────────────────────────────────
+
+func (r *Repository) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.Order, error) {
+	return r.ListOrders(ctx, ownerID, 0, "held", "", "")
+}
+
 // GenerateOrderNumber produces ORD-YYYYMMDD-XXXX format using today's order count.
 func (r *Repository) GenerateOrderNumber(ctx context.Context, ownerID int64) (string, error) {
 	today := time.Now().Format("20060102")

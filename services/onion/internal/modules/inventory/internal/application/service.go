@@ -62,6 +62,14 @@ func (s *Service) GetLowStockProducts(ctx context.Context, ownerID int64) ([]dom
 	}, cacher.WithExpiry(ctx, inventoryCacheTTL))
 }
 
+func (s *Service) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
+	cacheKey := fmt.Sprintf("inventory:valuation:%d", ownerID)
+
+	return cacher.Of[[]domain.ValuationItem]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.ValuationItem, error) {
+		return s.repo.GetValuation(ctx, ownerID)
+	}, cacher.WithExpiry(ctx, inventoryCacheTTL))
+}
+
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
 	reportKey := fmt.Sprintf("inventory:report:%d", ownerID)
 	lowStockKey := fmt.Sprintf("inventory:low_stock:%d", ownerID)

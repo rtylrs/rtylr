@@ -278,3 +278,137 @@ func (s *Service) invalidateDashboardCache(ctx context.Context, ownerID int64) {
 	cacheKey := fmt.Sprintf("crm:dashboard:%d", ownerID)
 	cacher.Of[domain.DashboardStats]().Invalidate(ctx, []string{cacheKey})
 }
+
+// -- Timeline ----------------------------------------------------------------
+
+func (s *Service) GetCustomerTimeline(ctx context.Context, ownerID, customerID int64) ([]domain.TimelineEntry, error) {
+	return s.repo.GetCustomerTimeline(ctx, ownerID, customerID)
+}
+
+// -- Customer Detail with Loyalty --------------------------------------------
+
+func (s *Service) GetCustomerDetail(ctx context.Context, ownerID, customerID int64) (domain.CustomerDetail, error) {
+	customer, err := s.repo.GetCustomerByID(ctx, ownerID, customerID)
+	if err != nil {
+		return domain.CustomerDetail{}, err
+	}
+
+	txs, _, txErr := s.repo.ListLoyaltyTransactions(ctx, ownerID, customerID, 1, 10)
+	if txErr != nil {
+		logger.Ctx(ctx).Error("Failed to get loyalty transactions for detail", logger.Error(txErr))
+		txs = []domain.LoyaltyTransaction{}
+	}
+
+	timeline, tlErr := s.repo.GetCustomerTimeline(ctx, ownerID, customerID)
+	if tlErr != nil {
+		logger.Ctx(ctx).Error("Failed to get timeline for detail", logger.Error(tlErr))
+		timeline = []domain.TimelineEntry{}
+	}
+
+	return domain.CustomerDetail{
+		Customer:            customer,
+		LoyaltyTransactions: txs,
+		RecentVisits:        timeline,
+	}, nil
+}
+
+// -- Import ------------------------------------------------------------------
+
+func (s *Service) ImportCustomers(ctx context.Context, ownerID int64, items []domain.CustomerImportItem) (domain.CustomerImportResult, error) {
+	imported, failed, err := s.repo.BulkCreateCustomers(ctx, ownerID, items)
+	if err != nil {
+		return domain.CustomerImportResult{}, err
+	}
+
+	s.invalidateDashboardCache(ctx, ownerID)
+
+	return domain.CustomerImportResult{
+		TotalProcessed: len(items),
+		Imported:       imported,
+		Failed:         failed,
+	}, nil
+}
+
+// -- Export (GDPR) -----------------------------------------------------------
+
+func (s *Service) ExportCustomerData(ctx context.Context, ownerID, customerID int64) (domain.CustomerExport, error) {
+	return s.repo.ExportCustomerData(ctx, ownerID, customerID)
+}
+
+// -- Merge -------------------------------------------------------------------
+
+func (s *Service) MergeCustomers(ctx context.Context, input domain.MergeCustomersInput) error {
+	if err := s.repo.MergeCustomers(ctx, input); err != nil {
+		return err
+	}
+
+	s.invalidateDashboardCache(ctx, input.OwnerID)
+
+	return nil
+}
+
+// -- Loyalty Tiers -----------------------------------------------------------
+
+func (s *Service) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]domain.LoyaltyTier, error) {
+	return s.repo.ListLoyaltyTiers(ctx, ownerID)
+}
+
+func (s *Service) CreateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierInput) (int64, error) {
+	return s.repo.CreateLoyaltyTier(ctx, input)
+}
+
+func (s *Service) UpdateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierUpdateInput) error {
+	return s.repo.UpdateLoyaltyTier(ctx, input)
+}
+
+// -- Campaign Stats ----------------------------------------------------------
+
+func (s *Service) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {
+	return s.repo.GetCampaignStats(ctx, ownerID, campaignID)
+}
+
+// -- Campaign Detail ---------------------------------------------------------
+
+func (s *Service) GetCampaignDetail(ctx context.Context, ownerID, campaignID int64) (domain.CampaignDetail, error) {
+	campaign, err := s.repo.GetCampaignByID(ctx, ownerID, campaignID)
+	if err != nil {
+		return domain.CampaignDetail{}, err
+	}
+
+	stats, sErr := s.repo.GetCampaignStats(ctx, ownerID, campaignID)
+	if sErr != nil {
+		logger.Ctx(ctx).Error("Failed to get campaign stats for detail", logger.Error(sErr))
+		stats = domain.CampaignStats{CampaignID: campaignID}
+	}
+
+	return domain.CampaignDetail{
+		Campaign: campaign,
+		Stats:    stats,
+	}, nil
+}
+
+// -- Segment Detail ----------------------------------------------------------
+
+func (s *Service) GetSegmentDetail(ctx context.Context, ownerID, segmentID int64) (domain.SegmentDetail, error) {
+	segment, err := s.repo.GetSegmentByID(ctx, ownerID, segmentID)
+	if err != nil {
+		return domain.SegmentDetail{}, err
+	}
+
+	customers, _, cErr := s.repo.GetSegmentCustomers(ctx, ownerID, segmentID, 1, 50)
+	if cErr != nil {
+		logger.Ctx(ctx).Error("Failed to get segment customers for detail", logger.Error(cErr))
+		customers = []domain.Customer{}
+	}
+
+	return domain.SegmentDetail{
+		Segment:   segment,
+		Customers: customers,
+	}, nil
+}
+
+// -- Segment Customers -------------------------------------------------------
+
+func (s *Service) GetSegmentCustomers(ctx context.Context, ownerID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
+	return s.repo.GetSegmentCustomers(ctx, ownerID, segmentID, page, pageSize)
+}

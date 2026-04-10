@@ -30,4 +30,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		handlers.LowStockRoutes(),
 		&handlers.LowStockHandler{Service: service},
 	)
+
+	http.RegisterGET[handlers.ValuationRequest, handlers.ValuationResponse](
+		ctx,
+		router,
+		handlers.ValuationRoutes(),
+		&handlers.ValuationHandler{Service: service},
+	)
 }

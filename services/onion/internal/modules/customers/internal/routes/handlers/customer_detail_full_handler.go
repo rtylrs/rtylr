@@ -1,0 +1,88 @@
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+
+	"github.com/voxire/onion/internal/modules/customers/internal/application"
+	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+)
+
+func CustomerDetailFullRoutes() []string {
+	return []string{"/crm/customers/detail/full"}
+}
+
+type GetCustomerDetailFullHandler struct {
+	CRMService *application.Service
+}
+
+type GetCustomerDetailFullRequest struct {
+	ID int64 `json:"id"`
+}
+
+type GetCustomerDetailFullResponse struct {
+	Customer            CustomerPayload             `json:"customer"`
+	LoyaltyTransactions []LoyaltyTransactionPayload `json:"loyaltyTransactions"`
+	RecentVisits        []TimelineEntryPayload      `json:"recentVisits"`
+}
+
+func (h *GetCustomerDetailFullHandler) Validate(_ context.Context, req *GetCustomerDetailFullRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Customer ID is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustomerDetailFullRequest) (GetCustomerDetailFullResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetCustomerDetailFullResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	detail, err := h.CRMService.GetCustomerDetail(ctx, device.User.UserID, req.ID)
+	if err != nil {
+		if errors.Is(err, domain.ErrCustomerNotFound) {
+			return GetCustomerDetailFullResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Customer not found",
+			}
+		}
+
+		return GetCustomerDetailFullResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to get customer detail",
+		}
+	}
+
+	txPayloads := make([]LoyaltyTransactionPayload, len(detail.LoyaltyTransactions))
+	for i, tx := range detail.LoyaltyTransactions {
+		txPayloads[i] = newLoyaltyTransactionPayload(tx)
+	}
+
+	visitPayloads := make([]TimelineEntryPayload, len(detail.RecentVisits))
+	for i, e := range detail.RecentVisits {
+		visitPayloads[i] = TimelineEntryPayload{
+			ID:          e.ID,
+			CustomerID:  e.CustomerID,
+			Type:        e.Type,
+			Description: e.Description,
+			Metadata:    json.RawMessage(e.Metadata),
+			CreatedAt:   e.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		}
+	}
+
+	return GetCustomerDetailFullResponse{
+		Customer:            newCustomerPayload(detail.Customer),
+		LoyaltyTransactions: txPayloads,
+		RecentVisits:        visitPayloads,
+	}, nil
+}

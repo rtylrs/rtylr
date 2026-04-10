@@ -95,3 +95,62 @@ CREATE TABLE IF NOT EXISTS flow_task_activity (
     new_value TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS flow_task_attachments (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    task_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    size BIGINT DEFAULT 0,
+    uploaded_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS flow_time_logs (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    task_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    duration_minutes INT NOT NULL DEFAULT 0,
+    description TEXT,
+    logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS flow_milestones (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    project_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    target_date DATE,
+    status ENUM('upcoming','active','completed','missed') DEFAULT 'upcoming',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS flow_cycles (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    workspace_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    status ENUM('upcoming','active','completed') DEFAULT 'upcoming',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS flow_views (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    workspace_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    filters JSON,
+    sort_by VARCHAR(100) DEFAULT '',
+    group_by VARCHAR(100) DEFAULT '',
+    is_default BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

@@ -111,3 +111,62 @@ CREATE TABLE IF NOT EXISTS finance_recurring_invoices (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS finance_quotes (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    customer_email VARCHAR(255),
+    status ENUM('draft','sent','accepted','rejected','expired') DEFAULT 'draft',
+    items JSON,
+    subtotal DECIMAL(10,2) DEFAULT 0,
+    tax DECIMAL(10,2) DEFAULT 0,
+    discount DECIMAL(10,2) DEFAULT 0,
+    total DECIMAL(10,2) DEFAULT 0,
+    valid_until DATE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS finance_bills (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    supplier_id BIGINT,
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'USD',
+    due_date DATE NOT NULL,
+    status ENUM('pending','paid','overdue') DEFAULT 'pending',
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS finance_bank_accounts (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    institution VARCHAR(255),
+    account_type VARCHAR(50),
+    balance DECIMAL(15,2) DEFAULT 0,
+    currency VARCHAR(10) DEFAULT 'USD',
+    is_connected BOOLEAN DEFAULT FALSE,
+    last_synced_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS finance_journal_entries (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS finance_journal_lines (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    entry_id BIGINT NOT NULL,
+    account_id BIGINT NOT NULL,
+    debit DECIMAL(15,2) DEFAULT 0,
+    credit DECIMAL(15,2) DEFAULT 0
+);

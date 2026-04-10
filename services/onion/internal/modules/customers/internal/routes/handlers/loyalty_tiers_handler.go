@@ -1,0 +1,218 @@
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+
+	"github.com/voxire/onion/internal/modules/customers/internal/application"
+	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+)
+
+func LoyaltyTiersListRoutes() []string {
+	return []string{"/crm/loyalty/tiers"}
+}
+
+func LoyaltyTiersCreateRoutes() []string {
+	return []string{"/crm/loyalty/tiers"}
+}
+
+func LoyaltyTiersUpdateRoutes() []string {
+	return []string{"/crm/loyalty/tiers"}
+}
+
+type LoyaltyTierPayload struct {
+	ID          int64           `json:"id"`
+	OwnerID     int64           `json:"ownerId"`
+	Name        string          `json:"name"`
+	MinPoints   int             `json:"minPoints"`
+	DiscountPct float64         `json:"discountPct"`
+	Perks       json.RawMessage `json:"perks"`
+	SortOrder   int             `json:"sortOrder"`
+	CreatedAt   string          `json:"createdAt"`
+	UpdatedAt   string          `json:"updatedAt"`
+}
+
+func newLoyaltyTierPayload(t domain.LoyaltyTier) LoyaltyTierPayload {
+	return LoyaltyTierPayload{
+		ID:          t.ID,
+		OwnerID:     t.OwnerID,
+		Name:        t.Name,
+		MinPoints:   t.MinPoints,
+		DiscountPct: t.DiscountPct,
+		Perks:       json.RawMessage(t.Perks),
+		SortOrder:   t.SortOrder,
+		CreatedAt:   t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+}
+
+// -- LIST --------------------------------------------------------------------
+
+type ListLoyaltyTiersHandler struct {
+	CRMService *application.Service
+}
+
+type ListLoyaltyTiersRequest struct{}
+
+type ListLoyaltyTiersResponse struct {
+	Tiers []LoyaltyTierPayload `json:"tiers"`
+}
+
+func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListLoyaltyTiersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	tiers, err := h.CRMService.ListLoyaltyTiers(ctx, device.User.UserID)
+	if err != nil {
+		return ListLoyaltyTiersResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to list loyalty tiers",
+		}
+	}
+
+	payloads := make([]LoyaltyTierPayload, len(tiers))
+	for i, t := range tiers {
+		payloads[i] = newLoyaltyTierPayload(t)
+	}
+
+	return ListLoyaltyTiersResponse{Tiers: payloads}, nil
+}
+
+// -- CREATE ------------------------------------------------------------------
+
+type CreateLoyaltyTierHandler struct {
+	CRMService *application.Service
+}
+
+type CreateLoyaltyTierRequest struct {
+	Name        string          `json:"name"`
+	MinPoints   int             `json:"minPoints"`
+	DiscountPct float64         `json:"discountPct"`
+	Perks       json.RawMessage `json:"perks"`
+	SortOrder   int             `json:"sortOrder"`
+}
+
+type CreateLoyaltyTierResponse struct {
+	TierID  int64  `json:"tierId"`
+	Message string `json:"message"`
+}
+
+func (h *CreateLoyaltyTierHandler) Validate(_ context.Context, req *CreateLoyaltyTierRequest) *errorModels.ServerError {
+	if req.Name == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Tier name is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyaltyTierRequest) (CreateLoyaltyTierResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CreateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	perks := []byte(req.Perks)
+	if perks == nil {
+		perks = []byte("[]")
+	}
+
+	id, err := h.CRMService.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
+		OwnerID:     device.User.UserID,
+		Name:        req.Name,
+		MinPoints:   req.MinPoints,
+		DiscountPct: req.DiscountPct,
+		Perks:       perks,
+		SortOrder:   req.SortOrder,
+	})
+	if err != nil {
+		return CreateLoyaltyTierResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to create loyalty tier",
+		}
+	}
+
+	return CreateLoyaltyTierResponse{TierID: id, Message: "Loyalty tier created successfully"}, nil
+}
+
+// -- UPDATE ------------------------------------------------------------------
+
+type UpdateLoyaltyTierHandler struct {
+	CRMService *application.Service
+}
+
+type UpdateLoyaltyTierRequest struct {
+	ID          int64           `json:"id"`
+	Name        string          `json:"name"`
+	MinPoints   int             `json:"minPoints"`
+	DiscountPct float64         `json:"discountPct"`
+	Perks       json.RawMessage `json:"perks"`
+	SortOrder   int             `json:"sortOrder"`
+}
+
+type UpdateLoyaltyTierResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateLoyaltyTierHandler) Validate(_ context.Context, req *UpdateLoyaltyTierRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Tier ID is required",
+		}
+	}
+
+	if req.Name == "" {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Tier name is required",
+		}
+	}
+
+	return nil
+}
+
+func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyaltyTierRequest) (UpdateLoyaltyTierResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	perks := []byte(req.Perks)
+	if perks == nil {
+		perks = []byte("[]")
+	}
+
+	if err := h.CRMService.UpdateLoyaltyTier(ctx, domain.LoyaltyTierUpdateInput{
+		ID:          req.ID,
+		OwnerID:     device.User.UserID,
+		Name:        req.Name,
+		MinPoints:   req.MinPoints,
+		DiscountPct: req.DiscountPct,
+		Perks:       perks,
+		SortOrder:   req.SortOrder,
+	}); err != nil {
+		if errors.Is(err, domain.ErrTierNotFound) {
+			return UpdateLoyaltyTierResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Loyalty tier not found",
+			}
+		}
+
+		return UpdateLoyaltyTierResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update loyalty tier",
+		}
+	}
+
+	return UpdateLoyaltyTierResponse{Message: "Loyalty tier updated successfully"}, nil
+}

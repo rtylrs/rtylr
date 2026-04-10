@@ -282,6 +282,54 @@ func (s *Service) GetDashboard(ctx context.Context, workspaceID, ownerID, userID
 }
 
 // ─────────────────────────────────────────────
+// Task Activity (standalone)
+// ─────────────────────────────────────────────
+
+func (s *Service) GetTaskActivity(ctx context.Context, taskID int64) ([]domain.TaskActivity, error) {
+	return s.repo.GetActivityByTask(ctx, taskID, 100)
+}
+
+// ─────────────────────────────────────────────
+// Task Subtasks (standalone)
+// ─────────────────────────────────────────────
+
+func (s *Service) GetSubtasks(ctx context.Context, taskID int64) ([]domain.Task, error) {
+	return s.repo.GetSubtasks(ctx, taskID)
+}
+
+func (s *Service) CreateSubtask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
+	return s.CreateTask(ctx, input)
+}
+
+// ─────────────────────────────────────────────
+// Task Attachments
+// ─────────────────────────────────────────────
+
+func (s *Service) GetAttachments(ctx context.Context, taskID int64) ([]domain.TaskAttachment, error) {
+	return s.repo.GetAttachmentsByTask(ctx, taskID)
+}
+
+func (s *Service) CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error) {
+	return s.repo.CreateAttachment(ctx, input)
+}
+
+func (s *Service) DeleteAttachment(ctx context.Context, attachmentID, ownerID int64) error {
+	return s.repo.DeleteAttachment(ctx, attachmentID, ownerID)
+}
+
+// ─────────────────────────────────────────────
+// Time Logs
+// ─────────────────────────────────────────────
+
+func (s *Service) GetTimeLogs(ctx context.Context, taskID int64) ([]domain.TimeLog, error) {
+	return s.repo.GetTimeLogsByTask(ctx, taskID)
+}
+
+func (s *Service) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) (int64, error) {
+	return s.repo.CreateTimeLog(ctx, input)
+}
+
+// ─────────────────────────────────────────────
 // Labels
 // ─────────────────────────────────────────────
 

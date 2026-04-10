@@ -38,6 +38,27 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.DeleteStaffHandler{Service: service},
 	)
 
+	http.RegisterGETWithValidation[handlers.GetStaffRequest, handlers.GetStaffResponse](
+		ctx,
+		router,
+		handlers.GetStaffRoutes(),
+		&handlers.GetStaffHandler{Service: service},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.ClockInRequest, handlers.ClockInResponse](
+		ctx,
+		router,
+		handlers.ClockInRoutes(),
+		&handlers.ClockInHandler{Service: service},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.ClockOutRequest, handlers.ClockOutResponse](
+		ctx,
+		router,
+		handlers.ClockOutRoutes(),
+		&handlers.ClockOutHandler{Service: service},
+	)
+
 	http.RegisterGET[handlers.DashboardRequest, handlers.DashboardResponse](
 		ctx,
 		router,

@@ -11,34 +11,81 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/voxire/onion/internal/modules/accounts"
+	"github.com/voxire/onion/internal/modules/activity"
+	apikeys "github.com/voxire/onion/internal/modules/api_keys"
+	"github.com/voxire/onion/internal/modules/apps"
+	"github.com/voxire/onion/internal/modules/automations"
+	bankaccounts "github.com/voxire/onion/internal/modules/bank_accounts"
+	"github.com/voxire/onion/internal/modules/benefits"
+	"github.com/voxire/onion/internal/modules/billing"
+	"github.com/voxire/onion/internal/modules/bills"
+	"github.com/voxire/onion/internal/modules/brands"
+	"github.com/voxire/onion/internal/modules/business"
 	"github.com/voxire/onion/internal/modules/campaigns"
 	"github.com/voxire/onion/internal/modules/careers"
+	"github.com/voxire/onion/internal/modules/categories"
 	"github.com/voxire/onion/internal/modules/config"
+	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
 	"github.com/voxire/onion/internal/modules/customers"
-	timeoff "github.com/voxire/onion/internal/modules/time_off"
-	"github.com/voxire/onion/internal/modules/expenses"
-	"github.com/voxire/onion/internal/modules/invoices"
-	"github.com/voxire/onion/internal/modules/loyalty"
+	"github.com/voxire/onion/internal/modules/cycles"
+	"github.com/voxire/onion/internal/modules/departments"
+	"github.com/voxire/onion/internal/modules/documents"
 	"github.com/voxire/onion/internal/modules/echo"
+	"github.com/voxire/onion/internal/modules/expenses"
+	"github.com/voxire/onion/internal/modules/feedback"
+	financereports "github.com/voxire/onion/internal/modules/finance_reports"
+	"github.com/voxire/onion/internal/modules/insights"
+	"github.com/voxire/onion/internal/modules/integrations"
 	"github.com/voxire/onion/internal/modules/inventory"
+	"github.com/voxire/onion/internal/modules/invoices"
+	"github.com/voxire/onion/internal/modules/journal"
+	"github.com/voxire/onion/internal/modules/kpis"
+	"github.com/voxire/onion/internal/modules/loyalty"
 	"github.com/voxire/onion/internal/modules/memory"
+	"github.com/voxire/onion/internal/modules/milestones"
+	"github.com/voxire/onion/internal/modules/notifications"
+	oneonones "github.com/voxire/onion/internal/modules/one_on_ones"
+	"github.com/voxire/onion/internal/modules/payroll"
+	poscombos "github.com/voxire/onion/internal/modules/pos_combos"
+	poscustomers "github.com/voxire/onion/internal/modules/pos_customers"
+	posdaysummary "github.com/voxire/onion/internal/modules/pos_day_summary"
+	posgiftcards "github.com/voxire/onion/internal/modules/pos_gift_cards"
+	poskds "github.com/voxire/onion/internal/modules/pos_kds"
 	poslocations "github.com/voxire/onion/internal/modules/pos_locations"
+	posmanager "github.com/voxire/onion/internal/modules/pos_manager"
+	posmenu "github.com/voxire/onion/internal/modules/pos_menu"
+	posmodifiers "github.com/voxire/onion/internal/modules/pos_modifiers"
 	posorders "github.com/voxire/onion/internal/modules/pos_orders"
+	posreceipts "github.com/voxire/onion/internal/modules/pos_receipts"
 	possessions "github.com/voxire/onion/internal/modules/pos_sessions"
 	postables "github.com/voxire/onion/internal/modules/pos_tables"
 	"github.com/voxire/onion/internal/modules/products"
 	"github.com/voxire/onion/internal/modules/projects"
 	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
+	"github.com/voxire/onion/internal/modules/quotes"
+	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
+	"github.com/voxire/onion/internal/modules/reviews"
+	"github.com/voxire/onion/internal/modules/roles"
+	"github.com/voxire/onion/internal/modules/security"
 	"github.com/voxire/onion/internal/modules/segments"
-	"github.com/voxire/onion/internal/modules/departments"
-	"github.com/voxire/onion/internal/modules/payroll"
 	"github.com/voxire/onion/internal/modules/shifts"
 	"github.com/voxire/onion/internal/modules/staff"
+	stocktakes "github.com/voxire/onion/internal/modules/stock_takes"
+	stocktransfers "github.com/voxire/onion/internal/modules/stock_transfers"
 	"github.com/voxire/onion/internal/modules/suppliers"
 	"github.com/voxire/onion/internal/modules/tasks"
 	"github.com/voxire/onion/internal/modules/tax"
 	"github.com/voxire/onion/internal/modules/team"
+	"github.com/voxire/onion/internal/modules/templates"
+	timeoff "github.com/voxire/onion/internal/modules/time_off"
+	"github.com/voxire/onion/internal/modules/timesheets"
+	"github.com/voxire/onion/internal/modules/training"
 	"github.com/voxire/onion/internal/modules/user"
+	"github.com/voxire/onion/internal/modules/variants"
+	"github.com/voxire/onion/internal/modules/views"
+	"github.com/voxire/onion/internal/modules/warehouses"
+	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
@@ -82,8 +129,6 @@ func runServer(shutdownCtx context.Context) error {
 
 	defer recoverAndLog(serverCtx)
 	defer logger.Flush()
-
-	// No application struct needed - setup directly in main
 
 	serverErr := make(chan error, 1)
 
@@ -149,70 +194,164 @@ func run(ctx context.Context) {
 }
 
 type apiModules struct {
-	User      *user.Module
-	Config    *config.Module
-	Careers   *careers.Module
-	Echo      *echo.Module
-	Memory    *memory.Module
-	Products       *products.Module
-	Inventory      *inventory.Module
-	Suppliers      *suppliers.Module
-	PurchaseOrders *purchaseorders.Module
-	Staff       *staff.Module
-	Departments *departments.Module
-	Shifts      *shifts.Module
-	Payroll     *payroll.Module
-	TimeOff     *timeoff.Module
-	Customers   *customers.Module
-	Loyalty     *loyalty.Module
-	Campaigns   *campaigns.Module
-	Segments    *segments.Module
-	Invoices    *invoices.Module
-	Expenses    *expenses.Module
-	Tax         *tax.Module
-	Workspaces  *workspaces.Module
-	Projects    *projects.Module
-	Tasks       *tasks.Module
-	PosOrders   *posorders.Module
-	PosTables   *postables.Module
-	PosSessions *possessions.Module
-	PosLocations *poslocations.Module
-	Team        *team.Module
+	Accounts             *accounts.Module
+	Activity             *activity.Module
+	APIKeys              *apikeys.Module
+	Apps                 *apps.Module
+	Automations          *automations.Module
+	BankAccounts         *bankaccounts.Module
+	Benefits             *benefits.Module
+	Billing              *billing.Module
+	Bills                *bills.Module
+	Brands               *brands.Module
+	Business             *business.Module
+	Campaigns            *campaigns.Module
+	Careers              *careers.Module
+	Categories           *categories.Module
+	Config               *config.Module
+	CRMSettings          *crmsettings.Module
+	Customers            *customers.Module
+	Cycles               *cycles.Module
+	Departments          *departments.Module
+	Documents            *documents.Module
+	Echo                 *echo.Module
+	Expenses             *expenses.Module
+	Feedback             *feedback.Module
+	FinanceReports       *financereports.Module
+	Insights             *insights.Module
+	Integrations         *integrations.Module
+	Inventory            *inventory.Module
+	Invoices             *invoices.Module
+	Journal              *journal.Module
+	KPIs                 *kpis.Module
+	Loyalty              *loyalty.Module
+	Memory               *memory.Module
+	Milestones           *milestones.Module
+	Notifications        *notifications.Module
+	OneOnOnes            *oneonones.Module
+	Payroll              *payroll.Module
+	PosCombos            *poscombos.Module
+	PosCustomers         *poscustomers.Module
+	PosDaySummary        *posdaysummary.Module
+	PosGiftCards         *posgiftcards.Module
+	PosKDS               *poskds.Module
+	PosLocations         *poslocations.Module
+	PosManager           *posmanager.Module
+	PosMenu              *posmenu.Module
+	PosModifiers         *posmodifiers.Module
+	PosOrders            *posorders.Module
+	PosReceipts          *posreceipts.Module
+	PosSessions          *possessions.Module
+	PosTables            *postables.Module
+	Products             *products.Module
+	Projects             *projects.Module
+	PurchaseOrders       *purchaseorders.Module
+	Quotes               *quotes.Module
+	RecurringInvoices    *recurringinvoices.Module
+	Reviews              *reviews.Module
+	Roles                *roles.Module
+	Security             *security.Module
+	Segments             *segments.Module
+	Shifts               *shifts.Module
+	Staff                *staff.Module
+	StockTakes           *stocktakes.Module
+	StockTransfers       *stocktransfers.Module
+	Suppliers            *suppliers.Module
+	Tasks                *tasks.Module
+	Tax                  *tax.Module
+	Team                 *team.Module
+	Templates            *templates.Module
+	TimeOff              *timeoff.Module
+	Timesheets           *timesheets.Module
+	Training             *training.Module
+	User                 *user.Module
+	Variants             *variants.Module
+	Views                *views.Module
+	Warehouses           *warehouses.Module
+	Webhooks             *webhooks.Module
+	Workspaces           *workspaces.Module
 }
 
 func initializeModules(ctx context.Context) *apiModules {
 	memoryModule := memory.NewModule(ctx)
 
 	return &apiModules{
-		User:      user.NewModule(ctx),
-		Config:    config.NewModule(ctx),
-		Careers:   careers.NewModule(ctx),
-		Echo:      echo.NewModule(ctx, memoryModule),
-		Memory:    memoryModule,
-		Products:       products.NewModule(ctx),
-		Inventory:      inventory.NewModule(ctx),
-		Suppliers:      suppliers.NewModule(ctx),
-		PurchaseOrders: purchaseorders.NewModule(ctx),
-		Staff:       staff.NewModule(ctx),
-		Departments: departments.NewModule(ctx),
-		Shifts:      shifts.NewModule(ctx),
-		Payroll:     payroll.NewModule(ctx),
-		TimeOff:     timeoff.NewModule(ctx),
-		Customers:   customers.NewModule(ctx),
-		Loyalty:     loyalty.NewModule(ctx),
-		Campaigns:   campaigns.NewModule(ctx),
-		Segments:    segments.NewModule(ctx),
-		Invoices:    invoices.NewModule(ctx),
-		Expenses:    expenses.NewModule(ctx),
-		Tax:         tax.NewModule(ctx),
-		Workspaces:  workspaces.NewModule(ctx),
-		Projects:    projects.NewModule(ctx),
-		Tasks:       tasks.NewModule(ctx),
-		PosOrders:   posorders.NewModule(ctx),
-		PosTables:   postables.NewModule(ctx),
-		PosSessions: possessions.NewModule(ctx),
-		PosLocations: poslocations.NewModule(ctx),
-		Team:        team.NewModule(ctx),
+		Accounts:             accounts.NewModule(ctx),
+		Activity:             activity.NewModule(ctx),
+		APIKeys:              apikeys.NewModule(ctx),
+		Apps:                 apps.NewModule(ctx),
+		Automations:          automations.NewModule(ctx),
+		BankAccounts:         bankaccounts.NewModule(ctx),
+		Benefits:             benefits.NewModule(ctx),
+		Billing:              billing.NewModule(ctx),
+		Bills:                bills.NewModule(ctx),
+		Brands:               brands.NewModule(ctx),
+		Business:             business.NewModule(ctx),
+		Campaigns:            campaigns.NewModule(ctx),
+		Careers:              careers.NewModule(ctx),
+		Categories:           categories.NewModule(ctx),
+		Config:               config.NewModule(ctx),
+		CRMSettings:          crmsettings.NewModule(ctx),
+		Customers:            customers.NewModule(ctx),
+		Cycles:               cycles.NewModule(ctx),
+		Departments:          departments.NewModule(ctx),
+		Documents:            documents.NewModule(ctx),
+		Echo:                 echo.NewModule(ctx, memoryModule),
+		Expenses:             expenses.NewModule(ctx),
+		Feedback:             feedback.NewModule(ctx),
+		FinanceReports:       financereports.NewModule(ctx),
+		Insights:             insights.NewModule(ctx),
+		Integrations:         integrations.NewModule(ctx),
+		Inventory:            inventory.NewModule(ctx),
+		Invoices:             invoices.NewModule(ctx),
+		Journal:              journal.NewModule(ctx),
+		KPIs:                 kpis.NewModule(ctx),
+		Loyalty:              loyalty.NewModule(ctx),
+		Memory:               memoryModule,
+		Milestones:           milestones.NewModule(ctx),
+		Notifications:        notifications.NewModule(ctx),
+		OneOnOnes:            oneonones.NewModule(ctx),
+		Payroll:              payroll.NewModule(ctx),
+		PosCombos:            poscombos.NewModule(ctx),
+		PosCustomers:         poscustomers.NewModule(ctx),
+		PosDaySummary:        posdaysummary.NewModule(ctx),
+		PosGiftCards:         posgiftcards.NewModule(ctx),
+		PosKDS:               poskds.NewModule(ctx),
+		PosLocations:         poslocations.NewModule(ctx),
+		PosManager:           posmanager.NewModule(ctx),
+		PosMenu:              posmenu.NewModule(ctx),
+		PosModifiers:         posmodifiers.NewModule(ctx),
+		PosOrders:            posorders.NewModule(ctx),
+		PosReceipts:          posreceipts.NewModule(ctx),
+		PosSessions:          possessions.NewModule(ctx),
+		PosTables:            postables.NewModule(ctx),
+		Products:             products.NewModule(ctx),
+		Projects:             projects.NewModule(ctx),
+		PurchaseOrders:       purchaseorders.NewModule(ctx),
+		Quotes:               quotes.NewModule(ctx),
+		RecurringInvoices:    recurringinvoices.NewModule(ctx),
+		Reviews:              reviews.NewModule(ctx),
+		Roles:                roles.NewModule(ctx),
+		Security:             security.NewModule(ctx),
+		Segments:             segments.NewModule(ctx),
+		Shifts:               shifts.NewModule(ctx),
+		Staff:                staff.NewModule(ctx),
+		StockTakes:           stocktakes.NewModule(ctx),
+		StockTransfers:       stocktransfers.NewModule(ctx),
+		Suppliers:            suppliers.NewModule(ctx),
+		Tasks:                tasks.NewModule(ctx),
+		Tax:                  tax.NewModule(ctx),
+		Team:                 team.NewModule(ctx),
+		Templates:            templates.NewModule(ctx),
+		TimeOff:              timeoff.NewModule(ctx),
+		Timesheets:           timesheets.NewModule(ctx),
+		Training:             training.NewModule(ctx),
+		User:                 user.NewModule(ctx),
+		Variants:             variants.NewModule(ctx),
+		Views:                views.NewModule(ctx),
+		Warehouses:           warehouses.NewModule(ctx),
+		Webhooks:             webhooks.NewModule(ctx),
+		Workspaces:           workspaces.NewModule(ctx),
 	}
 }
 

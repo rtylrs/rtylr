@@ -11,6 +11,7 @@ var (
 	ErrLoyaltyConfigExists = errors.New("loyalty config already exists")
 	ErrSegmentNotFound     = errors.New("segment not found")
 	ErrCampaignNotFound    = errors.New("campaign not found")
+	ErrTierNotFound        = errors.New("loyalty tier not found")
 )
 
 type Customer struct {
@@ -252,3 +253,121 @@ const (
 	TierGold     = "gold"
 	TierPlatinum = "platinum"
 )
+
+// Timeline
+
+type TimelineEntry struct {
+	ID          int64     `json:"id"`
+	OwnerID     int64     `json:"ownerId"`
+	CustomerID  int64     `json:"customerId"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Metadata    []byte    `json:"metadata"`
+	CreatedAt   time.Time `json:"createdAt"`
+}
+
+// CustomerDetail includes loyalty transactions and visit info
+
+type CustomerDetail struct {
+	Customer            Customer             `json:"customer"`
+	LoyaltyTransactions []LoyaltyTransaction `json:"loyaltyTransactions"`
+	RecentVisits        []TimelineEntry      `json:"recentVisits"`
+}
+
+// Import
+
+type CustomerImportItem struct {
+	FirstName   string   `json:"firstName"`
+	LastName    string   `json:"lastName"`
+	Email       string   `json:"email"`
+	Phone       string   `json:"phone"`
+	DateOfBirth string   `json:"dateOfBirth"`
+	Gender      string   `json:"gender"`
+	Address     string   `json:"address"`
+	City        string   `json:"city"`
+	Country     string   `json:"country"`
+	Tags        []string `json:"tags"`
+	Notes       string   `json:"notes"`
+}
+
+type CustomerImportResult struct {
+	TotalProcessed int `json:"totalProcessed"`
+	Imported       int `json:"imported"`
+	Failed         int `json:"failed"`
+}
+
+// Export (GDPR)
+
+type CustomerExport struct {
+	Customer     Customer             `json:"customer"`
+	Transactions []LoyaltyTransaction `json:"transactions"`
+	Timeline     []TimelineEntry      `json:"timeline"`
+}
+
+// Merge
+
+type MergeCustomersInput struct {
+	OwnerID     int64
+	PrimaryID   int64
+	SecondaryID int64
+}
+
+// Loyalty Tiers
+
+type LoyaltyTier struct {
+	ID             int64     `json:"id"`
+	OwnerID        int64     `json:"ownerId"`
+	Name           string    `json:"name"`
+	MinPoints      int       `json:"minPoints"`
+	DiscountPct    float64   `json:"discountPct"`
+	Perks          []byte    `json:"perks"`
+	SortOrder      int       `json:"sortOrder"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+}
+
+type LoyaltyTierInput struct {
+	OwnerID     int64
+	Name        string
+	MinPoints   int
+	DiscountPct float64
+	Perks       []byte
+	SortOrder   int
+}
+
+type LoyaltyTierUpdateInput struct {
+	ID          int64
+	OwnerID     int64
+	Name        string
+	MinPoints   int
+	DiscountPct float64
+	Perks       []byte
+	SortOrder   int
+}
+
+// Campaign Stats
+
+type CampaignStats struct {
+	CampaignID     int64 `json:"campaignId"`
+	AudienceCount  int   `json:"audienceCount"`
+	SentCount      int   `json:"sentCount"`
+	DeliveredCount int   `json:"deliveredCount"`
+	OpenedCount    int   `json:"openedCount"`
+	ClickedCount   int   `json:"clickedCount"`
+	BouncedCount   int   `json:"bouncedCount"`
+	FailedCount    int   `json:"failedCount"`
+}
+
+// Campaign Detail
+
+type CampaignDetail struct {
+	Campaign Campaign      `json:"campaign"`
+	Stats    CampaignStats `json:"stats"`
+}
+
+// Segment Detail
+
+type SegmentDetail struct {
+	Segment   Segment    `json:"segment"`
+	Customers []Customer `json:"customers"`
+}

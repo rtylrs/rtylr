@@ -1,0 +1,55 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/business/internal/application"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+func BusinessMeRoutes() []string { return []string{"/business/me"} }
+
+type GetProfileHandler struct{ Service *application.Service }
+type GetProfileRequest struct{}
+
+type GetProfileResponse struct {
+	ID           int64  `json:"id"`
+	SiteName     string `json:"siteName"`
+	LogoURL      string `json:"logoUrl"`
+	ContactEmail string `json:"contactEmail"`
+	ContactPhone string `json:"contactPhone"`
+	Address      string `json:"address"`
+	Currency     string `json:"currency"`
+	Timezone     string `json:"timezone"`
+	Plan         string `json:"plan"`
+}
+
+func (h *GetProfileHandler) Serve(ctx context.Context, _ *GetProfileRequest) (GetProfileResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetProfileResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	profile, err := h.Service.GetProfile(ctx, device.User.UserID)
+	if err != nil {
+		return GetProfileResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to get business profile",
+		}
+	}
+
+	return GetProfileResponse{
+		ID:           profile.ID,
+		SiteName:     profile.SiteName,
+		LogoURL:      profile.LogoURL,
+		ContactEmail: profile.ContactEmail,
+		ContactPhone: profile.ContactPhone,
+		Address:      profile.Address,
+		Currency:     profile.Currency,
+		Timezone:     profile.Timezone,
+		Plan:         profile.Plan,
+	}, nil
+}

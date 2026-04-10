@@ -927,3 +927,366 @@ func nullableTime(t *time.Time) sql.NullTime {
 
 	return sql.NullTime{Time: *t, Valid: true}
 }
+
+// -- Timeline ----------------------------------------------------------------
+
+func (r *Repository) GetCustomerTimeline(ctx context.Context, ownerID, customerID int64) ([]domain.TimelineEntry, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, owner_id, customer_id, type, description, metadata, created_at
+		 FROM crm_customer_timeline
+		 WHERE owner_id = ? AND customer_id = ?
+		 ORDER BY created_at DESC
+		 LIMIT 100`,
+		ownerID, customerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get customer timeline", logger.Error(err))
+
+		return nil, err
+	}
+	defer rows.Close()
+
+	entries := make([]domain.TimelineEntry, 0)
+
+	for rows.Next() {
+		var e domain.TimelineEntry
+		var metadata sql.NullString
+
+		if scanErr := rows.Scan(&e.ID, &e.OwnerID, &e.CustomerID, &e.Type, &e.Description, &metadata, &e.CreatedAt); scanErr != nil {
+			logger.Ctx(ctx).Error("Failed to scan timeline entry", logger.Error(scanErr))
+
+			return nil, scanErr
+		}
+
+		if metadata.Valid {
+			e.Metadata = []byte(metadata.String)
+		} else {
+			e.Metadata = []byte("{}")
+		}
+
+		entries = append(entries, e)
+	}
+
+	return entries, rows.Err()
+}
+
+func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.TimelineEntry) error {
+	_, err := r.pool.ExecContext(ctx,
+		`INSERT INTO crm_customer_timeline (owner_id, customer_id, type, description, metadata)
+		 VALUES (?, ?, ?, ?, ?)`,
+		entry.OwnerID, entry.CustomerID, entry.Type, entry.Description, string(entry.Metadata),
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to insert timeline entry", logger.Error(err))
+	}
+
+	return err
+}
+
+// -- Import ------------------------------------------------------------------
+
+func (r *Repository) BulkCreateCustomers(ctx context.Context, ownerID int64, items []domain.CustomerImportItem) (int, int, error) {
+	imported := 0
+	failed := 0
+
+	for _, item := range items {
+		var dob *time.Time
+
+		if item.DateOfBirth != "" {
+			t, err := time.Parse("2006-01-02", item.DateOfBirth)
+			if err == nil {
+				dob = &t
+			}
+		}
+
+		tagsJSON, err := json.Marshal(item.Tags)
+		if err != nil {
+			tagsJSON = []byte("[]")
+		}
+
+		_, err = r.pool.ExecContext(ctx,
+			`INSERT INTO crm_customers
+			  (owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+			   address, city, country, tags, notes, loyalty_tier, is_active)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', TRUE)`,
+			ownerID,
+			item.FirstName,
+			nullableString(item.LastName),
+			nullableString(item.Email),
+			nullableString(item.Phone),
+			nullableTime(dob),
+			nullableString(item.Gender),
+			nullableString(item.Address),
+			nullableString(item.City),
+			nullableString(item.Country),
+			tagsJSON,
+			nullableString(item.Notes),
+		)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to import customer", logger.Error(err))
+			failed++
+		} else {
+			imported++
+		}
+	}
+
+	return imported, failed, nil
+}
+
+// -- Export (GDPR) -----------------------------------------------------------
+
+func (r *Repository) ExportCustomerData(ctx context.Context, ownerID, customerID int64) (domain.CustomerExport, error) {
+	customer, err := r.GetCustomerByID(ctx, ownerID, customerID)
+	if err != nil {
+		return domain.CustomerExport{}, err
+	}
+
+	txs, _, err := r.ListLoyaltyTransactions(ctx, ownerID, customerID, 1, 100)
+	if err != nil {
+		return domain.CustomerExport{}, err
+	}
+
+	timeline, err := r.GetCustomerTimeline(ctx, ownerID, customerID)
+	if err != nil {
+		return domain.CustomerExport{}, err
+	}
+
+	return domain.CustomerExport{
+		Customer:     customer,
+		Transactions: txs,
+		Timeline:     timeline,
+	}, nil
+}
+
+// -- Merge -------------------------------------------------------------------
+
+func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCustomersInput) error {
+	secondary, err := r.GetCustomerByID(ctx, input.OwnerID, input.SecondaryID)
+	if err != nil {
+		return err
+	}
+
+	primary, err := r.GetCustomerByID(ctx, input.OwnerID, input.PrimaryID)
+	if err != nil {
+		return err
+	}
+
+	newPoints := primary.LoyaltyPoints + secondary.LoyaltyPoints
+	newSpent := primary.TotalSpent + secondary.TotalSpent
+	newVisits := primary.VisitCount + secondary.VisitCount
+
+	_, err = r.pool.ExecContext(ctx,
+		`UPDATE crm_customers
+		 SET loyalty_points = ?, total_spent = ?, visit_count = ?
+		 WHERE id = ? AND owner_id = ?`,
+		newPoints, newSpent, newVisits, input.PrimaryID, input.OwnerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update primary customer during merge", logger.Error(err))
+
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx,
+		`UPDATE crm_loyalty_transactions SET customer_id = ? WHERE customer_id = ? AND owner_id = ?`,
+		input.PrimaryID, input.SecondaryID, input.OwnerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to migrate loyalty transactions during merge", logger.Error(err))
+
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx,
+		`UPDATE crm_customer_timeline SET customer_id = ? WHERE customer_id = ? AND owner_id = ?`,
+		input.PrimaryID, input.SecondaryID, input.OwnerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to migrate timeline during merge", logger.Error(err))
+
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx,
+		"DELETE FROM crm_customers WHERE id = ? AND owner_id = ?",
+		input.SecondaryID, input.OwnerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete secondary customer during merge", logger.Error(err))
+
+		return err
+	}
+
+	return nil
+}
+
+// -- Loyalty Tiers -----------------------------------------------------------
+
+func (r *Repository) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]domain.LoyaltyTier, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, owner_id, name, min_points, discount_pct, perks, sort_order, created_at, updated_at
+		 FROM crm_loyalty_tiers WHERE owner_id = ? ORDER BY sort_order ASC`, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list loyalty tiers", logger.Error(err))
+
+		return nil, err
+	}
+	defer rows.Close()
+
+	tiers := make([]domain.LoyaltyTier, 0)
+
+	for rows.Next() {
+		var t domain.LoyaltyTier
+		var perks sql.NullString
+
+		if scanErr := rows.Scan(&t.ID, &t.OwnerID, &t.Name, &t.MinPoints, &t.DiscountPct, &perks, &t.SortOrder, &t.CreatedAt, &t.UpdatedAt); scanErr != nil {
+			return nil, scanErr
+		}
+
+		if perks.Valid {
+			t.Perks = []byte(perks.String)
+		} else {
+			t.Perks = []byte("[]")
+		}
+
+		tiers = append(tiers, t)
+	}
+
+	return tiers, rows.Err()
+}
+
+func (r *Repository) CreateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierInput) (int64, error) {
+	result, err := r.pool.ExecContext(ctx,
+		`INSERT INTO crm_loyalty_tiers (owner_id, name, min_points, discount_pct, perks, sort_order)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		input.OwnerID, input.Name, input.MinPoints, input.DiscountPct, string(input.Perks), input.SortOrder,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create loyalty tier", logger.Error(err))
+
+		return 0, err
+	}
+
+	return result.LastInsertId()
+}
+
+func (r *Repository) UpdateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierUpdateInput) error {
+	result, err := r.pool.ExecContext(ctx,
+		`UPDATE crm_loyalty_tiers SET name = ?, min_points = ?, discount_pct = ?, perks = ?, sort_order = ?
+		 WHERE id = ? AND owner_id = ?`,
+		input.Name, input.MinPoints, input.DiscountPct, string(input.Perks), input.SortOrder,
+		input.ID, input.OwnerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update loyalty tier", logger.Error(err))
+
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return domain.ErrTierNotFound
+	}
+
+	return nil
+}
+
+// -- Campaign Stats ----------------------------------------------------------
+
+func (r *Repository) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {
+	campaign, err := r.GetCampaignByID(ctx, ownerID, campaignID)
+	if err != nil {
+		return domain.CampaignStats{}, err
+	}
+
+	var stats domain.CampaignStats
+	stats.CampaignID = campaign.ID
+	stats.AudienceCount = campaign.AudienceCount
+	stats.SentCount = campaign.SentCount
+	stats.DeliveredCount = campaign.DeliveredCount
+	stats.OpenedCount = campaign.OpenedCount
+	stats.ClickedCount = campaign.ClickedCount
+
+	var bounced, failed int
+
+	err = r.pool.QueryRowContext(ctx,
+		`SELECT
+			COALESCE(SUM(CASE WHEN status = 'bounced' THEN 1 ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0)
+		 FROM crm_campaign_sends WHERE campaign_id = ?`,
+		campaignID,
+	).Scan(&bounced, &failed)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get campaign send stats", logger.Error(err))
+	}
+
+	stats.BouncedCount = bounced
+	stats.FailedCount = failed
+
+	return stats, nil
+}
+
+// -- Segment Customers -------------------------------------------------------
+
+func (r *Repository) GetSegmentCustomers(ctx context.Context, ownerID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
+	if page < 1 {
+		page = 1
+	}
+
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+
+	seg, err := r.GetSegmentByID(ctx, ownerID, segmentID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	_ = seg
+
+	var total int
+
+	if err := r.pool.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM crm_customers WHERE owner_id = ? AND is_active = TRUE",
+		ownerID,
+	).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	query := `
+		SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+		       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+		       loyalty_tier, tags, notes, is_active, created_at, updated_at
+		FROM crm_customers
+		WHERE owner_id = ? AND is_active = TRUE
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?`
+
+	rows, err := r.pool.QueryContext(ctx, query, ownerID, pageSize, offset)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get segment customers", logger.Error(err))
+
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	customers := make([]domain.Customer, 0)
+
+	for rows.Next() {
+		c, scanErr := scanCustomer(rows)
+		if scanErr != nil {
+			return nil, 0, scanErr
+		}
+
+		customers = append(customers, c)
+	}
+
+	return customers, total, rows.Err()
+}

@@ -113,6 +113,54 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.DeleteCommentHandler{FlowService: flowService},
 	)
 
+	// ─── Task Activity ────────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.GetTaskActivityRequest, handlers.GetTaskActivityResponse](
+		ctx, router, handlers.GetTaskActivityRoutes(),
+		&handlers.GetTaskActivityHandler{FlowService: flowService},
+	)
+
+	// ─── Task Subtasks ───────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.GetSubtasksRequest, handlers.GetSubtasksResponse](
+		ctx, router, handlers.GetSubtasksRoutes(),
+		&handlers.GetSubtasksHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateSubtaskRequest, handlers.CreateSubtaskResponse](
+		ctx, router, handlers.CreateSubtaskRoutes(),
+		&handlers.CreateSubtaskHandler{FlowService: flowService},
+	)
+
+	// ─── Task Attachments ────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.GetAttachmentsRequest, handlers.GetAttachmentsResponse](
+		ctx, router, handlers.GetAttachmentsRoutes(),
+		&handlers.GetAttachmentsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateAttachmentRequest, handlers.CreateAttachmentResponse](
+		ctx, router, handlers.CreateAttachmentRoutes(),
+		&handlers.CreateAttachmentHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteAttachmentRequest, handlers.DeleteAttachmentResponse](
+		ctx, router, handlers.DeleteAttachmentRoutes(),
+		&handlers.DeleteAttachmentHandler{FlowService: flowService},
+	)
+
+	// ─── Time Logs ───────────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.GetTimeLogsRequest, handlers.GetTimeLogsResponse](
+		ctx, router, handlers.GetTimeLogsRoutes(),
+		&handlers.GetTimeLogsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateTimeLogRequest, handlers.CreateTimeLogResponse](
+		ctx, router, handlers.CreateTimeLogRoutes(),
+		&handlers.CreateTimeLogHandler{FlowService: flowService},
+	)
+
 	// ─── Dashboard ────────────────────────────────────────────────────────────
 
 	http.RegisterGETWithValidation[handlers.GetDashboardRequest, handlers.GetDashboardResponse](

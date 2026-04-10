@@ -127,6 +127,8 @@ const (
 	OrderStatusPaid      OrderStatus = "paid"
 	OrderStatusCancelled OrderStatus = "cancelled"
 	OrderStatusRefunded  OrderStatus = "refunded"
+	OrderStatusVoided    OrderStatus = "voided"
+	OrderStatusHeld      OrderStatus = "held"
 )
 
 type PaymentMethod string
@@ -252,6 +254,15 @@ type RefundInput struct {
 	OrderID int64
 	Amount  float64
 	Reason  string
+}
+
+// ─── Discount ───────────────────────────────────────────────────────────────
+
+type DiscountInput struct {
+	OrderID       int64
+	DiscountType  string
+	DiscountValue float64
+	Reason        string
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

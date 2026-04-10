@@ -23,6 +23,14 @@ type InventoryAdjustInput struct {
 	Notes     string                   `json:"notes"`
 }
 
+type ValuationItem struct {
+	CategoryName  string  `json:"categoryName"`
+	WarehouseName string  `json:"warehouseName"`
+	TotalItems    int64   `json:"totalItems"`
+	TotalValue    float64 `json:"totalValue"`
+	TotalCost     float64 `json:"totalCost"`
+}
+
 type InventoryReportItem struct {
 	ProductID         int64   `json:"productId"`
 	ProductName       string  `json:"productName"`

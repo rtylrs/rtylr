@@ -33,8 +33,20 @@ func (s *Service) UpdateStaff(ctx context.Context, ownerID int64, input domain.S
 	return s.repo.UpdateStaff(ctx, ownerID, input)
 }
 
+func (s *Service) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
+	return s.repo.GetStaffByID(ctx, ownerID, staffID)
+}
+
 func (s *Service) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
 	return s.repo.DeleteStaff(ctx, ownerID, staffID)
+}
+
+func (s *Service) ClockIn(ctx context.Context, ownerID, staffID int64) error {
+	return s.repo.ClockIn(ctx, ownerID, staffID)
+}
+
+func (s *Service) ClockOut(ctx context.Context, ownerID, staffID int64) error {
+	return s.repo.ClockOut(ctx, ownerID, staffID)
 }
 
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {

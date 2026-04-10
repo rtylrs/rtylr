@@ -209,6 +209,28 @@ func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, 
 	return refundID, nil
 }
 
+// ─── Split / Discount / Void / Hold ─────────────────────────────────────────
+
+func (s *Service) SplitOrder(ctx context.Context, ownerID, orderID int64, splits [][]int64) ([]int64, error) {
+	return s.repo.SplitOrder(ctx, ownerID, orderID, splits)
+}
+
+func (s *Service) ApplyDiscount(ctx context.Context, ownerID int64, input domain.DiscountInput) error {
+	return s.repo.ApplyDiscount(ctx, ownerID, input)
+}
+
+func (s *Service) VoidOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
+	return s.repo.VoidOrder(ctx, ownerID, orderID, reason)
+}
+
+func (s *Service) HoldOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
+	return s.repo.HoldOrder(ctx, ownerID, orderID, reason)
+}
+
+func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.Order, error) {
+	return s.repo.ListHeldOrders(ctx, ownerID)
+}
+
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {

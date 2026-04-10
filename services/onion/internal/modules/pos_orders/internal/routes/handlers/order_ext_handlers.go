@@ -1,0 +1,208 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ---- Split Order ----
+
+func SplitOrderRoutes() []string { return []string{"/pos/orders/split"} }
+
+type SplitOrderHandler struct{ Service *application.Service }
+
+type SplitOrderRequest struct {
+	OrderID int64     `json:"orderId"`
+	Splits  [][]int64 `json:"splits"`
+}
+
+type SplitOrderResponse struct {
+	OrderIDs []int64 `json:"orderIds"`
+	Message  string  `json:"message"`
+}
+
+func (h *SplitOrderHandler) Validate(_ context.Context, req *SplitOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if len(req.Splits) < 2 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "At least two splits are required"}
+	}
+	return nil
+}
+
+func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (SplitOrderResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return SplitOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderIDs, err := h.Service.SplitOrder(ctx, device.User.UserID, req.OrderID, req.Splits)
+	if err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to split order"}
+	}
+	return SplitOrderResponse{OrderIDs: orderIDs, Message: "Order split successfully"}, nil
+}
+
+// ---- Apply Discount ----
+
+func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount"} }
+
+type DiscountOrderHandler struct{ Service *application.Service }
+
+type DiscountOrderRequest struct {
+	OrderID        int64   `json:"orderId"`
+	DiscountType   string  `json:"discountType"`
+	DiscountValue  float64 `json:"discountValue"`
+	Reason         string  `json:"reason"`
+}
+
+type DiscountOrderResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DiscountOrderHandler) Validate(_ context.Context, req *DiscountOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if req.DiscountValue <= 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Discount value must be positive"}
+	}
+	return nil
+}
+
+func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequest) (DiscountOrderResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DiscountOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ApplyDiscount(ctx, device.User.UserID, domain.DiscountInput{
+		OrderID:       req.OrderID,
+		DiscountType:  req.DiscountType,
+		DiscountValue: req.DiscountValue,
+		Reason:        req.Reason,
+	}); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return DiscountOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return DiscountOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to apply discount"}
+	}
+	return DiscountOrderResponse{Message: "Discount applied successfully"}, nil
+}
+
+// ---- Void Order ----
+
+func VoidOrderRoutes() []string { return []string{"/pos/orders/void"} }
+
+type VoidOrderHandler struct{ Service *application.Service }
+
+type VoidOrderRequest struct {
+	OrderID int64  `json:"orderId"`
+	Reason  string `json:"reason"`
+}
+
+type VoidOrderResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *VoidOrderHandler) Validate(_ context.Context, req *VoidOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if req.Reason == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Reason is required"}
+	}
+	return nil
+}
+
+func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (VoidOrderResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return VoidOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.VoidOrder(ctx, device.User.UserID, req.OrderID, req.Reason); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to void order"}
+	}
+	return VoidOrderResponse{Message: "Order voided successfully"}, nil
+}
+
+// ---- Hold Order ----
+
+func HoldOrderRoutes() []string { return []string{"/pos/orders/hold"} }
+
+type HoldOrderHandler struct{ Service *application.Service }
+
+type HoldOrderRequest struct {
+	OrderID int64  `json:"orderId"`
+	Reason  string `json:"reason"`
+}
+
+type HoldOrderResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *HoldOrderHandler) Validate(_ context.Context, req *HoldOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	return nil
+}
+
+func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (HoldOrderResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return HoldOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.HoldOrder(ctx, device.User.UserID, req.OrderID, req.Reason); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to hold order"}
+	}
+	return HoldOrderResponse{Message: "Order held successfully"}, nil
+}
+
+// ---- List Held Orders ----
+
+func ListHeldOrdersRoutes() []string { return []string{"/pos/orders/held"} }
+
+type ListHeldOrdersHandler struct{ Service *application.Service }
+
+type ListHeldOrdersRequest struct{}
+
+type ListHeldOrdersResponse struct {
+	Orders []OrderPayload `json:"orders"`
+}
+
+func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListHeldOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orders, err := h.Service.ListHeldOrders(ctx, device.User.UserID)
+	if err != nil {
+		return ListHeldOrdersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list held orders"}
+	}
+
+	payloads := make([]OrderPayload, 0, len(orders))
+	for _, o := range orders {
+		payloads = append(payloads, newOrderPayload(o))
+	}
+	return ListHeldOrdersResponse{Orders: payloads}, nil
+}

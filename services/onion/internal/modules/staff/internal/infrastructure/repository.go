@@ -219,6 +219,35 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 	return nil
 }
 
+func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE hr_shifts SET clock_in_at = NOW(), status = 'in_progress', updated_at = NOW()
+		 WHERE owner_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NULL
+		 ORDER BY start_time ASC LIMIT 1`,
+		ownerID, staffID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to clock in", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE hr_shifts SET clock_out_at = NOW(), status = 'completed',
+		        hours_worked = TIMESTAMPDIFF(MINUTE, clock_in_at, NOW()) / 60.0, updated_at = NOW()
+		 WHERE owner_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
+		 ORDER BY start_time ASC LIMIT 1`,
+		ownerID, staffID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to clock out", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) CountActiveStaff(ctx context.Context, ownerID int64) (int, error) {
 	var count int
 	if err := r.pool.QueryRowContext(ctx,

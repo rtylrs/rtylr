@@ -131,6 +131,62 @@ func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]
 	return scanInventoryReportRows(ctx, rows)
 }
 
+func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
+	query := `
+		SELECT
+			COALESCE(c.name, 'Uncategorized') AS category_name,
+			'' AS warehouse_name,
+			COUNT(*) AS total_items,
+			SUM(p.stock_quantity * p.sale_price) AS total_value,
+			SUM(p.stock_quantity * p.cost_price) AS total_cost
+		FROM erp_products p
+		LEFT JOIN erp_categories c ON c.id = p.category_id AND c.owner_id = p.owner_id
+		WHERE p.owner_id = ? AND p.is_active = TRUE AND p.track_inventory = TRUE
+		GROUP BY c.name
+		ORDER BY total_value DESC`
+
+	rows, err := r.pool.QueryContext(ctx, query, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get inventory valuation", logger.Error(err))
+
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var items []domain.ValuationItem
+
+	for rows.Next() {
+		var item domain.ValuationItem
+		var totalValue sql.NullFloat64
+		var totalCost sql.NullFloat64
+
+		if err := rows.Scan(
+			&item.CategoryName,
+			&item.WarehouseName,
+			&item.TotalItems,
+			&totalValue,
+			&totalCost,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan valuation row", logger.Error(err))
+
+			return nil, err
+		}
+
+		if totalValue.Valid {
+			item.TotalValue = totalValue.Float64
+		}
+
+		if totalCost.Valid {
+			item.TotalCost = totalCost.Float64
+		}
+
+		items = append(items, item)
+	}
+
+	return items, rows.Err()
+}
+
 func scanInventoryReportRows(ctx context.Context, rows *sql.Rows) ([]domain.InventoryReportItem, error) {
 	var report []domain.InventoryReportItem
 

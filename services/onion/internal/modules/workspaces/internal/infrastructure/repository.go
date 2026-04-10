@@ -546,6 +546,104 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 }
 
 // ─────────────────────────────────────────────
+// Attachments
+// ─────────────────────────────────────────────
+
+func (r *Repository) CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error) {
+	res, err := r.pool.ExecContext(ctx,
+		`INSERT INTO flow_task_attachments (task_id, owner_id, name, url, size, uploaded_by)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		input.TaskID, input.OwnerID, input.Name, input.URL, input.Size, input.UploadedBy,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateAttachment failed", logger.Error(err))
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) GetAttachmentsByTask(ctx context.Context, taskID int64) ([]domain.TaskAttachment, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, task_id, owner_id, name, url, size, uploaded_by, created_at
+		 FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC`,
+		taskID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetAttachmentsByTask failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var attachments []domain.TaskAttachment
+	for rows.Next() {
+		var a domain.TaskAttachment
+		if scanErr := rows.Scan(&a.ID, &a.TaskID, &a.OwnerID, &a.Name, &a.URL, &a.Size, &a.UploadedBy, &a.CreatedAt); scanErr != nil {
+			logger.Ctx(ctx).Error("GetAttachmentsByTask scan failed", logger.Error(scanErr))
+			return nil, scanErr
+		}
+		attachments = append(attachments, a)
+	}
+	return attachments, rows.Err()
+}
+
+func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, ownerID int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`DELETE FROM flow_task_attachments WHERE id = ? AND owner_id = ?`, attachmentID, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteAttachment failed", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
+// ─────────────────────────────────────────────
+// Time Logs
+// ─────────────────────────────────────────────
+
+func (r *Repository) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) (int64, error) {
+	res, err := r.pool.ExecContext(ctx,
+		`INSERT INTO flow_time_logs (owner_id, task_id, user_id, duration_minutes, description)
+		 VALUES (?, ?, ?, ?, ?)`,
+		input.OwnerID, input.TaskID, input.UserID, input.DurationMinutes,
+		nullableString(input.Description),
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateTimeLog failed", logger.Error(err))
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) GetTimeLogsByTask(ctx context.Context, taskID int64) ([]domain.TimeLog, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, owner_id, task_id, user_id, duration_minutes, COALESCE(description,''), logged_at, created_at
+		 FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC`,
+		taskID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetTimeLogsByTask failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var logs []domain.TimeLog
+	for rows.Next() {
+		var l domain.TimeLog
+		if scanErr := rows.Scan(&l.ID, &l.OwnerID, &l.TaskID, &l.UserID, &l.DurationMinutes, &l.Description, &l.LoggedAt, &l.CreatedAt); scanErr != nil {
+			logger.Ctx(ctx).Error("GetTimeLogsByTask scan failed", logger.Error(scanErr))
+			return nil, scanErr
+		}
+		logs = append(logs, l)
+	}
+	return logs, rows.Err()
+}
+
+func nullableString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
+// ─────────────────────────────────────────────
 // Labels
 // ─────────────────────────────────────────────
 

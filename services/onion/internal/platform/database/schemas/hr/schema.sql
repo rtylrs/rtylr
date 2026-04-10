@@ -90,3 +90,72 @@ CREATE TABLE IF NOT EXISTS hr_payroll_records (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS hr_reviews (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    reviewer_id BIGINT,
+    period VARCHAR(100),
+    rating DECIMAL(3,1) DEFAULT 0,
+    goals_rating DECIMAL(3,1) DEFAULT 0,
+    values_rating DECIMAL(3,1) DEFAULT 0,
+    skills_rating DECIMAL(3,1) DEFAULT 0,
+    notes TEXT,
+    status ENUM('draft','submitted','acknowledged') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hr_one_on_ones (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    manager_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    scheduled_at TIMESTAMP NOT NULL,
+    notes TEXT,
+    action_items JSON,
+    status ENUM('scheduled','completed','cancelled') DEFAULT 'scheduled',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hr_documents (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    staff_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100),
+    file_url TEXT,
+    expiry_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hr_benefit_plans (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('health','dental','vision','401k','life','other') DEFAULT 'other',
+    provider VARCHAR(255),
+    cost_employer DECIMAL(10,2) DEFAULT 0,
+    cost_employee DECIMAL(10,2) DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hr_training_courses (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration_hours DECIMAL(6,1) DEFAULT 0,
+    is_required BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hr_training_progress (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    status ENUM('not_started','in_progress','completed') DEFAULT 'not_started',
+    completed_at TIMESTAMP NULL
+);
