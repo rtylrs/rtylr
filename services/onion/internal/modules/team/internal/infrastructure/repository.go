@@ -240,6 +240,18 @@ func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (str
 	return row.Name, row.OwnerID, nil
 }
 
+// ─── Access Requests ────────────────────────────────────────────────────────
+
+func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID int64, app string) error {
+	pool := dbclient.Pool()
+	_, err := pool.ExecContext(ctx,
+		`INSERT INTO access_requests (business_id, user_id, app) VALUES (?, ?, ?)
+		 ON DUPLICATE KEY UPDATE status = 'pending', created_at = NOW()`,
+		businessID, userID, app,
+	)
+	return err
+}
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sqlc.NullUserAppPermissionsRole, isActive sql.NullBool, createdAt, updatedAt sql.NullTime) *domain.UserAppPermission {

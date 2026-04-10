@@ -45,4 +45,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.AcceptInviteRoutes(),
 		&handlers.AcceptInviteHandler{Service: service},
 	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.RequestAccessRequest, handlers.RequestAccessResponse](
+		ctx, router, handlers.RequestAccessRoutes(),
+		&handlers.RequestAccessHandler{Service: service},
+	)
 }

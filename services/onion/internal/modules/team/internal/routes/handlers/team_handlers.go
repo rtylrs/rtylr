@@ -387,3 +387,58 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		IsOwner:      isOwner,
 	}, nil
 }
+
+// ─── Request Access ─────────────────────────────────────────────────────────
+
+func RequestAccessRoutes() []string { return []string{"/team/request-access"} }
+
+type RequestAccessHandler struct{ Service *application.Service }
+
+type RequestAccessRequest struct {
+	App string `json:"app"`
+}
+
+type RequestAccessResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *RequestAccessHandler) Validate(_ context.Context, req *RequestAccessRequest) *errorModels.ServerError {
+	if req.App == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "App is required"}
+	}
+	return nil
+}
+
+func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequest) (RequestAccessResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return RequestAccessResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	err := h.Service.RequestAccess(ctx, device.User.BusinessID, device.User.UserID, req.App)
+	if err != nil {
+		return RequestAccessResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to request access",
+		}
+	}
+
+	// Send email to business owner (non-blocking)
+	go func() {
+		ownerEmail := h.Service.GetBusinessOwnerEmail(context.Background(), device.User.BusinessID)
+		if ownerEmail != "" {
+			userName := ""
+			if device.User != nil {
+				userName = "A team member"
+			}
+			emailPkg.Send(context.Background(), emailPkg.SendParams{
+				To:      []string{ownerEmail},
+				Subject: userName + " requested access to " + req.App + " on rtylr",
+				HTML:    "<p>" + userName + " is requesting access to <strong>" + req.App + "</strong>. Go to Hub > Team to approve.</p>",
+			})
+		}
+	}()
+
+	return RequestAccessResponse{Message: "Access requested"}, nil
+}

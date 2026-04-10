@@ -138,6 +138,24 @@ func (s *Service) GetMeByBusiness(ctx context.Context, businessID, userID int64)
 	return email, fullName, perm.Apps, perm.Role, nil
 }
 
+// RequestAccess stores a pending access request from a staff user.
+func (s *Service) RequestAccess(ctx context.Context, businessID, userID int64, app string) error {
+	return s.repo.CreateAccessRequest(ctx, businessID, userID, app)
+}
+
+// GetBusinessOwnerEmail returns the email of the business owner.
+func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) string {
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return ""
+	}
+	email, _, err := s.repo.GetUserByID(ctx, ownerID)
+	if err != nil {
+		return ""
+	}
+	return email
+}
+
 // GetBusinessInfo returns the business name and whether the user is the owner.
 func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
 	if businessID == 0 {
