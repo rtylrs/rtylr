@@ -118,3 +118,56 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+// GetUserBusinessID returns the business_id for a user. Returns 0 if not set.
+func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
+	var businessID sql.NullInt64
+	err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", userID).Scan(&businessID)
+	if err != nil {
+		return 0, err
+	}
+	if businessID.Valid {
+		return businessID.Int64, nil
+	}
+	return 0, nil
+}
+
+// GetUserRole returns the role for a user within their business.
+func (r *Repository) GetUserRole(ctx context.Context, businessID, userID int64) (string, error) {
+	// Check if user is the business owner
+	var ownerID int64
+	err := r.pool.QueryRowContext(ctx, "SELECT owner_id FROM businesses WHERE id = ?", businessID).Scan(&ownerID)
+	if err == nil && ownerID == userID {
+		return "owner", nil
+	}
+
+	// Otherwise check permissions table
+	var role string
+	err = r.pool.QueryRowContext(ctx,
+		"SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?",
+		businessID, userID,
+	).Scan(&role)
+	if err != nil {
+		return "staff", nil // default
+	}
+	return role, nil
+}
+
+// CreateBusiness creates a new business and returns its ID.
+func (r *Repository) CreateBusiness(ctx context.Context, name string, ownerID int64) (int64, error) {
+	res, err := r.pool.ExecContext(ctx,
+		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
+		name, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create business", logger.Error(err))
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+// SetUserBusinessID sets the business_id for a user.
+func (r *Repository) SetUserBusinessID(ctx context.Context, userID, businessID int64) error {
+	_, err := r.pool.ExecContext(ctx, "UPDATE users SET business_id = ? WHERE id = ?", businessID, userID)
+	return err
+}

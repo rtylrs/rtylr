@@ -40,6 +40,8 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 
 	return &authPkg.TokenClaims{
 		UserID:         claims.UserID,
+		BusinessID:     claims.BusinessID,
+		Role:           claims.Role,
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,

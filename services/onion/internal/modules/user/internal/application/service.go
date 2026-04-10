@@ -132,6 +132,16 @@ func (s *Service) Authenticate(ctx context.Context, email, password string) (int
 	return user.ID, nil
 }
 
+// CreateBusinessForUser creates a new business and assigns the user as owner.
+func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, businessName string) error {
+	businessID, err := s.repo.CreateBusiness(ctx, businessName, userID)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.SetUserBusinessID(ctx, userID, businessID)
+}
+
 type PlatformClaims struct {
 	Platform       string
 	PlatformUserID int64
@@ -147,10 +157,16 @@ func (s *Service) GenerateToken(ctx context.Context, userID int64) (string, erro
 }
 
 func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, pc *PlatformClaims) (string, error) {
-	_ = ctx
-
 	claims := &AccessTokenClaims{
 		UserID: userID,
+	}
+
+	// Look up business_id and role
+	businessID, _ := s.repo.GetUserBusinessID(ctx, userID)
+	if businessID > 0 {
+		claims.BusinessID = businessID
+		role, _ := s.repo.GetUserRole(ctx, businessID, userID)
+		claims.Role = role
 	}
 
 	if pc != nil {
@@ -246,6 +262,8 @@ func (s *Service) GetUserByID(ctx context.Context, id int64) (*domain.User, erro
 
 type AccessTokenClaims struct {
 	UserID         int64  `json:"user_id"`
+	BusinessID     int64  `json:"business_id,omitempty"`
+	Role           string `json:"role,omitempty"`
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`

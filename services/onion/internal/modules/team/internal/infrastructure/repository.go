@@ -313,3 +313,17 @@ func (r *Repository) SetPassword(ctx context.Context, userID int64, passwordHash
 	)
 	return err
 }
+
+// GetBusinessByID returns the business name and owner ID.
+func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (string, int64, error) {
+	var name string
+	var ownerID int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT name, owner_id FROM businesses WHERE id = ?`,
+		businessID,
+	).Scan(&name, &ownerID)
+	if err != nil {
+		return "", 0, err
+	}
+	return name, ownerID, nil
+}

@@ -327,11 +327,14 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID       int64    `json:"id"`
-	Email    string   `json:"email"`
-	FullName string   `json:"fullName"`
-	Apps     []string `json:"apps"`
-	Role     string   `json:"role"`
+	ID           int64    `json:"id"`
+	Email        string   `json:"email"`
+	FullName     string   `json:"fullName"`
+	Apps         []string `json:"apps"`
+	Role         string   `json:"role"`
+	BusinessID   int64    `json:"businessId"`
+	BusinessName string   `json:"businessName"`
+	IsOwner      bool     `json:"isOwner"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -341,7 +344,9 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 	}
 
 	userID := device.User.UserID
+	businessID := device.User.BusinessID
 
+	// Use businessID from JWT to scope the query
 	ownerID := req.OwnerID
 	if ownerID == 0 {
 		ownerID = userID
@@ -368,11 +373,23 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		apps = []string{}
 	}
 
+	// Get business name
+	businessName, isOwner := h.Service.GetBusinessInfo(ctx, businessID, userID)
+
+	// If user is the owner, they have access to everything
+	if isOwner {
+		role = "owner"
+		apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
+	}
+
 	return MeResponse{
-		ID:       userID,
-		Email:    email,
-		FullName: fullName,
-		Apps:     apps,
-		Role:     string(role),
+		ID:           userID,
+		Email:        email,
+		FullName:     fullName,
+		Apps:         apps,
+		Role:         string(role),
+		BusinessID:   businessID,
+		BusinessName: businessName,
+		IsOwner:      isOwner,
 	}, nil
 }

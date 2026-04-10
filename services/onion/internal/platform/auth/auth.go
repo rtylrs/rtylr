@@ -10,6 +10,8 @@ const (
 
 type AuthUser struct {
 	UserID         int64  `json:"user_id"`
+	BusinessID     int64  `json:"business_id"`
+	Role           string `json:"role"`
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
@@ -19,6 +21,8 @@ type AuthUser struct {
 
 type TokenClaims struct {
 	UserID         int64
+	BusinessID     int64
+	Role           string
 	Platform       string
 	PlatformUserID int64
 	PlanID         int64

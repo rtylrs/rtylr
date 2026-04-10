@@ -119,6 +119,20 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	return userID, nil
 }
 
+// GetBusinessInfo returns the business name and whether the user is the owner.
+func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
+	if businessID == 0 {
+		return "", false
+	}
+
+	name, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return "", false
+	}
+
+	return name, ownerID == userID
+}
+
 func (s *Service) UpdatePermissions(ctx context.Context, ownerID int64, input domain.UpdatePermissionsInput) error {
 	if input.UserID == 0 {
 		return errors.New("user id is required")

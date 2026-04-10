@@ -25,9 +25,10 @@ type RegisterHandler struct {
 }
 
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	Name         string `json:"name"`
+	BusinessName string `json:"businessName"`
 }
 
 type RegisterResponse struct {
@@ -100,6 +101,18 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 				Message: "Registration failed",
 			}
 		}
+	}
+
+	// Create business for this user (they are the owner)
+	businessName := strings.TrimSpace(req.BusinessName)
+	if businessName == "" {
+		businessName = strings.TrimSpace(req.Name) + "'s Business"
+	}
+
+	if bizErr := h.UserService.CreateBusinessForUser(ctx, userId, businessName); bizErr != nil {
+		// Non-fatal: user is created but business creation failed
+		// Log it but don't block registration
+		_ = bizErr
 	}
 
 	var platformClaims *application.PlatformClaims
