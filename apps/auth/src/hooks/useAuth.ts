@@ -15,6 +15,7 @@ interface RegisterPayload {
   email: string;
   password: string;
   name: string;
+  businessName?: string;
   referred: string;
 }
 
