@@ -31,10 +31,11 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int)
 	}
 
 	query := `
-		SELECT id, owner_id, entity_type, entity_id, action, description, user_id, created_at
-		FROM erp_activity_log
-		WHERE owner_id = ?
-		ORDER BY created_at DESC
+		SELECT a.id, a.owner_id, a.app, a.entity_type, a.entity_id, a.action, a.description, a.user_id, u.full_name, a.created_at
+		FROM activity_log a
+		LEFT JOIN users u ON u.id = a.user_id
+		WHERE a.owner_id = ?
+		ORDER BY a.created_at DESC
 		LIMIT ?`
 
 	rows, err := r.pool.QueryContext(ctx, query, ownerID, limit)

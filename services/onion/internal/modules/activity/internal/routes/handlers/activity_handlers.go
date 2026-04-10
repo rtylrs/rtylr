@@ -12,7 +12,7 @@ import (
 // --- List Activity -----------------------------------------------------------
 
 func ListActivityRoutes() []string {
-	return []string{"/erp/activity"}
+	return []string{"/erp/activity", "/activity"}
 }
 
 type ListActivityHandler struct {
@@ -26,11 +26,13 @@ type ListActivityRequest struct {
 type ActivityPayload struct {
 	ID          int64  `json:"id"`
 	OwnerID     int64  `json:"ownerId"`
+	App         string `json:"app"`
 	EntityType  string `json:"entityType"`
 	EntityID    int64  `json:"entityId"`
 	Action      string `json:"action"`
 	Description string `json:"description"`
 	UserID      int64  `json:"userId"`
+	UserName    string `json:"userName"`
 	CreatedAt   string `json:"createdAt"`
 }
 
@@ -62,11 +64,13 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		payloads = append(payloads, ActivityPayload{
 			ID:          a.ID,
 			OwnerID:     a.OwnerID,
+			App:         a.App,
 			EntityType:  a.EntityType,
 			EntityID:    a.EntityID,
 			Action:      a.Action,
 			Description: a.Description,
 			UserID:      a.UserID,
+			UserName:    a.UserName,
 			CreatedAt:   a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
