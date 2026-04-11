@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { PERSONAL_WORKSPACE_ID } from '../lib/personalWorkspace';
 
 // -- Types ---------------------------------------------------------------
 
@@ -120,6 +121,24 @@ export interface TimeLog {
   note?: string;
 }
 
+/** Sections within a project (list/board grouping). */
+export interface ProjectSection {
+  id: string;
+  projectId: string;
+  name: string;
+  order: number;
+}
+
+/** Custom field definitions (per project). */
+export interface CustomFieldDefinition {
+  id: string;
+  projectId: string;
+  name: string;
+  type: 'text' | 'number' | 'dropdown';
+  options?: string[];
+  order: number;
+}
+
 export interface Task {
   id: string;
   projectId: string;
@@ -146,6 +165,9 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   identifier: string; // e.g. FLOW-123
+  sectionId?: string;
+  /** Values keyed by CustomFieldDefinition.id */
+  customFieldValues?: Record<string, string | number>;
 }
 
 export interface SavedView {
@@ -210,6 +232,8 @@ interface FlowState {
   templates: TaskTemplate[];
   notifications: Notification[];
   timelogs: TimeLog[];
+  sections: ProjectSection[];
+  customFieldDefinitions: CustomFieldDefinition[];
 
   // preferences
   commandBarOpen: boolean;
@@ -234,6 +258,8 @@ interface FlowState {
   setTemplates: (t: TaskTemplate[]) => void;
   setNotifications: (n: Notification[]) => void;
   setTimelogs: (t: TimeLog[]) => void;
+  setSections: (s: ProjectSection[]) => void;
+  setCustomFieldDefinitions: (c: CustomFieldDefinition[]) => void;
 
   // actions
   setActiveWorkspace: (id: string) => void;
@@ -247,7 +273,7 @@ interface FlowState {
   deleteTask: (id: string) => void;
   archiveTask: (id: string) => void;
   bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void;
-  addComment: (taskId: string, body: string) => void;
+  addComment: (taskId: string, body: string, author?: { name: string; initials: string; id: string }) => void;
   toggleSubtask: (id: string) => void;
   addSubtask: (taskId: string, title: string) => void;
   markNotificationRead: (id: string) => void;
@@ -275,6 +301,8 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   templates: [],
   notifications: [],
   timelogs: [],
+  sections: [],
+  customFieldDefinitions: [],
 
   commandBarOpen: false,
   quickCreateOpen: false,
@@ -283,7 +311,14 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   showArchived: false,
 
   // setters for API data
-  setWorkspaces: (ws) => set({ workspaces: ws, activeWorkspaceId: get().activeWorkspaceId || ws[0]?.id || '' }),
+  setWorkspaces: (ws) => {
+    const current = get().activeWorkspaceId;
+    const stillValid = current && ws.some((w) => w.id === current);
+    const nextActive = stillValid
+      ? current
+      : ws.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? ws[0]?.id ?? '';
+    set({ workspaces: ws, activeWorkspaceId: nextActive });
+  },
   setMembers: (m) => set({ members: m }),
   setProjects: (p) => set({ projects: p }),
   setTasks: (t) => set({ tasks: t }),
@@ -298,6 +333,8 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   setTemplates: (t) => set({ templates: t }),
   setNotifications: (n) => set({ notifications: n }),
   setTimelogs: (t) => set({ timelogs: t }),
+  setSections: (s) => set({ sections: s }),
+  setCustomFieldDefinitions: (c) => set({ customFieldDefinitions: c }),
 
   setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
   setCommandBarOpen: (open) => set({ commandBarOpen: open }),
@@ -341,6 +378,9 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       labels: data.labels || [],
       cycleId: data.cycleId,
       milestoneId: data.milestoneId,
+      sectionId: data.sectionId,
+      customFieldValues: data.customFieldValues ? { ...data.customFieldValues } : undefined,
+      dependencies: data.dependencies ? [...data.dependencies] : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       identifier: `${(project?.name || 'TASK').slice(0, 4).toUpperCase()}-${count}`,
@@ -364,16 +404,16 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       ),
     })),
 
-  addComment: (taskId, body) =>
+  addComment: (taskId, body, author) =>
     set((s) => ({
       comments: [
         ...s.comments,
         {
           id: `cm${Date.now()}`,
           taskId,
-          authorId: '',
-          author: '',
-          authorInitials: '',
+          authorId: author?.id ?? '',
+          author: author?.name ?? 'You',
+          authorInitials: author?.initials ?? 'YO',
           body,
           createdAt: new Date().toISOString(),
         },

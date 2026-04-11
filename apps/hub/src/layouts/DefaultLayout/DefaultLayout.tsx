@@ -238,7 +238,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             src="/logo.png"
             alt="rtylr"
             className="h-6 w-auto"
-            style={{ filter: theme === 'dark' ? 'brightness(0) invert(1)' : 'brightness(0)' }}
+            style={{ filter: (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'brightness(0) invert(1)' : 'brightness(0)' }}
           />
         </div>
 

@@ -12,8 +12,10 @@ import {
 import { useUserStore } from '../../stores/userStore';
 import { useFlowStore } from '../../stores/flowStore';
 import { cn, formatDate } from '../../lib/utils';
+import { isTaskMine } from '../../lib/currentUser';
 import { type DashboardStats } from '../../services/flowApi';
 import { useFlowDashboard } from '../../hooks/useDashboard';
+import { PERSONAL_WORKSPACE_ID } from '../../lib/personalWorkspace';
 
 const ACCENT = '#64C5B9';
 
@@ -85,7 +87,7 @@ const statCard = (
 );
 
 const WorkspaceDashboard: React.FC = () => {
-  const { workspaceId = 'default' } = useParams<{ workspaceId: string }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID } = useParams<{ workspaceId: string }>();
   const { user } = useUserStore();
   const { tasks, projects, workspaces } = useFlowStore();
 
@@ -100,9 +102,11 @@ const WorkspaceDashboard: React.FC = () => {
   const greeting =
     hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-  const myTasks = apiStats?.myTasks ?? workspaceTasks.filter(
-    (t) => t.assigneeInitials === 'MH' && t.status !== 'done'
-  );
+  const myTasks =
+    apiStats?.myTasks ??
+    (workspaceTasks.filter(
+      (t) => isTaskMine(t.assigneeId) && t.status !== 'done' && t.status !== 'cancelled'
+    ) as any);
 
   const openTasks = apiStats?.openTasks ?? workspaceTasks.filter((t) => t.status === 'todo').length;
   const inProgress = apiStats?.inProgress ?? workspaceTasks.filter((t) => t.status === 'in_progress').length;

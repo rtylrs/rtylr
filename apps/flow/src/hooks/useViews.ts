@@ -1,19 +1,43 @@
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
-import { SavedView, Task, PRIORITY_ORDER } from '../stores/flowStore';
+import { isFlowLocal } from '../lib/flowLocalMode';
+import { useFlowStore, PRIORITY_ORDER, type SavedView, type Task } from '../stores/flowStore';
 
 export function useViews() {
-  return useQuery<SavedView[]>({
+  const views = useFlowStore((s) => s.views);
+  const q = useQuery<SavedView[]>({
     queryKey: ['views'],
     queryFn: () => flowApi.getViews() as Promise<SavedView[]>,
+    enabled: !isFlowLocal(),
   });
+  return {
+    ...q,
+    data: isFlowLocal() ? views : q.data,
+    isLoading: isFlowLocal() ? false : q.isLoading,
+  };
 }
 
 export function useCreateView() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<SavedView>) => flowApi.createView(data as any),
+    mutationFn: (data: Partial<SavedView>) => {
+      if (isFlowLocal()) {
+        const id = `view-${Date.now()}`;
+        const row: SavedView = {
+          id,
+          name: data.name ?? 'New view',
+          icon: data.icon ?? 'eye',
+          filters: data.filters ?? {},
+          groupBy: data.groupBy,
+          sortBy: data.sortBy,
+          sortDir: data.sortDir,
+        };
+        useFlowStore.setState({ views: [...useFlowStore.getState().views, row] });
+        return Promise.resolve(row as any);
+      }
+      return flowApi.createView(data as any);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });
 }
@@ -21,7 +45,15 @@ export function useCreateView() {
 export function useDeleteView() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => flowApi.deleteView(id),
+    mutationFn: (id: string) => {
+      if (isFlowLocal()) {
+        useFlowStore.setState({
+          views: useFlowStore.getState().views.filter((v) => v.id !== id),
+        });
+        return Promise.resolve();
+      }
+      return flowApi.deleteView(id);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });
 }
@@ -66,22 +98,4 @@ export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
     }
     return filtered;
   }, [tasks, view]);
-}
-
-export function groupTasks(
-  tasks: Task[],
-  groupBy: SavedView['groupBy']
-): { key: string; label: string; tasks: Task[] }[] {
-  if (!groupBy) return [{ key: 'all', label: 'All', tasks }];
-  const map: Record<string, Task[]> = {};
-  tasks.forEach((t) => {
-    const key = t[groupBy as keyof Task] as string;
-    if (!map[key]) map[key] = [];
-    map[key].push(t);
-  });
-  return Object.entries(map).map(([key, items]) => ({
-    key,
-    label: String(key).replace('_', ' '),
-    tasks: items,
-  }));
 }

@@ -7,7 +7,8 @@ import ProjectSelect from './ProjectSelect';
 import PriorityIcon from './PriorityIcon';
 
 export const QuickCreate: React.FC = () => {
-  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, createTask } = useFlowStore();
+  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, createTask, sections } =
+    useFlowStore();
   const [title, setTitle] = useState('');
   const [projectId, setProjectId] = useState<string>('');
   const [priority, setPriority] = useState<Task['priority']>('medium');
@@ -27,11 +28,15 @@ export const QuickCreate: React.FC = () => {
     if (!title.trim() || !projectId) return;
     const project = projects.find((p) => p.id === projectId);
     if (!project) return;
+    const projectSections = sections
+      .filter((s) => s.projectId === projectId)
+      .sort((a, b) => a.order - b.order);
     const task = createTask({
       title: title.trim(),
       projectId,
       workspaceId: project.workspaceId,
       priority,
+      sectionId: projectSections[0]?.id,
     });
     toast.success(`Created ${task.identifier}`, { description: task.title });
     setQuickCreateOpen(false);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useFlowStore, Task } from '../../stores/flowStore';
+import { PERSONAL_WORKSPACE_ID } from '../../lib/personalWorkspace';
 import { cn, formatDate } from '../../lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../../hooks/useTasks';
 
@@ -203,16 +204,37 @@ const StatusGroup: React.FC<{
 };
 
 const ProjectList: React.FC = () => {
-  const { workspaceId = 'default', projectId = 'flow' } = useParams<{
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams<{
     workspaceId: string;
     projectId: string;
   }>();
 
-  const { projects, tasks } = useFlowStore();
+  const { projects, tasks, sections } = useFlowStore();
   const { data: apiTasks } = useTasks({ projectId });
 
   const project = projects.find((p) => p.id === projectId);
-  const projectTasks = apiTasks ?? tasks.filter((t) => t.projectId === projectId);
+  const projectTasks = (apiTasks ?? tasks.filter((t) => t.projectId === projectId)) as Task[];
+
+  const projectSections = useMemo(
+    () =>
+      sections
+        .filter((s) => s.projectId === projectId)
+        .sort((a, b) => a.order - b.order),
+    [sections, projectId]
+  );
+
+  const sectionBlocks = useMemo(() => {
+    if (projectSections.length === 0) return null;
+    const blocks: { id: string; title: string; tasks: Task[] }[] = projectSections.map((sec) => ({
+      id: sec.id,
+      title: sec.name,
+      tasks: projectTasks.filter((t) => t.sectionId === sec.id),
+    }));
+    const inSection = new Set(projectSections.map((s) => s.id));
+    const loose = projectTasks.filter((t) => !t.sectionId || !inSection.has(t.sectionId));
+    if (loose.length) blocks.push({ id: '_unsectioned', title: 'Other', tasks: loose });
+    return blocks;
+  }, [projectSections, projectTasks]);
 
   if (!project) {
     return (
@@ -288,15 +310,42 @@ const ProjectList: React.FC = () => {
         <div className="w-5" />
       </div>
 
-      {/* Task Groups */}
+      {/* Sections + status groups */}
       <div className="flex-1 overflow-y-auto">
-        {STATUS_GROUPS.map((group) => (
-          <StatusGroup
-            key={group.id}
-            group={group}
-            tasks={projectTasks.filter((t) => t.status === group.id)}
-          />
-        ))}
+        {sectionBlocks ? (
+          sectionBlocks.map((block) => (
+            <div key={block.id} className="mb-4">
+              <div
+                className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider sticky top-0 z-[1]"
+                style={{
+                  background: 'var(--flow-bg)',
+                  borderBottom: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text-muted)',
+                }}
+              >
+                {block.title}
+                <span className="ml-2 font-normal" style={{ color: 'var(--flow-text-dim)' }}>
+                  {block.tasks.length}
+                </span>
+              </div>
+              {STATUS_GROUPS.map((group) => (
+                <StatusGroup
+                  key={`${block.id}-${group.id}`}
+                  group={group}
+                  tasks={block.tasks.filter((t) => t.status === group.id)}
+                />
+              ))}
+            </div>
+          ))
+        ) : (
+          STATUS_GROUPS.map((group) => (
+            <StatusGroup
+              key={group.id}
+              group={group}
+              tasks={projectTasks.filter((t) => t.status === group.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );

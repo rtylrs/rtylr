@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface FlowUser {
+export interface FlowUser {
   id: string;
   name: string;
   email: string;
   avatar?: string;
+  /** From API when `name` is assembled from parts */
+  firstName?: string;
 }
 
 interface UserState {

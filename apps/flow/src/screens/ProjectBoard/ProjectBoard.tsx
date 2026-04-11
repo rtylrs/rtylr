@@ -9,6 +9,7 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useFlowStore, Task, STATUS_LABELS } from '../../stores/flowStore';
+import { PERSONAL_WORKSPACE_ID } from '../../lib/personalWorkspace';
 import TaskCard from '../../components/TaskCard';
 
 const ACCENT = '#64C5B9';
@@ -22,7 +23,7 @@ const COLUMNS: { id: Task['status']; label: string; color: string; bgColor: stri
 ];
 
 const ProjectBoard: React.FC = () => {
-  const { workspaceId = 'default', projectId = 'flow' } = useParams<{
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams<{
     workspaceId: string;
     projectId: string;
   }>();

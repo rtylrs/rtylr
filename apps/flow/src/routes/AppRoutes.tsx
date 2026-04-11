@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import FlowLayout from '../layouts/FlowLayout/FlowLayout';
+import { PERSONAL_WORKSPACE_ID } from '../lib/personalWorkspace';
 
 const WorkspaceDashboard = React.lazy(
   () => import('../screens/WorkspaceDashboard/WorkspaceDashboard')
@@ -58,7 +59,7 @@ function withLayout(element: React.ReactNode): React.ReactNode {
 }
 
 const appRoutes: RouteObject[] = [
-  { path: '/', element: <Navigate to="/w/default" replace /> },
+  { path: '/', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
   { path: '/w/:workspaceId', element: withLayout(<WorkspaceDashboard />) },
   { path: '/w/:workspaceId/p/:projectId', element: withLayout(<ProjectBoard />) },
   { path: '/w/:workspaceId/p/:projectId/list', element: withLayout(<ProjectList />) },
@@ -78,7 +79,7 @@ const appRoutes: RouteObject[] = [
   { path: '/archive', element: withLayout(<Archive />) },
   { path: '/inbox', element: withLayout(<Inbox />) },
   { path: '/settings', element: withLayout(<FlowSettings />) },
-  { path: '*', element: <Navigate to="/w/default" replace /> },
+  { path: '*', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
 ];
 
 export default appRoutes;

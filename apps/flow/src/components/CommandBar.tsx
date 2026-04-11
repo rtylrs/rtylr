@@ -49,7 +49,7 @@ export const CommandBar: React.FC = () => {
   const items = useMemo<CommandItem[]>(() => {
     const navItems: CommandItem[] = [
       { id: 'nav-inbox', label: 'Go to Inbox', icon: Inbox, action: () => navigate('/inbox'), group: 'nav', hint: 'G I' },
-      { id: 'nav-my', label: 'My Issues', icon: ListTodo, action: () => navigate('/my-issues'), group: 'nav', hint: 'G M' },
+      { id: 'nav-my', label: 'My tasks', icon: ListTodo, action: () => navigate('/my-issues'), group: 'nav', hint: 'G M' },
       { id: 'nav-dash', label: 'Workspace Dashboard', icon: LayoutGrid, action: () => navigate(`/w/${activeWorkspaceId}`), group: 'nav' },
       { id: 'nav-cal', label: 'Calendar', icon: Calendar, action: () => navigate('/calendar'), group: 'nav' },
       { id: 'nav-timeline', label: 'Timeline', icon: Timer, action: () => navigate('/timeline'), group: 'nav' },

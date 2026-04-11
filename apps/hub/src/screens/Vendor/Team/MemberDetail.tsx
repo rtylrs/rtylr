@@ -95,10 +95,10 @@ const MemberDetail: React.FC = () => {
 
       <SettingSection title="App access" description="Apps this member can launch.">
         <div className="flex flex-wrap gap-2">
-          {member.apps.length === 0 ? (
+          {(member.apps ?? []).length === 0 ? (
             <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>No apps assigned.</p>
           ) : (
-            member.apps.map((a) => <AppBadge key={a} app={a} size="sm" />)
+            (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
           )}
         </div>
       </SettingSection>

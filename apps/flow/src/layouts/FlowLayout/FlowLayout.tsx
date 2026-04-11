@@ -12,7 +12,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  ArrowLeft,
   Circle,
   ListTodo,
   Calendar,
@@ -25,6 +24,8 @@ import {
   Archive,
   Search,
   Command,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { useUserStore } from '../../stores/userStore';
@@ -37,8 +38,23 @@ import BulkEditBar from '../../components/BulkEditBar';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import { useProjects } from '../../hooks/useProjects';
+import { isTaskMine } from '../../lib/currentUser';
+import { isFlowLocal } from '../../lib/flowLocalMode';
+import { displayUserEmail, displayUserName } from '../../lib/userDisplay';
+import { useSidebarSections } from '../../hooks/useSidebarSections';
+import {
+  useSidebarSectionOrder,
+  type SidebarSectionId,
+} from '../../hooks/useSidebarSectionOrder';
 
 const ACCENT = '#64C5B9';
+
+/** Horizontal inset for sidebar content (single column). */
+const sx = 'px-3';
+
+/** Collapsible group headers — compact, same row height as nav links. */
+const sidebarSectionHeaderClass =
+  'w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-left transition-colors hover:bg-[var(--flow-hover)]';
 
 interface SidebarLinkProps {
   to: string;
@@ -47,6 +63,78 @@ interface SidebarLinkProps {
   exact?: boolean;
   badge?: number;
 }
+
+const SidebarSectionReorder: React.FC<{
+  id: SidebarSectionId;
+  order: SidebarSectionId[];
+  moveSection: (id: SidebarSectionId, direction: 'up' | 'down') => void;
+}> = ({ id, order, moveSection }) => {
+  const i = order.indexOf(id);
+  const canUp = i > 0;
+  const canDown = i >= 0 && i < order.length - 1;
+  return (
+    <div
+      className="flex h-full flex-col justify-center gap-px overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        disabled={!canUp}
+        aria-label="Move section up"
+        title="Move up"
+        className={cn(
+          'rounded p-px transition-colors flex items-center justify-center',
+          canUp ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
+        )}
+        onClick={() => canUp && moveSection(id, 'up')}
+      >
+        <ArrowUp size={11} strokeWidth={2} style={{ color: 'var(--flow-text-muted)' }} />
+      </button>
+      <button
+        type="button"
+        disabled={!canDown}
+        aria-label="Move section down"
+        title="Move down"
+        className={cn(
+          'rounded p-px transition-colors flex items-center justify-center',
+          canDown ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
+        )}
+        onClick={() => canDown && moveSection(id, 'down')}
+      >
+        <ArrowDown size={11} strokeWidth={2} style={{ color: 'var(--flow-text-muted)' }} />
+      </button>
+    </div>
+  );
+};
+
+/** Zero layout width until row hover; then expands so the title shifts — no permanent gutter.
+ *  (Do not use focus-within: clicking the section toggle keeps focus on the button and would
+ *  leave the strip expanded after the mouse leaves.) */
+const sidebarReorderWrapClass =
+  'shrink-0 w-0 overflow-hidden opacity-0 transition-[width,opacity] duration-150 ease-out pointer-events-none group-hover:w-4 group-hover:opacity-100 group-hover:pointer-events-auto';
+
+const SIDEBAR_SECTION_EASE = [0.4, 0, 0.2, 1] as const;
+
+/** Height + fade when expanding/collapsing Plan / Team / Projects bodies. */
+const SidebarCollapsible: React.FC<{ open: boolean; children: React.ReactNode }> = ({
+  open,
+  children,
+}) => (
+  <AnimatePresence initial={false}>
+    {open && (
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: 'auto', opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: 0.22, ease: SIDEBAR_SECTION_EASE }}
+        className="overflow-hidden"
+      >
+        {children}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({
   to,
@@ -106,6 +194,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
+  const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
+    useSidebarSections();
+  const { order: sidebarSectionOrder, moveSection: moveSidebarSection } =
+    useSidebarSectionOrder();
+
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
   const {
@@ -125,13 +218,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const currentWorkspaceId = workspaceId || activeWorkspaceId || workspaces[0]?.id || '';
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
+  // Remote API: hydrate the store from React Query. Local mode uses the store as SSOT — syncing
+  // back would loop (setProjects → new filtered array from useProjects → effect runs again).
   useEffect(() => {
+    if (isFlowLocal()) return;
     if (apiWorkspaces && apiWorkspaces.length > 0) {
       setWorkspaces(apiWorkspaces as any);
     }
   }, [apiWorkspaces, setWorkspaces]);
 
   useEffect(() => {
+    if (isFlowLocal()) return;
     if (apiProjects && apiProjects.length > 0) {
       setProjects(apiProjects as any);
     }
@@ -149,12 +246,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   );
 
   const myIssuesCount = tasks.filter(
-    (t) => t.assigneeId === 'u1' && t.status !== 'done' && t.status !== 'cancelled' && !t.archived
+    (t) =>
+      isTaskMine(t.assigneeId) && t.status !== 'done' && t.status !== 'cancelled' && !t.archived
   ).length;
   const unreadNotifications = notifications.filter((n) => !n.read).length;
 
-  const userName = user?.name || 'User';
-  const userEmail = user?.email || '';
+  const userEmail = displayUserEmail(user);
+  const userName = displayUserName(user);
 
   const handleLogout = () => {
     logout();
@@ -176,30 +274,31 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           borderRight: '1px solid var(--flow-border)',
         }}
       >
-        {/* Top logo */}
+        {/* Logo — same markup as Hub `DefaultLayout` (img src + filter + padding) */}
         <div
-          className="flex items-center justify-between px-4 py-3.5"
+          className={cn('flex items-center gap-2.5 py-2.5', sx)}
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
-          </div>
-          <a
-            href={APP_URLS.hub}
-            className="flex items-center gap-1 text-[11px] px-1.5 py-1 rounded transition-colors hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-dim)' }}
-            title="Back to Hub"
-          >
-            <ArrowLeft size={11} />
-            Hub
-          </a>
+          <img
+            src="/logo.png"
+            alt="rtylr"
+            className="h-6 w-auto"
+            style={{
+              filter:
+                theme === 'dark' ||
+                (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? 'brightness(0) invert(1)'
+                  : 'brightness(0)',
+            }}
+          />
         </div>
 
-        {/* Workspace Switcher */}
-        <div className="px-2 pt-3 pb-1 relative">
+        {/* Workspace + search — shared inset, even vertical rhythm */}
+        <div className={cn('space-y-1.5 pt-1.5 pb-1.5 relative', sx)}>
           <button
+            type="button"
             onClick={() => setWorkspaceSwitcherOpen((o) => !o)}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <span
@@ -233,7 +332,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                className="absolute left-2 right-2 z-50 mt-1 rounded-lg py-1 shadow-lg"
+                className="absolute left-0 right-0 z-50 mt-1 rounded-lg py-1 shadow-lg"
                 style={{
                   background: 'var(--flow-card)',
                   border: '1px solid var(--flow-border)',
@@ -277,19 +376,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
-        {/* Search trigger */}
-        <div className="px-2 pt-1 pb-2">
           <button
+            type="button"
             onClick={() => setCommandBarOpen(true)}
-            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] transition-colors hover:opacity-90"
             style={{
               background: 'var(--flow-hover)',
               color: 'var(--flow-text-dim)',
             }}
           >
-            <Search size={11} />
+            <Search size={12} />
             <span className="flex-1 text-left">Search…</span>
             <span
               className="text-[9px] font-mono px-1.5 py-0.5 rounded"
@@ -300,111 +397,204 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-2 pb-2">
-          <nav className="space-y-0.5">
-            <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
-            <SidebarLink to="/my-issues" icon={ListTodo} label="My Issues" badge={myIssuesCount} />
-            <SidebarLink to={`/w/${currentWorkspaceId}`} icon={LayoutGrid} label="Dashboard" exact />
-            <SidebarLink to="/triage" icon={Eye} label="Triage" />
-          </nav>
+        <div className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
+          <div className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-px">
+              <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
+              <SidebarLink to="/my-issues" icon={ListTodo} label="My tasks" badge={myIssuesCount} />
+              <SidebarLink to={`/w/${currentWorkspaceId}`} icon={LayoutGrid} label="Dashboard" exact />
+              <SidebarLink to="/triage" icon={Eye} label="Triage" />
+            </nav>
 
-          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
-            <span
-              className="text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              Plan
-            </span>
-          </div>
-          <nav className="space-y-0.5">
-            <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
-            <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
-            <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
-            <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
-            <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
-            <SidebarLink to="/views" icon={Eye} label="Views" />
-          </nav>
+            <div className="flex flex-col gap-2">
+              {sidebarSectionOrder.map((sectionId) => (
+                <React.Fragment key={sectionId}>
+                  {sectionId === 'plan' && (
+                <div className="flex flex-col gap-0">
+                  <div className="group flex items-center gap-0 min-h-0">
+                    <div className={sidebarReorderWrapClass}>
+                      <SidebarSectionReorder
+                        id="plan"
+                        order={sidebarSectionOrder}
+                        moveSection={moveSidebarSection}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSidebarSection('plan')}
+                      className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                    >
+                      <span
+                        className="text-[12px] font-semibold tracking-wide"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        Plan
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        strokeWidth={2}
+                        className={cn(
+                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                          isSidebarSectionCollapsed('plan') && '-rotate-90'
+                        )}
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      />
+                    </button>
+                  </div>
+                  <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
+                    <nav className="flex flex-col gap-px pt-px">
+                      <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+                      <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
+                      <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
+                      <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+                      <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
+                      <SidebarLink to="/views" icon={Eye} label="Views" />
+                    </nav>
+                  </SidebarCollapsible>
+                </div>
+              )}
 
-          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
-            <span
-              className="text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              Team
-            </span>
-          </div>
-          <nav className="space-y-0.5">
-            <SidebarLink to="/team" icon={Users} label="Workload" />
-            <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
-            <SidebarLink to="/archive" icon={Archive} label="Archive" />
-          </nav>
+              {sectionId === 'team' && (
+                <div className="flex flex-col gap-0">
+                  <div className="group flex items-center gap-0 min-h-0">
+                    <div className={sidebarReorderWrapClass}>
+                      <SidebarSectionReorder
+                        id="team"
+                        order={sidebarSectionOrder}
+                        moveSection={moveSidebarSection}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSidebarSection('team')}
+                      className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                    >
+                      <span
+                        className="text-[12px] font-semibold tracking-wide"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        Team
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        strokeWidth={2}
+                        className={cn(
+                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                          isSidebarSectionCollapsed('team') && '-rotate-90'
+                        )}
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      />
+                    </button>
+                  </div>
+                  <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
+                    <nav className="flex flex-col gap-px pt-px">
+                      <SidebarLink to="/team" icon={Users} label="Workload" />
+                      <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+                      <SidebarLink to="/archive" icon={Archive} label="Archive" />
+                    </nav>
+                  </SidebarCollapsible>
+                </div>
+              )}
 
-          <div className="flex items-center justify-between px-3 mt-4 mb-1.5">
-            <span
-              className="text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              Projects
-            </span>
-            <button
-              className="h-4 w-4 rounded flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-dim)' }}
-              title="New Project"
-            >
-              <Plus size={12} />
-            </button>
-          </div>
-          <div className="space-y-0.5">
-            {workspaceProjects.map((project) => {
-              const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
-              const isActive = location.pathname.startsWith(boardPath);
-              return (
-                <Link
-                  key={project.id}
-                  to={boardPath}
-                  className={cn(
-                    'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
-                    isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+              {sectionId === 'projects' && (
+                <div className="flex flex-col gap-0">
+                  <div className="group flex items-center gap-0 min-h-0">
+                    <div className={sidebarReorderWrapClass}>
+                      <SidebarSectionReorder
+                        id="projects"
+                        order={sidebarSectionOrder}
+                        moveSection={moveSidebarSection}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSidebarSection('projects')}
+                      className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
+                    >
+                      <span
+                        className="text-[12px] font-semibold tracking-wide truncate"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        Projects
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        strokeWidth={2}
+                        className={cn(
+                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                          isSidebarSectionCollapsed('projects') && '-rotate-90'
+                        )}
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                      title="New Project"
+                    >
+                      <Plus size={15} strokeWidth={2} />
+                    </button>
+                  </div>
+                  <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
+                    <div className="flex flex-col gap-px pt-px">
+                      {workspaceProjects.map((project) => {
+                        const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
+                        const isActive = location.pathname.startsWith(boardPath);
+                        return (
+                          <Link
+                            key={project.id}
+                            to={boardPath}
+                            className={cn(
+                              'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
+                              isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                            )}
+                            style={{
+                              color: isActive
+                                ? 'var(--flow-text)'
+                                : 'var(--flow-text-muted)',
+                            }}
+                          >
+                            {isActive && (
+                              <motion.span
+                                layoutId={`project-active-${project.id}`}
+                                className="absolute inset-0 rounded-md"
+                                style={{ background: 'var(--flow-active)' }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                              />
+                            )}
+                            <Circle
+                              size={8}
+                              className="relative shrink-0 fill-current"
+                              style={{ color: project.color }}
+                            />
+                            <span className="relative flex-1 truncate font-medium">
+                              {project.name}
+                            </span>
+                            <span
+                              className="relative text-[10px]"
+                              style={{ color: 'var(--flow-text-dim)' }}
+                            >
+                              {project.taskCount - project.completedCount}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </SidebarCollapsible>
+                </div>
                   )}
-                  style={{
-                    color: isActive
-                      ? 'var(--flow-text)'
-                      : 'var(--flow-text-muted)',
-                  }}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId={`project-active-${project.id}`}
-                      className="absolute inset-0 rounded-md"
-                      style={{ background: 'var(--flow-active)' }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                    />
-                  )}
-                  <Circle
-                    size={8}
-                    className="relative shrink-0 fill-current"
-                    style={{ color: project.color }}
-                  />
-                  <span className="relative flex-1 truncate font-medium">
-                    {project.name}
-                  </span>
-                  <span
-                    className="relative text-[10px]"
-                    style={{ color: 'var(--flow-text-dim)' }}
-                  >
-                    {project.taskCount - project.completedCount}
-                  </span>
-                </Link>
-              );
-            })}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-2" style={{ borderTop: '1px solid var(--flow-border)' }}>
+        <div className={cn('flex flex-col gap-1.5 py-2', sx)} style={{ borderTop: '1px solid var(--flow-border)' }}>
           <SidebarLink to="/settings" icon={Settings} label="Settings" />
 
-          <div className="relative mt-0.5">
+          <div className="relative">
             <button
               onClick={() => setUserMenuOpen((o) => !o)}
               className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
