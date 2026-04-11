@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   MonitorSpeaker, Heart, BarChart2, Paintbrush, Globe,
   MessageSquare, Search, Loader2, AlertTriangle,
+  Store, CalendarCheck, Headphones, FileText,
+  ShoppingCart, Monitor, Code, EyeOff, Download, Mail,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,9 +14,21 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: Reac
   'utensils-crossed': MonitorSpeaker,
   'heart': Heart,
   'bar-chart-2': BarChart2,
+  'bar-chart': BarChart2,
   'paintbrush': Paintbrush,
   'globe': Globe,
   'message-square': MessageSquare,
+  'shopping-bag': Store,
+  'shopping-cart': ShoppingCart,
+  'calendar-check': CalendarCheck,
+  'calendar': CalendarCheck,
+  'headphones': Headphones,
+  'file-text': FileText,
+  'monitor': Monitor,
+  'code': Code,
+  'eye-off': EyeOff,
+  'download': Download,
+  'mail': Mail,
 };
 
 const COLOR_MAP: Record<string, { bg: string; color: string }> = {
@@ -24,6 +38,20 @@ const COLOR_MAP: Record<string, { bg: string; color: string }> = {
   analytics:        { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6' },
   custom_branding:  { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
   multi_language:   { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+  store:            { bg: 'rgba(20,184,166,0.12)',   color: '#14b8a6' },
+  book:             { bg: 'rgba(14,165,233,0.12)',   color: '#0ea5e9' },
+  support:          { bg: 'rgba(69,131,196,0.12)',   color: '#4583C4' },
+  insights:         { bg: 'rgba(99,102,241,0.12)',   color: '#6366f1' },
+  custom_domain:    { bg: 'rgba(113,113,122,0.12)',  color: '#71717a' },
+  email_marketing:  { bg: 'rgba(236,72,153,0.12)',   color: '#ec4899' },
+  sms:              { bg: 'rgba(234,179,8,0.12)',    color: '#eab308' },
+  reservations:     { bg: 'rgba(14,165,233,0.12)',   color: '#0ea5e9' },
+  online_ordering:  { bg: 'rgba(249,115,22,0.12)',   color: '#f97316' },
+  kds:              { bg: 'rgba(168,85,247,0.12)',   color: '#a855f7' },
+  api_access:       { bg: 'rgba(34,197,94,0.12)',    color: '#22c55e' },
+  white_label:      { bg: 'rgba(113,113,122,0.12)',  color: '#71717a' },
+  priority_support: { bg: 'rgba(239,68,68,0.12)',    color: '#ef4444' },
+  data_export:      { bg: 'rgba(59,130,246,0.12)',   color: '#3b82f6' },
 };
 
 interface AddonData {

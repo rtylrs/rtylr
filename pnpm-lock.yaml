@@ -71,6 +71,9 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
       next:
         specifier: 15.5.6
         version: 15.5.6(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.94.0)
@@ -1796,6 +1799,9 @@ importers:
       axios:
         specifier: ^1.15.0
         version: 1.15.0
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
     devDependencies:
       typescript:
         specifier: ~5.5.2
@@ -5440,6 +5446,10 @@ packages:
     resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
     engines: {node: '>= 4.4.x'}
     hasBin: true
+
+  neverthrow@8.2.0:
+    resolution: {integrity: sha512-kOCT/1MCPAxY5iUV3wytNFUMUolzuwd/VF/1KCx7kf6CutrOsTie+84zTGTpgQycjvfLdBBdvBvFLqFD2c0wkQ==}
+    engines: {node: '>=18'}
 
   next@15.5.6:
     resolution: {integrity: sha512-zTxsnI3LQo3c9HSdSf91O1jMNsEzIXDShXd4wVdg9y5shwLqBXi4ZtUUJyB86KGVSJLZx0PFONvO54aheGX8QQ==}
@@ -10818,6 +10828,10 @@ snapshots:
       iconv-lite: 0.6.3
       sax: 1.4.3
     optional: true
+
+  neverthrow@8.2.0:
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu': 4.53.2
 
   next@15.5.6(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.94.0):
     dependencies:
