@@ -3,12 +3,13 @@ import { toast } from 'sonner';
 import { FileText, Trash2, AlertTriangle } from 'lucide-react';
 import { useDocuments, useAddDocument, useDeleteDocument, useExpiringDocuments } from '../../hooks/useHrExtras';
 import { useStaff } from '../../hooks/useStaff';
-import { Card, SectionHeader, EmptyState, Skeleton, Pill, Select, Label, ConfirmDialog } from '../../components/ui';
+import { Card, SectionHeader, EmptyState, Skeleton, Pill, Select, Label, ConfirmDialog, useIsMobile } from '../../components/ui';
 import DocumentUpload from '../../components/DocumentUpload';
 
 const TYPES = ['I-9', 'W4', 'Contract', 'NDA', 'Offer Letter', 'Other'] as const;
 
 const Documents: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data, isLoading } = useDocuments();
   const { data: expiring = [] } = useExpiringDocuments(30);
   const { data: staff = [] } = useStaff();
@@ -50,7 +51,7 @@ const Documents: React.FC = () => {
         </Card>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <div>
           <Label>Employee</Label>
           <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
@@ -73,8 +74,9 @@ const Documents: React.FC = () => {
       ) : !data || data.length === 0 ? (
         <EmptyState icon={<FileText size={20} />} title="No documents yet" description="Upload I-9, W4, contracts, and other files." />
       ) : (
-        <Card style={{ padding: 0 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ background: 'var(--hr-hover)' }}>
                 <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: 10, color: 'var(--hr-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Document</th>
@@ -103,6 +105,7 @@ const Documents: React.FC = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
 

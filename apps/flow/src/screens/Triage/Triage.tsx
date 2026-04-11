@@ -27,15 +27,15 @@ const Triage: React.FC = () => {
           Triage
         </h1>
         <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          {needsTriage.length} tasks need attention
+          {needsTriage.length} tasks need attention · Capture → set priority & date → move out of backlog
         </p>
       </div>
       <div className="flex-1 overflow-y-auto">
         {needsTriage.length === 0 ? (
           <EmptyState
             icon={Eye}
-            title="Triage inbox is empty"
-            description="All incoming tasks have been prioritized or routed."
+            title="Inbox zero"
+            description="Nothing stuck without a priority or due date. New work lands in capture first—keep triage lean so planned work stays trustworthy."
           />
         ) : (
           needsTriage.map((t) => <TaskRow key={t.id} task={t} showProject />)

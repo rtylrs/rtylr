@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { UserPlus, Mail, Search, Users } from 'lucide-react';
 import { StaffMember } from '../../services/hrApi';
 import { useStaff } from '../../hooks/useStaff';
-import { EmptyState } from '../../components/ui';
+import { EmptyState, useIsMobile } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -31,6 +31,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } 
 const cardAnim  = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } } };
 
 const Staff: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [search, setSearch] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -53,7 +54,7 @@ const Staff: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>Staff Directory</h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
@@ -81,9 +82,9 @@ const Staff: React.FC = () => {
       </div>
 
       {/* Filters + search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '4px', padding: '4px', background: 'var(--hr-surface)', borderRadius: '10px', border: '1px solid var(--hr-border)' }}>
+        <div style={{ display: 'flex', gap: '4px', padding: '4px', background: 'var(--hr-surface)', borderRadius: '10px', border: '1px solid var(--hr-border)', overflowX: 'auto', width: isMobile ? '100%' : 'auto' }}>
           {filterTabs.map((tab) => (
             <button
               key={tab}
@@ -106,7 +107,7 @@ const Staff: React.FC = () => {
         </div>
 
         {/* Search */}
-        <div style={{ position: 'relative', flex: 1, maxWidth: '280px' }}>
+        <div style={{ position: 'relative', flex: 1, width: isMobile ? '100%' : undefined, maxWidth: isMobile ? '100%' : '280px' }}>
           <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--hr-text-dim)' }} />
           <input
             ref={searchRef}
@@ -132,7 +133,7 @@ const Staff: React.FC = () => {
         variants={container}
         initial="hidden"
         animate="show"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}
       >
         {filtered.map((s, i) => {
           const av = avatarColors[i % avatarColors.length];

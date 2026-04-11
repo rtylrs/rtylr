@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Palette, Keyboard } from 'lucide-react';
+import { Bell, Palette, Keyboard, Sparkles } from 'lucide-react';
 import { useThemeStore } from '../../stores/themeStore';
 import { cn } from '../../lib/utils';
+import { useLifePreferences } from '../../lib/lifePreferences';
 
 const ACCENT = '#64C5B9';
 
@@ -15,6 +16,7 @@ interface SettingsSection {
 const SECTIONS: SettingsSection[] = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'life', label: 'Life & rhythm', icon: Sparkles },
   { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
 ];
 
@@ -95,6 +97,90 @@ const NotificationsSection: React.FC = () => {
   );
 };
 
+const LifeRhythmSection: React.FC = () => {
+  const { prefs, setPrefs } = useLifePreferences();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Life & rhythm
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Quiet hours affect in-app banners only for now; digest hour is saved for when scheduled
+          reminders ship.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Quiet hours start
+          </label>
+          <input
+            type="time"
+            value={prefs.quietStart}
+            onChange={(e) => setPrefs({ quietStart: e.target.value })}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+          />
+        </div>
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Quiet hours end
+          </label>
+          <input
+            type="time"
+            value={prefs.quietEnd}
+            onChange={(e) => setPrefs({ quietEnd: e.target.value })}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label
+          className="block text-[12px] font-medium mb-1.5"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          Preferred digest hour (local)
+        </label>
+        <select
+          value={prefs.digestHour}
+          onChange={(e) => setPrefs({ digestHour: Number(e.target.value) })}
+          className="w-full max-w-[200px] rounded-lg px-3 py-2 text-[13px] outline-none"
+          style={{
+            background: 'var(--flow-input-bg)',
+            border: '1px solid var(--flow-border)',
+            color: 'var(--flow-text)',
+          }}
+        >
+          {Array.from({ length: 24 }, (_, i) => (
+            <option key={i} value={i}>
+              {String(i).padStart(2, '0')}:00
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
+
 const AppearanceSection: React.FC = () => {
   const { theme, setTheme } = useThemeStore();
 
@@ -169,6 +255,7 @@ const ShortcutsSection: React.FC = () => {
     { keys: ['⌘', 'K'], desc: 'Open command bar' },
     { keys: ['G', 'I'], desc: 'Go to Inbox' },
     { keys: ['G', 'M'], desc: 'Go to My Issues' },
+    { keys: ['G', 'F'], desc: 'Go to Today (focus)' },
     { keys: ['G', 'D'], desc: 'Go to Dashboard' },
     { keys: ['G', 'C'], desc: 'Go to Calendar' },
     { keys: ['G', 'T'], desc: 'Go to Timeline' },
@@ -225,6 +312,7 @@ const ShortcutsSection: React.FC = () => {
 const SECTION_CONTENT: Record<string, React.FC> = {
   notifications: NotificationsSection,
   appearance: AppearanceSection,
+  life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
 };
 
@@ -247,20 +335,19 @@ const FlowSettings: React.FC = () => {
     (() => <PlaceholderSection id={activeSection} />);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-0 flex-col md:flex-row">
       {/* Settings sidebar */}
       <div
-        className="w-[236px] shrink-0 overflow-y-auto"
-        style={{ borderRight: '1px solid var(--flow-border)' }}
+        className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto"
       >
-        <div className="p-4">
+        <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">
           <h1
-            className="text-[13px] font-semibold mb-4"
+            className="mb-3 hidden text-[13px] font-semibold md:mb-4 md:block"
             style={{ color: 'var(--flow-text)' }}
           >
             Settings
           </h1>
-          <nav className="space-y-0.5">
+          <nav className="flex min-w-max flex-row gap-1 md:min-w-0 md:flex-col md:space-y-0.5">
             {SECTIONS.map((section) => {
               const isActive = activeSection === section.id;
               const Icon = section.icon;
@@ -269,7 +356,7 @@ const FlowSettings: React.FC = () => {
                   key={section.id}
                   type="button"
                   onClick={() => setActiveSection(section.id)}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-[13px] text-left transition-colors min-w-0"
+                  className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-[13px] transition-colors md:w-full md:min-w-0 md:whitespace-normal"
                   style={{
                     background: isActive ? 'var(--flow-active)' : 'transparent',
                     color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)',
@@ -291,13 +378,13 @@ const FlowSettings: React.FC = () => {
       </div>
 
       {/* Settings content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <motion.div
           key={activeSection}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18 }}
-          className="max-w-xl p-8"
+          className="max-w-xl p-4 sm:p-8"
         >
           <ActiveComponent />
         </motion.div>

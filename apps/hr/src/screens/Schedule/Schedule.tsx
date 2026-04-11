@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import { useShiftSchedule, usePublishWeek, useUpsertShift, useDeleteShift } from '../../hooks/useHrExtras';
 import { useStaff } from '../../hooks/useStaff';
-import { Card, SectionHeader, Button, Modal, Input, Label, Select } from '../../components/ui';
+import { Card, SectionHeader, Button, Modal, Input, Label, Select, useIsMobile } from '../../components/ui';
 import ShiftCell from '../../components/ShiftCell';
 import { ScheduleShift } from '../../services/hrExtras';
 
@@ -27,6 +27,7 @@ function dayStr(date: Date) {
 const ROLE_COLORS = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
 const Schedule: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(2026, 3, 13)));
   const { data: shifts = [] } = useShiftSchedule();
   const { data: staff = [] } = useStaff();
@@ -90,7 +91,7 @@ const Schedule: React.FC = () => {
         title="Shift Schedule"
         subtitle="Weekly grid view for scheduling shifts"
         right={
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <Button icon={<ChevronLeft size={13} />} onClick={() => setWeekStart(addDays(weekStart, -7))} />
             <Button onClick={() => setWeekStart(startOfWeek(new Date()))}>Today</Button>
             <Button icon={<ChevronRight size={13} />} onClick={() => setWeekStart(addDays(weekStart, 7))} />
@@ -107,7 +108,8 @@ const Schedule: React.FC = () => {
       <p style={{ margin: 0, fontSize: 12, color: 'var(--hr-text-muted)' }}>{weekLabel}</p>
 
       <Card style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        <div style={{ overflowX: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))', minWidth: 840 }}>
           {days.map((d) => (
             <div key={d.toISOString()} style={{ borderRight: '1px solid var(--hr-border)' }}>
               <div style={{ padding: '10px 12px', background: 'var(--hr-hover)', borderBottom: '1px solid var(--hr-border)' }}>
@@ -146,6 +148,7 @@ const Schedule: React.FC = () => {
             </div>
           ))}
         </div>
+        </div>
       </Card>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New shift">
@@ -158,7 +161,7 @@ const Schedule: React.FC = () => {
                 {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </Select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
               <div>
                 <Label>Start</Label>
                 <Input type="time" value={editing.start ?? ''} onChange={(e) => setEditing({ ...editing, start: e.target.value })} />

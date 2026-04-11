@@ -3,11 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useStaff } from '../../hooks/useStaff';
 import { useSubmitTimeOff } from '../../hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Textarea, Select, Breadcrumbs } from '../../components/ui';
+import { Card, SectionHeader, Button, Label, Input, Textarea, Select, Breadcrumbs, useIsMobile } from '../../components/ui';
 
 const TYPES = ['Vacation', 'Sick', 'Personal', 'Bereavement', 'Unpaid'] as const;
 
 const TimeOffNew: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const nav = useNavigate();
   const { data: staff } = useStaff();
   const submit = useSubmitTimeOff();
@@ -62,7 +63,7 @@ const TimeOffNew: React.FC = () => {
               {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </Select>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
             <div>
               <Label>Start date</Label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -76,7 +77,7 @@ const TimeOffNew: React.FC = () => {
             <Label>Reason</Label>
             <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Brief reason for request" />
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             <Link to="/time-off"><Button type="button" variant="ghost">Cancel</Button></Link>
             <Button type="submit" variant="primary" disabled={submit.isPending}>
               {submit.isPending ? 'Submitting...' : 'Submit request'}

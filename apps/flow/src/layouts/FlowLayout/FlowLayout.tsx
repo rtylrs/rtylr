@@ -26,6 +26,8 @@ import {
   Command,
   ArrowUp,
   ArrowDown,
+  Menu,
+  X,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { useUserStore } from '../../stores/userStore';
@@ -46,6 +48,8 @@ import {
   useSidebarSectionOrder,
   type SidebarSectionId,
 } from '../../hooks/useSidebarSectionOrder';
+import { useLifePreferences } from '../../lib/lifePreferences';
+import { isDueToday, isQuietNow } from '../../lib/lifeRhythm';
 
 const ACCENT = '#64C5B9';
 
@@ -152,7 +156,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
     <Link
       to={to}
       className={cn(
-        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors duration-150',
+        'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
       )}
       style={{ color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -198,6 +202,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     useSidebarSections();
   const { order: sidebarSectionOrder, moveSection: moveSidebarSection } =
     useSidebarSectionOrder();
+  const { prefs: lifePrefs } = useLifePreferences();
 
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
@@ -211,6 +216,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     notifications,
     tasks,
     setCommandBarOpen,
+    setQuickCreateOpen,
   } = useFlowStore();
 
   // Fetch workspaces and projects from API and populate store
@@ -236,6 +242,20 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileNavOpen]);
 
   useKeyboardShortcuts();
 
@@ -249,6 +269,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     (t) =>
       isTaskMine(t.assigneeId) && t.status !== 'done' && t.status !== 'cancelled' && !t.archived
   ).length;
+  const todayFocusCount = tasks.filter(
+    (t) =>
+      t.workspaceId === currentWorkspaceId &&
+      !t.archived &&
+      t.status !== 'done' &&
+      t.status !== 'cancelled' &&
+      isTaskMine(t.assigneeId) &&
+      (t.focusPin === true || isDueToday(t.dueDate))
+  ).length;
+  const inQuietHours = isQuietNow(lifePrefs.quietStart, lifePrefs.quietEnd);
   const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   const userEmail = displayUserEmail(user);
@@ -262,16 +292,79 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
   const modKey = isMac ? '⌘' : 'Ctrl';
 
+  const logoFilter =
+    theme === 'dark' ||
+    (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ? 'brightness(0) invert(1)'
+      : 'brightness(0)';
+
   return (
     <div
-      className="flex h-screen overflow-hidden"
+      className="flex h-[100dvh] min-h-0 flex-col overflow-hidden lg:flex-row"
       style={{ background: 'var(--flow-bg)' }}
     >
+      {/* Mobile: top bar */}
+      <header
+        className="flex shrink-0 items-center gap-2 border-b px-3 py-2.5 lg:hidden"
+        style={{
+          borderColor: 'var(--flow-border)',
+          background: 'var(--flow-surface)',
+          paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
+        }}
+      >
+        <button
+          type="button"
+          aria-label="Open menu"
+          onClick={() => setMobileNavOpen(true)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text)' }}
+        >
+          <Menu size={20} strokeWidth={2} />
+        </button>
+        <img src="/logo.png" alt="" className="h-5 w-auto shrink-0" style={{ filter: logoFilter }} />
+        <span
+          className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold"
+          style={{ color: 'var(--flow-text)' }}
+        >
+          {activeWorkspace.name}
+        </span>
+        <button
+          type="button"
+          aria-label="Search"
+          onClick={() => setCommandBarOpen(true)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <Search size={18} strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          aria-label="New task"
+          onClick={() => setQuickCreateOpen(true)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
+          style={{ color: ACCENT }}
+        >
+          <Plus size={20} strokeWidth={2} />
+        </button>
+      </header>
+
+      {mobileNavOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+
       <aside
-        className="w-60 flex flex-col shrink-0 overflow-hidden"
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-r border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-60 lg:max-w-none lg:shrink-0 lg:translate-x-0',
+          mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
         style={{
           background: 'var(--flow-surface)',
-          borderRight: '1px solid var(--flow-border)',
+          paddingTop: 'env(safe-area-inset-top)',
         }}
       >
         {/* Logo — same markup as Hub `DefaultLayout` (img src + filter + padding) */}
@@ -283,14 +376,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             src="/logo.png"
             alt="rtylr"
             className="h-6 w-auto"
-            style={{
-              filter:
-                theme === 'dark' ||
-                (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-                  ? 'brightness(0) invert(1)'
-                  : 'brightness(0)',
-            }}
+            style={{ filter: logoFilter }}
           />
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMobileNavOpen(false)}
+            className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg lg:hidden hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
         </div>
 
         {/* Workspace + search — shared inset, even vertical rhythm */}
@@ -389,7 +485,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <Search size={12} />
             <span className="flex-1 text-left">Search…</span>
             <span
-              className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded sm:inline"
               style={{ background: 'var(--flow-active)' }}
             >
               {modKey}K
@@ -402,6 +498,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <nav className="flex flex-col gap-px">
               <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
               <SidebarLink to="/my-issues" icon={ListTodo} label="My tasks" badge={myIssuesCount} />
+              <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
               <SidebarLink to={`/w/${currentWorkspaceId}`} icon={LayoutGrid} label="Dashboard" exact />
               <SidebarLink to="/triage" icon={Eye} label="Triage" />
             </nav>
@@ -705,7 +802,20 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {inQuietHours && (
+          <div
+            className="shrink-0 px-3 py-2 text-center text-[10px] sm:px-4 sm:text-[11px] leading-snug"
+            style={{
+              background: 'var(--flow-hover)',
+              color: 'var(--flow-text-muted)',
+              borderBottom: '1px solid var(--flow-border)',
+            }}
+          >
+            Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}) — non-urgent reminders stay soft.
+            Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life & rhythm.
+          </div>
+        )}
         <AnimatePresence mode="wait">
           <motion.main
             key={location.pathname}
@@ -713,7 +823,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="flex-1 overflow-y-auto"
+            className="flex-1 overflow-y-auto pb-[max(0.5rem,env(safe-area-inset-bottom))]"
           >
             {children}
           </motion.main>

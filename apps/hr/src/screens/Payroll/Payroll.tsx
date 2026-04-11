@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, DollarSign, TrendingUp, Users, Download } from 'lucide-react';
 import { PayrollRow } from '../../services/hrApi';
 import { usePayroll } from '../../hooks/usePayroll';
+import { useIsMobile } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -22,6 +23,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const rowAnim   = { hidden: { opacity: 0, x: -6 }, show: { opacity: 1, x: 0, transition: { duration: 0.18 } } };
 
 const Payroll: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data: fetchedPayroll } = usePayroll();
   const payrollData: PayrollRow[] = fetchedPayroll || [];
 
@@ -34,14 +36,14 @@ const Payroll: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>Payroll</h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
             Pay period: Apr 1 – Apr 30, 2026
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
           <button
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
@@ -68,7 +70,7 @@ const Payroll: React.FC = () => {
       </div>
 
       {/* Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
         {[
           { label: 'Total Base Pay',  value: fmt(totalBase),       icon: DollarSign, color: ACCENT,    bg: 'rgba(139,92,246,0.12)' },
           { label: 'Total Overtime',  value: fmt(totalOvertime),   icon: TrendingUp, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
@@ -106,11 +108,13 @@ const Payroll: React.FC = () => {
         animate="show"
         style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)', borderRadius: '12px', overflow: 'hidden' }}
       >
+        <div style={{ overflowX: 'auto' }}>
         {/* Table header */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
+            minWidth: 760,
             padding: '12px 20px',
             borderBottom: '1px solid var(--hr-border)',
             background: 'var(--hr-hover)',
@@ -130,6 +134,7 @@ const Payroll: React.FC = () => {
             style={{
               display: 'grid',
               gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
+              minWidth: 760,
               alignItems: 'center',
               padding: '14px 20px',
               borderBottom: i < payrollData.length - 1 ? '1px solid var(--hr-border)' : 'none',
@@ -172,6 +177,7 @@ const Payroll: React.FC = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr',
+            minWidth: 760,
             alignItems: 'center',
             padding: '14px 20px',
             background: 'var(--hr-hover)',
@@ -186,6 +192,7 @@ const Payroll: React.FC = () => {
           <span style={{ fontSize: '13px', fontWeight: 600, color: '#f59e0b' }}>{fmt(totalOvertime)}</span>
           <span style={{ fontSize: '13px', fontWeight: 600, color: '#ef4444' }}>{fmt(totalDeductions)}</span>
           <span style={{ fontSize: '14px', fontWeight: 800, color: '#10b981' }}>{fmt(totalNet)}</span>
+        </div>
         </div>
       </motion.div>
     </div>

@@ -18,7 +18,7 @@ const Benefits: React.FC = () => {
       ) : !plans || plans.length === 0 ? (
         <EmptyState icon={<Shield size={20} />} title="No benefit plans" description="Create plans to allow enrollment." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
           {plans.map((p) => {
             const enrolled = enrollments.some((e) => e.planId === p.id && e.staffId === 1);
             return (

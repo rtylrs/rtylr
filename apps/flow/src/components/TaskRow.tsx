@@ -53,12 +53,16 @@ export const TaskRow: React.FC<TaskRowProps> = ({
         {task.identifier}
       </span>
       <StatusIcon status={task.status} />
-      <p
-        className="text-[13px] font-medium flex-1 truncate"
-        style={{ color: 'var(--flow-text)' }}
-      >
-        {task.title}
-      </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-medium truncate" style={{ color: 'var(--flow-text)' }}>
+          {task.title}
+        </p>
+        {task.waitingOn && (
+          <p className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--flow-text-dim)' }}>
+            Waiting on {task.waitingOn}
+          </p>
+        )}
+      </div>
       {showProject && project && (
         <span
           className="text-[11px] px-2 py-0.5 rounded shrink-0 font-medium"

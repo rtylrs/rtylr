@@ -30,7 +30,7 @@ const Reviews: React.FC = () => {
       ) : !data || data.length === 0 ? (
         <EmptyState icon={<ClipboardList size={20} />} title="No reviews yet" description="Start a review cycle to see results here." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
           {data.map((r) => (
             <Card key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
@@ -43,7 +43,7 @@ const Reviews: React.FC = () => {
               <div>
                 <RatingStars value={r.overall} readOnly size={16} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, fontSize: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 6, fontSize: 10 }}>
                 <div><span style={{ color: 'var(--hr-text-muted)' }}>Goals</span> <strong style={{ color: 'var(--hr-text)' }}>{r.goals}/5</strong></div>
                 <div><span style={{ color: 'var(--hr-text-muted)' }}>Values</span> <strong style={{ color: 'var(--hr-text)' }}>{r.values}/5</strong></div>
                 <div><span style={{ color: 'var(--hr-text-muted)' }}>Skills</span> <strong style={{ color: 'var(--hr-text)' }}>{r.skills}/5</strong></div>

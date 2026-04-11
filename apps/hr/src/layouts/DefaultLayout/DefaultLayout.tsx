@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { APP_URLS } from '@voxire/config';
@@ -28,9 +28,12 @@ import {
   Timer,
   Search,
   Command,
+  Menu,
+  X,
 } from 'lucide-react';
 import CommandPalette from '../../components/CommandPalette';
 import GlobalShortcuts from '../../components/GlobalShortcuts';
+import { useMediaQuery } from '../../components/ui';
 
 /* ── Types ── */
 interface NavItem {
@@ -357,22 +360,45 @@ interface DefaultLayoutProps {
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [theme, setTheme] = useTheme();
+  const isMobile = useMediaQuery('(max-width: 960px)');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const pageTitle = getPageTitle(location.pathname);
 
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname, isMobile]);
+
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--hr-bg)' }}>
+    <div style={{ display: 'flex', height: '100dvh', minHeight: '100vh', overflow: 'hidden', background: 'var(--hr-bg)' }}>
       <CommandPalette />
       <GlobalShortcuts />
+      {isMobile && mobileNavOpen && (
+        <div
+          onClick={() => setMobileNavOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 70,
+          }}
+        />
+      )}
       {/* Sidebar */}
       <aside
         style={{
-          width: '220px',
+          width: isMobile ? '280px' : '220px',
           display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
           overflow: 'hidden',
           background: 'var(--hr-surface)',
           borderRight: '1px solid var(--hr-border)',
+          position: isMobile ? 'fixed' : 'relative',
+          inset: isMobile ? '0 auto 0 0' : 'auto',
+          zIndex: 80,
+          transform: isMobile ? (mobileNavOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+          transition: 'transform 0.22s ease',
+          boxShadow: isMobile ? 'var(--hr-shadow)' : 'none',
         }}
       >
         {/* Logo + Hub back link */}
@@ -448,34 +474,57 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main */}
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minWidth: 0 }}>
         {/* Topbar */}
         <header
           style={{
-            height: '44px',
+            height: isMobile ? '56px' : '44px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             flexShrink: 0,
             background: 'var(--hr-surface)',
             borderBottom: '1px solid var(--hr-border)',
           }}
         >
-          <h1 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
-            {pageTitle}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            {isMobile && (
+              <button
+                onClick={() => setMobileNavOpen((open) => !open)}
+                style={{
+                  height: 36,
+                  width: 36,
+                  borderRadius: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--hr-hover)',
+                  border: '1px solid var(--hr-border)',
+                  cursor: 'pointer',
+                  color: 'var(--hr-text)',
+                  flexShrink: 0,
+                }}
+                aria-label={mobileNavOpen ? 'Close navigation' : 'Open navigation'}
+              >
+                {mobileNavOpen ? <X size={16} /> : <Menu size={16} />}
+              </button>
+            )}
+            <h1 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {pageTitle}
+            </h1>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('hr:open-palette'));
               }}
               style={{
-                height: '28px',
+                height: isMobile ? '36px' : '28px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '0 10px',
+                padding: isMobile ? '0 12px' : '0 10px',
                 borderRadius: '8px',
                 background: 'var(--hr-hover)',
                 border: '1px solid var(--hr-border)',
@@ -488,15 +537,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               aria-label="Open command palette"
             >
               <Search size={12} />
-              Search
-              <kbd style={{ display: 'inline-flex', alignItems: 'center', gap: 2, padding: '1px 4px', borderRadius: 4, border: '1px solid var(--hr-border)', fontSize: 9 }}>
+              {!isMobile && 'Search'}
+              {!isMobile && <kbd style={{ display: 'inline-flex', alignItems: 'center', gap: 2, padding: '1px 4px', borderRadius: 4, border: '1px solid var(--hr-border)', fontSize: 9 }}>
                 <Command size={9} />K
-              </kbd>
+              </kbd>}
             </button>
             <button
               style={{
-                height: '28px',
-                width: '28px',
+                height: isMobile ? '36px' : '28px',
+                width: isMobile ? '36px' : '28px',
                 borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
@@ -523,7 +572,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            style={{ flex: 1, overflowY: 'auto', padding: '24px' }}
+            style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '24px' }}
           >
             {children}
           </motion.main>

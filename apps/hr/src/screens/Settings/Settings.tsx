@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useHrSettings, useUpdateHrSettings } from '../../hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Select, Skeleton } from '../../components/ui';
+import { Card, SectionHeader, Button, Label, Input, Select, Skeleton, useIsMobile } from '../../components/ui';
 import { HrSettings } from '../../services/hrExtras';
 
 const Settings: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data, isLoading } = useHrSettings();
   const update = useUpdateHrSettings();
 
@@ -26,7 +27,7 @@ const Settings: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
       <SectionHeader title="HR Settings" subtitle="Work week, overtime, PTO policy, and currency" />
       <Card>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
           <div>
             <Label>Work week starts on</Label>
             <Select value={form.workWeekStart} onChange={(e) => setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })}>

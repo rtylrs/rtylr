@@ -14,12 +14,13 @@ import {
 } from '../../hooks/useHrExtras';
 import { usePayroll } from '../../hooks/usePayroll';
 import { useStaff } from '../../hooks/useStaff';
-import { Card, SectionHeader, Button, Tabs, Label, Select, Input, Pill, EmptyState, ACCENT } from '../../components/ui';
+import { Card, SectionHeader, Button, Tabs, Label, Select, Input, Pill, EmptyState, ACCENT, useIsMobile } from '../../components/ui';
 import ApprovalButtons from '../../components/ApprovalButtons';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
 const Operations: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const [tab, setTab] = useState<(typeof TABS)[number]>('Labor Cost');
   const { data: staff = [] } = useStaff();
   const { data: payroll = [] } = usePayroll();
@@ -79,15 +80,15 @@ const Operations: React.FC = () => {
 
       {tab === 'Labor Cost' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
             <Label style={{ marginBottom: 0 }}>Department</Label>
-            <div style={{ width: 200 }}>
+            <div style={{ width: isMobile ? '100%' : 200 }}>
               <Select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
                 {departments.map((d) => <option key={d}>{d}</option>)}
               </Select>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <Calculator size={13} style={{ color: ACCENT }} />
@@ -114,7 +115,7 @@ const Operations: React.FC = () => {
               Overtime after: <strong style={{ color: 'var(--hr-text)' }}>{settings?.overtimeAfterHours ?? 40}h</strong>
             </div>
           </Card>
-          <Card style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Card style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
             <MapPin size={14} style={{ color: ACCENT }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>GPS clock-in demo</div>
@@ -129,7 +130,7 @@ const Operations: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Card>
             <SectionHeader title="Request a swap" />
-            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 10 }}>
               <div>
                 <Label>Requester</Label>
                 <Select value={swapForm.requesterId} onChange={(e) => setSwapForm({ ...swapForm, requesterId: Number(e.target.value) })}>
@@ -208,10 +209,11 @@ const Operations: React.FC = () => {
       )}
 
       {tab === 'Availability' && (
-        <Card style={{ padding: 0 }}>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
           {availability.length === 0 ? (
             <EmptyState icon={<Clock size={20} />} title="No availability set" description="Ask team to mark their weekly availability." />
           ) : (
+            <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: 'var(--hr-hover)' }}>
@@ -236,6 +238,7 @@ const Operations: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       )}

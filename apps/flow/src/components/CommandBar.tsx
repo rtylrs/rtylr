@@ -150,7 +150,7 @@ export const CommandBar: React.FC = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.12 }}
           onClick={() => setCommandBarOpen(false)}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4"
+          className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-4 sm:px-4 sm:pt-[10vh]"
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
         >
           <motion.div
@@ -160,7 +160,7 @@ export const CommandBar: React.FC = () => {
             transition={{ duration: 0.14 }}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={handleKey}
-            className="w-full max-w-xl rounded-xl overflow-hidden"
+            className="max-h-[min(85dvh,720px)] w-full max-w-xl overflow-hidden rounded-xl"
             style={{
               background: 'var(--flow-card)',
               border: '1px solid var(--flow-border)',
@@ -193,7 +193,7 @@ export const CommandBar: React.FC = () => {
             </div>
 
             {/* Results */}
-            <div className="max-h-[60vh] overflow-y-auto py-1">
+            <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1 sm:max-h-[60vh]">
               {filtered.length === 0 && (
                 <div
                   className="text-[12px] text-center py-8"

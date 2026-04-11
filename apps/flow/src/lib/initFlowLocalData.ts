@@ -62,6 +62,16 @@ export function initFlowLocalData(): void {
         status: 'todo',
         estimate: 4,
       },
+      {
+        id: 'tpl-shutdown',
+        name: 'End-of-day shutdown',
+        title: 'Shutdown: ',
+        description:
+          'Close loops (inbox, waiting-on). Note tomorrow\'s first move in one line.',
+        priority: 'low',
+        status: 'todo',
+        estimate: 0.25,
+      },
     ],
     activeWorkspaceId: 'personal',
   });

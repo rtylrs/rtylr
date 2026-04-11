@@ -1,0 +1,29 @@
+
+> @rtylr/book@0.0.0 build /Users/mhomsi/personal/code/voxire/rtylr/rtylr/apps/book
+> vite build
+
+vite v6.4.1 building for production...
+transforming...
+(node:67836) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mhomsi/personal/code/voxire/rtylr/rtylr/packages/tailwind-config/tailwind.config.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/mhomsi/personal/code/voxire/rtylr/rtylr/packages/tailwind-config/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ 2188 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         1.03 kB │ gzip:  0.51 kB
+dist/.vite/manifest.json                3.54 kB │ gzip:  0.58 kB
+dist/assets/index-DJvariPq.css         21.21 kB │ gzip:  4.85 kB
+dist/assets/useMutation-FFgmPeJB.js     2.10 kB │ gzip:  0.90 kB
+dist/assets/Customers-CtZPDepB.js       4.08 kB │ gzip:  1.33 kB
+dist/assets/Services-DSgyYzYD.js        4.26 kB │ gzip:  1.43 kB
+dist/assets/Resources-BUhiECJw.js       4.36 kB │ gzip:  1.57 kB
+dist/assets/Appointments-BAk7Go6-.js    4.59 kB │ gzip:  1.60 kB
+dist/assets/Waitlist-DZ0YYQkU.js        4.69 kB │ gzip:  1.68 kB
+dist/assets/Dashboard-DW1SdoWo.js       5.18 kB │ gzip:  1.76 kB
+dist/assets/Settings-BWc0t06d.js        6.32 kB │ gzip:  1.71 kB
+dist/assets/Calendar-CnJLUoiu.js        7.94 kB │ gzip:  2.43 kB
+dist/assets/bookService-C3kiMTSq.js    10.16 kB │ gzip:  3.52 kB
+dist/assets/index-CihTuLl4.js         108.33 kB │ gzip: 35.69 kB
+dist/assets/vendor-aeyiPLWy.js        291.61 kB │ gzip: 94.65 kB
+✓ built in 9.09s

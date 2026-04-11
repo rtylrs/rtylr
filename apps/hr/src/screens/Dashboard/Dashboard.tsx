@@ -22,7 +22,7 @@ import { useStaff } from '../../hooks/useStaff';
 import { useExpiringDocuments, useOvertimeAlerts, useEmployeeProfile } from '../../hooks/useHrExtras';
 import BirthdayWidget from '../../components/BirthdayWidget';
 import AnniversaryWidget from '../../components/AnniversaryWidget';
-import { Card, StatCard } from '../../components/ui';
+import { Card, StatCard, useIsMobile } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -53,6 +53,7 @@ const item = {
 };
 
 const Dashboard: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data: dashboard, isLoading: loading } = useHRDashboard();
   const { data: staff = [] } = useStaff();
   const { data: expiring = [] } = useExpiringDocuments(30);
@@ -110,7 +111,7 @@ const Dashboard: React.FC = () => {
     <motion.div variants={container} initial="hidden" animate="show" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
         {stats.map((s) => (
           <motion.div
             key={s.label}
@@ -154,7 +155,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Bottom grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px', gap: '16px' }}>
 
         {/* Recent activity */}
         <motion.div
@@ -166,7 +167,7 @@ const Dashboard: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>Recent Activity</h2>
             <span style={{ fontSize: '11px', color: ACCENT, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
               View all <ArrowUpRight size={11} />
@@ -178,7 +179,8 @@ const Dashboard: React.FC = () => {
                 key={i}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  flexDirection: isMobile ? 'column' : 'row',
                   gap: '12px',
                   padding: '12px 20px',
                   borderBottom: i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
@@ -206,7 +208,7 @@ const Dashboard: React.FC = () => {
                   <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>{a.name}</p>
                   <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--hr-text-muted)' }}>{a.role}</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, flexWrap: 'wrap' }}>
                   <span
                     style={{
                       display: 'flex',
@@ -283,7 +285,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* HR metrics dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         <StatCard label="Headcount" value={staff.length} sub="Total active" icon={<Users size={14} />} />
         <StatCard label="Avg tenure" value={`${avgTenureYears} yrs`} sub="Across all staff" icon={<Clock size={14} />} color="#10b981" />
         <StatCard label="Turnover" value={`${turnoverRate}%`} sub="Last 12 months" icon={<TrendingUp size={14} />} color="#f59e0b" />
@@ -291,7 +293,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Widgets row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         <BirthdayWidget />
         <AnniversaryWidget />
         <Card>
@@ -320,7 +322,7 @@ const Dashboard: React.FC = () => {
 
       {/* Alerts row */}
       {(expiring.length > 0 || overtimeAlerts.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {expiring.length > 0 && (
             <Card style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>

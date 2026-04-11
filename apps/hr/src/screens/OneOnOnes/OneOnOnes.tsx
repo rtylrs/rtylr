@@ -3,9 +3,10 @@ import { toast } from 'sonner';
 import { MessageSquare, Plus, Calendar, Clock } from 'lucide-react';
 import { useOneOnOnes, useCreateOneOnOne } from '../../hooks/useHrExtras';
 import { useStaff } from '../../hooks/useStaff';
-import { Card, SectionHeader, Button, EmptyState, Skeleton, Pill, Modal, Label, Input, Select, Textarea } from '../../components/ui';
+import { Card, SectionHeader, Button, EmptyState, Skeleton, Pill, Modal, Label, Input, Select, Textarea, useIsMobile } from '../../components/ui';
 
 const OneOnOnes: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data, isLoading } = useOneOnOnes();
   const { data: staff = [] } = useStaff();
   const create = useCreateOneOnOne();
@@ -55,7 +56,7 @@ const OneOnOnes: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {data.map((o) => (
             <Card key={o.id}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 12, marginBottom: 8 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                     {o.manager} <span style={{ color: 'var(--hr-text-muted)', fontWeight: 400 }}>&harr;</span> {o.report}
@@ -83,7 +84,7 @@ const OneOnOnes: React.FC = () => {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Schedule 1-on-1">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
             <div>
               <Label>Manager</Label>
               <Select value={form.managerId} onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}>

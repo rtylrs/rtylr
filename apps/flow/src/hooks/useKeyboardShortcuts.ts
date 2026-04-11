@@ -53,6 +53,7 @@ export function useKeyboardShortcuts() {
       // g + X chord navigation
       const now = Date.now();
       if (lastKey === 'g' && now - lastKeyAt < 1200) {
+        e.preventDefault();
         switch (e.key) {
           case 'i':
             navigate('/inbox');
@@ -80,6 +81,9 @@ export function useKeyboardShortcuts() {
             break;
           case 'x':
             navigate('/triage');
+            break;
+          case 'f':
+            navigate('/today');
             break;
         }
         lastKey = '';

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, UserCheck, DollarSign, ChefHat, Coffee, Briefcase, Truck, Plus } from 'lucide-react';
 import { Department } from '../../services/hrApi';
 import { useDepartments } from '../../hooks/useDepartments';
+import { useIsMobile } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -31,6 +32,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } 
 const cardAnim  = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } } };
 
 const Departments: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { data: fetchedDepartments, isLoading: loading } = useDepartments();
   const departments: Department[] = fetchedDepartments || [];
 
@@ -38,7 +40,7 @@ const Departments: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>Departments</h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
@@ -63,7 +65,7 @@ const Departments: React.FC = () => {
         variants={container}
         initial="hidden"
         animate="show"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}
       >
         {departments.map((dept, idx) => {
           const color = (dept as any).color || getDeptColor(idx);
@@ -137,7 +139,7 @@ const Departments: React.FC = () => {
               <div style={{ height: '1px', background: 'var(--hr-border)' }} />
 
               {/* Stats row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Users size={13} style={{ color: 'var(--hr-text-dim)' }} />
