@@ -108,12 +108,6 @@ const Login: React.FC = () => {
       subtitle="Sign in to your account."
       footer={
         <div className="text-center space-y-3">
-          {redirectAppName && (
-            <p className="text-xs text-[#999]">
-              You will be redirected to{' '}
-              <span className="text-[#111] font-medium">{redirectAppName}</span> after sign-in.
-            </p>
-          )}
           <p className="text-sm text-[#666]">
             Don't have an account?{' '}
             <button
