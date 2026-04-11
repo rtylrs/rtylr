@@ -1,12 +1,11 @@
 import { FaInstagram } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import PackageJson from '@root/package.json';
-import { RootState } from '../../../redux/store';
+import { useConfigStore } from '../../../stores/configStore';
 import React from 'react';
 
 const Footer: React.FC = () => {
-  const config = useSelector((state: RootState) => state.config.contactInfo);
+  const config = useConfigStore((s) => s.contactInfo);
 
   const footerSections = [
     {

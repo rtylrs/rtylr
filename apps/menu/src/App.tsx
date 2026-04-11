@@ -1,18 +1,16 @@
 import React, { Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { FullScreenLoader } from '@voxire/components';
 import PublicRoutes from './routes/PublicRoutes';
-import { fetchConfigData } from './redux/reducers/configSlice';
-import { AppDispatch } from './redux/store';
+import { useConfigStore } from './stores/configStore';
 import '@voxire/menu/styles';
 
 const App = (): JSX.Element => {
   const location = useLocation();
-  const dispatch = useDispatch<AppDispatch>();
+  const fetchConfigData = useConfigStore((s) => s.fetchConfigData);
 
   useEffect(() => {
-    dispatch(fetchConfigData());
+    fetchConfigData();
   }, []);
 
   return (

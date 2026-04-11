@@ -9,7 +9,6 @@ import i18next from "./services/i18next";
 import ScrollToTop from "./components/ScrollToTop";
 import { Toaster } from "sonner";
 import { CookiesProvider } from "react-cookie";
-import Modal from "react-modal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -21,7 +20,6 @@ import { initTheme } from './stores/themeStore';
 // Apply persisted theme before first render to prevent flash
 initTheme();
 
-Modal.setAppElement("#root");
 injectTheme();
 
 const rootElement = document.getElementById("root");

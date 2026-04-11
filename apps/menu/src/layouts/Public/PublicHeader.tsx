@@ -10,10 +10,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@voxire/components';
 import useColors from '../../hooks/useColors';
 import { useWindowDimensions } from '@voxire/utils';
-import { useSelector } from 'react-redux';
 import { selectLanguage } from '../../services/i18next';
 import { getCookie } from '../../lib/cookies';
-import { RootState } from '../../redux/store';
 
 interface LinkWithColorProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -32,7 +30,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
-  const user = useSelector((state: RootState) => state.user);
+  const token = localStorage.getItem('token');
 
   const isMobile = useMemo(() => width < 968, [width]);
   const isQuestionnaire = useMemo(
@@ -104,18 +102,12 @@ const Header: React.FC = () => {
   }, []);
 
   const handleClick = useCallback(() => {
-    const token = localStorage.getItem('token');
-
     if (token) {
-      if (user.role === 'business' || user.role === 'admin') {
-        navigate('/app/business/');
-      } else {
-        navigate('/app/user/');
-      }
+      navigate('/app/business/');
     } else {
       navigate('/auth/register');
     }
-  }, [user.role, navigate]);
+  }, [token, navigate]);
 
   const handleLogoClick = useCallback(() => {
     navigate('/');
@@ -243,7 +235,7 @@ const Header: React.FC = () => {
           <button
             className="login-button"
             style={{
-              display: isMobile ? 'none' : user.token ? 'none' : 'flex',
+              display: isMobile ? 'none' : token ? 'none' : 'flex',
             }}
             onClick={handleLoginClick}
           >
@@ -264,7 +256,7 @@ const Header: React.FC = () => {
               <p>Logout</p>
             </div>
           ) : (
-            <>{user.token ? 'Dashboard' : 'Register Now'}</>
+            <>{token ? 'Dashboard' : 'Register Now'}</>
           )}
         </Button>
 
@@ -297,7 +289,7 @@ const Header: React.FC = () => {
           <LinkWithColor to="/contact">Contact Us</LinkWithColor>
           <Button
             styles={{
-              display: user.token ? 'none' : 'flex',
+              display: token ? 'none' : 'flex',
               marginBottom: '0px',
             }}
             onClick={handleLoginClick}
@@ -306,7 +298,7 @@ const Header: React.FC = () => {
           </Button>
 
           <Button onClick={handleClick}>
-            {user.token ? 'Dashboard' : 'Register Now'}
+            {token ? 'Dashboard' : 'Register Now'}
           </Button>
         </div>
       )}
