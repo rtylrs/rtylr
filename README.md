@@ -113,10 +113,6 @@ export function useProducts() {
 }
 ```
 
-## Addon System
-
-Core apps (POS, ERP, HR, CRM, Finance, Flow) are always enabled. Store, Book, Support, and Insights are addon-gated and can be toggled per business from the Hub Addons page.
-
 ## Development
 
 ```bash
