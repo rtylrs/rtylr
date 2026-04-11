@@ -1,5 +1,5 @@
 export type UserRole = 'owner' | 'admin' | 'operator' | 'staff' | 'viewer';
-export type AppId = 'hub' | 'auth' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow' | 'menu' | 'landing' | 'store' | 'book' | 'support' | 'insights' | 'docs';
+export type AppId = 'hub' | 'auth' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow' | 'menu' | 'landing' | 'store' | 'book' | 'support' | 'insights';
 
 export interface User {
   id?: string;

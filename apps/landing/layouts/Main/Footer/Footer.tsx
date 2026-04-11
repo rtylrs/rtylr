@@ -28,6 +28,10 @@ const Footer: React.FC = () => {
         { to: '/features/crm', label: 'CRM' },
         { to: '/features/finance', label: 'Finance' },
         { to: '/features/flow', label: 'Flow' },
+        { to: '/features/store', label: 'Store' },
+        { to: '/features/book', label: 'Book' },
+        { to: '/features/support', label: 'Support' },
+        { to: '/features/insights', label: 'Insights' },
       ],
     },
     {
