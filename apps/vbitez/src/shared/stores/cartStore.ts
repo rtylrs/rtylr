@@ -1,71 +1,371 @@
 import { create } from 'zustand';
 
-export interface CartProduct {
-  id: string;
+// ── Types ────────────────────────────────────────────────────────
+
+export interface CartItemModifier {
+  id: number;
   name: string;
-  price: number;
+  priceDelta: number;
+}
+
+export interface CartItem {
+  /** Unique key for this line item (product + variant + modifiers hash) */
+  lineId: string;
+  productId: number;
+  name: string;
+  sku?: string;
+  barcode?: string;
+  unitPrice: number;
   quantity: number;
   notes?: string;
+  modifiers: CartItemModifier[];
+  comboId?: number;
+  variantName?: string;
+  /** Per-item discount (percentage 0-100) */
+  discountPct: number;
+  /** Per-item discount (flat amount) */
+  discountAmount: number;
+  taxRate: number;
+  /** Status for KDS tracking */
+  status: 'pending' | 'preparing' | 'ready' | 'served' | 'cancelled';
 }
 
-interface CartState {
-  items: CartProduct[];
-  orderId: string | null;
-  tableNumber: string | null;
+export interface CartPayment {
+  method: 'cash' | 'card' | 'online' | 'gift_card' | 'store_credit' | 'other';
+  amount: number;
+  reference?: string;
+  cardLast4?: string;
+  giftCardCode?: string;
 }
+
+export interface CartDiscount {
+  type: 'percentage' | 'fixed';
+  value: number;
+  reason?: string;
+  approvedBy?: number;
+}
+
+export interface CartState {
+  // ── Order identity ──
+  localOrderId: string | null;
+  serverOrderId: number | null;
+  orderNumber: string | null;
+  orderType: 'dine_in' | 'takeaway' | 'delivery' | 'online';
+
+  // ── Location context ──
+  branchId: number | null;
+  terminalId: number | null;
+  employeeId: number | null;
+  tableId: number | null;
+  floorId: number | null;
+
+  // ── Customer ──
+  customerId: number | null;
+  customerName: string | null;
+
+  // ── Items ──
+  items: CartItem[];
+
+  // ── Order-level discount ──
+  orderDiscount: CartDiscount | null;
+
+  // ── Tip ──
+  tipAmount: number;
+
+  // ── Payments ──
+  payments: CartPayment[];
+
+  // ── Notes ──
+  notes: string;
+  kitchenNotes: string;
+
+  // ── Held/parked state ──
+  isHeld: boolean;
+  holdLabel: string;
+}
+
+// ── Computed helpers ─────────────────────────────────────────────
+
+function generateLineId(productId: number, variantName?: string, modifiers?: CartItemModifier[]): string {
+  const modKey = (modifiers ?? []).map((m) => m.id).sort().join(',');
+  return `${productId}:${variantName ?? ''}:${modKey}`;
+}
+
+function computeItemTotal(item: CartItem): number {
+  const modifierTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
+  const basePrice = (item.unitPrice + modifierTotal) * item.quantity;
+  const discountedPrice = item.discountPct > 0
+    ? basePrice * (1 - item.discountPct / 100)
+    : basePrice - item.discountAmount;
+  return Math.max(0, discountedPrice);
+}
+
+// ── Store ────────────────────────────────────────────────────────
 
 interface CartActions {
-  addItem: (product: Omit<CartProduct, 'quantity'>) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  updateNotes: (id: string, notes: string) => void;
+  // Items
+  addItem: (product: {
+    productId: number;
+    name: string;
+    sku?: string;
+    barcode?: string;
+    unitPrice: number;
+    taxRate?: number;
+    modifiers?: CartItemModifier[];
+    comboId?: number;
+    variantName?: string;
+  }) => void;
+  removeItem: (lineId: string) => void;
+  updateQuantity: (lineId: string, quantity: number) => void;
+  updateItemNotes: (lineId: string, notes: string) => void;
+  setItemDiscount: (lineId: string, discountPct: number, discountAmount: number) => void;
+  setItemStatus: (lineId: string, status: CartItem['status']) => void;
+
+  // Order-level
+  setOrderDiscount: (discount: CartDiscount | null) => void;
+  setTip: (amount: number) => void;
+  setOrderType: (type: CartState['orderType']) => void;
+  setNotes: (notes: string) => void;
+  setKitchenNotes: (notes: string) => void;
+
+  // Customer
+  setCustomer: (id: number | null, name: string | null) => void;
+
+  // Table
+  setTable: (tableId: number | null, floorId?: number | null) => void;
+
+  // Context
+  setContext: (branchId: number, terminalId: number, employeeId: number) => void;
+
+  // Payments
+  addPayment: (payment: CartPayment) => void;
+  removePayment: (index: number) => void;
+  clearPayments: () => void;
+
+  // Hold/park
+  holdOrder: (label: string) => void;
+  resumeOrder: () => void;
+
+  // Order tracking
+  setServerOrderId: (id: number) => void;
+  setOrderNumber: (num: string) => void;
+
+  // Reset
   clearCart: () => void;
-  setOrderId: (id: string | null) => void;
-  setTableNumber: (table: string | null) => void;
+  newOrder: () => void;
+
+  // Computed
+  subtotal: () => number;
+  discountTotal: () => number;
+  taxTotal: () => number;
   total: () => number;
+  amountPaid: () => number;
+  amountDue: () => number;
+  itemCount: () => number;
 }
 
-export const useCartStore = create<CartState & CartActions>()((set, get) => ({
+const initialState: CartState = {
+  localOrderId: null,
+  serverOrderId: null,
+  orderNumber: null,
+  orderType: 'dine_in',
+  branchId: null,
+  terminalId: null,
+  employeeId: null,
+  tableId: null,
+  floorId: null,
+  customerId: null,
+  customerName: null,
   items: [],
-  orderId: null,
-  tableNumber: null,
+  orderDiscount: null,
+  tipAmount: 0,
+  payments: [],
+  notes: '',
+  kitchenNotes: '',
+  isHeld: false,
+  holdLabel: '',
+};
+
+export const useCartStore = create<CartState & CartActions>()((set, get) => ({
+  ...initialState,
+
+  // ── Items ──────────────────────────────────────────────────────
 
   addItem: (product) => {
+    const lineId = generateLineId(product.productId, product.variantName, product.modifiers);
     set((state) => {
-      const existing = state.items.find((i) => i.id === product.id);
+      const existing = state.items.find((i) => i.lineId === lineId);
       if (existing) {
         return {
           items: state.items.map((i) =>
-            i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+            i.lineId === lineId ? { ...i, quantity: i.quantity + 1 } : i,
           ),
         };
       }
-      return { items: [...state.items, { ...product, quantity: 1 }] };
+      const newItem: CartItem = {
+        lineId,
+        productId: product.productId,
+        name: product.name,
+        sku: product.sku,
+        barcode: product.barcode,
+        unitPrice: product.unitPrice,
+        quantity: 1,
+        modifiers: product.modifiers ?? [],
+        comboId: product.comboId,
+        variantName: product.variantName,
+        discountPct: 0,
+        discountAmount: 0,
+        taxRate: product.taxRate ?? 0,
+        status: 'pending',
+      };
+      return { items: [...state.items, newItem] };
     });
   },
 
-  removeItem: (id) => set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+  removeItem: (lineId) =>
+    set((state) => ({ items: state.items.filter((i) => i.lineId !== lineId) })),
 
-  updateQuantity: (id, quantity) => {
+  updateQuantity: (lineId, quantity) => {
     if (quantity <= 0) {
-      get().removeItem(id);
+      get().removeItem(lineId);
     } else {
       set((state) => ({
-        items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+        items: state.items.map((i) => (i.lineId === lineId ? { ...i, quantity } : i)),
       }));
     }
   },
 
-  updateNotes: (id, notes) =>
+  updateItemNotes: (lineId, notes) =>
     set((state) => ({
-      items: state.items.map((i) => (i.id === id ? { ...i, notes } : i)),
+      items: state.items.map((i) => (i.lineId === lineId ? { ...i, notes } : i)),
     })),
 
-  clearCart: () => set({ items: [], orderId: null, tableNumber: null }),
+  setItemDiscount: (lineId, discountPct, discountAmount) =>
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.lineId === lineId ? { ...i, discountPct, discountAmount } : i,
+      ),
+    })),
 
-  setOrderId: (orderId) => set({ orderId }),
+  setItemStatus: (lineId, status) =>
+    set((state) => ({
+      items: state.items.map((i) => (i.lineId === lineId ? { ...i, status } : i)),
+    })),
 
-  setTableNumber: (tableNumber) => set({ tableNumber }),
+  // ── Order-level ───────────────────────────────────────────────
 
-  total: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+  setOrderDiscount: (discount) => set({ orderDiscount: discount }),
+  setTip: (tipAmount) => set({ tipAmount }),
+  setOrderType: (orderType) => set({ orderType }),
+  setNotes: (notes) => set({ notes }),
+  setKitchenNotes: (kitchenNotes) => set({ kitchenNotes }),
+
+  // ── Customer ──────────────────────────────────────────────────
+
+  setCustomer: (customerId, customerName) => set({ customerId, customerName }),
+
+  // ── Table ─────────────────────────────────────────────────────
+
+  setTable: (tableId, floorId) => set({ tableId, floorId: floorId ?? null }),
+
+  // ── Context ───────────────────────────────────────────────────
+
+  setContext: (branchId, terminalId, employeeId) => set({ branchId, terminalId, employeeId }),
+
+  // ── Payments ──────────────────────────────────────────────────
+
+  addPayment: (payment) =>
+    set((state) => ({ payments: [...state.payments, payment] })),
+
+  removePayment: (index) =>
+    set((state) => ({ payments: state.payments.filter((_, i) => i !== index) })),
+
+  clearPayments: () => set({ payments: [] }),
+
+  // ── Hold/park ─────────────────────────────────────────────────
+
+  holdOrder: (label) => set({ isHeld: true, holdLabel: label }),
+  resumeOrder: () => set({ isHeld: false, holdLabel: '' }),
+
+  // ── Order tracking ────────────────────────────────────────────
+
+  setServerOrderId: (serverOrderId) => set({ serverOrderId }),
+  setOrderNumber: (orderNumber) => set({ orderNumber }),
+
+  // ── Reset ─────────────────────────────────────────────────────
+
+  clearCart: () => set({ ...initialState }),
+
+  newOrder: () => {
+    const { branchId, terminalId, employeeId } = get();
+    set({
+      ...initialState,
+      branchId,
+      terminalId,
+      employeeId,
+      localOrderId: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    });
+  },
+
+  // ── Computed ──────────────────────────────────────────────────
+
+  subtotal: () => {
+    return get().items.reduce((sum, item) => sum + computeItemTotal(item), 0);
+  },
+
+  discountTotal: () => {
+    const { items, orderDiscount } = get();
+    const itemDiscounts = items.reduce((sum, item) => {
+      const modTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
+      const gross = (item.unitPrice + modTotal) * item.quantity;
+      const net = computeItemTotal(item);
+      return sum + (gross - net);
+    }, 0);
+
+    let orderDiscountAmount = 0;
+    if (orderDiscount) {
+      const sub = get().subtotal();
+      orderDiscountAmount = orderDiscount.type === 'percentage'
+        ? sub * (orderDiscount.value / 100)
+        : orderDiscount.value;
+    }
+
+    return itemDiscounts + orderDiscountAmount;
+  },
+
+  taxTotal: () => {
+    const { items, orderDiscount } = get();
+    const sub = get().subtotal();
+    const orderDiscountRatio = orderDiscount
+      ? (orderDiscount.type === 'percentage' ? orderDiscount.value / 100 : orderDiscount.value / (sub || 1))
+      : 0;
+
+    return items.reduce((sum, item) => {
+      const itemTotal = computeItemTotal(item);
+      const afterOrderDiscount = itemTotal * (1 - orderDiscountRatio);
+      return sum + afterOrderDiscount * (item.taxRate / 100);
+    }, 0);
+  },
+
+  total: () => {
+    const sub = get().subtotal();
+    const disc = get().orderDiscount;
+    const tax = get().taxTotal();
+    const tip = get().tipAmount;
+
+    let orderDiscountAmount = 0;
+    if (disc) {
+      orderDiscountAmount = disc.type === 'percentage'
+        ? sub * (disc.value / 100)
+        : disc.value;
+    }
+
+    return Math.max(0, sub - orderDiscountAmount + tax + tip);
+  },
+
+  amountPaid: () => get().payments.reduce((sum, p) => sum + p.amount, 0),
+
+  amountDue: () => Math.max(0, get().total() - get().amountPaid()),
+
+  itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 }));
