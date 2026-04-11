@@ -11,11 +11,15 @@ export interface CartItemModifier {
 export interface CartItem {
   /** Unique key for this line item (product + variant + modifiers hash) */
   lineId: string;
+  /** Alias for lineId - used in legacy components */
+  id: string;
   productId: number;
   name: string;
   sku?: string;
   barcode?: string;
   unitPrice: number;
+  /** Alias for unitPrice - used in legacy components */
+  price: number;
   quantity: number;
   notes?: string;
   modifiers: CartItemModifier[];
@@ -82,6 +86,10 @@ export interface CartState {
   // ── Held/parked state ──
   isHeld: boolean;
   holdLabel: string;
+
+  // ── Legacy aliases ──
+  orderId: string | null;
+  tableNumber: string | null;
 }
 
 // ── Computed helpers ─────────────────────────────────────────────
@@ -113,15 +121,18 @@ function computeItemTotal(item: CartItem): number {
 interface CartActions {
   // Items
   addItem: (product: {
+    id?: number | string;
     productId: number;
     name: string;
     sku?: string;
     barcode?: string;
     unitPrice: number;
+    price?: number;
     taxRate?: number;
     modifiers?: CartItemModifier[];
     comboId?: number;
     variantName?: string;
+    [key: string]: any;
   }) => void;
   removeItem: (lineId: string) => void;
   updateQuantity: (lineId: string, quantity: number) => void;
@@ -158,6 +169,12 @@ interface CartActions {
   setServerOrderId: (id: number) => void;
   setOrderNumber: (num: string) => void;
 
+  // Table number
+  setTableNumber: (num: string | null) => void;
+
+  // Notes update
+  updateNotes: (notes: string) => void;
+
   // Reset
   clearCart: () => void;
   newOrder: () => void;
@@ -192,6 +209,8 @@ const initialState: CartState = {
   kitchenNotes: '',
   isHeld: false,
   holdLabel: '',
+  orderId: null,
+  tableNumber: null,
 };
 
 export const useCartStore = create<CartState & CartActions>()((set, get) => ({
@@ -212,11 +231,13 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       }
       const newItem: CartItem = {
         lineId,
+        id: lineId,
         productId: product.productId,
         name: product.name,
         sku: product.sku,
         barcode: product.barcode,
         unitPrice: product.unitPrice,
+        price: product.unitPrice,
         quantity: 1,
         modifiers: product.modifiers ?? [],
         comboId: product.comboId,
@@ -298,6 +319,12 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
   setServerOrderId: (serverOrderId) => set({ serverOrderId }),
   setOrderNumber: (orderNumber) => set({ orderNumber }),
+
+  // ── Table number ──────────────────────────────────────────────
+  setTableNumber: (num) => set({ tableNumber: num }),
+
+  // ── Notes update ─────────────────────────────────────────────
+  updateNotes: (notes) => set({ notes }),
 
   // ── Reset ─────────────────────────────────────────────────────
 

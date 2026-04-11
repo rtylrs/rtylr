@@ -38,10 +38,10 @@ const DialogTrigger: React.FC<DialogTriggerProps> = ({ children }) => {
   const { setOpen } = useContext(DialogContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
+      (children.props as any).onClick?.(e);
       setOpen(true);
     },
-  });
+  } as any);
 };
 
 interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -117,10 +117,10 @@ const DialogClose: React.FC<{ children: React.ReactElement }> = ({ children }) =
   const { setOpen } = useContext(DialogContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
+      (children.props as any).onClick?.(e);
       setOpen(false);
     },
-  });
+  } as any);
 };
 
 export {

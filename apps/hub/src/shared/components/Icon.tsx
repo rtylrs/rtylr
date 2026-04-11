@@ -33,7 +33,7 @@ const SvgIcon: React.FC<SvgIconProps> = ({
   }, [icon]);
 
   if (!svgContent) {
-    return <CircularProgress color="primary" />;
+    return <Spinner />;
   }
 
   return (

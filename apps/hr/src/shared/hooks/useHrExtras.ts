@@ -9,8 +9,8 @@ export function useStaffById(id: number | undefined) {
     queryKey: ['staff', id],
     enabled: id !== undefined,
     queryFn: async () => {
-      const res = await hrApi.listStaff();
-      return (res.data ?? []).find((s: StaffMember) => s.id === id) ?? null;
+      const list = await unwrap(hrApi.listStaff());
+      return list.find((s: StaffMember) => s.id === id) ?? null;
     },
   });
 }
@@ -23,7 +23,8 @@ export function useTimeOff() {
 export function useSubmitTimeOff() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.submitTimeOff,
+    mutationFn: (data: Parameters<typeof hrExtras.submitTimeOff>[0]) =>
+      unwrap(hrExtras.submitTimeOff(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
   });
 }
@@ -32,7 +33,7 @@ export function useApproveTimeOff() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, approved, note }: { id: number; approved: boolean; note?: string }) =>
-      hrExtras.approveTimeOff(id, approved, note),
+      unwrap(hrExtras.approveTimeOff(id, approved, note)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
   });
 }
@@ -48,7 +49,8 @@ export function useShiftSchedule(weekStart?: string) {
 export function useUpsertShift() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.upsertScheduleShift,
+    mutationFn: (shift: Parameters<typeof hrExtras.upsertScheduleShift>[0]) =>
+      unwrap(hrExtras.upsertScheduleShift(shift)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
   });
 }
@@ -90,7 +92,8 @@ export function useReviews() {
 export function useCreateReview() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.createReview,
+    mutationFn: (data: Parameters<typeof hrExtras.createReview>[0]) =>
+      unwrap(hrExtras.createReview(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews'] }),
   });
 }
@@ -103,7 +106,8 @@ export function useOneOnOnes() {
 export function useCreateOneOnOne() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.createOneOnOne,
+    mutationFn: (data: Parameters<typeof hrExtras.createOneOnOne>[0]) =>
+      unwrap(hrExtras.createOneOnOne(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['one-on-ones'] }),
   });
 }
@@ -141,7 +145,8 @@ export function useDocuments() {
 export function useAddDocument() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.addDocument,
+    mutationFn: (doc: Parameters<typeof hrExtras.addDocument>[0]) =>
+      unwrap(hrExtras.addDocument(doc)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
   });
 }
@@ -179,7 +184,8 @@ export function useBenefitEnrollments() {
 export function useEnrollBenefit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.enrollBenefit,
+    mutationFn: (data: Parameters<typeof hrExtras.enrollBenefit>[0]) =>
+      unwrap(hrExtras.enrollBenefit(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['benefits'] }),
   });
 }
@@ -234,7 +240,8 @@ export function useResolveSwap() {
 export function useCreateSwap() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.createSwap,
+    mutationFn: (data: Parameters<typeof hrExtras.createSwap>[0]) =>
+      unwrap(hrExtras.createSwap(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
   });
 }
@@ -254,7 +261,7 @@ export function useStartBreak() {
       staffId: number;
       staffName: string;
       type: 'Lunch' | 'Short' | 'Other';
-    }) => hrExtras.startBreak(staffId, staffName, type),
+    }) => unwrap(hrExtras.startBreak(staffId, staffName, type)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
   });
 }
@@ -281,7 +288,8 @@ export function useHrSettings() {
 export function useUpdateHrSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: hrExtras.updateSettings,
+    mutationFn: (patch: Parameters<typeof hrExtras.updateSettings>[0]) =>
+      unwrap(hrExtras.updateSettings(patch)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
   });
 }
@@ -290,6 +298,6 @@ export function useEmployeeProfile(id: number | undefined) {
   return useQuery({
     queryKey: ['profile', id],
     enabled: id !== undefined,
-    queryFn: () => (id !== undefined ? hrExtras.getProfile(id) : Promise.resolve(null)),
+    queryFn: () => (id !== undefined ? unwrap(hrExtras.getProfile(id)) : Promise.resolve(null)),
   });
 }

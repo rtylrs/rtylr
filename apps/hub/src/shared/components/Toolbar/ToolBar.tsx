@@ -1,8 +1,8 @@
 import { List as Menu, House as Home, ArrowClockwise as RotateCw, X, User } from 'phosphor-react';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../stores/userStore';
-import { useFullscreen } from '../hooks/useFullscreen';
+import { useUserStore } from '../../stores/userStore';
+import { useFullscreen } from '../../hooks/useFullscreen';
 
 const getPlatform = () => {
   const ua = navigator.userAgent;
@@ -16,7 +16,7 @@ const useFPS = (): number => {
   const [fps, setFps] = useState(0);
   const frameCount = useRef(0);
   const lastFrameTime = useRef(Date.now());
-  const animationId = useRef<number>();
+  const animationId = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const calculateFPS = () => {

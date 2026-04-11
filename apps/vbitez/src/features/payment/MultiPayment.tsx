@@ -53,7 +53,7 @@ const MultiPaymentScreen: React.FC = () => {
     setBusy(true);
     try {
       if (orderId) {
-        await unwrap(posService.chargeOrder(orderId, { payments, tip, total }));
+        await unwrap(posService.chargeOrder(Number(orderId), { payments, tip, total }));
       }
       toast.success('Payment complete');
       clear();

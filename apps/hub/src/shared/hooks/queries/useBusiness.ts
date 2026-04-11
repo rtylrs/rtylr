@@ -12,10 +12,6 @@ export const useGetBusiness = (businessId: string | null) => {
       return response.data;
     },
     enabled: !!businessId,
-    onError: (error: any) => {
-      toast.error('Failed to fetch business information');
-      console.error('Error fetching business:', error);
-    },
   });
 };
 

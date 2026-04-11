@@ -124,7 +124,7 @@ const Purchasing: React.FC = () => {
                   className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
                   style={{ background: sc.bg }}
                 >
-                  <Icon size={15} style={{ color: sc.color }} />
+                  <Icon size={15} {...({ style: { color: sc.color } } as any)} />
                 </span>
                 <div>
                   <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>

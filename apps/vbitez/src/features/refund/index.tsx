@@ -29,7 +29,7 @@ const RefundScreen: React.FC = () => {
     setBusy(true);
     try {
       await unwrap(
-        posService.refundOrder(orderId!, {
+        posService.refundOrder(Number(orderId!), {
           amount: fullRefund ? null : Number(amount),
           reason,
           full: fullRefund,

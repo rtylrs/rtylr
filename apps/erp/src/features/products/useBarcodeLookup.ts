@@ -4,9 +4,6 @@ import { erpApi, Product } from '../../shared/services/erpApi';
 
 export function useBarcodeLookup() {
   return useMutation<Product | null, unknown, string>({
-    mutationFn: async (barcode: string) => {
-      const res = await erpApi.lookupBarcode(barcode);
-      return res.data ?? null;
-    },
+    mutationFn: (barcode: string) => unwrap(erpApi.lookupBarcode(barcode)),
   });
 }

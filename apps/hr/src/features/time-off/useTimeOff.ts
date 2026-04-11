@@ -13,7 +13,7 @@ export function useSubmitTimeOff() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { staffId: number; startDate: string; endDate: string; reason: string }) =>
-      hrApi.submitTimeOff(data),
+      unwrap(hrApi.submitTimeOff(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
   });
 }

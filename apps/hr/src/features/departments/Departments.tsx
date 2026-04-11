@@ -38,7 +38,7 @@ function fmt(n: number): string {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const cardAnim = {
+const cardAnim: Record<string, any> = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };

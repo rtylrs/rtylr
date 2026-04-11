@@ -15,6 +15,7 @@ import {
   TableHead,
   TableCell,
   Badge,
+  Button,
 } from '../../shared/components/ui';
 
 type OrderStatus = 'all' | 'pending' | 'in_progress' | 'completed';

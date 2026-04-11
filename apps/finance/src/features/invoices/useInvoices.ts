@@ -46,7 +46,7 @@ export function useUpdateInvoiceStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
-      financeApi.updateInvoiceStatus(id, status),
+      unwrap(financeApi.updateInvoiceStatus(id, status)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }

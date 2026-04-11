@@ -65,9 +65,9 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
       };
 
       if (addOrEdit === 'add') {
-        addCategory(categoryPayload);
+        addCategory(categoryPayload as any);
       } else if (addOrEdit === 'edit' && categoryData) {
-        editCategory(categoryData?._id, categoryPayload);
+        editCategory(categoryData?._id, categoryPayload as any);
       }
       setCategory('');
       setDescription('');

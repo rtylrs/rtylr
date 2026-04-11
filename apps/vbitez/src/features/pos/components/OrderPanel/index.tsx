@@ -16,7 +16,7 @@ interface OrderPanelProps {
 
 const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, clearCart, updateNotes, total } = useCartStore();
+  const { items, updateQuantity, removeItem, clearCart, updateItemNotes, total } = useCartStore();
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
 
@@ -191,7 +191,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         title={`Note for ${notingItem?.name ?? ''}`}
         onCancel={() => setNotingItemId(null)}
         onSave={(val) => {
-          if (notingItemId) updateNotes(notingItemId, val);
+          if (notingItemId) updateItemNotes(notingItemId, val);
           setNotingItemId(null);
         }}
       />

@@ -1,4 +1,4 @@
-import { LayoutType } from '../layouts/types';
+import { LayoutType } from '../../layouts/types';
 
 /**
  * Maps route paths to their layout types

@@ -161,8 +161,7 @@ const AdminDashboard: React.FC = () => {
           rowHeight={80}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}
-          isDraggable={showCatalog}
-          isResizable={showCatalog}
+          {...({ isDraggable: showCatalog, isResizable: showCatalog } as any)}
           draggableHandle=".widget-drag-handle"
           containerPadding={[0, 0]}
           margin={[12, 12]}

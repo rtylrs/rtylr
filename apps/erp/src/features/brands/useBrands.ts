@@ -5,9 +5,6 @@ import { erpApi, Brand } from '../../shared/services/erpApi';
 export function useBrands() {
   return useQuery<Brand[]>({
     queryKey: ['brands'],
-    queryFn: async () => {
-      const res = await erpApi.listBrands();
-      return res.data ?? [];
-    },
+    queryFn: () => unwrap(erpApi.listBrands()),
   });
 }
