@@ -20,8 +20,8 @@ const Bills: React.FC = () => {
   const { data = [], isLoading } = useBills();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const unpaid = data.filter((b) => b.status === 'unpaid' || b.status === 'overdue');
-  const totalDue = unpaid.reduce((s, b) => s + b.amount, 0);
+  const unpaid = data.filter((b: any) => b.status === 'unpaid' || b.status === 'overdue');
+  const totalDue = unpaid.reduce((s: any, b: any) => s + b.amount, 0);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -93,7 +93,7 @@ const Bills: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((b) => (
+              {data.map((b: any) => (
                 <tr key={b.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td style={{ padding: '12px 16px', width: 32 }}>
                     <input

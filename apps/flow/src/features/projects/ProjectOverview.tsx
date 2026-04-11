@@ -170,7 +170,7 @@ const ProjectOverview: React.FC = () => {
             </p>
           ) : (
             <div className="space-y-3">
-              {milestones.map((m) => (
+              {milestones.map((m: any) => (
                 <div key={m.id}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>

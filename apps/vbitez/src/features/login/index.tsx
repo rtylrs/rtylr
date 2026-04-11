@@ -85,8 +85,8 @@ const PinLogin: React.FC = () => {
                 error
                   ? 'border-destructive bg-destructive/30'
                   : i < pin.length
-                  ? 'border-pos-text bg-pos-text'
-                  : 'border-pos-muted bg-transparent'
+                    ? 'border-pos-text bg-pos-text'
+                    : 'border-pos-muted bg-transparent'
               }`}
             />
           ))}
@@ -105,8 +105,8 @@ const PinLogin: React.FC = () => {
                     key === ''
                       ? 'invisible'
                       : key === '⌫'
-                      ? 'bg-transparent text-pos-muted hover:bg-white/8'
-                      : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
+                        ? 'bg-transparent text-pos-muted hover:bg-white/8'
+                        : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
                   }`}
                   onClick={() => handleKey(key)}
                   disabled={loading || key === ''}

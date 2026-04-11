@@ -334,7 +334,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
     const stillValid = current && ws.some((w) => w.id === current);
     const nextActive = stillValid
       ? current
-      : ws.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? ws[0]?.id ?? '';
+      : (ws.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? ws[0]?.id ?? '');
     set({ workspaces: ws, activeWorkspaceId: nextActive });
   },
   setMembers: (m) => set({ members: m }),

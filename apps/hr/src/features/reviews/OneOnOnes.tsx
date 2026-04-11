@@ -121,8 +121,8 @@ const OneOnOnes: React.FC = () => {
                     o.status === 'Completed'
                       ? '#10b981'
                       : o.status === 'Cancelled'
-                      ? '#ef4444'
-                      : '#3b82f6'
+                        ? '#ef4444'
+                        : '#3b82f6'
                   }
                 >
                   {o.status}

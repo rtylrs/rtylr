@@ -18,7 +18,7 @@ const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
   const [matches, setMatches] = useState<Record<string, string>>({});
 
-  const unmatched = transactions.filter((t) => !t.matched && !matches[t.id]);
+  const unmatched = transactions.filter((t: any) => !t.matched && !matches[t.id]);
 
   const match = (txId: string, candidateId: string) => {
     setMatches((prev) => ({ ...prev, [txId]: candidateId }));
@@ -42,7 +42,7 @@ const Reconcile: React.FC = () => {
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {unmatched.map((t) => (
+        {unmatched.map((t: any) => (
           <div key={t.id} style={{ ...cardStyle, padding: 16 }}>
             <div
               style={{

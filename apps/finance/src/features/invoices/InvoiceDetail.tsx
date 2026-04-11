@@ -39,7 +39,7 @@ const InvoiceDetail: React.FC = () => {
 
   const paymentStatus =
     invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
-  const balanceDue = invoice.amount - invoice.paid;
+  const balanceDue = invoice.amount - (invoice.paid ?? 0);
 
   const clientObj = { id: 'c1', name: invoice.client, email: invoice.clientEmail };
 
@@ -98,7 +98,7 @@ const InvoiceDetail: React.FC = () => {
           client={clientObj}
           issuedDate={invoice.issuedDate}
           dueDate={invoice.dueDate}
-          items={invoice.items}
+          items={invoice.items as any}
           notes={invoice.notes}
           discount={invoice.discount}
         />
@@ -168,7 +168,7 @@ const InvoiceDetail: React.FC = () => {
             >
               History
             </div>
-            {invoice.history.map((h, i) => (
+            {invoice.history?.map((h, i) => (
               <div
                 key={i}
                 style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}

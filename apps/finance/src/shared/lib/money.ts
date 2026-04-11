@@ -33,7 +33,7 @@ export function formatMoney(
   currency: Currency = 'USD',
   fractionDigits = 2
 ): string {
-  const n = typeof value === 'string' ? parseFloat(value) : value ?? 0;
+  const n = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
   if (!isFinite(n as number)) return '-';
   try {
     return (n as number).toLocaleString('en-US', {

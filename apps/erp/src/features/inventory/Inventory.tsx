@@ -194,8 +194,8 @@ const Inventory: React.FC = () => {
                         product.stock === 0
                           ? '#f87171'
                           : product.stock < product.lowStock
-                          ? AMBER
-                          : 'var(--hub-text)',
+                            ? AMBER
+                            : 'var(--hub-text)',
                     }}
                   >
                     {product.stock}

@@ -22,7 +22,7 @@ const sections: NavSection[] = [
     ],
   },
   {
-    title: 'Platform',
+    title: 'Apps',
     items: [
       { label: 'Hub', href: '/docs/hub' },
       { label: 'POS', href: '/docs/pos' },
@@ -33,14 +33,17 @@ const sections: NavSection[] = [
       { label: 'Flow', href: '/docs/flow' },
       { label: 'Store', href: '/docs/store' },
       { label: 'Book', href: '/docs/book' },
+      { label: 'Support', href: '/docs/support' },
+      { label: 'Insights', href: '/docs/insights' },
     ],
   },
   {
-    title: 'Guides',
+    title: 'Platform',
     items: [
+      { label: 'Multi-Tenant', href: '/docs/multi-tenant' },
+      { label: 'Addon System', href: '/docs/addons' },
       { label: 'Authentication', href: '/docs/authentication' },
       { label: 'Team Management', href: '/docs/team-management' },
-      { label: 'Addons', href: '/docs/addons' },
       { label: 'Billing', href: '/docs/billing' },
     ],
   },
@@ -56,8 +59,8 @@ const sections: NavSection[] = [
   {
     title: 'Resources',
     items: [
-      { label: 'Changelog', href: '/changelog' },
       { label: 'FAQ', href: '/docs/faq' },
+      { label: 'Changelog', href: '/changelog' },
       { label: 'Contact', href: '/docs/contact' },
     ],
   },
@@ -65,8 +68,8 @@ const sections: NavSection[] = [
 
 const sectionIcons: Record<string, React.ReactNode> = {
   'Getting Started': <Book size={14} />,
-  Platform: <Layers size={14} />,
-  Guides: <Users size={14} />,
+  Apps: <Layers size={14} />,
+  Platform: <Users size={14} />,
   API: <Code size={14} />,
   Resources: <FileText size={14} />,
 };

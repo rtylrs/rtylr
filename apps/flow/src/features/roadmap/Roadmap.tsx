@@ -37,7 +37,7 @@ const Roadmap: React.FC = () => {
             transition={{ duration: 0.18, delay: i * 0.04 }}
           >
             <Link
-              to={`/w/${p.workspaceId}/p/${p.id}/overview`}
+              to={`/w/${(p as any).workspaceId}/p/${p.id}/overview`}
               className="block rounded-xl p-5"
               style={{
                 background: 'var(--flow-card)',
@@ -57,19 +57,19 @@ const Roadmap: React.FC = () => {
                       {p.name}
                     </p>
                     <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                      {p.description}
+                      {(p as any).description}
                     </p>
                   </div>
                 </div>
                 <AvatarStack
-                  members={p.memberAvatars.map((a) => ({ name: a, initials: a }))}
+                  members={(p as any).memberAvatars.map((a: any) => ({ name: a, initials: a }))}
                   size={22}
                   max={4}
                 />
               </div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {p.doneCount} of {p.tasks.length || p.taskCount} tasks done
+                  {p.doneCount} of {p.tasks.length || (p as any).taskCount} tasks done
                 </span>
                 <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {p.progress}%

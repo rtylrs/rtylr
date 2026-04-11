@@ -117,8 +117,8 @@ const Select: React.FC<SelectProps & { isSearchable?: boolean }> = ({
       backgroundColor: state.isSelected
         ? 'rgba(26, 26, 26, 0.08)'
         : state.isFocused
-        ? 'rgba(26, 26, 26, 0.05)'
-        : 'transparent',
+          ? 'rgba(26, 26, 26, 0.05)'
+          : 'transparent',
       color: '#1a1a1a',
       cursor: 'pointer',
       padding: '14px 16px',

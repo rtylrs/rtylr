@@ -21,7 +21,7 @@ const MoneyDisplay: React.FC<MoneyDisplayProps> = ({
 }) => {
   const settingsCurrency = useSettings((s) => s.currency);
   const c = currency ?? settingsCurrency;
-  const n = typeof amount === 'string' ? parseFloat(amount) : amount ?? 0;
+  const n = typeof amount === 'string' ? parseFloat(amount) : (amount ?? 0);
   const text = formatMoney(n, c, fractionDigits);
   const sign = signed && (n as number) > 0 ? '+' : '';
   return (

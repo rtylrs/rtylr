@@ -23,7 +23,7 @@ const ChartOfAccounts: React.FC = () => {
   const [filter, setFilter] = useState<AccountType | 'all'>('all');
   const [query, setQuery] = useState('');
 
-  const filtered = data.filter((a) => {
+  const filtered = data.filter((a: any) => {
     const matchesType = filter === 'all' || a.type === filter;
     const matchesQuery =
       !query || a.name.toLowerCase().includes(query.toLowerCase()) || a.code.includes(query);
@@ -119,7 +119,7 @@ const ChartOfAccounts: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((a) => (
+              {filtered.map((a: any) => (
                 <tr key={a.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td
                     style={{

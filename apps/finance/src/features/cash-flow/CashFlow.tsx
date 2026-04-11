@@ -12,9 +12,9 @@ const CashFlow: React.FC = () => {
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [date, setDate] = useState(new Date());
 
-  const net = data.reduce((s, d) => s + (d.inflow - d.outflow), 0);
-  const totalIn = data.reduce((s, d) => s + d.inflow, 0);
-  const totalOut = data.reduce((s, d) => s + d.outflow, 0);
+  const net = data.reduce((s: any, d: any) => s + (d.inflow - d.outflow), 0);
+  const totalIn = data.reduce((s: any, d: any) => s + d.inflow, 0);
+  const totalOut = data.reduce((s: any, d: any) => s + d.outflow, 0);
 
   return (
     <motion.div

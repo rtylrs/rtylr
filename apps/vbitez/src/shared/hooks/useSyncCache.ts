@@ -14,7 +14,9 @@ export function useSyncCache() {
     try {
       // Sync products
       const productsData = await unwrap(posService.getMenuItems());
-      const items = Array.isArray(productsData) ? productsData : (productsData as any)?.items ?? [];
+      const items = Array.isArray(productsData)
+        ? productsData
+        : ((productsData as any)?.items ?? []);
       if (items.length > 0) {
         await db.products.clear();
         await db.products.bulkPut(
@@ -37,7 +39,7 @@ export function useSyncCache() {
 
       // Sync modifiers
       const modsData = await unwrap(posService.getModifiers());
-      const mods = Array.isArray(modsData) ? modsData : (modsData as any)?.modifiers ?? [];
+      const mods = Array.isArray(modsData) ? modsData : ((modsData as any)?.modifiers ?? []);
       if (mods.length > 0) {
         await db.modifiers.clear();
         await db.modifiers.bulkPut(
@@ -54,7 +56,7 @@ export function useSyncCache() {
 
       // Sync combos
       const combosData = await unwrap(posService.getCombos());
-      const combos = Array.isArray(combosData) ? combosData : (combosData as any)?.combos ?? [];
+      const combos = Array.isArray(combosData) ? combosData : ((combosData as any)?.combos ?? []);
       if (combos.length > 0) {
         await db.combos.clear();
         await db.combos.bulkPut(
@@ -80,9 +82,12 @@ export function useSyncCache() {
   useEffect(() => {
     syncAll();
     // Re-sync every 5 minutes while online
-    const interval = setInterval(() => {
-      if (navigator.onLine) syncAll();
-    }, 5 * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        if (navigator.onLine) syncAll();
+      },
+      5 * 60 * 1000
+    );
     return () => clearInterval(interval);
   }, [syncAll]);
 

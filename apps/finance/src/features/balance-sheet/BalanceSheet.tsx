@@ -81,9 +81,9 @@ const BalanceSheet: React.FC = () => {
     );
   }
 
-  const totalAssets = data.assets.reduce((s, r) => s + r.amount, 0);
-  const totalLiab = data.liabilities.reduce((s, r) => s + r.amount, 0);
-  const totalEquity = data.equity.reduce((s, r) => s + r.amount, 0);
+  const totalAssets = data.assets.reduce((s: any, r: any) => s + r.amount, 0);
+  const totalLiab = data.liabilities.reduce((s: any, r: any) => s + r.amount, 0);
+  const totalEquity = data.equity.reduce((s: any, r: any) => s + r.amount, 0);
 
   return (
     <motion.div

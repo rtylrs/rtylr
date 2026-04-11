@@ -145,7 +145,7 @@ const Services: React.FC = () => {
                 <div className="flex items-center gap-1">
                   <Users size={11} style={{ color: 'var(--hub-text-dim)' }} />
                   <span className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
-                    {Array.isArray(svc.staff) ? svc.staff.join(', ') : svc.staffCount ?? 0}
+                    {Array.isArray(svc.staff) ? svc.staff.join(', ') : (svc.staffCount ?? 0)}
                   </span>
                 </div>
                 <div className="flex justify-end">

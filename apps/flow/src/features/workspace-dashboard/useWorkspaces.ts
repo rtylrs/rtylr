@@ -68,7 +68,7 @@ export function useDeleteWorkspace() {
         const next = state.workspaces.filter((w) => w.id !== id);
         const nextActive =
           state.activeWorkspaceId === id
-            ? next.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? next[0]?.id ?? ''
+            ? (next.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? next[0]?.id ?? '')
             : state.activeWorkspaceId;
         useFlowStore.setState({ workspaces: next, activeWorkspaceId: nextActive });
         return Promise.resolve();

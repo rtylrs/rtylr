@@ -320,7 +320,7 @@ const WorkspaceDashboard: React.FC = () => {
           </div>
 
           <div className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
-            {myTasks.slice(0, 4).map((task, i) => (
+            {myTasks.slice(0, 4).map((task: any, i: any) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, x: -8 }}

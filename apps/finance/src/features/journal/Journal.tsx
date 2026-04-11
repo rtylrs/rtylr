@@ -33,9 +33,9 @@ const Journal: React.FC = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {data.map((e) => {
-            const debits = e.lines.reduce((s, l) => s + l.debit, 0);
-            const credits = e.lines.reduce((s, l) => s + l.credit, 0);
+          {data.map((e: any) => {
+            const debits = e.lines.reduce((s: any, l: any) => s + l.debit, 0);
+            const credits = e.lines.reduce((s: any, l: any) => s + l.credit, 0);
             return (
               <div key={e.id} style={{ ...cardStyle, padding: 18 }}>
                 <div
@@ -102,7 +102,7 @@ const Journal: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {e.lines.map((l, i) => (
+                    {e.lines.map((l: any, i: any) => (
                       <tr key={i} style={{ borderTop: '1px solid var(--hub-border)' }}>
                         <td style={{ padding: '8px 4px', fontSize: 13, color: 'var(--hub-text)' }}>
                           {l.account}

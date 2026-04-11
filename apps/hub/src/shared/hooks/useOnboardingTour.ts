@@ -11,14 +11,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Skip tour',
-        action: function () {
+        action: function (this: any) {
           this.complete();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function () {
+        action: function (this: any) {
           this.next();
         },
       },
@@ -31,14 +31,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function () {
+        action: function (this: any) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function () {
+        action: function (this: any) {
           this.next();
         },
       },
@@ -51,14 +51,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function () {
+        action: function (this: any) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function () {
+        action: function (this: any) {
           this.next();
         },
       },
@@ -71,14 +71,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function () {
+        action: function (this: any) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function () {
+        action: function (this: any) {
           this.next();
         },
       },
@@ -91,14 +91,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function () {
+        action: function (this: any) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function () {
+        action: function (this: any) {
           this.next();
         },
       },
@@ -111,14 +111,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function () {
+        action: function (this: any) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Done',
-        action: function () {
+        action: function (this: any) {
           this.complete();
         },
       },
