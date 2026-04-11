@@ -1,64 +1,64 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 export const insightsService = {
   // Dashboard / KPIs
-  getKpis: () => api.get('/hub/kpis'),
-  getDashboardSummary: () => api.get('/insights/dashboard'),
+  getKpis: () => safe.get('/hub/kpis'),
+  getDashboardSummary: () => safe.get('/insights/dashboard'),
 
   // Revenue
   getRevenue: (params?: { period?: string; start?: string; end?: string }) =>
-    api.get('/insights/revenue', { params }),
+    safe.get('/insights/revenue', { params }),
   getRevenueByApp: (params?: { period?: string; start?: string; end?: string }) =>
-    api.get('/insights/revenue/by-app', { params }),
+    safe.get('/insights/revenue/by-app', { params }),
   getRevenueComparison: (params?: { period?: string }) =>
-    api.get('/insights/revenue/comparison', { params }),
+    safe.get('/insights/revenue/comparison', { params }),
 
   // Customers
-  getCustomerAnalytics: () => api.get('/insights/customers'),
+  getCustomerAnalytics: () => safe.get('/insights/customers'),
   getTopCustomers: (params?: { limit?: number }) =>
-    api.get('/insights/customers/top', { params }),
-  getCustomerChurn: () => api.get('/insights/customers/churn'),
-  getCustomerLtv: () => api.get('/insights/customers/ltv'),
+    safe.get('/insights/customers/top', { params }),
+  getCustomerChurn: () => safe.get('/insights/customers/churn'),
+  getCustomerLtv: () => safe.get('/insights/customers/ltv'),
 
   // Products
-  getProductPerformance: () => api.get('/insights/products'),
+  getProductPerformance: () => safe.get('/insights/products'),
   getBestSellers: (params?: { limit?: number }) =>
-    api.get('/insights/products/best-sellers', { params }),
+    safe.get('/insights/products/best-sellers', { params }),
   getSlowMovers: (params?: { limit?: number }) =>
-    api.get('/insights/products/slow-movers', { params }),
-  getMarginAnalysis: () => api.get('/insights/products/margins'),
-  getCategoryBreakdown: () => api.get('/insights/products/categories'),
-  getErpProducts: () => api.get('/erp/products'),
+    safe.get('/insights/products/slow-movers', { params }),
+  getMarginAnalysis: () => safe.get('/insights/products/margins'),
+  getCategoryBreakdown: () => safe.get('/insights/products/categories'),
+  getErpProducts: () => safe.get('/erp/products'),
 
   // Operations
-  getOperationsSummary: () => api.get('/insights/operations'),
-  getStaffUtilization: () => api.get('/insights/operations/utilization'),
-  getShiftCoverage: () => api.get('/insights/operations/shifts'),
-  getTimeOffTrends: () => api.get('/insights/operations/time-off'),
-  getDeptHeadcount: () => api.get('/insights/operations/headcount'),
-  getHrDashboard: () => api.get('/hr/dashboard'),
+  getOperationsSummary: () => safe.get('/insights/operations'),
+  getStaffUtilization: () => safe.get('/insights/operations/utilization'),
+  getShiftCoverage: () => safe.get('/insights/operations/shifts'),
+  getTimeOffTrends: () => safe.get('/insights/operations/time-off'),
+  getDeptHeadcount: () => safe.get('/insights/operations/headcount'),
+  getHrDashboard: () => safe.get('/hr/dashboard'),
 
   // Financial
   getProfitLoss: (params?: { start?: string; end?: string }) =>
-    api.get('/finance/pl', { params }),
+    safe.get('/finance/pl', { params }),
   getExpenseBreakdown: (params?: { start?: string; end?: string }) =>
-    api.get('/insights/financial/expenses', { params }),
-  getInvoiceAging: () => api.get('/insights/financial/invoice-aging'),
+    safe.get('/insights/financial/expenses', { params }),
+  getInvoiceAging: () => safe.get('/insights/financial/invoice-aging'),
   getCashFlow: (params?: { period?: string }) =>
-    api.get('/insights/financial/cash-flow', { params }),
+    safe.get('/insights/financial/cash-flow', { params }),
 
   // Reports
-  getReportTemplates: () => api.get('/insights/reports/templates'),
+  getReportTemplates: () => safe.get('/insights/reports/templates'),
   generateReport: (templateId: string, params?: Record<string, string>) =>
-    api.post(`/insights/reports/generate/${templateId}`, params),
+    safe.post(`/insights/reports/generate/${templateId}`, params),
   exportReport: (templateId: string, format: 'csv' | 'pdf', params?: Record<string, string>) =>
-    api.post(`/insights/reports/export/${templateId}`, { format, ...params }, { responseType: 'blob' }),
+    safe.post(`/insights/reports/export/${templateId}`, { format, ...params }, { responseType: 'blob' }),
 
   // Settings
-  getInsightsSettings: () => api.get('/insights/settings'),
-  updateInsightsSettings: (data: any) => api.put('/insights/settings', data),
-  getScheduledReports: () => api.get('/insights/settings/scheduled-reports'),
-  updateScheduledReport: (id: string, data: any) => api.put(`/insights/settings/scheduled-reports/${id}`, data),
-  createScheduledReport: (data: any) => api.post('/insights/settings/scheduled-reports', data),
-  deleteScheduledReport: (id: string) => api.delete(`/insights/settings/scheduled-reports/${id}`),
+  getInsightsSettings: () => safe.get('/insights/settings'),
+  updateInsightsSettings: (data: any) => safe.put('/insights/settings', data),
+  getScheduledReports: () => safe.get('/insights/settings/scheduled-reports'),
+  updateScheduledReport: (id: string, data: any) => safe.put(`/insights/settings/scheduled-reports/${id}`, data),
+  createScheduledReport: (data: any) => safe.post('/insights/settings/scheduled-reports', data),
+  deleteScheduledReport: (id: string) => safe.delete(`/insights/settings/scheduled-reports/${id}`),
 };

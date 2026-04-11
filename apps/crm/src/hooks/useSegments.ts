@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi, Segment } from '../services/crmApi';
 
 export function useSegments() {
   return useQuery({
     queryKey: ['segments'],
-    queryFn: () => crmApi.getSegments(),
+    queryFn: () => unwrap(crmApi.getSegments()),
   });
 }
 
 export function useSegmentById(id: number | undefined) {
   return useQuery({
     queryKey: ['segment', id],
-    queryFn: () => crmApi.getSegmentById(id!),
+    queryFn: () => unwrap(crmApi.getSegmentById(id!)),
     enabled: !!id,
   });
 }
@@ -19,7 +20,7 @@ export function useSegmentById(id: number | undefined) {
 export function useSegmentCustomers(id: number | undefined) {
   return useQuery({
     queryKey: ['segment-customers', id],
-    queryFn: () => crmApi.getSegmentCustomers(id!),
+    queryFn: () => unwrap(crmApi.getSegmentCustomers(id!)),
     enabled: !!id,
   });
 }
@@ -27,7 +28,7 @@ export function useSegmentCustomers(id: number | undefined) {
 export function useCreateSegment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Segment>) => crmApi.createSegment(data),
+    mutationFn: (data: Partial<Segment>) => unwrap(crmApi.createSegment(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['segments'] }),
   });
 }
@@ -35,7 +36,7 @@ export function useCreateSegment() {
 export function useUpdateSegment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Segment> }) => crmApi.updateSegment(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Segment> }) => unwrap(crmApi.updateSegment(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['segments'] }),
   });
 }
@@ -43,7 +44,7 @@ export function useUpdateSegment() {
 export function useDeleteSegment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => crmApi.deleteSegment(id),
+    mutationFn: (id: number) => unwrap(crmApi.deleteSegment(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['segments'] }),
   });
 }

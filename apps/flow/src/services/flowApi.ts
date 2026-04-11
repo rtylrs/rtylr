@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // -- Types ----------------------------------------------------------------
 
@@ -114,53 +114,53 @@ export interface ApiRoadmap {
 
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
-    api.get<DashboardStats>('/flow/dashboard', { params: workspaceId ? { workspaceId } : undefined })
-      .then((r) => r.data),
+    safe.get<DashboardStats>('/flow/dashboard', { params: workspaceId ? { workspaceId } : undefined })
+      ,
 
   // -- Workspaces ---------------------------------------------------------
 
   getWorkspaces: () =>
-    api.get<ApiWorkspace[]>('/flow/workspaces').then((r) => r.data),
+    safe.get<ApiWorkspace[]>('/flow/workspaces'),
 
   createWorkspace: (data: { name: string; color: string }) =>
-    api.post<ApiWorkspace>('/flow/workspaces', data).then((r) => r.data),
+    safe.post<ApiWorkspace>('/flow/workspaces', data),
 
   updateWorkspace: (id: string, data: Partial<{ name: string; color: string }>) =>
-    api.post<ApiWorkspace>(`/flow/workspaces/${id}`, data).then((r) => r.data),
+    safe.post<ApiWorkspace>(`/flow/workspaces/${id}`, data),
 
   deleteWorkspace: (id: string) =>
-    api.post(`/flow/workspaces/${id}/delete`).then((r) => r.data),
+    safe.post(`/flow/workspaces/${id}/delete`),
 
   addWorkspaceMember: (data: { workspaceId: string; userId: string; role?: string }) =>
-    api.post('/flow/workspaces/member', data).then((r) => r.data),
+    safe.post('/flow/workspaces/member', data),
 
   removeWorkspaceMember: (userId: string, workspaceId: string) =>
-    api.post(`/flow/workspaces/member/${userId}`, { workspaceId }).then((r) => r.data),
+    safe.post(`/flow/workspaces/member/${userId}`, { workspaceId }),
 
   // -- Projects -----------------------------------------------------------
 
   getProjects: (workspaceId: string) =>
-    api.get<ApiProject[]>('/flow/projects', { params: { workspaceId } }).then((r) => r.data),
+    safe.get<ApiProject[]>('/flow/projects', { params: { workspaceId } }),
 
   createProject: (data: { workspaceId: string; name: string; color?: string }) =>
-    api.post<ApiProject>('/flow/projects', data).then((r) => r.data),
+    safe.post<ApiProject>('/flow/projects', data),
 
   updateProject: (id: string, data: Partial<{ name: string; color: string }>) =>
-    api.post<ApiProject>(`/flow/projects/${id}`, data).then((r) => r.data),
+    safe.post<ApiProject>(`/flow/projects/${id}`, data),
 
   deleteProject: (id: string) =>
-    api.post(`/flow/projects/${id}/delete`).then((r) => r.data),
+    safe.post(`/flow/projects/${id}/delete`),
 
   // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
-    api.get<ApiTask[]>('/flow/tasks', { params }).then((r) => r.data),
+    safe.get<ApiTask[]>('/flow/tasks', { params }),
 
   getMyTasks: () =>
-    api.get<ApiTask[]>('/flow/tasks/my').then((r) => r.data),
+    safe.get<ApiTask[]>('/flow/tasks/my'),
 
   getTaskDetail: (id: string) =>
-    api.get<ApiTask>('/flow/tasks/detail', { params: { id } }).then((r) => r.data),
+    safe.get<ApiTask>('/flow/tasks/detail', { params: { id } }),
 
   createTask: (data: {
     projectId: string;
@@ -171,79 +171,79 @@ export const flowApi = {
     assigneeId?: string;
     dueDate?: string;
   }) =>
-    api.post<ApiTask>('/flow/tasks', data).then((r) => r.data),
+    safe.post<ApiTask>('/flow/tasks', data),
 
   updateTask: (id: string, data: Partial<ApiTask>) =>
-    api.post<ApiTask>(`/flow/tasks/${id}`, data).then((r) => r.data),
+    safe.post<ApiTask>(`/flow/tasks/${id}`, data),
 
   deleteTask: (id: string) =>
-    api.post(`/flow/tasks/${id}/delete`).then((r) => r.data),
+    safe.post(`/flow/tasks/${id}/delete`),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
-    api.post('/flow/tasks/status', { id, status }).then((r) => r.data),
+    safe.post('/flow/tasks/status', { id, status }),
 
   addComment: (data: { taskId: string; content: string }) =>
-    api.post('/flow/tasks/comment', data).then((r) => r.data),
+    safe.post('/flow/tasks/comment', data),
 
   deleteComment: (id: string) =>
-    api.delete(`/flow/tasks/comment/${id}`).then((r) => r.data),
+    safe.delete(`/flow/tasks/comment/${id}`),
 
   // -- Labels -------------------------------------------------------------
 
   getLabels: () =>
-    api.get<ApiLabel[]>('/flow/labels').then((r) => r.data),
+    safe.get<ApiLabel[]>('/flow/labels'),
 
   createLabel: (data: { name: string; color: string }) =>
-    api.post<ApiLabel>('/flow/labels', data).then((r) => r.data),
+    safe.post<ApiLabel>('/flow/labels', data),
 
   // -- Milestones ---------------------------------------------------------
 
   getMilestones: (projectId?: string) =>
-    api.get<ApiMilestone[]>('/flow/milestones', { params: projectId ? { projectId } : undefined }).then((r) => r.data),
+    safe.get<ApiMilestone[]>('/flow/milestones', { params: projectId ? { projectId } : undefined }),
 
   createMilestone: (data: Partial<ApiMilestone>) =>
-    api.post<ApiMilestone>('/flow/milestones', data).then((r) => r.data),
+    safe.post<ApiMilestone>('/flow/milestones', data),
 
   updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
-    api.put<ApiMilestone>(`/flow/milestones/${id}`, data).then((r) => r.data),
+    safe.put<ApiMilestone>(`/flow/milestones/${id}`, data),
 
   // -- Cycles -------------------------------------------------------------
 
   getCycles: (workspaceId?: string) =>
-    api.get<ApiCycle[]>('/flow/cycles', { params: workspaceId ? { workspaceId } : undefined }).then((r) => r.data),
+    safe.get<ApiCycle[]>('/flow/cycles', { params: workspaceId ? { workspaceId } : undefined }),
 
   createCycle: (data: Partial<ApiCycle>) =>
-    api.post<ApiCycle>('/flow/cycles', data).then((r) => r.data),
+    safe.post<ApiCycle>('/flow/cycles', data),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
-    api.put<ApiCycle>(`/flow/cycles/${id}`, data).then((r) => r.data),
+    safe.put<ApiCycle>(`/flow/cycles/${id}`, data),
 
   // -- Views --------------------------------------------------------------
 
   getViews: () =>
-    api.get<ApiView[]>('/flow/views').then((r) => r.data),
+    safe.get<ApiView[]>('/flow/views'),
 
   createView: (data: Partial<ApiView>) =>
-    api.post<ApiView>('/flow/views', data).then((r) => r.data),
+    safe.post<ApiView>('/flow/views', data),
 
   updateView: (id: string, data: Partial<ApiView>) =>
-    api.put<ApiView>(`/flow/views/${id}`, data).then((r) => r.data),
+    safe.put<ApiView>(`/flow/views/${id}`, data),
 
   deleteView: (id: string) =>
-    api.delete(`/flow/views/${id}`).then((r) => r.data),
+    safe.delete(`/flow/views/${id}`),
 
   // -- Insights -----------------------------------------------------------
 
   getInsights: (workspaceId?: string) =>
-    api.get<ApiInsights>('/flow/insights', { params: workspaceId ? { workspaceId } : undefined }).then((r) => r.data),
+    safe.get<ApiInsights>('/flow/insights', { params: workspaceId ? { workspaceId } : undefined }),
 
   // -- Team workload ------------------------------------------------------
 
   getTeamWorkload: () =>
-    api.get<ApiTeamWorkload[]>('/flow/team/workload').then((r) => r.data),
+    safe.get<ApiTeamWorkload[]>('/flow/team/workload'),
 
   // -- Roadmap ------------------------------------------------------------
 
   getRoadmap: () =>
-    api.get<ApiRoadmap[]>('/flow/roadmap').then((r) => r.data),
+    safe.get<ApiRoadmap[]>('/flow/roadmap'),
 };

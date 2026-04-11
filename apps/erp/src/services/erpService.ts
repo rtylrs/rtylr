@@ -1,25 +1,25 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 export const erpService = {
   // Products
   getProducts: (params?: { search?: string; categoryId?: number; limit?: number; offset?: number }) =>
-    api.get('/erp/products', { params }),
-  createProduct: (data: any) => api.post('/erp/products', data),
-  updateProduct: (id: number, data: any) => api.put(`/erp/products/${id}`, data),
-  deleteProduct: (id: number) => api.delete(`/erp/products/${id}`),
+    safe.get('/erp/products', { params }),
+  createProduct: (data: any) => safe.post('/erp/products', data),
+  updateProduct: (id: number, data: any) => safe.put(`/erp/products/${id}`, data),
+  deleteProduct: (id: number) => safe.delete(`/erp/products/${id}`),
 
   // Suppliers
-  getSuppliers: () => api.get('/erp/suppliers'),
-  createSupplier: (data: any) => api.post('/erp/suppliers', data),
-  updateSupplier: (id: number, data: any) => api.put(`/erp/suppliers/${id}`, data),
+  getSuppliers: () => safe.get('/erp/suppliers'),
+  createSupplier: (data: any) => safe.post('/erp/suppliers', data),
+  updateSupplier: (id: number, data: any) => safe.put(`/erp/suppliers/${id}`, data),
 
   // Inventory
-  getInventoryReport: () => api.get('/erp/inventory/report'),
-  getLowStock: () => api.get('/erp/inventory/low-stock'),
-  adjustInventory: (data: any) => api.post('/erp/inventory/adjust', data),
+  getInventoryReport: () => safe.get('/erp/inventory/report'),
+  getLowStock: () => safe.get('/erp/inventory/low-stock'),
+  adjustInventory: (data: any) => safe.post('/erp/inventory/adjust', data),
 
   // Purchase Orders
-  getPurchaseOrders: () => api.get('/erp/purchase-orders'),
-  createPurchaseOrder: (data: any) => api.post('/erp/purchase-orders', data),
-  updatePurchaseOrderStatus: (id: number, status: string) => api.put(`/erp/purchase-orders/${id}/status`, { status }),
+  getPurchaseOrders: () => safe.get('/erp/purchase-orders'),
+  createPurchaseOrder: (data: any) => safe.post('/erp/purchase-orders', data),
+  updatePurchaseOrderStatus: (id: number, status: string) => safe.put(`/erp/purchase-orders/${id}/status`, { status }),
 };

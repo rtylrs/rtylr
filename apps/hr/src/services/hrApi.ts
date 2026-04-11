@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -111,51 +111,51 @@ export interface HRDashboardStats {
 export const hrApi = {
   // Staff
   listStaff: () =>
-    api.get<StaffMember[]>('/hr/staff'),
+    safe.get<StaffMember[]>('/hr/staff'),
   createStaff: (data: CreateStaffInput) =>
-    api.post<StaffMember>('/hr/staff', data),
+    safe.post<StaffMember>('/hr/staff', data),
   updateStaff: (data: UpdateStaffInput) =>
-    api.post<StaffMember>('/hr/staff', data),
+    safe.post<StaffMember>('/hr/staff', data),
   deleteStaff: (id: number) =>
-    api.post<{ success: boolean }>('/hr/staff', { id, _action: 'delete' }),
+    safe.post<{ success: boolean }>('/hr/staff', { id, _action: 'delete' }),
   clockIn: (staffId: number) =>
-    api.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
+    safe.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
   clockOut: (staffId: number) =>
-    api.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
+    safe.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
 
   // Departments
   listDepartments: () =>
-    api.get<Department[]>('/hr/departments'),
+    safe.get<Department[]>('/hr/departments'),
   createDepartment: (data: CreateDepartmentInput) =>
-    api.post<Department>('/hr/departments', data),
+    safe.post<Department>('/hr/departments', data),
   updateDepartment: (data: UpdateDepartmentInput) =>
-    api.post<Department>('/hr/departments', data),
+    safe.post<Department>('/hr/departments', data),
 
   // Shifts
   listShifts: (params?: { day?: string; staffId?: number }) =>
-    api.get<Shift[]>('/hr/shifts', { params }),
+    safe.get<Shift[]>('/hr/shifts', { params }),
   createShift: (data: CreateShiftInput) =>
-    api.post<Shift>('/hr/shifts', data),
+    safe.post<Shift>('/hr/shifts', data),
   updateShift: (data: UpdateShiftInput) =>
-    api.post<Shift>('/hr/shifts', data),
+    safe.post<Shift>('/hr/shifts', data),
 
   // Payroll
   listPayroll: (params?: { period?: string }) =>
-    api.get<PayrollRow[]>('/hr/payroll', { params }),
+    safe.get<PayrollRow[]>('/hr/payroll', { params }),
   runPayroll: (period: string) =>
-    api.post<{ success: boolean }>('/hr/payroll/run', { period }),
+    safe.post<{ success: boolean }>('/hr/payroll/run', { period }),
   markPayrollPaid: (id: number) =>
-    api.post<{ success: boolean }>('/hr/payroll/paid', { id }),
+    safe.post<{ success: boolean }>('/hr/payroll/paid', { id }),
 
   // Time Off
   listTimeOff: () =>
-    api.get<TimeOffRequest[]>('/hr/time-off'),
+    safe.get<TimeOffRequest[]>('/hr/time-off'),
   submitTimeOff: (data: { staffId: number; startDate: string; endDate: string; reason: string }) =>
-    api.post<TimeOffRequest>('/hr/time-off', data),
+    safe.post<TimeOffRequest>('/hr/time-off', data),
   approveTimeOff: (id: number, approved: boolean) =>
-    api.post<{ success: boolean }>('/hr/time-off/approve', { id, approved }),
+    safe.post<{ success: boolean }>('/hr/time-off/approve', { id, approved }),
 
   // Dashboard
   getDashboard: () =>
-    api.get<HRDashboardStats>('/hr/dashboard'),
+    safe.get<HRDashboardStats>('/hr/dashboard'),
 };

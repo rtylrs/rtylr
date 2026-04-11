@@ -1,6 +1,7 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { useConfigStore } from '../../stores/configStore';
 import { toast } from 'sonner';
 
@@ -17,7 +18,7 @@ export const useGetConfig = () => {
   const query = useQuery({
     queryKey: ['config'],
     queryFn: async () => {
-      const response = await api.get('/config');
+      const response = await unwrap(safe.get('/config'));
       return response.data.config;
     },
   });
@@ -61,7 +62,7 @@ export const useUpdateConfig = () => {
 
   return useMutation({
     mutationFn: async (data: { aboutContent: string }) => {
-      const response = await api.put('/config/update', data);
+      const response = await unwrap(safe.put('/config/update', data));
       return response.data;
     },
     onSuccess: (data) => {
@@ -82,7 +83,7 @@ export const useGetFaqs = () => {
   const query = useQuery({
     queryKey: ['faqs'],
     queryFn: async () => {
-      const response = await api.get('/config/faqs');
+      const response = await unwrap(safe.get('/config/faqs'));
       return response.data;
     },
   });

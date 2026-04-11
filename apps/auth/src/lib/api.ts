@@ -1,44 +1,17 @@
-import axios from 'axios';
+import { createApiClient, safeFetch } from '@voxire/api';
+import type { SafeApi } from '@voxire/api';
 import i18next from 'i18next';
-import { getCookie } from './cookies';
 
-const getBaseUrl = () => {
-  return 'https://api.voxire.dev/';
+// Auth app uses createApiClient but doesn't redirect on 401 (it IS auth).
+// The 401 interceptor from createApiClient redirects to auth — which is fine
+// because if you're already on auth with an expired token, it just reloads.
+const api = createApiClient('auth');
 
-  // temp hide
-  const mode = getCookie('mode') || 'prod';
-  return mode === 'dev' ? 'http://localhost:9999/' : 'https://api.voxire.dev/';
-};
-
-const api = axios.create({
-  baseURL: getBaseUrl(),
+// Inject accept-language header from i18next
+api.interceptors.request.use((config) => {
+  config.headers['accept-language'] = i18next.language;
+  return config;
 });
 
-api.interceptors.request.use(
-  async (config) => {
-    try {
-      const user = getCookie('token');
-      if (user) {
-        config.headers['authorization'] = `Bearer ${user}`;
-      }
-      config.headers['accept-language'] = i18next.language;
-      return config;
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
+export const safe: SafeApi = safeFetch(api);
 export default api;

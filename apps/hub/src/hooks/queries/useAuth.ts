@@ -1,6 +1,7 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { useUserStore } from '../../stores/userStore';
 import { toast } from 'sonner';
 
@@ -26,7 +27,7 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
-      const response = await api.post('/auth/login', payload);
+      const response = await unwrap(safe.post('/auth/login', payload));
       return response.data;
     },
     onSuccess: (data) => {
@@ -51,7 +52,7 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (payload: RegisterPayload) => {
-      const response = await api.post('/auth/create/business', payload);
+      const response = await unwrap(safe.post('/auth/create/business', payload));
       return response.data;
     },
     onSuccess: (data) => {
@@ -76,7 +77,7 @@ export const useGoogleAuth = () => {
 
   return useMutation({
     mutationFn: async (payload: GoogleAuthPayload) => {
-      const response = await api.post('/auth/create/business/google', payload);
+      const response = await unwrap(safe.post('/auth/create/business/google', payload));
       return response.data;
     },
     onSuccess: (data) => {
@@ -101,7 +102,7 @@ export const useGetUserInfo = () => {
   const query = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const response = await api.get('/business/me');
+      const response = await unwrap(safe.get('/business/me'));
       return response.data;
     },
     enabled: !!document.cookie

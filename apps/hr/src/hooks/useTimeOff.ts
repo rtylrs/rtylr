@@ -1,10 +1,11 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrApi } from '../services/hrApi';
 
 export function useTimeOff() {
   return useQuery({
     queryKey: ['time-off'],
-    queryFn: () => hrApi.listTimeOff().then((r) => r.data || []),
+    queryFn: () => unwrap(hrApi.listTimeOff()),
   });
 }
 
@@ -20,7 +21,7 @@ export function useSubmitTimeOff() {
 export function useApproveTimeOff() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, approved }: { id: number; approved: boolean }) => hrApi.approveTimeOff(id, approved),
+    mutationFn: ({ id, approved }: { id: number; approved: boolean }) => unwrap(hrApi.approveTimeOff(id, approved)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
   });
 }

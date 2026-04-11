@@ -148,6 +148,29 @@ export function safeFetch(client: AxiosInstance): SafeApi {
   };
 }
 
+// ---------------------------------------------------------------------------
+// React Query integration helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Unwraps a ResultAsync for use inside React Query's queryFn / mutationFn.
+ * Returns the success value or throws ApiError (which React Query catches
+ * and exposes via `error` on the query/mutation object).
+ *
+ * Usage:
+ * ```ts
+ * useQuery({
+ *   queryKey: ['products'],
+ *   queryFn: () => unwrap(safe.get<Product[]>('/store/products')),
+ * });
+ * ```
+ */
+export async function unwrap<T>(result: ResultAsync<T, ApiError>): Promise<T> {
+  const r = await result;
+  if (r.isOk()) return r.value;
+  throw r.error;
+}
+
 // Re-export neverthrow primitives so consumers only need @voxire/api
 export { ok, err, Result, ResultAsync };
 export type { AxiosInstance };

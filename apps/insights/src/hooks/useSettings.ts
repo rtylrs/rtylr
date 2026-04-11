@@ -1,17 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { insightsService } from '../services/insightsService';
 
 export function useInsightsSettings() {
   return useQuery({
     queryKey: ['insights', 'settings'],
-    queryFn: () => insightsService.getInsightsSettings().then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getInsightsSettings()),
   });
 }
 
 export function useUpdateInsightsSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => insightsService.updateInsightsSettings(data).then((r) => r.data),
+    mutationFn: (data: any) => unwrap(insightsService.updateInsightsSettings(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'settings'] });
     },
@@ -21,14 +22,14 @@ export function useUpdateInsightsSettings() {
 export function useScheduledReports() {
   return useQuery({
     queryKey: ['insights', 'scheduled-reports'],
-    queryFn: () => insightsService.getScheduledReports().then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getScheduledReports()),
   });
 }
 
 export function useCreateScheduledReport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => insightsService.createScheduledReport(data).then((r) => r.data),
+    mutationFn: (data: any) => unwrap(insightsService.createScheduledReport(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'scheduled-reports'] });
     },
@@ -38,7 +39,7 @@ export function useCreateScheduledReport() {
 export function useDeleteScheduledReport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => insightsService.deleteScheduledReport(id).then((r) => r.data),
+    mutationFn: (id: string) => unwrap(insightsService.deleteScheduledReport(id)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'scheduled-reports'] });
     },

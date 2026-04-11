@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -21,7 +22,7 @@ export function useMyIssues() {
   );
   const q = useQuery({
     queryKey: ['my-tasks'],
-    queryFn: () => flowApi.getMyTasks(),
+    queryFn: () => unwrap(flowApi.getMyTasks()),
     enabled: !isFlowLocal(),
   });
   return {

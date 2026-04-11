@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
 import { isFlowLocal } from '../lib/flowLocalMode';
@@ -7,7 +8,7 @@ export function useTask(id: string | undefined) {
   const fromStore = useFlowStore((s) => (id ? s.tasks.find((t) => t.id === id) : undefined));
   const q = useQuery({
     queryKey: ['task', id],
-    queryFn: () => flowApi.getTaskDetail(id!),
+    queryFn: () => unwrap(flowApi.getTaskDetail(id!)),
     enabled: !isFlowLocal() && !!id,
   });
   return {

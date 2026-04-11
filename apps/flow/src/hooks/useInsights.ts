@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -14,7 +15,7 @@ export function useInsights(workspaceId?: string) {
 
   const q = useQuery({
     queryKey: ['insights', workspaceId],
-    queryFn: () => flowApi.getInsights(workspaceId),
+    queryFn: () => unwrap(flowApi.getInsights(workspaceId)),
     enabled: !isFlowLocal() && !!workspaceId,
   });
   return {

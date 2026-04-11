@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -8,7 +9,7 @@ export function useViews() {
   const views = useFlowStore((s) => s.views);
   const q = useQuery<SavedView[]>({
     queryKey: ['views'],
-    queryFn: () => flowApi.getViews() as Promise<SavedView[]>,
+    queryFn: () => unwrap(flowApi.getViews()) as Promise<SavedView[]>,
     enabled: !isFlowLocal(),
   });
   return {

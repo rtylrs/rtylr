@@ -1,6 +1,7 @@
+import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export const useGetAnalytics = (businessId: string | null, dateRange?: { start: string; end: string }) => {
@@ -8,7 +9,7 @@ export const useGetAnalytics = (businessId: string | null, dateRange?: { start: 
     queryKey: ['analytics', businessId, dateRange],
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
-      const response = await api.get(`/business/${businessId}/analytics`, { params });
+      const response = await unwrap(safe.get(`/business/${businessId}/analytics`, { params }));
       return response.data;
     },
     enabled: !!businessId,
@@ -29,7 +30,7 @@ export const useGetRevenue = (businessId: string | null, dateRange?: { start: st
     queryKey: ['revenue', businessId, dateRange],
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
-      const response = await api.get(`/business/${businessId}/analytics/revenue`, { params });
+      const response = await unwrap(safe.get(`/business/${businessId}/analytics/revenue`, { params }));
       return response.data;
     },
     enabled: !!businessId,
@@ -49,7 +50,7 @@ export const useGetOrders = (businessId: string | null, dateRange?: { start: str
     queryKey: ['orders', businessId, dateRange],
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
-      const response = await api.get(`/business/${businessId}/analytics/orders`, { params });
+      const response = await unwrap(safe.get(`/business/${businessId}/analytics/orders`, { params }));
       return response.data;
     },
     enabled: !!businessId,

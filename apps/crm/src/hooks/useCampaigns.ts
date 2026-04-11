@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi, Campaign } from '../services/crmApi';
 
 export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
-    queryFn: () => crmApi.getCampaigns(),
+    queryFn: () => unwrap(crmApi.getCampaigns()),
   });
 }
 
 export function useCampaignById(id: number | undefined) {
   return useQuery({
     queryKey: ['campaign', id],
-    queryFn: () => crmApi.getCampaignById(id!),
+    queryFn: () => unwrap(crmApi.getCampaignById(id!)),
     enabled: !!id,
   });
 }
@@ -19,7 +20,7 @@ export function useCampaignById(id: number | undefined) {
 export function useCampaignStats(id: number | undefined) {
   return useQuery({
     queryKey: ['campaign-stats', id],
-    queryFn: () => crmApi.getCampaignStats(id!),
+    queryFn: () => unwrap(crmApi.getCampaignStats(id!)),
     enabled: !!id,
   });
 }
@@ -27,7 +28,7 @@ export function useCampaignStats(id: number | undefined) {
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Campaign>) => crmApi.createCampaign(data),
+    mutationFn: (data: Partial<Campaign>) => unwrap(crmApi.createCampaign(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }
@@ -35,7 +36,7 @@ export function useCreateCampaign() {
 export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Campaign> }) => crmApi.updateCampaign(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Campaign> }) => unwrap(crmApi.updateCampaign(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }
@@ -43,7 +44,7 @@ export function useUpdateCampaign() {
 export function useUpdateCampaignStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => crmApi.updateCampaignStatus(id, status),
+    mutationFn: ({ id, status }: { id: number; status: string }) => unwrap(crmApi.updateCampaignStatus(id, status)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }

@@ -1,23 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { insightsService } from '../services/insightsService';
 
 export function useReportTemplates() {
   return useQuery({
     queryKey: ['insights', 'report-templates'],
-    queryFn: () => insightsService.getReportTemplates().then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getReportTemplates()),
   });
 }
 
 export function useGenerateReport() {
   return useMutation({
     mutationFn: ({ templateId, params }: { templateId: string; params?: Record<string, string> }) =>
-      insightsService.generateReport(templateId, params).then((r) => r.data),
+      unwrap(insightsService.generateReport(templateId, params)),
   });
 }
 
 export function useExportReport() {
   return useMutation({
     mutationFn: ({ templateId, format, params }: { templateId: string; format: 'csv' | 'pdf'; params?: Record<string, string> }) =>
-      insightsService.exportReport(templateId, format, params).then((r) => r.data),
+      unwrap(insightsService.exportReport(templateId, format, params)),
   });
 }

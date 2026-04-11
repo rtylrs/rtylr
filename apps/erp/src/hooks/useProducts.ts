@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { erpApi, CreateProductInput, UpdateProductInput, Product } from '../services/erpApi';
 
@@ -46,13 +47,13 @@ export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ['products', filters],
     queryFn: async () => {
-      const r = await erpApi.listProducts({
+      const data = await unwrap(erpApi.listProducts({
         search: filters?.search,
         categoryId: filters?.categoryId,
         limit: filters?.limit,
         offset: filters?.offset,
-      });
-      return applyFilters(r.data ?? [], filters);
+      }));
+      return applyFilters(data ?? [], filters);
     },
   });
 }
@@ -63,8 +64,7 @@ export function useProduct(id: number | undefined) {
     enabled: !!id,
     queryFn: async () => {
       if (!id) return null;
-      const r = await erpApi.getProduct(id);
-      return r.data ?? null;
+      return unwrap(erpApi.getProduct(id));
     },
   });
 }
@@ -72,7 +72,7 @@ export function useProduct(id: number | undefined) {
 export function useCreateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateProductInput) => erpApi.createProduct(data),
+    mutationFn: (data: CreateProductInput) => unwrap(erpApi.createProduct(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
   });
 }
@@ -80,7 +80,7 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateProductInput) => erpApi.updateProduct(data),
+    mutationFn: (data: UpdateProductInput) => unwrap(erpApi.updateProduct(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
   });
 }
@@ -88,7 +88,7 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => erpApi.deleteProduct(id),
+    mutationFn: (id: number) => unwrap(erpApi.deleteProduct(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
   });
 }

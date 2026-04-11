@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export interface ApiKey {
@@ -16,8 +17,8 @@ export const useApiKeys = () => {
   return useQuery<ApiKey[]>({
     queryKey: ['api-keys'],
     queryFn: async () => {
-      const res = await api.get('/api-keys');
-      return (res.data?.keys ?? res.data) as ApiKey[];
+      const res = await unwrap(safe.get('/api-keys'));
+      return (res?.keys ?? res) as ApiKey[];
     },
   });
 };
@@ -26,8 +27,8 @@ export const useCreateApiKey = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { name: string; scopes: string[] }) => {
-      const res = await api.post('/api-keys', payload);
-      return res.data as { key: string; meta: ApiKey };
+      const res = await unwrap(safe.post('/api-keys', payload));
+      return res as { key: string; meta: ApiKey };
     },
     onSuccess: () => {
       toast.success('API key created');
@@ -41,7 +42,7 @@ export const useRevokeApiKey = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/api-keys/${id}`);
+      await unwrap(safe.delete(`/api-keys/${id}`));
       return id;
     },
     onSuccess: () => {

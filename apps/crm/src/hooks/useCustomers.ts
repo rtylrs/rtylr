@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi, Customer, CustomersParams } from '../services/crmApi';
 
 export function useCustomers(params?: CustomersParams) {
   return useQuery({
     queryKey: ['customers', params],
-    queryFn: () => crmApi.getCustomers(params),
+    queryFn: () => unwrap(crmApi.getCustomers(params)),
   });
 }
 
 export function useCustomer(id: number | undefined) {
   return useQuery({
     queryKey: ['customer', id],
-    queryFn: () => crmApi.getCustomerDetail(id!),
+    queryFn: () => unwrap(crmApi.getCustomerDetail(id!)),
     enabled: !!id,
   });
 }
@@ -23,7 +24,7 @@ export function useCustomerDetail(id: number | undefined) {
 export function useCustomerTimeline(id: number | undefined) {
   return useQuery({
     queryKey: ['customer-timeline', id],
-    queryFn: () => crmApi.getCustomerTimeline(id!),
+    queryFn: () => unwrap(crmApi.getCustomerTimeline(id!)),
     enabled: !!id,
   });
 }
@@ -31,7 +32,7 @@ export function useCustomerTimeline(id: number | undefined) {
 export function useCreateCustomer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Customer>) => crmApi.createCustomer(data),
+    mutationFn: (data: Partial<Customer>) => unwrap(crmApi.createCustomer(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }
@@ -39,7 +40,7 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Customer> }) => crmApi.updateCustomer(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Customer> }) => unwrap(crmApi.updateCustomer(id, data)),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['customers'] });
       qc.invalidateQueries({ queryKey: ['customer', vars.id] });
@@ -50,7 +51,7 @@ export function useUpdateCustomer() {
 export function useDeleteCustomer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => crmApi.deleteCustomer(id),
+    mutationFn: (id: number) => unwrap(crmApi.deleteCustomer(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }
@@ -58,7 +59,7 @@ export function useDeleteCustomer() {
 export function useRecordVisit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (customerId: number) => crmApi.recordVisit(customerId),
+    mutationFn: (customerId: number) => unwrap(crmApi.recordVisit(customerId)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }
@@ -66,7 +67,7 @@ export function useRecordVisit() {
 export function useImportCustomers() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rows: any[]) => crmApi.importCustomers(rows),
+    mutationFn: (rows: any[]) => unwrap(crmApi.importCustomers(rows)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }
@@ -82,6 +83,6 @@ export function useMergeCustomers() {
 
 export function useExportCustomerData() {
   return useMutation({
-    mutationFn: (id: number) => crmApi.exportCustomerData(id),
+    mutationFn: (id: number) => unwrap(crmApi.exportCustomerData(id)),
   });
 }

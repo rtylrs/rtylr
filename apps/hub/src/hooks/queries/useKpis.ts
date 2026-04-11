@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 
 export interface HubKpis {
   revenueToday: number;
@@ -20,8 +21,8 @@ export const useKpis = () => {
   return useQuery<HubKpis>({
     queryKey: ['hub-kpis'],
     queryFn: async () => {
-      const res = await api.get('/hub/kpis');
-      return res.data as HubKpis;
+      const res = await unwrap(safe.get('/hub/kpis'));
+      return res as HubKpis;
     },
     staleTime: 30_000,
   });

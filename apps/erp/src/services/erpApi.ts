@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -208,86 +208,86 @@ export interface ActivityItem {
 export const erpApi = {
   // Products
   listProducts: (params?: { search?: string; categoryId?: number; limit?: number; offset?: number }) =>
-    api.get<Product[]>('/erp/products', { params }),
+    safe.get<Product[]>('/erp/products', { params }),
   getProduct: (id: number) =>
-    api.get<Product>(`/erp/products/${id}`),
+    safe.get<Product>(`/erp/products/${id}`),
   createProduct: (data: CreateProductInput) =>
-    api.post<Product>('/erp/products', data),
+    safe.post<Product>('/erp/products', data),
   updateProduct: (data: UpdateProductInput) =>
-    api.post<Product>('/erp/products', data),
+    safe.post<Product>('/erp/products', data),
   deleteProduct: (id: number) =>
-    api.post<{ success: boolean }>('/erp/products', { id, _action: 'delete' }),
+    safe.post<{ success: boolean }>('/erp/products', { id, _action: 'delete' }),
   lookupBarcode: (code: string) =>
-    api.get<Product>(`/erp/products/barcode/${encodeURIComponent(code)}`),
+    safe.get<Product>(`/erp/products/barcode/${encodeURIComponent(code)}`),
 
   // Categories
-  listCategories: () => api.get<Category[]>('/erp/categories'),
-  createCategory: (data: any) => api.post<Category>('/erp/categories', data),
+  listCategories: () => safe.get<Category[]>('/erp/categories'),
+  createCategory: (data: any) => safe.post<Category>('/erp/categories', data),
 
   // Brands
-  listBrands: () => api.get<Brand[]>('/erp/brands'),
-  createBrand: (data: any) => api.post<Brand>('/erp/brands', data),
+  listBrands: () => safe.get<Brand[]>('/erp/brands'),
+  createBrand: (data: any) => safe.post<Brand>('/erp/brands', data),
 
   // Warehouses
-  listWarehouses: () => api.get<Warehouse[]>('/erp/warehouses'),
-  createWarehouse: (data: any) => api.post<Warehouse>('/erp/warehouses', data),
+  listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
+  createWarehouse: (data: any) => safe.post<Warehouse>('/erp/warehouses', data),
 
   // Stock transfers
-  listStockTransfers: () => api.get<StockTransfer[]>('/erp/stock-transfers'),
-  createStockTransfer: (data: any) => api.post<StockTransfer>('/erp/stock-transfers', data),
+  listStockTransfers: () => safe.get<StockTransfer[]>('/erp/stock-transfers'),
+  createStockTransfer: (data: any) => safe.post<StockTransfer>('/erp/stock-transfers', data),
 
   // Stock takes
-  listStockTakes: () => api.get<StockTake[]>('/erp/stock-takes'),
-  createStockTake: (data: any) => api.post<StockTake>('/erp/stock-takes', data),
+  listStockTakes: () => safe.get<StockTake[]>('/erp/stock-takes'),
+  createStockTake: (data: any) => safe.post<StockTake>('/erp/stock-takes', data),
 
   // Suppliers
   listSuppliers: () =>
-    api.get<Supplier[]>('/erp/suppliers'),
+    safe.get<Supplier[]>('/erp/suppliers'),
   createSupplier: (data: CreateSupplierInput) =>
-    api.post<Supplier>('/erp/suppliers', data),
+    safe.post<Supplier>('/erp/suppliers', data),
   updateSupplier: (data: UpdateSupplierInput) =>
-    api.post<Supplier>('/erp/suppliers', data),
+    safe.post<Supplier>('/erp/suppliers', data),
 
   // Purchase Orders
   listPurchaseOrders: () =>
-    api.get<PurchaseOrder[]>('/erp/purchase-orders'),
+    safe.get<PurchaseOrder[]>('/erp/purchase-orders'),
   createPurchaseOrder: (data: any) =>
-    api.post<PurchaseOrder>('/erp/purchase-orders', data),
+    safe.post<PurchaseOrder>('/erp/purchase-orders', data),
   updatePurchaseOrderStatus: (id: number, status: string) =>
-    api.post<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
+    safe.post<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
   approvePurchaseOrder: (id: number) =>
-    api.post<PurchaseOrder>(`/erp/purchase-orders/${id}/approve`, {}),
+    safe.post<PurchaseOrder>(`/erp/purchase-orders/${id}/approve`, {}),
 
   // Inventory
   getInventoryReport: () =>
-    api.get<InventoryReportItem[]>('/erp/inventory/report'),
+    safe.get<InventoryReportItem[]>('/erp/inventory/report'),
   getLowStock: () =>
-    api.get<LowStockItem[]>('/erp/inventory/low-stock'),
+    safe.get<LowStockItem[]>('/erp/inventory/low-stock'),
   adjustInventory: (data: any) =>
-    api.post<{ success: boolean }>('/erp/inventory/adjust', data),
+    safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
   getValuation: (method: 'FIFO' | 'LIFO' | 'WAC' = 'WAC') =>
-    api.get<any>('/erp/inventory/valuation', { params: { method } }),
+    safe.get<any>('/erp/inventory/valuation', { params: { method } }),
 
   // Reorder / forecasting
   getReorderSuggestions: () =>
-    api.get<ReorderSuggestion[]>('/erp/reorder-suggestions'),
+    safe.get<ReorderSuggestion[]>('/erp/reorder-suggestions'),
 
   // Expiry
   getExpiryItems: () =>
-    api.get<ExpiryItem[]>('/erp/expiry'),
+    safe.get<ExpiryItem[]>('/erp/expiry'),
 
   // Price lists
-  listPriceLists: () => api.get<PriceList[]>('/erp/price-lists'),
+  listPriceLists: () => safe.get<PriceList[]>('/erp/price-lists'),
 
   // Variants
   listVariants: (productId?: number) =>
-    api.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
+    safe.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
 
   // Activity log
   listActivity: (limit = 20) =>
-    api.get<ActivityItem[]>('/erp/activity', { params: { limit } }),
+    safe.get<ActivityItem[]>('/erp/activity', { params: { limit } }),
 
   // Dashboard (combines multiple endpoints)
   getDashboardStats: () =>
-    api.get<DashboardStats>('/erp/dashboard'),
+    safe.get<DashboardStats>('/erp/dashboard'),
 };

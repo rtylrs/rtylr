@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export interface Integration {
@@ -16,8 +17,8 @@ export const useIntegrations = () => {
   return useQuery<Integration[]>({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const res = await api.get('/integrations');
-      return (res.data?.integrations ?? res.data) as Integration[];
+      const res = await unwrap(safe.get('/integrations'));
+      return (res?.integrations ?? res) as Integration[];
     },
   });
 };
@@ -26,7 +27,7 @@ export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.post(`/integrations/${id}/connect`);
+      await unwrap(safe.post(`/integrations/${id}/connect`));
       return id;
     },
     onSuccess: () => {
@@ -40,7 +41,7 @@ export const useDisconnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.post(`/integrations/${id}/disconnect`);
+      await unwrap(safe.post(`/integrations/${id}/disconnect`));
       return id;
     },
     onSuccess: () => {

@@ -10,6 +10,7 @@
     "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
+    "@voxire/api": "workspace:*",
     "@aldabil/react-scheduler": "^2.9.3",
     "@tanstack/react-query": "^5.89.0",
     "@types/lodash": "^4.17.20",

@@ -1,23 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { insightsService } from '../services/insightsService';
 
 export function useRevenue(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue', period],
-    queryFn: () => insightsService.getRevenue({ period }).then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getRevenue({ period })),
   });
 }
 
 export function useRevenueByApp(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue-by-app', period],
-    queryFn: () => insightsService.getRevenueByApp({ period }).then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getRevenueByApp({ period })),
   });
 }
 
 export function useRevenueComparison(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue-comparison', period],
-    queryFn: () => insightsService.getRevenueComparison({ period }).then((r) => r.data),
+    queryFn: () => unwrap(insightsService.getRevenueComparison({ period })),
   });
 }

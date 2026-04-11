@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
 import { isFlowLocal } from '../lib/flowLocalMode';
@@ -8,7 +9,7 @@ export function useWorkspaces() {
   const local = useFlowStore((s) => s.workspaces);
   const q = useQuery({
     queryKey: ['workspaces'],
-    queryFn: () => flowApi.getWorkspaces(),
+    queryFn: () => unwrap(flowApi.getWorkspaces()),
     enabled: !isFlowLocal(),
   });
   return {

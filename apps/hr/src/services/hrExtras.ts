@@ -1,7 +1,7 @@
 /**
  * Extended HR service layer backed by real API endpoints.
  */
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -220,125 +220,125 @@ export interface HrSettings {
 export const hrExtras = {
   // Profiles
   getProfile: (id: number) =>
-    api.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }).then((r) => r.data ?? null),
+    safe.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }).then((r) => r.data ?? null),
   upsertProfile: (p: EmployeeProfile) =>
-    api.post<EmployeeProfile>('/hr/staff', p).then((r) => r.data),
+    safe.post<EmployeeProfile>('/hr/staff', p),
 
   // Time Off
   listTimeOff: () =>
-    api.get<TimeOffEntry[]>('/hr/time-off').then((r) => r.data ?? []),
+    safe.get<TimeOffEntry[]>('/hr/time-off').then((r) => r.data ?? []),
   submitTimeOff: (data: Omit<TimeOffEntry, 'id' | 'status' | 'createdAt'>) =>
-    api.post<TimeOffEntry>('/hr/time-off', data).then((r) => r.data),
+    safe.post<TimeOffEntry>('/hr/time-off', data),
   approveTimeOff: (id: number, approved: boolean, note?: string) =>
-    api.post<{ success: boolean }>('/hr/time-off/approve', { id, approved, note }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/time-off/approve', { id, approved, note }),
 
   // Schedule
   listSchedule: (weekStart?: string) =>
-    api.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { weekStart } : {} }).then((r) => r.data ?? []),
+    safe.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { weekStart } : {} }).then((r) => r.data ?? []),
   upsertScheduleShift: (shift: Omit<ScheduleShift, 'id'> & { id?: number }) =>
-    api.post<{ success: boolean }>('/hr/shifts', shift).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/shifts', shift),
   deleteScheduleShift: (id: number) =>
-    api.post<{ success: boolean }>('/hr/shifts', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/shifts', { id, _action: 'delete' }),
   publishWeek: (weekStart: string) =>
-    api.post<{ success: boolean }>('/hr/shifts', { weekStart, _action: 'publish' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/shifts', { weekStart, _action: 'publish' }),
 
   // Timesheets
   listTimesheets: () =>
-    api.get<TimesheetRow[]>('/hr/timesheets').then((r) => r.data ?? []),
+    safe.get<TimesheetRow[]>('/hr/timesheets').then((r) => r.data ?? []),
   approveTimesheet: (id: number) =>
-    api.post<{ success: boolean }>('/hr/timesheets', { id, _action: 'approve' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/timesheets', { id, _action: 'approve' }),
   upsertTimesheet: (row: TimesheetRow) =>
-    api.post<TimesheetRow>('/hr/timesheets', row).then((r) => r.data),
+    safe.post<TimesheetRow>('/hr/timesheets', row),
 
   // Reviews
   listReviews: () =>
-    api.get<Review[]>('/hr/reviews').then((r) => r.data ?? []),
+    safe.get<Review[]>('/hr/reviews').then((r) => r.data ?? []),
   createReview: (data: Omit<Review, 'id'>) =>
-    api.post<Review>('/hr/reviews', data).then((r) => r.data),
+    safe.post<Review>('/hr/reviews', data),
 
   // 1-on-1s
   listOneOnOnes: () =>
-    api.get<OneOnOne[]>('/hr/one-on-ones').then((r) => r.data ?? []),
+    safe.get<OneOnOne[]>('/hr/one-on-ones').then((r) => r.data ?? []),
   createOneOnOne: (data: Omit<OneOnOne, 'id'>) =>
-    api.post<OneOnOne>('/hr/one-on-ones', data).then((r) => r.data),
+    safe.post<OneOnOne>('/hr/one-on-ones', data),
   updateOneOnOne: (id: number, patch: Partial<OneOnOne>) =>
-    api.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
 
   // Onboarding
   listOnboarding: () =>
-    api.get<OnboardingTask[]>('/hr/training').then((r) => r.data ?? []),
+    safe.get<OnboardingTask[]>('/hr/training').then((r) => r.data ?? []),
   toggleOnboardingTask: (id: number) =>
-    api.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle' }),
   addOnboardingTask: (task: Omit<OnboardingTask, 'id' | 'completed'>) =>
-    api.post<OnboardingTask>('/hr/training', task).then((r) => r.data),
+    safe.post<OnboardingTask>('/hr/training', task),
 
   // Offboarding
   listOffboarding: () =>
-    api.get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } }).then((r) => r.data ?? []),
+    safe.get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } }).then((r) => r.data ?? []),
   toggleOffboardingTask: (id: number) =>
-    api.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle-offboarding' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle-offboarding' }),
 
   // Documents
   listDocuments: () =>
-    api.get<DocumentItem[]>('/hr/documents').then((r) => r.data ?? []),
+    safe.get<DocumentItem[]>('/hr/documents').then((r) => r.data ?? []),
   addDocument: (doc: Omit<DocumentItem, 'id' | 'uploadedAt'>) =>
-    api.post<DocumentItem>('/hr/documents', doc).then((r) => r.data),
+    safe.post<DocumentItem>('/hr/documents', doc),
   deleteDocument: (id: number) =>
-    api.post<{ success: boolean }>('/hr/documents', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/documents', { id, _action: 'delete' }),
   expiringDocuments: (daysAhead = 30) =>
-    api.get<DocumentItem[]>('/hr/documents', { params: { expiring: daysAhead } }).then((r) => r.data ?? []),
+    safe.get<DocumentItem[]>('/hr/documents', { params: { expiring: daysAhead } }).then((r) => r.data ?? []),
 
   // Benefits
   listBenefitPlans: () =>
-    api.get<BenefitPlan[]>('/hr/benefits').then((r) => r.data ?? []),
+    safe.get<BenefitPlan[]>('/hr/benefits').then((r) => r.data ?? []),
   listBenefitEnrollments: () =>
-    api.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }).then((r) => r.data ?? []),
+    safe.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }).then((r) => r.data ?? []),
   enrollBenefit: (data: Omit<BenefitEnrollment, 'id' | 'startedAt' | 'status'>) =>
-    api.post<BenefitEnrollment>('/hr/benefits', data).then((r) => r.data),
+    safe.post<BenefitEnrollment>('/hr/benefits', data),
 
   // Training
   listCourses: () =>
-    api.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }).then((r) => r.data ?? []),
+    safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }).then((r) => r.data ?? []),
   listTrainingProgress: () =>
-    api.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }).then((r) => r.data ?? []),
+    safe.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }).then((r) => r.data ?? []),
   updateTrainingProgress: (id: number, progress: number) =>
-    api.post<{ success: boolean }>('/hr/training', { id, progress, _action: 'update-progress' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/training', { id, progress, _action: 'update-progress' }),
 
   // Birthdays & anniversaries
   listBirthdays: () =>
-    api.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }).then((r) => r.data ?? []),
+    safe.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }).then((r) => r.data ?? []),
   listAnniversaries: () =>
-    api.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }).then((r) => r.data ?? []),
+    safe.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }).then((r) => r.data ?? []),
 
   // Availability
   listAvailability: () =>
-    api.get<Availability[]>('/hr/shifts', { params: { view: 'availability' } }).then((r) => r.data ?? []),
+    safe.get<Availability[]>('/hr/shifts', { params: { view: 'availability' } }).then((r) => r.data ?? []),
   setAvailability: (row: Availability) =>
-    api.post<Availability>('/hr/shifts', { ...row, _action: 'set-availability' }).then((r) => r.data),
+    safe.post<Availability>('/hr/shifts', { ...row, _action: 'set-availability' }),
 
   // Swaps
   listSwaps: () =>
-    api.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }).then((r) => r.data ?? []),
+    safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }).then((r) => r.data ?? []),
   createSwap: (data: Omit<SwapRequest, 'id' | 'status'>) =>
-    api.post<SwapRequest>('/hr/shifts', { ...data, _action: 'create-swap' }).then((r) => r.data),
+    safe.post<SwapRequest>('/hr/shifts', { ...data, _action: 'create-swap' }),
   resolveSwap: (id: number, accepted: boolean) =>
-    api.post<{ success: boolean }>('/hr/shifts', { id, accepted, _action: 'resolve-swap' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/shifts', { id, accepted, _action: 'resolve-swap' }),
 
   // Breaks
   listBreaks: () =>
-    api.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }).then((r) => r.data ?? []),
+    safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }).then((r) => r.data ?? []),
   startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
-    api.post<BreakLog>('/hr/shifts/clock-in', { staffId, staffName, type, _action: 'start-break' }).then((r) => r.data),
+    safe.post<BreakLog>('/hr/shifts/clock-in', { staffId, staffName, type, _action: 'start-break' }),
   endBreak: (id: number) =>
-    api.post<{ success: boolean }>('/hr/shifts/clock-out', { id, _action: 'end-break' }).then((r) => r.data),
+    safe.post<{ success: boolean }>('/hr/shifts/clock-out', { id, _action: 'end-break' }),
 
   // Overtime
   listOvertimeAlerts: () =>
-    api.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }).then((r) => r.data ?? []),
+    safe.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }).then((r) => r.data ?? []),
 
   // Settings
   getSettings: () =>
-    api.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }).then((r) => r.data ?? {
+    safe.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }).then((r) => r.data ?? {
       workWeekStart: 'Monday' as const,
       overtimeAfterHours: 40,
       ptoPolicyDays: 15,
@@ -346,5 +346,5 @@ export const hrExtras = {
       weeklyHours: 40,
     }),
   updateSettings: (patch: Partial<HrSettings>) =>
-    api.post<HrSettings>('/hr/dashboard', { ...patch, _action: 'update-settings' }).then((r) => r.data),
+    safe.post<HrSettings>('/hr/dashboard', { ...patch, _action: 'update-settings' }),
 };

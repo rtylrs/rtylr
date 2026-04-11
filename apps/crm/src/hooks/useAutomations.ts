@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi, Automation } from '../services/crmApi';
 
 export function useAutomations() {
   return useQuery({
     queryKey: ['automations'],
-    queryFn: () => crmApi.getAutomations(),
+    queryFn: () => unwrap(crmApi.getAutomations()),
   });
 }
 
 export function useCreateAutomation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Automation>) => crmApi.createAutomation(data),
+    mutationFn: (data: Partial<Automation>) => unwrap(crmApi.createAutomation(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['automations'] }),
   });
 }

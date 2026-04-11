@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { bookService } from '../services/bookService';
 
 export interface WaitlistFilters {
@@ -11,17 +12,14 @@ export interface WaitlistFilters {
 export function useWaitlist(filters?: WaitlistFilters) {
   return useQuery({
     queryKey: ['waitlist', filters],
-    queryFn: async () => {
-      const res = await bookService.getWaitlist(filters);
-      return res.data?.data ?? res.data ?? [];
-    },
+    queryFn: () => unwrap(bookService.getWaitlist(filters)),
   });
 }
 
 export function useAddToWaitlist() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => bookService.addToWaitlist(data),
+    mutationFn: (data: any) => unwrap(bookService.addToWaitlist(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['waitlist'] }),
   });
 }
@@ -29,7 +27,7 @@ export function useAddToWaitlist() {
 export function useNotifyWaitlist() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => bookService.notifyWaitlist(id),
+    mutationFn: (id: number) => unwrap(bookService.notifyWaitlist(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['waitlist'] }),
   });
 }
@@ -37,7 +35,7 @@ export function useNotifyWaitlist() {
 export function useRemoveFromWaitlist() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => bookService.removeFromWaitlist(id),
+    mutationFn: (id: number) => unwrap(bookService.removeFromWaitlist(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['waitlist'] }),
   });
 }

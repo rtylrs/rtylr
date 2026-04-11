@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { supportService } from '../services/supportService';
 
 export function useCustomers(params?: { search?: string; limit?: number; offset?: number }) {
   return useQuery({
     queryKey: ['customers', params],
-    queryFn: () => supportService.getCustomers(params).then((r) => r.data),
+    queryFn: () => unwrap(supportService.getCustomers(params)),
   });
 }
 
 export function useCustomer(id: number) {
   return useQuery({
     queryKey: ['customer', id],
-    queryFn: () => supportService.getCustomer(id).then((r) => r.data),
+    queryFn: () => unwrap(supportService.getCustomer(id)),
     enabled: !!id,
   });
 }
@@ -19,7 +20,7 @@ export function useCustomer(id: number) {
 export function useCustomerTickets(customerId: number) {
   return useQuery({
     queryKey: ['customer-tickets', customerId],
-    queryFn: () => supportService.getCustomerTickets(customerId).then((r) => r.data),
+    queryFn: () => unwrap(supportService.getCustomerTickets(customerId)),
     enabled: !!customerId,
   });
 }
