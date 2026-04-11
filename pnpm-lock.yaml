@@ -490,7 +490,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^4.2.0
-        version: 4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))
+        version: 4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.27(postcss@8.4.49)
@@ -505,10 +505,10 @@ importers:
         version: 5.5.4
       vite:
         specifier: ^7.2.2
-        version: 7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0)
+        version: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
       vite-plugin-svgr:
         specifier: ^4.2.0
-        version: 4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))
+        version: 4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))
 
   apps/docs:
     dependencies:
@@ -1831,6 +1831,16 @@ importers:
       typescript:
         specifier: ~5.5.2
         version: 5.5.4
+
+  packages/permissions:
+    dependencies:
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
 
   packages/tailwind-config:
     devDependencies:
@@ -10037,6 +10047,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@vitejs/plugin-react@4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))':
+    dependencies:
+      '@babel/core': 7.29.0
+      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
+      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.29.0)
+      '@rolldown/pluginutils': 1.0.0-beta.27
+      '@types/babel__core': 7.20.5
+      react-refresh: 0.17.0
+      vite: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
+    transitivePeerDependencies:
+      - supports-color
+
   '@vitejs/plugin-react@4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))':
     dependencies:
       '@babel/core': 7.29.0
@@ -13317,6 +13339,17 @@ snapshots:
       - tsx
       - yaml
 
+  vite-plugin-svgr@4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)):
+    dependencies:
+      '@rollup/pluginutils': 5.3.0(rollup@4.60.1)
+      '@svgr/core': 8.1.0(typescript@5.5.4)
+      '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
+      vite: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
+    transitivePeerDependencies:
+      - rollup
+      - supports-color
+      - typescript
+
   vite-plugin-svgr@4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0)):
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.60.1)
@@ -13349,6 +13382,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0):
+    dependencies:
+      esbuild: 0.27.7
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+      postcss: 8.4.49
+      rollup: 4.60.1
+      tinyglobby: 0.2.16
+    optionalDependencies:
+      '@types/node': 20.19.39
+      fsevents: 2.3.3
+      jiti: 1.21.7
+      sass: 1.99.0
 
   vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0):
     dependencies:
