@@ -1,0 +1,12 @@
+-- name: ListShippingMethods :many
+SELECT id, owner_id, name, price, estimated_days, is_active, created_at
+FROM store_shipping_methods WHERE owner_id = ? ORDER BY name ASC;
+
+-- name: CreateShippingMethod :execresult
+INSERT INTO store_shipping_methods (owner_id, name, price, estimated_days, is_active) VALUES (?, ?, ?, ?, ?);
+
+-- name: UpdateShippingMethod :exec
+UPDATE store_shipping_methods SET name = ?, price = ?, estimated_days = ?, is_active = ? WHERE owner_id = ? AND id = ?;
+
+-- name: DeleteShippingMethod :exec
+DELETE FROM store_shipping_methods WHERE owner_id = ? AND id = ?;

@@ -21,6 +21,13 @@ import (
 	"github.com/voxire/onion/internal/modules/benefits"
 	"github.com/voxire/onion/internal/modules/billing"
 	"github.com/voxire/onion/internal/modules/bills"
+	bookingappointments "github.com/voxire/onion/internal/modules/booking_appointments"
+	bookingcalendar "github.com/voxire/onion/internal/modules/booking_calendar"
+	bookingdashboard "github.com/voxire/onion/internal/modules/booking_dashboard"
+	bookingreminders "github.com/voxire/onion/internal/modules/booking_reminders"
+	bookingresources "github.com/voxire/onion/internal/modules/booking_resources"
+	bookingservices "github.com/voxire/onion/internal/modules/booking_services"
+	bookingwaitlist "github.com/voxire/onion/internal/modules/booking_waitlist"
 	"github.com/voxire/onion/internal/modules/brands"
 	"github.com/voxire/onion/internal/modules/business"
 	"github.com/voxire/onion/internal/modules/campaigns"
@@ -74,6 +81,20 @@ import (
 	"github.com/voxire/onion/internal/modules/staff"
 	stocktakes "github.com/voxire/onion/internal/modules/stock_takes"
 	stocktransfers "github.com/voxire/onion/internal/modules/stock_transfers"
+	supportcanned "github.com/voxire/onion/internal/modules/support_canned"
+	supportcustomers "github.com/voxire/onion/internal/modules/support_customers"
+	supportinbox "github.com/voxire/onion/internal/modules/support_inbox"
+	supportknowledge "github.com/voxire/onion/internal/modules/support_knowledge"
+	supportsettings "github.com/voxire/onion/internal/modules/support_settings"
+	supporttickets "github.com/voxire/onion/internal/modules/support_tickets"
+	storecategories "github.com/voxire/onion/internal/modules/store_categories"
+	storecheckout "github.com/voxire/onion/internal/modules/store_checkout"
+	"github.com/voxire/onion/internal/modules/storefronts"
+	storeorders "github.com/voxire/onion/internal/modules/store_orders"
+	storepayments "github.com/voxire/onion/internal/modules/store_payments"
+	storeproducts "github.com/voxire/onion/internal/modules/store_products"
+	storeshipping "github.com/voxire/onion/internal/modules/store_shipping"
+	storethemes "github.com/voxire/onion/internal/modules/store_themes"
 	"github.com/voxire/onion/internal/modules/suppliers"
 	"github.com/voxire/onion/internal/modules/tasks"
 	"github.com/voxire/onion/internal/modules/tax"
@@ -208,6 +229,13 @@ type apiModules struct {
 	Benefits             *benefits.Module
 	Billing              *billing.Module
 	Bills                *bills.Module
+	BookingAppointments  *bookingappointments.Module
+	BookingCalendar      *bookingcalendar.Module
+	BookingDashboard     *bookingdashboard.Module
+	BookingReminders     *bookingreminders.Module
+	BookingResources     *bookingresources.Module
+	BookingServices      *bookingservices.Module
+	BookingWaitlist      *bookingwaitlist.Module
 	Brands               *brands.Module
 	Business             *business.Module
 	Campaigns            *campaigns.Module
@@ -261,6 +289,20 @@ type apiModules struct {
 	Staff                *staff.Module
 	StockTakes           *stocktakes.Module
 	StockTransfers       *stocktransfers.Module
+	StoreCategories      *storecategories.Module
+	StoreCheckout        *storecheckout.Module
+	Storefronts          *storefronts.Module
+	StoreOrders          *storeorders.Module
+	StorePayments        *storepayments.Module
+	StoreProducts        *storeproducts.Module
+	StoreShipping        *storeshipping.Module
+	StoreThemes          *storethemes.Module
+	SupportCanned        *supportcanned.Module
+	SupportCustomers     *supportcustomers.Module
+	SupportInbox         *supportinbox.Module
+	SupportKnowledge     *supportknowledge.Module
+	SupportSettings      *supportsettings.Module
+	SupportTickets       *supporttickets.Module
 	Suppliers            *suppliers.Module
 	Tasks                *tasks.Module
 	Tax                  *tax.Module
@@ -291,6 +333,13 @@ func initializeModules(ctx context.Context) *apiModules {
 		Benefits:             benefits.NewModule(ctx),
 		Billing:              billing.NewModule(ctx),
 		Bills:                bills.NewModule(ctx),
+		BookingAppointments:  bookingappointments.NewModule(ctx),
+		BookingCalendar:      bookingcalendar.NewModule(ctx),
+		BookingDashboard:     bookingdashboard.NewModule(ctx),
+		BookingReminders:     bookingreminders.NewModule(ctx),
+		BookingResources:     bookingresources.NewModule(ctx),
+		BookingServices:      bookingservices.NewModule(ctx),
+		BookingWaitlist:      bookingwaitlist.NewModule(ctx),
 		Brands:               brands.NewModule(ctx),
 		Business:             business.NewModule(ctx),
 		Campaigns:            campaigns.NewModule(ctx),
@@ -344,6 +393,20 @@ func initializeModules(ctx context.Context) *apiModules {
 		Staff:                staff.NewModule(ctx),
 		StockTakes:           stocktakes.NewModule(ctx),
 		StockTransfers:       stocktransfers.NewModule(ctx),
+		StoreCategories:      storecategories.NewModule(ctx),
+		StoreCheckout:        storecheckout.NewModule(ctx),
+		Storefronts:          storefronts.NewModule(ctx),
+		StoreOrders:          storeorders.NewModule(ctx),
+		StorePayments:        storepayments.NewModule(ctx),
+		StoreProducts:        storeproducts.NewModule(ctx),
+		StoreShipping:        storeshipping.NewModule(ctx),
+		StoreThemes:          storethemes.NewModule(ctx),
+		SupportCanned:        supportcanned.NewModule(ctx),
+		SupportCustomers:     supportcustomers.NewModule(ctx),
+		SupportInbox:         supportinbox.NewModule(ctx),
+		SupportKnowledge:     supportknowledge.NewModule(ctx),
+		SupportSettings:      supportsettings.NewModule(ctx),
+		SupportTickets:       supporttickets.NewModule(ctx),
 		Suppliers:            suppliers.NewModule(ctx),
 		Tasks:                tasks.NewModule(ctx),
 		Tax:                  tax.NewModule(ctx),

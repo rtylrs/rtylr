@@ -1,0 +1,25 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/booking_calendar/internal/application"
+	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+func CalendarRoutes() []string { return []string{"/book/calendar"} }
+
+type CalendarHandler struct{ Service *application.Service }
+type CalendarRequest struct { From string `json:"from"`; To string `json:"to"` }
+type CalendarResponse struct{ Days []domain.CalendarDay `json:"days"` }
+
+func (h *CalendarHandler) Serve(ctx context.Context, req *CalendarRequest) (CalendarResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok { return CalendarResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	days, err := h.Service.GetCalendar(ctx, authUser.UserID, req.From, req.To)
+	if err != nil { return CalendarResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to get calendar"} }
+	return CalendarResponse{Days: days}, nil
+}
