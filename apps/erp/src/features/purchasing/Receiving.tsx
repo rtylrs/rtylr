@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
 import { usePurchaseOrders } from './usePurchaseOrders';
 import PageHeader from '../../shared/components/PageHeader';

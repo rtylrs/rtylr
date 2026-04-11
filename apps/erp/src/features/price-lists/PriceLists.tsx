@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, Tags } from 'lucide-react';
 import { usePriceLists } from './usePriceLists';
 import PageHeader from '../../shared/components/PageHeader';

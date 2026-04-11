@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
 import api from "../shared/lib/api";
 import {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Eye, Plus, Flame, Timer, CheckCircle2 } from 'lucide-react';
 import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
 import { useViews, useFilteredTasks } from './useViews';

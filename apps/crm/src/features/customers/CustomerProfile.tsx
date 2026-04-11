@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Mail, Phone, Calendar, Tag as TagIcon, Trash2, Download, Users,

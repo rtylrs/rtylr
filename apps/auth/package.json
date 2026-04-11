@@ -13,7 +13,7 @@
     "@voxire/api": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
-    "framer-motion": "^12.23.12",
+    "motion": "^12.0.0",
     "lucide-react": "^0.544.0"
   }
 }

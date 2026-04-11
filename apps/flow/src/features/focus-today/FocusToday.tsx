@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { isDueToday } from '../../shared/lib/lifeRhythm';

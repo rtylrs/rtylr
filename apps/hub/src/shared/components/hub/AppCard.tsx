@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExternalLink, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import type { RtylrApp } from '../../hooks/queries/useApps';
 
 export interface AppCardProps {

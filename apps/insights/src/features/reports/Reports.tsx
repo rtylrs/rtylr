@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { FileText, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useReportTemplates, useExportReport } from './useReports';
 import { SkeletonRow } from '../../shared/components/Skeleton';

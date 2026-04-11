@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Map as MapIcon } from 'lucide-react';
 import { useRoadmap } from './useRoadmap';

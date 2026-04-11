@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import { useRouter } from 'next/router';

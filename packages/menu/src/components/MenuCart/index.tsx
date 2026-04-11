@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { MenuItemData } from '../MenuItem';
 import styles from './MenuCart.module.scss';
 

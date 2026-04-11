@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 import { useHeldOrdersStore } from '../../../../shared/stores/heldOrdersStore';

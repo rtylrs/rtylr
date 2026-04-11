@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useInvoice } from './useInvoice';

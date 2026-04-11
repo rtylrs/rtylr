@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { BarChart3, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
 import { useInsights } from './useInsights';
 import { useFlowStore } from '../../shared/stores/flowStore';

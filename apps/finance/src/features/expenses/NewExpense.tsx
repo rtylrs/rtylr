@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Save, ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';

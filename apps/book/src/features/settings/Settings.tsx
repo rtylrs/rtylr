@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Settings as SettingsIcon, Globe, Clock, XCircle, Bell } from 'lucide-react';
 import { useBookSettings, useUpdateBookSettings } from './useBookSettings';
 import { toast } from 'sonner';

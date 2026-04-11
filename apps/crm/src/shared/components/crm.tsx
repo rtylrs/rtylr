@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
   Star, X, TrendingUp, TrendingDown, Plus, Minus, Mail, MessageSquare,
   ShoppingBag, Gift, StickyNote, Award, Clock, Check, Search as SearchIcon, User,

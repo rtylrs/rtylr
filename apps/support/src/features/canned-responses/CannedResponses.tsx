@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { MessageSquareText, Search, Plus, Pencil, Trash2, X, Save } from 'lucide-react';
 import { useCannedResponses, useCreateCannedResponse, useUpdateCannedResponse, useDeleteCannedResponse } from './useCannedResponses';
 import { toast } from 'sonner';

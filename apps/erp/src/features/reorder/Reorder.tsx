@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Sparkles, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';

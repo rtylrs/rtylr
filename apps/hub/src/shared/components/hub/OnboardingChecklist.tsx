@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Circle, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
 export interface OnboardingStep {

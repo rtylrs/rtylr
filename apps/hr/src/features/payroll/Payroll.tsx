@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Play, DollarSign, TrendingUp, Users, Download } from 'lucide-react';
 import { PayrollRow } from '../../shared/services/hrApi';
 import { usePayroll } from './usePayroll';

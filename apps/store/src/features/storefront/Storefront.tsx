@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Globe, Palette, Image, Type, Link2, MessageSquare } from 'lucide-react';
 import { useStorefrontConfig } from './useStorefront';
 import { SkeletonRow } from '../../shared/components/Skeleton';

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import classNames from 'classnames';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import styles from './AiChat.module.scss';
 
 export interface ChatMessage {

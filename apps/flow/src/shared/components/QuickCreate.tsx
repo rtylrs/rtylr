@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { ChevronRight, Calendar, User, CircleUser, FolderInput, Flag, Gauge } from 'lucide-react';
 import { useFlowStore, Task } from '../stores/flowStore';

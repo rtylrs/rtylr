@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Monitor, Search, Filter } from 'lucide-react';
 import { useResources } from './useResources';
 

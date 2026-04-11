@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';

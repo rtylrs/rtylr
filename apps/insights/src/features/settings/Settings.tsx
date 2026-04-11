@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Settings as SettingsIcon, Clock, Mail, Calendar, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useInsightsSettings, useUpdateInsightsSettings, useScheduledReports, useCreateScheduledReport, useDeleteScheduledReport } from './useSettings';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';

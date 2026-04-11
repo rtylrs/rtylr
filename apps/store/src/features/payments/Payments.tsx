@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CreditCard, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { usePaymentMethods } from './usePayments';
 import { SkeletonRow } from '../../shared/components/Skeleton';

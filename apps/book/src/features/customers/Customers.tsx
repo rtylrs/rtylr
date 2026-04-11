@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, Search, Calendar, Phone, Mail } from 'lucide-react';
 import { useCustomers } from './useCustomers';
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Search, Plus, Folder } from 'lucide-react';
 import { useArticles, useArticleCategories } from './useKnowledgeBase';

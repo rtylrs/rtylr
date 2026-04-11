@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, UserCheck, DollarSign, ChefHat, Coffee, Briefcase, Truck, Plus } from 'lucide-react';
 import { Department } from '../../shared/services/hrApi';
 import { useDepartments } from './useDepartments';

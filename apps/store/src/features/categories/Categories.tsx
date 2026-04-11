@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Folder, Plus, Package } from 'lucide-react';
 import { useCategories } from './useCategories';
 import { SkeletonRow } from '../../shared/components/Skeleton';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
 import { PurchaseOrder } from '../../shared/services/erpApi';
 import { usePurchaseOrders } from './usePurchaseOrders';

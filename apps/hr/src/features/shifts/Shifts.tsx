@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CalendarPlus, Clock, CheckCircle2, Play, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Shift } from '../../shared/services/hrApi';
 import { useShifts } from './useShifts';

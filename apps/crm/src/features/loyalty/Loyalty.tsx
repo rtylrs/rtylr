@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLoyaltyConfig, useLoyaltyTransactions } from './useLoyalty';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
 import { type LoyaltyTransaction } from '../../shared/services/crmApi';
 

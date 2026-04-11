@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Briefcase, Users, Clock, Calendar } from 'lucide-react';
 import { useOperationsSummary, useStaffUtilization, useShiftCoverage, useTimeOffTrends, useDeptHeadcount, useHrDashboard } from './useOperations';
 import { formatNumber, formatPercent } from '../../shared/lib/format';

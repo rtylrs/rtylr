@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Package, Search, Grid3X3, List, Plus } from 'lucide-react';
 import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from './useProducts';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
 import { fadeInUp, viewportOnce } from '../../../lib/animations';

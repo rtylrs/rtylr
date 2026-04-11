@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, Layers } from 'lucide-react';
 import { useVariants } from '../products/useVariants';
 import PageHeader from '../../shared/components/PageHeader';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Mail, MessageCircle, Circle, User, Search, Filter } from 'lucide-react';
 import { useConversations } from './useConversations';
 

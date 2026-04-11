@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, Warehouse as WarehouseIcon, MapPin, User } from 'lucide-react';
 import { useWarehouses } from './useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';

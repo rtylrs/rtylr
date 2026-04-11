@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useRevenue, useRevenueByApp, useRevenueComparison } from './useRevenue';
 import { formatCurrency, formatPercent } from '../../shared/lib/format';

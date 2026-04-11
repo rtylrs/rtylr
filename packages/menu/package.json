@@ -19,7 +19,7 @@
     "@voxire/components": "workspace:*",
     "@voxire/config": "workspace:*",
     "classnames": "^2.5.1",
-    "framer-motion": "^11.2.10"
+    "motion": "^12.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

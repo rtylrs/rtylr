@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from './useProducts';

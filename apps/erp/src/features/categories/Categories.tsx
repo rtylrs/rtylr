@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
 import { useCategories } from './useCategories';
 import PageHeader from '../../shared/components/PageHeader';

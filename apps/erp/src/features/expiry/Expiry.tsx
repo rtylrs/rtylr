@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CalendarX, TrendingDown } from 'lucide-react';
 import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';

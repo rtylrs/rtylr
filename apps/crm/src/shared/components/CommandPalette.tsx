@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Search, Users, Gift, Megaphone, PieChart, LayoutDashboard,
   Zap, FileText, MessageSquare, Settings as SettingsIcon, Plus, Award,
