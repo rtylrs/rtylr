@@ -43,4 +43,8 @@ VALUES
     ('api_access', 'API Access', 'Full REST API access for custom integrations and automation.', 'code', 29.00, false, false, 13),
     ('white_label', 'White Label', 'Remove rtylr branding from all customer-facing pages.', 'eye-off', 24.00, false, false, 14),
     ('priority_support', 'Priority Support', 'Dedicated support channel with guaranteed response times.', 'headphones', 19.00, false, false, 15),
-    ('data_export', 'Data Export', 'Export all your business data in CSV, JSON, or Excel format.', 'download', 0.00, true, false, 16);
+    ('data_export', 'Data Export', 'Export all your business data in CSV, JSON, or Excel format.', 'download', 0.00, true, false, 16),
+    ('store', 'Online Store', 'Launch an online storefront with product catalog, checkout, and order management.', 'shopping-bag', 0.00, true, true, 17),
+    ('book', 'Appointments', 'Online booking for appointments, services, and resource scheduling.', 'calendar-check', 0.00, true, true, 18),
+    ('support', 'Help Desk', 'Shared inbox, ticketing, knowledge base, and customer support tools.', 'headphones', 0.00, true, true, 19),
+    ('insights', 'Insights', 'Cross-app analytics, revenue trends, and business intelligence dashboards.', 'bar-chart', 0.00, true, true, 20);
