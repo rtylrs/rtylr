@@ -12,6 +12,7 @@ import { CookiesProvider } from "react-cookie";
 import Modal from "react-modal";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
+import { HelmetProvider } from "react-helmet-async";
 
 import './globals.css';
 import "react-lazy-load-image-component/src/effects/blur.css";
@@ -27,6 +28,7 @@ const rootElement = document.getElementById("root");
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
+    <HelmetProvider>
     <QueryClientProvider client={queryClient}>
     <CookiesProvider>
         <Suspense fallback={<FullScreenLoader />}>
@@ -40,6 +42,7 @@ if (rootElement) {
         </Suspense>
     </CookiesProvider>
     </QueryClientProvider>
+    </HelmetProvider>
   );
 } else {
   <div>The App Failed To Load</div>;
