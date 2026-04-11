@@ -155,6 +155,9 @@ importers:
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
+      usehooks-ts:
+        specifier: ^3.1.1
+        version: 3.1.1(react@19.2.0)
       zustand:
         specifier: ^5.0.8
         version: 5.0.8(@types/react@19.2.5)(immer@10.2.0)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
@@ -460,7 +463,7 @@ importers:
         version: 18.3.0
       '@vitejs/plugin-react':
         specifier: ^4.2.0
-        version: 4.7.0(vite@7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
+        version: 4.7.0(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.27(postcss@8.4.49)
@@ -475,10 +478,10 @@ importers:
         version: 5.5.4
       vite:
         specifier: ^7.2.2
-        version: 7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
+        version: 7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
       vite-plugin-svgr:
         specifier: ^4.2.0
-        version: 4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
+        version: 4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
 
   apps/docs:
     dependencies:
@@ -6646,6 +6649,12 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  usehooks-ts@3.1.1:
+    resolution: {integrity: sha512-I4diPp9Cq6ieSUH2wu+fDAVQO43xwtulo+fKEidHUwZPnYImbtkTjzIJYcDcJqxgmX31GVqNFURodvcgHcW0pA==}
+    engines: {node: '>=16.15.0'}
+    peerDependencies:
+      react: ^16.8.0  || ^17 || ^18 || ^19 || ^19.0.0-rc
+
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
@@ -9159,18 +9168,6 @@ snapshots:
     dependencies:
       debug: 4.4.3
       typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-react@4.7.0(vite@7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))':
-    dependencies:
-      '@babel/core': 7.28.5
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.5)
-      '@rolldown/pluginutils': 1.0.0-beta.27
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.17.0
-      vite: 7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -12172,6 +12169,11 @@ snapshots:
     dependencies:
       react: 19.2.0
 
+  usehooks-ts@3.1.1(react@19.2.0):
+    dependencies:
+      lodash.debounce: 4.0.8
+      react: 19.2.0
+
   util-deprecate@1.0.2: {}
 
   utrie@1.0.2:
@@ -12201,17 +12203,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  vite-plugin-svgr@4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)):
-    dependencies:
-      '@rollup/pluginutils': 5.3.0(rollup@4.53.2)
-      '@svgr/core': 8.1.0(typescript@5.5.4)
-      '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
-      vite: 7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
-    transitivePeerDependencies:
-      - rollup
-      - supports-color
-      - typescript
 
   vite-plugin-svgr@4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)):
     dependencies:
@@ -12256,24 +12247,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
-
-  vite@7.2.2(@types/node@20.19.25)(jiti@1.21.7)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1):
-    dependencies:
-      esbuild: 0.25.12
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.4.49
-      rollup: 4.53.2
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 20.19.25
-      fsevents: 2.3.3
-      jiti: 1.21.7
-      less: 4.4.2
-      sass: 1.94.0
-      sass-embedded: 1.93.3
-      terser: 5.44.1
-      yaml: 2.8.1
 
   vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1):
     dependencies:

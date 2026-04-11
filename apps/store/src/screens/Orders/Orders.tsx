@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Search, Package } from 'lucide-react';
+import { useDebounce } from '@voxire/utils';
 import { useOrders, OrderFilters } from '../../hooks/useOrders';
 import { formatCurrency, formatDateTime } from '../../lib/format';
 import { SkeletonRow } from '../../components/Skeleton';
@@ -30,10 +31,11 @@ const statusOptions = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelle
 
 const Orders: React.FC = () => {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<OrderFilters['status']>();
 
   const { data: orders, isLoading, error } = useOrders({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: statusFilter,
   });
 

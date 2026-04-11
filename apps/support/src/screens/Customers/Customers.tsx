@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, Mail, Ticket } from 'lucide-react';
+import { useDebounce } from '@voxire/utils';
 import { useCustomers } from '../../hooks/useCustomers';
 
 const Customers: React.FC = () => {
   const [search, setSearch] = useState('');
-  const { data, isLoading, isError } = useCustomers({ search: search || undefined });
+  const debouncedSearch = useDebounce(search, 300);
+  const { data, isLoading, isError } = useCustomers({ search: debouncedSearch || undefined });
 
   const customers: any[] = data ?? [];
 
