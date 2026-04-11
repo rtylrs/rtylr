@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@voxire/api": "workspace:*",
     "@voxire/config": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "@voxire/tailwind-config": "workspace:*",

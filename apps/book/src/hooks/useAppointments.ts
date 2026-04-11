@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { bookService } from '../services/bookService';
 
 export interface AppointmentFilters {
@@ -12,10 +13,7 @@ export interface AppointmentFilters {
 export function useAppointments(filters?: AppointmentFilters) {
   return useQuery({
     queryKey: ['appointments', filters],
-    queryFn: async () => {
-      const res = await bookService.getAppointments(filters);
-      return res.data?.data ?? res.data ?? [];
-    },
+    queryFn: () => unwrap(bookService.getAppointments(filters)),
   });
 }
 
@@ -23,18 +21,14 @@ export function useAppointment(id: number | undefined) {
   return useQuery({
     queryKey: ['appointment', id],
     enabled: !!id,
-    queryFn: async () => {
-      if (!id) return null;
-      const res = await bookService.getAppointment(id);
-      return res.data?.data ?? res.data ?? null;
-    },
+    queryFn: () => unwrap(bookService.getAppointment(id!)),
   });
 }
 
 export function useCreateAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => bookService.createAppointment(data),
+    mutationFn: (data: any) => unwrap(bookService.createAppointment(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['calendar'] });
@@ -46,7 +40,7 @@ export function useCreateAppointment() {
 export function useUpdateAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => bookService.updateAppointment(id, data),
+    mutationFn: ({ id, data }: { id: number; data: any }) => unwrap(bookService.updateAppointment(id, data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['calendar'] });
@@ -58,7 +52,7 @@ export function useUpdateAppointment() {
 export function useCancelAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => bookService.cancelAppointment(id),
+    mutationFn: (id: number) => unwrap(bookService.cancelAppointment(id)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['calendar'] });

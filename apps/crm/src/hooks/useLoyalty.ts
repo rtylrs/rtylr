@@ -1,38 +1,39 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crmApi, LoyaltyConfig, LoyaltyTier } from '../services/crmApi';
 
 export function useLoyaltyTransactions() {
   return useQuery({
     queryKey: ['loyalty-transactions'],
-    queryFn: () => crmApi.getLoyaltyTransactions(),
+    queryFn: () => unwrap(crmApi.getLoyaltyTransactions()),
   });
 }
 
 export function useLoyaltyConfig() {
   return useQuery({
     queryKey: ['loyalty-config'],
-    queryFn: () => crmApi.getLoyaltyConfig(),
+    queryFn: () => unwrap(crmApi.getLoyaltyConfig()),
   });
 }
 
 export function useLoyaltyMembers() {
   return useQuery({
     queryKey: ['loyalty-members'],
-    queryFn: () => crmApi.getLoyaltyMembers(),
+    queryFn: () => unwrap(crmApi.getLoyaltyMembers()),
   });
 }
 
 export function useLoyaltyRewards() {
   return useQuery({
     queryKey: ['loyalty-rewards'],
-    queryFn: () => crmApi.getLoyaltyRewards(),
+    queryFn: () => unwrap(crmApi.getLoyaltyRewards()),
   });
 }
 
 export function useLoyaltyTiers() {
   return useQuery({
     queryKey: ['loyalty-tiers'],
-    queryFn: () => crmApi.getLoyaltyTiers(),
+    queryFn: () => unwrap(crmApi.getLoyaltyTiers()),
   });
 }
 
@@ -48,7 +49,7 @@ export function useUpdateLoyaltyTier() {
 export function useUpdateLoyaltyConfig() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (config: Partial<LoyaltyConfig>) => crmApi.updateLoyaltyConfig(config),
+    mutationFn: (config: Partial<LoyaltyConfig>) => unwrap(crmApi.updateLoyaltyConfig(config)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['loyalty-config'] }),
   });
 }

@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -12,7 +13,7 @@ export function useProjects(workspaceId: string | undefined) {
   );
   const q = useQuery({
     queryKey: ['projects', workspaceId],
-    queryFn: () => flowApi.getProjects(workspaceId!),
+    queryFn: () => unwrap(flowApi.getProjects(workspaceId!)),
     enabled: !isFlowLocal() && !!workspaceId,
   });
   return {

@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -32,7 +33,7 @@ export function useRoadmap() {
 
   const q = useQuery({
     queryKey: ['roadmap'],
-    queryFn: () => flowApi.getRoadmap(),
+    queryFn: () => unwrap(flowApi.getRoadmap()),
     enabled: !isFlowLocal(),
   });
   return {

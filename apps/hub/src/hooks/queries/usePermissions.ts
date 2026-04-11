@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export type Role = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string;
@@ -22,8 +23,8 @@ export const usePermissions = () => {
   return useQuery<PermissionMatrix>({
     queryKey: ['permissions'],
     queryFn: async () => {
-      const res = await api.get('/permissions');
-      return res.data as PermissionMatrix;
+      const res = await unwrap(safe.get('/permissions'));
+      return res as PermissionMatrix;
     },
   });
 };
@@ -32,7 +33,7 @@ export const useUpdatePermission = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { role: Role; permission: string; value: boolean }) => {
-      await api.post('/permissions', payload);
+      await unwrap(safe.post('/permissions', payload));
       return payload;
     },
     onMutate: async ({ role, permission, value }) => {
@@ -68,8 +69,8 @@ export const useCustomRoles = () => {
   return useQuery<CustomRole[]>({
     queryKey: ['custom-roles'],
     queryFn: async () => {
-      const res = await api.get('/roles');
-      return (res.data?.roles ?? res.data) as CustomRole[];
+      const res = await unwrap(safe.get('/roles'));
+      return (res?.roles ?? res) as CustomRole[];
     },
   });
 };

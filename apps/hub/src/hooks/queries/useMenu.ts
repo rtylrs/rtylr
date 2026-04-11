@@ -1,6 +1,7 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { useMenuStore } from '../../stores/menuStore';
 import { toast } from 'sonner';
 
@@ -30,11 +31,11 @@ export const useGetAllMenus = (restaurantId: string | null) => {
   const query = useQuery({
     queryKey: ['menus', restaurantId],
     queryFn: async () => {
-      const response = await api.get(`/menu/menus/${restaurantId}`);
-      if (response.data.message === 'No menus found') {
+      const data = await unwrap(safe.get(`/menu/menus/${restaurantId}`));
+      if (data?.message === 'No menus found') {
         return [];
       }
-      return response.data;
+      return data;
     },
     enabled: !!restaurantId,
   });
@@ -61,10 +62,10 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
   const query = useQuery({
     queryKey: ['menu', userId, disabled],
     queryFn: async () => {
-      const response = await api.get(`/menu/${userId}`, {
+      const response = await unwrap(safe.get(`/menu/${userId}`, {
         params: { disabled },
-      });
-      return response.data;
+      }));
+      return response;
     },
     enabled: !!userId,
   });
@@ -92,8 +93,7 @@ export const useGetMenuById = (menuId: string | null) => {
   const query = useQuery({
     queryKey: ['menu', menuId],
     queryFn: async () => {
-      const response = await api.get(`/menu/${menuId}`);
-      return response.data;
+      return unwrap(safe.get(`/menu/${menuId}`));
     },
     enabled: !!menuId,
   });
@@ -121,11 +121,10 @@ export const useCreateMenu = () => {
 
   return useMutation({
     mutationFn: async ({ restaurantId, menuName }: { restaurantId: string; menuName: string }) => {
-      const response = await api.post('/menu/createNewMenu', {
+      return unwrap(safe.post('/menu/createNewMenu', {
         restaurantId,
         menuName,
-      });
-      return response.data;
+      }));
     },
     onSuccess: (data, variables) => {
       setAllMenus([...allMenus, data]);
@@ -145,7 +144,7 @@ export const useSetActiveMenu = () => {
 
   return useMutation({
     mutationFn: async ({ restaurantId, menuId }: { restaurantId: string; menuId: string }) => {
-      await api.post('/menu/set-active-menu', { restaurantId, menuId });
+      await unwrap(safe.post('/menu/set-active-menu', { restaurantId, menuId }));
       return { menuId };
     },
     onSuccess: (data) => {
@@ -179,12 +178,12 @@ export const useAddMenuItem = () => {
         }
       });
 
-      const response = await api.post(`/menu/category/${categoryId}/item`, formData, {
+      const created = await unwrap(safe.post(`/menu/category/${categoryId}/item`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      });
-      return { categoryId, item: response.data };
+      }));
+      return { categoryId, item: created };
     },
     onSuccess: (data) => {
       const updatedItems = items.map((cat) => {
@@ -213,8 +212,8 @@ export const useEditMenuItem = () => {
 
   return useMutation({
     mutationFn: async ({ itemId, item }: { itemId: string; item: Partial<MenuItem> }) => {
-      const response = await api.put(`/menu/item/${itemId}`, item);
-      return { itemId, item: response.data };
+      const response = await unwrap(safe.put(`/menu/item/${itemId}`, item));
+      return { itemId, item: response };
     },
     onSuccess: (data) => {
       const updatedItems = items.map((cat) => {
@@ -243,7 +242,7 @@ export const useDeleteMenuItem = () => {
 
   return useMutation({
     mutationFn: async ({ categoryId, itemId }: { categoryId: string; itemId: string }) => {
-      await api.delete(`/menu/category/${categoryId}/item/${itemId}`);
+      await unwrap(safe.delete(`/menu/category/${categoryId}/item/${itemId}`));
       return { categoryId, itemId };
     },
     onSuccess: (data) => {
@@ -273,8 +272,8 @@ export const useAddCategory = () => {
 
   return useMutation({
     mutationFn: async (category: Partial<Category>) => {
-      const response = await api.post('/menu/category', category);
-      return response.data;
+      const response = await unwrap(safe.post('/menu/category', category));
+      return response;
     },
     onSuccess: (data) => {
       setItems([...items, data]);
@@ -294,8 +293,8 @@ export const useEditCategory = () => {
 
   return useMutation({
     mutationFn: async ({ categoryId, category }: { categoryId: string; category: Partial<Category> }) => {
-      const response = await api.put(`/menu/category/${categoryId}`, category);
-      return { categoryId, category: response.data };
+      const response = await unwrap(safe.put(`/menu/category/${categoryId}`, category));
+      return { categoryId, category: response };
     },
     onSuccess: (data) => {
       const updatedItems = items.map((item) =>
@@ -318,7 +317,7 @@ export const useDeleteCategory = () => {
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      await api.delete(`/menu/category/${categoryId}`);
+      await unwrap(safe.delete(`/menu/category/${categoryId}`));
       return categoryId;
     },
     onSuccess: (data) => {
@@ -343,8 +342,8 @@ export const useRenameCategory = () => {
 
   return useMutation({
     mutationFn: async ({ categoryId, newName }: { categoryId: string; newName: string }) => {
-      const response = await api.put(`/menu/category/${categoryId}`, { newName });
-      return { categoryId, name: response.data.name };
+      const response = await unwrap(safe.put(`/menu/category/${categoryId}`, { newName }));
+      return { categoryId, name: response.name };
     },
     onSuccess: (data) => {
       const updatedItems = items.map((cat) => {
@@ -370,12 +369,11 @@ export const useAddBanner = () => {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post('/menu/banner', formData, {
+      return unwrap(safe.post('/menu/banner', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      });
-      return response.data;
+      }));
     },
     onSuccess: (data) => {
       setItems([...items, data]);

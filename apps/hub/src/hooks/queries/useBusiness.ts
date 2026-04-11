@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { useUserStore } from '../../stores/userStore';
 import { toast } from 'sonner';
 
@@ -7,7 +8,7 @@ export const useGetBusiness = (businessId: string | null) => {
   return useQuery({
     queryKey: ['business', businessId],
     queryFn: async () => {
-      const response = await api.get(`/business/${businessId}`);
+      const response = await unwrap(safe.get(`/business/${businessId}`));
       return response.data;
     },
     enabled: !!businessId,
@@ -23,7 +24,7 @@ export const useUpdateBusiness = () => {
 
   return useMutation({
     mutationFn: async ({ businessId, data }: { businessId: string; data: any }) => {
-      const response = await api.put(`/business/${businessId}`, data);
+      const response = await unwrap(safe.put(`/business/${businessId}`, data));
       return response.data;
     },
     onSuccess: (data, variables) => {
@@ -45,7 +46,7 @@ export const useUpdateTheme = () => {
 
   return useMutation({
     mutationFn: async ({ id, themeData }: { id: string; themeData: any }) => {
-      const response = await api.put(`/business/${id}/theme`, themeData);
+      const response = await unwrap(safe.put(`/business/${id}/theme`, themeData));
       return response.data;
     },
     onSuccess: (data, variables) => {

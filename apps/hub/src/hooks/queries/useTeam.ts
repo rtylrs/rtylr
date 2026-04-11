@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export interface TeamMember {
@@ -20,8 +21,8 @@ export const useTeam = () => {
   return useQuery<TeamMember[]>({
     queryKey: ['team'],
     queryFn: async () => {
-      const res = await api.get('/team/members');
-      const raw = res.data?.users ?? res.data?.members ?? res.data;
+      const res = await unwrap(safe.get('/team/members'));
+      const raw = res?.users ?? res?.members ?? res;
       if (!Array.isArray(raw)) return [];
       return raw.map((m: any) => ({ ...m, name: m.fullName || m.name || m.email })) as TeamMember[];
     },
@@ -34,8 +35,8 @@ export const useMember = (id: string | undefined) => {
     queryKey: ['team', id],
     queryFn: async () => {
       if (!id) return undefined;
-      const res = await api.get(`/team/members/${id}`);
-      const m = res.data?.user ?? res.data;
+      const res = await unwrap(safe.get(`/team/members/${id}`));
+      const m = res?.user ?? res;
       if (!m) return undefined;
       return { ...m, name: m.fullName || m.name || m.email, apps: m.apps ?? [], status: m.isActive ? 'active' : 'inactive' } as TeamMember;
     },
@@ -47,8 +48,8 @@ export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { email: string; fullName: string; role: TeamMember['role']; apps: string[] }) => {
-      const res = await api.post('/team/invite', payload);
-      return res.data;
+      const res = await unwrap(safe.post('/team/invite', payload));
+      return res;
     },
     onSuccess: () => {
       toast.success('Invitation sent');
@@ -63,7 +64,7 @@ export const useUpdateMember = () => {
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
       const res = await api.patch(`/team/members/${id}`, patch);
-      return res.data;
+      return res;
     },
     onSuccess: () => {
       toast.success('Member updated');
@@ -77,7 +78,7 @@ export const useDeactivateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.post(`/team/members/${id}/deactivate`);
+      await unwrap(safe.post(`/team/members/${id}/deactivate`));
       return id;
     },
     onSuccess: () => {

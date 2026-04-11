@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi, ApiTask } from '../services/flowApi';
@@ -17,7 +18,7 @@ export function useTasks(params: { projectId?: string; status?: ApiTask['status'
 
   const q = useQuery({
     queryKey: ['tasks', params],
-    queryFn: () => flowApi.getTasks(params),
+    queryFn: () => unwrap(flowApi.getTasks(params)),
     enabled: !isFlowLocal(),
   });
   return {
@@ -35,7 +36,7 @@ export function useMyTasks() {
   );
   const q = useQuery({
     queryKey: ['my-tasks'],
-    queryFn: () => flowApi.getMyTasks(),
+    queryFn: () => unwrap(flowApi.getMyTasks()),
     enabled: !isFlowLocal(),
   });
   return {
@@ -49,7 +50,7 @@ export function useTaskDetail(id: string | undefined) {
   const fromStore = useFlowStore((s) => (id ? s.tasks.find((t) => t.id === id) : undefined));
   const q = useQuery({
     queryKey: ['task', id],
-    queryFn: () => flowApi.getTaskDetail(id!),
+    queryFn: () => unwrap(flowApi.getTaskDetail(id!)),
     enabled: !isFlowLocal() && !!id,
   });
   return {

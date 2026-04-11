@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // -- Types --
 
@@ -149,63 +149,63 @@ export interface DashboardStats {
 export const storeApi = {
   // Dashboard
   getDashboardStats: () =>
-    api.get<DashboardStats>('/store/dashboard'),
+    safe.get<DashboardStats>('/store/dashboard'),
 
   // Products
   listProducts: (params?: { search?: string; categoryId?: number; status?: string; limit?: number; offset?: number }) =>
-    api.get<StoreProduct[]>('/store/products', { params }),
+    safe.get<StoreProduct[]>('/store/products', { params }),
   getProduct: (id: number) =>
-    api.get<StoreProduct>(`/store/products/${id}`),
+    safe.get<StoreProduct>(`/store/products/${id}`),
   createProduct: (data: CreateProductInput) =>
-    api.post<StoreProduct>('/store/products', data),
+    safe.post<StoreProduct>('/store/products', data),
   updateProduct: (data: UpdateProductInput) =>
-    api.post<StoreProduct>('/store/products', data),
+    safe.post<StoreProduct>('/store/products', data),
   deleteProduct: (id: number) =>
-    api.post<{ success: boolean }>('/store/products', { id, _action: 'delete' }),
+    safe.post<{ success: boolean }>('/store/products', { id, _action: 'delete' }),
 
   // Orders
   listOrders: (params?: { status?: string; search?: string; limit?: number; offset?: number }) =>
-    api.get<StoreOrder[]>('/store/orders', { params }),
+    safe.get<StoreOrder[]>('/store/orders', { params }),
   getOrder: (id: number) =>
-    api.get<StoreOrder>(`/store/orders/${id}`),
+    safe.get<StoreOrder>(`/store/orders/${id}`),
   updateOrderStatus: (id: number, status: StoreOrder['status']) =>
-    api.post<StoreOrder>('/store/orders/status', { id, status }),
+    safe.post<StoreOrder>('/store/orders/status', { id, status }),
 
   // Categories
   listCategories: () =>
-    api.get<StoreCategory[]>('/store/categories'),
+    safe.get<StoreCategory[]>('/store/categories'),
   createCategory: (data: CreateCategoryInput) =>
-    api.post<StoreCategory>('/store/categories', data),
+    safe.post<StoreCategory>('/store/categories', data),
   updateCategory: (data: Partial<CreateCategoryInput> & { id: number }) =>
-    api.post<StoreCategory>('/store/categories', data),
+    safe.post<StoreCategory>('/store/categories', data),
   deleteCategory: (id: number) =>
-    api.post<{ success: boolean }>('/store/categories', { id, _action: 'delete' }),
+    safe.post<{ success: boolean }>('/store/categories', { id, _action: 'delete' }),
 
   // Shipping
   listShippingZones: () =>
-    api.get<ShippingZone[]>('/store/shipping/zones'),
+    safe.get<ShippingZone[]>('/store/shipping/zones'),
   createShippingZone: (data: CreateShippingZoneInput) =>
-    api.post<ShippingZone>('/store/shipping/zones', data),
+    safe.post<ShippingZone>('/store/shipping/zones', data),
   updateShippingZone: (data: Partial<CreateShippingZoneInput> & { id: number }) =>
-    api.post<ShippingZone>('/store/shipping/zones', data),
+    safe.post<ShippingZone>('/store/shipping/zones', data),
   listShippingMethods: () =>
-    api.get<ShippingMethod[]>('/store/shipping/methods'),
+    safe.get<ShippingMethod[]>('/store/shipping/methods'),
 
   // Payments
   listPaymentMethods: () =>
-    api.get<PaymentMethod[]>('/store/payments/methods'),
+    safe.get<PaymentMethod[]>('/store/payments/methods'),
   updatePaymentMethod: (data: Partial<PaymentMethod> & { id: number }) =>
-    api.post<PaymentMethod>('/store/payments/methods', data),
+    safe.post<PaymentMethod>('/store/payments/methods', data),
 
   // Storefront
   getStorefrontConfig: () =>
-    api.get<StorefrontConfig>('/store/storefront'),
+    safe.get<StorefrontConfig>('/store/storefront'),
   updateStorefrontConfig: (data: Partial<StorefrontConfig>) =>
-    api.post<StorefrontConfig>('/store/storefront', data),
+    safe.post<StorefrontConfig>('/store/storefront', data),
 
   // Settings
   getSettings: () =>
-    api.get<StoreSettings>('/store/settings'),
+    safe.get<StoreSettings>('/store/settings'),
   updateSettings: (data: Partial<StoreSettings>) =>
-    api.post<StoreSettings>('/store/settings', data),
+    safe.post<StoreSettings>('/store/settings', data),
 };

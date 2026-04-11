@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../services/hrApi';
 
 export function useDepartments() {
   return useQuery({
     queryKey: ['departments'],
-    queryFn: () => hrApi.listDepartments().then((r) => r.data || []),
+    queryFn: () => unwrap(hrApi.listDepartments()),
   });
 }
 
 export function useCreateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateDepartmentInput) => hrApi.createDepartment(data),
+    mutationFn: (data: CreateDepartmentInput) => unwrap(hrApi.createDepartment(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   });
 }
@@ -19,7 +20,7 @@ export function useCreateDepartment() {
 export function useUpdateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateDepartmentInput) => hrApi.updateDepartment(data),
+    mutationFn: (data: UpdateDepartmentInput) => unwrap(hrApi.updateDepartment(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   });
 }

@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -13,7 +14,7 @@ export function useMilestones(projectId?: string) {
   );
   const q = useQuery({
     queryKey: ['milestones', projectId],
-    queryFn: () => flowApi.getMilestones(projectId),
+    queryFn: () => unwrap(flowApi.getMilestones(projectId)),
     enabled: !isFlowLocal(),
   });
   return {

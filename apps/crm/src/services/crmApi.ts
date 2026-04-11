@@ -1,4 +1,5 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
+import { unwrap } from '@voxire/api';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -205,130 +206,130 @@ export interface Settings {
 export const crmApi = {
   // Dashboard
   getDashboard: () =>
-    api.get<DashboardStats>('/crm/dashboard').then((r) => r.data),
+    safe.get<DashboardStats>('/crm/dashboard'),
 
   // Customers
   getCustomers: (params?: CustomersParams) =>
-    api.get<Customer[]>('/crm/customers', { params }).then((r) => r.data),
+    safe.get<Customer[]>('/crm/customers', { params }),
 
   getCustomerDetail: (id: number) =>
-    api.get<Customer>('/crm/customers/detail', { params: { id } }).then((r) => r.data),
+    safe.get<Customer>('/crm/customers/detail', { params: { id } }),
 
   getCustomerTimeline: (id: number) =>
-    api.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }).then((r) => r.data),
+    safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }),
 
   createCustomer: (data: Partial<Customer>) =>
-    api.post<Customer>('/crm/customers', data).then((r) => r.data),
+    safe.post<Customer>('/crm/customers', data),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
-    api.post<Customer>('/crm/customers', { id, ...data }).then((r) => r.data),
+    safe.post<Customer>('/crm/customers', { id, ...data }),
 
   deleteCustomer: (id: number) =>
-    api.post('/crm/customers', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post('/crm/customers', { id, _action: 'delete' }),
 
   recordVisit: (customerId: number) =>
-    api.post('/crm/customers/record-visit', { customerId }).then((r) => r.data),
+    safe.post('/crm/customers/record-visit', { customerId }),
 
   importCustomers: (rows: any[]) =>
-    api.post('/crm/customers/import', { rows }).then((r) => r.data),
+    safe.post('/crm/customers/import', { rows }),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
-    api.post('/crm/customers/merge', { primaryId, secondaryId }).then((r) => r.data),
+    safe.post('/crm/customers/merge', { primaryId, secondaryId }),
 
   exportCustomerData: (id: number) =>
-    api.get('/crm/customers/export', { params: { id } }).then((r) => r.data),
+    safe.get('/crm/customers/export', { params: { id } }),
 
   // Loyalty
   awardPoints: (customerId: number, points: number, reason?: string) =>
-    api.post('/crm/loyalty/award', { customerId, points, reason }).then((r) => r.data),
+    safe.post('/crm/loyalty/award', { customerId, points, reason }),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
-    api.post('/crm/loyalty/redeem', { customerId, points, reason }).then((r) => r.data),
+    safe.post('/crm/loyalty/redeem', { customerId, points, reason }),
 
   getLoyaltyConfig: () =>
-    api.get<LoyaltyConfig>('/crm/loyalty/config').then((r) => r.data),
+    safe.get<LoyaltyConfig>('/crm/loyalty/config'),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    api.post<LoyaltyConfig>('/crm/loyalty/config', config).then((r) => r.data),
+    safe.post<LoyaltyConfig>('/crm/loyalty/config', config),
 
   getLoyaltyTransactions: () =>
-    api.get<LoyaltyTransaction[]>('/crm/loyalty/transactions').then((r) => r.data),
+    safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
 
   getLoyaltyMembers: () =>
-    api.get<LoyaltyMember[]>('/crm/loyalty/members').then((r) => r.data),
+    safe.get<LoyaltyMember[]>('/crm/loyalty/members'),
 
   getLoyaltyRewards: () =>
-    api.get<LoyaltyReward[]>('/crm/loyalty/rewards').then((r) => r.data),
+    safe.get<LoyaltyReward[]>('/crm/loyalty/rewards'),
 
   getLoyaltyTiers: () =>
-    api.get<LoyaltyTier[]>('/crm/loyalty/tiers').then((r) => r.data),
+    safe.get<LoyaltyTier[]>('/crm/loyalty/tiers'),
 
   updateLoyaltyTier: (id: number, data: Partial<LoyaltyTier>) =>
-    api.post('/crm/loyalty/tiers', { id, ...data }).then((r) => r.data),
+    safe.post('/crm/loyalty/tiers', { id, ...data }),
 
   // Segments
   getSegments: () =>
-    api.get<Segment[]>('/crm/segments').then((r) => r.data),
+    safe.get<Segment[]>('/crm/segments'),
 
   getSegmentById: (id: number) =>
-    api.get<Segment>('/crm/segments/detail', { params: { id } }).then((r) => r.data),
+    safe.get<Segment>('/crm/segments/detail', { params: { id } }),
 
   getSegmentCustomers: (id: number) =>
-    api.get<Customer[]>('/crm/segments/customers', { params: { id } }).then((r) => r.data),
+    safe.get<Customer[]>('/crm/segments/customers', { params: { id } }),
 
   createSegment: (data: Partial<Segment>) =>
-    api.post<Segment>('/crm/segments', data).then((r) => r.data),
+    safe.post<Segment>('/crm/segments', data),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
-    api.post<Segment>('/crm/segments', { id, ...data }).then((r) => r.data),
+    safe.post<Segment>('/crm/segments', { id, ...data }),
 
   deleteSegment: (id: number) =>
-    api.post('/crm/segments', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post('/crm/segments', { id, _action: 'delete' }),
 
   // Campaigns
   getCampaigns: () =>
-    api.get<Campaign[]>('/crm/campaigns').then((r) => r.data),
+    safe.get<Campaign[]>('/crm/campaigns'),
 
   getCampaignById: (id: number) =>
-    api.get<Campaign>('/crm/campaigns/detail', { params: { id } }).then((r) => r.data),
+    safe.get<Campaign>('/crm/campaigns/detail', { params: { id } }),
 
   getCampaignStats: (id: number) =>
-    api.get<CampaignStats>('/crm/campaigns/stats', { params: { id } }).then((r) => r.data),
+    safe.get<CampaignStats>('/crm/campaigns/stats', { params: { id } }),
 
   createCampaign: (data: Partial<Campaign>) =>
-    api.post<Campaign>('/crm/campaigns', data).then((r) => r.data),
+    safe.post<Campaign>('/crm/campaigns', data),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
-    api.post<Campaign>('/crm/campaigns', { id, ...data }).then((r) => r.data),
+    safe.post<Campaign>('/crm/campaigns', { id, ...data }),
 
   updateCampaignStatus: (id: number, status: string) =>
-    api.post('/crm/campaigns/status', { id, status }).then((r) => r.data),
+    safe.post('/crm/campaigns/status', { id, status }),
 
   // Automations
   getAutomations: () =>
-    api.get<Automation[]>('/crm/automations').then((r) => r.data),
+    safe.get<Automation[]>('/crm/automations'),
 
   createAutomation: (data: Partial<Automation>) =>
-    api.post<Automation>('/crm/automations', data).then((r) => r.data),
+    safe.post<Automation>('/crm/automations', data),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
-    api.post<Automation>('/crm/automations', { id, ...data }).then((r) => r.data),
+    safe.post<Automation>('/crm/automations', { id, ...data }),
 
   // Templates
   getTemplates: () =>
-    api.get<Template[]>('/crm/templates').then((r) => r.data),
+    safe.get<Template[]>('/crm/templates'),
 
   createTemplate: (data: Partial<Template>) =>
-    api.post<Template>('/crm/templates', data).then((r) => r.data),
+    safe.post<Template>('/crm/templates', data),
 
   // Feedback
   getFeedback: () =>
-    api.get<FeedbackItem[]>('/crm/feedback').then((r) => r.data),
+    safe.get<FeedbackItem[]>('/crm/feedback'),
 
   // Settings
   getSettings: () =>
-    api.get<Settings>('/crm/settings').then((r) => r.data),
+    safe.get<Settings>('/crm/settings'),
 
   updateSettings: (data: Partial<Settings>) =>
-    api.post<Settings>('/crm/settings', data).then((r) => r.data),
+    safe.post<Settings>('/crm/settings', data),
 };

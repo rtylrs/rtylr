@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { bookService } from '../services/bookService';
 
 export interface CalendarFilters {
@@ -10,9 +11,6 @@ export interface CalendarFilters {
 export function useCalendarEvents(filters?: CalendarFilters) {
   return useQuery({
     queryKey: ['calendar', filters],
-    queryFn: async () => {
-      const res = await bookService.getCalendarEvents(filters);
-      return res.data?.data ?? res.data ?? [];
-    },
+    queryFn: () => unwrap(bookService.getCalendarEvents(filters)),
   });
 }

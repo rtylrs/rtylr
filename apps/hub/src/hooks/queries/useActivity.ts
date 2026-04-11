@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 
 export interface ActivityEntry {
   id: string;
@@ -17,8 +18,8 @@ export const useActivity = (limit = 100) => {
   return useQuery<ActivityEntry[]>({
     queryKey: ['activity', limit],
     queryFn: async () => {
-      const res = await api.get(`/activity?limit=${limit}`);
-      const raw = res.data?.activities ?? res.data?.entries ?? res.data;
+      const res = await unwrap(safe.get(`/activity?limit=${limit}`));
+      const raw = res?.activities ?? res?.entries ?? res;
       return Array.isArray(raw) ? raw : [];
     },
     staleTime: 20_000,
@@ -29,8 +30,8 @@ export const useAuditLog = (limit = 200) => {
   return useQuery<ActivityEntry[]>({
     queryKey: ['audit', limit],
     queryFn: async () => {
-      const res = await api.get(`/audit?limit=${limit}`);
-      return res.data as ActivityEntry[];
+      const res = await unwrap(safe.get(`/audit?limit=${limit}`));
+      return res as ActivityEntry[];
     },
     staleTime: 20_000,
   });

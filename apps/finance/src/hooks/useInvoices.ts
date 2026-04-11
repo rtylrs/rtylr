@@ -1,17 +1,18 @@
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { financeApi, Invoice } from '../services/financeApi';
 
 export function useInvoices() {
   return useQuery({
     queryKey: ['invoices'],
-    queryFn: () => financeApi.getInvoices(),
+    queryFn: () => unwrap(financeApi.getInvoices()),
   });
 }
 
 export function useInvoiceDetail(id: string | undefined) {
   return useQuery({
     queryKey: ['invoice', id],
-    queryFn: () => financeApi.getInvoiceDetail(id!),
+    queryFn: () => unwrap(financeApi.getInvoiceDetail(id!)),
     enabled: !!id,
   });
 }
@@ -19,7 +20,7 @@ export function useInvoiceDetail(id: string | undefined) {
 export function useCreateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Invoice>) => financeApi.createInvoice(data),
+    mutationFn: (data: Partial<Invoice>) => unwrap(financeApi.createInvoice(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -27,7 +28,7 @@ export function useCreateInvoice() {
 export function useUpdateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }) => financeApi.updateInvoice(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }) => unwrap(financeApi.updateInvoice(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -35,7 +36,7 @@ export function useUpdateInvoice() {
 export function useDeleteInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => financeApi.deleteInvoice(id),
+    mutationFn: (id: string) => unwrap(financeApi.deleteInvoice(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -52,7 +53,7 @@ export function useUpdateInvoiceStatus() {
 export function useRecordPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) => financeApi.recordPayment(id, amount),
+    mutationFn: ({ id, amount }: { id: string; amount: number }) => unwrap(financeApi.recordPayment(id, amount)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }

@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import {
   MonitorSpeaker,
@@ -14,7 +15,7 @@ import {
   Headphones,
   FileText,
 } from 'lucide-react';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 
 export interface RtylrApp {
   key: string;
@@ -65,8 +66,8 @@ export const useApps = () => {
   return useQuery<RtylrApp[]>({
     queryKey: ['apps'],
     queryFn: async () => {
-      const res = await api.get('/apps');
-      const remote = res.data?.apps ?? res.data;
+      const res = await unwrap(safe.get('/apps'));
+      const remote = res?.apps ?? res;
       if (!Array.isArray(remote)) return [];
       return remote.map((a: any) => {
         const meta = APP_META[a.id] ?? { href: '#', color: '#888', bg: 'rgba(136,136,136,0.12)', category: 'core' as const };

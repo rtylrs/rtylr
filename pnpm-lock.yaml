@@ -273,6 +273,9 @@ importers:
 
   apps/auth:
     dependencies:
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -412,6 +415,9 @@ importers:
 
   apps/crm:
     dependencies:
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -649,6 +655,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.89.0
         version: 5.90.9(react@19.2.0)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -746,6 +755,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.89.0
         version: 5.90.9(react@19.2.0)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -813,6 +825,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.89.0
         version: 5.90.9(react@19.2.0)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -889,6 +904,9 @@ importers:
       '@types/react-helmet':
         specifier: ^6.1.11
         version: 6.1.11
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config

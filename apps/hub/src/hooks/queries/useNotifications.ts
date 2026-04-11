@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 
 export interface Notification {
   id: string;
@@ -16,8 +17,8 @@ export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const res = await api.get('/notifications');
-      return (res.data?.notifications ?? res.data) as Notification[];
+      const res = await unwrap(safe.get('/notifications'));
+      return (res?.notifications ?? res) as Notification[];
     },
     staleTime: 15_000,
   });
@@ -27,7 +28,7 @@ export const useMarkNotificationRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.post(`/notifications/${id}/read`);
+      await unwrap(safe.post(`/notifications/${id}/read`));
       return id;
     },
     onMutate: async (id) => {
@@ -48,7 +49,7 @@ export const useMarkAllNotificationsRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      await api.post('/notifications/read-all');
+      await unwrap(safe.post('/notifications/read-all'));
     },
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });

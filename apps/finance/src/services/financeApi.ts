@@ -1,4 +1,4 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -98,127 +98,127 @@ export interface TaxReport {
 export const financeApi = {
   // Dashboard
   getDashboard: () =>
-    api.get<DashboardStats>('/finance/dashboard').then((r) => r.data),
+    safe.get<DashboardStats>('/finance/dashboard'),
 
   // Invoices
   getInvoices: () =>
-    api.get<Invoice[]>('/finance/invoices').then((r) => r.data),
+    safe.get<Invoice[]>('/finance/invoices'),
 
   getInvoiceDetail: (id: string) =>
-    api.get<Invoice>('/finance/invoices/detail', { params: { id } }).then((r) => r.data),
+    safe.get<Invoice>('/finance/invoices/detail', { params: { id } }),
 
   createInvoice: (data: Partial<Invoice>) =>
-    api.post<Invoice>('/finance/invoices', data).then((r) => r.data),
+    safe.post<Invoice>('/finance/invoices', data),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
-    api.post<Invoice>('/finance/invoices', { id, ...data }).then((r) => r.data),
+    safe.post<Invoice>('/finance/invoices', { id, ...data }),
 
   deleteInvoice: (id: string) =>
-    api.post('/finance/invoices', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post('/finance/invoices', { id, _action: 'delete' }),
 
   updateInvoiceStatus: (id: string, status: Invoice['status']) =>
-    api.post('/finance/invoices/status', { id, status }).then((r) => r.data),
+    safe.post('/finance/invoices/status', { id, status }),
 
   recordPayment: (id: string, amount: number) =>
-    api.post('/finance/invoices/payment', { id, amount }).then((r) => r.data),
+    safe.post('/finance/invoices/payment', { id, amount }),
 
   // Expenses
   getExpenses: () =>
-    api.get<Expense[]>('/finance/expenses').then((r) => r.data),
+    safe.get<Expense[]>('/finance/expenses'),
 
   createExpense: (data: Partial<Expense>) =>
-    api.post<Expense>('/finance/expenses', data).then((r) => r.data),
+    safe.post<Expense>('/finance/expenses', data),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
-    api.post<Expense>('/finance/expenses', { id, ...data }).then((r) => r.data),
+    safe.post<Expense>('/finance/expenses', { id, ...data }),
 
   deleteExpense: (id: string) =>
-    api.post('/finance/expenses', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post('/finance/expenses', { id, _action: 'delete' }),
 
   // Expense Categories
   getExpenseCategories: () =>
-    api.get<ExpenseCategory[]>('/finance/expense-categories').then((r) => r.data),
+    safe.get<ExpenseCategory[]>('/finance/expense-categories'),
 
   createExpenseCategory: (data: Partial<ExpenseCategory>) =>
-    api.post<ExpenseCategory>('/finance/expense-categories', data).then((r) => r.data),
+    safe.post<ExpenseCategory>('/finance/expense-categories', data),
 
   // P&L
   getPL: (period: string) =>
-    api.get<PLReport>('/finance/pl', { params: { period } }).then((r) => r.data),
+    safe.get<PLReport>('/finance/pl', { params: { period } }),
 
   // Tax
   getTaxConfig: () =>
-    api.get<TaxConfig[]>('/finance/tax/config').then((r) => r.data),
+    safe.get<TaxConfig[]>('/finance/tax/config'),
 
   createTaxConfig: (data: TaxConfig) =>
-    api.post<TaxConfig>('/finance/tax/config', data).then((r) => r.data),
+    safe.post<TaxConfig>('/finance/tax/config', data),
 
   getTaxReport: () =>
-    api.get<TaxReport>('/finance/tax/report').then((r) => r.data),
+    safe.get<TaxReport>('/finance/tax/report'),
 
   // Recurring Invoices
   getRecurringInvoices: () =>
-    api.get('/finance/recurring-invoices').then((r) => r.data),
+    safe.get('/finance/recurring-invoices'),
 
   createRecurringInvoice: (data: any) =>
-    api.post('/finance/recurring-invoices', data).then((r) => r.data),
+    safe.post('/finance/recurring-invoices', data),
 
   updateRecurringInvoice: (id: string, data: any) =>
-    api.post('/finance/recurring-invoices', { id, ...data }).then((r) => r.data),
+    safe.post('/finance/recurring-invoices', { id, ...data }),
 
   // Quotes
   getQuotes: () =>
-    api.get('/finance/quotes').then((r) => r.data),
+    safe.get('/finance/quotes'),
 
   createQuote: (data: any) =>
-    api.post('/finance/quotes', data).then((r) => r.data),
+    safe.post('/finance/quotes', data),
 
   updateQuote: (id: string, data: any) =>
-    api.post('/finance/quotes', { id, ...data }).then((r) => r.data),
+    safe.post('/finance/quotes', { id, ...data }),
 
   deleteQuote: (id: string) =>
-    api.post('/finance/quotes', { id, _action: 'delete' }).then((r) => r.data),
+    safe.post('/finance/quotes', { id, _action: 'delete' }),
 
   // Bills
   getBills: () =>
-    api.get('/finance/bills').then((r) => r.data),
+    safe.get('/finance/bills'),
 
   createBill: (data: any) =>
-    api.post('/finance/bills', data).then((r) => r.data),
+    safe.post('/finance/bills', data),
 
   updateBill: (id: string, data: any) =>
-    api.post('/finance/bills', { id, ...data }).then((r) => r.data),
+    safe.post('/finance/bills', { id, ...data }),
 
   // Bank Accounts
   getBankAccounts: () =>
-    api.get('/finance/bank-accounts').then((r) => r.data),
+    safe.get('/finance/bank-accounts'),
 
   createBankAccount: (data: any) =>
-    api.post('/finance/bank-accounts', data).then((r) => r.data),
+    safe.post('/finance/bank-accounts', data),
 
   // Balance Sheet
   getBalanceSheet: () =>
-    api.get('/finance/balance-sheet').then((r) => r.data),
+    safe.get('/finance/balance-sheet'),
 
   // Cash Flow
   getCashFlow: () =>
-    api.get('/finance/cash-flow').then((r) => r.data),
+    safe.get('/finance/cash-flow'),
 
   // Chart of Accounts
   getAccounts: () =>
-    api.get('/finance/accounts').then((r) => r.data),
+    safe.get('/finance/accounts'),
 
   createAccount: (data: any) =>
-    api.post('/finance/accounts', data).then((r) => r.data),
+    safe.post('/finance/accounts', data),
 
   // Journal
   getJournal: () =>
-    api.get('/finance/journal').then((r) => r.data),
+    safe.get('/finance/journal'),
 
   createJournalEntry: (data: any) =>
-    api.post('/finance/journal', data).then((r) => r.data),
+    safe.post('/finance/journal', data),
 
   // Expense detail
   getExpenseDetail: (id: string) =>
-    api.get('/finance/expenses', { params: { id } }).then((r) => r.data),
+    safe.get('/finance/expenses', { params: { id } }),
 };

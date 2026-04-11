@@ -1,22 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { bookService } from '../services/bookService';
 
 export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard', 'stats'],
-    queryFn: async () => {
-      const res = await bookService.getDashboardStats();
-      return res.data?.data ?? res.data ?? null;
-    },
+    queryFn: () => unwrap(bookService.getDashboardStats()),
   });
 }
 
 export function useTodayAppointments() {
   return useQuery({
     queryKey: ['dashboard', 'today'],
-    queryFn: async () => {
-      const res = await bookService.getTodayAppointments();
-      return res.data?.data ?? res.data ?? [];
-    },
+    queryFn: () => unwrap(bookService.getTodayAppointments()),
   });
 }

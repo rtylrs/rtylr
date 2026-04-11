@@ -1,23 +1,23 @@
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 export const financeService = {
-  getDashboard: () => api.get('/finance/dashboard'),
+  getDashboard: () => safe.get('/finance/dashboard'),
 
-  getInvoices: (params?: any) => api.get('/finance/invoices', { params }),
-  createInvoice: (data: any) => api.post('/finance/invoices', data),
-  getInvoice: (id: number) => api.get(`/finance/invoices/${id}`),
-  updateInvoice: (id: number, data: any) => api.put(`/finance/invoices/${id}`, data),
-  deleteInvoice: (id: number) => api.delete(`/finance/invoices/${id}`),
-  updateInvoiceStatus: (id: number, status: string) => api.put(`/finance/invoices/${id}/status`, { status }),
-  recordPayment: (id: number, data: any) => api.post(`/finance/invoices/${id}/payment`, data),
+  getInvoices: (params?: any) => safe.get('/finance/invoices', { params }),
+  createInvoice: (data: any) => safe.post('/finance/invoices', data),
+  getInvoice: (id: number) => safe.get(`/finance/invoices/${id}`),
+  updateInvoice: (id: number, data: any) => safe.put(`/finance/invoices/${id}`, data),
+  deleteInvoice: (id: number) => safe.delete(`/finance/invoices/${id}`),
+  updateInvoiceStatus: (id: number, status: string) => safe.put(`/finance/invoices/${id}/status`, { status }),
+  recordPayment: (id: number, data: any) => safe.post(`/finance/invoices/${id}/payment`, data),
 
-  getExpenses: (params?: any) => api.get('/finance/expenses', { params }),
-  createExpense: (data: any) => api.post('/finance/expenses', data),
-  updateExpense: (id: number, data: any) => api.put(`/finance/expenses/${id}`, data),
-  deleteExpense: (id: number) => api.delete(`/finance/expenses/${id}`),
-  getExpenseCategories: () => api.get('/finance/expenses/categories'),
+  getExpenses: (params?: any) => safe.get('/finance/expenses', { params }),
+  createExpense: (data: any) => safe.post('/finance/expenses', data),
+  updateExpense: (id: number, data: any) => safe.put(`/finance/expenses/${id}`, data),
+  deleteExpense: (id: number) => safe.delete(`/finance/expenses/${id}`),
+  getExpenseCategories: () => safe.get('/finance/expenses/categories'),
 
-  getTaxConfig: () => api.get('/finance/tax'),
-  updateTaxConfig: (data: any) => api.put('/finance/tax', data),
-  getPLReport: (params?: any) => api.get('/finance/pl', { params }),
+  getTaxConfig: () => safe.get('/finance/tax'),
+  updateTaxConfig: (data: any) => safe.put('/finance/tax', data),
+  getPLReport: (params?: any) => safe.get('/finance/pl', { params }),
 };

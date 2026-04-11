@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -15,7 +16,7 @@ export function useFlowDashboard(workspaceId?: string) {
 
   const q = useQuery({
     queryKey: ['flow-dashboard', workspaceId],
-    queryFn: () => flowApi.getDashboard(workspaceId),
+    queryFn: () => unwrap(flowApi.getDashboard(workspaceId)),
     enabled: !isFlowLocal() && !!workspaceId,
   });
   return {

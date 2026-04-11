@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../services/flowApi';
@@ -12,7 +13,7 @@ export function useTeamWorkload() {
 
   const q = useQuery({
     queryKey: ['team-workload'],
-    queryFn: () => flowApi.getTeamWorkload(),
+    queryFn: () => unwrap(flowApi.getTeamWorkload()),
     enabled: !isFlowLocal(),
   });
   return {

@@ -1,5 +1,6 @@
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
 export interface Webhook {
@@ -15,8 +16,8 @@ export const useWebhooks = () => {
   return useQuery<Webhook[]>({
     queryKey: ['webhooks'],
     queryFn: async () => {
-      const res = await api.get('/webhooks');
-      return (res.data?.webhooks ?? res.data) as Webhook[];
+      const res = await unwrap(safe.get('/webhooks'));
+      return (res?.webhooks ?? res) as Webhook[];
     },
   });
 };
@@ -25,8 +26,8 @@ export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
-      const res = await api.post('/webhooks', payload);
-      return res.data as Webhook;
+      const res = await unwrap(safe.post('/webhooks', payload));
+      return res as Webhook;
     },
     onSuccess: () => {
       toast.success('Webhook created');
@@ -39,7 +40,7 @@ export const useDeleteWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/webhooks/${id}`);
+      await unwrap(safe.delete(`/webhooks/${id}`));
       return id;
     },
     onSuccess: () => {
