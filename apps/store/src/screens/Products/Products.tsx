@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Search, Grid3X3, List, Plus } from 'lucide-react';
+import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from '../../hooks/useProducts';
 import { formatCurrency } from '../../lib/format';
 import { SkeletonRow } from '../../components/Skeleton';
@@ -25,11 +26,12 @@ const itemVariants = {
 
 const Products: React.FC = () => {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<ProductFilters['status']>();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
   const { data: products, isLoading, error } = useProducts({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: statusFilter,
   });
 

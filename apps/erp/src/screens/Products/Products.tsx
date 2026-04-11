@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from '../../hooks/useProducts';
 import { useCategories } from '../../hooks/useCategories';
 import { useBrands } from '../../hooks/useBrands';
@@ -22,13 +23,14 @@ const AMBER = '#f59e0b';
 
 const Products: React.FC = () => {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [filters, setFilters] = useState<ProductFilters>({});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [showAdd, setShowAdd] = useState(false);
 
-  const mergedFilters: ProductFilters = { ...filters, search };
+  const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch };
   const { data: products = [], isLoading } = useProducts(mergedFilters);
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();

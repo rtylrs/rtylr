@@ -5,3 +5,4 @@ export * from "./useKeyPress";
 export * from "./useLocalStorage";
 export * from "./usePrevious";
 export * from "./useWindowDimensions";
+export * from "./useMediaQuery";

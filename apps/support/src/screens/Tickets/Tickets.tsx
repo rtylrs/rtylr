@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Ticket, Search, Plus, Circle } from 'lucide-react';
+import { useDebounce } from '@voxire/utils';
 import { useTickets } from '../../hooks/useTickets';
 
 const statusColors: Record<string, string> = {
@@ -13,10 +14,11 @@ const statusColors: Record<string, string> = {
 
 const Tickets: React.FC = () => {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const { data, isLoading, isError } = useTickets({
     status: statusFilter || undefined,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
   });
 
   const tickets: any[] = data ?? [];
