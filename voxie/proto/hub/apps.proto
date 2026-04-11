@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub";
+
+// ── Apps ────────────────────────────────────────────────────────────
+
+message App {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  bool is_enabled = 5;
+}
+
+message ListAppsRequest {}
+
+message ListAppsResponse {
+  repeated App apps = 1;
+}
+
+// ── Addons ──────────────────────────────────────────────────────────
+
+message Addon {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  double price = 5;
+  bool is_free = 6;
+  bool is_enabled = 7;
+}
+
+message ListAddonsRequest {}
+
+message ListAddonsResponse {
+  repeated Addon addons = 1;
+}
+
+message EnableAddonRequest {
+  string addon_id = 1;
+}
+
+message EnableAddonResponse {
+  bool success = 1;
+}
+
+message DisableAddonRequest {
+  string addon_id = 1;
+}
+
+message DisableAddonResponse {
+  bool success = 1;
+}

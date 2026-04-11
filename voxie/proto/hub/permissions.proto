@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub";
+
+// ── Permissions ─────────────────────────────────────────────────────
+
+message PermissionMatrix {
+  repeated PermissionRow rows = 1;
+  repeated string roles = 2;
+}
+
+message PermissionRow {
+  string key = 1;
+  string category = 2;
+  string label = 3;
+  map<string, bool> role_values = 4; // role -> enabled
+}
+
+message GetPermissionsRequest {}
+
+message GetPermissionsResponse {
+  PermissionMatrix matrix = 1;
+}
+
+message UpdatePermissionsRequest {
+  string role = 1;
+  string permission_key = 2;
+  bool enabled = 3;
+}
+
+message UpdatePermissionsResponse {
+  bool success = 1;
+}
+
+// ── Roles ───────────────────────────────────────────────────────────
+
+message CustomRole {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated string permissions = 4;
+  int32 member_count = 5;
+  string created_at = 6;
+}
+
+message ListRolesRequest {}
+
+message ListRolesResponse {
+  repeated CustomRole roles = 1;
+}
+
+message CreateRoleRequest {
+  string name = 1;
+  string description = 2;
+  repeated string permissions = 3;
+}
+
+message CreateRoleResponse {
+  CustomRole role = 1;
+}

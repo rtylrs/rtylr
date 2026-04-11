@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/voxire/voxie/gen/go/common";
+
+// Standard API error response
+message ErrorResponse {
+  int32 code = 1;
+  string message = 2;
+  string error_code = 3; // Machine-readable: UNAUTHORIZED, VALIDATION, etc.
+  map<string, string> details = 4; // Field-level validation errors
+}

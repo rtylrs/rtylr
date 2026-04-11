@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/voxire/voxie/gen/go/common";
+
+// Standard pagination request params
+message PaginationRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string sort_by = 3;
+  string sort_dir = 4; // "asc" or "desc"
+}
+
+// Standard pagination response metadata
+message PaginationResponse {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 total_pages = 4;
+  bool has_next = 5;
+  bool has_prev = 6;
+}
+
+// Standard timestamp wrapper
+message Timestamp {
+  string iso = 1; // ISO 8601 string
+  int64 unix = 2; // Unix timestamp in seconds
+}

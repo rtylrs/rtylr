@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub";
+
+// ── Dashboard KPIs ──────────────────────────────────────────────────
+
+message KPIs {
+  double total_revenue = 1;
+  double revenue_change = 2;
+  int32 total_orders = 3;
+  double orders_change = 4;
+  int32 total_customers = 5;
+  double customers_change = 6;
+  int32 active_staff = 7;
+  double avg_order_value = 8;
+  string top_product = 9;
+}
+
+message GetKPIsRequest {}
+
+message GetKPIsResponse {
+  KPIs kpis = 1;
+}
+
+// ── Activity ────────────────────────────────────────────────────────
+
+message ActivityEntry {
+  int64 id = 1;
+  string action = 2;
+  string actor = 3;
+  string target = 4;
+  string description = 5;
+  string ip_address = 6;
+  string created_at = 7;
+}
+
+message ListActivityRequest {
+  int32 limit = 1;
+}
+
+message ListActivityResponse {
+  repeated ActivityEntry entries = 1;
+}
+
+// ── Notifications ───────────────────────────────────────────────────
+
+message Notification {
+  int64 id = 1;
+  string title = 2;
+  string body = 3;
+  string type = 4; // info, warning, success, error
+  bool read = 5;
+  string created_at = 6;
+}
+
+message ListNotificationsRequest {}
+
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
+  int32 unread_count = 2;
+}
+
+message MarkNotificationReadRequest {
+  int64 id = 1;
+}
+
+message MarkNotificationReadResponse {
+  bool success = 1;
+}

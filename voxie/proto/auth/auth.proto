@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/voxire/voxie/gen/go/auth";
+
+// ── Auth ────────────────────────────────────────────────────────────
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  AuthUser user = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+  string business_name = 4;
+  string referred = 5;
+}
+
+message RegisterResponse {
+  string token = 1;
+  AuthUser user = 2;
+}
+
+message AuthUser {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+  int64 business_id = 5;
+  string business_name = 6;
+  bool is_owner = 7;
+  repeated string apps = 8;
+}
+
+message ResetPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+message VerifyEmailResponse {
+  bool success = 1;
+}
+
+message InviteAcceptRequest {
+  string token = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message InviteAcceptResponse {
+  string auth_token = 1;
+  AuthUser user = 2;
+}
+
+message GoogleAuthRequest {
+  string id_token = 1;
+  string business_name = 2;
+}
+
+message GoogleAuthResponse {
+  string token = 1;
+  AuthUser user = 2;
+  bool is_new = 3;
+}

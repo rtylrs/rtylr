@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub";
+
+// ── Billing ─────────────────────────────────────────────────────────
+
+message BillingSummary {
+  string plan = 1;
+  double monthly_cost = 2;
+  int32 member_count = 3;
+  int32 member_limit = 4;
+  repeated AddonCharge addon_charges = 5;
+  string next_billing_date = 6;
+  string payment_method = 7;
+  string card_last4 = 8;
+}
+
+message AddonCharge {
+  string addon_id = 1;
+  string addon_name = 2;
+  double price = 3;
+}
+
+message GetBillingSummaryRequest {}
+
+message GetBillingSummaryResponse {
+  BillingSummary summary = 1;
+}
+
+message Invoice {
+  int64 id = 1;
+  string number = 2;
+  double amount = 3;
+  string status = 4; // paid, pending, failed
+  string period = 5;
+  string created_at = 6;
+  string pdf_url = 7;
+}
+
+message ListInvoicesRequest {}
+
+message ListInvoicesResponse {
+  repeated Invoice invoices = 1;
+}
