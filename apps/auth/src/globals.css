@@ -8,16 +8,39 @@
   *::after {
     box-sizing: border-box;
   }
-  html {
-    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
-    background-color: #ffffff;
+
+  :root {
+    --auth-bg: #ffffff;
+    --auth-card: #ffffff;
+    --auth-text: #111111;
+    --auth-text-muted: #6b7280;
+    --auth-border: #e5e7eb;
+    --auth-input-bg: #f9fafb;
     color-scheme: light;
   }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --auth-bg: #0a0a0a;
+      --auth-card: #141414;
+      --auth-text: #f0f0ee;
+      --auth-text-muted: #9ca3af;
+      --auth-border: #262626;
+      --auth-input-bg: #1a1a1a;
+      color-scheme: dark;
+    }
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+    background-color: var(--auth-bg);
+  }
+
   body {
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
-    color: #111111;
+    background-color: var(--auth-bg);
+    color: var(--auth-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

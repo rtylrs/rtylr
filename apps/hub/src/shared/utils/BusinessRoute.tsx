@@ -143,7 +143,7 @@ function StaffView({ user }: { user: any }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--hub-bg, #fafafa)' }}>
       {/* Top bar */}
       <div
         style={{
@@ -152,7 +152,7 @@ function StaffView({ user }: { user: any }) {
           justifyContent: 'space-between',
           padding: '16px 32px',
           borderBottom: '1px solid #eee',
-          background: '#fff',
+          background: 'var(--hub-bg, #fff)',
         }}
       >
         <img src="/logo.png" alt="rtylr" style={{ height: 24, filter: 'brightness(0)' }} />
@@ -183,20 +183,20 @@ function StaffView({ user }: { user: any }) {
                 top: 44,
                 right: 0,
                 width: 200,
-                background: '#fff',
+                background: 'var(--hub-bg, #fff)',
                 borderRadius: 10,
-                border: '1px solid #e5e5e5',
+                border: '1px solid var(--hub-border, #e5e5e5)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                 zIndex: 50,
                 overflow: 'hidden',
               }}
             >
               <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#111', margin: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)', margin: 0 }}>
                   {fullName}
                 </p>
                 {businessName && (
-                  <p style={{ fontSize: 11, color: '#999', margin: '2px 0 0 0' }}>{businessName}</p>
+                  <p style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)', margin: '2px 0 0 0' }}>{businessName}</p>
                 )}
               </div>
               <a
@@ -205,7 +205,7 @@ function StaffView({ user }: { user: any }) {
                   display: 'block',
                   padding: '10px 16px',
                   fontSize: 13,
-                  color: '#333',
+                  color: 'var(--hub-text, #333)',
                   textDecoration: 'none',
                 }}
               >
@@ -242,11 +242,11 @@ function StaffView({ user }: { user: any }) {
         }}
       >
         <div style={{ maxWidth: 960, width: '100%', textAlign: 'center' }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: '#111', margin: '0 0 6px 0' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--hub-text, #111)', margin: '0 0 6px 0' }}>
             Welcome, {fullName.split(' ')[0]}
           </h1>
           {businessName && (
-            <p style={{ fontSize: 13, color: '#999', marginBottom: 0 }}>{businessName}</p>
+            <p style={{ fontSize: 13, color: 'var(--hub-text-muted, #999)', marginBottom: 0 }}>{businessName}</p>
           )}
           <div style={{ height: 36 }} />
 
@@ -268,8 +268,8 @@ function StaffView({ user }: { user: any }) {
                       gap: 8,
                       padding: '24px 16px',
                       borderRadius: 12,
-                      background: '#fff',
-                      border: '1px solid #e5e5e5',
+                      background: 'var(--hub-bg, #fff)',
+                      border: '1px solid var(--hub-border, #e5e5e5)',
                       textDecoration: 'none',
                       transition: 'border-color 0.2s',
                     }}
@@ -293,8 +293,8 @@ function StaffView({ user }: { user: any }) {
                     >
                       <Icon size={20} color={app.color} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{app.name}</span>
-                    <span style={{ fontSize: 11, color: '#999' }}>{app.desc}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)' }}>{app.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)' }}>{app.desc}</span>
                   </a>
                 );
               }
@@ -309,8 +309,8 @@ function StaffView({ user }: { user: any }) {
                     gap: 8,
                     padding: '24px 16px',
                     borderRadius: 12,
-                    background: '#fafafa',
-                    border: '1px dashed #e0e0e0',
+                    background: 'var(--hub-bg, #fafafa)',
+                    border: '1px dashed var(--hub-border, #e0e0e0)',
                     opacity: 0.7,
                   }}
                 >
@@ -319,7 +319,7 @@ function StaffView({ user }: { user: any }) {
                       width: 40,
                       height: 40,
                       borderRadius: 10,
-                      background: '#f0f0f0',
+                      background: 'var(--hub-hover, #f0f0f0)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -327,7 +327,7 @@ function StaffView({ user }: { user: any }) {
                   >
                     <Lock size={16} color="#bbb" />
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#888' }}>{app.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text-muted, #888)' }}>{app.name}</span>
                   {isRequested ? (
                     <span style={{ fontSize: 11, color: '#10b981', fontWeight: 500 }}>
                       Requested
@@ -405,7 +405,7 @@ function BusinessRoute() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#fff',
+          background: 'var(--hub-bg, #fff)',
         }}
       >
         <div
