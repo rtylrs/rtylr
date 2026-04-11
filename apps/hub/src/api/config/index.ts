@@ -6,7 +6,7 @@ const getNews = async () => {
   return res.data;
 };
 
-const getSpecificNews = async ({ id }) => {
+const getSpecificNews = async ({ id }: any) => {
   const res = await api.get(API_ROUTES.GET.GET_NEWS_WITH_ID(id));
   return res.data;
 };

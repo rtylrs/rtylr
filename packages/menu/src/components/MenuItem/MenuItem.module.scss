@@ -3,7 +3,9 @@
   overflow: hidden;
   background: var(--menu-card-bg, #ffffff);
   border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
-  transition: box-shadow 0.18s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.15s ease;
 
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -211,7 +213,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 
   &:hover {
     opacity: 0.85;
@@ -231,7 +235,9 @@
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
     background: var(--menu-accent, #1a1a1a);

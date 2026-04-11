@@ -17,8 +17,8 @@ const Stat: React.FC<{ label: string; value: string; tone?: 'positive' | 'negati
         tone === 'negative'
           ? 'text-destructive'
           : tone === 'positive'
-          ? 'text-emerald-300'
-          : 'text-pos-text'
+            ? 'text-emerald-300'
+            : 'text-pos-text'
       }`}
     >
       {value}

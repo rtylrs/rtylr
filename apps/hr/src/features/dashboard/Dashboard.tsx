@@ -190,8 +190,8 @@ const Dashboard: React.FC = () => {
                     s.trend === 'up'
                       ? '#10b981'
                       : s.trend === 'down'
-                      ? '#ef4444'
-                      : 'var(--hr-text-muted)',
+                        ? '#ef4444'
+                        : 'var(--hr-text-muted)',
                   margin: '4px 0 0',
                   display: 'flex',
                   alignItems: 'center',

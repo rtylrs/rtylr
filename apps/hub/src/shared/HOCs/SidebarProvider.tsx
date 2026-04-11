@@ -27,10 +27,13 @@ export function SidebarProvider({ children, initialSections }: SidebarProviderPr
     return savedValue === null ? defaultValue : savedValue === 'true';
   };
 
-  const initialVisibility = initialSections.reduce((acc, section) => {
-    acc[section] = getInitialState(section + 'Visible');
-    return acc;
-  }, {} as { [key: string]: boolean });
+  const initialVisibility = initialSections.reduce(
+    (acc, section) => {
+      acc[section] = getInitialState(section + 'Visible');
+      return acc;
+    },
+    {} as { [key: string]: boolean }
+  );
 
   const [sectionsVisible, setSectionsVisible] = useState(initialVisibility);
 

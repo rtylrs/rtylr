@@ -109,14 +109,14 @@ const Automations: React.FC = () => {
                         a.status === 'active'
                           ? 'rgba(16,185,129,0.12)'
                           : a.status === 'paused'
-                          ? 'rgba(245,158,11,0.12)'
-                          : 'rgba(148,163,184,0.12)',
+                            ? 'rgba(245,158,11,0.12)'
+                            : 'rgba(148,163,184,0.12)',
                       color:
                         a.status === 'active'
                           ? '#10b981'
                           : a.status === 'paused'
-                          ? '#f59e0b'
-                          : '#94a3b8',
+                            ? '#f59e0b'
+                            : '#94a3b8',
                     }}
                   >
                     {a.status === 'active' ? (

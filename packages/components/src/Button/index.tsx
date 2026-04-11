@@ -3,8 +3,10 @@ import classNames from 'classnames';
 import LoadingSpinner from '../LoadingSpinner';
 import './Button.scss';
 
-interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'prefix' | 'suffix'> {
+interface ButtonProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'onClick' | 'prefix' | 'suffix'
+> {
   children: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'soft' | 'dark-outline';

@@ -135,7 +135,7 @@ function StaffView({ user }: { user: any }) {
 
   const initials = fullName
     .split(' ')
-    .map((n) => n[0])
+    .map((n: any) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);

@@ -77,8 +77,8 @@ const Reorder: React.FC = () => {
               s.confidence === 'high'
                 ? '#10b981'
                 : s.confidence === 'medium'
-                ? AMBER
-                : 'var(--hub-text-dim)';
+                  ? AMBER
+                  : 'var(--hub-text-dim)';
             return (
               <div
                 key={s.productId}

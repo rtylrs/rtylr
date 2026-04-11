@@ -46,7 +46,7 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
         // Owner/admin sees all locations
         try {
           const data = await unwrap(posService.getBranches());
-          const branches = Array.isArray(data) ? data : (data as any)?.locations ?? [];
+          const branches = Array.isArray(data) ? data : ((data as any)?.locations ?? []);
           const mapped = branches.map((b: any) => ({
             locationId: b.id,
             name: b.name,

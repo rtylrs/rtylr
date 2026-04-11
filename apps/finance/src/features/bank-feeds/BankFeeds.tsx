@@ -22,7 +22,7 @@ const BankFeeds: React.FC = () => {
   const [selected, setSelected] = useState<string | undefined>();
   const { data: transactions = [] } = useBankTransactions(selected);
 
-  const total = accounts.reduce((s, a) => s + a.balance, 0);
+  const total = accounts.reduce((s: any, a: any) => s + a.balance, 0);
 
   return (
     <motion.div
@@ -58,7 +58,7 @@ const BankFeeds: React.FC = () => {
               gap: 14,
             }}
           >
-            {accounts.map((a) => {
+            {accounts.map((a: any) => {
               const Icon = iconFor[a.type] ?? Building2;
               return (
                 <button
@@ -158,7 +158,7 @@ const BankFeeds: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((t) => (
+                {transactions.map((t: any) => (
                   <tr key={t.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                     <td
                       style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}

@@ -47,8 +47,8 @@ const Categories: React.FC = () => {
           }}
         >
           {data.map((c) => {
-            const pct = Math.min(100, Math.round((c.spent / c.budget) * 100));
-            const over = c.spent > c.budget;
+            const pct = Math.min(100, Math.round(((c.spent ?? 0) / (c.budget ?? 1)) * 100));
+            const over = (c.spent ?? 0) > (c.budget ?? 0);
             return (
               <div key={c.id} style={{ ...cardStyle, padding: 16 }}>
                 <div

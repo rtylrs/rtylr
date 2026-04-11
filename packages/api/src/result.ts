@@ -72,16 +72,16 @@ function parseAxiosError(error: AxiosError<any>): ApiError {
     (status === 401
       ? 'Session expired. Please sign in again.'
       : status === 403
-      ? 'You do not have permission to perform this action.'
-      : status === 404
-      ? 'The requested resource was not found.'
-      : status === 422
-      ? 'Please check your input and try again.'
-      : status === 429
-      ? 'Too many requests. Please wait a moment.'
-      : status >= 500
-      ? 'Something went wrong on our end. Please try again.'
-      : 'An unexpected error occurred.');
+        ? 'You do not have permission to perform this action.'
+        : status === 404
+          ? 'The requested resource was not found.'
+          : status === 422
+            ? 'Please check your input and try again.'
+            : status === 429
+              ? 'Too many requests. Please wait a moment.'
+              : status >= 500
+                ? 'Something went wrong on our end. Please try again.'
+                : 'An unexpected error occurred.');
 
   return { status, code: resolveCode(status), message, cause: error };
 }

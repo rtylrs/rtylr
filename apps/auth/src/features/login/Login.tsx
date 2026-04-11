@@ -54,7 +54,7 @@ const Login: React.FC = () => {
     return params.get('redirect');
   }, []);
 
-  const redirectAppName = redirectParam ? REDIRECT_APP_NAMES[redirectParam] ?? null : null;
+  const redirectAppName = redirectParam ? (REDIRECT_APP_NAMES[redirectParam] ?? null) : null;
 
   const redirectTo = () => {
     const destination =

@@ -70,7 +70,7 @@ const RecurringInvoices: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((r) => (
+              {data.map((r: any) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td
                     style={{

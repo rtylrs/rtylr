@@ -342,8 +342,8 @@ const Operations: React.FC = () => {
                       s.status === 'Accepted'
                         ? '#10b981'
                         : s.status === 'Rejected'
-                        ? '#ef4444'
-                        : '#f59e0b'
+                          ? '#ef4444'
+                          : '#f59e0b'
                     }
                   >
                     {s.status}

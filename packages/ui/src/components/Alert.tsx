@@ -15,8 +15,7 @@ const alertVariants = cva('rounded-lg border px-4 py-3 text-sm', {
 });
 
 export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {}
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {}
 
 const Alert: React.FC<AlertProps> = ({ className, variant, ...props }) => (
   <div role="alert" className={cn(alertVariants({ variant, className }))} {...props} />

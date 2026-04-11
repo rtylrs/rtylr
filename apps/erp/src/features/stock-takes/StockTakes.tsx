@@ -49,8 +49,8 @@ const StockTakes: React.FC = () => {
               st.status === 'Completed'
                 ? '#10b981'
                 : st.status === 'In Progress'
-                ? AMBER
-                : 'var(--hub-text-dim)';
+                  ? AMBER
+                  : 'var(--hub-text-dim)';
             return (
               <div
                 key={st.id}
