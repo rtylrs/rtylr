@@ -5,6 +5,37 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <meta charSet="UTF-8" />
+
+        {/* Canonical */}
+        <link rel="canonical" href="https://rtylr.com" />
+
+        {/* Structured Data - Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'rtylr',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'Web, Windows, macOS, Linux',
+              description:
+                'All-in-one business operating system for SMBs. POS, ERP, HR, CRM, Finance, and more.',
+              url: 'https://rtylr.com',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+                description: 'Free tier available',
+              },
+              publisher: {
+                '@type': 'Organization',
+                name: 'Voxire',
+                url: 'https://voxire.com',
+              },
+            }),
+          }}
+        />
         {/* Favicons */}
         <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />

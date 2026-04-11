@@ -192,11 +192,26 @@ function StaffView({ user }: { user: any }) {
               }}
             >
               <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)', margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--hub-text, #111)',
+                    margin: 0,
+                  }}
+                >
                   {fullName}
                 </p>
                 {businessName && (
-                  <p style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)', margin: '2px 0 0 0' }}>{businessName}</p>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--hub-text-muted, #999)',
+                      margin: '2px 0 0 0',
+                    }}
+                  >
+                    {businessName}
+                  </p>
                 )}
               </div>
               <a
@@ -242,11 +257,20 @@ function StaffView({ user }: { user: any }) {
         }}
       >
         <div style={{ maxWidth: 960, width: '100%', textAlign: 'center' }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--hub-text, #111)', margin: '0 0 6px 0' }}>
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 600,
+              color: 'var(--hub-text, #111)',
+              margin: '0 0 6px 0',
+            }}
+          >
             Welcome, {fullName.split(' ')[0]}
           </h1>
           {businessName && (
-            <p style={{ fontSize: 13, color: 'var(--hub-text-muted, #999)', marginBottom: 0 }}>{businessName}</p>
+            <p style={{ fontSize: 13, color: 'var(--hub-text-muted, #999)', marginBottom: 0 }}>
+              {businessName}
+            </p>
           )}
           <div style={{ height: 36 }} />
 
@@ -293,8 +317,12 @@ function StaffView({ user }: { user: any }) {
                     >
                       <Icon size={20} color={app.color} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)' }}>{app.name}</span>
-                    <span style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)' }}>{app.desc}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)' }}>
+                      {app.name}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)' }}>
+                      {app.desc}
+                    </span>
                   </a>
                 );
               }
@@ -327,7 +355,11 @@ function StaffView({ user }: { user: any }) {
                   >
                     <Lock size={16} color="#bbb" />
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text-muted, #888)' }}>{app.name}</span>
+                  <span
+                    style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text-muted, #888)' }}
+                  >
+                    {app.name}
+                  </span>
                   {isRequested ? (
                     <span style={{ fontSize: 11, color: '#10b981', fontWeight: 500 }}>
                       Requested

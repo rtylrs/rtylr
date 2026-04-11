@@ -18,10 +18,12 @@ const DiscountScreen: React.FC = () => {
 
   const submit = async () => {
     try {
-      await unwrap(posService.applyDiscount(orderId!, {
-        mode,
-        value: Number(value),
-      }));
+      await unwrap(
+        posService.applyDiscount(orderId!, {
+          mode,
+          value: Number(value),
+        })
+      );
       toast.success('Discount applied');
       navigate(-1);
     } catch {

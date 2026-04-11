@@ -22,11 +22,13 @@ const CloseSessionScreen: React.FC = () => {
   const close = async () => {
     setBusy(true);
     try {
-      await unwrap(posService.closeSession('current', {
-        expected,
-        actual,
-        variance,
-      }));
+      await unwrap(
+        posService.closeSession('current', {
+          expected,
+          actual,
+          variance,
+        })
+      );
       closeDrawer();
       toast.success('Session closed');
       navigate('/day-summary');

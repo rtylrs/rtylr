@@ -28,11 +28,13 @@ const RefundScreen: React.FC = () => {
   const submit = async () => {
     setBusy(true);
     try {
-      await unwrap(posService.refundOrder(orderId!, {
-        amount: fullRefund ? null : Number(amount),
-        reason,
-        full: fullRefund,
-      }));
+      await unwrap(
+        posService.refundOrder(orderId!, {
+          amount: fullRefund ? null : Number(amount),
+          reason,
+          full: fullRefund,
+        })
+      );
       toast.success('Refund processed');
       navigate('/receipts');
     } catch (e: any) {

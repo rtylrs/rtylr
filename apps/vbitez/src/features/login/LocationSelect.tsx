@@ -48,7 +48,10 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
           const data = await unwrap(posService.getBranches());
           const branches = Array.isArray(data) ? data : (data as any)?.locations ?? [];
           const mapped = branches.map((b: any) => ({
-            locationId: b.id, name: b.name, address: b.address ?? '', phone: b.phone ?? '',
+            locationId: b.id,
+            name: b.name,
+            address: b.address ?? '',
+            phone: b.phone ?? '',
           }));
           setLocations(mapped);
           if (mapped.length === 1) handleLocationSelect(mapped[0]);
@@ -67,7 +70,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
       const data = await unwrap(posService.getTerminals());
       const all = (data as any)?.terminals ?? (Array.isArray(data) ? data : []);
       // Filter terminals for this location
-      const filtered = all.filter((t: any) => t.branchId === loc.locationId || t.branch_id === loc.locationId);
+      const filtered = all.filter(
+        (t: any) => t.branchId === loc.locationId || t.branch_id === loc.locationId
+      );
       setTerminals(filtered);
     } catch {}
     setLoading(false);
@@ -82,11 +87,13 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     if (!selectedLocation || !newTerminalName.trim()) return;
     setCreatingTerminal(true);
     try {
-      const data = await unwrap(posService.createTerminal({
-        branchId: selectedLocation.locationId,
-        name: newTerminalName.trim(),
-        type: 'pos',
-      }));
+      const data = await unwrap(
+        posService.createTerminal({
+          branchId: selectedLocation.locationId,
+          name: newTerminalName.trim(),
+          type: 'pos',
+        })
+      );
       const id = (data as any)?.id;
       if (id) {
         onComplete(selectedLocation.locationId, id);
@@ -110,7 +117,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-pos-text">rtylr POS</h1>
           <p className="text-sm text-pos-muted mt-1">
-            {step === 'location' ? 'Select your location' : `Select terminal at ${selectedLocation?.name}`}
+            {step === 'location'
+              ? 'Select your location'
+              : `Select terminal at ${selectedLocation?.name}`}
           </p>
         </div>
 
@@ -120,7 +129,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
               <div className="text-center py-12">
                 <MapPin className="w-10 h-10 mx-auto text-pos-muted mb-3" />
                 <p className="text-sm text-pos-muted">No locations assigned to your account.</p>
-                <p className="text-xs text-pos-muted mt-1">Ask your business owner to assign you to a location.</p>
+                <p className="text-xs text-pos-muted mt-1">
+                  Ask your business owner to assign you to a location.
+                </p>
               </div>
             )}
             {locations.map((loc) => (
@@ -134,7 +145,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-pos-text">{loc.name}</p>
-                  {loc.address && <p className="text-xs text-pos-muted truncate mt-0.5">{loc.address}</p>}
+                  {loc.address && (
+                    <p className="text-xs text-pos-muted truncate mt-0.5">{loc.address}</p>
+                  )}
                 </div>
               </button>
             ))}
@@ -146,7 +159,10 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
             {/* Back button */}
             {locations.length > 1 && (
               <button
-                onClick={() => { setStep('location'); setSelectedLocation(null); }}
+                onClick={() => {
+                  setStep('location');
+                  setSelectedLocation(null);
+                }}
                 className="text-xs text-pos-muted hover:text-pos-text transition-colors"
               >
                 &larr; Back to locations

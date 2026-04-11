@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+echo "Running build check before push..."
+pnpm turbo build
