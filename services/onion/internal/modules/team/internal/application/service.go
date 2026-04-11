@@ -53,8 +53,17 @@ func (s *Service) InviteUser(ctx context.Context, ownerID int64, input domain.In
 	userID := existingID
 
 	if userID == 0 {
-		// Create user without a password (they'll set it via invite link)
-		userID, err = s.repo.CreateUser(ctx, normalizedEmail, "", strings.TrimSpace(input.FullName))
+		// Hash password if provided (manual auth), otherwise empty (invite link)
+		passwordHash := ""
+		if input.Password != "" {
+			hash, hashErr := passwordutils.HashPassword(input.Password)
+			if hashErr != nil {
+				return 0, "", hashErr
+			}
+			passwordHash = hash
+		}
+
+		userID, err = s.repo.CreateUser(ctx, normalizedEmail, passwordHash, strings.TrimSpace(input.FullName))
 		if err != nil {
 			return 0, "", err
 		}

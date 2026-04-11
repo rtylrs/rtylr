@@ -138,6 +138,7 @@ type InviteUserHandler struct{ Service *application.Service }
 type InviteUserRequest struct {
 	Email    string   `json:"email"`
 	FullName string   `json:"fullName"`
+	Password string   `json:"password"`
 	Apps     []string `json:"apps"`
 	Role     string   `json:"role"`
 }
@@ -180,6 +181,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 	userID, token, err := h.Service.InviteUser(ctx, ownerID, domain.InviteUserInput{
 		Email:    req.Email,
 		FullName: req.FullName,
+		Password: req.Password,
 		Apps:     apps,
 		Role:     role,
 	})
@@ -191,13 +193,16 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		}
 	}
 
-	// Send invitation email with the invite token link
-	go func() {
-		inviteLink := "https://auth.rtylr.com/invite/" + token
-		emailPkg.SendInvitation(ctx, req.Email, "Your team", "rtylr", inviteLink)
-	}()
+	// Only send invite email if no password was set manually
+	if req.Password == "" && token != "" {
+		go func() {
+			inviteLink := "https://auth.rtylr.com/invite/" + token
+			emailPkg.SendInvitation(ctx, req.Email, "Your team", "rtylr", inviteLink)
+		}()
+		return InviteUserResponse{UserID: userID, Message: "Invitation sent"}, nil
+	}
 
-	return InviteUserResponse{UserID: userID, Message: "Invitation sent"}, nil
+	return InviteUserResponse{UserID: userID, Message: "Member created"}, nil
 }
 
 // ─── Verify Invite Token ────────────────────────────────────────────────────

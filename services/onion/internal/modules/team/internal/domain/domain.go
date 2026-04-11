@@ -57,6 +57,7 @@ type StaffUser struct {
 type InviteUserInput struct {
 	Email    string
 	FullName string
+	Password string
 	Apps     []string
 	Role     Role
 }
