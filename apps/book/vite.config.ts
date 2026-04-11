@@ -42,7 +42,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/book",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

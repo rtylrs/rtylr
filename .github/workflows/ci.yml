@@ -76,6 +76,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/landing/out --project-name=rtylr-landing
+          command: pages deploy dist/landing --project-name=rtylr-landing
 
   # Other app deploys are disabled during development.

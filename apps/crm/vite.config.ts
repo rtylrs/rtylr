@@ -38,7 +38,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/crm",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

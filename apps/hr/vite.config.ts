@@ -32,7 +32,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/hr",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

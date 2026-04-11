@@ -32,7 +32,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/flow",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

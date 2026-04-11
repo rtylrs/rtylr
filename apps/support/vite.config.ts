@@ -42,7 +42,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/support",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
