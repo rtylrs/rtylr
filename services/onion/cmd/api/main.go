@@ -74,6 +74,8 @@ import (
 	poscashmovements "github.com/voxire/onion/internal/modules/pos_cash_movements"
 	posloyalty "github.com/voxire/onion/internal/modules/pos_loyalty"
 	posstockmovements "github.com/voxire/onion/internal/modules/pos_stock_movements"
+	posusers "github.com/voxire/onion/internal/modules/pos_users"
+	posmemberlocations "github.com/voxire/onion/internal/modules/pos_member_locations"
 	"github.com/voxire/onion/internal/modules/products"
 	"github.com/voxire/onion/internal/modules/projects"
 	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
@@ -288,6 +290,8 @@ type apiModules struct {
 	PosCashMovements     *poscashmovements.Module
 	PosLoyalty           *posloyalty.Module
 	PosStockMovements    *posstockmovements.Module
+	PosUsers             *posusers.Module
+	PosMemberLocations   *posmemberlocations.Module
 	Products             *products.Module
 	Projects             *projects.Module
 	PurchaseOrders       *purchaseorders.Module
@@ -398,6 +402,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosCashMovements:     poscashmovements.NewModule(ctx),
 		PosLoyalty:           posloyalty.NewModule(ctx),
 		PosStockMovements:    posstockmovements.NewModule(ctx),
+		PosUsers:             posusers.NewModule(ctx),
+		PosMemberLocations:   posmemberlocations.NewModule(ctx),
 		Products:             products.NewModule(ctx),
 		Projects:             projects.NewModule(ctx),
 		PurchaseOrders:       purchaseorders.NewModule(ctx),

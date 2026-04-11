@@ -1,0 +1,71 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+
+	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
+)
+
+type Repository struct{}
+
+func NewRepository(_ context.Context) *Repository { return &Repository{} }
+
+type MyLocation struct {
+	LocationID int64  `json:"locationId"`
+	Name       string `json:"name"`
+	Address    string `json:"address"`
+	Phone      string `json:"phone"`
+}
+
+func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
+	q := sqlc.New(dbclient.Pool())
+	rows, err := q.ListMemberLocations(ctx, sqlc.ListMemberLocationsParams{BusinessID: businessID, UserID: userID})
+	if err != nil { return nil, err }
+	out := make([]domain.MemberLocation, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.MemberLocation{
+			ID: row.ID, BusinessID: row.BusinessID, UserID: row.UserID,
+			LocationID: row.LocationID, CanManagePOSUsers: row.CanManagePosUsers.Bool,
+			CanManageTerminals: row.CanManageTerminals.Bool, CanViewReports: row.CanViewReports.Bool,
+			CreatedAt: row.CreatedAt.Time,
+		})
+	}
+	return out, nil
+}
+
+func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int64) ([]MyLocation, error) {
+	q := sqlc.New(dbclient.Pool())
+	rows, err := q.GetMyLocations(ctx, sqlc.GetMyLocationsParams{BusinessID: businessID, UserID: userID})
+	if err != nil { return nil, err }
+	out := make([]MyLocation, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, MyLocation{
+			LocationID: row.LocationID, Name: row.Name,
+			Address: row.Address.String, Phone: row.Phone.String,
+		})
+	}
+	return out, nil
+}
+
+func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
+	q := sqlc.New(dbclient.Pool())
+	res, err := q.AssignMemberToLocation(ctx, sqlc.AssignMemberToLocationParams{
+		BusinessID:         businessID,
+		UserID:             userID,
+		LocationID:         locationID,
+		CanManagePosUsers:  sql.NullBool{Bool: canManagePOSUsers, Valid: true},
+		CanManageTerminals: sql.NullBool{Bool: canManageTerminals, Valid: true},
+		CanViewReports:     sql.NullBool{Bool: canViewReports, Valid: true},
+	})
+	if err != nil { return 0, err }
+	id, _ := res.LastInsertId()
+	return id, nil
+}
+
+func (r *Repository) Remove(ctx context.Context, businessID, id int64) error {
+	q := sqlc.New(dbclient.Pool())
+	return q.RemoveMemberFromLocation(ctx, sqlc.RemoveMemberFromLocationParams{BusinessID: businessID, ID: id})
+}

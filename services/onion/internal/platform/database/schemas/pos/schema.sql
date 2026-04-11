@@ -140,3 +140,38 @@ CREATE TABLE IF NOT EXISTS pos_manager_pins (
     pin VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS pos_users (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    location_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    pin VARCHAR(10) NOT NULL,
+    role ENUM('cashier','server','bartender','kitchen') DEFAULT 'cashier',
+    is_active BOOLEAN DEFAULT TRUE,
+    hourly_rate DECIMAL(10,2) DEFAULT 0,
+    max_discount_pct DECIMAL(5,2) DEFAULT 0,
+    can_void BOOLEAN DEFAULT FALSE,
+    can_refund BOOLEAN DEFAULT FALSE,
+    can_open_drawer BOOLEAN DEFAULT FALSE,
+    can_apply_discount BOOLEAN DEFAULT FALSE,
+    created_by BIGINT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_users_business (business_id),
+    INDEX idx_pos_users_location (location_id),
+    UNIQUE KEY unique_pin_business (business_id, pin)
+);
+
+CREATE TABLE IF NOT EXISTS pos_member_locations (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    location_id BIGINT NOT NULL,
+    can_manage_pos_users BOOLEAN DEFAULT FALSE,
+    can_manage_terminals BOOLEAN DEFAULT FALSE,
+    can_view_reports BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_member_location (user_id, location_id),
+    INDEX idx_member_loc_business (business_id)
+);
