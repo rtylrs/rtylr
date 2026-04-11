@@ -17,10 +17,7 @@ const FullScreenLoader: React.FC<FullScreenLoaderProps> = ({
   ...props
 }) => {
   return (
-    <div
-      className={`voxire-fullscreen-loader ${className || ''}`}
-      style={{ backgroundColor }}
-    >
+    <div className={`voxire-fullscreen-loader ${className || ''}`} style={{ backgroundColor }}>
       <LoadingSpinner size={size} color={color}>
         {children}
       </LoadingSpinner>

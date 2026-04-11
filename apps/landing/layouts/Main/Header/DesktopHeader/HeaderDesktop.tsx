@@ -10,8 +10,7 @@ import { getCookie } from '../../../../lib/cookies';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from './HeaderDesktop.module.scss';
 
-interface LinkWithColorProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface LinkWithColorProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   color?: string;
   to: string;
 }
@@ -62,17 +61,11 @@ const HeaderDesktop: React.FC = () => {
         setFeaturesDropdown(false);
       }
 
-      if (
-        solutionsDropdown &&
-        !target.closest('.solutions-dropdown-container')
-      ) {
+      if (solutionsDropdown && !target.closest('.solutions-dropdown-container')) {
         setSolutionsDropdown(false);
       }
 
-      if (
-        resourcesDropdown &&
-        !target.closest('.resources-dropdown-container')
-      ) {
+      if (resourcesDropdown && !target.closest('.resources-dropdown-container')) {
         setResourcesDropdown(false);
       }
 
@@ -85,12 +78,7 @@ const HeaderDesktop: React.FC = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [
-    featuresDropdown,
-    solutionsDropdown,
-    resourcesDropdown,
-    languageDropdown,
-  ]);
+  }, [featuresDropdown, solutionsDropdown, resourcesDropdown, languageDropdown]);
 
   const toggleFeaturesDropdown = useCallback(() => {
     setFeaturesDropdown((prev) => !prev);
@@ -202,9 +190,7 @@ const HeaderDesktop: React.FC = () => {
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
-                  transform: featuresDropdown
-                    ? 'rotate(180deg)'
-                    : 'rotate(0deg)',
+                  transform: featuresDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
             </p>
@@ -310,34 +296,24 @@ const HeaderDesktop: React.FC = () => {
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
-                  transform: solutionsDropdown
-                    ? 'rotate(180deg)'
-                    : 'rotate(0deg)',
+                  transform: solutionsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
             </p>
             {solutionsDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6
-                  onClick={() => handleNavigation('/solutions/food-beverage')}
-                >
+                <h6 onClick={() => handleNavigation('/solutions/food-beverage')}>
                   Food & Beverage
                 </h6>
-                <h6 onClick={() => handleNavigation('/solutions/retail')}>
-                  Retail & Omnichannel
-                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/retail')}>Retail & Omnichannel</h6>
                 <h6 onClick={() => handleNavigation('/solutions/services')}>
                   Services & Appointments
                 </h6>
                 <h6 onClick={() => handleNavigation('/solutions/grocery')}>
                   Grocery & Convenience
                 </h6>
-                <h6 onClick={() => handleNavigation('/solutions/wholesale')}>
-                  Wholesale & B2B
-                </h6>
-                <h6 onClick={() => handleNavigation('/solutions/events')}>
-                  Events & Hospitality
-                </h6>
+                <h6 onClick={() => handleNavigation('/solutions/wholesale')}>Wholesale & B2B</h6>
+                <h6 onClick={() => handleNavigation('/solutions/events')}>Events & Hospitality</h6>
               </div>
             )}
           </div>
@@ -352,9 +328,7 @@ const HeaderDesktop: React.FC = () => {
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
-                  transform: resourcesDropdown
-                    ? 'rotate(180deg)'
-                    : 'rotate(0deg)',
+                  transform: resourcesDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
             </p>
@@ -362,23 +336,11 @@ const HeaderDesktop: React.FC = () => {
               <div className={styles['header-dropdown']}>
                 <h6 onClick={() => handleNavigation('/hardware')}>Hardware</h6>
                 <h6 onClick={() => handleNavigation('/blog')}>Blog</h6>
-                <h6
-                  onClick={() => handleExternalLink('https://docs.rtylr.com')}
-                >
-                  Documentation
-                </h6>
+                <h6 onClick={() => handleExternalLink('https://docs.rtylr.com')}>Documentation</h6>
                 <h6 onClick={() => handleNavigation('/about')}>About</h6>
-                <h6
-                  onClick={() =>
-                    handleExternalLink('https://voxire.com/careers')
-                  }
-                >
-                  Careers
-                </h6>
+                <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
                 <h6 onClick={() => handleNavigation('/support')}>Support</h6>
-                <h6 onClick={() => handleExternalLink(APP_URLS.status)}>
-                  Status
-                </h6>
+                <h6 onClick={() => handleExternalLink(APP_URLS.status)}>Status</h6>
               </div>
             )}
           </div>
@@ -394,15 +356,8 @@ const HeaderDesktop: React.FC = () => {
           className={`${styles['language-selector-container']} lang-dropdown-container`}
           style={{ display: 'none' }}
         >
-          <span
-            className={styles['language-selector']}
-            onClick={toggleLanguageDropdown}
-          >
-            {language === 'en'
-              ? 'English'
-              : language === 'ar'
-              ? 'عربي'
-              : 'Français'}
+          <span className={styles['language-selector']} onClick={toggleLanguageDropdown}>
+            {language === 'en' ? 'English' : language === 'ar' ? 'عربي' : 'Français'}
           </span>
           {languageDropdown && (
             <div className={styles['languages-dropdown']}>
@@ -414,20 +369,10 @@ const HeaderDesktop: React.FC = () => {
         </div>
 
         <div className={styles['header-buttons']}>
-          <Button
-            onClick={handleLoginClick}
-            variant="soft"
-            width="140px"
-            height="40px"
-          >
+          <Button onClick={handleLoginClick} variant="soft" width="140px" height="40px">
             Sign In
           </Button>
-          <Button
-            onClick={handleSignupClick}
-            variant="dark-outline"
-            width="140px"
-            height="40px"
-          >
+          <Button onClick={handleSignupClick} variant="dark-outline" width="140px" height="40px">
             Sign Up
           </Button>
         </div>

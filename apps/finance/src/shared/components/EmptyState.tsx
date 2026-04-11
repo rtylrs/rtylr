@@ -9,7 +9,12 @@ interface EmptyStateProps {
   action?: React.ReactNode;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon = Inbox, title, description, action }) => (
+const EmptyState: React.FC<EmptyStateProps> = ({
+  icon: Icon = Inbox,
+  title,
+  description,
+  action,
+}) => (
   <div
     style={{
       padding: '48px 24px',
@@ -33,9 +38,19 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon = Inbox, title, desc
     >
       <Icon size={22} style={{ color: ACCENT }} />
     </div>
-    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 6 }}>{title}</div>
+    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 6 }}>
+      {title}
+    </div>
     {description && (
-      <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginBottom: 18, maxWidth: 360, margin: '0 auto 18px' }}>
+      <div
+        style={{
+          fontSize: 12,
+          color: 'var(--hub-text-muted)',
+          marginBottom: 18,
+          maxWidth: 360,
+          margin: '0 auto 18px',
+        }}
+      >
         {description}
       </div>
     )}

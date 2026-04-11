@@ -47,15 +47,18 @@ const Account: React.FC = () => {
 
   useEffect(() => {
     import('../../../../../shared/lib/api').then(({ default: api }) => {
-      api.get('/security/login-history')
+      api
+        .get('/security/login-history')
         .then((res: any) => {
           const history = res.data?.history ?? [];
-          setLoginHistory(history.map((h: any) => ({
-            email: h.email,
-            method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
-            ip: h.ip ? `from ${h.ip}` : '',
-            timeAgo: formatTimeAgo(h.createdAt),
-          })));
+          setLoginHistory(
+            history.map((h: any) => ({
+              email: h.email,
+              method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
+              ip: h.ip ? `from ${h.ip}` : '',
+              timeAgo: formatTimeAgo(h.createdAt),
+            }))
+          );
         })
         .catch(() => {});
     });
@@ -112,20 +115,40 @@ const Account: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} />
+              <Input
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} />
+              <Input
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+              />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
           </div>
           <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={handleCancel} disabled={!isEditing}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!isEditing}>Save changes</Button>
+            <Button variant="outline" onClick={handleCancel} disabled={!isEditing}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={!isEditing}>
+              Save changes
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -140,14 +163,20 @@ const Account: React.FC = () => {
           <p className="text-sm text-gray-500 mb-3">
             Invalidate all sessions for your account. This will log you out everywhere.
           </p>
-          <Button variant="destructive" size="sm" onClick={async () => {
-            try {
-              const { default: api } = await import('../../../../../shared/lib/api');
-              await api.post('/security/invalidate-sessions');
-              document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-              window.location.href = '/';
-            } catch {}
-          }}>Invalidate all sessions</Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={async () => {
+              try {
+                const { default: api } = await import('../../../../../shared/lib/api');
+                await api.post('/security/invalidate-sessions');
+                document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+              } catch {}
+            }}
+          >
+            Invalidate all sessions
+          </Button>
         </CardContent>
       </Card>
 

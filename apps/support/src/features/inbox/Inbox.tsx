@@ -56,7 +56,11 @@ const InboxScreen: React.FC = () => {
           value={channelFilter}
           onChange={(e) => setChannelFilter(e.target.value)}
           className="h-9 px-3 rounded-lg text-sm outline-none"
-          style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+          style={{
+            background: 'var(--hub-input-bg)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text)',
+          }}
         >
           <option value="">All channels</option>
           <option value="email">Email</option>
@@ -79,7 +83,11 @@ const InboxScreen: React.FC = () => {
       {isError && (
         <div
           className="flex items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           Failed to load conversations. Please try again.
         </div>
@@ -88,7 +96,11 @@ const InboxScreen: React.FC = () => {
       {!isLoading && !isError && filtered.length === 0 && (
         <div
           className="flex flex-col items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           <Mail size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
           <p>No conversations found</p>
@@ -106,18 +118,30 @@ const InboxScreen: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-card)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-card)';
+                }}
               >
                 <div className="relative">
                   <Icon size={16} style={{ color: 'var(--hub-text-muted)' }} />
                   {conv.unread && (
-                    <Circle size={6} fill="#4583C4" stroke="none" className="absolute -top-0.5 -right-0.5" />
+                    <Circle
+                      size={6}
+                      fill="#4583C4"
+                      stroke="none"
+                      className="absolute -top-0.5 -right-0.5"
+                    />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                    <span
+                      className="text-sm font-medium truncate"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
                       {conv.customerName || 'Unknown'}
                     </span>
                     <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
@@ -129,7 +153,10 @@ const InboxScreen: React.FC = () => {
                   </p>
                 </div>
                 {conv.assigneeName && (
-                  <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}>
+                  <div
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                  >
                     <User size={10} />
                     {conv.assigneeName}
                   </div>

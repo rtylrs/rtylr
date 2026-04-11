@@ -163,11 +163,17 @@ export function useExpiringDocuments(daysAhead = 30) {
 
 /* ── 39. useBenefits ── */
 export function useBenefits() {
-  return useQuery({ queryKey: ['benefits', 'plans'], queryFn: () => unwrap(hrExtras.listBenefitPlans()) });
+  return useQuery({
+    queryKey: ['benefits', 'plans'],
+    queryFn: () => unwrap(hrExtras.listBenefitPlans()),
+  });
 }
 
 export function useBenefitEnrollments() {
-  return useQuery({ queryKey: ['benefits', 'enrollments'], queryFn: () => unwrap(hrExtras.listBenefitEnrollments()) });
+  return useQuery({
+    queryKey: ['benefits', 'enrollments'],
+    queryFn: () => unwrap(hrExtras.listBenefitEnrollments()),
+  });
 }
 
 export function useEnrollBenefit() {
@@ -180,11 +186,17 @@ export function useEnrollBenefit() {
 
 /* ── 40. useTraining ── */
 export function useTraining() {
-  return useQuery({ queryKey: ['training', 'courses'], queryFn: () => unwrap(hrExtras.listCourses()) });
+  return useQuery({
+    queryKey: ['training', 'courses'],
+    queryFn: () => unwrap(hrExtras.listCourses()),
+  });
 }
 
 export function useTrainingProgress() {
-  return useQuery({ queryKey: ['training', 'progress'], queryFn: () => unwrap(hrExtras.listTrainingProgress()) });
+  return useQuery({
+    queryKey: ['training', 'progress'],
+    queryFn: () => unwrap(hrExtras.listTrainingProgress()),
+  });
 }
 
 /* ── extras ── */
@@ -193,11 +205,17 @@ export function useBirthdays() {
 }
 
 export function useAnniversaries() {
-  return useQuery({ queryKey: ['anniversaries'], queryFn: () => unwrap(hrExtras.listAnniversaries()) });
+  return useQuery({
+    queryKey: ['anniversaries'],
+    queryFn: () => unwrap(hrExtras.listAnniversaries()),
+  });
 }
 
 export function useAvailability() {
-  return useQuery({ queryKey: ['availability'], queryFn: () => unwrap(hrExtras.listAvailability()) });
+  return useQuery({
+    queryKey: ['availability'],
+    queryFn: () => unwrap(hrExtras.listAvailability()),
+  });
 }
 
 export function useSwaps() {
@@ -207,7 +225,8 @@ export function useSwaps() {
 export function useResolveSwap() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, accepted }: { id: number; accepted: boolean }) => unwrap(hrExtras.resolveSwap(id, accepted)),
+    mutationFn: ({ id, accepted }: { id: number; accepted: boolean }) =>
+      unwrap(hrExtras.resolveSwap(id, accepted)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
   });
 }
@@ -227,8 +246,15 @@ export function useBreaks() {
 export function useStartBreak() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ staffId, staffName, type }: { staffId: number; staffName: string; type: 'Lunch' | 'Short' | 'Other' }) =>
-      hrExtras.startBreak(staffId, staffName, type),
+    mutationFn: ({
+      staffId,
+      staffName,
+      type,
+    }: {
+      staffId: number;
+      staffName: string;
+      type: 'Lunch' | 'Short' | 'Other';
+    }) => hrExtras.startBreak(staffId, staffName, type),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
   });
 }
@@ -242,7 +268,10 @@ export function useEndBreak() {
 }
 
 export function useOvertimeAlerts() {
-  return useQuery({ queryKey: ['overtime-alerts'], queryFn: () => unwrap(hrExtras.listOvertimeAlerts()) });
+  return useQuery({
+    queryKey: ['overtime-alerts'],
+    queryFn: () => unwrap(hrExtras.listOvertimeAlerts()),
+  });
 }
 
 export function useHrSettings() {

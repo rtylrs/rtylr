@@ -6,4 +6,3 @@ export const useLayout = (): LayoutType => {
   const location = useLocation();
   return getLayoutTypeForRoute(location.pathname);
 };
-

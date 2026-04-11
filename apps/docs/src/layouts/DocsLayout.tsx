@@ -65,10 +65,10 @@ const sections: NavSection[] = [
 
 const sectionIcons: Record<string, React.ReactNode> = {
   'Getting Started': <Book size={14} />,
-  'Platform': <Layers size={14} />,
-  'Guides': <Users size={14} />,
-  'API': <Code size={14} />,
-  'Resources': <FileText size={14} />,
+  Platform: <Layers size={14} />,
+  Guides: <Users size={14} />,
+  API: <Code size={14} />,
+  Resources: <FileText size={14} />,
 };
 
 const DocsLayout: React.FC = () => {
@@ -86,8 +86,10 @@ const DocsLayout: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 border-r flex flex-col flex-shrink-0 h-full overflow-hidden"
-        style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-surface)' }}>
+      <aside
+        className="w-64 border-r flex flex-col flex-shrink-0 h-full overflow-hidden"
+        style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-surface)' }}
+      >
         {/* Logo */}
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--docs-border)' }}>
           <a
@@ -99,8 +101,10 @@ const DocsLayout: React.FC = () => {
             <span className="text-base font-semibold" style={{ color: 'var(--docs-text)' }}>
               rtylr
             </span>
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded"
-              style={{ background: 'var(--docs-accent-bg)', color: 'var(--docs-accent)' }}>
+            <span
+              className="text-xs font-medium px-1.5 py-0.5 rounded"
+              style={{ background: 'var(--docs-accent-bg)', color: 'var(--docs-accent)' }}
+            >
               docs
             </span>
           </a>
@@ -110,8 +114,11 @@ const DocsLayout: React.FC = () => {
         <div className="px-3 py-3">
           <form onSubmit={handleSearch}>
             <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2"
-                style={{ color: 'var(--docs-text-dim)' }} />
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2"
+                style={{ color: 'var(--docs-text-dim)' }}
+              />
               <input
                 type="text"
                 placeholder="Search docs..."
@@ -136,8 +143,10 @@ const DocsLayout: React.FC = () => {
                 <span style={{ color: 'var(--docs-text-muted)' }}>
                   {sectionIcons[section.title]}
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--docs-text-muted)' }}>
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--docs-text-muted)' }}
+                >
                   {section.title}
                 </span>
               </div>

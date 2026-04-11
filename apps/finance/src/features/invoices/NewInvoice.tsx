@@ -8,7 +8,14 @@ import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
-import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle, ACCENT } from '../../shared/lib/tokens';
+import {
+  cardStyle,
+  ghostBtn,
+  primaryBtn,
+  inputStyle,
+  labelStyle,
+  ACCENT,
+} from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
 
 const STEPS = ['Client', 'Items', 'Tax & Notes', 'Preview'] as const;
@@ -22,7 +29,9 @@ const NewInvoice: React.FC = () => {
   const due = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
   const [issuedDate, setIssuedDate] = useState(today);
   const [dueDate, setDueDate] = useState(due);
-  const [invoiceNumber, setInvoiceNumber] = useState(`${settings.invoicePrefix}-${Math.floor(Math.random() * 9000) + 1000}`);
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    `${settings.invoicePrefix}-${Math.floor(Math.random() * 9000) + 1000}`
+  );
   const [items, setItems] = useState<LineItem[]>([
     { id: 'l1', description: '', quantity: 1, unitPrice: 0, taxRate: settings.defaultTaxRate },
   ]);
@@ -32,7 +41,13 @@ const NewInvoice: React.FC = () => {
   const addItem = () =>
     setItems((prev) => [
       ...prev,
-      { id: `l${prev.length + 1}-${Date.now()}`, description: '', quantity: 1, unitPrice: 0, taxRate: settings.defaultTaxRate },
+      {
+        id: `l${prev.length + 1}-${Date.now()}`,
+        description: '',
+        quantity: 1,
+        unitPrice: 0,
+        taxRate: settings.defaultTaxRate,
+      },
     ]);
 
   const updateItem = (i: number, item: LineItem) =>
@@ -42,7 +57,8 @@ const NewInvoice: React.FC = () => {
 
   const canProceed = () => {
     if (step === 0) return !!client;
-    if (step === 1) return items.length > 0 && items.every((it) => it.description && it.unitPrice > 0);
+    if (step === 1)
+      return items.length > 0 && items.every((it) => it.description && it.unitPrice > 0);
     return true;
   };
 
@@ -52,7 +68,11 @@ const NewInvoice: React.FC = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="New Invoice"
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'New' }]}
@@ -94,12 +114,16 @@ const NewInvoice: React.FC = () => {
               </span>
               {s}
             </button>
-            {i < STEPS.length - 1 && <ChevronRight size={12} style={{ color: 'var(--hub-text-dim)' }} />}
+            {i < STEPS.length - 1 && (
+              <ChevronRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
+            )}
           </React.Fragment>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: step === 3 ? '1fr 1fr' : '1fr', gap: 20 }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: step === 3 ? '1fr 1fr' : '1fr', gap: 20 }}
+      >
         <div style={{ ...cardStyle, padding: 20 }}>
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -112,15 +136,29 @@ const NewInvoice: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Invoice #</label>
-                  <input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} style={{ ...inputStyle, marginTop: 6 }} />
+                  <input
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                    style={{ ...inputStyle, marginTop: 6 }}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Issued</label>
-                  <input type="date" value={issuedDate} onChange={(e) => setIssuedDate(e.target.value)} style={{ ...inputStyle, marginTop: 6 }} />
+                  <input
+                    type="date"
+                    value={issuedDate}
+                    onChange={(e) => setIssuedDate(e.target.value)}
+                    style={{ ...inputStyle, marginTop: 6 }}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Due</label>
-                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={{ ...inputStyle, marginTop: 6 }} />
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    style={{ ...inputStyle, marginTop: 6 }}
+                  />
                 </div>
               </div>
             </div>
@@ -136,7 +174,8 @@ const NewInvoice: React.FC = () => {
                         key={h}
                         style={{
                           padding: '8px',
-                          textAlign: h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'right' : 'left',
+                          textAlign:
+                            h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'right' : 'left',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',
@@ -150,7 +189,12 @@ const NewInvoice: React.FC = () => {
                 </thead>
                 <tbody>
                   {items.map((it, i) => (
-                    <LineItemRow key={it.id} item={it} onChange={(v) => updateItem(i, v)} onRemove={() => removeItem(i)} />
+                    <LineItemRow
+                      key={it.id}
+                      item={it}
+                      onChange={(v) => updateItem(i, v)}
+                      onRemove={() => removeItem(i)}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -186,7 +230,8 @@ const NewInvoice: React.FC = () => {
 
           {step === 3 && (
             <div style={{ color: 'var(--hub-text-muted)', fontSize: 12 }}>
-              Review the invoice on the right. Click <strong>Save as Draft</strong> or <strong>Save & Send</strong> to finalize.
+              Review the invoice on the right. Click <strong>Save as Draft</strong> or{' '}
+              <strong>Save & Send</strong> to finalize.
             </div>
           )}
         </div>

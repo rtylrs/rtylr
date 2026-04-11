@@ -21,7 +21,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={cn('rounded-xl px-8 py-14 flex flex-col items-center justify-center text-center', className)}
+      className={cn(
+        'rounded-xl px-8 py-14 flex flex-col items-center justify-center text-center',
+        className
+      )}
       style={{ background: 'var(--hub-card)', border: '1px dashed var(--hub-border)' }}
     >
       {Icon && (
@@ -32,9 +35,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <Icon size={20} style={{ color: 'var(--hub-text-dim)' }} />
         </div>
       )}
-      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{title}</p>
+      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        {title}
+      </p>
       {description && (
-        <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--hub-text-muted)' }}>{description}</p>
+        <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--hub-text-muted)' }}>
+          {description}
+        </p>
       )}
       {actionLabel && onAction && (
         <Button className="mt-4" size="sm" onClick={onAction}>

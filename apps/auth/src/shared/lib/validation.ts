@@ -16,8 +16,7 @@ export const isStrongPassword = (value: string): boolean => {
   return hasUpper && hasLower && hasDigit;
 };
 
-export const passwordsMatch = (a: string, b: string): boolean =>
-  !!a && a === b;
+export const passwordsMatch = (a: string, b: string): boolean => !!a && a === b;
 
 export const isPhoneNumber = (value: string): boolean => {
   if (!value) return false;
@@ -31,10 +30,7 @@ export const getEmailError = (value: string): string | undefined => {
   return isEmail(value) ? undefined : 'Please enter a valid email address';
 };
 
-export const getPasswordMatchError = (
-  a: string,
-  b: string
-): string | undefined => {
+export const getPasswordMatchError = (a: string, b: string): string | undefined => {
   if (!b) return undefined;
   return passwordsMatch(a, b) ? undefined : 'Passwords do not match';
 };

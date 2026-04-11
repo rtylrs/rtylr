@@ -15,14 +15,9 @@ import {
   TableHead,
   TableCell,
   Separator,
-} from "../../shared/components/ui";
+} from '../../shared/components/ui';
 
-const planFeatures = [
-  'Up to 3 menus',
-  'QR code generation',
-  'Basic analytics',
-  'Email support',
-];
+const planFeatures = ['Up to 3 menus', 'QR code generation', 'Basic analytics', 'Email support'];
 
 const Billing: React.FC = () => {
   return (
@@ -52,7 +47,11 @@ const Billing: React.FC = () => {
           <Separator />
           <div className="grid grid-cols-2 gap-2">
             {planFeatures.map((feature) => (
-              <div key={feature} className="flex items-center gap-2 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+              <div
+                key={feature}
+                className="flex items-center gap-2 text-sm"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
                 <CheckCircle size={14} className="text-emerald-500 shrink-0" />
                 {feature}
               </div>
@@ -79,7 +78,10 @@ const Billing: React.FC = () => {
           <CardDescription>Your saved payment methods</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg" style={{ border: '1px dashed var(--hub-border)' }}>
+          <div
+            className="flex flex-col items-center justify-center py-8 text-center rounded-lg"
+            style={{ border: '1px dashed var(--hub-border)' }}
+          >
             <CreditCard size={28} className="text-gray-300 mb-3" />
             <p className="text-sm font-medium text-gray-400">No payment method added</p>
             <p className="text-xs text-gray-300 mt-1 mb-4">Add a card to upgrade your plan</p>

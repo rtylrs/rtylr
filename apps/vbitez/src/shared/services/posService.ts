@@ -15,8 +15,7 @@ export const posService = {
   chargeOrder: (id: number | string, data: any) => api.post(`/pos/orders/${id}/charge`, data),
   voidOrder: (id: number | string, data: any) => api.post(`/pos/orders/${id}/void`, data),
   refundOrder: (id: number | string, data: any) => api.post(`/pos/orders/${id}/refund`, data),
-  applyDiscount: (id: number | string, data: any) =>
-    api.post(`/pos/orders/${id}/discount`, data),
+  applyDiscount: (id: number | string, data: any) => api.post(`/pos/orders/${id}/discount`, data),
   splitOrder: (id: number | string, data: any) => api.post(`/pos/orders/${id}/split`, data),
   holdOrder: (id: number | string) => api.post(`/pos/orders/${id}/hold`),
   releaseOrder: (id: number | string) => api.post(`/pos/orders/${id}/release`),

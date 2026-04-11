@@ -10,8 +10,11 @@ const Article: React.FC = () => {
   if (!article) {
     return (
       <div>
-        <Link to="/" className="inline-flex items-center gap-1 text-sm mb-6 no-underline"
-          style={{ color: 'var(--docs-accent)' }}>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm mb-6 no-underline"
+          style={{ color: 'var(--docs-accent)' }}
+        >
           <ChevronLeft size={14} />
           Back to docs
         </Link>
@@ -27,8 +30,11 @@ const Article: React.FC = () => {
 
   return (
     <div>
-      <Link to="/" className="inline-flex items-center gap-1 text-sm mb-6 no-underline"
-        style={{ color: 'var(--docs-accent)' }}>
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1 text-sm mb-6 no-underline"
+        style={{ color: 'var(--docs-accent)' }}
+      >
         <ChevronLeft size={14} />
         Back to docs
       </Link>

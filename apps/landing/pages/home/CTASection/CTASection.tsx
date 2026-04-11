@@ -37,20 +37,10 @@ const CTASection: React.FC = () => {
             Free forever for up to 5 members. No credit card required.
           </motion.p>
           <motion.div className={styles.ctaButtons} variants={fadeInUp}>
-            <Button
-              variant="soft"
-              onClick={handleGetStarted}
-              width="200px"
-              height="44px"
-            >
+            <Button variant="soft" onClick={handleGetStarted} width="200px" height="44px">
               Get started free
             </Button>
-            <Button
-              variant="dark-outline"
-              onClick={handleBookDemo}
-              width="200px"
-              height="44px"
-            >
+            <Button variant="dark-outline" onClick={handleBookDemo} width="200px" height="44px">
               Book a demo
             </Button>
           </motion.div>

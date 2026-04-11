@@ -42,8 +42,7 @@ const MultiPaymentScreen: React.FC = () => {
     setAmount('');
   };
 
-  const removePayment = (id: string) =>
-    setPayments((prev) => prev.filter((p) => p.id !== id));
+  const removePayment = (id: string) => setPayments((prev) => prev.filter((p) => p.id !== id));
 
   const finalize = async () => {
     if (remaining > 0.001) {
@@ -136,10 +135,7 @@ const MultiPaymentScreen: React.FC = () => {
                 <span className="text-sm font-semibold text-pos-text">
                   {formatCurrency(p.amount)}
                 </span>
-                <button
-                  onClick={() => removePayment(p.id)}
-                  className="text-xs text-destructive"
-                >
+                <button onClick={() => removePayment(p.id)} className="text-xs text-destructive">
                   Remove
                 </button>
               </li>

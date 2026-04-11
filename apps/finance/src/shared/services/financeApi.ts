@@ -97,24 +97,20 @@ export interface TaxReport {
 
 export const financeApi = {
   // Dashboard
-  getDashboard: () =>
-    safe.get<DashboardStats>('/finance/dashboard'),
+  getDashboard: () => safe.get<DashboardStats>('/finance/dashboard'),
 
   // Invoices
-  getInvoices: () =>
-    safe.get<Invoice[]>('/finance/invoices'),
+  getInvoices: () => safe.get<Invoice[]>('/finance/invoices'),
 
   getInvoiceDetail: (id: string) =>
     safe.get<Invoice>('/finance/invoices/detail', { params: { id } }),
 
-  createInvoice: (data: Partial<Invoice>) =>
-    safe.post<Invoice>('/finance/invoices', data),
+  createInvoice: (data: Partial<Invoice>) => safe.post<Invoice>('/finance/invoices', data),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
     safe.post<Invoice>('/finance/invoices', { id, ...data }),
 
-  deleteInvoice: (id: string) =>
-    safe.post('/finance/invoices', { id, _action: 'delete' }),
+  deleteInvoice: (id: string) => safe.post('/finance/invoices', { id, _action: 'delete' }),
 
   updateInvoiceStatus: (id: string, status: Invoice['status']) =>
     safe.post('/finance/invoices/status', { id, status }),
@@ -123,102 +119,76 @@ export const financeApi = {
     safe.post('/finance/invoices/payment', { id, amount }),
 
   // Expenses
-  getExpenses: () =>
-    safe.get<Expense[]>('/finance/expenses'),
+  getExpenses: () => safe.get<Expense[]>('/finance/expenses'),
 
-  createExpense: (data: Partial<Expense>) =>
-    safe.post<Expense>('/finance/expenses', data),
+  createExpense: (data: Partial<Expense>) => safe.post<Expense>('/finance/expenses', data),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
     safe.post<Expense>('/finance/expenses', { id, ...data }),
 
-  deleteExpense: (id: string) =>
-    safe.post('/finance/expenses', { id, _action: 'delete' }),
+  deleteExpense: (id: string) => safe.post('/finance/expenses', { id, _action: 'delete' }),
 
   // Expense Categories
-  getExpenseCategories: () =>
-    safe.get<ExpenseCategory[]>('/finance/expense-categories'),
+  getExpenseCategories: () => safe.get<ExpenseCategory[]>('/finance/expense-categories'),
 
   createExpenseCategory: (data: Partial<ExpenseCategory>) =>
     safe.post<ExpenseCategory>('/finance/expense-categories', data),
 
   // P&L
-  getPL: (period: string) =>
-    safe.get<PLReport>('/finance/pl', { params: { period } }),
+  getPL: (period: string) => safe.get<PLReport>('/finance/pl', { params: { period } }),
 
   // Tax
-  getTaxConfig: () =>
-    safe.get<TaxConfig[]>('/finance/tax/config'),
+  getTaxConfig: () => safe.get<TaxConfig[]>('/finance/tax/config'),
 
-  createTaxConfig: (data: TaxConfig) =>
-    safe.post<TaxConfig>('/finance/tax/config', data),
+  createTaxConfig: (data: TaxConfig) => safe.post<TaxConfig>('/finance/tax/config', data),
 
-  getTaxReport: () =>
-    safe.get<TaxReport>('/finance/tax/report'),
+  getTaxReport: () => safe.get<TaxReport>('/finance/tax/report'),
 
   // Recurring Invoices
-  getRecurringInvoices: () =>
-    safe.get('/finance/recurring-invoices'),
+  getRecurringInvoices: () => safe.get('/finance/recurring-invoices'),
 
-  createRecurringInvoice: (data: any) =>
-    safe.post('/finance/recurring-invoices', data),
+  createRecurringInvoice: (data: any) => safe.post('/finance/recurring-invoices', data),
 
   updateRecurringInvoice: (id: string, data: any) =>
     safe.post('/finance/recurring-invoices', { id, ...data }),
 
   // Quotes
-  getQuotes: () =>
-    safe.get('/finance/quotes'),
+  getQuotes: () => safe.get('/finance/quotes'),
 
-  createQuote: (data: any) =>
-    safe.post('/finance/quotes', data),
+  createQuote: (data: any) => safe.post('/finance/quotes', data),
 
-  updateQuote: (id: string, data: any) =>
-    safe.post('/finance/quotes', { id, ...data }),
+  updateQuote: (id: string, data: any) => safe.post('/finance/quotes', { id, ...data }),
 
-  deleteQuote: (id: string) =>
-    safe.post('/finance/quotes', { id, _action: 'delete' }),
+  deleteQuote: (id: string) => safe.post('/finance/quotes', { id, _action: 'delete' }),
 
   // Bills
-  getBills: () =>
-    safe.get('/finance/bills'),
+  getBills: () => safe.get('/finance/bills'),
 
-  createBill: (data: any) =>
-    safe.post('/finance/bills', data),
+  createBill: (data: any) => safe.post('/finance/bills', data),
 
-  updateBill: (id: string, data: any) =>
-    safe.post('/finance/bills', { id, ...data }),
+  updateBill: (id: string, data: any) => safe.post('/finance/bills', { id, ...data }),
 
   // Bank Accounts
-  getBankAccounts: () =>
-    safe.get('/finance/bank-accounts'),
+  getBankAccounts: () => safe.get('/finance/bank-accounts'),
 
-  createBankAccount: (data: any) =>
-    safe.post('/finance/bank-accounts', data),
+  createBankAccount: (data: any) => safe.post('/finance/bank-accounts', data),
 
   // Balance Sheet
-  getBalanceSheet: () =>
-    safe.get('/finance/balance-sheet'),
+  getBalanceSheet: () => safe.get('/finance/balance-sheet'),
 
   // Cash Flow
-  getCashFlow: () =>
-    safe.get('/finance/cash-flow'),
+  getCashFlow: () => safe.get('/finance/cash-flow'),
 
   // Chart of Accounts
-  getAccounts: () =>
-    safe.get('/finance/accounts'),
+  getAccounts: () => safe.get('/finance/accounts'),
 
-  createAccount: (data: any) =>
-    safe.post('/finance/accounts', data),
+  createAccount: (data: any) => safe.post('/finance/accounts', data),
 
   // Journal
-  getJournal: () =>
-    safe.get('/finance/journal'),
+  getJournal: () => safe.get('/finance/journal'),
 
-  createJournalEntry: (data: any) =>
-    safe.post('/finance/journal', data),
+  createJournalEntry: (data: any) => safe.post('/finance/journal', data),
 
   // Expense detail
-  getExpenseDetail: (id: string) =>
-    safe.get('/finance/expenses', { params: { id } }),
+  getExpenseDetail: (id: string) => safe.get('/finance/expenses', { params: { id } }),
 };

@@ -41,10 +41,16 @@ const PriceLists: React.FC = () => {
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
         </div>
       ) : lists.length === 0 ? (
-        <EmptyState icon={Tags} title="No price lists" description="Create your first price list to enable tier pricing" />
+        <EmptyState
+          icon={Tags}
+          title="No price lists"
+          description="Create your first price list to enable tier pricing"
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {lists.map((l) => {

@@ -4,19 +4,19 @@
  * @returns Formatted date string
  */
 export const formatDate = (date: string | Date): string => {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   if (isNaN(dateObj.getTime())) {
-    return "Invalid Date";
+    return 'Invalid Date';
   }
 
   const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   };
 
-  return dateObj.toLocaleDateString("en-US", options);
+  return dateObj.toLocaleDateString('en-US', options);
 };
 
 /**
@@ -25,36 +25,36 @@ export const formatDate = (date: string | Date): string => {
  * @returns Relative time string
  */
 export const formatRelativeTime = (date: string | Date): string => {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return "just now";
+    return 'just now';
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 30) {
-    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
   }
 
   const diffInMonths = Math.floor(diffInDays / 30);
   if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
+    return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
   }
 
   const diffInYears = Math.floor(diffInMonths / 12);
-  return `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
+  return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
 };
 
 /**
@@ -63,12 +63,9 @@ export const formatRelativeTime = (date: string | Date): string => {
  * @param currency - Currency code (default: 'USD')
  * @returns Formatted currency string
  */
-export const formatCurrency = (
-  amount: number,
-  currency: string = "USD"
-): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+export const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency,
   }).format(amount);
 };
@@ -79,7 +76,7 @@ export const formatCurrency = (
  * @returns Formatted number string
  */
 export const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat("en-US").format(num);
+  return new Intl.NumberFormat('en-US').format(num);
 };
 
 export const formatting = {

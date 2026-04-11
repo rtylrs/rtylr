@@ -20,7 +20,7 @@ const ReceiptsScreen: React.FC = () => {
     (r) =>
       !search ||
       r.orderId.toLowerCase().includes(search.toLowerCase()) ||
-      (r.customerName ?? '').toLowerCase().includes(search.toLowerCase()),
+      (r.customerName ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   const send = async (id: string) => {
@@ -52,9 +52,7 @@ const ReceiptsScreen: React.FC = () => {
                   }`}
                 >
                   <div className="flex justify-between">
-                    <span className="text-sm font-semibold text-pos-text">
-                      Order #{r.orderId}
-                    </span>
+                    <span className="text-sm font-semibold text-pos-text">Order #{r.orderId}</span>
                     <span className="text-sm text-pos-text">{formatCurrency(r.total)}</span>
                   </div>
                   <div className="text-[10px] text-pos-muted">{formatDate(r.printedAt)}</div>

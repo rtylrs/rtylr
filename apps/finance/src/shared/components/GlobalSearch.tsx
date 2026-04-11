@@ -1,6 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, FileText, Receipt, Users, LayoutDashboard, TrendingUp, Calculator } from 'lucide-react';
+import {
+  Search,
+  FileText,
+  Receipt,
+  Users,
+  LayoutDashboard,
+  TrendingUp,
+  Calculator,
+} from 'lucide-react';
 import Modal from './Modal';
 import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
@@ -18,18 +26,48 @@ interface Result {
 const PAGES: Result[] = [
   { id: 'p-dashboard', label: 'Dashboard', to: '/', icon: LayoutDashboard, group: 'Pages' },
   { id: 'p-invoices', label: 'Invoices', to: '/invoices', icon: FileText, group: 'Pages' },
-  { id: 'p-new-invoice', label: 'New invoice', to: '/invoices/new', icon: FileText, group: 'Pages' },
-  { id: 'p-recurring', label: 'Recurring invoices', to: '/invoices/recurring', icon: FileText, group: 'Pages' },
+  {
+    id: 'p-new-invoice',
+    label: 'New invoice',
+    to: '/invoices/new',
+    icon: FileText,
+    group: 'Pages',
+  },
+  {
+    id: 'p-recurring',
+    label: 'Recurring invoices',
+    to: '/invoices/recurring',
+    icon: FileText,
+    group: 'Pages',
+  },
   { id: 'p-quotes', label: 'Quotes', to: '/quotes', icon: FileText, group: 'Pages' },
   { id: 'p-expenses', label: 'Expenses', to: '/expenses', icon: Receipt, group: 'Pages' },
   { id: 'p-new-expense', label: 'New expense', to: '/expenses/new', icon: Receipt, group: 'Pages' },
-  { id: 'p-categories', label: 'Expense categories', to: '/categories', icon: Receipt, group: 'Pages' },
+  {
+    id: 'p-categories',
+    label: 'Expense categories',
+    to: '/categories',
+    icon: Receipt,
+    group: 'Pages',
+  },
   { id: 'p-bills', label: 'Bills', to: '/bills', icon: Receipt, group: 'Pages' },
   { id: 'p-bank', label: 'Bank feeds', to: '/bank', icon: Receipt, group: 'Pages' },
   { id: 'p-reconcile', label: 'Reconcile', to: '/reconcile', icon: Receipt, group: 'Pages' },
   { id: 'p-pl', label: 'Profit & Loss', to: '/pl', icon: TrendingUp, group: 'Pages' },
-  { id: 'p-balance', label: 'Balance sheet', to: '/reports/balance-sheet', icon: TrendingUp, group: 'Pages' },
-  { id: 'p-cashflow', label: 'Cash flow', to: '/reports/cash-flow', icon: TrendingUp, group: 'Pages' },
+  {
+    id: 'p-balance',
+    label: 'Balance sheet',
+    to: '/reports/balance-sheet',
+    icon: TrendingUp,
+    group: 'Pages',
+  },
+  {
+    id: 'p-cashflow',
+    label: 'Cash flow',
+    to: '/reports/cash-flow',
+    icon: TrendingUp,
+    group: 'Pages',
+  },
   { id: 'p-tax', label: 'Tax', to: '/tax', icon: Calculator, group: 'Pages' },
   { id: 'p-taxreport', label: 'Tax summary', to: '/reports/tax', icon: Calculator, group: 'Pages' },
   { id: 'p-journal', label: 'Journal', to: '/journal', icon: FileText, group: 'Pages' },
@@ -52,21 +90,26 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
     if (open) {
       setQuery('');
       setIndex(0);
-      api.get<Client[]>('/crm/customers').then((r) => setClients(r.data ?? [])).catch(() => {});
+      api
+        .get<Client[]>('/crm/customers')
+        .then((r) => setClients(r.data ?? []))
+        .catch(() => {});
     }
   }, [open]);
 
   const results = useMemo(() => {
     const q = query.toLowerCase();
     const pages = PAGES.filter((p) => p.label.toLowerCase().includes(q));
-    const clientResults: Result[] = clients.filter((c) => c.name.toLowerCase().includes(q)).map((c) => ({
-      id: `client-${c.id}`,
-      label: c.name,
-      sub: c.email,
-      to: `/invoices/new?client=${c.id}`,
-      icon: Users,
-      group: 'Clients',
-    }));
+    const clientResults: Result[] = clients
+      .filter((c) => c.name.toLowerCase().includes(q))
+      .map((c) => ({
+        id: `client-${c.id}`,
+        label: c.name,
+        sub: c.email,
+        to: `/invoices/new?client=${c.id}`,
+        icon: Users,
+        group: 'Clients',
+      }));
     return [...pages, ...clientResults].slice(0, 12);
   }, [query, clients]);
 
@@ -94,7 +137,17 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
 
   return (
     <Modal open={open} onClose={onClose} title="Search" width={560}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--hub-hover)', borderRadius: 10, marginBottom: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 10px',
+          background: 'var(--hub-hover)',
+          borderRadius: 10,
+          marginBottom: 12,
+        }}
+      >
         <Search size={14} style={{ color: 'var(--hub-text-dim)' }} />
         <input
           autoFocus
@@ -109,7 +162,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
       </div>
       <div style={{ maxHeight: 360, overflowY: 'auto' }}>
         {results.length === 0 && (
-          <div style={{ padding: 30, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}>No results</div>
+          <div
+            style={{ padding: 30, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}
+          >
+            No results
+          </div>
         )}
         {results.map((r, i) => {
           const Icon = r.icon;
@@ -142,7 +199,16 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{r.label}</div>
                 {r.sub && <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{r.sub}</div>}
               </div>
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)', textTransform: 'uppercase' }}>{r.group}</span>
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: 10,
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {r.group}
+              </span>
             </button>
           );
         })}

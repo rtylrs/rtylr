@@ -1,3 +1,1 @@
-export { default } from "./NoSidebarLayout";
-
-
+export { default } from './NoSidebarLayout';

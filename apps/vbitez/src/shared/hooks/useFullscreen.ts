@@ -12,19 +12,22 @@ export const useFullscreen = () => {
   const { isFullscreen, setFullscreen, toggleFullscreen } = useFullscreenStore();
 
   // Apply fullscreen state to the window
-  const applyFullscreen = useCallback(async (shouldBeFullscreen: boolean) => {
-    if (!isTauri) {
-      console.warn('Fullscreen control is only available in Tauri desktop app');
-      return;
-    }
+  const applyFullscreen = useCallback(
+    async (shouldBeFullscreen: boolean) => {
+      if (!isTauri) {
+        console.warn('Fullscreen control is only available in Tauri desktop app');
+        return;
+      }
 
-    try {
-      await appWindow.setFullscreen(shouldBeFullscreen);
-      setFullscreen(shouldBeFullscreen);
-    } catch (error) {
-      console.error('Failed to set fullscreen:', error);
-    }
-  }, [isTauri, setFullscreen]);
+      try {
+        await appWindow.setFullscreen(shouldBeFullscreen);
+        setFullscreen(shouldBeFullscreen);
+      } catch (error) {
+        console.error('Failed to set fullscreen:', error);
+      }
+    },
+    [isTauri, setFullscreen]
+  );
 
   // Toggle fullscreen state
   const toggle = useCallback(async () => {

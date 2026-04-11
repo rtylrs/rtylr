@@ -38,7 +38,9 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
         </span>
       </div>
       {items.length === 0 ? (
-        <div style={{ padding: 20, textAlign: 'center', color: 'var(--hub-text-muted)', fontSize: 12 }}>
+        <div
+          style={{ padding: 20, textAlign: 'center', color: 'var(--hub-text-muted)', fontSize: 12 }}
+        >
           No overdue invoices.
         </div>
       ) : (
@@ -65,7 +67,11 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
                 <div style={{ fontSize: 10, color: '#ef4444' }}>{item.daysOverdue}d overdue</div>
               </div>
               <span style={{ fontSize: 13, fontWeight: 700, color: ACCENT }}>
-                {typeof item.amount === 'number' ? <MoneyDisplay amount={item.amount} /> : item.amount}
+                {typeof item.amount === 'number' ? (
+                  <MoneyDisplay amount={item.amount} />
+                ) : (
+                  item.amount
+                )}
               </span>
             </Link>
           ))}

@@ -10,7 +10,11 @@ interface Props {
 }
 
 function formatCurrency(n: number) {
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  return n.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  });
 }
 
 const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
@@ -49,11 +53,15 @@ const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
         </div>
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Base</div>
-          <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>{formatCurrency(row.basePay)}</div>
+          <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
+            {formatCurrency(row.basePay)}
+          </div>
         </div>
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Overtime</div>
-          <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>{formatCurrency(row.overtime)}</div>
+          <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
+            {formatCurrency(row.overtime)}
+          </div>
         </div>
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Deductions</div>
@@ -61,7 +69,15 @@ const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--hr-border)', paddingTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          borderTop: '1px solid var(--hr-border)',
+          paddingTop: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <div>
           <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>Net pay</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: ACCENT }}>{formatCurrency(net)}</div>

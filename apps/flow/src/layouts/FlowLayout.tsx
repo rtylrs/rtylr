@@ -140,17 +140,9 @@ const SidebarCollapsible: React.FC<{ open: boolean; children: React.ReactNode }>
   </AnimatePresence>
 );
 
-const SidebarLink: React.FC<SidebarLinkProps> = ({
-  to,
-  icon: Icon,
-  label,
-  exact,
-  badge,
-}) => {
+const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon: Icon, label, exact, badge }) => {
   const location = useLocation();
-  const isActive = exact
-    ? location.pathname === to
-    : location.pathname.startsWith(to);
+  const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
 
   return (
     <Link
@@ -200,8 +192,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
     useSidebarSections();
-  const { order: sidebarSectionOrder, moveSection: moveSidebarSection } =
-    useSidebarSectionOrder();
+  const { order: sidebarSectionOrder, moveSection: moveSidebarSection } = useSidebarSectionOrder();
   const { prefs: lifePrefs } = useLifePreferences();
 
   const { user, logout } = useUserStore();
@@ -259,8 +250,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   useKeyboardShortcuts();
 
-  const activeWorkspace =
-    workspaces.find((w) => w.id === currentWorkspaceId) || workspaces[0] || { id: '', name: 'Loading...', color: '#6b7280' };
+  const activeWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) ||
+    workspaces[0] || { id: '', name: 'Loading...', color: '#6b7280' };
   const workspaceProjects = projects.filter(
     (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
@@ -294,7 +285,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const logoFilter =
     theme === 'dark' ||
-    (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
       ? 'brightness(0) invert(1)'
       : 'brightness(0)';
 
@@ -321,7 +314,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         >
           <Menu size={20} strokeWidth={2} />
         </button>
-        <img src="/logo.png" alt="" className="h-5 w-auto shrink-0" style={{ filter: logoFilter }} />
+        <img
+          src="/logo.png"
+          alt=""
+          className="h-5 w-auto shrink-0"
+          style={{ filter: logoFilter }}
+        />
         <span
           className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold"
           style={{ color: 'var(--flow-text)' }}
@@ -372,12 +370,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           className={cn('flex items-center gap-2.5 py-2.5', sx)}
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
-          <img
-            src="/logo.png"
-            alt="rtylr"
-            className="h-6 w-auto"
-            style={{ filter: logoFilter }}
-          />
+          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" style={{ filter: logoFilter }} />
           <button
             type="button"
             aria-label="Close menu"
@@ -499,7 +492,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
               <SidebarLink to="/my-issues" icon={ListTodo} label="My tasks" badge={myIssuesCount} />
               <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
-              <SidebarLink to={`/w/${currentWorkspaceId}`} icon={LayoutGrid} label="Dashboard" exact />
+              <SidebarLink
+                to={`/w/${currentWorkspaceId}`}
+                icon={LayoutGrid}
+                label="Dashboard"
+                exact
+              />
               <SidebarLink to="/triage" icon={Eye} label="Triage" />
             </nav>
 
@@ -507,179 +505,177 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               {sidebarSectionOrder.map((sectionId) => (
                 <React.Fragment key={sectionId}>
                   {sectionId === 'plan' && (
-                <div className="flex flex-col gap-0">
-                  <div className="group flex items-center gap-0 min-h-0">
-                    <div className={sidebarReorderWrapClass}>
-                      <SidebarSectionReorder
-                        id="plan"
-                        order={sidebarSectionOrder}
-                        moveSection={moveSidebarSection}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleSidebarSection('plan')}
-                      className={cn(sidebarSectionHeaderClass, 'flex-1')}
-                    >
-                      <span
-                        className="text-[12px] font-semibold tracking-wide"
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      >
-                        Plan
-                      </span>
-                      <ChevronDown
-                        size={14}
-                        strokeWidth={2}
-                        className={cn(
-                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                          isSidebarSectionCollapsed('plan') && '-rotate-90'
-                        )}
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      />
-                    </button>
-                  </div>
-                  <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
-                    <nav className="flex flex-col gap-px pt-px">
-                      <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
-                      <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
-                      <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
-                      <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
-                      <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
-                      <SidebarLink to="/views" icon={Eye} label="Views" />
-                    </nav>
-                  </SidebarCollapsible>
-                </div>
-              )}
-
-              {sectionId === 'team' && (
-                <div className="flex flex-col gap-0">
-                  <div className="group flex items-center gap-0 min-h-0">
-                    <div className={sidebarReorderWrapClass}>
-                      <SidebarSectionReorder
-                        id="team"
-                        order={sidebarSectionOrder}
-                        moveSection={moveSidebarSection}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleSidebarSection('team')}
-                      className={cn(sidebarSectionHeaderClass, 'flex-1')}
-                    >
-                      <span
-                        className="text-[12px] font-semibold tracking-wide"
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      >
-                        Team
-                      </span>
-                      <ChevronDown
-                        size={14}
-                        strokeWidth={2}
-                        className={cn(
-                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                          isSidebarSectionCollapsed('team') && '-rotate-90'
-                        )}
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      />
-                    </button>
-                  </div>
-                  <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
-                    <nav className="flex flex-col gap-px pt-px">
-                      <SidebarLink to="/team" icon={Users} label="Workload" />
-                      <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
-                      <SidebarLink to="/archive" icon={Archive} label="Archive" />
-                    </nav>
-                  </SidebarCollapsible>
-                </div>
-              )}
-
-              {sectionId === 'projects' && (
-                <div className="flex flex-col gap-0">
-                  <div className="group flex items-center gap-0 min-h-0">
-                    <div className={sidebarReorderWrapClass}>
-                      <SidebarSectionReorder
-                        id="projects"
-                        order={sidebarSectionOrder}
-                        moveSection={moveSidebarSection}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleSidebarSection('projects')}
-                      className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
-                    >
-                      <span
-                        className="text-[12px] font-semibold tracking-wide truncate"
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      >
-                        Projects
-                      </span>
-                      <ChevronDown
-                        size={14}
-                        strokeWidth={2}
-                        className={cn(
-                          'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                          isSidebarSectionCollapsed('projects') && '-rotate-90'
-                        )}
-                        style={{ color: 'var(--flow-text-muted)' }}
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                      title="New Project"
-                    >
-                      <Plus size={15} strokeWidth={2} />
-                    </button>
-                  </div>
-                  <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
-                    <div className="flex flex-col gap-px pt-px">
-                      {workspaceProjects.map((project) => {
-                        const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
-                        const isActive = location.pathname.startsWith(boardPath);
-                        return (
-                          <Link
-                            key={project.id}
-                            to={boardPath}
-                            className={cn(
-                              'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
-                              isActive ? '' : 'hover:bg-[var(--flow-hover)]'
-                            )}
-                            style={{
-                              color: isActive
-                                ? 'var(--flow-text)'
-                                : 'var(--flow-text-muted)',
-                            }}
+                    <div className="flex flex-col gap-0">
+                      <div className="group flex items-center gap-0 min-h-0">
+                        <div className={sidebarReorderWrapClass}>
+                          <SidebarSectionReorder
+                            id="plan"
+                            order={sidebarSectionOrder}
+                            moveSection={moveSidebarSection}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleSidebarSection('plan')}
+                          className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                        >
+                          <span
+                            className="text-[12px] font-semibold tracking-wide"
+                            style={{ color: 'var(--flow-text-muted)' }}
                           >
-                            {isActive && (
-                              <motion.span
-                                layoutId={`project-active-${project.id}`}
-                                className="absolute inset-0 rounded-md"
-                                style={{ background: 'var(--flow-active)' }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                              />
+                            Plan
+                          </span>
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2}
+                            className={cn(
+                              'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                              isSidebarSectionCollapsed('plan') && '-rotate-90'
                             )}
-                            <Circle
-                              size={8}
-                              className="relative shrink-0 fill-current"
-                              style={{ color: project.color }}
-                            />
-                            <span className="relative flex-1 truncate font-medium">
-                              {project.name}
-                            </span>
-                            <span
-                              className="relative text-[10px]"
-                              style={{ color: 'var(--flow-text-dim)' }}
-                            >
-                              {project.taskCount - project.completedCount}
-                            </span>
-                          </Link>
-                        );
-                      })}
+                            style={{ color: 'var(--flow-text-muted)' }}
+                          />
+                        </button>
+                      </div>
+                      <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
+                        <nav className="flex flex-col gap-px pt-px">
+                          <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+                          <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
+                          <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
+                          <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+                          <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
+                          <SidebarLink to="/views" icon={Eye} label="Views" />
+                        </nav>
+                      </SidebarCollapsible>
                     </div>
-                  </SidebarCollapsible>
-                </div>
+                  )}
+
+                  {sectionId === 'team' && (
+                    <div className="flex flex-col gap-0">
+                      <div className="group flex items-center gap-0 min-h-0">
+                        <div className={sidebarReorderWrapClass}>
+                          <SidebarSectionReorder
+                            id="team"
+                            order={sidebarSectionOrder}
+                            moveSection={moveSidebarSection}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleSidebarSection('team')}
+                          className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                        >
+                          <span
+                            className="text-[12px] font-semibold tracking-wide"
+                            style={{ color: 'var(--flow-text-muted)' }}
+                          >
+                            Team
+                          </span>
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2}
+                            className={cn(
+                              'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                              isSidebarSectionCollapsed('team') && '-rotate-90'
+                            )}
+                            style={{ color: 'var(--flow-text-muted)' }}
+                          />
+                        </button>
+                      </div>
+                      <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
+                        <nav className="flex flex-col gap-px pt-px">
+                          <SidebarLink to="/team" icon={Users} label="Workload" />
+                          <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+                          <SidebarLink to="/archive" icon={Archive} label="Archive" />
+                        </nav>
+                      </SidebarCollapsible>
+                    </div>
+                  )}
+
+                  {sectionId === 'projects' && (
+                    <div className="flex flex-col gap-0">
+                      <div className="group flex items-center gap-0 min-h-0">
+                        <div className={sidebarReorderWrapClass}>
+                          <SidebarSectionReorder
+                            id="projects"
+                            order={sidebarSectionOrder}
+                            moveSection={moveSidebarSection}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleSidebarSection('projects')}
+                          className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
+                        >
+                          <span
+                            className="text-[12px] font-semibold tracking-wide truncate"
+                            style={{ color: 'var(--flow-text-muted)' }}
+                          >
+                            Projects
+                          </span>
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2}
+                            className={cn(
+                              'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                              isSidebarSectionCollapsed('projects') && '-rotate-90'
+                            )}
+                            style={{ color: 'var(--flow-text-muted)' }}
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
+                          style={{ color: 'var(--flow-text-muted)' }}
+                          title="New Project"
+                        >
+                          <Plus size={15} strokeWidth={2} />
+                        </button>
+                      </div>
+                      <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
+                        <div className="flex flex-col gap-px pt-px">
+                          {workspaceProjects.map((project) => {
+                            const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
+                            const isActive = location.pathname.startsWith(boardPath);
+                            return (
+                              <Link
+                                key={project.id}
+                                to={boardPath}
+                                className={cn(
+                                  'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
+                                  isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                                )}
+                                style={{
+                                  color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                                }}
+                              >
+                                {isActive && (
+                                  <motion.span
+                                    layoutId={`project-active-${project.id}`}
+                                    className="absolute inset-0 rounded-md"
+                                    style={{ background: 'var(--flow-active)' }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                                  />
+                                )}
+                                <Circle
+                                  size={8}
+                                  className="relative shrink-0 fill-current"
+                                  style={{ color: project.color }}
+                                />
+                                <span className="relative flex-1 truncate font-medium">
+                                  {project.name}
+                                </span>
+                                <span
+                                  className="relative text-[10px]"
+                                  style={{ color: 'var(--flow-text-dim)' }}
+                                >
+                                  {project.taskCount - project.completedCount}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </SidebarCollapsible>
+                    </div>
                   )}
                 </React.Fragment>
               ))}
@@ -688,7 +684,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         </div>
 
         {/* Footer */}
-        <div className={cn('flex flex-col gap-1.5 py-2', sx)} style={{ borderTop: '1px solid var(--flow-border)' }}>
+        <div
+          className={cn('flex flex-col gap-1.5 py-2', sx)}
+          style={{ borderTop: '1px solid var(--flow-border)' }}
+        >
           <SidebarLink to="/settings" icon={Settings} label="Settings" />
 
           <div className="relative">
@@ -762,16 +761,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           onClick={() => setTheme(value)}
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
                           style={{
-                            background:
-                              theme === value
-                                ? `${ACCENT}22`
-                                : 'var(--flow-hover)',
-                            color:
-                              theme === value ? ACCENT : 'var(--flow-text-muted)',
+                            background: theme === value ? `${ACCENT}22` : 'var(--flow-hover)',
+                            color: theme === value ? ACCENT : 'var(--flow-text-muted)',
                             border:
-                              theme === value
-                                ? `1px solid ${ACCENT}44`
-                                : '1px solid transparent',
+                              theme === value ? `1px solid ${ACCENT}44` : '1px solid transparent',
                           }}
                         >
                           <Icon size={12} />
@@ -812,8 +805,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               borderBottom: '1px solid var(--flow-border)',
             }}
           >
-            Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}) — non-urgent reminders stay soft.
-            Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life & rhythm.
+            Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}) — non-urgent reminders stay
+            soft. Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life & rhythm.
           </div>
         )}
         <AnimatePresence mode="wait">

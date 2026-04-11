@@ -43,20 +43,46 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
         gap: 8,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--hub-text-muted)' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: 13,
+          color: 'var(--hub-text-muted)',
+        }}
+      >
         <span>Subtotal</span>
         <MoneyDisplay amount={subtotal} />
       </div>
       {buckets.map((b) => (
-        <div key={b.rate} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--hub-text-dim)' }}>
-          <span>Tax ({b.rate.toFixed(1)}% of <MoneyDisplay amount={b.taxable} />)</span>
+        <div
+          key={b.rate}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: 12,
+            color: 'var(--hub-text-dim)',
+          }}
+        >
+          <span>
+            Tax ({b.rate.toFixed(1)}% of <MoneyDisplay amount={b.taxable} />)
+          </span>
           <MoneyDisplay amount={b.tax} />
         </div>
       ))}
       {discount > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#f59e0b' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: 13,
+            color: '#f59e0b',
+          }}
+        >
           <span>Discount</span>
-          <span>-<MoneyDisplay amount={discount} /></span>
+          <span>
+            -<MoneyDisplay amount={discount} />
+          </span>
         </div>
       )}
       <div

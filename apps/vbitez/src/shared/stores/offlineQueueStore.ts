@@ -36,20 +36,20 @@ export const useOfflineQueueStore = create<OfflineQueueState & OfflineQueueActio
       retry: (id) =>
         set((s) => ({
           queue: s.queue.map((q) =>
-            q.id === id ? { ...q, retries: q.retries + 1, status: 'syncing' as const } : q,
+            q.id === id ? { ...q, retries: q.retries + 1, status: 'syncing' as const } : q
           ),
         })),
       markSynced: (id) => set((s) => ({ queue: s.queue.filter((q) => q.id !== id) })),
       markFailed: (id, err) =>
         set((s) => ({
           queue: s.queue.map((q) =>
-            q.id === id ? { ...q, status: 'failed' as const, lastError: err } : q,
+            q.id === id ? { ...q, status: 'failed' as const, lastError: err } : q
           ),
         })),
       clear: () => set({ queue: [] }),
     }),
-    { name: 'pos-offline-queue' },
-  ),
+    { name: 'pos-offline-queue' }
+  )
 );
 
 // Initialize online listeners once at module load (safe in Tauri webview)

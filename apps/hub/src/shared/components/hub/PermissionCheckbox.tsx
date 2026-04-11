@@ -19,7 +19,11 @@ export const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
 }) => {
   return (
     <label
-      className={cn('inline-flex items-center gap-2 cursor-pointer select-none', disabled && 'cursor-not-allowed opacity-50', className)}
+      className={cn(
+        'inline-flex items-center gap-2 cursor-pointer select-none',
+        disabled && 'cursor-not-allowed opacity-50',
+        className
+      )}
     >
       <button
         type="button"
@@ -35,7 +39,11 @@ export const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
       >
         {checked && <Check size={11} color="white" strokeWidth={3} />}
       </button>
-      {label && <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>{label}</span>}
+      {label && (
+        <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+          {label}
+        </span>
+      )}
     </label>
   );
 };

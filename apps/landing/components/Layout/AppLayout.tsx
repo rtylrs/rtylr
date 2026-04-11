@@ -22,15 +22,7 @@ import { useConfigStore } from '../../stores/configStore';
 import { useConfigData } from '../../hooks/api/useConfigApi';
 import { useUserInfo } from '../../hooks/api/useUserApi';
 
-ChartJS.register(
-  LineElement,
-  PointElement,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale
-);
+ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -65,10 +57,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <React.Fragment>
       {configData && (
-        <HelmetContainer
-          title={'Rtylr - Contactless QR Menu'}
-          favicon={'/favicon.ico'}
-        />
+        <HelmetContainer title={'Rtylr - Contactless QR Menu'} favicon={'/favicon.ico'} />
       )}
 
       {/* Toolbar and Cookies components temporarily commented out */}

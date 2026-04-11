@@ -21,20 +21,48 @@ const AnniversaryWidget: React.FC = () => {
   return (
     <Card>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <span style={{ padding: 6, borderRadius: 8, background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
+        <span
+          style={{
+            padding: 6,
+            borderRadius: 8,
+            background: 'rgba(245,158,11,0.15)',
+            color: '#f59e0b',
+          }}
+        >
           <Trophy size={14} />
         </span>
-        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Work anniversaries</h3>
+        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+          Work anniversaries
+        </h3>
       </div>
       {upcoming.length === 0 ? (
         <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>Nothing upcoming.</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <ul
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+          }}
+        >
           {upcoming.map((a) => (
-            <li key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+            <li
+              key={a.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: 12,
+              }}
+            >
               <div>
                 <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>{a.name}</div>
-                <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{a.years} year milestone</div>
+                <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>
+                  {a.years} year milestone
+                </div>
               </div>
               <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>
                 {a.days === 0 ? 'Today' : `in ${a.days}d`}

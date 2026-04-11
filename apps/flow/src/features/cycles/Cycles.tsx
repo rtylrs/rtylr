@@ -8,7 +8,12 @@ import CycleBadge from '../../shared/components/CycleBadge';
 const Cycles: React.FC = () => {
   const { data: cycles = [], isLoading } = useCycles();
 
-  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading cycles...</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading cycles...
+      </div>
+    );
 
   const active = cycles.find((c) => c.status === 'active');
   const upcoming = cycles.filter((c) => c.status === 'upcoming');
@@ -16,10 +21,7 @@ const Cycles: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Cycles
         </h1>
@@ -41,20 +43,21 @@ const Cycles: React.FC = () => {
             }}
           >
             <div className="flex items-center gap-2 mb-3">
+              <span className="h-2 w-2 rounded-full" style={{ background: '#22c55e' }} />
               <span
-                className="h-2 w-2 rounded-full"
-                style={{ background: '#22c55e' }}
-              />
-              <span className="text-[10px] uppercase tracking-wider font-semibold"
-                style={{ color: '#22c55e' }}>
+                className="text-[10px] uppercase tracking-wider font-semibold"
+                style={{ color: '#22c55e' }}
+              >
                 Active cycle
               </span>
             </div>
             <h2 className="text-[22px] font-bold mb-2" style={{ color: 'var(--flow-text)' }}>
               {active.name}
             </h2>
-            <div className="flex items-center gap-2 text-[11px]"
-              style={{ color: 'var(--flow-text-muted)' }}>
+            <div
+              className="flex items-center gap-2 text-[11px]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
               <span>{formatDate(active.startDate)}</span>
               <ArrowRight size={10} />
               <span>{formatDate(active.endDate)}</span>
@@ -68,8 +71,10 @@ const Cycles: React.FC = () => {
                   {active.scope > 0 ? Math.round((active.completed / active.scope) * 100) : 0}%
                 </span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden"
-                style={{ background: 'var(--flow-hover)' }}>
+              <div
+                className="h-2 rounded-full overflow-hidden"
+                style={{ background: 'var(--flow-hover)' }}
+              >
                 <div
                   className="h-full rounded-full"
                   style={{
@@ -82,12 +87,8 @@ const Cycles: React.FC = () => {
           </motion.section>
         )}
 
-        {upcoming.length > 0 && (
-          <CycleSection title="Upcoming" cycles={upcoming} />
-        )}
-        {completed.length > 0 && (
-          <CycleSection title="Completed" cycles={completed} />
-        )}
+        {upcoming.length > 0 && <CycleSection title="Upcoming" cycles={upcoming} />}
+        {completed.length > 0 && <CycleSection title="Completed" cycles={completed} />}
       </div>
     </div>
   );
@@ -95,8 +96,10 @@ const Cycles: React.FC = () => {
 
 const CycleSection: React.FC<{ title: string; cycles: any[] }> = ({ title, cycles }) => (
   <section>
-    <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-3"
-      style={{ color: 'var(--flow-text-muted)' }}>
+    <h3
+      className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+      style={{ color: 'var(--flow-text-muted)' }}
+    >
       {title}
     </h3>
     <div className="space-y-2">

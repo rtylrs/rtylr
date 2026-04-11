@@ -11,21 +11,25 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  default:     'text-white',
-  secondary:   'text-white/70 hover:text-white',
-  outline:     'text-white/60 hover:text-white/90',
-  ghost:       'text-white/50 hover:text-white/80',
+  default: 'text-white',
+  secondary: 'text-white/70 hover:text-white',
+  outline: 'text-white/60 hover:text-white/90',
+  ghost: 'text-white/50 hover:text-white/80',
   destructive: 'bg-red-600/90 text-white hover:bg-red-600',
-  accent:      'text-white hover:opacity-90',
+  accent: 'text-white hover:opacity-90',
 };
 
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
-  default:     { background: '#4583C4' },
-  secondary:   { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' },
-  outline:     { background: 'transparent', border: '1px solid var(--accent-border)', color: 'var(--accent)' },
-  ghost:       { background: 'transparent' },
+  default: { background: '#4583C4' },
+  secondary: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' },
+  outline: {
+    background: 'transparent',
+    border: '1px solid var(--accent-border)',
+    color: 'var(--accent)',
+  },
+  ghost: { background: 'transparent' },
   destructive: {},
-  accent:      { background: '#4583C4' },
+  accent: { background: '#4583C4' },
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface SidebarState {
   sectionsVisible: Record<string, boolean>;
@@ -39,7 +39,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
       },
     }),
     {
-      name: "rtylr:sidebar",
+      name: 'rtylr:sidebar',
       storage: createJSONStorage(() => localStorage),
     }
   )

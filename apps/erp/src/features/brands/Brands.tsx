@@ -47,18 +47,29 @@ const Brands: React.FC = () => {
               key={b.id}
               className="rounded-xl p-4 transition-colors"
               style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+              }}
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm"
                   style={{ background: 'rgba(245,158,11,0.12)', color: AMBER }}
                 >
-                  {b.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                  {b.name
+                    .split(' ')
+                    .map((w) => w[0])
+                    .join('')
+                    .slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
+                  <p
+                    className="text-sm font-semibold truncate"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
                     {b.name}
                   </p>
                   <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>

@@ -1,7 +1,7 @@
 import { usePermissionsStore } from '../stores/permissionsStore';
 import { useUserStore } from '../stores/userStore';
 
-export type PermissionKey = 
+export type PermissionKey =
   | 'canEditProducts'
   | 'canViewAnalytics'
   | 'canManageSettings'
@@ -19,7 +19,7 @@ export const hasPermission = (permission: PermissionKey): boolean => {
 export const canAccessRoute = (route: string): boolean => {
   const permissionsStore = usePermissionsStore.getState();
   const userStore = useUserStore.getState();
-  
+
   // Define route-permission mappings
   const routePermissions: Record<string, PermissionKey[]> = {
     '/settings': ['canManageSettings'],
@@ -32,9 +32,7 @@ export const canAccessRoute = (route: string): boolean => {
   const requiredPermissions = routePermissions[route];
   if (!requiredPermissions) return true; // Route doesn't require specific permissions
 
-  return requiredPermissions.some((permission) => 
-    permissionsStore.hasPermission(permission)
-  );
+  return requiredPermissions.some((permission) => permissionsStore.hasPermission(permission));
 };
 
 export const PERMISSIONS = {
@@ -69,4 +67,3 @@ export const usePermissions = () => {
 
 // Need to import React for the hook
 import React from 'react';
-

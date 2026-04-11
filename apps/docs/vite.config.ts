@@ -1,13 +1,13 @@
 /// <reference types='vitest' />
-import { defineConfig } from "vite";
-import path from "path";
-import react from "@vitejs/plugin-react";
-import svgr from "vite-plugin-svgr";
+import { defineConfig } from 'vite';
+import path from 'path';
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: "./node_modules/.vite/docs",
-  base: "/",
+  cacheDir: './node_modules/.vite/docs',
+  base: '/',
   plugins: [
     react(),
     svgr({
@@ -18,10 +18,10 @@ export default defineConfig(() => ({
   ],
   resolve: {
     alias: {
-      "@app": path.resolve(__dirname, "./src"),
-      "@screens": path.resolve(__dirname, "./src/screens"),
-      "@layouts": path.resolve(__dirname, "./src/layouts"),
-      "@content": path.resolve(__dirname, "./src/content"),
+      '@app': path.resolve(__dirname, './src'),
+      '@screens': path.resolve(__dirname, './src/screens'),
+      '@layouts': path.resolve(__dirname, './src/layouts'),
+      '@content': path.resolve(__dirname, './src/content'),
     },
   },
   server: {
@@ -34,16 +34,16 @@ export default defineConfig(() => ({
   },
   preview: {
     port: 5188,
-    host: "localhost",
+    host: 'localhost',
     strictPort: true,
   },
   build: {
-    outDir: "../../dist/docs",
+    outDir: '../../dist/docs',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
-    target: "esnext",
-    minify: "esbuild" as const,
+    target: 'esnext',
+    minify: 'esbuild' as const,
     cssMinify: true,
     cssCodeSplit: true,
     modulePreload: true,
@@ -54,27 +54,17 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       output: {
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: [
-            "react",
-            "react-dom",
-            "react-router-dom",
-            "lucide-react",
-          ],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'lucide-react'],
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "lucide-react",
-    ],
-    exclude: ["@voxire/tailwind-config"],
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react'],
+    exclude: ['@voxire/tailwind-config'],
   },
 }));

@@ -54,25 +54,17 @@ function HelmetContainer({
       {ogLocale && <meta property="og:locale" content={ogLocale} />}
       {ogSiteName && <meta property="og:site_name" content={ogSiteName} />}
       {(ogDescription || description) && (
-        <meta
-          property="og:description"
-          content={ogDescription || description}
-        />
+        <meta property="og:description" content={ogDescription || description} />
       )}
 
       {twitterCard && <meta name="twitter:card" content={twitterCard} />}
       {twitterCard && <meta name="twitter:title" content={title} />}
-      {twitterCard && description && (
-        <meta name="twitter:description" content={description} />
-      )}
+      {twitterCard && description && <meta name="twitter:description" content={description} />}
       {twitterCard && image && <meta name="twitter:image" content={image} />}
       {twitterSite && <meta name="twitter:site" content={twitterSite} />}
-      {twitterCreator && (
-        <meta name="twitter:creator" content={twitterCreator} />
-      )}
+      {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
 
-      {customMetaTags &&
-        customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
+      {customMetaTags && customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
     </Head>
   );
 }

@@ -22,17 +22,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       >
         <Icon size={22} style={{ color: 'var(--flow-text-dim)' }} />
       </div>
-      <h3
-        className="text-[14px] font-semibold mb-1"
-        style={{ color: 'var(--flow-text)' }}
-      >
+      <h3 className="text-[14px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
         {title}
       </h3>
       {description && (
-        <p
-          className="text-[12px] max-w-sm mb-3"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
+        <p className="text-[12px] max-w-sm mb-3" style={{ color: 'var(--flow-text-muted)' }}>
           {description}
         </p>
       )}

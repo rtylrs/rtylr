@@ -15,7 +15,11 @@ const endpointGroups: EndpointGroup[] = [
   {
     name: 'Authentication',
     endpoints: [
-      { method: 'POST', path: '/auth/login', description: 'Authenticate and receive an access token' },
+      {
+        method: 'POST',
+        path: '/auth/login',
+        description: 'Authenticate and receive an access token',
+      },
       { method: 'POST', path: '/auth/refresh', description: 'Refresh an expired access token' },
       { method: 'POST', path: '/auth/logout', description: 'Revoke the current access token' },
     ],
@@ -83,8 +87,11 @@ const ApiReference: React.FC = () => {
         API Reference
       </h1>
       <p className="text-sm mb-8" style={{ color: 'var(--docs-text-muted)' }}>
-        The rtylr REST API. Base URL: <code className="text-xs px-1.5 py-0.5 rounded"
-          style={{ background: 'var(--docs-surface)', border: '1px solid var(--docs-border)' }}>
+        The rtylr REST API. Base URL:{' '}
+        <code
+          className="text-xs px-1.5 py-0.5 rounded"
+          style={{ background: 'var(--docs-surface)', border: '1px solid var(--docs-border)' }}
+        >
           https://api.rtylr.com/v1
         </code>
       </p>
@@ -94,7 +101,10 @@ const ApiReference: React.FC = () => {
           <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--docs-text)' }}>
             {group.name}
           </h2>
-          <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'var(--docs-border)' }}>
+          <div
+            className="border rounded-lg overflow-hidden"
+            style={{ borderColor: 'var(--docs-border)' }}
+          >
             {group.endpoints.map((endpoint, idx) => {
               const colors = methodColors[endpoint.method];
               return (

@@ -1,10 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import api from '../lib/api';
 import { useUserStore } from '../stores/userStore';
-import {
-  setCookie,
-  getDefaultCookieDomain,
-} from '../lib/cookies';
+import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
 
 interface LoginPayload {
   email: string;
@@ -49,9 +46,8 @@ export const useLogin = () => {
       login(data.role);
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message ||
-                          error.response?.data?.error ||
-                          'Login failed';
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || 'Login failed';
       setError(errorMessage);
       setLoading(false);
     },
@@ -82,9 +78,8 @@ export const useRegisterRestaurant = () => {
       login(data.role);
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message ||
-                          error.response?.data?.error ||
-                          'Registration failed';
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || 'Registration failed';
       setError(errorMessage);
       setLoading(false);
     },
@@ -115,9 +110,8 @@ export const useGoogleAuth = () => {
       login(data.role);
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message ||
-                          error.response?.data?.error ||
-                          'Google login failed';
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || 'Google login failed';
       setError(errorMessage);
       setLoading(false);
     },

@@ -31,15 +31,17 @@ export const useLogin = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      const domain =
-        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
       const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${
+        domain ? `; domain=${domain}` : ''
+      }`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || error.response?.data?.error || 'Login failed';
+      const message =
+        error.response?.data?.message || error.response?.data?.error || 'Login failed';
       toast.error(message);
       throw error;
     },
@@ -56,15 +58,17 @@ export const useRegister = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      const domain =
-        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
       const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${
+        domain ? `; domain=${domain}` : ''
+      }`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || error.response?.data?.error || 'Registration failed';
+      const message =
+        error.response?.data?.message || error.response?.data?.error || 'Registration failed';
       toast.error(message);
       throw error;
     },
@@ -81,15 +85,17 @@ export const useGoogleAuth = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      const domain =
-        window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+      const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
       const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `token=${data.token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
+      document.cookie = `token=${data.token}; path=/; expires=${expires}${
+        domain ? `; domain=${domain}` : ''
+      }`;
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || error.response?.data?.error || 'Google login failed';
+      const message =
+        error.response?.data?.message || error.response?.data?.error || 'Google login failed';
       toast.error(message);
       throw error;
     },
@@ -121,10 +127,11 @@ export const useGetUserInfo = () => {
       setAddons(user.addons);
       setVisits(visits);
       if (token) {
-        const domain =
-          window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
+        const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
         const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
-        document.cookie = `token=${token}; path=/; expires=${expires}${domain ? `; domain=${domain}` : ''}`;
+        document.cookie = `token=${token}; path=/; expires=${expires}${
+          domain ? `; domain=${domain}` : ''
+        }`;
       }
     }
   }, [query.data, setUser, setRole, setUserId, setToken, setAddons, setVisits]);
@@ -132,11 +139,11 @@ export const useGetUserInfo = () => {
   useEffect(() => {
     if (query.error) {
       const error: any = query.error;
-      const message = error.response?.data?.message || error.response?.data?.error || 'Failed to get user info';
+      const message =
+        error.response?.data?.message || error.response?.data?.error || 'Failed to get user info';
       toast.error(message);
     }
   }, [query.error]);
 
   return query;
 };
-

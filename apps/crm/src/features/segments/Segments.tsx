@@ -1,7 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Users, Star, AlertTriangle, Clock, TrendingUp, Plus, ChevronRight, X, Filter } from 'lucide-react';
+import {
+  Users,
+  Star,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
+  Plus,
+  ChevronRight,
+  X,
+  Filter,
+} from 'lucide-react';
 import { useSegments } from './useSegments';
 
 const ACCENT = '#3b82f6';
@@ -18,22 +28,28 @@ interface Segment {
   trendUp: boolean;
 }
 
-
 // Static rule builder options
-const ruleFields = ['Loyalty Tier', 'Total Spend', 'Visit Count', 'Last Visit', 'First Purchase', 'Points Balance'];
+const ruleFields = [
+  'Loyalty Tier',
+  'Total Spend',
+  'Visit Count',
+  'Last Visit',
+  'First Purchase',
+  'Points Balance',
+];
 const ruleOperators: Record<string, string[]> = {
-  'Loyalty Tier':   ['=', '!='],
-  'Total Spend':    ['>', '<', '>=', '<=', '='],
-  'Visit Count':    ['>', '<', '>=', '<=', '='],
-  'Last Visit':     ['within', 'more than'],
+  'Loyalty Tier': ['=', '!='],
+  'Total Spend': ['>', '<', '>=', '<=', '='],
+  'Visit Count': ['>', '<', '>=', '<=', '='],
+  'Last Visit': ['within', 'more than'],
   'First Purchase': ['within', 'more than'],
   'Points Balance': ['>', '<', '>=', '<=', '='],
 };
 const ruleValues: Record<string, string[]> = {
-  'Loyalty Tier':   ['Bronze', 'Silver', 'Gold', 'Platinum'],
-  'Total Spend':    ['$100', '$250', '$500', '$1,000', '$2,500'],
-  'Visit Count':    ['1', '3', '5', '10', '20'],
-  'Last Visit':     ['7 days', '14 days', '30 days', '60 days', '90 days'],
+  'Loyalty Tier': ['Bronze', 'Silver', 'Gold', 'Platinum'],
+  'Total Spend': ['$100', '$250', '$500', '$1,000', '$2,500'],
+  'Visit Count': ['1', '3', '5', '10', '20'],
+  'Last Visit': ['7 days', '14 days', '30 days', '60 days', '90 days'],
   'First Purchase': ['7 days', '14 days', '30 days', '60 days', '90 days'],
   'Points Balance': ['100', '250', '500', '1000', '2500'],
 };
@@ -123,11 +139,19 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Filter size={15} style={{ color: ACCENT }} />
-            <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)' }}>Segment Builder</span>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)' }}>
+              Segment Builder
+            </span>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--hub-text-muted)', padding: '4px' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--hub-text-muted)',
+              padding: '4px',
+            }}
           >
             <X size={16} />
           </button>
@@ -135,7 +159,17 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
 
         {/* Name input */}
         <div>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--hub-text-muted)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'var(--hub-text-muted)',
+              marginBottom: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             Segment Name
           </label>
           <input
@@ -159,29 +193,74 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
 
         {/* Rules */}
         <div>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--hub-text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'var(--hub-text-muted)',
+              marginBottom: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             Rules (ALL must match)
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {rules.map((rule, i) => (
               <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {i > 0 && (
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: ACCENT, width: '28px', flexShrink: 0 }}>AND</span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: ACCENT,
+                      width: '28px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    AND
+                  </span>
                 )}
                 {i === 0 && <div style={{ width: '28px', flexShrink: 0 }} />}
-                <select style={selectStyle} value={rule.field} onChange={(e) => updateRule(rule.id, 'field', e.target.value)}>
-                  {ruleFields.map((f) => <option key={f}>{f}</option>)}
+                <select
+                  style={selectStyle}
+                  value={rule.field}
+                  onChange={(e) => updateRule(rule.id, 'field', e.target.value)}
+                >
+                  {ruleFields.map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
                 </select>
-                <select style={selectStyle} value={rule.operator} onChange={(e) => updateRule(rule.id, 'operator', e.target.value)}>
-                  {(ruleOperators[rule.field] || ['=']).map((op) => <option key={op}>{op}</option>)}
+                <select
+                  style={selectStyle}
+                  value={rule.operator}
+                  onChange={(e) => updateRule(rule.id, 'operator', e.target.value)}
+                >
+                  {(ruleOperators[rule.field] || ['=']).map((op) => (
+                    <option key={op}>{op}</option>
+                  ))}
                 </select>
-                <select style={selectStyle} value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)}>
-                  {(ruleValues[rule.field] || []).map((v) => <option key={v}>{v}</option>)}
+                <select
+                  style={selectStyle}
+                  value={rule.value}
+                  onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
+                >
+                  {(ruleValues[rule.field] || []).map((v) => (
+                    <option key={v}>{v}</option>
+                  ))}
                 </select>
                 {rules.length > 1 && (
                   <button
                     onClick={() => removeRule(rule.id)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--hub-text-dim)', padding: '4px', flexShrink: 0 }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--hub-text-dim)',
+                      padding: '4px',
+                      flexShrink: 0,
+                    }}
                   >
                     <X size={13} />
                   </button>
@@ -249,7 +328,15 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
   );
 }
 
-function SegmentCard({ segment, index, onClick }: { segment: Segment; index: number; onClick?: () => void }) {
+function SegmentCard({
+  segment,
+  index,
+  onClick,
+}: {
+  segment: Segment;
+  index: number;
+  onClick?: () => void;
+}) {
   const Icon = segment.icon;
   return (
     <motion.div
@@ -286,8 +373,12 @@ function SegmentCard({ segment, index, onClick }: { segment: Segment; index: num
             <Icon size={17} style={{ color: segment.color } as React.CSSProperties} />
           </div>
           <div>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>{segment.name}</div>
-            <div style={{ fontSize: '11px', color: segment.trendUp ? '#10b981' : '#ef4444' }}>{segment.trend}</div>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              {segment.name}
+            </div>
+            <div style={{ fontSize: '11px', color: segment.trendUp ? '#10b981' : '#ef4444' }}>
+              {segment.trend}
+            </div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -318,7 +409,15 @@ function SegmentCard({ segment, index, onClick }: { segment: Segment; index: num
               border: '1px solid var(--hub-border)',
             }}
           >
-            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: segment.color, flexShrink: 0 }} />
+            <span
+              style={{
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: segment.color,
+                flexShrink: 0,
+              }}
+            />
             <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{rule}</span>
           </div>
         ))}
@@ -341,8 +440,12 @@ function SegmentCard({ segment, index, onClick }: { segment: Segment; index: num
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${segment.color}20`; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${segment.color}10`; }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.background = `${segment.color}20`;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = `${segment.color}10`;
+        }}
       >
         <span>View Customers</span>
         <ChevronRight size={13} />
@@ -352,7 +455,11 @@ function SegmentCard({ segment, index, onClick }: { segment: Segment; index: num
 }
 
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
-  Star, Users, AlertTriangle, Clock, TrendingUp,
+  Star,
+  Users,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
 };
 
 const Segments: React.FC = () => {
@@ -372,9 +479,12 @@ const Segments: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>Segments</h2>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+            Segments
+          </h2>
           <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-            {segments.length} active segments · {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total
+            {segments.length} active segments ·{' '}
+            {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total
           </p>
         </div>
         <button
@@ -401,7 +511,12 @@ const Segments: React.FC = () => {
       {/* Segment grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
         {segments.map((segment, i) => (
-          <SegmentCard key={segment.id} segment={segment} index={i} onClick={() => navigate(`/segments/${segment.id}`)} />
+          <SegmentCard
+            key={segment.id}
+            segment={segment}
+            index={i}
+            onClick={() => navigate(`/segments/${segment.id}`)}
+          />
         ))}
       </div>
 

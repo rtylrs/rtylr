@@ -16,17 +16,16 @@ interface PeriodData {
 }
 
 const defaultPeriodData: Record<Period, PeriodData> = {
-  'This Month':    { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'Last Month':    { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'This Quarter':  { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'This Year':     { revenue: 0, cogs: 0, operatingExpenses: 0 },
+  'This Month': { revenue: 0, cogs: 0, operatingExpenses: 0 },
+  'Last Month': { revenue: 0, cogs: 0, operatingExpenses: 0 },
+  'This Quarter': { revenue: 0, cogs: 0, operatingExpenses: 0 },
+  'This Year': { revenue: 0, cogs: 0, operatingExpenses: 0 },
 };
 
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
 
-const pct = (n: number, of: number) =>
-  of === 0 ? '0.0%' : `${((n / of) * 100).toFixed(1)}%`;
+const pct = (n: number, of: number) => (of === 0 ? '0.0%' : `${((n / of) * 100).toFixed(1)}%`);
 
 const ACCENT = '#10b981';
 
@@ -49,7 +48,17 @@ interface RowProps {
   large?: boolean;
 }
 
-const PLRow: React.FC<RowProps> = ({ label, value, indent, bold, positive, negative, separator, sub, large }) => {
+const PLRow: React.FC<RowProps> = ({
+  label,
+  value,
+  indent,
+  bold,
+  positive,
+  negative,
+  separator,
+  sub,
+  large,
+}) => {
   const color = positive ? '#10b981' : negative ? '#ef4444' : 'var(--hub-text)';
   return (
     <div
@@ -74,7 +83,9 @@ const PLRow: React.FC<RowProps> = ({ label, value, indent, bold, positive, negat
           {label}
         </span>
         {sub && (
-          <span style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingLeft: indent ? 16 : 0 }}>
+          <span
+            style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingLeft: indent ? 16 : 0 }}
+          >
             {sub}
           </span>
         )}
@@ -94,19 +105,19 @@ const PLRow: React.FC<RowProps> = ({ label, value, indent, bold, positive, negat
 };
 
 const PERIOD_PARAMS: Record<Period, string> = {
-  'This Month':   'month',
-  'Last Month':   'last_month',
+  'This Month': 'month',
+  'Last Month': 'last_month',
   'This Quarter': 'quarter',
-  'This Year':    'year',
+  'This Year': 'year',
 };
 
 const CATEGORY_BREAKDOWN = [
-  { category: 'Rent',                    amount: 6800, color: '#3b82f6' },
+  { category: 'Rent', amount: 6800, color: '#3b82f6' },
   { category: 'Marketing & Advertising', amount: 5200, color: '#ec4899' },
-  { category: 'Software & SaaS',         amount: 2820, color: '#8b5cf6' },
-  { category: 'Travel',                  amount: 1870, color: '#f59e0b' },
-  { category: 'Meals & Entertainment',   amount: 1240, color: '#ef4444' },
-  { category: 'Utilities',               amount: 720,  color: '#10b981' },
+  { category: 'Software & SaaS', amount: 2820, color: '#8b5cf6' },
+  { category: 'Travel', amount: 1870, color: '#f59e0b' },
+  { category: 'Meals & Entertainment', amount: 1240, color: '#ef4444' },
+  { category: 'Utilities', amount: 720, color: '#10b981' },
 ];
 
 const ProfitLoss: React.FC = () => {
@@ -124,17 +135,29 @@ const ProfitLoss: React.FC = () => {
 
   const grossProfit = data.revenue - data.cogs;
   const grossMargin = pct(grossProfit, data.revenue);
-  const netProfit   = grossProfit - data.operatingExpenses;
-  const netMargin   = pct(netProfit, data.revenue);
+  const netProfit = grossProfit - data.operatingExpenses;
+  const netMargin = pct(netProfit, data.revenue);
 
   const periods: Period[] = ['This Month', 'Last Month', 'This Quarter', 'This Year'];
 
   // Summary cards
   const summaryItems = [
-    { label: 'Revenue',       value: data.revenue,            color: '#10b981', Icon: TrendingUp },
-    { label: 'Gross Profit',  value: grossProfit,             color: '#3b82f6', Icon: TrendingUp },
-    { label: 'Net Profit',    value: netProfit,               color: netProfit >= 0 ? '#10b981' : '#ef4444', Icon: netProfit >= 0 ? TrendingUp : TrendingDown },
-    { label: 'Net Margin',    value: parseFloat(netMargin),   color: '#f59e0b', Icon: TrendingUp, isMeta: true, display: netMargin },
+    { label: 'Revenue', value: data.revenue, color: '#10b981', Icon: TrendingUp },
+    { label: 'Gross Profit', value: grossProfit, color: '#3b82f6', Icon: TrendingUp },
+    {
+      label: 'Net Profit',
+      value: netProfit,
+      color: netProfit >= 0 ? '#10b981' : '#ef4444',
+      Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
+    },
+    {
+      label: 'Net Margin',
+      value: parseFloat(netMargin),
+      color: '#f59e0b',
+      Icon: TrendingUp,
+      isMeta: true,
+      display: netMargin,
+    },
   ];
 
   return (
@@ -147,18 +170,26 @@ const ProfitLoss: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>Profit & Loss</h2>
-          <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>Financial statement for {period.toLowerCase()}</p>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
+            Profit & Loss
+          </h2>
+          <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
+            Financial statement for {period.toLowerCase()}
+          </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 14px', borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              borderRadius: 8,
               border: '1px solid var(--hub-border)',
               background: 'var(--hub-hover)',
               color: 'var(--hub-text-muted)',
-              fontSize: 13, cursor: 'pointer',
+              fontSize: 13,
+              cursor: 'pointer',
             }}
             onClick={() => toast.success('P&L exported')}
           >
@@ -168,12 +199,17 @@ const ProfitLoss: React.FC = () => {
           <button
             onClick={() => setShowClose(true)}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 14px', borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              borderRadius: 8,
               border: '1px solid rgba(245,158,11,0.3)',
               background: 'rgba(245,158,11,0.08)',
               color: '#f59e0b',
-              fontSize: 13, cursor: 'pointer', fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              fontWeight: 600,
             }}
           >
             <Lock size={13} />
@@ -183,7 +219,17 @@ const ProfitLoss: React.FC = () => {
       </div>
 
       {/* Period selector */}
-      <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--hub-surface)', borderRadius: 10, border: '1px solid var(--hub-border)', width: 'fit-content' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 4,
+          padding: 4,
+          background: 'var(--hub-surface)',
+          borderRadius: 10,
+          border: '1px solid var(--hub-border)',
+          width: 'fit-content',
+        }}
+      >
         {periods.map((p) => (
           <button
             key={p}
@@ -208,12 +254,39 @@ const ProfitLoss: React.FC = () => {
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
         {summaryItems.map(({ label, value, color, Icon, isMeta, display }) => (
-          <div key={label} style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', borderRadius: 12, padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <span style={{ fontSize: 11, color: 'var(--hub-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</span>
+          <div
+            key={label}
+            style={{
+              background: 'var(--hub-card)',
+              border: '1px solid var(--hub-border)',
+              borderRadius: 12,
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  color: 'var(--hub-text-muted)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.07em',
+                }}
+              >
+                {label}
+              </span>
               <Icon size={14} style={{ color }} />
             </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums' }}>
+            <div
+              style={{ fontSize: 22, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums' }}
+            >
               {isMeta ? display : fmt(value)}
             </div>
           </div>
@@ -223,15 +296,25 @@ const ProfitLoss: React.FC = () => {
       {/* P&L Statement */}
       <div style={cardStyle}>
         {/* Header row */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 24px',
-          borderBottom: '1px solid var(--hub-border)',
-          background: 'var(--hub-surface)',
-        }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 24px',
+            borderBottom: '1px solid var(--hub-border)',
+            background: 'var(--hub-surface)',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: 'var(--hub-text)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+            }}
+          >
             P&L Statement
           </span>
           <span style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{period}</span>
@@ -239,7 +322,16 @@ const ProfitLoss: React.FC = () => {
 
         {/* Revenue section */}
         <div style={{ padding: '8px 0' }}>
-          <div style={{ padding: '6px 24px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hub-text-dim)' }}>
+          <div
+            style={{
+              padding: '6px 24px',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'var(--hub-text-dim)',
+            }}
+          >
             Revenue
           </div>
           <PLRow label="Gross Revenue" value={data.revenue} positive />
@@ -247,7 +339,16 @@ const ProfitLoss: React.FC = () => {
 
         {/* COGS */}
         <div style={{ borderTop: '1px solid var(--hub-border)', padding: '8px 0' }}>
-          <div style={{ padding: '6px 24px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hub-text-dim)' }}>
+          <div
+            style={{
+              padding: '6px 24px',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'var(--hub-text-dim)',
+            }}
+          >
             Cost of Goods Sold
           </div>
           <PLRow label="Direct costs (COGS)" value={data.cogs} indent negative />
@@ -267,16 +368,59 @@ const ProfitLoss: React.FC = () => {
 
         {/* Operating expenses */}
         <div style={{ borderTop: '1px solid var(--hub-border)', padding: '8px 0' }}>
-          <div style={{ padding: '6px 24px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hub-text-dim)' }}>
+          <div
+            style={{
+              padding: '6px 24px',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'var(--hub-text-dim)',
+            }}
+          >
             Operating Expenses
           </div>
-          <PLRow label="Rent"                   value={Math.round(data.operatingExpenses * 0.42)} indent negative />
-          <PLRow label="Marketing & Advertising" value={Math.round(data.operatingExpenses * 0.28)} indent negative />
-          <PLRow label="Utilities & Software"    value={Math.round(data.operatingExpenses * 0.18)} indent negative />
-          <PLRow label="Other Operating"         value={Math.round(data.operatingExpenses * 0.12)} indent negative />
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 24px', borderTop: '1px solid var(--hub-border)', marginTop: 4 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text-muted)' }}>Total Operating</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#ef4444', fontVariantNumeric: 'tabular-nums' }}>-{fmt(data.operatingExpenses)}</span>
+          <PLRow label="Rent" value={Math.round(data.operatingExpenses * 0.42)} indent negative />
+          <PLRow
+            label="Marketing & Advertising"
+            value={Math.round(data.operatingExpenses * 0.28)}
+            indent
+            negative
+          />
+          <PLRow
+            label="Utilities & Software"
+            value={Math.round(data.operatingExpenses * 0.18)}
+            indent
+            negative
+          />
+          <PLRow
+            label="Other Operating"
+            value={Math.round(data.operatingExpenses * 0.12)}
+            indent
+            negative
+          />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '6px 24px',
+              borderTop: '1px solid var(--hub-border)',
+              marginTop: 4,
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text-muted)' }}>
+              Total Operating
+            </span>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: '#ef4444',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              -{fmt(data.operatingExpenses)}
+            </span>
           </div>
         </div>
 

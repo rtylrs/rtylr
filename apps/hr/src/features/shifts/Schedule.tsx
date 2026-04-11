@@ -1,9 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react';
-import { useShiftSchedule, usePublishWeek, useUpsertShift, useDeleteShift } from '../../shared/hooks/useHrExtras';
+import {
+  useShiftSchedule,
+  usePublishWeek,
+  useUpsertShift,
+  useDeleteShift,
+} from '../../shared/hooks/useHrExtras';
 import { useStaff } from '../staff/useStaff';
-import { Card, SectionHeader, Button, Modal, Input, Label, Select, useIsMobile } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Modal,
+  Input,
+  Label,
+  Select,
+  useIsMobile,
+} from '../../shared/components/ui';
 import ShiftCell from '../../shared/components/ShiftCell';
 import { ScheduleShift } from '../../shared/services/hrExtras';
 
@@ -21,7 +35,9 @@ function addDays(d: Date, n: number) {
 }
 
 function dayStr(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate()
+  ).padStart(2, '0')}`;
 }
 
 const ROLE_COLORS = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
@@ -38,7 +54,10 @@ const Schedule: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<ScheduleShift> | null>(null);
 
-  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart]
+  );
 
   const grid = useMemo(() => {
     const map = new Map<string, ScheduleShift[]>();
@@ -79,11 +98,14 @@ const Schedule: React.FC = () => {
           setModalOpen(false);
           setEditing(null);
         },
-      },
+      }
     );
   };
 
-  const weekLabel = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  const weekLabel = `${weekStart.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })} - ${addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -92,13 +114,23 @@ const Schedule: React.FC = () => {
         subtitle="Weekly grid view for scheduling shifts"
         right={
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <Button icon={<ChevronLeft size={13} />} onClick={() => setWeekStart(addDays(weekStart, -7))} />
+            <Button
+              icon={<ChevronLeft size={13} />}
+              onClick={() => setWeekStart(addDays(weekStart, -7))}
+            />
             <Button onClick={() => setWeekStart(startOfWeek(new Date()))}>Today</Button>
-            <Button icon={<ChevronRight size={13} />} onClick={() => setWeekStart(addDays(weekStart, 7))} />
+            <Button
+              icon={<ChevronRight size={13} />}
+              onClick={() => setWeekStart(addDays(weekStart, 7))}
+            />
             <Button
               variant="primary"
               icon={<Send size={13} />}
-              onClick={() => publish.mutate(dayStr(weekStart), { onSuccess: () => toast.success('Week published') })}
+              onClick={() =>
+                publish.mutate(dayStr(weekStart), {
+                  onSuccess: () => toast.success('Week published'),
+                })
+              }
             >
               Publish week
             </Button>
@@ -109,45 +141,74 @@ const Schedule: React.FC = () => {
 
       <Card style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))', minWidth: 840 }}>
-          {days.map((d) => (
-            <div key={d.toISOString()} style={{ borderRight: '1px solid var(--hr-border)' }}>
-              <div style={{ padding: '10px 12px', background: 'var(--hr-hover)', borderBottom: '1px solid var(--hr-border)' }}>
-                <div style={{ fontSize: 10, color: 'var(--hr-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                  {d.toLocaleDateString('en-US', { weekday: 'short' })}
-                </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>{d.getDate()}</div>
-              </div>
-              <div style={{ padding: 8, minHeight: 260, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {(grid.get(dayStr(d)) ?? []).map((sh) => (
-                  <ShiftCell
-                    key={sh.id}
-                    shift={sh}
-                    onClick={() => {
-                      if (confirm(`Delete shift for ${sh.staffName}?`)) {
-                        del.mutate(sh.id, { onSuccess: () => toast.success('Shift removed') });
-                      }
-                    }}
-                  />
-                ))}
-                <button
-                  onClick={() => openNew(dayStr(d))}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',
+              minWidth: 840,
+            }}
+          >
+            {days.map((d) => (
+              <div key={d.toISOString()} style={{ borderRight: '1px solid var(--hr-border)' }}>
+                <div
                   style={{
-                    padding: '6px',
-                    borderRadius: 8,
-                    border: '1px dashed var(--hr-border)',
-                    background: 'transparent',
-                    color: 'var(--hr-text-muted)',
-                    fontSize: 10,
-                    cursor: 'pointer',
+                    padding: '10px 12px',
+                    background: 'var(--hr-hover)',
+                    borderBottom: '1px solid var(--hr-border)',
                   }}
                 >
-                  + add shift
-                </button>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: 'var(--hr-text-muted)',
+                      textTransform: 'uppercase',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>
+                    {d.getDate()}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    padding: 8,
+                    minHeight: 260,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                  }}
+                >
+                  {(grid.get(dayStr(d)) ?? []).map((sh) => (
+                    <ShiftCell
+                      key={sh.id}
+                      shift={sh}
+                      onClick={() => {
+                        if (confirm(`Delete shift for ${sh.staffName}?`)) {
+                          del.mutate(sh.id, { onSuccess: () => toast.success('Shift removed') });
+                        }
+                      }}
+                    />
+                  ))}
+                  <button
+                    onClick={() => openNew(dayStr(d))}
+                    style={{
+                      padding: '6px',
+                      borderRadius: 8,
+                      border: '1px dashed var(--hr-border)',
+                      background: 'transparent',
+                      color: 'var(--hr-text-muted)',
+                      fontSize: 10,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    + add shift
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </div>
       </Card>
 
@@ -156,19 +217,40 @@ const Schedule: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <Label>Employee</Label>
-              <Select value={editing.staffId ?? ''} onChange={(e) => setEditing({ ...editing, staffId: Number(e.target.value) })}>
+              <Select
+                value={editing.staffId ?? ''}
+                onChange={(e) => setEditing({ ...editing, staffId: Number(e.target.value) })}
+              >
                 <option value="">Select</option>
-                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
               </Select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: 10,
+              }}
+            >
               <div>
                 <Label>Start</Label>
-                <Input type="time" value={editing.start ?? ''} onChange={(e) => setEditing({ ...editing, start: e.target.value })} />
+                <Input
+                  type="time"
+                  value={editing.start ?? ''}
+                  onChange={(e) => setEditing({ ...editing, start: e.target.value })}
+                />
               </div>
               <div>
                 <Label>End</Label>
-                <Input type="time" value={editing.end ?? ''} onChange={(e) => setEditing({ ...editing, end: e.target.value })} />
+                <Input
+                  type="time"
+                  value={editing.end ?? ''}
+                  onChange={(e) => setEditing({ ...editing, end: e.target.value })}
+                />
               </div>
             </div>
             <div>
@@ -192,8 +274,12 @@ const Schedule: React.FC = () => {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-              <Button variant="primary" onClick={saveShift}>Save shift</Button>
+              <Button variant="ghost" onClick={() => setModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={saveShift}>
+                Save shift
+              </Button>
             </div>
           </div>
         )}

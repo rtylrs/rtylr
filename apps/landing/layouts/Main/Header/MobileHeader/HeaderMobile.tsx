@@ -154,10 +154,7 @@ const HeaderMobile: React.FC = () => {
       {isMenuOpen && (
         <div className={styles['mobile-menu-overlay']}>
           <div className={styles['mobile-menu-header']}>
-            <div
-              className={styles['mobile-menu-logo']}
-              onClick={handleLogoClick}
-            >
+            <div className={styles['mobile-menu-logo']} onClick={handleLogoClick}>
               <img src={ASSETS.logos.light} alt="Logo" />
             </div>
             <button
@@ -230,9 +227,7 @@ const HeaderMobile: React.FC = () => {
                     onClick={() => handleNavigation('/features/finance')}
                     className={styles['mobile-feature-link']}
                   >
-                    <span className={styles['mobile-feature-title']}>
-                      Finance
-                    </span>
+                    <span className={styles['mobile-feature-title']}>Finance</span>
                     <span className={styles['mobile-feature-desc']}>
                       Invoices, expenses, tax, and a real P&L in seconds.
                     </span>
@@ -242,9 +237,7 @@ const HeaderMobile: React.FC = () => {
                     onClick={() => handleNavigation('/features/flow')}
                     className={styles['mobile-feature-link']}
                   >
-                    <span className={styles['mobile-feature-title']}>
-                      Flow
-                    </span>
+                    <span className={styles['mobile-feature-title']}>Flow</span>
                     <span className={styles['mobile-feature-desc']}>
                       Projects, tasks, and team workspaces for every department.
                     </span>
@@ -371,10 +364,7 @@ const HeaderMobile: React.FC = () => {
               </p>
               {resourcesDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link
-                    href="/hardware"
-                    onClick={() => handleNavigation('/hardware')}
-                  >
+                  <Link href="/hardware" onClick={() => handleNavigation('/hardware')}>
                     Hardware
                   </Link>
                   <Link href="/blog" onClick={() => handleNavigation('/blog')}>
@@ -389,10 +379,7 @@ const HeaderMobile: React.FC = () => {
                   >
                     Documentation
                   </a>
-                  <Link
-                    href="/about"
-                    onClick={() => handleNavigation('/about')}
-                  >
+                  <Link href="/about" onClick={() => handleNavigation('/about')}>
                     About
                   </Link>
                   <a
@@ -404,10 +391,7 @@ const HeaderMobile: React.FC = () => {
                   >
                     Careers
                   </a>
-                  <Link
-                    href="/support"
-                    onClick={() => handleNavigation('/support')}
-                  >
+                  <Link href="/support" onClick={() => handleNavigation('/support')}>
                     Support
                   </Link>
                   <a
@@ -434,27 +418,14 @@ const HeaderMobile: React.FC = () => {
 
           <div className={styles['mobile-menu-footer']}>
             <div className={styles['mobile-menu-buttons']}>
-              <Button
-                onClick={handleLoginClick}
-                variant="dark-outline"
-                width="100%"
-                height="44px"
-              >
+              <Button onClick={handleLoginClick} variant="dark-outline" width="100%" height="44px">
                 Sign In
               </Button>
-              <Button
-                onClick={handleSignupClick}
-                variant="soft"
-                width="100%"
-                height="44px"
-              >
+              <Button onClick={handleSignupClick} variant="soft" width="100%" height="44px">
                 Sign Up
               </Button>
             </div>
-            <div
-              className={styles['mobile-language-selector']}
-              style={{ display: 'none' }}
-            >
+            <div className={styles['mobile-language-selector']} style={{ display: 'none' }}>
               <span
                 onClick={() => handleLanguageChange('en')}
                 className={language === 'en' ? styles.active : ''}

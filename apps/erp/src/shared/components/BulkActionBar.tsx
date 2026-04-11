@@ -11,7 +11,14 @@ interface BulkActionBarProps {
   onEdit?: () => void;
 }
 
-const BulkActionBar: React.FC<BulkActionBarProps> = ({ count, onClear, onDelete, onArchive, onExport, onEdit }) => {
+const BulkActionBar: React.FC<BulkActionBarProps> = ({
+  count,
+  onClear,
+  onDelete,
+  onArchive,
+  onExport,
+  onEdit,
+}) => {
   return (
     <AnimatePresence>
       {count > 0 && (
@@ -38,8 +45,12 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({ count, onClear, onDelete,
               onClick={onEdit}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Edit3 size={12} /> Edit
             </button>
@@ -49,8 +60,12 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({ count, onClear, onDelete,
               onClick={onExport}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Download size={12} /> Export
             </button>
@@ -60,8 +75,12 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({ count, onClear, onDelete,
               onClick={onArchive}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Archive size={12} /> Archive
             </button>
@@ -71,8 +90,12 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({ count, onClear, onDelete,
               onClick={onDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: '#f87171' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Trash2 size={12} /> Delete
             </button>

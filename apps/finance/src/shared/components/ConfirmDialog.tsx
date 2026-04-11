@@ -60,7 +60,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       >
         <AlertTriangle size={18} />
       </div>
-      <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text-muted)', lineHeight: 1.5 }}>{message}</p>
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text-muted)', lineHeight: 1.5 }}>
+        {message}
+      </p>
     </div>
   </Modal>
 );

@@ -1,6 +1,6 @@
 export const API_ROUTES = {
   GET: {
-    GET_ALL: "/business",
+    GET_ALL: '/business',
   },
   POST: {},
   PATCH: {},

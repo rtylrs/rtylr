@@ -24,7 +24,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4583C4;
+  color: #4583c4;
   margin-bottom: 20px;
   padding: 6px 16px;
   border: 1px solid rgba(69, 131, 196, 0.3);
@@ -64,8 +64,7 @@
   padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  transition: background 0.3s ease, border-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.04);

@@ -10,14 +10,21 @@ import {
   DialogFooter,
   Input,
   Label,
-} from "../../shared/components/ui";
-import { Breadcrumbs, ConfirmDialog, EmptyState, PermissionCheckbox, SkeletonList, WebhookRow } from "../../shared/components/hub";
+} from '../../shared/components/ui';
+import {
+  Breadcrumbs,
+  ConfirmDialog,
+  EmptyState,
+  PermissionCheckbox,
+  SkeletonList,
+  WebhookRow,
+} from '../../shared/components/hub';
 import {
   useWebhooks,
   useCreateWebhook,
   useDeleteWebhook,
   type Webhook,
-} from "../../shared/hooks/queries/useWebhooks";
+} from '../../shared/hooks/queries/useWebhooks';
 
 const EVENTS = [
   'order.created',
@@ -49,14 +56,18 @@ const Webhooks: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-4xl">
-      
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
+          <div
+            className="h-9 w-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(69,131,196,0.15)' }}
+          >
             <WebhookIcon size={16} style={{ color: '#4583C4' }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Webhooks</h1>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Webhooks
+            </h1>
             <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
               Receive events in real time at your own endpoints.
             </p>
@@ -68,9 +79,14 @@ const Webhooks: React.FC = () => {
         </Button>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
         {isLoading ? (
-          <div className="p-2"><SkeletonList rows={3} withAvatar={false} /></div>
+          <div className="p-2">
+            <SkeletonList rows={3} withAvatar={false} />
+          </div>
         ) : data.length === 0 ? (
           <div className="p-4">
             <EmptyState
@@ -83,7 +99,13 @@ const Webhooks: React.FC = () => {
           </div>
         ) : (
           <div className="p-2">
-            {data.map((w) => <WebhookRow key={w.id} webhook={w} onDelete={(id) => setToDelete(data.find((x) => x.id === id) ?? null)} />)}
+            {data.map((w) => (
+              <WebhookRow
+                key={w.id}
+                webhook={w}
+                onDelete={(id) => setToDelete(data.find((x) => x.id === id) ?? null)}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -92,31 +114,51 @@ const Webhooks: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New webhook</DialogTitle>
-            <DialogDescription>We&apos;ll POST JSON to this URL for the selected events.</DialogDescription>
+            <DialogDescription>
+              We&apos;ll POST JSON to this URL for the selected events.
+            </DialogDescription>
           </DialogHeader>
           <div className="px-6 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="wh-url">Endpoint URL</Label>
-              <Input id="wh-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://api.example.com/hooks" />
+              <Input
+                id="wh-url"
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://api.example.com/hooks"
+              />
             </div>
             <div className="space-y-2">
               <Label>Events</Label>
               <div className="grid grid-cols-2 gap-2">
                 {EVENTS.map((ev) => (
-                  <label key={ev} className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[var(--hub-hover)]">
+                  <label
+                    key={ev}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[var(--hub-hover)]"
+                  >
                     <PermissionCheckbox
                       checked={events.includes(ev)}
-                      onChange={(v) => setEvents((prev) => (v ? [...prev, ev] : prev.filter((e) => e !== ev)))}
+                      onChange={(v) =>
+                        setEvents((prev) => (v ? [...prev, ev] : prev.filter((e) => e !== ev)))
+                      }
                     />
-                    <code className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>{ev}</code>
+                    <code className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
+                      {ev}
+                    </code>
                   </label>
                 ))}
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button onClick={submitCreate} disabled={create.isPending || !url.trim() || events.length === 0}>
+            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={submitCreate}
+              disabled={create.isPending || !url.trim() || events.length === 0}
+            >
               Create webhook
             </Button>
           </DialogFooter>

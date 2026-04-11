@@ -16,8 +16,7 @@ export const WorkloadBar: React.FC<WorkloadBarProps> = ({
   assigned,
 }) => {
   const clamped = Math.min(1.5, Math.max(0, load));
-  const color =
-    clamped < 0.7 ? '#22c55e' : clamped < 1 ? '#f59e0b' : '#ef4444';
+  const color = clamped < 0.7 ? '#22c55e' : clamped < 1 ? '#f59e0b' : '#ef4444';
   return (
     <div className="flex items-center gap-3 py-2">
       <span

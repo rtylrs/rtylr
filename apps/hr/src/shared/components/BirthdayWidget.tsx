@@ -24,17 +24,40 @@ const BirthdayWidget: React.FC = () => {
         <span style={{ padding: 6, borderRadius: 8, background: `${ACCENT}22`, color: ACCENT }}>
           <Cake size={14} />
         </span>
-        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Upcoming birthdays</h3>
+        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+          Upcoming birthdays
+        </h3>
       </div>
       {upcoming.length === 0 ? (
-        <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>No birthdays in view.</p>
+        <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+          No birthdays in view.
+        </p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <ul
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+          }}
+        >
           {upcoming.map((b) => (
-            <li key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+            <li
+              key={b.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: 12,
+              }}
+            >
               <div>
                 <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>{b.name}</div>
-                {b.department && <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{b.department}</div>}
+                {b.department && (
+                  <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{b.department}</div>
+                )}
               </div>
               <span style={{ fontSize: 11, color: ACCENT, fontWeight: 600 }}>
                 {b.days === 0 ? 'Today' : `in ${b.days}d`}

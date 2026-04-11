@@ -31,30 +31,47 @@ const Payments: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load payment methods</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load payment methods
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4 max-w-5xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-4 max-w-5xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Payment Methods</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Payment Methods
+          </h2>
         </div>
       </motion.div>
 
       {isLoading ? (
         <div className="space-y-1">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={5} />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonRow key={i} cols={5} />
+          ))}
         </div>
       ) : (methods ?? []).length === 0 ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
           <CreditCard size={32} style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No payment methods configured</p>
-          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>Configure payment providers to start accepting orders.</p>
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            No payment methods configured
+          </p>
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Configure payment providers to start accepting orders.
+          </p>
         </motion.div>
       ) : (
         <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -67,13 +84,24 @@ const Payments: React.FC = () => {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg flex items-center justify-center"
-                    style={{ background: method.enabled ? 'rgba(20,184,166,0.08)' : 'var(--hub-hover)' }}>
-                    <CreditCard size={16} style={{ color: method.enabled ? TEAL : 'var(--hub-text-dim)' }} />
+                  <div
+                    className="h-9 w-9 rounded-lg flex items-center justify-center"
+                    style={{
+                      background: method.enabled ? 'rgba(20,184,166,0.08)' : 'var(--hub-hover)',
+                    }}
+                  >
+                    <CreditCard
+                      size={16}
+                      style={{ color: method.enabled ? TEAL : 'var(--hub-text-dim)' }}
+                    />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{method.name}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--hub-text-muted)' }}>{method.provider}</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                      {method.name}
+                    </p>
+                    <p className="text-[10px]" style={{ color: 'var(--hub-text-muted)' }}>
+                      {method.provider}
+                    </p>
                   </div>
                 </div>
                 {method.enabled ? (
@@ -90,8 +118,10 @@ const Payments: React.FC = () => {
                   {typeLabel(method.type)}
                 </span>
                 {method.testMode && (
-                  <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
+                  <span
+                    className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}
+                  >
                     <AlertTriangle size={9} />
                     Test Mode
                   </span>

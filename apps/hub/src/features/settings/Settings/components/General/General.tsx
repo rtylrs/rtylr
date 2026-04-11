@@ -31,10 +31,20 @@ const General: React.FC = () => {
   const updateBusiness = useUpdateBusiness();
 
   const [formData, setFormData] = useState({
-    storeName: '', contactEmail: '', senderEmail: '',
-    storeIndustry: businessType || 'restaurant', cuisineType: '',
-    companyName: '', website: '', telephone: '', mapsUrl: '',
-    address: '', city: '', zipcode: '', country: 'Lebanon', state: '',
+    storeName: '',
+    contactEmail: '',
+    senderEmail: '',
+    storeIndustry: businessType || 'restaurant',
+    cuisineType: '',
+    companyName: '',
+    website: '',
+    telephone: '',
+    mapsUrl: '',
+    address: '',
+    city: '',
+    zipcode: '',
+    country: 'Lebanon',
+    state: '',
     customBusinessType: '',
   });
 
@@ -68,8 +78,12 @@ const General: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>General</h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>Manage your store details and business information.</p>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+          General
+        </h2>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          Manage your store details and business information.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -86,30 +100,56 @@ const General: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <Label>Contact email</Label>
-              <Input type="email" name="contactEmail" value={formData.contactEmail} onChange={handleInputChange} />
+              <Input
+                type="email"
+                name="contactEmail"
+                value={formData.contactEmail}
+                onChange={handleInputChange}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Sender email</Label>
-              <Input type="email" name="senderEmail" value={formData.senderEmail} onChange={handleInputChange} />
+              <Input
+                type="email"
+                name="senderEmail"
+                value={formData.senderEmail}
+                onChange={handleInputChange}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Store industry</Label>
-              <Select name="storeIndustry" value={formData.storeIndustry} onChange={handleInputChange}>
+              <Select
+                name="storeIndustry"
+                value={formData.storeIndustry}
+                onChange={handleInputChange}
+              >
                 {BUSINESS_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
                 ))}
               </Select>
             </div>
             {formData.storeIndustry === 'other' && (
               <div className="space-y-1.5">
                 <Label>Custom business type</Label>
-                <Input name="customBusinessType" value={formData.customBusinessType} onChange={handleInputChange} placeholder="Enter your business type" />
+                <Input
+                  name="customBusinessType"
+                  value={formData.customBusinessType}
+                  onChange={handleInputChange}
+                  placeholder="Enter your business type"
+                />
               </div>
             )}
             {formData.storeIndustry === 'restaurant' && (
               <div className="space-y-1.5">
                 <Label>Cuisine type</Label>
-                <Input name="cuisineType" value={formData.cuisineType} onChange={handleInputChange} placeholder="e.g. Italian, Mexican, Asian" />
+                <Input
+                  name="cuisineType"
+                  value={formData.cuisineType}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Italian, Mexican, Asian"
+                />
               </div>
             )}
           </CardContent>
@@ -134,7 +174,11 @@ const General: React.FC = () => {
             ].map((field) => (
               <div key={field.name} className="space-y-1.5">
                 <Label>{field.label}</Label>
-                <Input name={field.name} value={(formData as any)[field.name]} onChange={handleInputChange} />
+                <Input
+                  name={field.name}
+                  value={(formData as any)[field.name]}
+                  onChange={handleInputChange}
+                />
               </div>
             ))}
             <div className="space-y-1.5">
@@ -152,7 +196,6 @@ const General: React.FC = () => {
           </Button>
         </div>
       </form>
-
     </div>
   );
 };

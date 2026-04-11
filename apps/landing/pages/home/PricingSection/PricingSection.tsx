@@ -2,11 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { HiCheck } from 'react-icons/hi';
 import { useRouter } from 'next/router';
-import {
-  fadeInUp,
-  staggerContainer,
-  viewportOnce,
-} from '../../../lib/animations';
+import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import styles from './PricingSection.module.scss';
 
 interface Plan {
@@ -99,8 +95,7 @@ const PricingSection = (): JSX.Element => {
             of every size.
           </h2>
           <p className={styles.sectionDescription}>
-            Start free. Upgrade when you need more. No hidden fees, no
-            surprises.
+            Start free. Upgrade when you need more. No hidden fees, no surprises.
           </p>
         </motion.div>
 
@@ -114,18 +109,14 @@ const PricingSection = (): JSX.Element => {
           {plans.map((plan) => (
             <motion.div
               key={plan.name}
-              className={`${styles.pricingCard} ${
-                plan.featured ? styles.featured : ''
-              }`}
+              className={`${styles.pricingCard} ${plan.featured ? styles.featured : ''}`}
               variants={cardVariants}
               whileHover={{
                 y: -8,
                 transition: { duration: 0.25, ease: 'easeOut' },
               }}
             >
-              {plan.featured && (
-                <div className={styles.popularBadge}>Most Popular</div>
-              )}
+              {plan.featured && <div className={styles.popularBadge}>Most Popular</div>}
               <div className={styles.planHeader}>
                 <h3 className={styles.planName}>{plan.name}</h3>
                 <p className={styles.planDescription}>{plan.description}</p>
@@ -134,9 +125,7 @@ const PricingSection = (): JSX.Element => {
                 <span className={styles.amount}>{plan.price}</span>
                 <span className={styles.priceSuffix}>{plan.priceSuffix}</span>
               </div>
-              {plan.priceNote && (
-                <p className={styles.priceNote}>{plan.priceNote}</p>
-              )}
+              {plan.priceNote && <p className={styles.priceNote}>{plan.priceNote}</p>}
               <ul className={styles.featuresList}>
                 {plan.features.map((feature, i) => (
                   <li key={i} className={styles.featureItem}>
@@ -146,9 +135,7 @@ const PricingSection = (): JSX.Element => {
                 ))}
               </ul>
               <button
-                className={`${styles.ctaButton} ${
-                  plan.featured ? styles.ctaFeatured : ''
-                }`}
+                className={`${styles.ctaButton} ${plan.featured ? styles.ctaFeatured : ''}`}
                 onClick={handleCTA}
               >
                 {plan.ctaText}

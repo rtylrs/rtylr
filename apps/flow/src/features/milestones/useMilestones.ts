@@ -53,9 +53,9 @@ export function useUpdateMilestone() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ApiMilestone> }) => {
       if (isFlowLocal()) {
-        const milestones = useFlowStore.getState().milestones.map((m) =>
-          m.id === id ? { ...m, ...data } : m
-        );
+        const milestones = useFlowStore
+          .getState()
+          .milestones.map((m) => (m.id === id ? { ...m, ...data } : m));
         useFlowStore.setState({ milestones });
         return Promise.resolve();
       }

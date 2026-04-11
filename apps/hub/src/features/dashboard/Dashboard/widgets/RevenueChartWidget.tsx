@@ -9,9 +9,14 @@ const max = Math.max(...values, 1);
 const RevenueChartWidget: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
+      <div
+        className="flex items-center gap-2 px-4 py-3"
+        style={{ borderBottom: '1px solid var(--hub-border)' }}
+      >
         <BarChart3 size={14} style={{ color: '#4583C4' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Revenue (7 days)</p>
+        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          Revenue (7 days)
+        </p>
       </div>
       <div className="flex-1 flex items-end gap-2 px-4 pb-4 pt-2">
         {days.map((day, i) => (
@@ -26,7 +31,9 @@ const RevenueChartWidget: React.FC = () => {
                 }}
               />
             </div>
-            <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{day}</span>
+            <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+              {day}
+            </span>
           </div>
         ))}
       </div>

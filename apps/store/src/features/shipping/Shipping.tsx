@@ -35,18 +35,29 @@ const Shipping: React.FC = () => {
   if (hasError) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load shipping data</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load shipping data
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 max-w-5xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6 max-w-5xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Truck size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Shipping</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Shipping
+          </h2>
         </div>
         <button
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
@@ -59,15 +70,24 @@ const Shipping: React.FC = () => {
 
       {/* Shipping zones */}
       <motion.div variants={itemVariants}>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>Shipping Zones</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>
+          Shipping Zones
+        </h3>
         {isLoading ? (
           <div className="space-y-1">
-            {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={3} />)}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
           </div>
         ) : (zones ?? []).length === 0 ? (
-          <div className="flex flex-col items-center py-12 gap-3 rounded-xl" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+          <div
+            className="flex flex-col items-center py-12 gap-3 rounded-xl"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
             <MapPin size={28} style={{ color: 'var(--hub-text-dim)' }} />
-            <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No shipping zones configured</p>
+            <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+              No shipping zones configured
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -79,11 +99,17 @@ const Shipping: React.FC = () => {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin size={13} style={{ color: TEAL }} />
-                  <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{zone.name}</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    {zone.name}
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {zone.regions.map((r) => (
-                    <span key={r} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}>
+                    <span
+                      key={r}
+                      className="text-[10px] px-2 py-0.5 rounded-full"
+                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                    >
                       {r}
                     </span>
                   ))}
@@ -91,11 +117,29 @@ const Shipping: React.FC = () => {
                 {zone.methods.length > 0 && (
                   <div className="space-y-1">
                     {zone.methods.map((m) => (
-                      <div key={m.id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'var(--hub-hover)' }}>
-                        <span className="text-xs font-medium flex-1" style={{ color: 'var(--hub-text)' }}>{m.name}</span>
-                        <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{methodTypeLabel(m.type)}</span>
-                        <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>{formatCurrency(m.cost)}</span>
-                        <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{m.estimatedDays}</span>
+                      <div
+                        key={m.id}
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                        style={{ background: 'var(--hub-hover)' }}
+                      >
+                        <span
+                          className="text-xs font-medium flex-1"
+                          style={{ color: 'var(--hub-text)' }}
+                        >
+                          {m.name}
+                        </span>
+                        <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                          {methodTypeLabel(m.type)}
+                        </span>
+                        <span
+                          className="text-xs font-medium"
+                          style={{ color: 'var(--hub-text-muted)' }}
+                        >
+                          {formatCurrency(m.cost)}
+                        </span>
+                        <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                          {m.estimatedDays}
+                        </span>
                         {m.enabled ? (
                           <CheckCircle size={12} style={{ color: '#10b981' }} />
                         ) : (
@@ -114,10 +158,14 @@ const Shipping: React.FC = () => {
       {/* Standalone methods */}
       {(methods ?? []).length > 0 && (
         <motion.div variants={itemVariants}>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>Shipping Methods</h3>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>
+            Shipping Methods
+          </h3>
           <div className="space-y-1">
-            <div className="grid grid-cols-5 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
-              style={{ color: 'var(--hub-text-dim)' }}>
+            <div
+              className="grid grid-cols-5 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
+              style={{ color: 'var(--hub-text-dim)' }}
+            >
               <span>Method</span>
               <span>Type</span>
               <span>Cost</span>
@@ -125,11 +173,23 @@ const Shipping: React.FC = () => {
               <span>Status</span>
             </div>
             {(methods ?? []).map((m) => (
-              <div key={m.id} className="grid grid-cols-5 gap-2 items-center px-3 py-2.5 rounded-lg" style={{ background: 'var(--hub-hover)' }}>
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{m.name}</span>
-                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{methodTypeLabel(m.type)}</span>
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{formatCurrency(m.cost)}</span>
-                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{m.estimatedDays}</span>
+              <div
+                key={m.id}
+                className="grid grid-cols-5 gap-2 items-center px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {m.name}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  {methodTypeLabel(m.type)}
+                </span>
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {formatCurrency(m.cost)}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  {m.estimatedDays}
+                </span>
                 <span
                   className="text-[10px] font-medium px-2 py-0.5 rounded-full w-fit"
                   style={{

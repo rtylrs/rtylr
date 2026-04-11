@@ -101,19 +101,13 @@ const Footer: React.FC = () => {
       <div className={styles['footer-container']}>
         <div className={styles['footer-top']}>
           <div className={styles['footer-logo-section']}>
-            <img
-              src={ASSETS.logos.light}
-              alt="Rtylr Logo"
-              className={styles['footer-logo']}
-            />
+            <img src={ASSETS.logos.light} alt="Rtylr Logo" className={styles['footer-logo']} />
           </div>
 
           <div className={styles['footer-nav']}>
             {footerSections.map((section, index) => (
               <div key={index} className={styles['footer-section']}>
-                <h3 className={styles['footer-section-title']}>
-                  {section.title}
-                </h3>
+                <h3 className={styles['footer-section-title']}>{section.title}</h3>
                 <nav aria-label={`${section.title} navigation`}>
                   <ul className={styles['footer-links']}>
                     {section.links.map((link, linkIndex) => (
@@ -128,10 +122,7 @@ const Footer: React.FC = () => {
                             {link.label}
                           </a>
                         ) : (
-                          <Link
-                            href={link.to}
-                            className={styles['footer-link']}
-                          >
+                          <Link href={link.to} className={styles['footer-link']}>
                             {link.label}
                           </Link>
                         )}
@@ -152,11 +143,7 @@ const Footer: React.FC = () => {
               Start for free
             </Button>
             {!isDemoPage && (
-              <Button
-                onClick={handleBookDemoClick}
-                variant="soft"
-                className={styles['cta-button']}
-              >
+              <Button onClick={handleBookDemoClick} variant="soft" className={styles['cta-button']}>
                 Book a demo
               </Button>
             )}

@@ -21,22 +21,40 @@ const Automations: React.FC = () => {
       <PageHeader
         title="Automations"
         subtitle={`${automations.length} workflows configured`}
-        actions={<Button variant="primary" onClick={() => navigate('/automations/new')}><Plus size={13} />New automation</Button>}
+        actions={
+          <Button variant="primary" onClick={() => navigate('/automations/new')}>
+            <Plus size={13} />
+            New automation
+          </Button>
+        }
       />
 
       {isLoading ? (
-        <Card><SkeletonList count={4} /></Card>
+        <Card>
+          <SkeletonList count={4} />
+        </Card>
       ) : automations.length === 0 ? (
         <Card>
           <EmptyState
             icon={Zap}
             title="No automations yet"
             description="Set up drip campaigns, birthday greetings, and win-back flows."
-            action={<Button variant="primary" onClick={() => navigate('/automations/new')}><Plus size={13} />Create one</Button>}
+            action={
+              <Button variant="primary" onClick={() => navigate('/automations/new')}>
+                <Plus size={13} />
+                Create one
+              </Button>
+            }
           />
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '14px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '14px',
+          }}
+        >
           {automations.map((a) => {
             const Icon = icons[a.name] || Zap;
             return (
@@ -54,10 +72,16 @@ const Automations: React.FC = () => {
                   gap: '10px',
                   transition: 'border-color 0.15s',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(59,130,246,0.4)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(59,130,246,0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <div
                     style={{
                       width: '38px',
@@ -82,22 +106,41 @@ const Automations: React.FC = () => {
                       fontSize: '10px',
                       fontWeight: 600,
                       background:
-                        a.status === 'active' ? 'rgba(16,185,129,0.12)' :
-                        a.status === 'paused' ? 'rgba(245,158,11,0.12)' :
-                        'rgba(148,163,184,0.12)',
+                        a.status === 'active'
+                          ? 'rgba(16,185,129,0.12)'
+                          : a.status === 'paused'
+                          ? 'rgba(245,158,11,0.12)'
+                          : 'rgba(148,163,184,0.12)',
                       color:
-                        a.status === 'active' ? '#10b981' :
-                        a.status === 'paused' ? '#f59e0b' :
-                        '#94a3b8',
+                        a.status === 'active'
+                          ? '#10b981'
+                          : a.status === 'paused'
+                          ? '#f59e0b'
+                          : '#94a3b8',
                     }}
                   >
-                    {a.status === 'active' ? <Play size={9} /> : a.status === 'paused' ? <Pause size={9} /> : null}
+                    {a.status === 'active' ? (
+                      <Play size={9} />
+                    ) : a.status === 'paused' ? (
+                      <Pause size={9} />
+                    ) : null}
                     {a.status.toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)', margin: '0 0 2px' }}>{a.name}</h3>
-                  <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: 0 }}>{a.description}</p>
+                  <h3
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      color: 'var(--hub-text)',
+                      margin: '0 0 2px',
+                    }}
+                  >
+                    {a.name}
+                  </h3>
+                  <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: 0 }}>
+                    {a.description}
+                  </p>
                 </div>
                 <div
                   style={{
@@ -110,15 +153,39 @@ const Automations: React.FC = () => {
                   }}
                 >
                   <div>
-                    <div style={{ color: 'var(--hub-text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Trigger</div>
+                    <div
+                      style={{
+                        color: 'var(--hub-text-dim)',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Trigger
+                    </div>
                     <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.trigger}</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--hub-text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Enrolled</div>
+                    <div
+                      style={{
+                        color: 'var(--hub-text-dim)',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Enrolled
+                    </div>
                     <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.enrolled}</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--hub-text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Done</div>
+                    <div
+                      style={{
+                        color: 'var(--hub-text-dim)',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Done
+                    </div>
                     <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.completed}</div>
                   </div>
                 </div>

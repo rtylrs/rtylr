@@ -12,7 +12,11 @@ const SkeletonRow: React.FC = () => (
 const Services: React.FC = () => {
   const [search, setSearch] = useState('');
 
-  const { data: services, isLoading, isError } = useServices({
+  const {
+    data: services,
+    isLoading,
+    isError,
+  } = useServices({
     search: search || undefined,
   });
 
@@ -53,7 +57,11 @@ const Services: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load services. Please try again later.
         </div>
@@ -76,13 +84,19 @@ const Services: React.FC = () => {
 
         {isLoading && (
           <div className="p-3 space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 
         {!isLoading && !isError && (!services || services.length === 0) && (
           <div className="py-12 text-center">
-            <Briefcase size={32} className="mx-auto mb-2" style={{ color: 'var(--hub-text-dim)' }} />
+            <Briefcase
+              size={32}
+              className="mx-auto mb-2"
+              style={{ color: 'var(--hub-text-dim)' }}
+            />
             <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
               No services found
             </p>
@@ -99,22 +113,34 @@ const Services: React.FC = () => {
                 key={svc.id}
                 className="grid grid-cols-5 items-center px-4 py-3 transition-colors"
                 style={{ borderBottom: '1px solid var(--hub-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
                 <div>
-                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{svc.name}</p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {svc.name}
+                  </p>
                   {svc.category && (
-                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{svc.category}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      {svc.category}
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock size={11} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{svc.duration} min</span>
+                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {svc.duration} min
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <DollarSign size={11} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{svc.price}</span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {svc.price}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users size={11} style={{ color: 'var(--hub-text-dim)' }} />
@@ -126,7 +152,8 @@ const Services: React.FC = () => {
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{
-                      background: svc.active !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                      background:
+                        svc.active !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
                       color: svc.active !== false ? '#10b981' : '#ef4444',
                     }}
                   >

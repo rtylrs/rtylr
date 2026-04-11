@@ -2,7 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { supportService } from '../../shared/services/supportService';
 
-export function useConversations(params?: { status?: string; assignee?: string; channel?: string }) {
+export function useConversations(params?: {
+  status?: string;
+  assignee?: string;
+  channel?: string;
+}) {
   return useQuery({
     queryKey: ['conversations', params],
     queryFn: () => unwrap(supportService.getConversations(params)),

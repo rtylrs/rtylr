@@ -38,7 +38,8 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }
         <p className="text-sm" style={{ color: 'var(--hub-text)' }}>
           <span className="font-semibold">{entry.actor}</span>
           <span className="font-normal" style={{ color: 'var(--hub-text-muted)' }}>
-            {' '}{entry.action}{' '}
+            {' '}
+            {entry.action}{' '}
           </span>
           <span className="font-medium">{entry.target}</span>
         </p>

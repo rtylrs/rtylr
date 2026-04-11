@@ -145,8 +145,12 @@ const Dashboard: React.FC = () => {
                   border: '1px solid var(--hub-border)',
                   textDecoration: 'none',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
@@ -212,7 +216,10 @@ const Dashboard: React.FC = () => {
                 <span className="text-[10px] w-4" style={{ color: 'var(--hub-text-dim)' }}>
                   {i + 1}
                 </span>
-                <span className="text-xs flex-1 truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                <span
+                  className="text-xs flex-1 truncate"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
                   {p.name}
                 </span>
               </div>
@@ -236,9 +243,16 @@ const Dashboard: React.FC = () => {
               const Icon = activityIconFor(a.type);
               return (
                 <div key={a.id} className="flex items-start gap-2">
-                  <Icon size={10} className="mt-1 shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
+                  <Icon
+                    size={10}
+                    className="mt-1 shrink-0"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                    <p
+                      className="text-[11px] font-medium truncate"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
                       {a.title}
                     </p>
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
@@ -332,10 +346,16 @@ const Dashboard: React.FC = () => {
                           {order.date}
                         </p>
                       </div>
-                      <p className="text-xs truncate pr-2" style={{ color: 'var(--hub-text-muted)' }}>
+                      <p
+                        className="text-xs truncate pr-2"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
                         {order.supplier}
                       </p>
-                      <p className="text-xs font-semibold text-right" style={{ color: 'var(--hub-text)' }}>
+                      <p
+                        className="text-xs font-semibold text-right"
+                        style={{ color: 'var(--hub-text)' }}
+                      >
                         {order.total}
                       </p>
                       <div className="flex justify-end">

@@ -93,25 +93,25 @@ const navGroups: NavGroup[] = [
 ];
 
 const routeLabels: Record<string, string> = {
-  '/':                         'Dashboard',
-  '/invoices':                 'Invoices',
-  '/invoices/new':             'New Invoice',
-  '/invoices/recurring':       'Recurring',
-  '/quotes':                   'Quotes',
-  '/expenses':                 'Expenses',
-  '/expenses/new':             'New Expense',
-  '/categories':               'Categories',
-  '/bills':                    'Bills',
-  '/bank':                     'Bank Feeds',
-  '/reconcile':                'Reconcile',
-  '/pl':                       'Profit & Loss',
-  '/reports/balance-sheet':    'Balance Sheet',
-  '/reports/cash-flow':        'Cash Flow',
-  '/reports/tax':              'Tax Summary',
-  '/tax':                      'Tax',
-  '/journal':                  'Journal',
-  '/accounts':                 'Chart of Accounts',
-  '/settings':                 'Settings',
+  '/': 'Dashboard',
+  '/invoices': 'Invoices',
+  '/invoices/new': 'New Invoice',
+  '/invoices/recurring': 'Recurring',
+  '/quotes': 'Quotes',
+  '/expenses': 'Expenses',
+  '/expenses/new': 'New Expense',
+  '/categories': 'Categories',
+  '/bills': 'Bills',
+  '/bank': 'Bank Feeds',
+  '/reconcile': 'Reconcile',
+  '/pl': 'Profit & Loss',
+  '/reports/balance-sheet': 'Balance Sheet',
+  '/reports/cash-flow': 'Cash Flow',
+  '/reports/tax': 'Tax Summary',
+  '/tax': 'Tax',
+  '/journal': 'Journal',
+  '/accounts': 'Chart of Accounts',
+  '/settings': 'Settings',
 };
 
 function getPageTitle(pathname: string): string {
@@ -124,9 +124,12 @@ function getPageTitle(pathname: string): string {
 type Theme = 'light' | 'dark' | 'system';
 
 function applyTheme(t: Theme) {
-  const resolved = t === 'system'
-    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : t;
+  const resolved =
+    t === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : t;
   document.documentElement.setAttribute('data-theme', resolved);
   localStorage.setItem('finance-theme', t);
 }
@@ -134,12 +137,17 @@ function applyTheme(t: Theme) {
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
   const isActive =
-    path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(path + '/');
+    path === '/'
+      ? location.pathname === '/'
+      : location.pathname === path || location.pathname.startsWith(path + '/');
 
   return (
     <Link
       to={path}
-      style={{ color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)', textDecoration: 'none' }}
+      style={{
+        color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+        textDecoration: 'none',
+      }}
       className={[
         'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--hub-hover)]',
@@ -190,7 +198,9 @@ const DefaultLayout: React.FC = () => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
-      const isEditing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      const isEditing =
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
       if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !isEditing)) {
         e.preventDefault();
         setSearchOpen(true);
@@ -276,11 +286,22 @@ const DefaultLayout: React.FC = () => {
           >
             <SearchIcon size={12} />
             <span>Search</span>
-            <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>Cmd K</span>
+            <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+              Cmd K
+            </span>
           </button>
         </div>
 
-        <nav style={{ flex: 1, overflowY: 'auto', padding: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <nav
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
           {navGroups.map((group) => (
             <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <p
@@ -317,11 +338,11 @@ const DefaultLayout: React.FC = () => {
             Appearance
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
-            {([
+            {[
               { value: 'light' as Theme, icon: Sun, label: 'Light' },
               { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
               { value: 'system' as Theme, icon: Monitor, label: 'System' },
-            ]).map(({ value, icon: Icon, label }) => (
+            ].map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => handleTheme(value)}

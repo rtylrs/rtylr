@@ -5,10 +5,7 @@ export interface BaseComponentProps {
 }
 
 export interface ButtonProps
-  extends Omit<
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    'onClick' | 'prefix' | 'suffix'
-  > {
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'prefix' | 'suffix'> {
   children: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';

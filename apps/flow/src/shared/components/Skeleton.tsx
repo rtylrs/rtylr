@@ -30,8 +30,10 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 export const TaskRowSkeleton: React.FC = () => (
-  <div className="flex items-center gap-3 px-4 py-2 border-b"
-    style={{ borderColor: 'var(--flow-border)' }}>
+  <div
+    className="flex items-center gap-3 px-4 py-2 border-b"
+    style={{ borderColor: 'var(--flow-border)' }}
+  >
     <Skeleton width={14} height={14} rounded="50%" />
     <Skeleton width={40} height={10} />
     <Skeleton width={14} height={14} rounded="50%" />

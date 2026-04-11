@@ -1,5 +1,5 @@
 import { Spinner } from '@voxire/components';
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from 'react';
 
 interface SvgIconProps {
   icon: string;
@@ -16,7 +16,7 @@ const SvgIcon: React.FC<SvgIconProps> = ({
   icon,
   className,
   color,
-  size = "1em",
+  size = '1em',
   style,
   alt,
   title,

@@ -225,7 +225,9 @@ export const QuickCreate: React.FC = () => {
                       style={{
                         background: !assignToMe ? 'var(--flow-hover)' : 'transparent',
                         color: 'var(--flow-text-muted)',
-                        border: !assignToMe ? '1px solid var(--flow-border)' : '1px solid transparent',
+                        border: !assignToMe
+                          ? '1px solid var(--flow-border)'
+                          : '1px solid transparent',
                       }}
                     >
                       <CircleUser size={14} />
@@ -258,7 +260,9 @@ export const QuickCreate: React.FC = () => {
                           background: effortMinutes === m ? `${ACCENT}28` : 'transparent',
                           color: 'var(--flow-text)',
                           border:
-                            effortMinutes === m ? `1px solid ${ACCENT}55` : '1px solid var(--flow-border)',
+                            effortMinutes === m
+                              ? `1px solid ${ACCENT}55`
+                              : '1px solid var(--flow-border)',
                         }}
                       >
                         {formatEffortMinutes(m)}
@@ -297,7 +301,9 @@ export const QuickCreate: React.FC = () => {
                         style={{
                           background: priority === p ? 'var(--flow-hover)' : 'transparent',
                           border:
-                            priority === p ? '1px solid var(--flow-border)' : '1px solid transparent',
+                            priority === p
+                              ? '1px solid var(--flow-border)'
+                              : '1px solid transparent',
                         }}
                         title={p}
                       >

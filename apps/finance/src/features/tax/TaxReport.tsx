@@ -19,7 +19,11 @@ const TaxReport: React.FC = () => {
   const toFile = PERIODS.filter((p) => !p.filed).length;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Tax Summary"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
@@ -33,15 +37,21 @@ const TaxReport: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax collected</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}><MoneyDisplay amount={totalCollected} /></div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
+            <MoneyDisplay amount={totalCollected} />
+          </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax owed</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#f59e0b', marginTop: 6 }}><MoneyDisplay amount={totalOwed} /></div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#f59e0b', marginTop: 6 }}>
+            <MoneyDisplay amount={totalOwed} />
+          </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Periods to file</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', marginTop: 6 }}>{toFile}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', marginTop: 6 }}>
+            {toFile}
+          </div>
         </div>
       </div>
 
@@ -71,8 +81,12 @@ const TaxReport: React.FC = () => {
             {PERIODS.map((p) => (
               <tr key={p.period} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                 <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{p.period}</td>
-                <td style={{ padding: '12px 16px', fontSize: 13 }}><MoneyDisplay amount={p.collected} /></td>
-                <td style={{ padding: '12px 16px', fontSize: 13 }}><MoneyDisplay amount={p.owed} /></td>
+                <td style={{ padding: '12px 16px', fontSize: 13 }}>
+                  <MoneyDisplay amount={p.collected} />
+                </td>
+                <td style={{ padding: '12px 16px', fontSize: 13 }}>
+                  <MoneyDisplay amount={p.owed} />
+                </td>
                 <td style={{ padding: '12px 16px' }}>
                   <span
                     style={{
@@ -87,9 +101,14 @@ const TaxReport: React.FC = () => {
                     {p.filed ? 'Filed' : 'Pending'}
                   </span>
                 </td>
-                <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{p.dueDate}</td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>
+                  {p.dueDate}
+                </td>
                 <td style={{ padding: '12px 16px' }}>
-                  <button style={{ ...ghostBtn, padding: '4px 10px' }} onClick={() => toast.success('Detail view opened')}>
+                  <button
+                    style={{ ...ghostBtn, padding: '4px 10px' }}
+                    onClick={() => toast.success('Detail view opened')}
+                  >
                     <FileSpreadsheet size={12} /> View
                   </button>
                 </td>

@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 import { auth } from '../../firebase';
 import { ASSETS } from '@voxire/config';
@@ -49,7 +45,10 @@ const ResetPassword: React.FC = () => {
         </p>
 
         <form
-          onSubmit={(e) => { e.preventDefault(); handleReset(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleReset();
+          }}
           className="flex flex-col gap-4"
         >
           <div className="flex flex-col gap-1.5">
@@ -74,9 +73,7 @@ const ResetPassword: React.FC = () => {
             <div
               className={[
                 'flex items-start gap-2 rounded-lg px-3 py-2.5 border',
-                requestSent
-                  ? 'border-green-200 bg-green-50'
-                  : 'border-red-200 bg-red-50',
+                requestSent ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50',
               ].join(' ')}
               role="alert"
             >

@@ -8,7 +8,11 @@ interface Props {
   placeholder?: string;
 }
 
-const DepartmentSelect: React.FC<Props> = ({ value, onChange, placeholder = 'Select department' }) => {
+const DepartmentSelect: React.FC<Props> = ({
+  value,
+  onChange,
+  placeholder = 'Select department',
+}) => {
   const { data } = useDepartments();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -58,18 +62,44 @@ const DepartmentSelect: React.FC<Props> = ({ value, onChange, placeholder = 'Sel
             overflowY: 'auto',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', border: '1px solid var(--hr-border)', borderRadius: 8, marginBottom: 6 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 8px',
+              border: '1px solid var(--hr-border)',
+              borderRadius: 8,
+              marginBottom: 6,
+            }}
+          >
             <Search size={13} style={{ color: 'var(--hr-text-muted)' }} />
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search"
-              style={{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--hr-text)', fontSize: 12, flex: 1 }}
+              style={{
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                color: 'var(--hr-text)',
+                fontSize: 12,
+                flex: 1,
+              }}
             />
           </div>
           {options.length === 0 && (
-            <div style={{ padding: 10, textAlign: 'center', color: 'var(--hr-text-muted)', fontSize: 12 }}>No matches</div>
+            <div
+              style={{
+                padding: 10,
+                textAlign: 'center',
+                color: 'var(--hr-text-muted)',
+                fontSize: 12,
+              }}
+            >
+              No matches
+            </div>
           )}
           {options.map((d: { id: number; name: string }) => (
             <button
@@ -91,8 +121,13 @@ const DepartmentSelect: React.FC<Props> = ({ value, onChange, placeholder = 'Sel
                 fontSize: 12,
                 cursor: 'pointer',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = value === d.name ? 'var(--hr-active)' : 'transparent')}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  value === d.name ? 'var(--hr-active)' : 'transparent')
+              }
             >
               {d.name}
             </button>

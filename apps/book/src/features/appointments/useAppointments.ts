@@ -40,7 +40,8 @@ export function useCreateAppointment() {
 export function useUpdateAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => unwrap(bookService.updateAppointment(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      unwrap(bookService.updateAppointment(id, data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['calendar'] });

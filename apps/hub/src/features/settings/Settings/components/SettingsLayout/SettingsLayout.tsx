@@ -1,8 +1,15 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  User, Building2, Globe, Mail, CreditCard, Puzzle,
-  ArrowLeft, Briefcase, Layers,
+  User,
+  Building2,
+  Globe,
+  Mail,
+  CreditCard,
+  Puzzle,
+  ArrowLeft,
+  Briefcase,
+  Layers,
 } from 'lucide-react';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
@@ -17,11 +24,13 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
     {
       label: 'Account',
       items: [
-        { label: 'Account',  path: '/settings/account',  icon: User },
-        ...(isOwner ? [
-          { label: 'General',  path: '/settings/general',  icon: Building2 },
-          { label: 'Industry', path: '/settings/industry', icon: Briefcase },
-        ] : []),
+        { label: 'Account', path: '/settings/account', icon: User },
+        ...(isOwner
+          ? [
+              { label: 'General', path: '/settings/general', icon: Building2 },
+              { label: 'Industry', path: '/settings/industry', icon: Briefcase },
+            ]
+          : []),
       ],
     },
   ];
@@ -31,15 +40,15 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
       label: 'Online Presence',
       items: [
         { label: 'Custom Domain', path: '/settings/domain', icon: Globe },
-        { label: 'Email',         path: '/settings/email',  icon: Mail },
+        { label: 'Email', path: '/settings/email', icon: Mail },
       ],
     });
 
     groups.push({
       label: 'Plans & Addons',
       items: [
-        { label: 'Billing',      path: '/settings/billing',      icon: CreditCard },
-        { label: 'Addons',       path: '/settings/addons',       icon: Puzzle },
+        { label: 'Billing', path: '/settings/billing', icon: CreditCard },
+        { label: 'Addons', path: '/settings/addons', icon: Puzzle },
         { label: 'Integrations', path: '/settings/integrations', icon: Layers },
       ],
     });

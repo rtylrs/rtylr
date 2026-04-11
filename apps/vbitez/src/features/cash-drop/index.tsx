@@ -7,15 +7,8 @@ import { formatCurrency, formatDate } from '../../shared/utils/format';
 type Action = 'drop' | 'paid_out' | 'paid_in' | 'float';
 
 const CashDropScreen: React.FC = () => {
-  const {
-    movements,
-    openingFloat,
-    openDrawer,
-    cashDrop,
-    paidOut,
-    paidIn,
-    expectedCash,
-  } = useCashDrawerStore();
+  const { movements, openingFloat, openDrawer, cashDrop, paidOut, paidIn, expectedCash } =
+    useCashDrawerStore();
   const [action, setAction] = useState<Action>('drop');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');

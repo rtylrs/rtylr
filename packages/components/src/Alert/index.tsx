@@ -19,7 +19,9 @@ export const Alert: React.FC<AlertProps> = ({ severity = 'info', children, class
     role="alert"
     className={`${styles.alert} ${styles[severity]}${className ? ` ${className}` : ''}`}
   >
-    <span className={styles.icon} aria-hidden="true">{icons[severity]}</span>
+    <span className={styles.icon} aria-hidden="true">
+      {icons[severity]}
+    </span>
     <span>{children}</span>
   </div>
 );

@@ -1,44 +1,42 @@
-import React from "react";
-import { useState, useRef, useEffect } from "react";
-import { QRCode } from "react-qrcode-logo";
-import html2canvas from "html2canvas";
-import { saveAs } from "file-saver";
-import { useUserStore } from "../../shared/stores/userStore";
-import { QrCodeTemplate, QrCodeTemplates, QrOptions } from "./templates";
+import React from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { QRCode } from 'react-qrcode-logo';
+import html2canvas from 'html2canvas';
+import { saveAs } from 'file-saver';
+import { useUserStore } from '../../shared/stores/userStore';
+import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
 function QrCode() {
   const { userId, user } = useUserStore();
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    url: "https://rtylr.voxire.com/restaurant/" + userId,
+    url: 'https://rtylr.voxire.com/restaurant/' + userId,
     size: 150,
-    fgColor: "#000000",
-    bgColor: "#ffffff",
+    fgColor: '#000000',
+    bgColor: '#ffffff',
     logoImage: false,
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
   });
   const [isLogoLoaded, setIsLogoLoaded] = useState(false);
 
   const qrRef = useRef(null);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setQrOptions({ ...qrOptions, [name]: value });
   };
 
   const handleDownload = async () => {
     if (qrOptions.logoImage && !isLogoLoaded) {
-      alert("Please wait for the logo to load before downloading.");
+      alert('Please wait for the logo to load before downloading.');
       return;
     }
 
     const canvas = await html2canvas(qrRef.current!);
     canvas.toBlob((blob) => {
-      if (blob) saveAs(blob, "qr-code.png");
+      if (blob) saveAs(blob, 'qr-code.png');
     });
   };
 
@@ -48,7 +46,7 @@ function QrCode() {
       img.src = user.logo;
       img.onload = () => setIsLogoLoaded(true);
       img.onerror = () => {
-        alert("Failed to load logo image.");
+        alert('Failed to load logo image.');
         setIsLogoLoaded(false);
       };
     } else {
@@ -87,47 +85,95 @@ function QrCode() {
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Background Color:</label>
-            <input type="color" name="backgroundColor" value={qrOptions.backgroundColor} onChange={handleInputChange} />
+            <input
+              type="color"
+              name="backgroundColor"
+              value={qrOptions.backgroundColor}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">QR Background Color:</label>
-            <input type="color" name="bgColor" value={qrOptions.bgColor} onChange={handleInputChange} />
+            <input
+              type="color"
+              name="bgColor"
+              value={qrOptions.bgColor}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Color:</label>
-            <input type="color" name="fgColor" value={qrOptions.fgColor} onChange={handleInputChange} />
+            <input
+              type="color"
+              name="fgColor"
+              value={qrOptions.fgColor}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Text Color:</label>
-            <input type="color" name="textColor" value={qrOptions.textColor} onChange={handleInputChange} />
+            <input
+              type="color"
+              name="textColor"
+              value={qrOptions.textColor}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Logo Width:</label>
-            <input className="border border-black/10 rounded px-2 py-1 text-sm w-20" type="number" name="logoWidth" value={qrOptions.logoWidth} onChange={handleInputChange} />
+            <input
+              className="border border-black/10 rounded px-2 py-1 text-sm w-20"
+              type="number"
+              name="logoWidth"
+              value={qrOptions.logoWidth}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Logo Height:</label>
-            <input className="border border-black/10 rounded px-2 py-1 text-sm w-20" type="number" name="logoHeight" value={qrOptions.logoHeight} onChange={handleInputChange} />
+            <input
+              className="border border-black/10 rounded px-2 py-1 text-sm w-20"
+              type="number"
+              name="logoHeight"
+              value={qrOptions.logoHeight}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Eye Radius:</label>
-            <input className="border border-black/10 rounded px-2 py-1 text-sm w-20" type="number" name="eyeRadius" value={qrOptions.eyeRadius} onChange={handleInputChange} />
+            <input
+              className="border border-black/10 rounded px-2 py-1 text-sm w-20"
+              type="number"
+              name="eyeRadius"
+              value={qrOptions.eyeRadius}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Eye Color:</label>
-            <input type="color" name="eyeColor" value={qrOptions.eyeColor} onChange={handleInputChange} />
+            <input
+              type="color"
+              name="eyeColor"
+              value={qrOptions.eyeColor}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">QR Style:</label>
-            <select className="border border-black/10 rounded px-2 py-1 text-sm" name="qrStyle" value={qrOptions.qrStyle} onChange={handleInputChange}>
+            <select
+              className="border border-black/10 rounded px-2 py-1 text-sm"
+              name="qrStyle"
+              value={qrOptions.qrStyle}
+              onChange={handleInputChange}
+            >
               <option value="squares">Squares</option>
               <option value="dots">Dots</option>
               <option value="fluid">Fluid</option>
@@ -136,17 +182,34 @@ function QrCode() {
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Title:</label>
-            <input className="border border-black/10 rounded px-2 py-1 text-sm flex-1" type="text" name="text" value={qrOptions.text} onChange={handleInputChange} />
+            <input
+              className="border border-black/10 rounded px-2 py-1 text-sm flex-1"
+              type="text"
+              name="text"
+              value={qrOptions.text}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Description:</label>
-            <input className="border border-black/10 rounded px-2 py-1 text-sm flex-1" type="text" name="description" value={qrOptions.description} onChange={handleInputChange} />
+            <input
+              className="border border-black/10 rounded px-2 py-1 text-sm flex-1"
+              type="text"
+              name="description"
+              value={qrOptions.description}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-primary w-40">Display Logo:</label>
-            <input type="checkbox" name="logoImage" checked={qrOptions.logoImage} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="logoImage"
+              checked={qrOptions.logoImage}
+              onChange={handleInputChange}
+            />
           </div>
         </div>
 
@@ -170,7 +233,7 @@ function QrCode() {
               size={qrOptions.size + 100}
               fgColor={qrOptions.fgColor}
               bgColor={qrOptions.bgColor}
-              logoImage={qrOptions.logoImage ? user?.logo : ""}
+              logoImage={qrOptions.logoImage ? user?.logo : ''}
               logoWidth={qrOptions.logoWidth}
               logoHeight={qrOptions.logoHeight}
               eyeRadius={qrOptions.eyeRadius}

@@ -143,7 +143,7 @@ const CustomScrollbar: React.FC = () => {
 
     window.scrollTo({
       top: newScrollTop,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
@@ -158,7 +158,9 @@ const CustomScrollbar: React.FC = () => {
 
   return (
     <div
-      className={`${styles.scrollbar} ${isVisible ? styles.visible : ''} ${isHovered ? styles.hovered : ''}`}
+      className={`${styles.scrollbar} ${isVisible ? styles.visible : ''} ${
+        isHovered ? styles.hovered : ''
+      }`}
       onClick={handleTrackClick}
     >
       <div

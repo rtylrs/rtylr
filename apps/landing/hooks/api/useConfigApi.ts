@@ -11,7 +11,7 @@ export const useConfigData = () => {
     setBusinessCount,
     setContactInfo,
     setLoading,
-    setError
+    setError,
   } = useConfigStore();
 
   const query = useQuery({
@@ -43,8 +43,17 @@ export const useConfigData = () => {
       setBusinessCount(query.data.businessCount || 0);
       setContactInfo(query.data.contactInfo || { contactEmail: null, contactNumber: null });
     }
-  }, [query.data, query.isLoading, query.error, setWebsiteData, setAboutContent, setBusinessCount, setContactInfo, setLoading, setError]);
+  }, [
+    query.data,
+    query.isLoading,
+    query.error,
+    setWebsiteData,
+    setAboutContent,
+    setBusinessCount,
+    setContactInfo,
+    setLoading,
+    setError,
+  ]);
 
   return query;
 };
-

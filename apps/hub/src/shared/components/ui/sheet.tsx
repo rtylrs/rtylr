@@ -26,11 +26,7 @@ const Sheet: React.FC<SheetProps> = ({ open: controlledOpen, onOpenChange, child
     onOpenChange?.(value);
   };
 
-  return (
-    <SheetContext.Provider value={{ open, setOpen }}>
-      {children}
-    </SheetContext.Provider>
-  );
+  return <SheetContext.Provider value={{ open, setOpen }}>{children}</SheetContext.Provider>;
 };
 
 const SheetTrigger: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -51,7 +47,9 @@ const SheetContent: React.FC<SheetContentProps> = ({ children, className, side =
   const { open, setOpen } = useContext(SheetContext);
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
     if (open) document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [open, setOpen]);
@@ -89,20 +87,38 @@ const SheetContent: React.FC<SheetContentProps> = ({ children, className, side =
   );
 };
 
-const SheetHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, style, ...props }) => (
-  <div className={cn('flex flex-col gap-1.5 p-6 pb-4', className)} style={{ borderBottom: '1px solid var(--hub-border)', ...style }} {...props} />
+const SheetHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  style,
+  ...props
+}) => (
+  <div
+    className={cn('flex flex-col gap-1.5 p-6 pb-4', className)}
+    style={{ borderBottom: '1px solid var(--hub-border)', ...style }}
+    {...props}
+  />
 );
 
-const SheetTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, ...props }) => (
-  <h2 className={cn('text-lg font-semibold text-primary', className)} {...props} />
-);
+const SheetTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
+  className,
+  ...props
+}) => <h2 className={cn('text-lg font-semibold text-primary', className)} {...props} />;
 
-const SheetDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, ...props }) => (
-  <p className={cn('text-sm text-gray-500', className)} {...props} />
-);
+const SheetDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({
+  className,
+  ...props
+}) => <p className={cn('text-sm text-gray-500', className)} {...props} />;
 
-const SheetFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, style, ...props }) => (
-  <div className={cn('flex items-center justify-end gap-2 p-6 pt-4 mt-auto', className)} style={{ borderTop: '1px solid var(--hub-border)', ...style }} {...props} />
+const SheetFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  style,
+  ...props
+}) => (
+  <div
+    className={cn('flex items-center justify-end gap-2 p-6 pt-4 mt-auto', className)}
+    style={{ borderTop: '1px solid var(--hub-border)', ...style }}
+    {...props}
+  />
 );
 
 const SheetClose: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -115,4 +131,13 @@ const SheetClose: React.FC<{ children: React.ReactElement }> = ({ children }) =>
   });
 };
 
-export { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose };
+export {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetClose,
+};

@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface SidebarContextType {
   sectionsVisible: { [key: string]: boolean };
@@ -27,17 +21,14 @@ interface SidebarProviderProps {
   initialSections: string[];
 }
 
-export function SidebarProvider({
-  children,
-  initialSections,
-}: SidebarProviderProps) {
+export function SidebarProvider({ children, initialSections }: SidebarProviderProps) {
   const getInitialState = (key: string, defaultValue: boolean = false) => {
     const savedValue = localStorage.getItem(key);
-    return savedValue === null ? defaultValue : savedValue === "true";
+    return savedValue === null ? defaultValue : savedValue === 'true';
   };
 
   const initialVisibility = initialSections.reduce((acc, section) => {
-    acc[section] = getInitialState(section + "Visible");
+    acc[section] = getInitialState(section + 'Visible');
     return acc;
   }, {} as { [key: string]: boolean });
 
@@ -45,7 +36,7 @@ export function SidebarProvider({
 
   useEffect(() => {
     Object.entries(sectionsVisible).forEach(([key, value]) => {
-      localStorage.setItem(key + "Visible", value.toString());
+      localStorage.setItem(key + 'Visible', value.toString());
     });
   }, [sectionsVisible]);
 
@@ -61,9 +52,5 @@ export function SidebarProvider({
     toggleSection,
   };
 
-  return (
-    <SidebarContext.Provider value={contextValue}>
-      {children}
-    </SidebarContext.Provider>
-  );
+  return <SidebarContext.Provider value={contextValue}>{children}</SidebarContext.Provider>;
 }

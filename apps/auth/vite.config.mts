@@ -66,12 +66,7 @@ export default defineConfig(() => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'motion',
-          ],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'motion'],
         },
       },
     },
@@ -85,10 +80,6 @@ export default defineConfig(() => ({
       '@voxire/config',
       '@voxire/utils',
     ],
-    exclude: [
-      '@voxire/components',
-      '@voxire/ui',
-      '@voxire/tailwind-config',
-    ],
+    exclude: ['@voxire/components', '@voxire/ui', '@voxire/tailwind-config'],
   },
 }));

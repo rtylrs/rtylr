@@ -2,8 +2,18 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Search, Users, Gift, Megaphone, PieChart, LayoutDashboard,
-  Zap, FileText, MessageSquare, Settings as SettingsIcon, Plus, Award,
+  Search,
+  Users,
+  Gift,
+  Megaphone,
+  PieChart,
+  LayoutDashboard,
+  Zap,
+  FileText,
+  MessageSquare,
+  Settings as SettingsIcon,
+  Plus,
+  Award,
 } from 'lucide-react';
 import { useCustomers } from '../../features/customers/useCustomers';
 import { CustomerAvatar } from './crm';
@@ -17,7 +27,10 @@ interface CommandItem {
   group: string;
 }
 
-export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = ({
+  open,
+  onClose,
+}) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
@@ -31,24 +44,133 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
 
   const items = useMemo<CommandItem[]>(() => {
     const base: CommandItem[] = [
-      { id: 'nav-dash', label: 'Dashboard', icon: LayoutDashboard, action: () => navigate('/'), group: 'Navigate' },
-      { id: 'nav-cust', label: 'Customers', icon: Users, action: () => navigate('/customers'), group: 'Navigate' },
-      { id: 'nav-loyalty', label: 'Loyalty', icon: Gift, action: () => navigate('/loyalty'), group: 'Navigate' },
-      { id: 'nav-camp', label: 'Campaigns', icon: Megaphone, action: () => navigate('/campaigns'), group: 'Navigate' },
-      { id: 'nav-seg', label: 'Segments', icon: PieChart, action: () => navigate('/segments'), group: 'Navigate' },
-      { id: 'nav-auto', label: 'Automations', icon: Zap, action: () => navigate('/automations'), group: 'Navigate' },
-      { id: 'nav-tmpl', label: 'Templates', icon: FileText, action: () => navigate('/templates'), group: 'Navigate' },
-      { id: 'nav-fb', label: 'Feedback & NPS', icon: MessageSquare, action: () => navigate('/feedback'), group: 'Navigate' },
-      { id: 'nav-set', label: 'Settings', icon: SettingsIcon, action: () => navigate('/settings'), group: 'Navigate' },
-      { id: 'new-cust', label: 'New customer', icon: Plus, action: () => navigate('/customers/new'), group: 'Create', hint: 'n' },
-      { id: 'new-seg', label: 'New segment', icon: Plus, action: () => navigate('/segments/new'), group: 'Create' },
-      { id: 'new-camp-email', label: 'New email campaign', icon: Plus, action: () => navigate('/campaigns/email'), group: 'Create' },
-      { id: 'new-camp-sms', label: 'New SMS campaign', icon: Plus, action: () => navigate('/campaigns/sms'), group: 'Create' },
-      { id: 'new-auto', label: 'New automation', icon: Plus, action: () => navigate('/automations/new'), group: 'Create' },
-      { id: 'import', label: 'Import customers from CSV', icon: Plus, action: () => navigate('/customers/import'), group: 'Create' },
-      { id: 'loyalty-members', label: 'Loyalty members', icon: Award, action: () => navigate('/loyalty/members'), group: 'Loyalty' },
-      { id: 'loyalty-rewards', label: 'Loyalty rewards catalog', icon: Gift, action: () => navigate('/loyalty/rewards'), group: 'Loyalty' },
-      { id: 'loyalty-tiers', label: 'Loyalty tiers', icon: Award, action: () => navigate('/loyalty/tiers'), group: 'Loyalty' },
+      {
+        id: 'nav-dash',
+        label: 'Dashboard',
+        icon: LayoutDashboard,
+        action: () => navigate('/'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-cust',
+        label: 'Customers',
+        icon: Users,
+        action: () => navigate('/customers'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-loyalty',
+        label: 'Loyalty',
+        icon: Gift,
+        action: () => navigate('/loyalty'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-camp',
+        label: 'Campaigns',
+        icon: Megaphone,
+        action: () => navigate('/campaigns'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-seg',
+        label: 'Segments',
+        icon: PieChart,
+        action: () => navigate('/segments'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-auto',
+        label: 'Automations',
+        icon: Zap,
+        action: () => navigate('/automations'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-tmpl',
+        label: 'Templates',
+        icon: FileText,
+        action: () => navigate('/templates'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-fb',
+        label: 'Feedback & NPS',
+        icon: MessageSquare,
+        action: () => navigate('/feedback'),
+        group: 'Navigate',
+      },
+      {
+        id: 'nav-set',
+        label: 'Settings',
+        icon: SettingsIcon,
+        action: () => navigate('/settings'),
+        group: 'Navigate',
+      },
+      {
+        id: 'new-cust',
+        label: 'New customer',
+        icon: Plus,
+        action: () => navigate('/customers/new'),
+        group: 'Create',
+        hint: 'n',
+      },
+      {
+        id: 'new-seg',
+        label: 'New segment',
+        icon: Plus,
+        action: () => navigate('/segments/new'),
+        group: 'Create',
+      },
+      {
+        id: 'new-camp-email',
+        label: 'New email campaign',
+        icon: Plus,
+        action: () => navigate('/campaigns/email'),
+        group: 'Create',
+      },
+      {
+        id: 'new-camp-sms',
+        label: 'New SMS campaign',
+        icon: Plus,
+        action: () => navigate('/campaigns/sms'),
+        group: 'Create',
+      },
+      {
+        id: 'new-auto',
+        label: 'New automation',
+        icon: Plus,
+        action: () => navigate('/automations/new'),
+        group: 'Create',
+      },
+      {
+        id: 'import',
+        label: 'Import customers from CSV',
+        icon: Plus,
+        action: () => navigate('/customers/import'),
+        group: 'Create',
+      },
+      {
+        id: 'loyalty-members',
+        label: 'Loyalty members',
+        icon: Award,
+        action: () => navigate('/loyalty/members'),
+        group: 'Loyalty',
+      },
+      {
+        id: 'loyalty-rewards',
+        label: 'Loyalty rewards catalog',
+        icon: Gift,
+        action: () => navigate('/loyalty/rewards'),
+        group: 'Loyalty',
+      },
+      {
+        id: 'loyalty-tiers',
+        label: 'Loyalty tiers',
+        icon: Award,
+        action: () => navigate('/loyalty/tiers'),
+        group: 'Loyalty',
+      },
     ];
     const customerItems: CommandItem[] = customers.slice(0, 20).map((c) => ({
       id: `cust-${c.id}`,
@@ -63,7 +185,9 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const filtered = useMemo(() => {
     if (!query) return items;
     const q = query.toLowerCase();
-    return items.filter((i) => i.label.toLowerCase().includes(q) || (i.hint || '').toLowerCase().includes(q));
+    return items.filter(
+      (i) => i.label.toLowerCase().includes(q) || (i.hint || '').toLowerCase().includes(q)
+    );
   }, [items, query]);
 
   const groups = useMemo(() => {
@@ -78,13 +202,25 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
-      if (e.key === 'ArrowDown') { e.preventDefault(); setCursor((c) => Math.min(c + 1, filtered.length - 1)); }
-      if (e.key === 'ArrowUp') { e.preventDefault(); setCursor((c) => Math.max(c - 1, 0)); }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setCursor((c) => Math.min(c + 1, filtered.length - 1));
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setCursor((c) => Math.max(c - 1, 0));
+      }
       if (e.key === 'Enter') {
         e.preventDefault();
         const item = filtered[cursor];
-        if (item) { item.action(); onClose(); }
+        if (item) {
+          item.action();
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handler);
@@ -142,7 +278,10 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
               <input
                 autoFocus
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); setCursor(0); }}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setCursor(0);
+                }}
                 placeholder="Search customers, navigate, create..."
                 style={{
                   flex: 1,
@@ -167,7 +306,14 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
             </div>
             <div style={{ overflowY: 'auto', flex: 1, padding: '8px 0' }}>
               {filtered.length === 0 && (
-                <div style={{ padding: '32px', textAlign: 'center', fontSize: '13px', color: 'var(--hub-text-muted)' }}>
+                <div
+                  style={{
+                    padding: '32px',
+                    textAlign: 'center',
+                    fontSize: '13px',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
                   No results for "{query}"
                 </div>
               )}
@@ -193,7 +339,10 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     return (
                       <button
                         key={item.id}
-                        onClick={() => { item.action(); onClose(); }}
+                        onClick={() => {
+                          item.action();
+                          onClose();
+                        }}
                         onMouseEnter={() => setCursor(idx)}
                         style={{
                           display: 'flex',
@@ -210,7 +359,15 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                         }}
                       >
                         {isCustomer ? (
-                          <CustomerAvatar initials={(item.label.split(' ').map((w) => w[0]).join('').slice(0, 2)).toUpperCase()} size={24} />
+                          <CustomerAvatar
+                            initials={item.label
+                              .split(' ')
+                              .map((w) => w[0])
+                              .join('')
+                              .slice(0, 2)
+                              .toUpperCase()}
+                            size={24}
+                          />
                         ) : (
                           Icon && (
                             <div
@@ -232,7 +389,9 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                         )}
                         <span style={{ flex: 1 }}>{item.label}</span>
                         {item.hint && (
-                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{item.hint}</span>
+                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                            {item.hint}
+                          </span>
                         )}
                       </button>
                     );

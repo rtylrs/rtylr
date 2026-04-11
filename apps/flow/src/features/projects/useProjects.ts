@@ -57,17 +57,11 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<{ name: string; color: string }>;
-    }) => {
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ name: string; color: string }> }) => {
       if (isFlowLocal()) {
-        const projects = useFlowStore.getState().projects.map((p) =>
-          p.id === id ? { ...p, ...data } : p
-        );
+        const projects = useFlowStore
+          .getState()
+          .projects.map((p) => (p.id === id ? { ...p, ...data } : p));
         useFlowStore.setState({ projects });
         return Promise.resolve();
       }

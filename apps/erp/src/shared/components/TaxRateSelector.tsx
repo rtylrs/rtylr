@@ -53,7 +53,10 @@ const TaxRateSelector: React.FC<TaxRateSelectorProps> = ({
         </select>
       </div>
       {onInclusiveToggle && (
-        <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: 'var(--hub-text-muted)' }}>
+        <label
+          className="flex items-center gap-2 text-xs cursor-pointer"
+          style={{ color: 'var(--hub-text-muted)' }}
+        >
           <input
             type="checkbox"
             checked={inclusive}

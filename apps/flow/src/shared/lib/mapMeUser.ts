@@ -3,7 +3,9 @@ import type { FlowUser } from '../stores/userStore';
 /**
  * Map `/user/me` (or equivalent) payload to Flow profile fields — same field fallbacks as Hub sidebar.
  */
-export function mapMeResponseToFlowUser(data: Record<string, unknown> | null | undefined): FlowUser | null {
+export function mapMeResponseToFlowUser(
+  data: Record<string, unknown> | null | undefined
+): FlowUser | null {
   if (!data || typeof data !== 'object') return null;
 
   const email = String(data.email ?? data.emailAddress ?? '').trim();
@@ -16,13 +18,7 @@ export function mapMeResponseToFlowUser(data: Record<string, unknown> | null | u
 
   const nameFromParts = [firstName, lastName].filter(Boolean).join(' ').trim();
 
-  const name =
-    fullName ||
-    nameFromParts ||
-    singleName ||
-    firstName ||
-    email ||
-    'User';
+  const name = fullName || nameFromParts || singleName || firstName || email || 'User';
 
   return {
     id: id || email || 'user',

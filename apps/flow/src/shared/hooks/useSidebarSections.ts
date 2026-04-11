@@ -33,10 +33,7 @@ export function useSidebarSections() {
     });
   }, []);
 
-  const isCollapsed = useCallback(
-    (id: SidebarSectionId) => collapsed[id] === true,
-    [collapsed]
-  );
+  const isCollapsed = useCallback((id: SidebarSectionId) => collapsed[id] === true, [collapsed]);
 
   return { toggle, isCollapsed };
 }

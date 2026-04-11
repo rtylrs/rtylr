@@ -39,7 +39,15 @@ const ClockInOutButton: React.FC<Props> = ({ clockedIn, onToggle, location, load
       {clockedIn ? 'Clock Out' : 'Clock In'}
     </button>
     {location && (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--hr-text-muted)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          fontSize: 10,
+          color: 'var(--hr-text-muted)',
+        }}
+      >
         <MapPin size={10} />
         {location}
       </div>

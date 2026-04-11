@@ -13,4 +13,3 @@ export const getLayoutTypeForRoute = (pathname: string): LayoutType => {
   // Default layout for all other routes
   return 'default';
 };
-

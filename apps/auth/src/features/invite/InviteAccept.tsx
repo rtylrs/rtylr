@@ -22,7 +22,8 @@ const InviteAccept: React.FC = () => {
   // Verify the token on mount
   useEffect(() => {
     if (!token) return;
-    api.get(`/auth/invite/verify?token=${token}`)
+    api
+      .get(`/auth/invite/verify?token=${token}`)
       .then((res) => {
         if (res.data?.valid) {
           setValid(true);
@@ -86,7 +87,10 @@ const InviteAccept: React.FC = () => {
           </p>
         }
       >
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5" role="alert">
+        <div
+          className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+          role="alert"
+        >
           <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
           <p className="text-xs text-red-600 leading-relaxed">
             Ask your team admin to send a new invitation.
@@ -103,12 +107,7 @@ const InviteAccept: React.FC = () => {
         title="You're all set!"
         subtitle="Your password has been set. You can now sign in."
         footer={
-          <Button
-            variant="primary"
-            fullWidth
-            height={40}
-            onClick={() => navigate('/')}
-          >
+          <Button variant="primary" fullWidth height={40} onClick={() => navigate('/')}>
             Sign in
           </Button>
         }
@@ -129,7 +128,10 @@ const InviteAccept: React.FC = () => {
       subtitle={`You've been invited to join rtylr${email ? ` as ${email}` : ''}.`}
     >
       <form
-        onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
         className="flex flex-col gap-4"
       >
         {/* Password */}
@@ -178,20 +180,17 @@ const InviteAccept: React.FC = () => {
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5" role="alert">
+          <div
+            className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+            role="alert"
+          >
             <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
             <p className="text-xs text-red-600 leading-relaxed">{error}</p>
           </div>
         )}
 
         {/* Submit */}
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          loading={loading}
-          height={40}
-        >
+        <Button type="submit" variant="primary" fullWidth loading={loading} height={40}>
           Set password and join
         </Button>
       </form>

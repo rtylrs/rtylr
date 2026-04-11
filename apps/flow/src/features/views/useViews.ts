@@ -3,7 +3,12 @@ import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
 import { isFlowLocal } from '../../shared/lib/flowLocalMode';
-import { useFlowStore, PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
+import {
+  useFlowStore,
+  PRIORITY_ORDER,
+  type SavedView,
+  type Task,
+} from '../../shared/stores/flowStore';
 
 export function useViews() {
   const views = useFlowStore((s) => s.views);
@@ -76,9 +81,7 @@ export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
       filtered = filtered.filter((t) => t.projectId === view.filters.projectId);
     }
     if (view.filters.labels && view.filters.labels.length) {
-      filtered = filtered.filter((t) =>
-        t.labels?.some((l) => view.filters.labels!.includes(l))
-      );
+      filtered = filtered.filter((t) => t.labels?.some((l) => view.filters.labels!.includes(l)));
     }
     if (view.sortBy) {
       const dir = view.sortDir === 'desc' ? -1 : 1;

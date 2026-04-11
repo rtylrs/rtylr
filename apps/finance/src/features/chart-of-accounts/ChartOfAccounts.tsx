@@ -9,7 +9,14 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useChartOfAccounts } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, ACCENT } from '../../shared/lib/tokens';
 
-const TYPES: (AccountType | 'all')[] = ['all', 'asset', 'liability', 'equity', 'revenue', 'expense'];
+const TYPES: (AccountType | 'all')[] = [
+  'all',
+  'asset',
+  'liability',
+  'equity',
+  'revenue',
+  'expense',
+];
 
 const ChartOfAccounts: React.FC = () => {
   const { data = [], isLoading } = useChartOfAccounts();
@@ -18,12 +25,17 @@ const ChartOfAccounts: React.FC = () => {
 
   const filtered = data.filter((a) => {
     const matchesType = filter === 'all' || a.type === filter;
-    const matchesQuery = !query || a.name.toLowerCase().includes(query.toLowerCase()) || a.code.includes(query);
+    const matchesQuery =
+      !query || a.name.toLowerCase().includes(query.toLowerCase()) || a.code.includes(query);
     return matchesType && matchesQuery;
   });
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Chart of Accounts"
         subtitle={`${filtered.length} accounts`}
@@ -35,7 +47,16 @@ const ChartOfAccounts: React.FC = () => {
       />
 
       <div style={{ display: 'flex', gap: 12 }}>
-        <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--hub-surface)', borderRadius: 10, border: '1px solid var(--hub-border)' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            padding: 4,
+            background: 'var(--hub-surface)',
+            borderRadius: 10,
+            border: '1px solid var(--hub-border)',
+          }}
+        >
           {TYPES.map((t) => (
             <button
               key={t}
@@ -57,7 +78,10 @@ const ChartOfAccounts: React.FC = () => {
           ))}
         </div>
         <div style={{ position: 'relative', flex: 1, maxWidth: 280 }}>
-          <Search size={13} style={{ position: 'absolute', left: 10, top: 11, color: 'var(--hub-text-dim)' }} />
+          <Search
+            size={13}
+            style={{ position: 'absolute', left: 10, top: 11, color: 'var(--hub-text-dim)' }}
+          />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -68,7 +92,9 @@ const ChartOfAccounts: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div style={{ ...cardStyle, padding: 20 }}><SkeletonRow /></div>
+        <div style={{ ...cardStyle, padding: 20 }}>
+          <SkeletonRow />
+        </div>
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -95,12 +121,31 @@ const ChartOfAccounts: React.FC = () => {
             <tbody>
               {filtered.map((a) => (
                 <tr key={a.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', fontVariantNumeric: 'tabular-nums' }}>{a.code}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>{a.name}</td>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--hub-text)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {a.code}
+                  </td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
+                    {a.name}
+                  </td>
                   <td style={{ padding: '12px 16px' }}>
                     <AccountTypeBadge type={a.type} />
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, textAlign: 'right' }}>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      textAlign: 'right',
+                    }}
+                  >
                     <MoneyDisplay amount={a.balance} />
                   </td>
                 </tr>

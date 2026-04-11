@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 //Package imports
-import { useState, useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
-import { motion } from "motion/react";
+import { useState, useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { motion } from 'motion/react';
 import {
   Chart as ChartJS,
   LineElement,
@@ -12,43 +12,35 @@ import {
   Tooltip,
   Legend,
   CategoryScale,
-} from "chart.js";
+} from 'chart.js';
 
 //Routes
-import AppRoutes from "./routes/AppRoutes";
+import AppRoutes from './routes/AppRoutes';
 
-import i18next from "./shared/services/i18next";
+import i18next from './shared/services/i18next';
 
 //Components
-import Cookies from "./shared/components/Cookies/Cookies";
-import Maintanance from "./features/extras/Maintanance";
-import NoMatch from "./features/extras/NoMatch";
+import Cookies from './shared/components/Cookies/Cookies';
+import Maintanance from './features/extras/Maintanance';
+import NoMatch from './features/extras/NoMatch';
 
 //Utilities
-import { getCookie } from "./shared/lib/cookies";
-import HelmetContainer from "./shared/components/HelmetContainer";
+import { getCookie } from './shared/lib/cookies';
+import HelmetContainer from './shared/components/HelmetContainer';
 
 //Hooks
-import useColors from "./shared/hooks/useColors";
-import { useFullscreen } from "./shared/hooks/useFullscreen";
+import useColors from './shared/hooks/useColors';
+import { useFullscreen } from './shared/hooks/useFullscreen';
 
 // Route Checks
-import { BusinessRoute } from "./shared/utils/BusinessRoute";
+import { BusinessRoute } from './shared/utils/BusinessRoute';
 
 // Store imports
-import { useConfigStore } from "./shared/stores/configStore";
-import { useUserStore } from "./shared/stores/userStore";
-import { useGetConfig } from "./shared/hooks/queries/useConfig";
+import { useConfigStore } from './shared/stores/configStore';
+import { useUserStore } from './shared/stores/userStore';
+import { useGetConfig } from './shared/hooks/queries/useConfig';
 
-ChartJS.register(
-  LineElement,
-  PointElement,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale
-);
+ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 
 const App = (): JSX.Element => {
   //Hooks
@@ -61,7 +53,7 @@ const App = (): JSX.Element => {
   const role = useUserStore((state) => state.role);
 
   useEffect(() => {
-    const language = getCookie("language");
+    const language = getCookie('language');
     if (language) {
       i18next.changeLanguage(language);
     }
@@ -69,7 +61,7 @@ const App = (): JSX.Element => {
 
   return (
     <React.Fragment>
-      <HelmetContainer title={"Rtylr"} favicon={"/favicon.ico"} />
+      <HelmetContainer title={'Rtylr'} favicon={'/favicon.ico'} />
 
       <Cookies />
 

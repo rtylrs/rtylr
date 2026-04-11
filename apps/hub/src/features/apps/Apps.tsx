@@ -1,17 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Grid3x3 } from 'lucide-react';
-import { Input } from "../../shared/components/ui";
-import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from "../../shared/components/hub";
-import { useApps } from "../../shared/hooks/queries/useApps";
-import { useUserStore } from "../../shared/stores/userStore";
+import { Input } from '../../shared/components/ui';
+import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from '../../shared/components/hub';
+import { useApps } from '../../shared/hooks/queries/useApps';
+import { useUserStore } from '../../shared/stores/userStore';
 
-const CATEGORIES: { key: 'all' | 'core' | 'sales' | 'operations' | 'finance' | 'growth'; label: string }[] = [
-  { key: 'all',        label: 'All' },
-  { key: 'core',       label: 'Core' },
-  { key: 'sales',      label: 'Sales' },
+const CATEGORIES: {
+  key: 'all' | 'core' | 'sales' | 'operations' | 'finance' | 'growth';
+  label: string;
+}[] = [
+  { key: 'all', label: 'All' },
+  { key: 'core', label: 'Core' },
+  { key: 'sales', label: 'Sales' },
   { key: 'operations', label: 'Operations' },
-  { key: 'finance',    label: 'Finance' },
-  { key: 'growth',     label: 'Growth' },
+  { key: 'finance', label: 'Finance' },
+  { key: 'growth', label: 'Growth' },
 ];
 
 const Apps: React.FC = () => {
@@ -28,7 +31,10 @@ const Apps: React.FC = () => {
   const filtered = useMemo(() => {
     return apps.filter((a) => {
       if (!isOwner && !userApps.includes(a.key)) return false;
-      const matchesQuery = !query.trim() || a.label.toLowerCase().includes(query.toLowerCase()) || a.description.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery =
+        !query.trim() ||
+        a.label.toLowerCase().includes(query.toLowerCase()) ||
+        a.description.toLowerCase().includes(query.toLowerCase());
       const matchesCat = category === 'all' || a.category === category;
       return matchesQuery && matchesCat;
     });
@@ -36,13 +42,17 @@ const Apps: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-6xl">
-      
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
+        <div
+          className="h-9 w-9 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(69,131,196,0.15)' }}
+        >
           <Grid3x3 size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>All apps</h1>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            All apps
+          </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
             Everything rtylr offers, in one place.
           </p>
@@ -51,8 +61,17 @@ const Apps: React.FC = () => {
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--hub-text-dim)' }} />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search apps..." className="pl-9" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: 'var(--hub-text-dim)' }}
+          />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search apps..."
+            className="pl-9"
+          />
         </div>
         <div className="flex items-center gap-1 flex-wrap">
           {CATEGORIES.map((c) => (
@@ -62,8 +81,11 @@ const Apps: React.FC = () => {
               className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
                 background: category === c.key ? 'rgba(69,131,196,0.15)' : 'var(--hub-hover)',
-                color:      category === c.key ? '#4583C4' : 'var(--hub-text-muted)',
-                border:     category === c.key ? '1px solid rgba(69,131,196,0.3)' : '1px solid var(--hub-border)',
+                color: category === c.key ? '#4583C4' : 'var(--hub-text-muted)',
+                border:
+                  category === c.key
+                    ? '1px solid rgba(69,131,196,0.3)'
+                    : '1px solid var(--hub-border)',
               }}
             >
               {c.label}
@@ -75,10 +97,16 @@ const Apps: React.FC = () => {
       {isLoading ? (
         <SkeletonGrid cols={3} rows={3} />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Grid3x3} title="No apps found" description="Try a different search or category." />
+        <EmptyState
+          icon={Grid3x3}
+          title="No apps found"
+          description="Try a different search or category."
+        />
       ) : (
         <div className="grid grid-cols-3 gap-4">
-          {filtered.map((app) => <AppCard key={app.key} app={app} />)}
+          {filtered.map((app) => (
+            <AppCard key={app.key} app={app} />
+          ))}
         </div>
       )}
     </div>

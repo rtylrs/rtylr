@@ -1,5 +1,5 @@
-import api from "../lib/api";
-import { API_ROUTES } from "./routes";
+import api from '../lib/api';
+import { API_ROUTES } from './routes';
 
 const editAddons = async ({ id, addons }) => {
   try {
@@ -8,7 +8,7 @@ const editAddons = async ({ id, addons }) => {
     });
     return res.data;
   } catch (error) {
-    console.error("Error editing addons:", error);
+    console.error('Error editing addons:', error);
     throw error;
   }
 };

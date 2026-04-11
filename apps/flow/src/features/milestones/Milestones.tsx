@@ -15,7 +15,12 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 const Milestones: React.FC = () => {
   const { data: milestones = [], isLoading } = useMilestones();
 
-  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading milestones...</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading milestones...
+      </div>
+    );
 
   if (milestones.length === 0) {
     return (
@@ -65,8 +70,10 @@ const Milestones: React.FC = () => {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="h-8 w-8 rounded-md flex items-center justify-center"
-                    style={{ background: `${m.project?.color || '#64C5B9'}22` }}>
+                  <span
+                    className="h-8 w-8 rounded-md flex items-center justify-center"
+                    style={{ background: `${m.project?.color || '#64C5B9'}22` }}
+                  >
                     <MilestoneIcon size={14} style={{ color: m.project?.color || '#64C5B9' }} />
                   </span>
                   <div>
@@ -98,16 +105,22 @@ const Milestones: React.FC = () => {
                   {m.computedProgress}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden mb-3"
-                style={{ background: 'var(--flow-hover)' }}>
+              <div
+                className="h-1.5 rounded-full overflow-hidden mb-3"
+                style={{ background: 'var(--flow-hover)' }}
+              >
                 <div
                   className="h-full transition-all"
                   style={{ width: `${m.computedProgress}%`, background: style.color }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px]"
-                style={{ color: 'var(--flow-text-dim)' }}>
-                <span>{m.doneCount} of {m.taskCount} tasks</span>
+              <div
+                className="flex items-center justify-between text-[10px]"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                <span>
+                  {m.doneCount} of {m.taskCount} tasks
+                </span>
                 <span>Target: {formatDate(m.targetDate)}</span>
               </div>
             </motion.div>

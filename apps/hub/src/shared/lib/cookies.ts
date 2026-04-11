@@ -8,8 +8,7 @@ export interface SetCookieOptions {
   sameSite?: CookieSameSite;
 }
 
-const isBrowser =
-  typeof document !== 'undefined' && typeof window !== 'undefined';
+const isBrowser = typeof document !== 'undefined' && typeof window !== 'undefined';
 
 export function getCookie(name: string): string | null {
   if (!isBrowser) return null;
@@ -23,11 +22,7 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
-export function setCookie(
-  name: string,
-  value: string,
-  options: SetCookieOptions = {}
-): void {
+export function setCookie(name: string, value: string, options: SetCookieOptions = {}): void {
   if (!isBrowser) return;
 
   const {
@@ -54,10 +49,7 @@ export function setCookie(
   document.cookie = cookie;
 }
 
-export function removeCookie(
-  name: string,
-  options: { path?: string; domain?: string } = {}
-): void {
+export function removeCookie(name: string, options: { path?: string; domain?: string } = {}): void {
   if (!isBrowser) return;
   const { path = '/', domain } = options;
   let cookie = `${name}=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=${path}`;
@@ -69,8 +61,7 @@ export function getDefaultCookieDomain(): string | undefined {
   if (!isBrowser) return undefined;
   const hostname = window.location.hostname.toLowerCase();
 
-  const isLocalhost =
-    hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+  const isLocalhost = hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
   if (isLocalhost) return undefined;
 
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) {

@@ -1,12 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import {
-  fadeInUp,
-  staggerContainer,
-  scaleIn,
-  viewportOnce,
-} from '../../../lib/animations';
+import { fadeInUp, staggerContainer, scaleIn, viewportOnce } from '../../../lib/animations';
 import styles from './UseCasesSection.module.scss';
 
 const useCases = [
@@ -43,9 +38,7 @@ const UseCasesSection: React.FC = () => {
           variants={fadeInUp}
         >
           <h2 className={styles.sectionTitle}>Solutions for Every Business</h2>
-          <p className={styles.sectionDescription}>
-            Tailored POS solutions for your industry
-          </p>
+          <p className={styles.sectionDescription}>Tailored POS solutions for your industry</p>
         </motion.div>
 
         <motion.div
@@ -59,9 +52,7 @@ const UseCasesSection: React.FC = () => {
             <motion.div key={index} variants={scaleIn}>
               <Link href={useCase.href} className={styles.useCaseCard}>
                 <h3 className={styles.useCaseTitle}>{useCase.title}</h3>
-                <p className={styles.useCaseDescription}>
-                  {useCase.description}
-                </p>
+                <p className={styles.useCaseDescription}>{useCase.description}</p>
                 <span className={styles.useCaseLink}>Learn more →</span>
               </Link>
             </motion.div>

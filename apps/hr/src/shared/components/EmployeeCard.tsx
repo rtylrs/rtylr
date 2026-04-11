@@ -13,7 +13,12 @@ const PALETTE = [
 ];
 
 export function initials(name: string) {
-  return name.split(' ').map((n) => n[0] ?? '').join('').slice(0, 2).toUpperCase();
+  return name
+    .split(' ')
+    .map((n) => n[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 export function paletteFor(id: number) {
@@ -44,8 +49,12 @@ const EmployeeCard: React.FC<Props> = ({ staff, compact = false, linkTo }) => {
         textDecoration: 'none',
         color: 'inherit',
       }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.35)')}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--hr-border)')}
+      onMouseEnter={(e) =>
+        ((e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.35)')
+      }
+      onMouseLeave={(e) =>
+        ((e.currentTarget as HTMLDivElement).style.borderColor = 'var(--hr-border)')
+      }
     >
       <span
         style={{
@@ -65,7 +74,16 @@ const EmployeeCard: React.FC<Props> = ({ staff, compact = false, linkTo }) => {
         {initials(staff.name)}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--hr-text)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {staff.name}
         </div>
         <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
@@ -73,13 +91,15 @@ const EmployeeCard: React.FC<Props> = ({ staff, compact = false, linkTo }) => {
           {staff.department && <> • {staff.department}</>}
         </div>
       </div>
-      {!compact && (
-        <Mail size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />
-      )}
+      {!compact && <Mail size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />}
     </div>
   );
 
-  return <Link to={href} style={{ textDecoration: 'none' }}>{body}</Link>;
+  return (
+    <Link to={href} style={{ textDecoration: 'none' }}>
+      {body}
+    </Link>
+  );
 };
 
 export default EmployeeCard;

@@ -30,7 +30,11 @@ const Products: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<ProductFilters['status']>();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
-  const { data: products, isLoading, error } = useProducts({
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useProducts({
     search: debouncedSearch || undefined,
     status: statusFilter,
   });
@@ -38,20 +42,34 @@ const Products: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load products</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load products
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4 max-w-7xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-4 max-w-7xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Package size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Products</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Products
+          </h2>
           {!isLoading && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
               {(products ?? []).length}
             </span>
           )}
@@ -83,9 +101,15 @@ const Products: React.FC = () => {
         </div>
         <select
           value={statusFilter ?? ''}
-          onChange={(e) => setStatusFilter((e.target.value || undefined) as ProductFilters['status'])}
+          onChange={(e) =>
+            setStatusFilter((e.target.value || undefined) as ProductFilters['status'])
+          }
           className="px-3 py-2 rounded-lg text-sm"
-          style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+          style={{
+            background: 'var(--hub-input-bg)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text)',
+          }}
         >
           <option value="">All statuses</option>
           <option value="active">Active</option>
@@ -96,14 +120,20 @@ const Products: React.FC = () => {
           <button
             onClick={() => setViewMode('list')}
             className="h-8 w-8 rounded-lg flex items-center justify-center"
-            style={{ background: viewMode === 'list' ? 'var(--hub-active)' : 'transparent', color: 'var(--hub-text-muted)' }}
+            style={{
+              background: viewMode === 'list' ? 'var(--hub-active)' : 'transparent',
+              color: 'var(--hub-text-muted)',
+            }}
           >
             <List size={14} />
           </button>
           <button
             onClick={() => setViewMode('grid')}
             className="h-8 w-8 rounded-lg flex items-center justify-center"
-            style={{ background: viewMode === 'grid' ? 'var(--hub-active)' : 'transparent', color: 'var(--hub-text-muted)' }}
+            style={{
+              background: viewMode === 'grid' ? 'var(--hub-active)' : 'transparent',
+              color: 'var(--hub-text-muted)',
+            }}
           >
             <Grid3X3 size={14} />
           </button>
@@ -113,17 +143,23 @@ const Products: React.FC = () => {
       {/* Product list */}
       {isLoading ? (
         <div className="space-y-1">
-          {Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={5} />)}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonRow key={i} cols={5} />
+          ))}
         </div>
       ) : (products ?? []).length === 0 ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
           <Package size={32} style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No products found</p>
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            No products found
+          </p>
         </motion.div>
       ) : viewMode === 'list' ? (
         <motion.div variants={containerVariants} className="space-y-1">
-          <div className="grid grid-cols-6 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
-            style={{ color: 'var(--hub-text-dim)' }}>
+          <div
+            className="grid grid-cols-6 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             <span className="col-span-2">Product</span>
             <span>SKU</span>
             <span>Price</span>
@@ -146,15 +182,23 @@ const Products: React.FC = () => {
                   >
                     <Package size={12} style={{ color: TEAL }} />
                   </div>
-                  <span className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                  <span
+                    className="text-xs font-medium truncate"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
                     {product.name}
                   </span>
                 </div>
-                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{product.sku}</span>
+                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  {product.sku}
+                </span>
                 <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
                   {formatCurrency(product.price)}
                 </span>
-                <span className="text-xs" style={{ color: product.stock <= 0 ? '#ef4444' : 'var(--hub-text-muted)' }}>
+                <span
+                  className="text-xs"
+                  style={{ color: product.stock <= 0 ? '#ef4444' : 'var(--hub-text-muted)' }}
+                >
                   {product.stock}
                 </span>
                 <span
@@ -168,7 +212,10 @@ const Products: React.FC = () => {
           })}
         </motion.div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <motion.div
+          variants={containerVariants}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+        >
           {(products ?? []).map((product) => {
             const statusStyle = getStatusStyle(product.status);
             return (
@@ -177,8 +224,12 @@ const Products: React.FC = () => {
                 variants={itemVariants}
                 className="rounded-xl p-4 cursor-pointer transition-all"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.3)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                }}
               >
                 <div
                   className="h-24 rounded-lg mb-3 flex items-center justify-center"
@@ -186,7 +237,10 @@ const Products: React.FC = () => {
                 >
                   <Package size={24} style={{ color: 'var(--hub-text-dim)' }} />
                 </div>
-                <p className="text-xs font-medium truncate mb-1" style={{ color: 'var(--hub-text)' }}>
+                <p
+                  className="text-xs font-medium truncate mb-1"
+                  style={{ color: 'var(--hub-text)' }}
+                >
                   {product.name}
                 </p>
                 <div className="flex items-center justify-between">

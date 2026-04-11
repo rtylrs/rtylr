@@ -77,19 +77,29 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+              <h3
+                className="text-sm font-semibold flex items-center gap-2"
+                style={{ color: 'var(--hub-text)' }}
+              >
                 <FileText size={14} /> Preview ({preview.length} rows)
               </h3>
               <button onClick={() => setPreview(null)}>
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>
-            <div className="overflow-auto max-h-64 rounded-lg" style={{ border: '1px solid var(--hub-border)' }}>
+            <div
+              className="overflow-auto max-h-64 rounded-lg"
+              style={{ border: '1px solid var(--hub-border)' }}
+            >
               <table className="w-full text-xs">
                 <thead>
                   <tr style={{ background: 'var(--hub-hover)' }}>
                     {Object.keys(preview[0]).map((k) => (
-                      <th key={k} className="p-2 text-left font-semibold" style={{ color: 'var(--hub-text-muted)' }}>
+                      <th
+                        key={k}
+                        className="p-2 text-left font-semibold"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
                         {k}
                       </th>
                     ))}

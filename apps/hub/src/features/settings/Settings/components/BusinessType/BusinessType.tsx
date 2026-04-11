@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useBusinessStore } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button, Input, Label } from '../../../../../shared/components/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  Button,
+  Input,
+  Label,
+} from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
 
 type IndustryGroup = {
@@ -16,47 +25,47 @@ const INDUSTRY_GROUPS: IndustryGroup[] = [
     label: 'Food & Beverage',
     emoji: '🍽️',
     types: [
-      { value: 'restaurant',  label: 'Restaurant' },
-      { value: 'cafe',        label: 'Cafe / Coffee Shop' },
-      { value: 'bar',         label: 'Bar / Pub' },
-      { value: 'food_truck',  label: 'Food Truck' },
-      { value: 'bakery',      label: 'Bakery' },
-      { value: 'juice_bar',   label: 'Juice Bar' },
-      { value: 'catering',    label: 'Catering' },
-      { value: 'fast_food',   label: 'Fast Food' },
+      { value: 'restaurant', label: 'Restaurant' },
+      { value: 'cafe', label: 'Cafe / Coffee Shop' },
+      { value: 'bar', label: 'Bar / Pub' },
+      { value: 'food_truck', label: 'Food Truck' },
+      { value: 'bakery', label: 'Bakery' },
+      { value: 'juice_bar', label: 'Juice Bar' },
+      { value: 'catering', label: 'Catering' },
+      { value: 'fast_food', label: 'Fast Food' },
     ],
   },
   {
     label: 'Retail',
     emoji: '🛍️',
     types: [
-      { value: 'retail_clothing',  label: 'Clothing & Apparel' },
-      { value: 'retail_grocery',   label: 'Grocery / Supermarket' },
-      { value: 'retail_pharmacy',  label: 'Pharmacy' },
+      { value: 'retail_clothing', label: 'Clothing & Apparel' },
+      { value: 'retail_grocery', label: 'Grocery / Supermarket' },
+      { value: 'retail_pharmacy', label: 'Pharmacy' },
       { value: 'retail_electronics', label: 'Electronics' },
-      { value: 'retail_gifts',     label: 'Gifts & Souvenirs' },
-      { value: 'retail_books',     label: 'Books & Stationery' },
+      { value: 'retail_gifts', label: 'Gifts & Souvenirs' },
+      { value: 'retail_books', label: 'Books & Stationery' },
     ],
   },
   {
     label: 'Health & Beauty',
     emoji: '💆',
     types: [
-      { value: 'salon',      label: 'Hair Salon' },
-      { value: 'barber',     label: 'Barbershop' },
-      { value: 'spa',        label: 'Spa & Wellness' },
-      { value: 'gym',        label: 'Gym / Fitness' },
+      { value: 'salon', label: 'Hair Salon' },
+      { value: 'barber', label: 'Barbershop' },
+      { value: 'spa', label: 'Spa & Wellness' },
+      { value: 'gym', label: 'Gym / Fitness' },
       { value: 'nail_salon', label: 'Nail Salon' },
-      { value: 'clinic',     label: 'Medical Clinic' },
+      { value: 'clinic', label: 'Medical Clinic' },
     ],
   },
   {
     label: 'Hospitality',
     emoji: '🏨',
     types: [
-      { value: 'hotel',      label: 'Hotel' },
-      { value: 'hostel',     label: 'Hostel' },
-      { value: 'resort',     label: 'Resort' },
+      { value: 'hotel', label: 'Hotel' },
+      { value: 'hostel', label: 'Hostel' },
+      { value: 'resort', label: 'Resort' },
       { value: 'guesthouse', label: 'Guesthouse / B&B' },
     ],
   },
@@ -64,10 +73,10 @@ const INDUSTRY_GROUPS: IndustryGroup[] = [
     label: 'Other',
     emoji: '🏢',
     types: [
-      { value: 'events',     label: 'Events & Venue' },
-      { value: 'education',  label: 'Education' },
-      { value: 'services',   label: 'Professional Services' },
-      { value: 'other',      label: 'Other' },
+      { value: 'events', label: 'Events & Venue' },
+      { value: 'education', label: 'Education' },
+      { value: 'services', label: 'Professional Services' },
+      { value: 'other', label: 'Other' },
     ],
   },
 ];
@@ -81,7 +90,9 @@ const BusinessTypeSettings: React.FC = () => {
   const [selected, setSelected] = useState<string>(businessType || '');
   const [customType, setCustomType] = useState('');
 
-  useEffect(() => { if (businessType) setSelected(businessType); }, [businessType]);
+  useEffect(() => {
+    if (businessType) setSelected(businessType);
+  }, [businessType]);
 
   const handleSave = async () => {
     if (!userId || !selected) return;
@@ -94,9 +105,12 @@ const BusinessTypeSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>Industry</h1>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+          Industry
+        </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Select the category that best describes your business. This personalizes your dashboard experience.
+          Select the category that best describes your business. This personalizes your dashboard
+          experience.
         </p>
       </div>
 
@@ -118,11 +132,13 @@ const BusinessTypeSettings: React.FC = () => {
                       key={type.value}
                       onClick={() => setSelected(type.value)}
                       className={cn(
-                        'px-3 py-2.5 rounded-lg text-sm text-left transition-all font-medium',
+                        'px-3 py-2.5 rounded-lg text-sm text-left transition-all font-medium'
                       )}
                       style={{
                         background: isActive ? 'rgba(69,131,196,0.12)' : 'var(--hub-hover)',
-                        border: isActive ? '1px solid rgba(69,131,196,0.35)' : '1px solid transparent',
+                        border: isActive
+                          ? '1px solid rgba(69,131,196,0.35)'
+                          : '1px solid transparent',
                         color: isActive ? '#4583C4' : 'var(--hub-text-muted)',
                       }}
                     >
@@ -154,7 +170,8 @@ const BusinessTypeSettings: React.FC = () => {
       {selected && (
         <div className="flex items-center justify-between pt-1">
           <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
-            Selected: <span style={{ color: 'var(--hub-text)', fontWeight: 500 }}>
+            Selected:{' '}
+            <span style={{ color: 'var(--hub-text)', fontWeight: 500 }}>
               {ALL_TYPES.find((t) => t.value === selected)?.label ?? selected}
             </span>
           </p>

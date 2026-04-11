@@ -52,8 +52,7 @@ export const useUserStore = create<UserState & UserActions>()(
       login: (user) => set({ user, isAuthenticated: true }),
 
       logout: () => {
-        document.cookie =
-          'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         set({
           user: null,
           isAuthenticated: false,

@@ -12,12 +12,7 @@ const Maintanance: React.FC = () => {
 
   return clickCount < 10 ? (
     <div className="maintanance">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="100"
-        height="70"
-        viewBox="0 0 100 68"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 68">
         <g id="large">
           <path
             fill="none"
@@ -62,15 +57,13 @@ const Maintanance: React.FC = () => {
       >
         <p
           onMouseEnter={() => {
-            const footerVersionElement =
-              document.querySelector('.footer-version p');
+            const footerVersionElement = document.querySelector('.footer-version p');
             if (footerVersionElement) {
               footerVersionElement.innerHTML = 'Version ' + PackageJson.version;
             }
           }}
           onMouseLeave={() => {
-            const footerVersionElement =
-              document.querySelector('.footer-version p');
+            const footerVersionElement = document.querySelector('.footer-version p');
             if (footerVersionElement) {
               footerVersionElement.innerHTML = PackageJson.version;
             }
@@ -84,4 +77,3 @@ const Maintanance: React.FC = () => {
 };
 
 export default Maintanance;
-

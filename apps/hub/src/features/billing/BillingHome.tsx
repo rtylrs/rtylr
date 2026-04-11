@@ -1,8 +1,8 @@
 import React from 'react';
 import { CreditCard, Download, Check } from 'lucide-react';
-import { Button } from "../../shared/components/ui";
-import { Breadcrumbs, SettingSection, SkeletonList } from "../../shared/components/hub";
-import { useBilling, useInvoices, type Invoice } from "../../shared/hooks/queries/useBilling";
+import { Button } from '../../shared/components/ui';
+import { Breadcrumbs, SettingSection, SkeletonList } from '../../shared/components/hub';
+import { useBilling, useInvoices, type Invoice } from '../../shared/hooks/queries/useBilling';
 import { toast } from 'sonner';
 
 function formatMoney(amount: number, currency: string) {
@@ -14,10 +14,19 @@ function formatMoney(amount: number, currency: string) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
-const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: string }> = ({ label, used, limit, unit }) => {
+const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: string }> = ({
+  label,
+  used,
+  limit,
+  unit,
+}) => {
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const color = pct > 90 ? '#ef4444' : pct > 75 ? '#f59e0b' : '#10b981';
   return (
@@ -25,10 +34,15 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
       <div className="flex items-center justify-between text-xs">
         <span style={{ color: 'var(--hub-text-muted)' }}>{label}</span>
         <span style={{ color: 'var(--hub-text)' }}>
-          {used.toLocaleString()}{unit ?? ''} / {limit.toLocaleString()}{unit ?? ''}
+          {used.toLocaleString()}
+          {unit ?? ''} / {limit.toLocaleString()}
+          {unit ?? ''}
         </span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--hub-hover)' }}>
+      <div
+        className="h-1.5 rounded-full overflow-hidden"
+        style={{ background: 'var(--hub-hover)' }}
+      >
         <div className="h-full transition-all" style={{ width: `${pct}%`, background: color }} />
       </div>
     </div>
@@ -38,14 +52,18 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
 const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
   <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{invoice.number}</p>
-      <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>{formatDate(invoice.createdAt)}</p>
+      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        {invoice.number}
+      </p>
+      <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+        {formatDate(invoice.createdAt)}
+      </p>
     </div>
     <span
       className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
       style={{
         background: invoice.status === 'paid' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-        color:      invoice.status === 'paid' ? '#10b981' : '#f59e0b',
+        color: invoice.status === 'paid' ? '#10b981' : '#f59e0b',
       }}
     >
       {invoice.status}
@@ -65,9 +83,21 @@ const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
 );
 
 const PLANS = [
-  { key: 'starter',    label: 'Starter',    price: 29, seats: 5,  features: ['Hub', 'POS', '1 location'] },
-  { key: 'pro',        label: 'Pro',        price: 79, seats: 15, features: ['Everything in Starter', 'All apps', '5 locations', 'Priority support'] },
-  { key: 'enterprise', label: 'Enterprise', price: 0,  seats: 0,  features: ['Unlimited seats', 'SSO & SAML', 'Custom SLA', 'Dedicated manager'] },
+  { key: 'starter', label: 'Starter', price: 29, seats: 5, features: ['Hub', 'POS', '1 location'] },
+  {
+    key: 'pro',
+    label: 'Pro',
+    price: 79,
+    seats: 15,
+    features: ['Everything in Starter', 'All apps', '5 locations', 'Priority support'],
+  },
+  {
+    key: 'enterprise',
+    label: 'Enterprise',
+    price: 0,
+    seats: 0,
+    features: ['Unlimited seats', 'SSO & SAML', 'Custom SLA', 'Dedicated manager'],
+  },
 ];
 
 const BillingHome: React.FC = () => {
@@ -77,7 +107,6 @@ const BillingHome: React.FC = () => {
   if (isLoading || !billing) {
     return (
       <div className="space-y-5 max-w-4xl">
-        
         <SkeletonList rows={6} withAvatar={false} />
       </div>
     );
@@ -85,14 +114,20 @@ const BillingHome: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-4xl">
-      
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
+        <div
+          className="h-9 w-9 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(69,131,196,0.15)' }}
+        >
           <CreditCard size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Billing</h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>Subscription, usage, and invoices.</p>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Billing
+          </h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            Subscription, usage, and invoices.
+          </p>
         </div>
       </div>
 
@@ -102,14 +137,26 @@ const BillingHome: React.FC = () => {
             className="flex-1 rounded-lg p-4"
             style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>Plan</p>
-            <p className="text-2xl font-bold capitalize mt-1" style={{ color: 'var(--hub-text)' }}>{billing.plan}</p>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--hub-text-dim)' }}
+            >
+              Plan
+            </p>
+            <p className="text-2xl font-bold capitalize mt-1" style={{ color: 'var(--hub-text)' }}>
+              {billing.plan}
+            </p>
           </div>
           <div
             className="flex-1 rounded-lg p-4"
             style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>Monthly</p>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--hub-text-dim)' }}
+            >
+              Monthly
+            </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatMoney(billing.amount, billing.currency)}
             </p>
@@ -118,8 +165,16 @@ const BillingHome: React.FC = () => {
             className="flex-1 rounded-lg p-4"
             style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>Status</p>
-            <p className="text-2xl font-bold mt-1 capitalize" style={{ color: billing.status === 'active' ? '#10b981' : '#f59e0b' }}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--hub-text-dim)' }}
+            >
+              Status
+            </p>
+            <p
+              className="text-2xl font-bold mt-1 capitalize"
+              style={{ color: billing.status === 'active' ? '#10b981' : '#f59e0b' }}
+            >
               {billing.status}
             </p>
           </div>
@@ -128,14 +183,34 @@ const BillingHome: React.FC = () => {
 
       <SettingSection title="Usage this month" description="Resets on the 1st of each month.">
         <div className="space-y-4">
-          <UsageBar label="Seats"      used={billing.usage.seats.used}     limit={billing.usage.seats.limit} />
-          <UsageBar label="Orders"     used={billing.usage.orders.used}    limit={billing.usage.orders.limit} />
-          <UsageBar label="API calls"  used={billing.usage.apiCalls.used}  limit={billing.usage.apiCalls.limit} />
-          <UsageBar label="Storage"    used={billing.usage.storageGb.used} limit={billing.usage.storageGb.limit} unit=" GB" />
+          <UsageBar
+            label="Seats"
+            used={billing.usage.seats.used}
+            limit={billing.usage.seats.limit}
+          />
+          <UsageBar
+            label="Orders"
+            used={billing.usage.orders.used}
+            limit={billing.usage.orders.limit}
+          />
+          <UsageBar
+            label="API calls"
+            used={billing.usage.apiCalls.used}
+            limit={billing.usage.apiCalls.limit}
+          />
+          <UsageBar
+            label="Storage"
+            used={billing.usage.storageGb.used}
+            limit={billing.usage.storageGb.limit}
+            unit=" GB"
+          />
         </div>
       </SettingSection>
 
-      <SettingSection title="Upgrade plan" description="Change your plan at any time. Prorated instantly.">
+      <SettingSection
+        title="Upgrade plan"
+        description="Change your plan at any time. Prorated instantly."
+      >
         <div className="grid grid-cols-3 gap-3">
           {PLANS.map((plan) => {
             const isCurrent = plan.key === billing.plan;
@@ -149,8 +224,17 @@ const BillingHome: React.FC = () => {
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{plan.label}</p>
-                  {isCurrent && <span className="text-[10px] font-semibold uppercase" style={{ color: '#4583C4' }}>Current</span>}
+                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    {plan.label}
+                  </p>
+                  {isCurrent && (
+                    <span
+                      className="text-[10px] font-semibold uppercase"
+                      style={{ color: '#4583C4' }}
+                    >
+                      Current
+                    </span>
+                  )}
                 </div>
                 <p className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
                   {plan.price === 0 ? 'Custom' : `$${plan.price}`}
@@ -160,7 +244,11 @@ const BillingHome: React.FC = () => {
                 </p>
                 <ul className="space-y-1 mt-3 flex-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-1.5 text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
+                    <li
+                      key={f}
+                      className="flex items-start gap-1.5 text-[11px]"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
                       <Check size={10} className="mt-0.5 shrink-0" style={{ color: '#10b981' }} />
                       {f}
                     </li>
@@ -186,7 +274,9 @@ const BillingHome: React.FC = () => {
           <SkeletonList rows={3} withAvatar={false} />
         ) : (
           <div className="-mx-5">
-            {invoices.map((i) => <InvoiceRow key={i.id} invoice={i} />)}
+            {invoices.map((i) => (
+              <InvoiceRow key={i.id} invoice={i} />
+            ))}
           </div>
         )}
       </SettingSection>

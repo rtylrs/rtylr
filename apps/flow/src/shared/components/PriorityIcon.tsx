@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  AlertTriangle,
-  ArrowUp,
-  Equal,
-  ArrowDown,
-  Minus,
-} from 'lucide-react';
+import { AlertTriangle, ArrowUp, Equal, ArrowDown, Minus } from 'lucide-react';
 import { Task, PRIORITY_COLORS, PRIORITY_LABELS } from '../stores/flowStore';
 
 interface PriorityIconProps {
@@ -36,9 +30,7 @@ export const PriorityIcon: React.FC<PriorityIconProps> = ({
       title={PRIORITY_LABELS[priority]}
     >
       <Icon size={size} />
-      {showLabel && (
-        <span className="text-[12px] font-medium">{PRIORITY_LABELS[priority]}</span>
-      )}
+      {showLabel && <span className="text-[12px] font-medium">{PRIORITY_LABELS[priority]}</span>}
     </span>
   );
 };

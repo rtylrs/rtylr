@@ -1,5 +1,5 @@
-import api from "../lib/api";
-import { API_ROUTES } from "./routes";
+import api from '../lib/api';
+import { API_ROUTES } from './routes';
 
 const getNews = async () => {
   const res = await api.get(API_ROUTES.GET.GET_NEWS);

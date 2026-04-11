@@ -32,14 +32,9 @@ const OrderItemRow: React.FC<OrderItemRowProps> = ({
         <p className="text-xs text-pos-muted mt-0.5">{formatCurrency(lineTotal)}</p>
       </div>
       <div className="flex flex-col items-end gap-1.5">
-        {!readonly && (
-          <QuantityStepper value={item.quantity} onChange={onQtyChange} />
-        )}
+        {!readonly && <QuantityStepper value={item.quantity} onChange={onQtyChange} />}
         {!readonly && onNoteClick && (
-          <button
-            onClick={onNoteClick}
-            className="text-[10px] text-pos-muted hover:text-pos-text"
-          >
+          <button onClick={onNoteClick} className="text-[10px] text-pos-muted hover:text-pos-text">
             Note
           </button>
         )}

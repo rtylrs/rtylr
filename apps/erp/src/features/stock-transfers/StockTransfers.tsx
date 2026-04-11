@@ -78,11 +78,17 @@ const StockTransfers: React.FC = () => {
                   <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
                     #{t.id}
                   </span>
-                  <span className="text-xs font-medium truncate pr-2" style={{ color: 'var(--hub-text)' }}>
+                  <span
+                    className="text-xs font-medium truncate pr-2"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
                     {t.fromName}
                   </span>
                   <ArrowRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs font-medium truncate pr-2" style={{ color: 'var(--hub-text)' }}>
+                  <span
+                    className="text-xs font-medium truncate pr-2"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
                     {t.toName}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text)' }}>

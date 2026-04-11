@@ -47,11 +47,21 @@ function resolveCode(status: number): ApiErrorCode {
 
 function parseAxiosError(error: AxiosError<any>): ApiError {
   if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-    return { status: 0, code: 'TIMEOUT', message: 'Request timed out. Please try again.', cause: error };
+    return {
+      status: 0,
+      code: 'TIMEOUT',
+      message: 'Request timed out. Please try again.',
+      cause: error,
+    };
   }
 
   if (!error.response) {
-    return { status: 0, code: 'NETWORK_ERROR', message: 'Unable to reach the server. Check your connection.', cause: error };
+    return {
+      status: 0,
+      code: 'NETWORK_ERROR',
+      message: 'Unable to reach the server. Check your connection.',
+      cause: error,
+    };
   }
 
   const status = error.response.status;
@@ -59,13 +69,19 @@ function parseAxiosError(error: AxiosError<any>): ApiError {
   const message =
     data?.message ??
     data?.error ??
-    (status === 401 ? 'Session expired. Please sign in again.' :
-     status === 403 ? 'You do not have permission to perform this action.' :
-     status === 404 ? 'The requested resource was not found.' :
-     status === 422 ? 'Please check your input and try again.' :
-     status === 429 ? 'Too many requests. Please wait a moment.' :
-     status >= 500 ? 'Something went wrong on our end. Please try again.' :
-     'An unexpected error occurred.');
+    (status === 401
+      ? 'Session expired. Please sign in again.'
+      : status === 403
+      ? 'You do not have permission to perform this action.'
+      : status === 404
+      ? 'The requested resource was not found.'
+      : status === 422
+      ? 'Please check your input and try again.'
+      : status === 429
+      ? 'Too many requests. Please wait a moment.'
+      : status >= 500
+      ? 'Something went wrong on our end. Please try again.'
+      : 'An unexpected error occurred.');
 
   return { status, code: resolveCode(status), message, cause: error };
 }
@@ -119,31 +135,31 @@ export function safeFetch(client: AxiosInstance): SafeApi {
     get: <T>(url: string, config?: AxiosRequestConfig) =>
       ResultAsync.fromPromise(
         client.get<T>(url, config).then((r) => r.data),
-        toApiError,
+        toApiError
       ),
 
     post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
       ResultAsync.fromPromise(
         client.post<T>(url, data, config).then((r) => r.data),
-        toApiError,
+        toApiError
       ),
 
     put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
       ResultAsync.fromPromise(
         client.put<T>(url, data, config).then((r) => r.data),
-        toApiError,
+        toApiError
       ),
 
     patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
       ResultAsync.fromPromise(
         client.patch<T>(url, data, config).then((r) => r.data),
-        toApiError,
+        toApiError
       ),
 
     delete: <T>(url: string, config?: AxiosRequestConfig) =>
       ResultAsync.fromPromise(
         client.delete<T>(url, config).then((r) => r.data),
-        toApiError,
+        toApiError
       ),
   };
 }

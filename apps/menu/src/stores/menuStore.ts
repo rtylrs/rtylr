@@ -131,11 +131,9 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
       }
     });
 
-    const response = await api.post(
-      `/menu/category/${categoryId}/item`,
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    );
+    const response = await api.post(`/menu/category/${categoryId}/item`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
     set((state) => {
       const items = state.items.map((cat) => {
@@ -156,9 +154,7 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
         if (isCategory(cat) && cat.menuItems.some((mi) => mi._id === itemId)) {
           return {
             ...cat,
-            menuItems: cat.menuItems.map((mi) =>
-              mi._id === itemId ? response.data : mi
-            ),
+            menuItems: cat.menuItems.map((mi) => (mi._id === itemId ? response.data : mi)),
           };
         }
         return cat;
@@ -205,9 +201,7 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
   deleteCategory: async (categoryId) => {
     await api.delete(`/menu/category/${categoryId}`);
     set((state) => ({
-      items: state.items.filter(
-        (item) => isCategory(item) && item._id !== categoryId
-      ),
+      items: state.items.filter((item) => isCategory(item) && item._id !== categoryId),
     }));
   },
 

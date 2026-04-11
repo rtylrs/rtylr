@@ -1,11 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import {
-  BusinessInfo,
-  HeaderConfig,
-  NavConfig,
-  PageConfig,
-} from '../../types';
+import { BusinessInfo, HeaderConfig, NavConfig, PageConfig } from '../../types';
 import styles from './MenuHeader.module.scss';
 
 // Re-export for backward compat
@@ -52,7 +47,11 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
   onCategorySelect,
   className,
 }) => {
-  const enabledPages = PAGE_DEFS.filter((p) => pages[p.id as keyof PageConfig] !== false && (p.id === 'menu' || pages[p.id as keyof PageConfig] === true));
+  const enabledPages = PAGE_DEFS.filter(
+    (p) =>
+      pages[p.id as keyof PageConfig] !== false &&
+      (p.id === 'menu' || pages[p.id as keyof PageConfig] === true)
+  );
   const showPageNav = enabledPages.length > 1;
   const showCategoryNav = activePage === 'menu' && categories && categories.length > 0;
   const coverH = COVER_HEIGHT[headerConfig.coverHeight] ?? '160px';
@@ -66,7 +65,13 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
     );
 
   return (
-    <header className={classNames(styles.header, { [styles['header--sticky']]: headerConfig.sticky }, className)}>
+    <header
+      className={classNames(
+        styles.header,
+        { [styles['header--sticky']]: headerConfig.sticky },
+        className
+      )}
+    >
       {/* Cover image */}
       {headerConfig.coverHeight !== 'none' && business.coverImage && (
         <div className={styles.header__cover} style={{ height: coverH }}>
@@ -97,9 +102,7 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
                   <a href={`tel:${business.phone}`}>{business.phone}</a>
                 </span>
               )}
-              {business.hours && (
-                <span className={styles.header__metaItem}>{business.hours}</span>
-              )}
+              {business.hours && <span className={styles.header__metaItem}>{business.hours}</span>}
             </div>
           )}
         </div>
@@ -122,9 +125,11 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
 
       {/* Category nav (menu page only) */}
       {showCategoryNav && (
-        <nav className={classNames(styles.header__nav, styles['header__nav--categories'], {
-          [styles['header__nav--sub']]: showPageNav,
-        })}>
+        <nav
+          className={classNames(styles.header__nav, styles['header__nav--categories'], {
+            [styles['header__nav--sub']]: showPageNav,
+          })}
+        >
           {categories!.map((cat) => (
             <button
               key={cat.id}

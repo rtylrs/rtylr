@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import { useMenuStore } from "../../../shared/stores/menuStore";
-import { useUserStore } from "../../../shared/stores/userStore";
+import { useState, useEffect } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import { useMenuStore } from '../../../shared/stores/menuStore';
+import { useUserStore } from '../../../shared/stores/userStore';
 
 interface CreateCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  addOrEdit: "add" | "edit";
+  addOrEdit: 'add' | 'edit';
   categoryData?: {
     _id: string;
     name: string;
@@ -25,35 +25,29 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   addOrEdit,
   categoryData,
 }) => {
-  const [category, setCategory] = useState(categoryData?.name || "");
-  const [description, setDescription] = useState(
-    categoryData?.description || ""
-  );
-  const [hasAlcohol, setHasAlcohol] = useState(
-    categoryData?.hasAlcohol || false
-  );
+  const [category, setCategory] = useState(categoryData?.name || '');
+  const [description, setDescription] = useState(categoryData?.description || '');
+  const [hasAlcohol, setHasAlcohol] = useState(categoryData?.hasAlcohol || false);
   const [availability, setAvailability] = useState(
-    categoryData?.availability || "always available"
+    categoryData?.availability || 'always available'
   );
-  const [iconURL, setIconURL] = useState(categoryData?.icon || "");
-  const [parentCategory, setParentCategory] = useState(
-    categoryData?.parentCategory || ""
-  );
+  const [iconURL, setIconURL] = useState(categoryData?.icon || '');
+  const [parentCategory, setParentCategory] = useState(categoryData?.parentCategory || '');
 
   const { userId: restaurantId } = useUserStore();
   const { items, addCategory, editCategory } = useMenuStore();
   const parentCategories = items.filter(
-    (item: any) => item.type === "category" && item.details.isParentCategory
+    (item: any) => item.type === 'category' && item.details.isParentCategory
   );
 
   useEffect(() => {
     if (isOpen && categoryData) {
-      setCategory(categoryData.name || "");
-      setDescription(categoryData.description || "");
+      setCategory(categoryData.name || '');
+      setDescription(categoryData.description || '');
       setHasAlcohol(categoryData.hasAlcohol || false);
-      setAvailability(categoryData.availability || "always available");
-      setIconURL(categoryData.icon || "");
-      setParentCategory(categoryData.parentCategory || "");
+      setAvailability(categoryData.availability || 'always available');
+      setIconURL(categoryData.icon || '');
+      setParentCategory(categoryData.parentCategory || '');
     }
   }, [isOpen, categoryData]);
 
@@ -70,20 +64,20 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         parentCategory,
       };
 
-      if (addOrEdit === "add") {
+      if (addOrEdit === 'add') {
         addCategory(categoryPayload);
-      } else if (addOrEdit === "edit" && categoryData) {
+      } else if (addOrEdit === 'edit' && categoryData) {
         editCategory(categoryData?._id, categoryPayload);
       }
-      setCategory("");
-      setDescription("");
+      setCategory('');
+      setDescription('');
       setHasAlcohol(false);
-      setAvailability("always available");
-      setIconURL("");
-      setParentCategory("");
+      setAvailability('always available');
+      setIconURL('');
+      setParentCategory('');
       onClose();
     } else {
-      alert("Category name and parent category cannot be empty.");
+      alert('Category name and parent category cannot be empty.');
     }
   };
 
@@ -94,7 +88,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         <Dialog.Content className="category-modal">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Dialog.Title asChild>
-              <h2>{addOrEdit === "add" ? "Create" : "Edit"} Category</h2>
+              <h2>{addOrEdit === 'add' ? 'Create' : 'Edit'} Category</h2>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
@@ -132,14 +126,9 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
             </div>
             <div className="form-group">
               <label>Category Availability:</label>
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-              >
+              <select value={availability} onChange={(e) => setAvailability(e.target.value)}>
                 <option value="hidden">Hidden</option>
-                <option value="available at certain time">
-                  Available at certain time
-                </option>
+                <option value="available at certain time">Available at certain time</option>
                 <option value="always available">Always available</option>
               </select>
             </div>

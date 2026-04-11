@@ -64,9 +64,11 @@ const PinLogin: React.FC = () => {
       <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
         <div className="flex flex-col items-center gap-1 text-center">
           <img
-            src={theme === 'dark'
-              ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
-              : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp'}
+            src={
+              theme === 'dark'
+                ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
+                : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp'
+            }
             alt="rtylr"
             className="h-8 w-auto"
           />

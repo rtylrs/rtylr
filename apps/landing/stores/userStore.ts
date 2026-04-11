@@ -56,11 +56,12 @@ export const useUserStore = create<UserState>()(
       setUserId: (userId) => set({ userId }),
       setAddons: (addons) => set({ addons }),
       setVisits: (visits) => set({ visits }),
-      logout: () => set({
-        ...initialState,
-        token: null,
-        isAuthenticated: false
-      }),
+      logout: () =>
+        set({
+          ...initialState,
+          token: null,
+          isAuthenticated: false,
+        }),
       reset: () => set(initialState),
     }),
     {

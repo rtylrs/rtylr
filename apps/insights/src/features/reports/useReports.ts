@@ -18,7 +18,14 @@ export function useGenerateReport() {
 
 export function useExportReport() {
   return useMutation({
-    mutationFn: ({ templateId, format, params }: { templateId: string; format: 'csv' | 'pdf'; params?: Record<string, string> }) =>
-      unwrap(insightsService.exportReport(templateId, format, params)),
+    mutationFn: ({
+      templateId,
+      format,
+      params,
+    }: {
+      templateId: string;
+      format: 'csv' | 'pdf';
+      params?: Record<string, string>;
+    }) => unwrap(insightsService.exportReport(templateId, format, params)),
   });
 }

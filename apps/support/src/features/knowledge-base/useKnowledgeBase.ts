@@ -38,8 +38,13 @@ export function useCreateArticle() {
 export function useUpdateArticle() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { title?: string; body?: string; category?: string } }) =>
-      unwrap(supportService.updateArticle(id, data)),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: { title?: string; body?: string; category?: string };
+    }) => unwrap(supportService.updateArticle(id, data)),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['articles'] });
       qc.invalidateQueries({ queryKey: ['article', vars.id] });

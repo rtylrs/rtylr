@@ -25,28 +25,42 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
     >
       <div className="flex items-start justify-between">
-        <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
+        <div
+          className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
           style={{
             background: 'var(--hub-hover)',
             border: '1px solid var(--hub-border)',
-          }}>
-          <span className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>{integration.logo}</span>
+          }}
+        >
+          <span className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+            {integration.logo}
+          </span>
         </div>
         {isConnected && (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
-            style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+          <span
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
+            style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}
+          >
             <Check size={10} /> Connected
           </span>
         )}
         {isComingSoon && (
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
+          <span
+            className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
+            style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+          >
             Soon
           </span>
         )}
       </div>
       <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{integration.name}</p>
-        <p className="text-xs mt-0.5 leading-relaxed line-clamp-2" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          {integration.name}
+        </p>
+        <p
+          className="text-xs mt-0.5 leading-relaxed line-clamp-2"
+          style={{ color: 'var(--hub-text-muted)' }}
+        >
           {integration.description}
         </p>
       </div>

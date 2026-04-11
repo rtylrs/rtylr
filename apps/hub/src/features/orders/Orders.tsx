@@ -15,7 +15,7 @@ import {
   TableHead,
   TableCell,
   Badge,
-} from "../../shared/components/ui";
+} from '../../shared/components/ui';
 
 type OrderStatus = 'all' | 'pending' | 'in_progress' | 'completed';
 
@@ -42,8 +42,12 @@ const EmptyState: React.FC<{ label: string }> = ({ label }) => (
     <TableCell colSpan={7}>
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <ShoppingBag size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>No {label} orders</p>
-        <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>Orders will appear here once placed by customers</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+          No {label} orders
+        </p>
+        <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+          Orders will appear here once placed by customers
+        </p>
       </div>
     </TableCell>
   </TableRow>
@@ -73,13 +77,13 @@ const OrdersTable: React.FC<{ orders: any[]; emptyLabel: string }> = ({ orders, 
             <TableCell>{order.itemCount}</TableCell>
             <TableCell>${order.total.toFixed(2)}</TableCell>
             <TableCell>
-              <Badge variant={statusBadgeVariant[order.status]}>
-                {statusLabel[order.status]}
-              </Badge>
+              <Badge variant={statusBadgeVariant[order.status]}>{statusLabel[order.status]}</Badge>
             </TableCell>
             <TableCell className="text-gray-400 text-xs">{order.time}</TableCell>
             <TableCell className="text-right">
-              <Button variant="ghost" size="sm">View</Button>
+              <Button variant="ghost" size="sm">
+                View
+              </Button>
             </TableCell>
           </TableRow>
         ))
@@ -108,8 +112,12 @@ const Orders: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>Orders</h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>Incoming orders from your customer menus</p>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+          Orders
+        </h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          Incoming orders from your customer menus
+        </p>
       </div>
 
       {/* POS info banner */}
@@ -119,9 +127,12 @@ const Orders: React.FC = () => {
       >
         <Info size={16} className="shrink-0 mt-0.5" style={{ color: '#4583C4' }} />
         <div>
-          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>Orders are placed by customers</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+            Orders are placed by customers
+          </p>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-            Orders come in when customers scan your QR code or visit your menu link. Staff orders are created through your POS system.
+            Orders come in when customers scan your QR code or visit your menu link. Staff orders
+            are created through your POS system.
           </p>
         </div>
       </div>
@@ -129,9 +140,30 @@ const Orders: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Pending',     count: pendingOrders.length,    color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.2)',  icon: Clock },
-          { label: 'In Progress', count: inProgressOrders.length, color: '#4583C4', bg: 'rgba(69,131,196,0.12)',  border: 'rgba(69,131,196,0.2)',  icon: Loader2 },
-          { label: 'Completed',   count: completedOrders.length,  color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle2 },
+          {
+            label: 'Pending',
+            count: pendingOrders.length,
+            color: '#f59e0b',
+            bg: 'rgba(245,158,11,0.12)',
+            border: 'rgba(245,158,11,0.2)',
+            icon: Clock,
+          },
+          {
+            label: 'In Progress',
+            count: inProgressOrders.length,
+            color: '#4583C4',
+            bg: 'rgba(69,131,196,0.12)',
+            border: 'rgba(69,131,196,0.2)',
+            icon: Loader2,
+          },
+          {
+            label: 'Completed',
+            count: completedOrders.length,
+            color: '#10b981',
+            bg: 'rgba(16,185,129,0.12)',
+            border: 'rgba(16,185,129,0.2)',
+            icon: CheckCircle2,
+          },
         ].map(({ label, count, color, bg, border, icon: Icon }) => (
           <div
             key={label}
@@ -156,9 +188,7 @@ const Orders: React.FC = () => {
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="pending">
-                  <span className="flex items-center gap-1.5">
-                    {tabIcons.pending} Pending
-                  </span>
+                  <span className="flex items-center gap-1.5">{tabIcons.pending} Pending</span>
                 </TabsTrigger>
                 <TabsTrigger value="in_progress">
                   <span className="flex items-center gap-1.5">
@@ -166,9 +196,7 @@ const Orders: React.FC = () => {
                   </span>
                 </TabsTrigger>
                 <TabsTrigger value="completed">
-                  <span className="flex items-center gap-1.5">
-                    {tabIcons.completed} Completed
-                  </span>
+                  <span className="flex items-center gap-1.5">{tabIcons.completed} Completed</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>

@@ -3,7 +3,20 @@ import { toast } from 'sonner';
 import { MessageSquare, Plus, Calendar, Clock } from 'lucide-react';
 import { useOneOnOnes, useCreateOneOnOne } from '../../shared/hooks/useHrExtras';
 import { useStaff } from '../staff/useStaff';
-import { Card, SectionHeader, Button, EmptyState, Skeleton, Pill, Modal, Label, Input, Select, Textarea, useIsMobile } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  EmptyState,
+  Skeleton,
+  Pill,
+  Modal,
+  Label,
+  Input,
+  Select,
+  Textarea,
+  useIsMobile,
+} from '../../shared/components/ui';
 
 const OneOnOnes: React.FC = () => {
   const isMobile = useIsMobile(900);
@@ -11,7 +24,13 @@ const OneOnOnes: React.FC = () => {
   const { data: staff = [] } = useStaff();
   const create = useCreateOneOnOne();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ managerId: 0, reportId: 0, scheduledAt: '', duration: 30, topics: '' });
+  const [form, setForm] = useState({
+    managerId: 0,
+    reportId: 0,
+    scheduledAt: '',
+    duration: 30,
+    topics: '',
+  });
 
   const onCreate = () => {
     const manager = staff.find((s) => s.id === form.managerId);
@@ -29,7 +48,10 @@ const OneOnOnes: React.FC = () => {
         scheduledAt: new Date(form.scheduledAt).toISOString(),
         duration: form.duration,
         status: 'Scheduled',
-        topics: form.topics.split(',').map((t) => t.trim()).filter(Boolean),
+        topics: form.topics
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
       },
       {
         onSuccess: () => {
@@ -37,7 +59,7 @@ const OneOnOnes: React.FC = () => {
           setOpen(false);
           setForm({ managerId: 0, reportId: 0, scheduledAt: '', duration: 30, topics: '' });
         },
-      },
+      }
     );
   };
 
@@ -46,37 +68,85 @@ const OneOnOnes: React.FC = () => {
       <SectionHeader
         title="1-on-1s"
         subtitle="Scheduled manager-report conversations"
-        right={<Button variant="primary" icon={<Plus size={13} />} onClick={() => setOpen(true)}>Schedule 1-on-1</Button>}
+        right={
+          <Button variant="primary" icon={<Plus size={13} />} onClick={() => setOpen(true)}>
+            Schedule 1-on-1
+          </Button>
+        }
       />
       {isLoading ? (
         <Skeleton height={200} />
       ) : !data || data.length === 0 ? (
-        <EmptyState icon={<MessageSquare size={20} />} title="No 1-on-1s scheduled" description="Managers will see upcoming 1-on-1s here." />
+        <EmptyState
+          icon={<MessageSquare size={20} />}
+          title="No 1-on-1s scheduled"
+          description="Managers will see upcoming 1-on-1s here."
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {data.map((o) => (
             <Card key={o.id}>
-              <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 12, marginBottom: 8 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: 12,
+                  marginBottom: 8,
+                }}
+              >
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                    {o.manager} <span style={{ color: 'var(--hr-text-muted)', fontWeight: 400 }}>&harr;</span> {o.report}
+                    {o.manager}{' '}
+                    <span style={{ color: 'var(--hr-text-muted)', fontWeight: 400 }}>&harr;</span>{' '}
+                    {o.report}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginTop: 4,
+                      fontSize: 11,
+                      color: 'var(--hr-text-muted)',
+                    }}
+                  >
                     <Calendar size={11} /> {new Date(o.scheduledAt).toLocaleString()}
                     <span>•</span>
                     <Clock size={11} /> {o.duration} min
                   </div>
                 </div>
-                <Pill color={o.status === 'Completed' ? '#10b981' : o.status === 'Cancelled' ? '#ef4444' : '#3b82f6'}>
+                <Pill
+                  color={
+                    o.status === 'Completed'
+                      ? '#10b981'
+                      : o.status === 'Cancelled'
+                      ? '#ef4444'
+                      : '#3b82f6'
+                  }
+                >
                   {o.status}
                 </Pill>
               </div>
               {o.topics.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                  {o.topics.map((t, i) => <Pill key={i}>{t}</Pill>)}
+                  {o.topics.map((t, i) => (
+                    <Pill key={i}>{t}</Pill>
+                  ))}
                 </div>
               )}
-              {o.notes && <p style={{ margin: '8px 0 0', fontSize: 11, color: 'var(--hr-text-muted)', fontStyle: 'italic' }}>"{o.notes}"</p>}
+              {o.notes && (
+                <p
+                  style={{
+                    margin: '8px 0 0',
+                    fontSize: 11,
+                    color: 'var(--hr-text-muted)',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  "{o.notes}"
+                </p>
+              )}
             </Card>
           ))}
         </div>
@@ -84,37 +154,69 @@ const OneOnOnes: React.FC = () => {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Schedule 1-on-1">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}
+          >
             <div>
               <Label>Manager</Label>
-              <Select value={form.managerId} onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}>
+              <Select
+                value={form.managerId}
+                onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}
+              >
                 <option value={0}>Select</option>
-                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
               <Label>Report</Label>
-              <Select value={form.reportId} onChange={(e) => setForm({ ...form, reportId: Number(e.target.value) })}>
+              <Select
+                value={form.reportId}
+                onChange={(e) => setForm({ ...form, reportId: Number(e.target.value) })}
+              >
                 <option value={0}>Select</option>
-                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
           <div>
             <Label>When</Label>
-            <Input type="datetime-local" value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
+            <Input
+              type="datetime-local"
+              value={form.scheduledAt}
+              onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+            />
           </div>
           <div>
             <Label>Duration (min)</Label>
-            <Input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={form.duration}
+              onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })}
+            />
           </div>
           <div>
             <Label>Topics (comma separated)</Label>
-            <Textarea value={form.topics} onChange={(e) => setForm({ ...form, topics: e.target.value })} placeholder="e.g. Career goals, Blockers, Feedback" />
+            <Textarea
+              value={form.topics}
+              onChange={(e) => setForm({ ...form, topics: e.target.value })}
+              placeholder="e.g. Career goals, Blockers, Feedback"
+            />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={onCreate}>Schedule</Button>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={onCreate}>
+              Schedule
+            </Button>
           </div>
         </div>
       </Modal>

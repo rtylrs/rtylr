@@ -145,10 +145,7 @@ const Calendar: React.FC = () => {
                     </button>
                   ))}
                   {dayTasks.length > 3 && (
-                    <span
-                      className="text-[9px] px-1"
-                      style={{ color: 'var(--flow-text-dim)' }}
-                    >
+                    <span className="text-[9px] px-1" style={{ color: 'var(--flow-text-dim)' }}>
                       +{dayTasks.length - 3} more
                     </span>
                   )}

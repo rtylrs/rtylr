@@ -35,12 +35,32 @@ const NotificationsSection: React.FC = () => {
   };
 
   const items = [
-    { key: 'taskAssigned' as const,      label: 'Task assigned to me',    desc: 'When someone assigns a task to you' },
-    { key: 'taskComments' as const,      label: 'Comments on my tasks',   desc: 'When someone comments on your tasks' },
-    { key: 'mentions' as const,          label: 'Mentions',               desc: 'When someone @mentions you' },
-    { key: 'statusChanges' as const,     label: 'Status changes',         desc: 'When a task you follow changes status' },
-    { key: 'weeklyDigest' as const,      label: 'Weekly digest',          desc: 'A weekly summary of your activity' },
-    { key: 'emailNotifications' as const,label: 'Email notifications',    desc: 'Receive notifications via email' },
+    {
+      key: 'taskAssigned' as const,
+      label: 'Task assigned to me',
+      desc: 'When someone assigns a task to you',
+    },
+    {
+      key: 'taskComments' as const,
+      label: 'Comments on my tasks',
+      desc: 'When someone comments on your tasks',
+    },
+    { key: 'mentions' as const, label: 'Mentions', desc: 'When someone @mentions you' },
+    {
+      key: 'statusChanges' as const,
+      label: 'Status changes',
+      desc: 'When a task you follow changes status',
+    },
+    {
+      key: 'weeklyDigest' as const,
+      label: 'Weekly digest',
+      desc: 'A weekly summary of your activity',
+    },
+    {
+      key: 'emailNotifications' as const,
+      label: 'Email notifications',
+      desc: 'Receive notifications via email',
+    },
   ];
 
   return (
@@ -196,15 +216,22 @@ const AppearanceSection: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-[12px] font-medium mb-3" style={{ color: 'var(--flow-text-muted)' }}>
+        <label
+          className="block text-[12px] font-medium mb-3"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
           Theme
         </label>
         <div className="grid grid-cols-3 gap-3">
           {(
             [
               { value: 'light', label: 'Light', preview: '#f4f4f5' },
-              { value: 'dark',  label: 'Dark',  preview: '#0a0a0a' },
-              { value: 'system',label: 'System', preview: 'linear-gradient(135deg, #f4f4f5 50%, #0a0a0a 50%)' },
+              { value: 'dark', label: 'Dark', preview: '#0a0a0a' },
+              {
+                value: 'system',
+                label: 'System',
+                preview: 'linear-gradient(135deg, #f4f4f5 50%, #0a0a0a 50%)',
+              },
             ] as const
           ).map(({ value, label, preview }) => (
             <button
@@ -217,10 +244,7 @@ const AppearanceSection: React.FC = () => {
                 color: theme === value ? ACCENT : 'var(--flow-text-muted)',
               }}
             >
-              <div
-                className="w-full h-12 rounded-lg mb-2"
-                style={{ background: preview }}
-              />
+              <div className="w-full h-12 rounded-lg mb-2" style={{ background: preview }} />
               {label}
             </button>
           ))}
@@ -228,14 +252,14 @@ const AppearanceSection: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--flow-text-muted)' }}>
+        <label
+          className="block text-[12px] font-medium mb-1.5"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
           Accent color
         </label>
         <div className="flex items-center gap-2">
-          <span
-            className="h-8 w-8 rounded-full"
-            style={{ background: ACCENT }}
-          />
+          <span className="h-8 w-8 rounded-full" style={{ background: ACCENT }} />
           <span className="text-[13px] font-mono" style={{ color: 'var(--flow-text)' }}>
             {ACCENT}
           </span>
@@ -331,15 +355,12 @@ const FlowSettings: React.FC = () => {
   const [activeSection, setActiveSection] = useState('notifications');
 
   const ActiveComponent =
-    SECTION_CONTENT[activeSection] ||
-    (() => <PlaceholderSection id={activeSection} />);
+    SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
       {/* Settings sidebar */}
-      <div
-        className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto"
-      >
+      <div className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto">
         <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">
           <h1
             className="mb-3 hidden text-[13px] font-semibold md:mb-4 md:block"

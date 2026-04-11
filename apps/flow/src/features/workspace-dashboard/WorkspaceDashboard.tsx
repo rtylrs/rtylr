@@ -69,10 +69,7 @@ const statCard = (
     }}
   >
     <div className="flex items-center justify-between">
-      <span
-        className="text-[12px] font-medium"
-        style={{ color: 'var(--flow-text-muted)' }}
-      >
+      <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
         {label}
       </span>
       <span
@@ -82,10 +79,7 @@ const statCard = (
         {icon}
       </span>
     </div>
-    <span
-      className="text-2xl font-bold"
-      style={{ color: 'var(--flow-text)' }}
-    >
+    <span className="text-2xl font-bold" style={{ color: 'var(--flow-text)' }}>
       {value}
     </span>
   </motion.div>
@@ -104,8 +98,7 @@ const WorkspaceDashboard: React.FC = () => {
 
   const firstName = user?.name?.split(' ')[0] || 'there';
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   const myTasks =
     apiStats?.myTasks ??
@@ -114,12 +107,16 @@ const WorkspaceDashboard: React.FC = () => {
     ) as any);
 
   const openTasks = apiStats?.openTasks ?? workspaceTasks.filter((t) => t.status === 'todo').length;
-  const inProgress = apiStats?.inProgress ?? workspaceTasks.filter((t) => t.status === 'in_progress').length;
-  const completedThisWeek = apiStats?.completedThisWeek ?? workspaceTasks.filter((t) => t.status === 'done').length;
-  const overdue = apiStats?.overdue ?? workspaceTasks.filter((t) => {
-    const d = new Date(t.dueDate);
-    return d < new Date() && t.status !== 'done';
-  }).length;
+  const inProgress =
+    apiStats?.inProgress ?? workspaceTasks.filter((t) => t.status === 'in_progress').length;
+  const completedThisWeek =
+    apiStats?.completedThisWeek ?? workspaceTasks.filter((t) => t.status === 'done').length;
+  const overdue =
+    apiStats?.overdue ??
+    workspaceTasks.filter((t) => {
+      const d = new Date(t.dueDate);
+      return d < new Date() && t.status !== 'done';
+    }).length;
 
   const uid = getCurrentUserId();
   const myCapacityHours = members.find((m) => m.id === uid)?.capacity ?? 40;
@@ -166,18 +163,12 @@ const WorkspaceDashboard: React.FC = () => {
         transition={{ duration: 0.2 }}
         className="mb-8"
       >
-        <h1
-          className="text-2xl font-bold mb-1"
-          style={{ color: 'var(--flow-text)' }}
-        >
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--flow-text)' }}>
           {greeting}, {firstName} 👋
         </h1>
         <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
           Here's what's happening in{' '}
-          <span style={{ color: workspace?.color || ACCENT }}>
-            {workspace?.name}
-          </span>{' '}
-          today.
+          <span style={{ color: workspace?.color || ACCENT }}>{workspace?.name}</span> today.
         </p>
       </motion.div>
 
@@ -225,10 +216,7 @@ const WorkspaceDashboard: React.FC = () => {
           }}
         >
           <div className="flex items-center justify-between">
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
+            <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
               Week load (your tasks due this week)
             </span>
             <Gauge size={15} style={{ color: ACCENT }} />
@@ -244,10 +232,7 @@ const WorkspaceDashboard: React.FC = () => {
               of ~{myCapacityHours}h capacity
             </span>
           </div>
-          <div
-            className="w-full rounded-full h-2"
-            style={{ background: 'var(--flow-hover)' }}
-          >
+          <div className="w-full rounded-full h-2" style={{ background: 'var(--flow-hover)' }}>
             <div
               className="h-2 rounded-full transition-all duration-500"
               style={{
@@ -273,17 +258,17 @@ const WorkspaceDashboard: React.FC = () => {
           }}
         >
           <div className="flex items-center justify-between">
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
+            <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
               Weekly review streak
             </span>
             <Flame size={15} style={{ color: '#f97316' }} />
           </div>
           <p className="text-3xl font-bold" style={{ color: 'var(--flow-text)' }}>
             {reviewStreak}
-            <span className="text-[14px] font-medium ml-1" style={{ color: 'var(--flow-text-dim)' }}>
+            <span
+              className="text-[14px] font-medium ml-1"
+              style={{ color: 'var(--flow-text-dim)' }}
+            >
               weeks
             </span>
           </p>
@@ -355,10 +340,7 @@ const WorkspaceDashboard: React.FC = () => {
                     >
                       {task.title}
                     </p>
-                    <p
-                      className="text-[11px] mt-0.5"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
                       {task.projectName}
                     </p>
                   </div>
@@ -402,10 +384,7 @@ const WorkspaceDashboard: React.FC = () => {
             className="flex items-center justify-between px-5 py-4"
             style={{ borderBottom: '1px solid var(--flow-border)' }}
           >
-            <h2
-              className="text-[14px] font-semibold"
-              style={{ color: 'var(--flow-text)' }}
-            >
+            <h2 className="text-[14px] font-semibold" style={{ color: 'var(--flow-text)' }}>
               Projects
             </h2>
             <Link
@@ -479,10 +458,7 @@ const WorkspaceDashboard: React.FC = () => {
                           </span>
                         ))}
                       </div>
-                      <span
-                        className="text-[11px]"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                      >
+                      <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
                         {progress}% done
                       </span>
                     </div>

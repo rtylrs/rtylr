@@ -12,7 +12,9 @@ import { formatCurrency } from '../../shared/utils/format';
 const ProductQuickEditScreen: React.FC = () => {
   const { items, loading, error, reload } = useMenuItems();
   const [search, setSearch] = useState('');
-  const [drafts, setDrafts] = useState<Record<string, { price: number; stock?: number; available: boolean }>>({});
+  const [drafts, setDrafts] = useState<
+    Record<string, { price: number; stock?: number; available: boolean }>
+  >({});
 
   useEffect(() => {
     setDrafts((prev) => {
@@ -31,7 +33,7 @@ const ProductQuickEditScreen: React.FC = () => {
   }, [items]);
 
   const filtered = items.filter(
-    (it) => !search || it.name.toLowerCase().includes(search.toLowerCase()),
+    (it) => !search || it.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const update = (id: string, field: keyof (typeof drafts)[string], value: any) =>
@@ -90,7 +92,11 @@ const ProductQuickEditScreen: React.FC = () => {
                         type="number"
                         value={draft.stock ?? ''}
                         onChange={(e) =>
-                          update(it.id, 'stock', e.target.value ? Number(e.target.value) : undefined)
+                          update(
+                            it.id,
+                            'stock',
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
                         className="h-10 w-20 rounded-lg bg-white/8 border border-pos-border px-2 text-pos-text"
                       />

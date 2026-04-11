@@ -16,7 +16,9 @@ export const Chip: React.FC<ChipProps> = ({
   size = 'sm',
   className,
 }) => (
-  <span className={`${styles.chip} ${styles[color]} ${styles[size]}${className ? ` ${className}` : ''}`}>
+  <span
+    className={`${styles.chip} ${styles[color]} ${styles[size]}${className ? ` ${className}` : ''}`}
+  >
     {icon && <span className={styles.icon}>{icon}</span>}
     {label}
   </span>

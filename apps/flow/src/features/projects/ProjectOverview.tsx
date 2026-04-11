@@ -30,27 +30,36 @@ const ProjectOverview: React.FC = () => {
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
 
-  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading project...</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading project...
+      </div>
+    );
 
   if (!data || !project) {
-    return <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>Project not found.</div>;
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Project not found.
+      </div>
+    );
   }
   const { stats, milestones } = data;
   const team = members.filter((m) => project.memberAvatars.includes(m.initials));
-  const recentComments: { id: string; author: string; authorInitials: string; body: string; createdAt: string }[] = [];
+  const recentComments: {
+    id: string;
+    author: string;
+    authorInitials: string;
+    body: string;
+    createdAt: string;
+  }[] = [];
   const health = HEALTH[project.health];
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
-          items={[
-            { label: 'Projects', to: `/w/${project.workspaceId}` },
-            { label: project.name },
-          ]}
+          items={[{ label: 'Projects', to: `/w/${project.workspaceId}` }, { label: project.name }]}
         />
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-3">
@@ -109,16 +118,20 @@ const ProjectOverview: React.FC = () => {
           style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--flow-text-muted)' }}>
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
               Progress
             </h3>
             <span className="text-[24px] font-bold" style={{ color: 'var(--flow-text)' }}>
               {stats.progress}%
             </span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden mb-4"
-            style={{ background: 'var(--flow-hover)' }}>
+          <div
+            className="h-2 rounded-full overflow-hidden mb-4"
+            style={{ background: 'var(--flow-hover)' }}
+          >
             <div
               className="h-full rounded-full transition-all"
               style={{ width: `${stats.progress}%`, background: project.color }}
@@ -126,7 +139,12 @@ const ProjectOverview: React.FC = () => {
           </div>
           <div className="grid grid-cols-4 gap-3">
             <StatCard icon={CheckCircle2} label="Done" value={stats.done} color="#22c55e" />
-            <StatCard icon={Activity} label="In progress" value={stats.inProgress} color="#3b82f6" />
+            <StatCard
+              icon={Activity}
+              label="In progress"
+              value={stats.inProgress}
+              color="#3b82f6"
+            />
             <StatCard icon={Clock} label="Total" value={stats.total} color="#64C5B9" />
             <StatCard icon={AlertCircle} label="Overdue" value={stats.overdue} color="#ef4444" />
           </div>
@@ -138,8 +156,10 @@ const ProjectOverview: React.FC = () => {
           style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--flow-text-muted)' }}>
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
               Milestones
             </h3>
             <MilestoneIcon size={12} style={{ color: 'var(--flow-text-dim)' }} />
@@ -160,7 +180,10 @@ const ProjectOverview: React.FC = () => {
                       {formatDate(m.targetDate)}
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--flow-hover)' }}>
+                  <div
+                    className="h-1.5 rounded-full overflow-hidden"
+                    style={{ background: 'var(--flow-hover)' }}
+                  >
                     <div
                       className="h-full"
                       style={{ width: `${m.progress}%`, background: '#64C5B9' }}
@@ -178,8 +201,10 @@ const ProjectOverview: React.FC = () => {
           style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--flow-text-muted)' }}>
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
               Team
             </h3>
             <Users size={12} style={{ color: 'var(--flow-text-dim)' }} />
@@ -201,8 +226,10 @@ const ProjectOverview: React.FC = () => {
           className="rounded-xl p-5"
           style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
         >
-          <h3 className="text-[12px] font-semibold uppercase tracking-wider mb-3"
-            style={{ color: 'var(--flow-text-muted)' }}>
+          <h3
+            className="text-[12px] font-semibold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
             Recent comments
           </h3>
           {recentComments.length === 0 ? (

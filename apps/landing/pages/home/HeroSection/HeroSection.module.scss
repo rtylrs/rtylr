@@ -62,7 +62,7 @@
       .alphaBadge {
         display: inline-block;
         background: rgba(69, 131, 196, 0.12);
-        color: #4583C4;
+        color: #4583c4;
         padding: 4px 12px;
         border-radius: 100px;
         font-size: 0.7rem;
@@ -349,12 +349,7 @@
             padding: 4px 10px;
             font-size: 0.65rem;
             font-weight: 600;
-            background: linear-gradient(
-              135deg,
-              #60a5fa 0%,
-              #a78bfa 50%,
-              #f0f9ff 100%
-            );
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f0f9ff 100%);
             color: #0d0d0d;
             border: none;
             border-radius: 4px;

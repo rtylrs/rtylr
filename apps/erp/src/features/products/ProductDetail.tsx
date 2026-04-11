@@ -43,11 +43,7 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
         vectorEffect="non-scaling-stroke"
         points={points}
       />
-      <polyline
-        fill={`${color}22`}
-        stroke="none"
-        points={`0,100 ${points} 100,100`}
-      />
+      <polyline fill={`${color}22`} stroke="none" points={`0,100 ${points} 100,100`} />
     </svg>
   );
 };
@@ -91,12 +87,7 @@ const ProductDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-5 max-w-5xl"
     >
-      <Breadcrumbs
-        items={[
-          { label: 'Products', to: '/products' },
-          { label: product.name },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: 'Products', to: '/products' }, { label: product.name }]} />
 
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -181,9 +172,15 @@ const ProductDetail: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-4 mt-5 pt-5" style={{ borderTop: '1px solid var(--hub-border)' }}>
+            <div
+              className="grid grid-cols-4 gap-4 mt-5 pt-5"
+              style={{ borderTop: '1px solid var(--hub-border)' }}
+            >
               <div>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>
+                <p
+                  className="text-[10px] uppercase tracking-wider"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                >
                   Cost Price
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--hub-text)' }}>
@@ -191,7 +188,10 @@ const ProductDetail: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>
+                <p
+                  className="text-[10px] uppercase tracking-wider"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                >
                   Sale Price
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: AMBER }}>
@@ -199,7 +199,10 @@ const ProductDetail: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>
+                <p
+                  className="text-[10px] uppercase tracking-wider"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                >
                   Margin
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: '#10b981' }}>
@@ -207,7 +210,10 @@ const ProductDetail: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>
+                <p
+                  className="text-[10px] uppercase tracking-wider"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                >
                   Stock
                 </p>
                 <div className="mt-0.5">
@@ -222,7 +228,10 @@ const ProductDetail: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+              <h3
+                className="text-sm font-semibold flex items-center gap-2"
+                style={{ color: 'var(--hub-text)' }}
+              >
                 <TrendingUp size={14} style={{ color: AMBER }} />
                 Stock History (12 weeks)
               </h3>
@@ -230,7 +239,9 @@ const ProductDetail: React.FC = () => {
             {stockHistory.length > 0 ? (
               <MiniLineChart data={stockHistory} color={AMBER} height={80} />
             ) : (
-              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>No stock history data yet.</p>
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
+                No stock history data yet.
+              </p>
             )}
           </div>
 
@@ -239,7 +250,10 @@ const ProductDetail: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+              <h3
+                className="text-sm font-semibold flex items-center gap-2"
+                style={{ color: 'var(--hub-text)' }}
+              >
                 <TrendingUp size={14} style={{ color: '#10b981' }} />
                 Sales History (7 days)
               </h3>
@@ -247,7 +261,9 @@ const ProductDetail: React.FC = () => {
             {salesHistory.length > 0 ? (
               <MiniLineChart data={salesHistory} color="#10b981" height={80} />
             ) : (
-              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>No sales history data yet.</p>
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
+                No sales history data yet.
+              </p>
             )}
           </div>
 
@@ -256,7 +272,10 @@ const ProductDetail: React.FC = () => {
               className="rounded-xl p-5"
               style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
             >
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+              <h3
+                className="text-sm font-semibold mb-3 flex items-center gap-2"
+                style={{ color: 'var(--hub-text)' }}
+              >
                 <Tag size={14} style={{ color: AMBER }} /> Variants
               </h3>
               <div className="space-y-2">
@@ -307,7 +326,10 @@ const ProductDetail: React.FC = () => {
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
-            <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--hub-text-muted)' }}>
+            <h3
+              className="text-xs font-semibold mb-3 flex items-center gap-2"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
               <Truck size={12} /> SUPPLIER INFO
             </h3>
             <div className="space-y-2 text-xs">
@@ -317,7 +339,9 @@ const ProductDetail: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-dim)' }}>Reorder Point</span>
-                <span style={{ color: 'var(--hub-text)' }}>{product.reorderPoint || product.lowStock} units</span>
+                <span style={{ color: 'var(--hub-text)' }}>
+                  {product.reorderPoint || product.lowStock} units
+                </span>
               </div>
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-dim)' }}>Unit</span>
@@ -330,7 +354,10 @@ const ProductDetail: React.FC = () => {
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
-            <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--hub-text-muted)' }}>
+            <h3
+              className="text-xs font-semibold mb-3 flex items-center gap-2"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
               <Clock size={12} /> ACTIVITY
             </h3>
             <div className="space-y-2 text-xs">

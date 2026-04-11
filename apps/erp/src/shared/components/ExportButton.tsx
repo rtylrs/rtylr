@@ -50,8 +50,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({ data, filename = 'export.cs
         color: 'var(--hub-text-muted)',
         border: '1px solid var(--hub-border)',
       }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--hub-text)'; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-muted)'; }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.color = 'var(--hub-text)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-muted)';
+      }}
     >
       <Download size={12} />
       Export CSV

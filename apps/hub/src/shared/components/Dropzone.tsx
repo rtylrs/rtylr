@@ -1,15 +1,12 @@
-import React, { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 
 interface DropzoneProps {
   onFileSelected: (file: File) => void;
   accept?: { [key: string]: string[] };
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({
-  onFileSelected,
-  accept = { "image/*": [] },
-}) => {
+const Dropzone: React.FC<DropzoneProps> = ({ onFileSelected, accept = { 'image/*': [] } }) => {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
@@ -26,7 +23,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
   });
 
   return (
-    <div {...getRootProps({ className: "dropzone" })} style={dropzoneStyle}>
+    <div {...getRootProps({ className: 'dropzone' })} style={dropzoneStyle}>
       <input {...getInputProps()} />
       {isDragActive ? (
         <p>Drop the files here ...</p>
@@ -38,11 +35,11 @@ const Dropzone: React.FC<DropzoneProps> = ({
 };
 
 const dropzoneStyle: React.CSSProperties = {
-  border: "2px dashed #9b51e0",
-  borderRadius: "6px",
-  padding: "20px",
-  textAlign: "center",
-  cursor: "pointer",
+  border: '2px dashed #9b51e0',
+  borderRadius: '6px',
+  padding: '20px',
+  textAlign: 'center',
+  cursor: 'pointer',
 };
 
 export default Dropzone;

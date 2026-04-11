@@ -41,7 +41,8 @@ const IMG_ASPECT_MAP: Record<string, string> = {
 };
 
 const MenuItem: React.FC<MenuItemProps> = ({ item, displayConfig, onClick, onAddToCart }) => {
-  const { imagePosition, imageSize, showDescription, showBadges, cardRadius, layout } = displayConfig;
+  const { imagePosition, imageSize, showDescription, showBadges, cardRadius, layout } =
+    displayConfig;
 
   const isUnavailable = item.available === false;
   const showImage = imagePosition !== 'none' && layout !== 'minimal';
@@ -62,15 +63,11 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, displayConfig, onClick, onAdd
 
   return (
     <div
-      className={classNames(
-        styles.item,
-        styles[`item--${layout}`],
-        {
-          [styles['item--unavailable']]: isUnavailable,
-          [styles['item--horizontal']]: isHorizontal,
-          [styles['item--imgLeft']]: imagePosition === 'left',
-        }
-      )}
+      className={classNames(styles.item, styles[`item--${layout}`], {
+        [styles['item--unavailable']]: isUnavailable,
+        [styles['item--horizontal']]: isHorizontal,
+        [styles['item--imgLeft']]: imagePosition === 'left',
+      })}
       style={cardStyle}
       onClick={() => !isUnavailable && onClick?.(item)}
     >
@@ -82,9 +79,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, displayConfig, onClick, onAdd
           ) : (
             <div className={styles.item__imagePlaceholder} />
           )}
-          {isUnavailable && (
-            <span className={styles.item__unavailableBadge}>Unavailable</span>
-          )}
+          {isUnavailable && <span className={styles.item__unavailableBadge}>Unavailable</span>}
         </div>
       )}
 
@@ -95,7 +90,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, displayConfig, onClick, onAdd
           {showBadges && item.badges && item.badges.length > 0 && (
             <div className={styles.item__badges}>
               {item.badges.map((b) => (
-                <span key={b} className={styles.item__badge}>{b}</span>
+                <span key={b} className={styles.item__badge}>
+                  {b}
+                </span>
               ))}
             </div>
           )}
@@ -110,7 +107,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, displayConfig, onClick, onAdd
           {onAddToCart && !isUnavailable && (
             <button
               className={layout === 'minimal' ? styles.item__addBtnMinimal : styles.item__addBtn}
-              onClick={(e) => { e.stopPropagation(); onAddToCart(item); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(item);
+              }}
               aria-label={`Add ${item.name} to cart`}
             >
               {layout === 'minimal' ? 'Add' : '+'}

@@ -3,7 +3,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useStaff } from '../staff/useStaff';
 import { useCreateReview } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Select, Textarea, Breadcrumbs, useIsMobile } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Label,
+  Input,
+  Select,
+  Textarea,
+  Breadcrumbs,
+  useIsMobile,
+} from '../../shared/components/ui';
 import RatingStars from '../../shared/components/RatingStars';
 
 const ReviewForm: React.FC = () => {
@@ -50,7 +60,7 @@ const ReviewForm: React.FC = () => {
           toast.success('Review created');
           nav('/reviews');
         },
-      },
+      }
     );
   };
 
@@ -60,27 +70,47 @@ const ReviewForm: React.FC = () => {
       <SectionHeader title="New Performance Review" subtitle="Rate goals, values, and skills" />
       <Card>
         <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}
+          >
             <div>
               <Label>Employee</Label>
               <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
                 <option value={0}>Select</option>
-                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
               <Label>Reviewer</Label>
               <Select value={reviewerId} onChange={(e) => setReviewerId(Number(e.target.value))}>
                 <option value={0}>Select</option>
-                {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staff.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
               </Select>
             </div>
           </div>
           <div>
             <Label>Period</Label>
-            <Input value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="e.g. Q2 2026" />
+            <Input
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              placeholder="e.g. Q2 2026"
+            />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 10 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+              gap: 10,
+            }}
+          >
             <div>
               <Label>Goals</Label>
               <RatingStars value={goals} onChange={setGoals} />
@@ -96,15 +126,35 @@ const ReviewForm: React.FC = () => {
           </div>
           <div>
             <Label>Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Key feedback and next steps" />
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Key feedback and next steps"
+            />
           </div>
-          <div style={{ padding: 10, background: 'var(--hr-hover)', borderRadius: 8, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              padding: 10,
+              background: 'var(--hr-hover)',
+              borderRadius: 8,
+              fontSize: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <span style={{ color: 'var(--hr-text-muted)' }}>Overall rating</span>
             <RatingStars value={overall} readOnly />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <Link to="/reviews"><Button type="button" variant="ghost">Cancel</Button></Link>
-            <Button type="submit" variant="primary">Submit review</Button>
+            <Link to="/reviews">
+              <Button type="button" variant="ghost">
+                Cancel
+              </Button>
+            </Link>
+            <Button type="submit" variant="primary">
+              Submit review
+            </Button>
           </div>
         </form>
       </Card>

@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Send, Lock, Circle, User } from 'lucide-react';
-import { useTicket, useTicketMessages, useSendTicketMessage, useUpdateTicketStatus } from './useTickets';
+import {
+  useTicket,
+  useTicketMessages,
+  useSendTicketMessage,
+  useUpdateTicketStatus,
+} from './useTickets';
 
 const statusColors: Record<string, string> = {
   open: '#3b82f6',
@@ -39,7 +44,10 @@ const TicketDetail: React.FC = () => {
   if (ticketLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 rounded animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+        <div
+          className="h-8 w-48 rounded animate-pulse"
+          style={{ background: 'var(--hub-hover)' }}
+        />
         <div className="h-64 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
       </div>
     );
@@ -47,9 +55,14 @@ const TicketDetail: React.FC = () => {
 
   if (ticketError || !ticket) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+      <div
+        className="flex flex-col items-center justify-center py-16 text-sm"
+        style={{ color: 'var(--hub-text-muted)' }}
+      >
         <p>Ticket not found</p>
-        <Link to="/tickets" className="mt-2 text-xs" style={{ color: '#4583C4' }}>Back to tickets</Link>
+        <Link to="/tickets" className="mt-2 text-xs" style={{ color: '#4583C4' }}>
+          Back to tickets
+        </Link>
       </div>
     );
   }
@@ -69,7 +82,9 @@ const TicketDetail: React.FC = () => {
             {ticket.subject}
           </h2>
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-xs font-mono" style={{ color: 'var(--hub-text-dim)' }}>#{ticket.id}</span>
+            <span className="text-xs font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+              #{ticket.id}
+            </span>
             <span
               className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
               style={{
@@ -111,13 +126,20 @@ const TicketDetail: React.FC = () => {
         {messagesLoading && (
           <div className="p-6 space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+              <div
+                key={i}
+                className="h-16 rounded-lg animate-pulse"
+                style={{ background: 'var(--hub-hover)' }}
+              />
             ))}
           </div>
         )}
 
         {!messagesLoading && messages.length === 0 && (
-          <div className="flex items-center justify-center py-12 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+          <div
+            className="flex items-center justify-center py-12 text-sm"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             No messages yet
           </div>
         )}
@@ -144,7 +166,10 @@ const TicketDetail: React.FC = () => {
                     {msg.senderName}
                   </span>
                   {msg.isInternal && (
-                    <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
+                    <span
+                      className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}
+                    >
                       <Lock size={8} />
                       Internal note
                     </span>

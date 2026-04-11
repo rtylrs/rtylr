@@ -33,9 +33,7 @@ const TopBanner: React.FC = () => {
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <span className={styles.alphaBadge}>ALPHA</span>
-            <span className={styles.badgeText}>
-              The all-in-one platform for your business
-            </span>
+            <span className={styles.badgeText}>The all-in-one platform for your business</span>
           </motion.div>
           <motion.h3
             className={styles.mainHeading}

@@ -67,7 +67,11 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
       />
       {value ? (
         <div style={{ position: 'relative' }}>
-          <img src={value} alt="Receipt" style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }} />
+          <img
+            src={value}
+            alt="Receipt"
+            style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }}
+          />
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -92,7 +96,17 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
             <X size={12} />
           </button>
           {ocrRunning && (
-            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: ACCENT, fontSize: 12 }}>
+            <div
+              style={{
+                marginTop: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: ACCENT,
+                fontSize: 12,
+              }}
+            >
               <Sparkles size={12} /> Running OCR...
             </div>
           )}
@@ -106,13 +120,32 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
           <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', marginTop: 6 }}>
             PNG, JPG up to 10MB
           </div>
-          <div style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, color: ACCENT }}>
+          <div
+            style={{
+              marginTop: 10,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 10,
+              color: ACCENT,
+            }}
+          >
             <Sparkles size={11} /> OCR preview enabled
           </div>
         </>
       )}
       {value && (
-        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--hub-text-dim)', fontSize: 11 }}>
+        <div
+          style={{
+            marginTop: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            color: 'var(--hub-text-dim)',
+            fontSize: 11,
+          }}
+        >
           <FileImage size={12} /> Click to replace
         </div>
       )}

@@ -11,7 +11,14 @@ interface FilterDrawerProps {
   children: React.ReactNode;
 }
 
-const FilterDrawer: React.FC<FilterDrawerProps> = ({ open, onClose, onApply, onReset, title = 'Filters', children }) => {
+const FilterDrawer: React.FC<FilterDrawerProps> = ({
+  open,
+  onClose,
+  onApply,
+  onReset,
+  title = 'Filters',
+  children,
+}) => {
   return (
     <AnimatePresence>
       {open && (
@@ -47,10 +54,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ open, onClose, onApply, onR
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">{children}</div>
-            <div
-              className="p-4 flex gap-2"
-              style={{ borderTop: '1px solid var(--hub-border)' }}
-            >
+            <div className="p-4 flex gap-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
               {onReset && (
                 <button
                   onClick={onReset}

@@ -75,7 +75,9 @@ const Revenue: React.FC = () => {
       {/* Comparison Cards */}
       {compLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -84,15 +86,22 @@ const Revenue: React.FC = () => {
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>Current Period</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+              Current Period
+            </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatCurrency(compData.current ?? 0)}
             </p>
             <div className="flex items-center gap-1 mt-1">
-              {(compData.changePercent ?? 0) >= 0
-                ? <ArrowUpRight size={12} style={{ color: '#10b981' }} />
-                : <ArrowDownRight size={12} style={{ color: '#f87171' }} />}
-              <span className="text-xs" style={{ color: (compData.changePercent ?? 0) >= 0 ? '#10b981' : '#f87171' }}>
+              {(compData.changePercent ?? 0) >= 0 ? (
+                <ArrowUpRight size={12} style={{ color: '#10b981' }} />
+              ) : (
+                <ArrowDownRight size={12} style={{ color: '#f87171' }} />
+              )}
+              <span
+                className="text-xs"
+                style={{ color: (compData.changePercent ?? 0) >= 0 ? '#10b981' : '#f87171' }}
+              >
                 {formatPercent(compData.changePercent ?? 0)} vs previous
               </span>
             </div>
@@ -102,7 +111,9 @@ const Revenue: React.FC = () => {
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>Previous Period</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+              Previous Period
+            </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatCurrency(compData.previous ?? 0)}
             </p>
@@ -112,7 +123,9 @@ const Revenue: React.FC = () => {
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
-            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>Difference</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+              Difference
+            </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatCurrency(compData.difference ?? 0)}
             </p>
@@ -134,10 +147,15 @@ const Revenue: React.FC = () => {
         </div>
         {isLoading ? (
           <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={3} />)}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
           </div>
         ) : revenueData.length === 0 ? (
-          <EmptyState title="No revenue data" description="Revenue data will appear here once transactions are recorded." />
+          <EmptyState
+            title="No revenue data"
+            description="Revenue data will appear here once transactions are recorded."
+          />
         ) : (
           <div className="space-y-1">
             {revenueData.map((item: any, i: number) => (
@@ -169,7 +187,9 @@ const Revenue: React.FC = () => {
         </h3>
         {byAppLoading ? (
           <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={2} />)}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonRow key={i} cols={2} />
+            ))}
           </div>
         ) : appBreakdown.length === 0 ? (
           <EmptyState title="No app breakdown" description="Breakdown by app will appear here." />

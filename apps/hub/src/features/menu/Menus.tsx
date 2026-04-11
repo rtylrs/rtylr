@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, UtensilsCrossed, Search, MoreHorizontal, CheckCircle } from 'lucide-react';
-import { useUserStore } from "../../shared/stores/userStore";
-import { useGetAllMenus, useCreateMenu, useSetActiveMenu } from "../../shared/hooks/queries/useMenu";
+import { useUserStore } from '../../shared/stores/userStore';
+import {
+  useGetAllMenus,
+  useCreateMenu,
+  useSetActiveMenu,
+} from '../../shared/hooks/queries/useMenu';
 import {
   Card,
   CardContent,
@@ -25,7 +29,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "../../shared/components/ui";
+} from '../../shared/components/ui';
 
 const Menus: React.FC = () => {
   const navigate = useNavigate();
@@ -43,9 +47,12 @@ const Menus: React.FC = () => {
 
   const handleCreate = () => {
     if (!newMenuName.trim() || !userId) return;
-    createMenu.mutate({ restaurantId: userId, menuName: newMenuName }, {
-      onSuccess: () => setNewMenuName(''),
-    });
+    createMenu.mutate(
+      { restaurantId: userId, menuName: newMenuName },
+      {
+        onSuccess: () => setNewMenuName(''),
+      }
+    );
   };
 
   const handleSetActive = (menuId: string) => {
@@ -80,7 +87,9 @@ const Menus: React.FC = () => {
                 placeholder="e.g. Lunch Menu, Drinks, Specials..."
                 value={newMenuName}
                 onChange={(e) => setNewMenuName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreate();
+                }}
               />
             </div>
             <DialogFooter>
@@ -112,8 +121,14 @@ const Menus: React.FC = () => {
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardContent className="pt-5">
-                <div className="h-4 animate-pulse rounded mb-2 w-3/4" style={{ background: 'var(--hub-hover)' }} />
-                <div className="h-3 animate-pulse rounded w-1/2" style={{ background: 'var(--hub-hover)' }} />
+                <div
+                  className="h-4 animate-pulse rounded mb-2 w-3/4"
+                  style={{ background: 'var(--hub-hover)' }}
+                />
+                <div
+                  className="h-3 animate-pulse rounded w-1/2"
+                  style={{ background: 'var(--hub-hover)' }}
+                />
               </CardContent>
             </Card>
           ))}
@@ -128,7 +143,10 @@ const Menus: React.FC = () => {
             const itemCount = menu.items?.length ?? menu.itemCount ?? 0;
             const isActive = menu.isActive || menu.active;
             return (
-              <Card key={menu._id} className="group hover:shadow-md transition-shadow cursor-pointer">
+              <Card
+                key={menu._id}
+                className="group hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -144,7 +162,9 @@ const Menus: React.FC = () => {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/app/business/menu/${menu._id}`)}>
+                          <DropdownMenuItem
+                            onClick={() => navigate(`/app/business/menu/${menu._id}`)}
+                          >
                             View Menu
                           </DropdownMenuItem>
                           {!isActive && (
@@ -177,7 +197,10 @@ const Menus: React.FC = () => {
       {/* Empty State */}
       {!isLoading && filteredMenus.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--hub-hover)' }}>
+          <div
+            className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4"
+            style={{ background: 'var(--hub-hover)' }}
+          >
             <UtensilsCrossed size={28} className="text-gray-300" />
           </div>
           <h3 className="text-sm font-semibold text-primary">No menus yet</h3>
@@ -207,7 +230,9 @@ const Menus: React.FC = () => {
                 <DialogClose>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleCreate} disabled={!newMenuName.trim()}>Create Menu</Button>
+                <Button onClick={handleCreate} disabled={!newMenuName.trim()}>
+                  Create Menu
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

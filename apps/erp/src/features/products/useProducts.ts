@@ -1,6 +1,11 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { erpApi, CreateProductInput, UpdateProductInput, Product } from '../../shared/services/erpApi';
+import {
+  erpApi,
+  CreateProductInput,
+  UpdateProductInput,
+  Product,
+} from '../../shared/services/erpApi';
 
 export interface ProductFilters {
   search?: string;
@@ -47,12 +52,14 @@ export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ['products', filters],
     queryFn: async () => {
-      const data = await unwrap(erpApi.listProducts({
-        search: filters?.search,
-        categoryId: filters?.categoryId,
-        limit: filters?.limit,
-        offset: filters?.offset,
-      }));
+      const data = await unwrap(
+        erpApi.listProducts({
+          search: filters?.search,
+          categoryId: filters?.categoryId,
+          limit: filters?.limit,
+          offset: filters?.offset,
+        })
+      );
       return applyFilters(data ?? [], filters);
     },
   });

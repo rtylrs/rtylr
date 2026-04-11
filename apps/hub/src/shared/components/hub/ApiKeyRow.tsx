@@ -9,7 +9,11 @@ export interface ApiKeyRowProps {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
@@ -21,9 +25,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
   };
 
   return (
-    <div
-      className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]"
-    >
+    <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
@@ -55,8 +57,12 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
         </div>
       </div>
       <div className="hidden md:flex flex-col items-end shrink-0">
-        <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>Created</p>
-        <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>{formatDate(apiKey.createdAt)}</p>
+        <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+          Created
+        </p>
+        <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+          {formatDate(apiKey.createdAt)}
+        </p>
       </div>
       <button
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10"

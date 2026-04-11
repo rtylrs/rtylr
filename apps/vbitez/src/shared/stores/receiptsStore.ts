@@ -25,6 +25,6 @@ export const useReceiptsStore = create<ReceiptsState & ReceiptsActions>()(
       clear: () => set({ receipts: [] }),
       byOrder: (orderId) => get().receipts.find((r) => r.orderId === orderId),
     }),
-    { name: 'pos-receipts' },
-  ),
+    { name: 'pos-receipts' }
+  )
 );

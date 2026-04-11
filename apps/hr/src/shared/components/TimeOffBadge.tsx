@@ -13,8 +13,6 @@ interface Props {
   status: Status;
 }
 
-const TimeOffBadge: React.FC<Props> = ({ status }) => (
-  <Pill color={COLORS[status]}>{status}</Pill>
-);
+const TimeOffBadge: React.FC<Props> = ({ status }) => <Pill color={COLORS[status]}>{status}</Pill>;
 
 export default TimeOffBadge;

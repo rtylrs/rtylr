@@ -17,11 +17,7 @@ const ICONS: Record<Task['status'], React.ComponentType<{ size?: number }>> = {
   cancelled: XCircle,
 };
 
-export const StatusIcon: React.FC<StatusIconProps> = ({
-  status,
-  size = 13,
-  showLabel = false,
-}) => {
+export const StatusIcon: React.FC<StatusIconProps> = ({ status, size = 13, showLabel = false }) => {
   const Icon = ICONS[status];
   const color = STATUS_COLORS[status];
   return (
@@ -31,9 +27,7 @@ export const StatusIcon: React.FC<StatusIconProps> = ({
       title={STATUS_LABELS[status]}
     >
       <Icon size={size} />
-      {showLabel && (
-        <span className="text-[12px] font-medium">{STATUS_LABELS[status]}</span>
-      )}
+      {showLabel && <span className="text-[12px] font-medium">{STATUS_LABELS[status]}</span>}
     </span>
   );
 };

@@ -44,17 +44,27 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {footerSections.map((section, index) => (
             <div key={index}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">{section.title}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">
+                {section.title}
+              </h3>
               <nav aria-label={`${section.title} navigation`}>
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
                       {link.external ? (
-                        <a href={link.to} target="_blank" rel="noopener noreferrer" className="text-sm text-white/70 hover:text-white transition-colors">
+                        <a
+                          href={link.to}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-white/70 hover:text-white transition-colors"
+                        >
                           {link.label}
                         </a>
                       ) : (
-                        <Link to={link.to} className="text-sm text-white/70 hover:text-white transition-colors">
+                        <Link
+                          to={link.to}
+                          className="text-sm text-white/70 hover:text-white transition-colors"
+                        >
                           {link.label}
                         </Link>
                       )}
@@ -66,17 +76,28 @@ const Footer: React.FC = () => {
           ))}
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">Contact</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">
+              Contact
+            </h3>
             <div className="space-y-2">
               <div>
                 <span className="text-xs text-white/40 block">Email</span>
-                <a href={`mailto:${config?.contactEmail || 'info@rtylr.com'}`} className="text-sm text-white/70 hover:text-white transition-colors">
+                <a
+                  href={`mailto:${config?.contactEmail || 'info@rtylr.com'}`}
+                  className="text-sm text-white/70 hover:text-white transition-colors"
+                >
                   {config?.contactEmail || 'info@rtylr.com'}
                 </a>
               </div>
               <div>
                 <span className="text-xs text-white/40 block mb-1">Follow us</span>
-                <a href="https://www.instagram.com/voxire.tech" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" aria-label="Follow us on Instagram">
+                <a
+                  href="https://www.instagram.com/voxire.tech"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 hover:text-white transition-colors"
+                  aria-label="Follow us on Instagram"
+                >
                   <FaInstagram size={18} />
                 </a>
               </div>
@@ -88,14 +109,25 @@ const Footer: React.FC = () => {
           <div>
             <p className="text-sm text-white/50">
               &copy; {new Date().getFullYear()}{' '}
-              <a href="https://voxire.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Voxire</a>{' '}
+              <a
+                href="https://voxire.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Voxire
+              </a>{' '}
               All rights reserved.
             </p>
             <p className="text-xs text-white/30 mt-1">
-              Unless otherwise noted, the use of third-party logos does not imply endorsement, sponsorship, or affiliation with Rtylr.
+              Unless otherwise noted, the use of third-party logos does not imply endorsement,
+              sponsorship, or affiliation with Rtylr.
             </p>
           </div>
-          <button className="text-xs text-white/30 hover:text-white/50 transition-colors" aria-label={`Current version: ${PackageJson.version}`}>
+          <button
+            className="text-xs text-white/30 hover:text-white/50 transition-colors"
+            aria-label={`Current version: ${PackageJson.version}`}
+          >
             v{PackageJson.version}
           </button>
         </div>

@@ -15,7 +15,9 @@ const QuickActionsWidget: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Quick actions</p>
+        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          Quick actions
+        </p>
       </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
         {actions.map((a) => {

@@ -3,14 +3,33 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Mail, Phone, Calendar, Tag as TagIcon, Trash2, Download, Users,
+  ArrowLeft,
+  Mail,
+  Phone,
+  Calendar,
+  Tag as TagIcon,
+  Trash2,
+  Download,
+  Users,
 } from 'lucide-react';
-import { useCustomer, useCustomerTimeline, useUpdateCustomer, useDeleteCustomer, useExportCustomerData } from './useCustomers';
+import {
+  useCustomer,
+  useCustomerTimeline,
+  useUpdateCustomer,
+  useDeleteCustomer,
+  useExportCustomerData,
+} from './useCustomers';
 import { useAwardPoints, useRedeemPoints } from '../loyalty/useLoyalty';
 import { Breadcrumbs, Button, Card, ConfirmModal, SkeletonList } from '../../shared/components/ui';
 import {
-  CustomerAvatar, TierBadge, PointsBadge, TagChip, NotesPanel, TimelineEntryRow,
-  ConsentBanner, LoyaltyPointsInput,
+  CustomerAvatar,
+  TierBadge,
+  PointsBadge,
+  TagChip,
+  NotesPanel,
+  TimelineEntryRow,
+  ConsentBanner,
+  LoyaltyPointsInput,
 } from '../../shared/components/crm';
 import { getTier, pointsToNextTier } from '../../shared/lib/tiers';
 
@@ -99,12 +118,7 @@ const CustomerProfile: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '1100px' }}>
-      <Breadcrumbs
-        items={[
-          { label: 'Customers', to: '/customers' },
-          { label: customer.name },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
       <button
         onClick={() => navigate('/customers')}
         style={{
@@ -140,12 +154,39 @@ const CustomerProfile: React.FC = () => {
       >
         <CustomerAvatar initials={customer.initials} points={customer.loyaltyPoints} size={72} />
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)', margin: '0 0 4px' }}>{customer.name}</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--hub-text-muted)', fontSize: '13px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Mail size={12} />{customer.email}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12} />{customer.phone}</span>
+          <h2
+            style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              color: 'var(--hub-text)',
+              margin: '0 0 4px',
+            }}
+          >
+            {customer.name}
+          </h2>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              color: 'var(--hub-text-muted)',
+              fontSize: '13px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Mail size={12} />
+              {customer.email}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Phone size={12} />
+              {customer.phone}
+            </span>
             {customer.createdAt && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={12} />Since {customer.createdAt}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Calendar size={12} />
+                Since {customer.createdAt}
+              </span>
             )}
           </div>
           <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
@@ -154,10 +195,24 @@ const CustomerProfile: React.FC = () => {
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Button variant="outline" onClick={handleExport}><Download size={13} />Export GDPR</Button>
-          <Button variant="outline" onClick={() => navigate('/customers/merge?primary=' + customer.id)}><Users size={13} />Merge</Button>
-          <Button variant="outline" onClick={() => setConfirmDelete(true)} style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}>
-            <Trash2 size={13} />Delete
+          <Button variant="outline" onClick={handleExport}>
+            <Download size={13} />
+            Export GDPR
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/customers/merge?primary=' + customer.id)}
+          >
+            <Users size={13} />
+            Merge
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setConfirmDelete(true)}
+            style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+          >
+            <Trash2 size={13} />
+            Delete
           </Button>
         </div>
       </motion.div>
@@ -174,16 +229,54 @@ const CustomerProfile: React.FC = () => {
               { label: 'Last Visit', value: customer.lastVisit },
             ].map((s) => (
               <Card key={s.label}>
-                <div style={{ fontSize: '10px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>{s.label}</div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', marginTop: '4px' }}>{s.value}</div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 700,
+                  }}
+                >
+                  {s.label}
+                </div>
+                <div
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: 'var(--hub-text)',
+                    marginTop: '4px',
+                  }}
+                >
+                  {s.value}
+                </div>
               </Card>
             ))}
           </div>
 
           {/* Tags */}
           <Card>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '10px',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--hub-text)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
                 <TagIcon size={12} /> Tags
               </h4>
             </div>
@@ -191,7 +284,9 @@ const CustomerProfile: React.FC = () => {
               {tags.map((t) => (
                 <TagChip key={t} label={t} onRemove={() => handleRemoveTag(t)} />
               ))}
-              {tags.length === 0 && <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No tags yet</span>}
+              {tags.length === 0 && (
+                <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No tags yet</span>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>
               <input
@@ -211,13 +306,26 @@ const CustomerProfile: React.FC = () => {
                   outline: 'none',
                 }}
               />
-              <Button variant="primary" onClick={handleAddTag} style={{ padding: '6px 12px' }}>Add</Button>
+              <Button variant="primary" onClick={handleAddTag} style={{ padding: '6px 12px' }}>
+                Add
+              </Button>
             </div>
           </Card>
 
           {/* Timeline */}
           <Card>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Timeline</h4>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Timeline
+            </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {timeline.map((t) => (
                 <TimelineEntryRow key={t.id} entry={t} />
@@ -229,15 +337,51 @@ const CustomerProfile: React.FC = () => {
         {/* Right column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Card>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tier Progress</h4>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
-              <span style={{ color: 'var(--hub-text)' }}>{customer.loyaltyPoints.toLocaleString()} pts</span>
-              <span style={{ color: 'var(--hub-text-muted)' }}>{next !== null ? `${next} to next` : 'Max tier'}</span>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Tier Progress
+            </h4>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '6px',
+                fontSize: '12px',
+              }}
+            >
+              <span style={{ color: 'var(--hub-text)' }}>
+                {customer.loyaltyPoints.toLocaleString()} pts
+              </span>
+              <span style={{ color: 'var(--hub-text-muted)' }}>
+                {next !== null ? `${next} to next` : 'Max tier'}
+              </span>
             </div>
-            <div style={{ height: '6px', background: 'var(--hub-hover)', borderRadius: '3px', overflow: 'hidden' }}>
+            <div
+              style={{
+                height: '6px',
+                background: 'var(--hub-hover)',
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}
+            >
               <div
                 style={{
-                  width: next === null ? '100%' : `${Math.min(100, (customer.loyaltyPoints / (customer.loyaltyPoints + (next || 1))) * 100)}%`,
+                  width:
+                    next === null
+                      ? '100%'
+                      : `${Math.min(
+                          100,
+                          (customer.loyaltyPoints / (customer.loyaltyPoints + (next || 1))) * 100
+                        )}%`,
                   height: '100%',
                   background: '#3b82f6',
                 }}

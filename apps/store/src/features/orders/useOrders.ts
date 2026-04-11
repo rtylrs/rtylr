@@ -12,12 +12,15 @@ export interface OrderFilters {
 export function useOrders(filters?: OrderFilters) {
   return useQuery({
     queryKey: ['store-orders', filters],
-    queryFn: () => unwrap(storeApi.listOrders({
-      search: filters?.search,
-      status: filters?.status,
-      limit: filters?.limit,
-      offset: filters?.offset,
-    })),
+    queryFn: () =>
+      unwrap(
+        storeApi.listOrders({
+          search: filters?.search,
+          status: filters?.status,
+          limit: filters?.limit,
+          offset: filters?.offset,
+        })
+      ),
   });
 }
 

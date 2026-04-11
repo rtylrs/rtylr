@@ -67,6 +67,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setKdsStation: (kdsStation) => set({ kdsStation }),
       reset: () => set(defaults),
     }),
-    { name: 'pos-settings' },
-  ),
+    { name: 'pos-settings' }
+  )
 );

@@ -14,13 +14,17 @@ import AuthShell from '../../shared/components/AuthShell';
 import { getEmailError } from '../../shared/lib/validation';
 
 const REDIRECT_APP_URLS: Record<string, string> = {
-  hub:     window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
-  pos:     window.location.hostname === 'localhost' ? 'http://localhost:5178' : 'https://pos.rtylr.com',
-  erp:     window.location.hostname === 'localhost' ? 'http://localhost:5179' : 'https://erp.rtylr.com',
-  hr:      window.location.hostname === 'localhost' ? 'http://localhost:5180' : 'https://hr.rtylr.com',
-  crm:     window.location.hostname === 'localhost' ? 'http://localhost:5181' : 'https://crm.rtylr.com',
-  finance: window.location.hostname === 'localhost' ? 'http://localhost:5182' : 'https://finance.rtylr.com',
-  flow:    window.location.hostname === 'localhost' ? 'http://localhost:5183' : 'https://flow.rtylr.com',
+  hub: window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
+  pos: window.location.hostname === 'localhost' ? 'http://localhost:5178' : 'https://pos.rtylr.com',
+  erp: window.location.hostname === 'localhost' ? 'http://localhost:5179' : 'https://erp.rtylr.com',
+  hr: window.location.hostname === 'localhost' ? 'http://localhost:5180' : 'https://hr.rtylr.com',
+  crm: window.location.hostname === 'localhost' ? 'http://localhost:5181' : 'https://crm.rtylr.com',
+  finance:
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:5182'
+      : 'https://finance.rtylr.com',
+  flow:
+    window.location.hostname === 'localhost' ? 'http://localhost:5183' : 'https://flow.rtylr.com',
 };
 
 const REDIRECT_APP_NAMES: Record<string, string> = {
@@ -50,19 +54,23 @@ const Login: React.FC = () => {
     return params.get('redirect');
   }, []);
 
-  const redirectAppName = redirectParam ? (REDIRECT_APP_NAMES[redirectParam] ?? null) : null;
+  const redirectAppName = redirectParam ? REDIRECT_APP_NAMES[redirectParam] ?? null : null;
 
   const redirectTo = () => {
     const destination =
-      (redirectParam && REDIRECT_APP_URLS[redirectParam])
+      redirectParam && REDIRECT_APP_URLS[redirectParam]
         ? REDIRECT_APP_URLS[redirectParam]
         : REDIRECT_APP_URLS.hub;
     window.location.href = destination;
   };
 
-  const handleSubmit = () => loginMutation.mutate({ email, password }, {
-    onSuccess: () => redirectTo(),
-  });
+  const handleSubmit = () =>
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: () => redirectTo(),
+      }
+    );
 
   const handleGoogle = async () => {
     try {
@@ -74,7 +82,9 @@ const Login: React.FC = () => {
     }
   };
 
-  useEffect(() => { clearError(); }, [clearError]);
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   useEffect(() => {
     // Only redirect if both the store says authenticated AND a token cookie exists.
@@ -82,7 +92,7 @@ const Login: React.FC = () => {
     const tokenCookie = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
     if (isAuthenticated && tokenCookie) {
       const destination =
-        (redirectParam && REDIRECT_APP_URLS[redirectParam])
+        redirectParam && REDIRECT_APP_URLS[redirectParam]
           ? REDIRECT_APP_URLS[redirectParam]
           : REDIRECT_APP_URLS.hub;
       window.location.href = destination;
@@ -117,103 +127,94 @@ const Login: React.FC = () => {
         </div>
       }
     >
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-          className="flex flex-col gap-4"
-        >
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
-              Email
-            </label>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        className="flex flex-col gap-4"
+      >
+        {/* Email */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
+            Email
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            placeholder="you@company.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoFocus
+            required
+            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+          />
+          {emailError && <p className="text-xs text-red-500">{emailError}</p>}
+        </div>
+
+        {/* Password */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
+            Password
+          </label>
+          <div className="relative">
             <input
-              id="login-email"
-              type="email"
-              placeholder="you@company.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
-            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
-          </div>
-
-          {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
-              >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </div>
-          </div>
-
-          {/* Forgot password */}
-          <div className="flex justify-end -mt-1">
             <button
               type="button"
-              className="text-xs text-[#4583C4] hover:underline underline-offset-2"
-              onClick={() => navigate('/password-reset')}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
             >
-              Forgot password?
+              {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
+        </div>
 
-          {/* Error */}
-          {errorMessage && (
-            <div
-              className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
-              role="alert"
-            >
-              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
-            </div>
-          )}
-
-          {/* Sign in button */}
-          <Button
-            type="submit"
-            variant="primary"
-            fullWidth
-            loading={loading}
-            height={40}
-          >
-            Sign in
-          </Button>
-
-          {/* Google sign in */}
-          <Button
+        {/* Forgot password */}
+        <div className="flex justify-end -mt-1">
+          <button
             type="button"
-            variant="outline"
-            fullWidth
-            height={40}
-            onClick={handleGoogle}
+            className="text-xs text-[#4583C4] hover:underline underline-offset-2"
+            onClick={() => navigate('/password-reset')}
           >
-            <span className="inline-flex items-center gap-2">
-              <FaGoogle className="text-[#444]" />
-              Continue with Google
-            </span>
-          </Button>
-        </form>
+            Forgot password?
+          </button>
+        </div>
+
+        {/* Error */}
+        {errorMessage && (
+          <div
+            className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
+          </div>
+        )}
+
+        {/* Sign in button */}
+        <Button type="submit" variant="primary" fullWidth loading={loading} height={40}>
+          Sign in
+        </Button>
+
+        {/* Google sign in */}
+        <Button type="button" variant="outline" fullWidth height={40} onClick={handleGoogle}>
+          <span className="inline-flex items-center gap-2">
+            <FaGoogle className="text-[#444]" />
+            Continue with Google
+          </span>
+        </Button>
+      </form>
     </AuthShell>
   );
 };

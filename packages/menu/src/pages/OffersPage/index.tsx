@@ -23,9 +23,7 @@ const OffersPage: React.FC<OffersPageProps> = ({ offers }) => {
           {offer.image && (
             <div className={styles.offers__image}>
               <img src={offer.image} alt={offer.title} loading="lazy" />
-              {offer.badge && (
-                <span className={styles.offers__badge}>{offer.badge}</span>
-              )}
+              {offer.badge && <span className={styles.offers__badge}>{offer.badge}</span>}
             </div>
           )}
           <div className={styles.offers__body}>

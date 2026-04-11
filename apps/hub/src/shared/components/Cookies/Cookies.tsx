@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { Cookie } from "phosphor-react";
-import { Button } from "../ui/button";
+import React, { useState, useEffect } from 'react';
+import { Cookie } from 'phosphor-react';
+import { Button } from '../ui/button';
 
 const Cookies: React.FC = () => {
   const [showPopup, setShowPopup] = useState(true);
 
   useEffect(() => {
-    const acceptedCookies = localStorage.getItem("acceptedCookies");
-    if (acceptedCookies === "true") {
+    const acceptedCookies = localStorage.getItem('acceptedCookies');
+    if (acceptedCookies === 'true') {
       setShowPopup(false);
     }
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem("acceptedCookies", "true");
+    localStorage.setItem('acceptedCookies', 'true');
     setShowPopup(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem("acceptedCookies", "false");
+    localStorage.setItem('acceptedCookies', 'false');
     setShowPopup(false);
   };
 
@@ -35,16 +35,25 @@ const Cookies: React.FC = () => {
         </div>
 
         <p className="text-sm text-muted leading-relaxed">
-          We use cookies to enhance your browsing experience, analyze site traffic, and personalize content.
-          By continuing to use our site, you consent to our use of cookies.
+          We use cookies to enhance your browsing experience, analyze site traffic, and personalize
+          content. By continuing to use our site, you consent to our use of cookies.
         </p>
 
         <div className="flex gap-3">
-          <Button variant="default" size="sm" onClick={handleAccept}>Accept All</Button>
-          <Button variant="outline" size="sm" onClick={handleDecline}>Decline</Button>
+          <Button variant="default" size="sm" onClick={handleAccept}>
+            Accept All
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDecline}>
+            Decline
+          </Button>
         </div>
 
-        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-accent hover:underline">
+        <a
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-xs text-accent hover:underline"
+        >
           Learn more about our privacy policy
         </a>
       </div>

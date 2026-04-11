@@ -44,7 +44,15 @@ export {
 
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 
-export { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell } from './table';
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+} from './table';
 
 export {
   Sheet,

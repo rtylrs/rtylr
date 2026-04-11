@@ -40,11 +40,7 @@ interface AvatarStackProps {
   size?: number;
 }
 
-export const AvatarStack: React.FC<AvatarStackProps> = ({
-  members,
-  max = 4,
-  size = 22,
-}) => {
+export const AvatarStack: React.FC<AvatarStackProps> = ({ members, max = 4, size = 22 }) => {
   const shown = members.slice(0, max);
   const remaining = members.length - shown.length;
   return (

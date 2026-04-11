@@ -54,40 +54,40 @@ const navSections: NavSection[] = [
   {
     title: 'Workspace',
     items: [
-      { label: 'Dashboard',   path: '/',            icon: LayoutDashboard },
-      { label: 'Staff',       path: '/staff',       icon: Users           },
-      { label: 'Departments', path: '/departments', icon: Building2       },
-      { label: 'Org Chart',   path: '/org-chart',   icon: Network         },
+      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+      { label: 'Staff', path: '/staff', icon: Users },
+      { label: 'Departments', path: '/departments', icon: Building2 },
+      { label: 'Org Chart', path: '/org-chart', icon: Network },
     ],
   },
   {
     title: 'Time',
     items: [
-      { label: 'Shifts',     path: '/shifts',     icon: Clock      },
-      { label: 'Schedule',   path: '/schedule',   icon: CalendarDays },
-      { label: 'Timesheets', path: '/timesheets', icon: Timer       },
-      { label: 'Time Off',   path: '/time-off',   icon: Calendar    },
-      { label: 'Calendar',   path: '/calendar',   icon: Calendar    },
+      { label: 'Shifts', path: '/shifts', icon: Clock },
+      { label: 'Schedule', path: '/schedule', icon: CalendarDays },
+      { label: 'Timesheets', path: '/timesheets', icon: Timer },
+      { label: 'Time Off', path: '/time-off', icon: Calendar },
+      { label: 'Calendar', path: '/calendar', icon: Calendar },
     ],
   },
   {
     title: 'People',
     items: [
-      { label: 'Reviews',      path: '/reviews',      icon: ClipboardList  },
-      { label: '1-on-1s',      path: '/one-on-ones',  icon: MessageSquare  },
-      { label: 'Onboarding',   path: '/onboarding',   icon: Rocket         },
-      { label: 'Offboarding',  path: '/offboarding',  icon: LogOut         },
-      { label: 'Training',     path: '/training',     icon: GraduationCap  },
+      { label: 'Reviews', path: '/reviews', icon: ClipboardList },
+      { label: '1-on-1s', path: '/one-on-ones', icon: MessageSquare },
+      { label: 'Onboarding', path: '/onboarding', icon: Rocket },
+      { label: 'Offboarding', path: '/offboarding', icon: LogOut },
+      { label: 'Training', path: '/training', icon: GraduationCap },
     ],
   },
   {
     title: 'HR',
     items: [
-      { label: 'Payroll',    path: '/payroll',    icon: DollarSign },
-      { label: 'Benefits',   path: '/benefits',   icon: Shield     },
-      { label: 'Documents',  path: '/documents',  icon: FileText   },
-      { label: 'Operations', path: '/operations', icon: Timer      },
-      { label: 'Settings',   path: '/settings',   icon: Settings   },
+      { label: 'Payroll', path: '/payroll', icon: DollarSign },
+      { label: 'Benefits', path: '/benefits', icon: Shield },
+      { label: 'Documents', path: '/documents', icon: FileText },
+      { label: 'Operations', path: '/operations', icon: Timer },
+      { label: 'Settings', path: '/settings', icon: Settings },
     ],
   },
 ];
@@ -95,27 +95,27 @@ const navSections: NavSection[] = [
 const navItems: NavItem[] = navSections.flatMap((s) => s.items);
 
 const routeLabels: Record<string, string> = {
-  '/':            'Dashboard',
-  '/staff':       'Staff',
-  '/shifts':      'Shifts',
-  '/payroll':     'Payroll',
+  '/': 'Dashboard',
+  '/staff': 'Staff',
+  '/shifts': 'Shifts',
+  '/payroll': 'Payroll',
   '/departments': 'Departments',
-  '/time-off':    'Time Off',
-  '/time-off/new':'Request Time Off',
-  '/calendar':    'Time Off Calendar',
-  '/schedule':    'Shift Schedule',
-  '/timesheets':  'Timesheets',
-  '/reviews':     'Performance Reviews',
+  '/time-off': 'Time Off',
+  '/time-off/new': 'Request Time Off',
+  '/calendar': 'Time Off Calendar',
+  '/schedule': 'Shift Schedule',
+  '/timesheets': 'Timesheets',
+  '/reviews': 'Performance Reviews',
   '/reviews/new': 'New Review',
   '/one-on-ones': '1-on-1s',
-  '/onboarding':  'Onboarding',
+  '/onboarding': 'Onboarding',
   '/offboarding': 'Offboarding',
-  '/documents':   'Documents',
-  '/benefits':    'Benefits',
-  '/training':    'Training',
-  '/org-chart':   'Org Chart',
-  '/operations':  'Operations',
-  '/settings':    'Settings',
+  '/documents': 'Documents',
+  '/benefits': 'Benefits',
+  '/training': 'Training',
+  '/org-chart': 'Org Chart',
+  '/operations': 'Operations',
+  '/settings': 'Settings',
 };
 
 function getPageTitle(pathname: string): string {
@@ -185,7 +185,10 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
-      <Icon size={15} style={{ position: 'relative', flexShrink: 0, color: isActive ? ACCENT : undefined }} />
+      <Icon
+        size={15}
+        style={{ position: 'relative', flexShrink: 0, color: isActive ? ACCENT : undefined }}
+      />
       <span style={{ position: 'relative' }}>{label}</span>
       {isActive && (
         <span
@@ -219,7 +222,12 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
   const userName = rawUser?.name || rawUser?.firstName || userEmail || 'User';
 
   function getInitials(name: string) {
-    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
 
   return (
@@ -238,8 +246,12 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+        onMouseEnter={(e) =>
+          ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
+        }
+        onMouseLeave={(e) =>
+          ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
+        }
       >
         {/* Avatar */}
         <span
@@ -259,11 +271,40 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
         >
           {getInitials(userName)}
         </span>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hr-text)', textAlign: 'left' }}>{userName}</span>
-          {userEmail && <span style={{ fontSize: '10px', color: 'var(--hr-text-muted)', textAlign: 'left' }}>{userEmail}</span>}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--hr-text)',
+              textAlign: 'left',
+            }}
+          >
+            {userName}
+          </span>
+          {userEmail && (
+            <span style={{ fontSize: '10px', color: 'var(--hr-text-muted)', textAlign: 'left' }}>
+              {userEmail}
+            </span>
+          )}
         </div>
-        <ChevronUp size={12} style={{ color: 'var(--hr-text-dim)', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+        <ChevronUp
+          size={12}
+          style={{
+            color: 'var(--hr-text-dim)',
+            flexShrink: 0,
+            transform: open ? 'rotate(180deg)' : 'rotate(0)',
+            transition: 'transform 0.2s',
+          }}
+        />
       </button>
 
       <AnimatePresence>
@@ -288,15 +329,24 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             }}
           >
             {/* Theme picker */}
-            <p style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--hr-text-dim)', padding: '4px 8px 6px' }}>
+            <p
+              style={{
+                fontSize: '10px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--hr-text-dim)',
+                padding: '4px 8px 6px',
+              }}
+            >
               Appearance
             </p>
             <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', padding: '0 4px' }}>
-              {([
-                { value: 'light' as Theme,  icon: Sun,     label: 'Light'  },
-                { value: 'dark' as Theme,   icon: Moon,    label: 'Dark'   },
+              {[
+                { value: 'light' as Theme, icon: Sun, label: 'Light' },
+                { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
                 { value: 'system' as Theme, icon: Monitor, label: 'System' },
-              ]).map(({ value, icon: Icon, label }) => (
+              ].map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
                   onClick={() => setTheme(value)}
@@ -321,9 +371,13 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 </button>
               ))}
             </div>
-            <hr style={{ border: 'none', borderTop: '1px solid var(--hr-border)', margin: '4px 0' }} />
+            <hr
+              style={{ border: 'none', borderTop: '1px solid var(--hr-border)', margin: '4px 0' }}
+            />
             <button
-              onClick={() => { window.location.href = APP_URLS.auth; }}
+              onClick={() => {
+                window.location.href = APP_URLS.auth;
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -339,8 +393,12 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 cursor: 'pointer',
                 textAlign: 'left',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)')
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
+              }
             >
               <LogOut size={14} />
               Sign out
@@ -369,7 +427,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   }, [location.pathname, isMobile]);
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', minHeight: '100vh', overflow: 'hidden', background: 'var(--hr-bg)' }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100dvh',
+        minHeight: '100vh',
+        overflow: 'hidden',
+        background: 'var(--hr-bg)',
+      }}
+    >
       <CommandPalette />
       <GlobalShortcuts />
       {isMobile && mobileNavOpen && (
@@ -396,7 +462,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           position: isMobile ? 'fixed' : 'relative',
           inset: isMobile ? '0 auto 0 0' : 'auto',
           zIndex: 80,
-          transform: isMobile ? (mobileNavOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+          transform: isMobile
+            ? mobileNavOpen
+              ? 'translateX(0)'
+              : 'translateX(-100%)'
+            : 'translateX(0)',
           transition: 'transform 0.22s ease',
           boxShadow: isMobile ? 'var(--hr-shadow)' : 'none',
         }}
@@ -426,8 +496,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               marginTop: '2px',
               transition: 'color 0.15s',
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-muted)')}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-dim)')}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-muted)')
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-dim)')
+            }
           >
             <ArrowLeft size={11} />
             Hub
@@ -446,7 +520,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           {navSections.map((section) => (
-            <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}>
+            <div
+              key={section.title}
+              style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
+            >
               <p
                 style={{
                   padding: '6px 12px 4px',
@@ -474,7 +551,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main */}
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minWidth: 0 }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          overflow: 'hidden',
+          minWidth: 0,
+        }}
+      >
         {/* Topbar */}
         <header
           style={{
@@ -510,7 +595,17 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 {mobileNavOpen ? <X size={16} /> : <Menu size={16} />}
               </button>
             )}
-            <h1 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <h1
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--hr-text)',
+                margin: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {pageTitle}
             </h1>
           </div>
@@ -532,15 +627,31 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 color: 'var(--hr-text-muted)',
                 fontSize: 11,
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-active)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-active)')
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
+              }
               aria-label="Open command palette"
             >
               <Search size={12} />
               {!isMobile && 'Search'}
-              {!isMobile && <kbd style={{ display: 'inline-flex', alignItems: 'center', gap: 2, padding: '1px 4px', borderRadius: 4, border: '1px solid var(--hr-border)', fontSize: 9 }}>
-                <Command size={9} />K
-              </kbd>}
+              {!isMobile && (
+                <kbd
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    padding: '1px 4px',
+                    borderRadius: 4,
+                    border: '1px solid var(--hr-border)',
+                    fontSize: 9,
+                  }}
+                >
+                  <Command size={9} />K
+                </kbd>
+              )}
             </button>
             <button
               style={{
@@ -556,8 +667,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 color: 'var(--hr-text-muted)',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
+              }
             >
               <Bell size={14} />
             </button>

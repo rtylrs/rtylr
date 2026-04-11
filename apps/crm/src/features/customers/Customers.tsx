@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
-  Search, ChevronDown, ChevronUp, Phone, Mail, Plus, Upload, Users as UsersIcon,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  Mail,
+  Plus,
+  Upload,
+  Users as UsersIcon,
   Tag as TagIcon,
 } from 'lucide-react';
 import { useCustomers, useUpdateCustomer } from './useCustomers';
@@ -37,7 +44,9 @@ function ExpandedDetail({ customer, onView }: { customer: any; onView: () => voi
           }}
         >
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>Contact Info</p>
+            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
+              Contact Info
+            </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <Mail size={12} style={{ color: ACCENT }} />
               <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{customer.email}</span>
@@ -48,19 +57,29 @@ function ExpandedDetail({ customer, onView }: { customer: any; onView: () => voi
             </div>
           </div>
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>Loyalty</p>
+            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
+              Loyalty
+            </p>
             <TierBadge tier={tier} />
             <p style={{ fontSize: '13px', color: 'var(--hub-text)', marginTop: '6px' }}>
               {customer.loyaltyPoints.toLocaleString()} points
             </p>
           </div>
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>Summary</p>
-            <p style={{ fontSize: '13px', color: 'var(--hub-text)' }}>${customer.totalSpent.toLocaleString()} lifetime spend</p>
-            <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{customer.visits} total visits</p>
+            <p style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginBottom: '4px' }}>
+              Summary
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--hub-text)' }}>
+              ${customer.totalSpent.toLocaleString()} lifetime spend
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+              {customer.visits} total visits
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Button variant="primary" onClick={onView}>View profile</Button>
+            <Button variant="primary" onClick={onView}>
+              View profile
+            </Button>
           </div>
         </div>
       </td>
@@ -117,11 +136,18 @@ const Customers: React.FC = () => {
     const rows = [
       ['Name', 'Email', 'Phone', 'Spent', 'Visits', 'Points', 'Tier'],
       ...filtered.map((c) => [
-        c.name, c.email, c.phone, String(c.totalSpent), String(c.visits),
-        String(c.loyaltyPoints), getTier(c.loyaltyPoints),
+        c.name,
+        c.email,
+        c.phone,
+        String(c.totalSpent),
+        String(c.visits),
+        String(c.loyaltyPoints),
+        getTier(c.loyaltyPoints),
       ]),
     ];
-    const csv = rows.map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csv = rows
+      .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+      .join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -139,9 +165,17 @@ const Customers: React.FC = () => {
         subtitle={`${customers.length} total customers`}
         actions={
           <>
-            <Button variant="outline" onClick={() => navigate('/customers/import')}><Upload size={13} />Import</Button>
-            <Button variant="outline" onClick={exportCsv}>Export CSV</Button>
-            <Button variant="primary" onClick={() => navigate('/customers/new')}><Plus size={13} />New customer</Button>
+            <Button variant="outline" onClick={() => navigate('/customers/import')}>
+              <Upload size={13} />
+              Import
+            </Button>
+            <Button variant="outline" onClick={exportCsv}>
+              Export CSV
+            </Button>
+            <Button variant="primary" onClick={() => navigate('/customers/new')}>
+              <Plus size={13} />
+              New customer
+            </Button>
           </>
         }
       />
@@ -168,10 +202,26 @@ const Customers: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search customers..."
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: '13px', color: 'var(--hub-text)' }}
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              fontSize: '13px',
+              color: 'var(--hub-text)',
+            }}
           />
         </div>
-        <div style={{ display: 'flex', gap: '4px', background: 'var(--hub-card)', border: '1px solid var(--hub-border)', borderRadius: '8px', padding: '3px' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '4px',
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '8px',
+            padding: '3px',
+          }}
+        >
           {tierFilters.map((t) => (
             <button
               key={t}
@@ -183,7 +233,8 @@ const Customers: React.FC = () => {
                 fontWeight: 500,
                 cursor: 'pointer',
                 border: 'none',
-                background: tierFilter === t ? (t === 'All' ? ACCENT : tierColor[t as Tier]) : 'transparent',
+                background:
+                  tierFilter === t ? (t === 'All' ? ACCENT : tierColor[t as Tier]) : 'transparent',
                 color: tierFilter === t ? '#fff' : 'var(--hub-text-muted)',
                 transition: 'all 0.15s',
               }}
@@ -229,8 +280,12 @@ const Customers: React.FC = () => {
                 width: '160px',
               }}
             />
-            <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>Apply</Button>
-            <Button variant="ghost" onClick={() => setSelected(new Set())}>Clear</Button>
+            <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>
+              Apply
+            </Button>
+            <Button variant="ghost" onClick={() => setSelected(new Set())}>
+              Clear
+            </Button>
           </div>
         </div>
       )}
@@ -248,13 +303,24 @@ const Customers: React.FC = () => {
         }}
       >
         {isLoading ? (
-          <div style={{ padding: '16px' }}><SkeletonList count={6} /></div>
+          <div style={{ padding: '16px' }}>
+            <SkeletonList count={6} />
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={UsersIcon}
             title="No customers found"
-            description={search ? `No customers match "${search}"` : 'Create your first customer to get started.'}
-            action={<Button variant="primary" onClick={() => navigate('/customers/new')}><Plus size={13} />New customer</Button>}
+            description={
+              search
+                ? `No customers match "${search}"`
+                : 'Create your first customer to get started.'
+            }
+            action={
+              <Button variant="primary" onClick={() => navigate('/customers/new')}>
+                <Plus size={13} />
+                New customer
+              </Button>
+            }
           />
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -268,7 +334,17 @@ const Customers: React.FC = () => {
                     style={{ accentColor: ACCENT, cursor: 'pointer' }}
                   />
                 </th>
-                {['Customer', 'Email', 'Phone', 'Total Spent', 'Visits', 'Points', 'Tags', 'Last Visit', ''].map((h, i) => (
+                {[
+                  'Customer',
+                  'Email',
+                  'Phone',
+                  'Total Spent',
+                  'Visits',
+                  'Points',
+                  'Tags',
+                  'Last Visit',
+                  '',
+                ].map((h, i) => (
                   <th
                     key={i}
                     style={{
@@ -300,12 +376,24 @@ const Customers: React.FC = () => {
                           borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
                           cursor: 'pointer',
                           transition: 'background 0.12s',
-                          background: isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
+                          background:
+                            isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
                         }}
-                        onMouseEnter={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                        onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = isSelected ? 'rgba(59,130,246,0.04)' : 'transparent'; }}
+                        onMouseEnter={(e) => {
+                          if (!isExpanded)
+                            (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isExpanded)
+                            (e.currentTarget as HTMLElement).style.background = isSelected
+                              ? 'rgba(59,130,246,0.04)'
+                              : 'transparent';
+                        }}
                       >
-                        <td style={{ padding: '12px 12px 12px 16px' }} onClick={(e) => e.stopPropagation()}>
+                        <td
+                          style={{ padding: '12px 12px 12px 16px' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -313,40 +401,115 @@ const Customers: React.FC = () => {
                             style={{ accentColor: ACCENT, cursor: 'pointer' }}
                           />
                         </td>
-                        <td style={{ padding: '12px 16px' }} onClick={() => setExpandedId(isExpanded ? null : c.id)}>
+                        <td
+                          style={{ padding: '12px 16px' }}
+                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                        >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={32} />
+                            <CustomerAvatar
+                              initials={c.initials}
+                              points={c.loyaltyPoints}
+                              size={32}
+                            />
                             <div>
-                              <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{c.name}</div>
+                              <div
+                                style={{
+                                  fontSize: '13px',
+                                  fontWeight: 500,
+                                  color: 'var(--hub-text)',
+                                }}
+                              >
+                                {c.name}
+                              </div>
                               <TierBadge tier={tier} />
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text-muted)' }}>{c.email}</td>
-                        <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text-muted)' }}>{c.phone}</td>
-                        <td style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.email}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.phone}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            color: 'var(--hub-text)',
+                          }}
+                        >
                           ${c.totalSpent.toLocaleString()}
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--hub-text)' }}>{c.visits}</td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '13px',
+                            color: 'var(--hub-text)',
+                          }}
+                        >
+                          {c.visits}
+                        </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <span style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}>
+                          <span
+                            style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}
+                          >
                             {c.loyaltyPoints.toLocaleString()}
                           </span>
                         </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', maxWidth: '160px' }}>
-                            {(c.tags || []).slice(0, 2).map((t) => <TagChip key={t} label={t} />)}
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '4px',
+                              flexWrap: 'wrap',
+                              maxWidth: '160px',
+                            }}
+                          >
+                            {(c.tags || []).slice(0, 2).map((t) => (
+                              <TagChip key={t} label={t} />
+                            ))}
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text-muted)' }}>{c.lastVisit}</td>
-                        <td style={{ padding: '12px 16px', textAlign: 'right' }} onClick={() => setExpandedId(isExpanded ? null : c.id)}>
-                          {isExpanded
-                            ? <ChevronUp size={14} style={{ color: ACCENT }} />
-                            : <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />}
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.lastVisit}
+                        </td>
+                        <td
+                          style={{ padding: '12px 16px', textAlign: 'right' }}
+                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                        >
+                          {isExpanded ? (
+                            <ChevronUp size={14} style={{ color: ACCENT }} />
+                          ) : (
+                            <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                          )}
                         </td>
                       </tr>
                       <AnimatePresence>
-                        {isExpanded && <ExpandedDetail customer={c} onView={() => navigate(`/customers/${c.id}`)} />}
+                        {isExpanded && (
+                          <ExpandedDetail
+                            customer={c}
+                            onView={() => navigate(`/customers/${c.id}`)}
+                          />
+                        )}
                       </AnimatePresence>
                     </React.Fragment>
                   );

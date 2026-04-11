@@ -1,8 +1,8 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import { Button } from "../../shared/components/ui";
-import { Breadcrumbs, SkeletonGrid } from "../../shared/components/hub";
-import { useCustomRoles } from "../../shared/hooks/queries/usePermissions";
+import { Button } from '../../shared/components/ui';
+import { Breadcrumbs, SkeletonGrid } from '../../shared/components/hub';
+import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
 import { toast } from 'sonner';
 
 const Roles: React.FC = () => {
@@ -10,10 +10,11 @@ const Roles: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-5xl">
-      
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Custom roles</h1>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Custom roles
+          </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
             Build purpose-built roles for your business. Assign them to members in Team.
           </p>
@@ -41,7 +42,8 @@ const Roles: React.FC = () => {
                 </p>
               </div>
               <p className="text-[11px] mb-3" style={{ color: 'var(--hub-text-dim)' }}>
-                {role.members} {role.members === 1 ? 'member' : 'members'} · {role.permissions.length} permissions
+                {role.members} {role.members === 1 ? 'member' : 'members'} ·{' '}
+                {role.permissions.length} permissions
               </p>
               <div className="flex flex-wrap gap-1">
                 {role.permissions.slice(0, 4).map((p) => (

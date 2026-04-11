@@ -90,9 +90,7 @@ const OrdersScreen: React.FC = () => {
                       <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-pos-text">
-                    {formatCurrency(o.total)}
-                  </span>
+                  <span className="text-sm font-bold text-pos-text">{formatCurrency(o.total)}</span>
                 </div>
                 <div className="text-[11px] text-pos-muted mt-1">{formatDate(o.createdAt)}</div>
               </li>

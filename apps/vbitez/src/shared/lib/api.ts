@@ -41,7 +41,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      window.location.href = 'https://auth.rtylr.com?redirect=' + window.location.hostname.split('.')[0];
+      window.location.href =
+        'https://auth.rtylr.com?redirect=' + window.location.hostname.split('.')[0];
     }
     return Promise.reject(error);
   }

@@ -4,10 +4,7 @@ import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import { ASSETS } from '@voxire/config';
 import { Button } from '@voxire/components';
-import {
-  useEmailVerification,
-  useResendVerificationEmail,
-} from './useEmailVerification';
+import { useEmailVerification, useResendVerificationEmail } from './useEmailVerification';
 import notify from '../../shared/lib/notify/notify';
 
 type Status = 'loading' | 'success' | 'error';
@@ -70,9 +67,7 @@ const VerifyEmail: React.FC = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 border border-green-200 mx-auto">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="mt-4 text-base font-semibold text-[#111]">
-              Email verified
-            </p>
+            <p className="mt-4 text-base font-semibold text-[#111]">Email verified</p>
             <div className="mt-6">
               <Button
                 type="button"

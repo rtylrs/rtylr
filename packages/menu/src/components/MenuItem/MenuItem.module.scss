@@ -213,8 +213,12 @@
   flex-shrink: 0;
   transition: opacity 0.15s ease, transform 0.15s ease;
 
-  &:hover { opacity: 0.85; }
-  &:active { transform: scale(0.9); }
+  &:hover {
+    opacity: 0.85;
+  }
+  &:active {
+    transform: scale(0.9);
+  }
 }
 
 // Inline text button (minimal)

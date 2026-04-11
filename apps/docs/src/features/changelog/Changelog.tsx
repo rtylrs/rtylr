@@ -71,7 +71,11 @@ const Changelog: React.FC = () => {
 
       <div className="flex flex-col gap-8">
         {entries.map((entry) => (
-          <div key={entry.version} className="relative pl-6 border-l-2" style={{ borderColor: 'var(--docs-border)' }}>
+          <div
+            key={entry.version}
+            className="relative pl-6 border-l-2"
+            style={{ borderColor: 'var(--docs-border)' }}
+          >
             {/* Version dot */}
             <div
               className="absolute -left-[7px] top-0.5 w-3 h-3 rounded-full border-2"

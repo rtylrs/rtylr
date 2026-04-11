@@ -17,25 +17,47 @@ const CashFlow: React.FC = () => {
   const totalOut = data.reduce((s, d) => s + d.outflow, 0);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Cash Flow"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Cash Flow' }]}
-        actions={<PeriodSelector period={period} onPeriodChange={setPeriod} date={date} onDateChange={setDate} />}
+        actions={
+          <PeriodSelector
+            period={period}
+            onPeriodChange={setPeriod}
+            date={date}
+            onDateChange={setDate}
+          />
+        }
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Total inflow</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}><MoneyDisplay amount={totalIn} /></div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
+            <MoneyDisplay amount={totalIn} />
+          </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Total outflow</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444', marginTop: 6 }}><MoneyDisplay amount={totalOut} /></div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444', marginTop: 6 }}>
+            <MoneyDisplay amount={totalOut} />
+          </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Net cash flow</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: net >= 0 ? ACCENT : '#ef4444', marginTop: 6 }}>
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: net >= 0 ? ACCENT : '#ef4444',
+              marginTop: 6,
+            }}
+          >
             <MoneyDisplay amount={net} signed />
           </div>
         </div>

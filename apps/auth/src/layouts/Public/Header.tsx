@@ -91,11 +91,7 @@ const Header: React.FC = () => {
           />
         </div>
         {languageDropdown && (
-          <div
-            className="languages-dropdown"
-            role="listbox"
-            aria-label="Select language"
-          >
+          <div className="languages-dropdown" role="listbox" aria-label="Select language">
             <span
               role="option"
               aria-selected={language === 'en'}

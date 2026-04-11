@@ -14,8 +14,8 @@ const GiftCardsScreen: React.FC = () => {
   const [balanceResult, setBalanceResult] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  const filtered = cards.filter((c) =>
-    !search || c.code.toLowerCase().includes(search.toLowerCase()),
+  const filtered = cards.filter(
+    (c) => !search || c.code.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSell = () => {
@@ -80,10 +80,7 @@ const GiftCardsScreen: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filtered.map((c) => (
-                  <div
-                    key={c.id}
-                    className="p-4 rounded-xl bg-pos-card border border-pos-border"
-                  >
+                  <div key={c.id} className="p-4 rounded-xl bg-pos-card border border-pos-border">
                     <div className="flex justify-between items-baseline">
                       <span className="font-mono text-sm text-pos-text">{c.code}</span>
                       <span

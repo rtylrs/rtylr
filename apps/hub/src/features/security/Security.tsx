@@ -1,13 +1,13 @@
 import React from 'react';
 import { Shield, Smartphone, Laptop, LogOut, CheckCircle2 } from 'lucide-react';
-import { Button } from "../../shared/components/ui";
-import { Breadcrumbs, SettingSection, SkeletonList } from "../../shared/components/hub";
+import { Button } from '../../shared/components/ui';
+import { Breadcrumbs, SettingSection, SkeletonList } from '../../shared/components/hub';
 import {
   useSecurity,
   useToggleTwoFactor,
   useRevokeSession,
   type Session,
-} from "../../shared/hooks/queries/useSecurity";
+} from '../../shared/hooks/queries/useSecurity';
 
 function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -19,7 +19,10 @@ function formatRelative(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }> = ({ session, onRevoke }) => {
+const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }> = ({
+  session,
+  onRevoke,
+}) => {
   const isMobile = /iphone|android|ipad/i.test(session.device);
   const Icon = isMobile ? Smartphone : Laptop;
   return (
@@ -36,13 +39,17 @@ const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }>
             {session.device}
           </p>
           {session.current && (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
+              style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}
+            >
               <CheckCircle2 size={9} /> This device
             </span>
           )}
         </div>
         <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-          {session.browser} · {session.location} · {session.ip} · {formatRelative(session.lastActive)}
+          {session.browser} · {session.location} · {session.ip} ·{' '}
+          {formatRelative(session.lastActive)}
         </p>
       </div>
       {!session.current && (
@@ -63,7 +70,6 @@ const Security: React.FC = () => {
   if (isLoading || !data) {
     return (
       <div className="space-y-5 max-w-3xl">
-        
         <SkeletonList rows={4} withAvatar={false} />
       </div>
     );
@@ -71,13 +77,17 @@ const Security: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-3xl">
-      
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)' }}>
+        <div
+          className="h-9 w-9 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(239,68,68,0.15)' }}
+        >
           <Shield size={16} style={{ color: '#ef4444' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Security</h1>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Security
+          </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
             Two-factor authentication, sessions, and trusted devices.
           </p>
@@ -120,20 +130,33 @@ const Security: React.FC = () => {
         </div>
       </SettingSection>
 
-      <SettingSection title="Active sessions" description="Devices currently signed in to your account.">
+      <SettingSection
+        title="Active sessions"
+        description="Devices currently signed in to your account."
+      >
         <div className="-mx-5">
-          {data.sessions.map((s) => <SessionRow key={s.id} session={s} onRevoke={(id) => revoke.mutate(id)} />)}
+          {data.sessions.map((s) => (
+            <SessionRow key={s.id} session={s} onRevoke={(id) => revoke.mutate(id)} />
+          ))}
         </div>
       </SettingSection>
 
       <SettingSection title="Trusted devices" description="Devices that skip 2FA on login.">
         <div className="space-y-2">
           {data.trustedDevices.map((d) => (
-            <div key={d.id} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}>
+            <div
+              key={d.id}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg"
+              style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            >
               <Laptop size={13} style={{ color: 'var(--hub-text-dim)' }} />
               <div className="flex-1">
-                <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>{d.name}</p>
-                <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>{d.os} · seen {formatRelative(d.lastSeen)}</p>
+                <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {d.name}
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                  {d.os} · seen {formatRelative(d.lastSeen)}
+                </p>
               </div>
             </div>
           ))}

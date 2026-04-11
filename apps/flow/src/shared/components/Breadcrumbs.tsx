@@ -32,10 +32,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
               {c.label}
             </Link>
           ) : (
-            <span
-              className="min-w-0 truncate font-medium"
-              style={{ color: 'var(--flow-text)' }}
-            >
+            <span className="min-w-0 truncate font-medium" style={{ color: 'var(--flow-text)' }}>
               {c.label}
             </span>
           )}

@@ -1,7 +1,14 @@
 import React from 'react';
 import { GraduationCap, Clock, Layers, Award } from 'lucide-react';
 import { useTraining, useTrainingProgress } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, EmptyState, Skeleton, Pill, ACCENT } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  EmptyState,
+  Skeleton,
+  Pill,
+  ACCENT,
+} from '../../shared/components/ui';
 import TrainingProgress from '../../shared/components/TrainingProgress';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -22,25 +29,53 @@ const Training: React.FC = () => {
       {isLoading ? (
         <Skeleton height={240} />
       ) : !courses || courses.length === 0 ? (
-        <EmptyState icon={<GraduationCap size={20} />} title="No training courses" description="Add courses employees need to complete." />
+        <EmptyState
+          icon={<GraduationCap size={20} />}
+          title="No training courses"
+          description="Add courses employees need to complete."
+        />
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 12,
+            }}
+          >
             {courses.map((c) => (
               <Card key={c.id}>
                 <div style={{ display: 'flex', alignItems: 'start', gap: 10 }}>
-                  <span style={{ padding: 8, borderRadius: 10, background: `${CATEGORY_COLORS[c.category] ?? ACCENT}22`, color: CATEGORY_COLORS[c.category] ?? ACCENT }}>
+                  <span
+                    style={{
+                      padding: 8,
+                      borderRadius: 10,
+                      background: `${CATEGORY_COLORS[c.category] ?? ACCENT}22`,
+                      color: CATEGORY_COLORS[c.category] ?? ACCENT,
+                    }}
+                  >
                     <GraduationCap size={16} />
                   </span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>{c.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                      {c.title}
+                    </div>
                     <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                       <Pill color={CATEGORY_COLORS[c.category] ?? ACCENT}>{c.category}</Pill>
                       {c.required && <Pill color="#ef4444">Required</Pill>}
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginTop: 12,
+                    fontSize: 11,
+                    color: 'var(--hr-text-muted)',
+                  }}
+                >
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <Clock size={11} /> {c.durationMin} min
                   </span>
@@ -60,7 +95,16 @@ const Training: React.FC = () => {
               ) : (
                 progress.map((p) => (
                   <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ minWidth: 120, fontSize: 12, color: 'var(--hr-text)', fontWeight: 600 }}>{p.staffName}</div>
+                    <div
+                      style={{
+                        minWidth: 120,
+                        fontSize: 12,
+                        color: 'var(--hr-text)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {p.staffName}
+                    </div>
                     <div style={{ flex: 1 }}>
                       <TrainingProgress progress={p.progress} label={p.courseName} />
                     </div>

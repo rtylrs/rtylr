@@ -14,9 +14,9 @@ import {
   ImageSize,
   CardRadius,
 } from '@voxire/menu';
-import { useLayoutPresetsStore } from "../../shared/stores/layoutPresetsStore";
-import { useUserStore } from "../../shared/stores/userStore";
-import { useMenuStore } from "../../shared/stores/menuStore";
+import { useLayoutPresetsStore } from '../../shared/stores/layoutPresetsStore';
+import { useUserStore } from '../../shared/stores/userStore';
+import { useMenuStore } from '../../shared/stores/menuStore';
 
 // -- Placeholder image helper ------------------------------------------------
 
@@ -95,7 +95,14 @@ function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '6px 0',
+      }}
+    >
       <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{label}</span>
       <button
         role="switch"
@@ -204,7 +211,14 @@ function SectionCard({
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div
+              style={{
+                padding: '12px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+              }}
+            >
               {children}
             </div>
           </motion.div>
@@ -218,8 +232,12 @@ function SectionCard({
 
 function ControlRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)', flexShrink: 0 }}>{label}</span>
+    <div
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+    >
+      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)', flexShrink: 0 }}>
+        {label}
+      </span>
       {children}
     </div>
   );
@@ -227,12 +245,24 @@ function ControlRow({ label, children }: { label: string; children: React.ReactN
 
 // ─── Color picker row ─────────────────────────────────────────────────────────
 
-function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function ColorRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+    <div
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+    >
       <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>{label}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)', fontFamily: 'monospace' }}>{value}</span>
+        <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)', fontFamily: 'monospace' }}>
+          {value}
+        </span>
         <label
           style={{
             width: 28,
@@ -260,7 +290,15 @@ function ColorRow({ label, value, onChange }: { label: string; value: string; on
 
 // ─── Phone Frame ──────────────────────────────────────────────────────────────
 
-function PhoneFrame({ config, businessInfo, menuCategories }: { config: MenuLayoutConfig; businessInfo: BusinessInfo; menuCategories: MenuCategoryData[] }) {
+function PhoneFrame({
+  config,
+  businessInfo,
+  menuCategories,
+}: {
+  config: MenuLayoutConfig;
+  businessInfo: BusinessInfo;
+  menuCategories: MenuCategoryData[];
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
@@ -304,7 +342,8 @@ function PhoneFrame({ config, businessInfo, menuCategories }: { config: MenuLayo
           height: PHONE_H * scale,
           borderRadius: 44 * scale,
           background: '#18181b',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5)',
           position: 'relative',
           overflow: 'hidden',
           flexShrink: 0,
@@ -426,11 +465,7 @@ function PhoneFrame({ config, businessInfo, menuCategories }: { config: MenuLayo
                 width: `${100 / scale}%`,
               }}
             >
-              <MenuLayout
-                business={businessInfo}
-                categories={menuCategories}
-                config={config}
-              />
+              <MenuLayout business={businessInfo} categories={menuCategories} config={config} />
             </div>
           </div>
 
@@ -571,9 +606,7 @@ const Design: React.FC = () => {
         }}
       >
         {activePreset && (
-          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>
-            {activePreset.name}
-          </span>
+          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>{activePreset.name}</span>
         )}
         <motion.button
           whileTap={{ scale: 0.96 }}
@@ -666,7 +699,8 @@ const Design: React.FC = () => {
                   style={{
                     fontSize: 13,
                     fontWeight: 500,
-                    color: preset.id === activePresetId ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                    color:
+                      preset.id === activePresetId ? 'var(--hub-text)' : 'var(--hub-text-muted)',
                     flex: 1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -791,10 +825,26 @@ const Design: React.FC = () => {
                 onChange={(v) => patchHeader({ coverHeight: v })}
               />
             </ControlRow>
-            <ToggleRow label="Sticky header" checked={draftConfig.header.sticky} onChange={(v) => patchHeader({ sticky: v })} />
-            <ToggleRow label="Show logo" checked={draftConfig.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} />
-            <ToggleRow label="Show description" checked={draftConfig.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} />
-            <ToggleRow label="Show meta (address, hours)" checked={draftConfig.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} />
+            <ToggleRow
+              label="Sticky header"
+              checked={draftConfig.header.sticky}
+              onChange={(v) => patchHeader({ sticky: v })}
+            />
+            <ToggleRow
+              label="Show logo"
+              checked={draftConfig.header.showLogo}
+              onChange={(v) => patchHeader({ showLogo: v })}
+            />
+            <ToggleRow
+              label="Show description"
+              checked={draftConfig.header.showDescription}
+              onChange={(v) => patchHeader({ showDescription: v })}
+            />
+            <ToggleRow
+              label="Show meta (address, hours)"
+              checked={draftConfig.header.showMeta}
+              onChange={(v) => patchHeader({ showMeta: v })}
+            />
           </SectionCard>
 
           {/* Nav Tabs */}
@@ -882,8 +932,16 @@ const Design: React.FC = () => {
                 onChange={(v) => patchItems({ cardRadius: v })}
               />
             </ControlRow>
-            <ToggleRow label="Show description" checked={draftConfig.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} />
-            <ToggleRow label="Show badges" checked={draftConfig.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} />
+            <ToggleRow
+              label="Show description"
+              checked={draftConfig.items.showDescription}
+              onChange={(v) => patchItems({ showDescription: v })}
+            />
+            <ToggleRow
+              label="Show badges"
+              checked={draftConfig.items.showBadges}
+              onChange={(v) => patchItems({ showBadges: v })}
+            />
           </SectionCard>
 
           {/* Colors */}
@@ -956,8 +1014,21 @@ const Design: React.FC = () => {
           >
             Preview
           </span>
-          <div style={{ flex: 1, width: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <PhoneFrame config={draftConfig} businessInfo={businessInfo} menuCategories={menuCategories} />
+          <div
+            style={{
+              flex: 1,
+              width: '100%',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <PhoneFrame
+              config={draftConfig}
+              businessInfo={businessInfo}
+              menuCategories={menuCategories}
+            />
           </div>
         </div>
       </div>

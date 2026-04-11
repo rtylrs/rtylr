@@ -12,7 +12,8 @@ export function usePaymentMethods() {
 export function useUpdatePaymentMethod() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<PaymentMethod> & { id: number }) => unwrap(storeApi.updatePaymentMethod(data)),
+    mutationFn: (data: Partial<PaymentMethod> & { id: number }) =>
+      unwrap(storeApi.updatePaymentMethod(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-payment-methods'] }),
   });
 }

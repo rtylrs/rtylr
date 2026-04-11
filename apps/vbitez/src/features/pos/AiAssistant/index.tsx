@@ -2,20 +2,37 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
-interface Message { id: string; role: 'user' | 'assistant'; content: string; }
-interface AiAssistantProps { onSendMessage?: (message: string, history: Message[]) => Promise<string>; }
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+interface AiAssistantProps {
+  onSendMessage?: (message: string, history: Message[]) => Promise<string>;
+}
 
 const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([{ id: 'greeting', role: 'assistant', content: "Hi! I'm your POS AI assistant. I can help with order suggestions, upsells, or questions about menu items." }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'greeting',
+      role: 'assistant',
+      content:
+        "Hi! I'm your POS AI assistant. I can help with order suggestions, upsells, or questions about menu items.",
+    },
+  ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const cartItems = useCartStore((s) => s.items);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
-  useEffect(() => { if (isOpen) setTimeout(() => inputRef.current?.focus(), 100); }, [isOpen]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+  useEffect(() => {
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [isOpen]);
 
   const send = async () => {
     const text = input.trim();
@@ -28,10 +45,22 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
       const reply = onSendMessage
         ? await onSendMessage(text, messages)
         : `I understand you're asking about "${text}". Once the backend is connected, I'll provide real-time insights.`;
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), role: 'assistant', content: reply }]);
+      setMessages((p) => [
+        ...p,
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: reply },
+      ]);
     } catch {
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), role: 'assistant', content: 'Sorry, something went wrong.' }]);
-    } finally { setLoading(false); }
+      setMessages((p) => [
+        ...p,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Sorry, something went wrong.',
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,9 +72,27 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
         aria-label={isOpen ? 'Close AI' : 'Open AI'}
       >
         <AnimatePresence mode="wait">
-          {isOpen
-            ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.12 }}>✕</motion.span>
-            : <motion.span key="ai" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.12 }}>✦</motion.span>}
+          {isOpen ? (
+            <motion.span
+              key="x"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.12 }}
+            >
+              ✕
+            </motion.span>
+          ) : (
+            <motion.span
+              key="ai"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.12 }}
+            >
+              ✦
+            </motion.span>
+          )}
         </AnimatePresence>
       </button>
 
@@ -54,23 +101,42 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
         {isOpen && (
           <motion.div
             className="w-80 h-96 flex flex-col bg-pos-card border border-pos-border rounded-2xl shadow-modal overflow-hidden"
-            initial={{ opacity: 0, y: 12, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-pos-border shrink-0">
               <span className="text-sm font-semibold text-pos-text">✦ POS Assistant</span>
-              {cartItems.length > 0 && <span className="text-xs text-pos-muted">{cartItems.length} item{cartItems.length > 1 ? 's' : ''} in cart</span>}
+              {cartItems.length > 0 && (
+                <span className="text-xs text-pos-muted">
+                  {cartItems.length} item{cartItems.length > 1 ? 's' : ''} in cart
+                </span>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {messages.map((msg) => (
-                <div key={msg.id} className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${msg.role === 'user' ? 'ml-auto bg-pos-text text-pos-bg rounded-br-sm' : 'bg-white/8 text-pos-text rounded-bl-sm'}`}>
+                <div
+                  key={msg.id}
+                  className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'ml-auto bg-pos-text text-pos-bg rounded-br-sm'
+                      : 'bg-white/8 text-pos-text rounded-bl-sm'
+                  }`}
+                >
                   {msg.content}
                 </div>
               ))}
               {loading && (
                 <div className="bg-white/8 rounded-xl rounded-bl-sm px-3 py-2 w-fit flex gap-1">
-                  {[0, 150, 300].map((d) => <span key={d} className="w-1.5 h-1.5 rounded-full bg-pos-muted animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                  {[0, 150, 300].map((d) => (
+                    <span
+                      key={d}
+                      className="w-1.5 h-1.5 rounded-full bg-pos-muted animate-bounce"
+                      style={{ animationDelay: `${d}ms` }}
+                    />
+                  ))}
                 </div>
               )}
               <div ref={bottomRef} />
@@ -90,7 +156,9 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
                 className="w-9 h-9 flex items-center justify-center rounded-lg bg-pos-text text-pos-bg font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
                 onClick={send}
                 disabled={!input.trim() || loading}
-              >↑</button>
+              >
+                ↑
+              </button>
             </div>
           </motion.div>
         )}

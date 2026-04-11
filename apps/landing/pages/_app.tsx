@@ -11,7 +11,6 @@ import i18next from '../services/i18next';
 import '@voxire/components/styles';
 import '../styles/index.scss';
 
-
 function MyApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(
     () =>
@@ -32,10 +31,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
-            <I18nextProvider i18n={i18next}>
-            <Component {...pageProps} />
-          </I18nextProvider>
-        </CookiesProvider>
+        <I18nextProvider i18n={i18next}>
+          <Component {...pageProps} />
+        </I18nextProvider>
+      </CookiesProvider>
     </QueryClientProvider>
   );
 }

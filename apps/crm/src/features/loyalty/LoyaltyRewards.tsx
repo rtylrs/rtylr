@@ -16,11 +16,25 @@ const LoyaltyRewards: React.FC = () => {
       />
 
       {isLoading ? (
-        <Card><SkeletonList count={4} /></Card>
+        <Card>
+          <SkeletonList count={4} />
+        </Card>
       ) : rewards.length === 0 ? (
-        <Card><EmptyState icon={Gift} title="No rewards yet" description="Add your first reward to the catalog." /></Card>
+        <Card>
+          <EmptyState
+            icon={Gift}
+            title="No rewards yet"
+            description="Add your first reward to the catalog."
+          />
+        </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '14px',
+          }}
+        >
           {rewards.map((r) => (
             <div
               key={r.id}
@@ -50,8 +64,12 @@ const LoyaltyRewards: React.FC = () => {
                 <Gift size={20} />
               </div>
               <div>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)' }}>{r.name}</div>
-                <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>{r.description}</div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                  {r.name}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+                  {r.description}
+                </div>
               </div>
               <div
                 style={{
@@ -62,7 +80,9 @@ const LoyaltyRewards: React.FC = () => {
                   borderTop: '1px solid var(--hub-border)',
                 }}
               >
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#3b82f6' }}>{r.pointsCost.toLocaleString()} pts</span>
+                <span style={{ fontSize: '16px', fontWeight: 700, color: '#3b82f6' }}>
+                  {r.pointsCost.toLocaleString()} pts
+                </span>
                 <span
                   style={{
                     fontSize: '10px',
@@ -79,7 +99,16 @@ const LoyaltyRewards: React.FC = () => {
                   {r.stock} left
                 </span>
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{r.category}</div>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {r.category}
+              </div>
             </div>
           ))}
         </div>

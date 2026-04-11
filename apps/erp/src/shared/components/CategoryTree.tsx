@@ -20,7 +20,11 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ selectedId, onSelect }) => 
   };
 
   if (isLoading) {
-    return <div className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>Loading categories…</div>;
+    return (
+      <div className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+        Loading categories…
+      </div>
+    );
   }
 
   const rootCategories = categories.filter((c) => !c.parentId);
@@ -42,8 +46,13 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ selectedId, onSelect }) => 
                 color: isSelected ? 'var(--hub-text)' : 'var(--hub-text-muted)',
                 background: isSelected ? 'var(--hub-active)' : 'transparent',
               }}
-              onMouseEnter={(e) => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                if (!isSelected)
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <ChevronRight
                 size={12}

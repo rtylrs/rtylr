@@ -20,9 +20,13 @@ const queryClient = new QueryClient({
 
 // Apply persisted theme before first render to prevent flash
 const saved = localStorage.getItem('crm-theme') || 'dark';
-document.documentElement.setAttribute('data-theme', saved === 'system'
-  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-  : saved
+document.documentElement.setAttribute(
+  'data-theme',
+  saved === 'system'
+    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+    : saved
 );
 
 function FullScreenLoader() {

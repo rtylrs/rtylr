@@ -1,13 +1,13 @@
 /// <reference types='vitest' />
-import { defineConfig } from "vite";
-import path from "path";
-import react from "@vitejs/plugin-react";
-import svgr from "vite-plugin-svgr";
+import { defineConfig } from 'vite';
+import path from 'path';
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: "./node_modules/.vite/store",
-  base: "/",
+  cacheDir: './node_modules/.vite/store',
+  base: '/',
   plugins: [
     react(),
     svgr({
@@ -18,14 +18,14 @@ export default defineConfig(() => ({
   ],
   resolve: {
     alias: {
-      "@app": path.resolve(__dirname, "./src"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
-      "@utils": path.resolve(__dirname, "./src/utils"),
-      "@styles": path.resolve(__dirname, "./src/styles"),
-      "@interfaces": path.resolve(__dirname, "./src/interfaces"),
-      "@root": path.resolve(__dirname, "./"),
+      '@app': path.resolve(__dirname, './src'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@styles': path.resolve(__dirname, './src/styles'),
+      '@interfaces': path.resolve(__dirname, './src/interfaces'),
+      '@root': path.resolve(__dirname, './'),
     },
   },
   server: {
@@ -38,16 +38,16 @@ export default defineConfig(() => ({
   },
   preview: {
     port: 5184,
-    host: "localhost",
+    host: 'localhost',
     strictPort: true,
   },
   build: {
-    outDir: "../../dist/store",
+    outDir: '../../dist/store',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
-    target: "esnext",
-    minify: "esbuild" as const,
+    target: 'esnext',
+    minify: 'esbuild' as const,
     cssMinify: true,
     cssCodeSplit: true,
     modulePreload: true,
@@ -58,31 +58,23 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       output: {
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: [
-            "react",
-            "react-dom",
-            "react-router-dom",
-            "zustand",
-            "motion",
-            "lucide-react",
-          ],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "zustand",
-      "motion",
-      "lucide-react",
+    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
+    exclude: [
+      '@voxire/ui',
+      '@voxire/tailwind-config',
+      '@voxire/auth',
+      '@voxire/api',
+      '@voxire/types',
     ],
-    exclude: ["@voxire/ui", "@voxire/tailwind-config", "@voxire/auth", "@voxire/api", "@voxire/types"],
   },
 }));

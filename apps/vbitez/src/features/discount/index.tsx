@@ -82,9 +82,7 @@ const DiscountScreen: React.FC = () => {
               className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold disabled:opacity-50"
             >
               Apply{' '}
-              {mode === 'percent'
-                ? `${Number(value || 0)}%`
-                : formatCurrency(Number(value || 0))}
+              {mode === 'percent' ? `${Number(value || 0)}%` : formatCurrency(Number(value || 0))}
             </button>
           </>
         )}

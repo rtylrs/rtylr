@@ -22,7 +22,11 @@ const Resources: React.FC = () => {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
-  const { data: resources, isLoading, isError } = useResources({
+  const {
+    data: resources,
+    isLoading,
+    isError,
+  } = useResources({
     search: search || undefined,
     type: typeFilter !== 'all' ? typeFilter : undefined,
   });
@@ -80,7 +84,11 @@ const Resources: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load resources. Please try again later.
         </div>
@@ -103,7 +111,9 @@ const Resources: React.FC = () => {
 
         {isLoading && (
           <div className="p-3 space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 
@@ -128,23 +138,34 @@ const Resources: React.FC = () => {
                   key={res.id}
                   className="grid grid-cols-5 items-center px-4 py-3 transition-colors"
                   style={{ borderBottom: '1px solid var(--hub-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
-                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{res.name}</p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {res.name}
+                  </p>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize w-fit"
                     style={{ background: `${typeColor}18`, color: typeColor }}
                   >
                     {res.type}
                   </span>
-                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{res.capacity ?? '-'}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>{res.location ?? '-'}</p>
+                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {res.capacity ?? '-'}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                    {res.location ?? '-'}
+                  </p>
                   <div className="flex justify-end">
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
-                        background: res.available !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                        background:
+                          res.available !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
                         color: res.available !== false ? '#10b981' : '#ef4444',
                       }}
                     >

@@ -23,27 +23,32 @@ interface Campaign {
   updatedAt: string;
 }
 
-
 const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: string }> = {
-  Draft:     { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
-  Active:    { bg: 'rgba(16,185,129,0.12)',  text: '#10b981', dot: '#10b981' },
-  Paused:    { bg: 'rgba(245,158,11,0.12)',  text: '#f59e0b', dot: '#f59e0b' },
-  Completed: { bg: 'rgba(59,130,246,0.12)',  text: ACCENT,    dot: ACCENT    },
+  Draft: { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
+  Active: { bg: 'rgba(16,185,129,0.12)', text: '#10b981', dot: '#10b981' },
+  Paused: { bg: 'rgba(245,158,11,0.12)', text: '#f59e0b', dot: '#f59e0b' },
+  Completed: { bg: 'rgba(59,130,246,0.12)', text: ACCENT, dot: ACCENT },
 };
 
 const channelIcon: Record<Channel, React.ComponentType<{ size?: number }>> = {
   Email: Mail,
-  SMS:   MessageSquare,
-  Push:  Bell,
+  SMS: MessageSquare,
+  Push: Bell,
 };
 
 const channelColor: Record<Channel, string> = {
   Email: ACCENT,
-  SMS:   '#10b981',
-  Push:  '#8b5cf6',
+  SMS: '#10b981',
+  Push: '#8b5cf6',
 };
 
-const statusFilters: Array<'All' | CampaignStatus> = ['All', 'Active', 'Draft', 'Paused', 'Completed'];
+const statusFilters: Array<'All' | CampaignStatus> = [
+  'All',
+  'Active',
+  'Draft',
+  'Paused',
+  'Completed',
+];
 
 function StatusBadge({ status }: { status: CampaignStatus }) {
   const s = statusColor[status];
@@ -61,13 +66,29 @@ function StatusBadge({ status }: { status: CampaignStatus }) {
         color: s.text,
       }}
     >
-      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: s.dot, display: 'inline-block' }} />
+      <span
+        style={{
+          width: '5px',
+          height: '5px',
+          borderRadius: '50%',
+          background: s.dot,
+          display: 'inline-block',
+        }}
+      />
       {status}
     </span>
   );
 }
 
-function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index: number; onClick?: () => void }) {
+function CampaignCard({
+  campaign,
+  index,
+  onClick,
+}: {
+  campaign: Campaign;
+  index: number;
+  onClick?: () => void;
+}) {
   const ChannelIcon = channelIcon[campaign.channel];
 
   return (
@@ -89,8 +110,17 @@ function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index:
       }}
     >
       {/* Card header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}
+        >
           <div
             style={{
               width: '36px',
@@ -103,10 +133,20 @@ function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index:
               flexShrink: 0,
             }}
           >
-            <ChannelIcon size={16} style={{ color: channelColor[campaign.channel] } as React.CSSProperties} />
+            <ChannelIcon
+              size={16}
+              style={{ color: channelColor[campaign.channel] } as React.CSSProperties}
+            />
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', marginBottom: '2px' }}>
+            <div
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                marginBottom: '2px',
+              }}
+            >
               {campaign.name}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', lineHeight: 1.4 }}>
@@ -120,8 +160,16 @@ function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index:
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {[
-          { label: 'Audience', value: campaign.audience ? campaign.audience.toLocaleString() : '-', icon: Users },
-          { label: 'Sent', value: campaign.sent ? campaign.sent.toLocaleString() : '-', icon: Send },
+          {
+            label: 'Audience',
+            value: campaign.audience ? campaign.audience.toLocaleString() : '-',
+            icon: Users,
+          },
+          {
+            label: 'Sent',
+            value: campaign.sent ? campaign.sent.toLocaleString() : '-',
+            icon: Send,
+          },
           { label: 'Open Rate', value: campaign.openRate, icon: Eye },
           { label: 'Click Rate', value: campaign.clickRate, icon: TrendingUp },
         ].map(({ label, value, icon: Icon }) => (
@@ -136,16 +184,30 @@ function CampaignCard({ campaign, index, onClick }: { campaign: Campaign; index:
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
               <Icon size={11} style={{ color: 'var(--hub-text-dim)' }} />
-              <span style={{ fontSize: '10px', color: 'var(--hub-text-dim)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+              <span
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {label}
+              </span>
             </div>
-            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>{value}</span>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
+              {value}
+            </span>
           </div>
         ))}
       </div>
 
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>Updated {campaign.updatedAt}</span>
+        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+          Updated {campaign.updatedAt}
+        </span>
         <div style={{ display: 'flex', gap: '8px' }}>
           {campaign.status === 'Draft' && (
             <button
@@ -212,21 +274,47 @@ const Campaigns: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>Campaigns</h2>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+            Campaigns
+          </h2>
           <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-            {campaigns.filter(c => c.status === 'Active').length} active campaigns
+            {campaigns.filter((c) => c.status === 'Active').length} active campaigns
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={() => navigate('/campaigns/sms')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, background: 'transparent', color: 'var(--hub-text)', border: '1px solid var(--hub-border)', cursor: 'pointer' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              background: 'transparent',
+              color: 'var(--hub-text)',
+              border: '1px solid var(--hub-border)',
+              cursor: 'pointer',
+            }}
           >
             <MessageSquare size={14} /> New SMS
           </button>
           <button
             onClick={() => navigate('/campaigns/email')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, background: ACCENT, color: '#fff', border: 'none', cursor: 'pointer' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              background: ACCENT,
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             <Plus size={15} /> New email campaign
           </button>
@@ -272,7 +360,7 @@ const Campaigns: React.FC = () => {
                   background: statusFilter === f ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
                 }}
               >
-                {campaigns.filter(c => c.status === f).length}
+                {campaigns.filter((c) => c.status === f).length}
               </span>
             )}
           </button>
@@ -283,11 +371,23 @@ const Campaigns: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <AnimatePresence mode="popLayout">
           {filtered.map((c, i) => (
-            <CampaignCard key={c.id} campaign={c} index={i} onClick={() => navigate(`/campaigns/${c.id}`)} />
+            <CampaignCard
+              key={c.id}
+              campaign={c}
+              index={i}
+              onClick={() => navigate(`/campaigns/${c.id}`)}
+            />
           ))}
         </AnimatePresence>
         {filtered.length === 0 && (
-          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+          <div
+            style={{
+              padding: '60px',
+              textAlign: 'center',
+              color: 'var(--hub-text-muted)',
+              fontSize: '13px',
+            }}
+          >
             No campaigns in this status.
           </div>
         )}

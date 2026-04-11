@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type BusinessType = 
+export type BusinessType =
   | 'restaurant'
   | 'gym'
   | 'retail'
@@ -53,4 +53,3 @@ export const useBusinessStore = create<BusinessState & BusinessActions>()(
     }
   )
 );
-

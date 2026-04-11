@@ -14,20 +14,20 @@ Provides cookie-based authentication primitives, the Zustand user store, `Protec
 
 ```ts
 // Cookie utilities
-export function getCookie(name: string): string | null
-export function setCookie(name: string, value: string, options?: SetCookieOptions): void
-export function removeCookie(name: string, options?: { path?: string; domain?: string }): void
-export function getDefaultCookieDomain(): string | undefined
+export function getCookie(name: string): string | null;
+export function setCookie(name: string, value: string, options?: SetCookieOptions): void;
+export function removeCookie(name: string, options?: { path?: string; domain?: string }): void;
+export function getDefaultCookieDomain(): string | undefined;
 
 // User store (Zustand)
-export const useUserStore: StoreApi<UserStore>
+export const useUserStore: StoreApi<UserStore>;
 
 // Guards
-export function ProtectedRoute({ appId, children }: ProtectedRouteProps): JSX.Element | null
-export function RoleGuard({ allowed, role, fallback, children }: RoleGuardProps): JSX.Element
+export function ProtectedRoute({ appId, children }: ProtectedRouteProps): JSX.Element | null;
+export function RoleGuard({ allowed, role, fallback, children }: RoleGuardProps): JSX.Element;
 
 // Types
-export type { User, UserState, UserActions, UserRole, AppId }
+export type { User, UserState, UserActions, UserRole, AppId };
 ```
 
 ### Usage
@@ -38,7 +38,7 @@ import { ProtectedRoute } from '@voxire/auth';
 
 <ProtectedRoute appId="erp">
   <App />
-</ProtectedRoute>
+</ProtectedRoute>;
 
 // Read auth state anywhere
 import { useUserStore } from '@voxire/auth';
@@ -51,7 +51,7 @@ import { RoleGuard } from '@voxire/auth';
 
 <RoleGuard allowed={['owner', 'admin']} role={role}>
   <DeleteButton />
-</RoleGuard>
+</RoleGuard>;
 
 // Set cookie after login
 import { setCookie, getDefaultCookieDomain } from '@voxire/auth';
@@ -69,6 +69,7 @@ setCookie('token', jwt, {
 **Source:** `packages/api/src/client.ts`
 
 Pre-configured Axios instance that:
+
 1. Reads `VITE_API_URL` (falls back to `https://api.voxire.dev/`)
 2. Automatically injects `Authorization: Bearer <token>` from the `token` cookie on every request
 3. On 401: clears the token cookie and redirects to `auth.rtylr.com?redirect=<appId>`
@@ -76,8 +77,8 @@ Pre-configured Axios instance that:
 ### Exports
 
 ```ts
-export const api: AxiosInstance  // default client, appId="hub"
-export function createApiClient(appId: string): AxiosInstance
+export const api: AxiosInstance; // default client, appId="hub"
+export function createApiClient(appId: string): AxiosInstance;
 ```
 
 ### Usage
@@ -91,15 +92,15 @@ const { data } = await api.get('/hub/users');
 // Create an app-specific client (for correct redirect-back behavior)
 import { createApiClient } from '@voxire/api';
 
-const api = createApiClient('erp');  // 401 → auth.rtylr.com?redirect=erp
+const api = createApiClient('erp'); // 401 → auth.rtylr.com?redirect=erp
 const { data } = await api.get('/erp/products', { params: { ownerId: 42 } });
 await api.post('/erp/products', { name: 'Flour', costPrice: 1.5, salePrice: 3.0 });
 ```
 
 ### Environment Variable
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable       | Default                   | Description          |
+| -------------- | ------------------------- | -------------------- |
 | `VITE_API_URL` | `https://api.voxire.dev/` | Backend API base URL |
 
 ---
@@ -113,9 +114,20 @@ TypeScript types for every domain in the platform. No runtime code — types onl
 ### Exports by file
 
 **`user.ts`**
+
 ```ts
 type UserRole = 'owner' | 'admin' | 'operator' | 'staff' | 'viewer';
-type AppId = 'hub' | 'auth' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow' | 'menu' | 'landing';
+type AppId =
+  | 'hub'
+  | 'auth'
+  | 'pos'
+  | 'erp'
+  | 'hr'
+  | 'crm'
+  | 'finance'
+  | 'flow'
+  | 'menu'
+  | 'landing';
 
 interface User {
   id?: string;
@@ -125,7 +137,7 @@ interface User {
   email?: string;
   role?: UserRole;
   businessName?: string;
-  apps?: AppId[];          // which apps this user has access to
+  apps?: AppId[]; // which apps this user has access to
   addons?: Record<string, boolean>;
 }
 
@@ -138,21 +150,70 @@ interface AuthResponse {
 ```
 
 **`pos.ts`**
+
 ```ts
 type OrderStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 type PaymentMethod = 'cash' | 'card' | 'online';
 
-interface OrderItem { id, name, price, quantity, notes? }
-interface Order { id, tableNumber?, items, total, status, paymentMethod?, createdAt, updatedAt? }
-interface Table { id, number, capacity, status: 'available' | 'occupied' | 'reserved', currentOrderId? }
+interface OrderItem {
+  id;
+  name;
+  price;
+  quantity;
+  notes?;
+}
+interface Order {
+  id;
+  tableNumber?;
+  items;
+  total;
+  status;
+  paymentMethod?;
+  createdAt;
+  updatedAt?;
+}
+interface Table {
+  id;
+  number;
+  capacity;
+  status: 'available' | 'occupied' | 'reserved';
+  currentOrderId?;
+}
 ```
 
 **`erp.ts`**
+
 ```ts
-interface Product { id, name, sku?, category?, costPrice, salePrice, stock, lowStockThreshold?, unit?, supplierId? }
-interface Supplier { id, name, email?, phone?, address?, products? }
+interface Product {
+  id;
+  name;
+  sku?;
+  category?;
+  costPrice;
+  salePrice;
+  stock;
+  lowStockThreshold?;
+  unit?;
+  supplierId?;
+}
+interface Supplier {
+  id;
+  name;
+  email?;
+  phone?;
+  address?;
+  products?;
+}
 type PurchaseOrderStatus = 'draft' | 'sent' | 'received' | 'cancelled';
-interface PurchaseOrder { id, supplierId, items, total, status, expectedDelivery?, createdAt }
+interface PurchaseOrder {
+  id;
+  supplierId;
+  items;
+  total;
+  status;
+  expectedDelivery?;
+  createdAt;
+}
 ```
 
 **`hr.ts`** — Staff, Shift, PayrollRecord, TimeOffRequest types
@@ -185,17 +246,20 @@ Central source of truth for app URLs and configuration. Auto-switches between lo
 
 ```ts
 // App base URLs keyed by AppId
-export const APP_URLS: Record<AppId, string>
+export const APP_URLS: Record<AppId, string>;
 
 // App metadata and role access keyed by AppId
-export const APP_CONFIG: Record<AppId, {
-  name: string;
-  devPort: number;
-  allowedRoles: UserRole[];
-}>
+export const APP_CONFIG: Record<
+  AppId,
+  {
+    name: string;
+    devPort: number;
+    allowedRoles: UserRole[];
+  }
+>;
 
 // Re-exported types
-export type { AppId }
+export type { AppId };
 ```
 
 ### Values
@@ -203,37 +267,41 @@ export type { AppId }
 ```ts
 // Local dev (when hostname === 'localhost')
 APP_URLS = {
-  hub:     'http://localhost:5175',
-  auth:    'http://localhost:5176',
-  menu:    'http://localhost:5177',
-  pos:     'http://localhost:5178',
-  erp:     'http://localhost:5179',
-  hr:      'http://localhost:5180',
-  crm:     'http://localhost:5181',
+  hub: 'http://localhost:5175',
+  auth: 'http://localhost:5176',
+  menu: 'http://localhost:5177',
+  pos: 'http://localhost:5178',
+  erp: 'http://localhost:5179',
+  hr: 'http://localhost:5180',
+  crm: 'http://localhost:5181',
   finance: 'http://localhost:5182',
-  flow:    'http://localhost:5183',
+  flow: 'http://localhost:5183',
   landing: 'http://localhost:4200',
-}
+};
 
 // Production
 APP_URLS = {
-  hub:     'https://hub.rtylr.com',
-  auth:    'https://auth.rtylr.com',
+  hub: 'https://hub.rtylr.com',
+  auth: 'https://auth.rtylr.com',
   // ...etc
-}
+};
 
 APP_CONFIG = {
-  hub:     { name: 'Hub',     devPort: 5175, allowedRoles: ['owner', 'admin', 'operator'] },
-  auth:    { name: 'Auth',    devPort: 5176, allowedRoles: ['owner', 'admin', 'operator', 'staff', 'viewer'] },
-  menu:    { name: 'Menu',    devPort: 5177, allowedRoles: [] },
-  pos:     { name: 'POS',     devPort: 5178, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  erp:     { name: 'ERP',     devPort: 5179, allowedRoles: ['owner', 'admin', 'operator'] },
-  hr:      { name: 'HR',      devPort: 5180, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  crm:     { name: 'CRM',     devPort: 5181, allowedRoles: ['owner', 'admin', 'operator'] },
+  hub: { name: 'Hub', devPort: 5175, allowedRoles: ['owner', 'admin', 'operator'] },
+  auth: {
+    name: 'Auth',
+    devPort: 5176,
+    allowedRoles: ['owner', 'admin', 'operator', 'staff', 'viewer'],
+  },
+  menu: { name: 'Menu', devPort: 5177, allowedRoles: [] },
+  pos: { name: 'POS', devPort: 5178, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
+  erp: { name: 'ERP', devPort: 5179, allowedRoles: ['owner', 'admin', 'operator'] },
+  hr: { name: 'HR', devPort: 5180, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
+  crm: { name: 'CRM', devPort: 5181, allowedRoles: ['owner', 'admin', 'operator'] },
   finance: { name: 'Finance', devPort: 5182, allowedRoles: ['owner', 'admin'] },
-  flow:    { name: 'Flow',    devPort: 5183, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
+  flow: { name: 'Flow', devPort: 5183, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
   landing: { name: 'Landing', devPort: 4200, allowedRoles: [] },
-}
+};
 ```
 
 ### Usage

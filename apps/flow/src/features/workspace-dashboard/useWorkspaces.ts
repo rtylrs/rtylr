@@ -25,10 +25,12 @@ export function useCreateWorkspace() {
     mutationFn: (data: { name: string; color: string }) => {
       if (isFlowLocal()) {
         const id = `ws-${Date.now()}`;
-        useFlowStore.getState().setWorkspaces([
-          ...useFlowStore.getState().workspaces,
-          { id, name: data.name, color: data.color },
-        ]);
+        useFlowStore
+          .getState()
+          .setWorkspaces([
+            ...useFlowStore.getState().workspaces,
+            { id, name: data.name, color: data.color },
+          ]);
         return Promise.resolve({ id, name: data.name, color: data.color });
       }
       return flowApi.createWorkspace(data);
@@ -40,17 +42,11 @@ export function useCreateWorkspace() {
 export function useUpdateWorkspace() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<{ name: string; color: string }>;
-    }) => {
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ name: string; color: string }> }) => {
       if (isFlowLocal()) {
-        const ws = useFlowStore.getState().workspaces.map((w) =>
-          w.id === id ? { ...w, ...data } : w
-        );
+        const ws = useFlowStore
+          .getState()
+          .workspaces.map((w) => (w.id === id ? { ...w, ...data } : w));
         useFlowStore.setState({ workspaces: ws });
         return Promise.resolve();
       }
@@ -72,7 +68,7 @@ export function useDeleteWorkspace() {
         const next = state.workspaces.filter((w) => w.id !== id);
         const nextActive =
           state.activeWorkspaceId === id
-            ? (next.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? next[0]?.id ?? '')
+            ? next.find((w) => w.id === PERSONAL_WORKSPACE_ID)?.id ?? next[0]?.id ?? ''
             : state.activeWorkspaceId;
         useFlowStore.setState({ workspaces: next, activeWorkspaceId: nextActive });
         return Promise.resolve();

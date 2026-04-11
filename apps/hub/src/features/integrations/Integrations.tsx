@@ -1,19 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { Plug2, Search, ExternalLink, Check } from 'lucide-react';
-import { Input } from "../../shared/components/ui";
+import { Input } from '../../shared/components/ui';
 import {
   useIntegrations,
   useConnectIntegration,
   useDisconnectIntegration,
-} from "../../shared/hooks/queries/useIntegrations";
+} from '../../shared/hooks/queries/useIntegrations';
 
 const CATEGORIES = [
-  { key: 'all',         label: 'All' },
-  { key: 'payments',    label: 'Payments' },
-  { key: 'messaging',   label: 'Messaging' },
-  { key: 'accounting',  label: 'Accounting' },
-  { key: 'analytics',   label: 'Analytics' },
-  { key: 'delivery',    label: 'Delivery' },
+  { key: 'all', label: 'All' },
+  { key: 'payments', label: 'Payments' },
+  { key: 'messaging', label: 'Messaging' },
+  { key: 'accounting', label: 'Accounting' },
+  { key: 'analytics', label: 'Analytics' },
+  { key: 'delivery', label: 'Delivery' },
 ] as const;
 
 const Integrations: React.FC = () => {
@@ -28,7 +28,8 @@ const Integrations: React.FC = () => {
   const filtered = useMemo(() => {
     return integrations.filter((i: any) => {
       const name = i.name || i.provider || '';
-      const matchesQuery = !searchTerm.trim() || name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesQuery =
+        !searchTerm.trim() || name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCat = cat === 'all' || i.category === cat;
       return matchesQuery && matchesCat;
     });
@@ -39,13 +40,19 @@ const Integrations: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>Integrations</h1>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+            Integrations
+          </h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
             Connect rtylr to the tools you already use
           </p>
         </div>
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--hub-text-dim)' }} />
+          <Search
+            size={13}
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--hub-text-dim)' }}
+          />
           <Input
             className="pl-9 w-56"
             placeholder="Search integrations..."
@@ -65,7 +72,8 @@ const Integrations: React.FC = () => {
             style={{
               background: cat === c.key ? 'rgba(69,131,196,0.12)' : 'var(--hub-hover)',
               color: cat === c.key ? '#4583C4' : 'var(--hub-text-muted)',
-              border: cat === c.key ? '1px solid rgba(69,131,196,0.25)' : '1px solid var(--hub-border)',
+              border:
+                cat === c.key ? '1px solid rgba(69,131,196,0.25)' : '1px solid var(--hub-border)',
             }}
           >
             {c.label}
@@ -77,7 +85,11 @@ const Integrations: React.FC = () => {
       {isLoading ? (
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+            <div
+              key={i}
+              className="h-32 rounded-xl animate-pulse"
+              style={{ background: 'var(--hub-hover)' }}
+            />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -117,9 +129,14 @@ const Integrations: React.FC = () => {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{name}</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    {name}
+                  </p>
                   {i.description && (
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--hub-text-muted)' }}>
+                    <p
+                      className="text-xs mt-1 leading-relaxed"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
                       {i.description}
                     </p>
                   )}
@@ -130,7 +147,11 @@ const Integrations: React.FC = () => {
                     <button
                       onClick={() => disconnect.mutate(i.id)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+                      style={{
+                        background: 'var(--hub-hover)',
+                        color: 'var(--hub-text-muted)',
+                        border: '1px solid var(--hub-border)',
+                      }}
                     >
                       Disconnect
                     </button>

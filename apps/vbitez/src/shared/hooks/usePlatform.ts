@@ -6,7 +6,7 @@ import {
   getPlatformCapabilities,
   platformConfig,
   PlatformType,
-  PlatformCapabilities
+  PlatformCapabilities,
 } from '../utils/platform';
 
 export interface PlatformInfo {

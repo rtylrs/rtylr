@@ -9,7 +9,11 @@ interface QuickStockAdjustProps {
   onChange?: (newStock: number) => void;
 }
 
-const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({ productId, currentStock, onChange }) => {
+const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
+  productId,
+  currentStock,
+  onChange,
+}) => {
   const [stock, setStock] = useState(currentStock);
   const adjust = useAdjustInventory();
 

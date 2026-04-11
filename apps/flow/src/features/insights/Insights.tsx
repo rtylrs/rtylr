@@ -8,16 +8,18 @@ const Insights: React.FC = () => {
   const { activeWorkspaceId } = useFlowStore();
   const { data, isLoading } = useInsights(activeWorkspaceId);
 
-  if (isLoading || !data) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading insights...</div>;
+  if (isLoading || !data)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading insights...
+      </div>
+    );
 
   const maxThroughput = Math.max(...(data.throughput?.map((t) => t.completed) ?? [0]));
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Insights
         </h1>
@@ -39,7 +41,9 @@ const Insights: React.FC = () => {
           <Kpi
             icon={TrendingUp}
             label="Velocity"
-            value={`${Math.round(data.velocity.reduce((s, v) => s + v.completed, 0) / Math.max(1, data.velocity.length))}`}
+            value={`${Math.round(
+              data.velocity.reduce((s, v) => s + v.completed, 0) / Math.max(1, data.velocity.length)
+            )}`}
             hint="avg per cycle"
             color="#3b82f6"
           />
@@ -93,10 +97,7 @@ const Insights: React.FC = () => {
                         strokeWidth="1.5"
                         strokeDasharray="4 4"
                       />
-                      <polygon
-                        points={`0,160 ${pts.join(' ')} 400,160`}
-                        fill="url(#bgrad)"
-                      />
+                      <polygon points={`0,160 ${pts.join(' ')} 400,160`} fill="url(#bgrad)" />
                       <polyline
                         points={pts.join(' ')}
                         fill="none"
@@ -209,13 +210,19 @@ const Kpi: React.FC<{
   >
     <div className="flex items-center gap-1.5 mb-2">
       <Icon size={11} />
-      <span className="text-[10px] uppercase tracking-wider font-semibold"
-        style={{ color: 'var(--flow-text-dim)' }}>
+      <span
+        className="text-[10px] uppercase tracking-wider font-semibold"
+        style={{ color: 'var(--flow-text-dim)' }}
+      >
         {label}
       </span>
     </div>
-    <p className="text-[22px] font-bold" style={{ color }}>{value}</p>
-    <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>{hint}</p>
+    <p className="text-[22px] font-bold" style={{ color }}>
+      {value}
+    </p>
+    <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+      {hint}
+    </p>
   </div>
 );
 
@@ -227,8 +234,10 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
       border: '1px solid var(--flow-border)',
     }}
   >
-    <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-3"
-      style={{ color: 'var(--flow-text-muted)' }}>
+    <h3
+      className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+      style={{ color: 'var(--flow-text-muted)' }}
+    >
       {title}
     </h3>
     {children}
@@ -236,8 +245,10 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
 );
 
 const EmptyChart: React.FC = () => (
-  <div className="flex items-center justify-center h-40 text-[11px]"
-    style={{ color: 'var(--flow-text-dim)' }}>
+  <div
+    className="flex items-center justify-center h-40 text-[11px]"
+    style={{ color: 'var(--flow-text-dim)' }}
+  >
     No data available
   </div>
 );

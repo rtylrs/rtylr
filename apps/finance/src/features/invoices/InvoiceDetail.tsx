@@ -26,7 +26,10 @@ const InvoiceDetail: React.FC = () => {
   if (isLoading || !invoice) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <PageHeader title="Invoice" breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: id ?? '' }]} />
+        <PageHeader
+          title="Invoice"
+          breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: id ?? '' }]}
+        />
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow count={4} />
         </div>
@@ -34,13 +37,18 @@ const InvoiceDetail: React.FC = () => {
     );
   }
 
-  const paymentStatus = invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
+  const paymentStatus =
+    invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
   const balanceDue = invoice.amount - invoice.paid;
 
   const clientObj = { id: 'c1', name: invoice.client, email: invoice.clientEmail };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title={`Invoice ${invoice.id}`}
         subtitle={
@@ -97,14 +105,38 @@ const InvoiceDetail: React.FC = () => {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ ...cardStyle, padding: 16 }}>
-            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 10,
+              }}
+            >
               Summary
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: 'var(--hub-text-muted)' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: 12,
+                padding: '6px 0',
+                color: 'var(--hub-text-muted)',
+              }}
+            >
               <span>Total invoiced</span>
               <MoneyDisplay amount={invoice.amount} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: 'var(--hub-text-muted)' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: 12,
+                padding: '6px 0',
+                color: 'var(--hub-text-muted)',
+              }}
+            >
               <span>Paid</span>
               <MoneyDisplay amount={invoice.paid} />
             </div>
@@ -125,12 +157,25 @@ const InvoiceDetail: React.FC = () => {
           </div>
 
           <div style={{ ...cardStyle, padding: 16 }}>
-            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 10,
+              }}
+            >
               History
             </div>
             {invoice.history.map((h, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}>
-                <div style={{ width: 6, height: 6, borderRadius: 3, background: ACCENT, marginTop: 5 }} />
+              <div
+                key={i}
+                style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}
+              >
+                <div
+                  style={{ width: 6, height: 6, borderRadius: 3, background: ACCENT, marginTop: 5 }}
+                />
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--hub-text)' }}>{h.label}</div>
                   <div style={{ fontSize: 10, color: 'var(--hub-text-dim)' }}>{h.at}</div>
@@ -140,11 +185,23 @@ const InvoiceDetail: React.FC = () => {
           </div>
 
           <div style={{ ...cardStyle, padding: 16 }}>
-            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: 10,
+              }}
+            >
               Client
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>{invoice.client}</div>
-            <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{invoice.clientEmail}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+              {invoice.client}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+              {invoice.clientEmail}
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { MessageSquareText, Search, Plus, Pencil, Trash2, X, Save } from 'lucide-react';
-import { useCannedResponses, useCreateCannedResponse, useUpdateCannedResponse, useDeleteCannedResponse } from './useCannedResponses';
+import {
+  useCannedResponses,
+  useCreateCannedResponse,
+  useUpdateCannedResponse,
+  useDeleteCannedResponse,
+} from './useCannedResponses';
 import { toast } from 'sonner';
 
 const CannedResponses: React.FC = () => {
@@ -42,7 +47,10 @@ const CannedResponses: React.FC = () => {
       updateMutation.mutate(
         { id: editingId, data: { title: formTitle, body: formBody } },
         {
-          onSuccess: () => { toast.success('Response updated'); resetForm(); },
+          onSuccess: () => {
+            toast.success('Response updated');
+            resetForm();
+          },
           onError: () => toast.error('Failed to update response'),
         }
       );
@@ -50,7 +58,10 @@ const CannedResponses: React.FC = () => {
       createMutation.mutate(
         { title: formTitle, body: formBody },
         {
-          onSuccess: () => { toast.success('Response created'); resetForm(); },
+          onSuccess: () => {
+            toast.success('Response created');
+            resetForm();
+          },
           onError: () => toast.error('Failed to create response'),
         }
       );
@@ -76,7 +87,10 @@ const CannedResponses: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => { resetForm(); setShowForm(true); }}
+          onClick={() => {
+            resetForm();
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 h-8 px-4 rounded-lg text-xs font-medium text-white transition-colors"
           style={{ background: '#4583C4' }}
         >
@@ -156,7 +170,11 @@ const CannedResponses: React.FC = () => {
       {isLoading && (
         <div className="space-y-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 rounded-lg animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+            <div
+              key={i}
+              className="h-20 rounded-lg animate-pulse"
+              style={{ background: 'var(--hub-hover)' }}
+            />
           ))}
         </div>
       )}
@@ -164,7 +182,11 @@ const CannedResponses: React.FC = () => {
       {isError && (
         <div
           className="flex items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           Failed to load canned responses. Please try again.
         </div>
@@ -173,7 +195,11 @@ const CannedResponses: React.FC = () => {
       {!isLoading && !isError && responses.length === 0 && (
         <div
           className="flex flex-col items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           <MessageSquareText size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
           <p>No canned responses yet</p>
@@ -199,8 +225,12 @@ const CannedResponses: React.FC = () => {
                     onClick={() => handleEdit(item)}
                     className="h-6 w-6 rounded flex items-center justify-center transition-colors"
                     style={{ color: 'var(--hub-text-muted)' }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
                   >
                     <Pencil size={11} />
                   </button>
@@ -208,8 +238,12 @@ const CannedResponses: React.FC = () => {
                     onClick={() => handleDelete(item.id)}
                     className="h-6 w-6 rounded flex items-center justify-center transition-colors"
                     style={{ color: '#ef4444' }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
                   >
                     <Trash2 size={11} />
                   </button>

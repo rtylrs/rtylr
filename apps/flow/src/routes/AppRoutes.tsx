@@ -6,22 +6,12 @@ import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 const WorkspaceDashboard = React.lazy(
   () => import('../features/workspace-dashboard/WorkspaceDashboard')
 );
-const ProjectBoard = React.lazy(
-  () => import('../features/projects/ProjectBoard')
-);
-const ProjectList = React.lazy(
-  () => import('../features/projects/ProjectList')
-);
-const ProjectOverview = React.lazy(
-  () => import('../features/projects/ProjectOverview')
-);
-const ProjectSettings = React.lazy(
-  () => import('../features/projects/ProjectSettings')
-);
+const ProjectBoard = React.lazy(() => import('../features/projects/ProjectBoard'));
+const ProjectList = React.lazy(() => import('../features/projects/ProjectList'));
+const ProjectOverview = React.lazy(() => import('../features/projects/ProjectOverview'));
+const ProjectSettings = React.lazy(() => import('../features/projects/ProjectSettings'));
 const Inbox = React.lazy(() => import('../features/inbox/Inbox'));
-const FlowSettings = React.lazy(
-  () => import('../features/settings/FlowSettings')
-);
+const FlowSettings = React.lazy(() => import('../features/settings/FlowSettings'));
 const TaskDetail = React.lazy(() => import('../features/tasks/TaskDetail'));
 const MyIssues = React.lazy(() => import('../features/tasks/MyIssues'));
 const Timeline = React.lazy(() => import('../features/timeline/Timeline'));

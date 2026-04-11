@@ -24,5 +24,6 @@ export const crmService = {
   getCampaigns: () => safe.get('/crm/campaigns'),
   createCampaign: (data: any) => safe.post('/crm/campaigns', data),
   updateCampaign: (id: number, data: any) => safe.put(`/crm/campaigns/${id}`, data),
-  updateCampaignStatus: (id: number, status: string) => safe.put(`/crm/campaigns/${id}/status`, { status }),
+  updateCampaignStatus: (id: number, status: string) =>
+    safe.put(`/crm/campaigns/${id}/status`, { status }),
 };

@@ -92,7 +92,8 @@ const Valuation: React.FC = () => {
             </p>
             <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
               Potential margin{' '}
-              {Math.round(((summary.totalRetail - summary.totalValue) / summary.totalRetail) * 100)}%
+              {Math.round(((summary.totalRetail - summary.totalValue) / summary.totalRetail) * 100)}
+              %
             </p>
           </div>
           <div

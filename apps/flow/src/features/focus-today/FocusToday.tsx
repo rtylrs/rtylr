@@ -46,11 +46,7 @@ const FocusToday: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Sun size={22} style={{ color: ACCENT }} strokeWidth={2} />
           <h1 className="text-xl font-bold" style={{ color: 'var(--flow-text)' }}>
@@ -58,13 +54,17 @@ const FocusToday: React.FC = () => {
           </h1>
         </div>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
-          A short list: pinned items and anything due today. Everything else stays out of this view so
-          you can commit without scanning the whole backlog.
+          A short list: pinned items and anything due today. Everything else stays out of this view
+          so you can commit without scanning the whole backlog.
         </p>
         {backlogHint > 0 && (
           <p className="text-[12px] mt-3" style={{ color: 'var(--flow-text-dim)' }}>
             {backlogHint} task{backlogHint === 1 ? '' : 's'} still in backlog — use{' '}
-            <Link to="/triage" className="underline-offset-2 hover:underline" style={{ color: ACCENT }}>
+            <Link
+              to="/triage"
+              className="underline-offset-2 hover:underline"
+              style={{ color: ACCENT }}
+            >
               Triage
             </Link>{' '}
             when you are ready.
@@ -72,7 +72,10 @@ const FocusToday: React.FC = () => {
         )}
       </motion.div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border" style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-card)' }}>
+      <div
+        className="flex-1 min-h-0 overflow-y-auto rounded-xl border"
+        style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-card)' }}
+      >
         {focusTasks.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
@@ -85,7 +88,12 @@ const FocusToday: React.FC = () => {
         ) : (
           <ul className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
             {focusTasks.map((t, i) => (
-              <FocusRow key={t.id} task={t} project={projects.find((p) => p.id === t.projectId)} index={i} />
+              <FocusRow
+                key={t.id}
+                task={t}
+                project={projects.find((p) => p.id === t.projectId)}
+                index={i}
+              />
             ))}
           </ul>
         )}
@@ -118,7 +126,10 @@ const FocusRow: React.FC<{
             {task.title}
           </span>
         </div>
-        <div className="flex items-center gap-2 mt-1 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        <div
+          className="flex items-center gap-2 mt-1 text-[11px]"
+          style={{ color: 'var(--flow-text-dim)' }}
+        >
           <span className="truncate">{project?.name ?? task.projectName}</span>
           {task.dueDate && (
             <>

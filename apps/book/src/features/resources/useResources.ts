@@ -27,7 +27,8 @@ export function useCreateResource() {
 export function useUpdateResource() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => unwrap(bookService.updateResource(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      unwrap(bookService.updateResource(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
 }

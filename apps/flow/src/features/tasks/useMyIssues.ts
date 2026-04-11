@@ -13,10 +13,7 @@ export function useMyIssues() {
     () =>
       tasks.filter(
         (t) =>
-          isTaskMine(t.assigneeId) &&
-          !t.archived &&
-          t.status !== 'done' &&
-          t.status !== 'cancelled'
+          isTaskMine(t.assigneeId) && !t.archived && t.status !== 'done' && t.status !== 'cancelled'
       ),
     [tasks]
   );

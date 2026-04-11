@@ -10,12 +10,7 @@ interface SwitchProps {
 
 export const Switch: React.FC<SwitchProps> = ({ checked, onChange, disabled, className }) => (
   <label className={`${styles.switch}${className ? ` ${className}` : ''}`}>
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      disabled={disabled}
-    />
+    <input type="checkbox" checked={checked} onChange={onChange} disabled={disabled} />
     <span className={styles.slider} />
   </label>
 );

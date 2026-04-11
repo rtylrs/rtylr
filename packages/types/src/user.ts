@@ -1,5 +1,19 @@
 export type UserRole = 'owner' | 'admin' | 'operator' | 'staff' | 'viewer';
-export type AppId = 'hub' | 'auth' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow' | 'menu' | 'landing' | 'store' | 'book' | 'support' | 'insights';
+export type AppId =
+  | 'hub'
+  | 'auth'
+  | 'pos'
+  | 'erp'
+  | 'hr'
+  | 'crm'
+  | 'finance'
+  | 'flow'
+  | 'menu'
+  | 'landing'
+  | 'store'
+  | 'book'
+  | 'support'
+  | 'insights';
 
 export interface User {
   id?: string;
@@ -12,7 +26,7 @@ export interface User {
   businessName?: string;
   storeName?: string;
   planType?: string;
-  apps?: AppId[];   // which apps this user has access to
+  apps?: AppId[]; // which apps this user has access to
   addons?: Record<string, boolean>;
   theme?: string;
   [key: string]: any;

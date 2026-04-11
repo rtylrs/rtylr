@@ -1,7 +1,12 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
-import { Breadcrumbs, PermissionCheckbox, RoleBadge, SkeletonList } from "../../shared/components/hub";
-import { usePermissions, useUpdatePermission } from "../../shared/hooks/queries/usePermissions";
+import {
+  Breadcrumbs,
+  PermissionCheckbox,
+  RoleBadge,
+  SkeletonList,
+} from '../../shared/components/hub';
+import { usePermissions, useUpdatePermission } from '../../shared/hooks/queries/usePermissions';
 
 const Permissions: React.FC = () => {
   const { data, isLoading } = usePermissions();
@@ -10,7 +15,6 @@ const Permissions: React.FC = () => {
   if (isLoading || !data) {
     return (
       <div className="space-y-5 max-w-5xl">
-        
         <SkeletonList rows={6} withAvatar={false} />
       </div>
     );
@@ -23,13 +27,17 @@ const Permissions: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-5xl">
-      
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
+        <div
+          className="h-9 w-9 rounded-xl flex items-center justify-center"
+          style={{ background: 'rgba(69,131,196,0.15)' }}
+        >
           <Shield size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Permissions</h1>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Permissions
+          </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
             Configure what each role can do across the workspace.
           </p>
@@ -48,7 +56,10 @@ const Permissions: React.FC = () => {
             background: 'var(--hub-hover)',
           }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--hub-text-dim)' }}>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             Permission
           </p>
           {data.roles.map((role) => (
@@ -62,7 +73,11 @@ const Permissions: React.FC = () => {
           <div key={group}>
             <p
               className="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: 'var(--hub-text-dim)', background: 'var(--hub-hover)', borderBottom: '1px solid var(--hub-border)' }}
+              style={{
+                color: 'var(--hub-text-dim)',
+                background: 'var(--hub-hover)',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
             >
               {group}
             </p>
@@ -76,8 +91,18 @@ const Permissions: React.FC = () => {
                 }}
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--hub-text)' }}>{p.label}</p>
-                  <p className="text-[10px] font-mono truncate" style={{ color: 'var(--hub-text-dim)' }}>{p.key}</p>
+                  <p
+                    className="text-xs font-semibold truncate"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {p.label}
+                  </p>
+                  <p
+                    className="text-[10px] font-mono truncate"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                  >
+                    {p.key}
+                  </p>
                 </div>
                 {data.roles.map((role) => {
                   const value = data.values[role]?.[p.key] ?? false;

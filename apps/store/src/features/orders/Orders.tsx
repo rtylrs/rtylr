@@ -27,14 +27,25 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
 };
 
-const statusOptions = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded'] as const;
+const statusOptions = [
+  'pending',
+  'confirmed',
+  'shipped',
+  'delivered',
+  'cancelled',
+  'refunded',
+] as const;
 
 const Orders: React.FC = () => {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<OrderFilters['status']>();
 
-  const { data: orders, isLoading, error } = useOrders({
+  const {
+    data: orders,
+    isLoading,
+    error,
+  } = useOrders({
     search: debouncedSearch || undefined,
     status: statusFilter,
   });
@@ -42,20 +53,34 @@ const Orders: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load orders</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load orders
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4 max-w-7xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-4 max-w-7xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShoppingCart size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Orders</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Orders
+          </h2>
           {!isLoading && (
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
               {(orders ?? []).length}
             </span>
           )}
@@ -82,11 +107,17 @@ const Orders: React.FC = () => {
           value={statusFilter ?? ''}
           onChange={(e) => setStatusFilter((e.target.value || undefined) as OrderFilters['status'])}
           className="px-3 py-2 rounded-lg text-sm"
-          style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+          style={{
+            background: 'var(--hub-input-bg)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text)',
+          }}
         >
           <option value="">All statuses</option>
           {statusOptions.map((s) => (
-            <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+            <option key={s} value={s}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </option>
           ))}
         </select>
       </motion.div>
@@ -94,17 +125,23 @@ const Orders: React.FC = () => {
       {/* Order list */}
       {isLoading ? (
         <div className="space-y-1">
-          {Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={6} />)}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonRow key={i} cols={6} />
+          ))}
         </div>
       ) : (orders ?? []).length === 0 ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
           <Package size={32} style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No orders found</p>
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            No orders found
+          </p>
         </motion.div>
       ) : (
         <motion.div variants={containerVariants} className="space-y-1">
-          <div className="grid grid-cols-6 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
-            style={{ color: 'var(--hub-text-dim)' }}>
+          <div
+            className="grid grid-cols-6 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             <span>Order</span>
             <span>Customer</span>
             <span>Items</span>

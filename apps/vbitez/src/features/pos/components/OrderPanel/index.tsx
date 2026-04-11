@@ -10,7 +10,9 @@ import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
 import { formatCurrency } from '../../../../shared/utils/format';
 
-interface OrderPanelProps { tableNumber?: string; }
+interface OrderPanelProps {
+  tableNumber?: string;
+}
 
 const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const navigate = useNavigate();
@@ -50,7 +52,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-pos-text">Current Order</h2>
           {tableNumber && <span className="text-xs text-pos-muted">Table {tableNumber}</span>}
-          <div className="mt-1"><OfflineBadge /></div>
+          <div className="mt-1">
+            <OfflineBadge />
+          </div>
         </div>
         {items.length > 0 && (
           <button

@@ -147,8 +147,7 @@ const FeaturesSection: React.FC = () => {
     };
   }, []);
 
-  const activeFeatureData =
-    features.find((f) => f.id === activeFeature) || features[0];
+  const activeFeatureData = features.find((f) => f.id === activeFeature) || features[0];
 
   return (
     <motion.section
@@ -181,13 +180,9 @@ const FeaturesSection: React.FC = () => {
                     ease: [0.25, 0.46, 0.45, 0.94],
                   }}
                 >
-                  <span className={styles.featureCategory}>
-                    {feature.category}
-                  </span>
+                  <span className={styles.featureCategory}>{feature.category}</span>
                   <h3 className={styles.featureTitle}>{feature.title}</h3>
-                  <p className={styles.featureDescription}>
-                    {feature.description}
-                  </p>
+                  <p className={styles.featureDescription}>{feature.description}</p>
                   <div className={styles.featureActions}>
                     <Button
                       variant="dark-outline"
@@ -218,11 +213,7 @@ const FeaturesSection: React.FC = () => {
                   activeFeature === feature.id ? styles.active : ''
                 }`}
               >
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className={styles.showcaseImg}
-                />
+                <img src={feature.image} alt={feature.title} className={styles.showcaseImg} />
               </div>
             ))}
           </div>

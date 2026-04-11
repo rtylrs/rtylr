@@ -10,7 +10,11 @@ const SkeletonRow: React.FC = () => (
 const Customers: React.FC = () => {
   const [search, setSearch] = useState('');
 
-  const { data: customers, isLoading, isError } = useCustomers({
+  const {
+    data: customers,
+    isLoading,
+    isError,
+  } = useCustomers({
     search: search || undefined,
   });
 
@@ -51,7 +55,11 @@ const Customers: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load customers. Please try again later.
         </div>
@@ -75,7 +83,9 @@ const Customers: React.FC = () => {
 
         {isLoading && (
           <div className="p-3 space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 
@@ -86,7 +96,9 @@ const Customers: React.FC = () => {
               No customers found
             </p>
             <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-              {search ? 'Try a different search term' : 'Customers will appear after their first booking'}
+              {search
+                ? 'Try a different search term'
+                : 'Customers will appear after their first booking'}
             </p>
           </div>
         )}
@@ -98,24 +110,41 @@ const Customers: React.FC = () => {
                 key={customer.id}
                 className="grid grid-cols-6 items-center px-4 py-3 transition-colors"
                 style={{ borderBottom: '1px solid var(--hub-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
-                <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{customer.name}</p>
+                <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {customer.name}
+                </p>
                 <div className="flex items-center gap-1">
                   <Mail size={10} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>{customer.email ?? '-'}</span>
+                  <span className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                    {customer.email ?? '-'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Phone size={10} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{customer.phone ?? '-'}</span>
+                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {customer.phone ?? '-'}
+                  </span>
                 </div>
-                <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{customer.totalBookings ?? 0}</p>
+                <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {customer.totalBookings ?? 0}
+                </p>
                 <div className="flex items-center gap-1">
                   <Calendar size={10} style={{ color: 'var(--hub-text-dim)' }} />
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{customer.lastVisit ?? '-'}</span>
+                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {customer.lastVisit ?? '-'}
+                  </span>
                 </div>
-                <p className="text-xs text-right truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                <p
+                  className="text-xs text-right truncate"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
                   {customer.preferences ?? '-'}
                 </p>
               </div>

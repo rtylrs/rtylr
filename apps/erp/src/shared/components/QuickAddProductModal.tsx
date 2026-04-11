@@ -70,7 +70,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+          <h3
+            className="text-sm font-semibold flex items-center gap-2"
+            style={{ color: 'var(--hub-text)' }}
+          >
             <PackagePlus size={14} style={{ color: '#f59e0b' }} />
             Quick Add Product
           </h3>
@@ -84,20 +87,32 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             onChange={(e) => setName(e.target.value)}
             placeholder="Product name *"
             className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
           <input
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             placeholder="SKU *"
             className="w-full px-3 py-2 rounded-lg text-sm outline-none font-mono"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             <option value="">Select category *</option>
             {categories.map((c) => (
@@ -113,7 +128,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               placeholder="Stock"
               type="number"
               className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
             />
             <UnitSelector value={unit} onChange={setUnit} />
           </div>
@@ -125,7 +144,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               type="number"
               step="0.01"
               className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
             />
             <input
               value={salePrice}
@@ -134,7 +157,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               type="number"
               step="0.01"
               className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
             />
           </div>
         </div>
@@ -150,7 +177,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             onClick={handleSubmit}
             disabled={createProduct.isPending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-            style={{ background: '#f59e0b', color: '#000', opacity: createProduct.isPending ? 0.6 : 1 }}
+            style={{
+              background: '#f59e0b',
+              color: '#000',
+              opacity: createProduct.isPending ? 0.6 : 1,
+            }}
           >
             {createProduct.isPending ? 'Creating…' : 'Create Product'}
           </button>

@@ -4,4 +4,3 @@ export interface LayoutConfig {
   type: LayoutType;
   showNavbar?: boolean;
 }
-

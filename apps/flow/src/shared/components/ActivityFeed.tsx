@@ -61,10 +61,7 @@ function describe(a: ActivityEntry): string {
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
   if (entries.length === 0) {
     return (
-      <div
-        className="text-[12px] text-center py-4"
-        style={{ color: 'var(--flow-text-dim)' }}
-      >
+      <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
         No activity yet.
       </div>
     );

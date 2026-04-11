@@ -3,10 +3,10 @@ import React from 'react';
 export type PaymentStatus = 'paid' | 'partial' | 'unpaid' | 'overdue' | 'refunded';
 
 const STYLE: Record<PaymentStatus, React.CSSProperties> = {
-  paid:     { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  partial:  { background: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
-  unpaid:   { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  overdue:  { background: 'rgba(239,68,68,0.12)',  color: '#ef4444' },
+  paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
+  partial: { background: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
+  unpaid: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
+  overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
   refunded: { background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
 };
 
@@ -18,7 +18,10 @@ const LABEL: Record<PaymentStatus, string> = {
   refunded: 'Refunded',
 };
 
-const PaymentBadge: React.FC<{ status: PaymentStatus; compact?: boolean }> = ({ status, compact }) => (
+const PaymentBadge: React.FC<{ status: PaymentStatus; compact?: boolean }> = ({
+  status,
+  compact,
+}) => (
   <span
     style={{
       display: 'inline-flex',

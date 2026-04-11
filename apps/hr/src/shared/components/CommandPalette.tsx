@@ -1,6 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, Clock, DollarSign, Building2, Calendar, ClipboardList, GraduationCap, Shield, FileText, Network, Settings as SettingsIcon, Rocket, LogOut, MessageSquare } from 'lucide-react';
+import {
+  Search,
+  Users,
+  Clock,
+  DollarSign,
+  Building2,
+  Calendar,
+  ClipboardList,
+  GraduationCap,
+  Shield,
+  FileText,
+  Network,
+  Settings as SettingsIcon,
+  Rocket,
+  LogOut,
+  MessageSquare,
+} from 'lucide-react';
 import { useStaff } from '../../features/staff/useStaff';
 
 interface Action {
@@ -52,27 +68,88 @@ const CommandPalette: React.FC = () => {
 
   const baseActions: Action[] = useMemo(
     () => [
-      { id: 'nav-dashboard', label: 'Dashboard', icon: Users, run: () => navigate('/'), keywords: 'home' },
+      {
+        id: 'nav-dashboard',
+        label: 'Dashboard',
+        icon: Users,
+        run: () => navigate('/'),
+        keywords: 'home',
+      },
       { id: 'nav-staff', label: 'Staff', icon: Users, run: () => navigate('/staff') },
       { id: 'nav-shifts', label: 'Shifts', icon: Clock, run: () => navigate('/shifts') },
       { id: 'nav-schedule', label: 'Schedule', icon: Calendar, run: () => navigate('/schedule') },
-      { id: 'nav-timesheets', label: 'Timesheets', icon: Clock, run: () => navigate('/timesheets') },
+      {
+        id: 'nav-timesheets',
+        label: 'Timesheets',
+        icon: Clock,
+        run: () => navigate('/timesheets'),
+      },
       { id: 'nav-payroll', label: 'Payroll', icon: DollarSign, run: () => navigate('/payroll') },
-      { id: 'nav-departments', label: 'Departments', icon: Building2, run: () => navigate('/departments') },
+      {
+        id: 'nav-departments',
+        label: 'Departments',
+        icon: Building2,
+        run: () => navigate('/departments'),
+      },
       { id: 'nav-time-off', label: 'Time Off', icon: Calendar, run: () => navigate('/time-off') },
-      { id: 'nav-new-time-off', label: 'New time off request', icon: Calendar, run: () => navigate('/time-off/new') },
-      { id: 'nav-calendar', label: 'Time Off Calendar', icon: Calendar, run: () => navigate('/calendar') },
-      { id: 'nav-reviews', label: 'Performance Reviews', icon: ClipboardList, run: () => navigate('/reviews') },
-      { id: 'nav-one-on-ones', label: '1-on-1s', icon: MessageSquare, run: () => navigate('/one-on-ones') },
-      { id: 'nav-onboarding', label: 'Onboarding', icon: Rocket, run: () => navigate('/onboarding') },
-      { id: 'nav-offboarding', label: 'Offboarding', icon: LogOut, run: () => navigate('/offboarding') },
-      { id: 'nav-documents', label: 'Documents', icon: FileText, run: () => navigate('/documents') },
+      {
+        id: 'nav-new-time-off',
+        label: 'New time off request',
+        icon: Calendar,
+        run: () => navigate('/time-off/new'),
+      },
+      {
+        id: 'nav-calendar',
+        label: 'Time Off Calendar',
+        icon: Calendar,
+        run: () => navigate('/calendar'),
+      },
+      {
+        id: 'nav-reviews',
+        label: 'Performance Reviews',
+        icon: ClipboardList,
+        run: () => navigate('/reviews'),
+      },
+      {
+        id: 'nav-one-on-ones',
+        label: '1-on-1s',
+        icon: MessageSquare,
+        run: () => navigate('/one-on-ones'),
+      },
+      {
+        id: 'nav-onboarding',
+        label: 'Onboarding',
+        icon: Rocket,
+        run: () => navigate('/onboarding'),
+      },
+      {
+        id: 'nav-offboarding',
+        label: 'Offboarding',
+        icon: LogOut,
+        run: () => navigate('/offboarding'),
+      },
+      {
+        id: 'nav-documents',
+        label: 'Documents',
+        icon: FileText,
+        run: () => navigate('/documents'),
+      },
       { id: 'nav-benefits', label: 'Benefits', icon: Shield, run: () => navigate('/benefits') },
-      { id: 'nav-training', label: 'Training', icon: GraduationCap, run: () => navigate('/training') },
+      {
+        id: 'nav-training',
+        label: 'Training',
+        icon: GraduationCap,
+        run: () => navigate('/training'),
+      },
       { id: 'nav-org-chart', label: 'Org Chart', icon: Network, run: () => navigate('/org-chart') },
-      { id: 'nav-settings', label: 'Settings', icon: SettingsIcon, run: () => navigate('/settings') },
+      {
+        id: 'nav-settings',
+        label: 'Settings',
+        icon: SettingsIcon,
+        run: () => navigate('/settings'),
+      },
     ],
-    [navigate],
+    [navigate]
   );
 
   const staffActions: Action[] = useMemo(
@@ -85,7 +162,7 @@ const CommandPalette: React.FC = () => {
         run: () => navigate(`/staff/${s.id}`),
         keywords: s.email,
       })),
-    [staff, navigate],
+    [staff, navigate]
   );
 
   const all = useMemo(() => [...baseActions, ...staffActions], [baseActions, staffActions]);
@@ -94,7 +171,12 @@ const CommandPalette: React.FC = () => {
     if (!query) return all.slice(0, 8);
     const q = query.toLowerCase();
     return all
-      .filter((a) => a.label.toLowerCase().includes(q) || a.subtitle?.toLowerCase().includes(q) || a.keywords?.toLowerCase().includes(q))
+      .filter(
+        (a) =>
+          a.label.toLowerCase().includes(q) ||
+          a.subtitle?.toLowerCase().includes(q) ||
+          a.keywords?.toLowerCase().includes(q)
+      )
       .slice(0, 10);
   }, [all, query]);
 
@@ -131,7 +213,15 @@ const CommandPalette: React.FC = () => {
           boxShadow: 'var(--hr-shadow)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 18px', borderBottom: '1px solid var(--hr-border)' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '14px 18px',
+            borderBottom: '1px solid var(--hr-border)',
+          }}
+        >
           <Search size={16} style={{ color: 'var(--hr-text-muted)' }} />
           <input
             ref={inputRef}
@@ -162,11 +252,30 @@ const CommandPalette: React.FC = () => {
               fontSize: 14,
             }}
           />
-          <kbd style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, border: '1px solid var(--hr-border)', color: 'var(--hr-text-muted)' }}>ESC</kbd>
+          <kbd
+            style={{
+              fontSize: 10,
+              padding: '2px 6px',
+              borderRadius: 4,
+              border: '1px solid var(--hr-border)',
+              color: 'var(--hr-text-muted)',
+            }}
+          >
+            ESC
+          </kbd>
         </div>
         <div style={{ overflowY: 'auto', maxHeight: 380 }}>
           {filtered.length === 0 && (
-            <div style={{ padding: 30, textAlign: 'center', color: 'var(--hr-text-muted)', fontSize: 13 }}>No matches</div>
+            <div
+              style={{
+                padding: 30,
+                textAlign: 'center',
+                color: 'var(--hr-text-muted)',
+                fontSize: 13,
+              }}
+            >
+              No matches
+            </div>
           )}
           {filtered.map((a, i) => {
             const Icon = a.icon;
@@ -192,7 +301,9 @@ const CommandPalette: React.FC = () => {
                 <Icon size={14} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{a.label}</div>
-                  {a.subtitle && <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{a.subtitle}</div>}
+                  {a.subtitle && (
+                    <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{a.subtitle}</div>
+                  )}
                 </div>
               </button>
             );

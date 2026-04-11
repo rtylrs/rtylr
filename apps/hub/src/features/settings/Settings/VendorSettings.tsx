@@ -5,8 +5,8 @@ import {
   File,
   Translate as Languages,
   Scales as Gavel,
-} from "phosphor-react";
-import { useNavigate } from "react-router-dom";
+} from 'phosphor-react';
+import { useNavigate } from 'react-router-dom';
 
 const VendorSettings = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const VendorSettings = () => {
           <div
             className="settings-content"
             onClick={() => {
-              navigate("/settings/general");
+              navigate('/settings/general');
             }}
           >
             <h2>General</h2>
@@ -35,10 +35,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Plan and permissions</h2>
-            <span>
-              View plan information and manage what staff can see or do in your
-              store
-            </span>
+            <span>View plan information and manage what staff can see or do in your store</span>
           </div>
         </div>
         <div className="settings-item">
@@ -65,9 +62,7 @@ const VendorSettings = () => {
           </div>
           <div className="settings-content">
             <h2>Store languages</h2>
-            <span>
-              Manage the languages your customers can view on your store
-            </span>
+            <span>Manage the languages your customers can view on your store</span>
           </div>
         </div>
         <div className="settings-item">

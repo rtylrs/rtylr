@@ -6,14 +6,14 @@ rtylr uses cookie-based SSO across all apps. A single JWT stored in a cookie on 
 
 ## The Token Cookie
 
-| Property | Value |
-|----------|-------|
-| Name | `token` |
-| Domain | `.rtylr.com` (or `undefined` on localhost) |
-| Path | `/` |
-| SameSite | `lax` |
-| Secure | `true` in production |
-| Encoding | URL-encoded JWT string |
+| Property | Value                                      |
+| -------- | ------------------------------------------ |
+| Name     | `token`                                    |
+| Domain   | `.rtylr.com` (or `undefined` on localhost) |
+| Path     | `/`                                        |
+| SameSite | `lax`                                      |
+| Secure   | `true` in production                       |
+| Encoding | URL-encoded JWT string                     |
 
 The cookie is set by the Auth app after a successful login (`POST /login`). It is read by every other app to authenticate API calls.
 
@@ -91,27 +91,27 @@ The `user` module marks `/login` and `/register` as anonymous. All other routes 
 
 Roles are stored in `user_app_permissions.role` and embedded in the JWT claims.
 
-| Role | Description |
-|------|-------------|
-| `owner` | Full access to everything. The business account creator. |
-| `admin` | Full access to all apps except some billing/account-level operations. |
-| `operator` | Access to operational apps: Hub, POS, ERP, HR, CRM, Flow. |
-| `staff` | Access to POS, HR (own data), Flow. |
-| `viewer` | Read-only access to Auth. |
+| Role       | Description                                                           |
+| ---------- | --------------------------------------------------------------------- |
+| `owner`    | Full access to everything. The business account creator.              |
+| `admin`    | Full access to all apps except some billing/account-level operations. |
+| `operator` | Access to operational apps: Hub, POS, ERP, HR, CRM, Flow.             |
+| `staff`    | Access to POS, HR (own data), Flow.                                   |
+| `viewer`   | Read-only access to Auth.                                             |
 
 App-level access matrix (from `APP_CONFIG`):
 
-| App | owner | admin | operator | staff | viewer |
-|-----|-------|-------|----------|-------|--------|
-| Hub | ✓ | ✓ | ✓ | | |
-| Auth | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Menu | (public) | (public) | (public) | (public) | (public) |
-| POS | ✓ | ✓ | ✓ | ✓ | |
-| ERP | ✓ | ✓ | ✓ | | |
-| HR | ✓ | ✓ | ✓ | ✓ | |
-| CRM | ✓ | ✓ | ✓ | | |
-| Finance | ✓ | ✓ | | | |
-| Flow | ✓ | ✓ | ✓ | ✓ | |
+| App     | owner    | admin    | operator | staff    | viewer   |
+| ------- | -------- | -------- | -------- | -------- | -------- |
+| Hub     | ✓        | ✓        | ✓        |          |          |
+| Auth    | ✓        | ✓        | ✓        | ✓        | ✓        |
+| Menu    | (public) | (public) | (public) | (public) | (public) |
+| POS     | ✓        | ✓        | ✓        | ✓        |          |
+| ERP     | ✓        | ✓        | ✓        |          |          |
+| HR      | ✓        | ✓        | ✓        | ✓        |          |
+| CRM     | ✓        | ✓        | ✓        |          |          |
+| Finance | ✓        | ✓        |          |          |          |
+| Flow    | ✓        | ✓        | ✓        | ✓        |          |
 | Landing | (public) | (public) | (public) | (public) | (public) |
 
 ---
@@ -126,17 +126,18 @@ import { ProtectedRoute } from '@voxire/auth';
 // In your app's root (e.g., main.tsx or App.tsx)
 <ProtectedRoute appId="pos">
   <App />
-</ProtectedRoute>
+</ProtectedRoute>;
 ```
 
 **Props:**
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `appId` | `AppId` | Used to build the redirect URL: `auth.rtylr.com?redirect=<appId>` |
-| `children` | `ReactNode` | Rendered only when the token cookie is present |
+| Prop       | Type        | Description                                                       |
+| ---------- | ----------- | ----------------------------------------------------------------- |
+| `appId`    | `AppId`     | Used to build the redirect URL: `auth.rtylr.com?redirect=<appId>` |
+| `children` | `ReactNode` | Rendered only when the token cookie is present                    |
 
 **Behavior:**
+
 - Reads the `token` cookie synchronously on render
 - If absent: `window.location.href = ${AUTH_URL}?redirect=${appId}` and returns `null`
 - If present: renders `children` immediately (no network call — the API will 401 if the token is expired)
@@ -164,12 +165,12 @@ function AdminPanel() {
 
 **Props:**
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `allowed` | `UserRole[]` | — | Roles that may see `children` |
-| `role` | `UserRole \| null` | — | The current user's role from the store |
-| `fallback` | `ReactNode` | `null` | Rendered when role is not in `allowed` |
-| `children` | `ReactNode` | — | Rendered when role is allowed |
+| Prop       | Type               | Default | Description                            |
+| ---------- | ------------------ | ------- | -------------------------------------- |
+| `allowed`  | `UserRole[]`       | —       | Roles that may see `children`          |
+| `role`     | `UserRole \| null` | —       | The current user's role from the store |
+| `fallback` | `ReactNode`        | `null`  | Rendered when role is not in `allowed` |
+| `children` | `ReactNode`        | —       | Rendered when role is allowed          |
 
 ---
 
@@ -185,24 +186,24 @@ const { user, role, isAuthenticated, login, logout, setToken } = useUserStore();
 
 **State:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `user` | `User \| null` | Full user object |
-| `token` | `string \| null` | JWT (in-memory only, not persisted) |
-| `isAuthenticated` | `boolean` | Whether the user is logged in |
-| `role` | `UserRole \| null` | Current role |
-| `userId` | `string \| null` | User ID |
-| `addons` | `Record<string, boolean>` | Enabled add-ons |
+| Field             | Type                      | Description                         |
+| ----------------- | ------------------------- | ----------------------------------- |
+| `user`            | `User \| null`            | Full user object                    |
+| `token`           | `string \| null`          | JWT (in-memory only, not persisted) |
+| `isAuthenticated` | `boolean`                 | Whether the user is logged in       |
+| `role`            | `UserRole \| null`        | Current role                        |
+| `userId`          | `string \| null`          | User ID                             |
+| `addons`          | `Record<string, boolean>` | Enabled add-ons                     |
 
 **Actions:**
 
-| Action | Signature | Description |
-|--------|-----------|-------------|
-| `login` | `(user: User) => void` | Sets user, role, userId, addons |
-| `logout` | `() => void` | Clears state and removes `token` cookie |
-| `setToken` | `(token: string) => void` | Stores token in memory |
-| `setUser` | `(user: User) => void` | Updates user and derived fields |
-| `setRole` | `(role: UserRole) => void` | Updates role |
+| Action     | Signature                  | Description                             |
+| ---------- | -------------------------- | --------------------------------------- |
+| `login`    | `(user: User) => void`     | Sets user, role, userId, addons         |
+| `logout`   | `() => void`               | Clears state and removes `token` cookie |
+| `setToken` | `(token: string) => void`  | Stores token in memory                  |
+| `setUser`  | `(user: User) => void`     | Updates user and derived fields         |
+| `setRole`  | `(role: UserRole) => void` | Updates role                            |
 
 ---
 
@@ -220,7 +221,7 @@ const token = getCookie('token'); // string | null
 setCookie('token', jwtString, {
   domain: getDefaultCookieDomain(), // '.rtylr.com' or undefined
   days: 30,
-  secure: true,   // auto-set in production
+  secure: true, // auto-set in production
   sameSite: 'lax',
 });
 
@@ -229,5 +230,6 @@ removeCookie('token', { domain: getDefaultCookieDomain() });
 ```
 
 `getDefaultCookieDomain()` returns:
+
 - `'.rtylr.com'` when on `rtylr.com` or any subdomain
 - `undefined` on localhost or IP addresses (so the cookie is domain-less)

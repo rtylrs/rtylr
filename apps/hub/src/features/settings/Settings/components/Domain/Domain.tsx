@@ -104,9 +104,7 @@ const Domain: React.FC = () => {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle>Custom Domain</CardTitle>
-              <CardDescription>
-                Point your own domain at your rtylr menu.
-              </CardDescription>
+              <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
             </div>
             {domainStatus === 'active' ? (
               <Badge variant="success">Active</Badge>
@@ -178,7 +176,10 @@ const Domain: React.FC = () => {
                           <th
                             key={h}
                             className="px-3 py-2 text-left font-semibold"
-                            style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}
+                            style={{
+                              color: 'var(--hub-text-muted)',
+                              borderBottom: '1px solid var(--hub-border)',
+                            }}
                           >
                             {h}
                           </th>
@@ -187,10 +188,21 @@ const Domain: React.FC = () => {
                     </thead>
                     <tbody>
                       <tr style={{ background: 'var(--hub-card)' }}>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>CNAME</td>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>menu</td>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: '#4583C4' }}>cname.rtylr.com</td>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text-muted)' }}>3600</td>
+                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>
+                          CNAME
+                        </td>
+                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>
+                          menu
+                        </td>
+                        <td className="px-3 py-2.5 font-mono" style={{ color: '#4583C4' }}>
+                          cname.rtylr.com
+                        </td>
+                        <td
+                          className="px-3 py-2.5 font-mono"
+                          style={{ color: 'var(--hub-text-muted)' }}
+                        >
+                          3600
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -223,8 +235,8 @@ const Domain: React.FC = () => {
           >
             <ShieldCheck size={13} className="shrink-0 mt-0.5 text-emerald-500" />
             <span>
-              SSL is automatically provisioned once your domain is verified. No manual
-              certificate setup required.
+              SSL is automatically provisioned once your domain is verified. No manual certificate
+              setup required.
             </span>
           </div>
         </CardContent>

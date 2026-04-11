@@ -40,19 +40,19 @@ rtylr/
 
 ## App Port Assignments
 
-| App       | Local Port | Production Domain          | Framework   |
-|-----------|-----------|----------------------------|-------------|
-| Hub       | 5175      | hub.rtylr.com              | React + Vite |
-| Auth      | 5176      | auth.rtylr.com             | React + Vite |
-| Menu      | 5177      | menu.rtylr.com             | React + Vite |
-| POS       | 5178      | pos.rtylr.com              | React + Vite |
-| ERP       | 5179      | erp.rtylr.com              | React + Vite |
-| HR        | 5180      | hr.rtylr.com               | React + Vite |
-| CRM       | 5181      | crm.rtylr.com              | React + Vite |
-| Finance   | 5182      | finance.rtylr.com          | React + Vite |
-| Flow      | 5183      | flow.rtylr.com             | React + Vite |
-| Landing   | 4200      | rtylr.com                  | Next.js 15  |
-| API       | 9999      | api.voxire.dev             | Go + Chi    |
+| App     | Local Port | Production Domain | Framework    |
+| ------- | ---------- | ----------------- | ------------ |
+| Hub     | 5175       | hub.rtylr.com     | React + Vite |
+| Auth    | 5176       | auth.rtylr.com    | React + Vite |
+| Menu    | 5177       | menu.rtylr.com    | React + Vite |
+| POS     | 5178       | pos.rtylr.com     | React + Vite |
+| ERP     | 5179       | erp.rtylr.com     | React + Vite |
+| HR      | 5180       | hr.rtylr.com      | React + Vite |
+| CRM     | 5181       | crm.rtylr.com     | React + Vite |
+| Finance | 5182       | finance.rtylr.com | React + Vite |
+| Flow    | 5183       | flow.rtylr.com    | React + Vite |
+| Landing | 4200       | rtylr.com         | Next.js 15   |
+| API     | 9999       | api.voxire.dev    | Go + Chi     |
 
 ## Frontend Stack
 
@@ -110,7 +110,7 @@ Every API request:
 ## Shared Packages Dependency Graph
 
 ```
-apps/* 
+apps/*
   └─ @voxire/auth      (guards, user store, cookie helpers)
   └─ @voxire/api       (axios client — reads token from cookie)
   └─ @voxire/types     (TypeScript types for all domains)

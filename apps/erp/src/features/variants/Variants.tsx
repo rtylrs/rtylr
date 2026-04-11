@@ -56,7 +56,11 @@ const Variants: React.FC = () => {
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : variants.length === 0 ? (
-          <EmptyState icon={Layers} title="No variants" description="Add variants to differentiate your products" />
+          <EmptyState
+            icon={Layers}
+            title="No variants"
+            description="Add variants to differentiate your products"
+          />
         ) : (
           variants.map((v, i) => (
             <div

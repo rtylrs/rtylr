@@ -54,18 +54,13 @@ export const HelmetContainer = ({
       {ogType && <meta property="og:type" content={ogType} />}
       {ogLocale && <meta property="og:locale" content={ogLocale} />}
       {ogSiteName && <meta property="og:site_name" content={ogSiteName} />}
-      {ogDescription && (
-        <meta property="og:description" content={ogDescription} />
-      )}
+      {ogDescription && <meta property="og:description" content={ogDescription} />}
 
       {twitterCard && <meta name="twitter:card" content={twitterCard} />}
       {twitterSite && <meta name="twitter:site" content={twitterSite} />}
-      {twitterCreator && (
-        <meta name="twitter:creator" content={twitterCreator} />
-      )}
+      {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
 
-      {customMetaTags &&
-        customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
+      {customMetaTags && customMetaTags.map((tag, index) => <meta key={index} {...tag} />)}
     </Helmet>
   );
 };

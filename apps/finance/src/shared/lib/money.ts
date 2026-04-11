@@ -13,13 +13,26 @@ const CURRENCY_SYMBOL: Record<Currency, string> = {
   CNY: '\u00A5',
 };
 
-export const CURRENCY_OPTIONS: Currency[] = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY'];
+export const CURRENCY_OPTIONS: Currency[] = [
+  'USD',
+  'EUR',
+  'GBP',
+  'JPY',
+  'CAD',
+  'AUD',
+  'CHF',
+  'CNY',
+];
 
 export function getCurrencySymbol(c: Currency): string {
   return CURRENCY_SYMBOL[c] ?? c;
 }
 
-export function formatMoney(value: number | string | null | undefined, currency: Currency = 'USD', fractionDigits = 2): string {
+export function formatMoney(
+  value: number | string | null | undefined,
+  currency: Currency = 'USD',
+  fractionDigits = 2
+): string {
   const n = typeof value === 'string' ? parseFloat(value) : value ?? 0;
   if (!isFinite(n as number)) return '-';
   try {
@@ -36,7 +49,8 @@ export function formatMoney(value: number | string | null | undefined, currency:
 
 export function formatCompact(n: number, currency: Currency = 'USD'): string {
   const abs = Math.abs(n);
-  if (abs >= 1_000_000_000) return `${getCurrencySymbol(currency)}${(n / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000_000)
+    return `${getCurrencySymbol(currency)}${(n / 1_000_000_000).toFixed(1)}B`;
   if (abs >= 1_000_000) return `${getCurrencySymbol(currency)}${(n / 1_000_000).toFixed(1)}M`;
   if (abs >= 1_000) return `${getCurrencySymbol(currency)}${(n / 1_000).toFixed(1)}K`;
   return `${getCurrencySymbol(currency)}${n.toFixed(0)}`;

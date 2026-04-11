@@ -10,13 +10,7 @@ const MainLayout: React.FC<{
   hasHeader?: boolean;
   hasFooter?: boolean;
 }> = React.memo(
-  ({
-    children,
-    hasPadding = true,
-    paddingTop = '30px',
-    hasHeader = true,
-    hasFooter = true,
-  }) => {
+  ({ children, hasPadding = true, paddingTop = '30px', hasHeader = true, hasFooter = true }) => {
     const router = useRouter();
     const [isHomePage, setIsHomePage] = useState(true);
 

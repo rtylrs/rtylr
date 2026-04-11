@@ -34,9 +34,7 @@ const CombosScreen: React.FC = () => {
               >
                 <div>
                   <h3 className="text-base font-bold text-pos-text">{c.name}</h3>
-                  {c.description && (
-                    <p className="text-xs text-pos-muted mt-1">{c.description}</p>
-                  )}
+                  {c.description && <p className="text-xs text-pos-muted mt-1">{c.description}</p>}
                   <p className="text-lg font-bold text-pos-text mt-2">{formatCurrency(c.price)}</p>
                 </div>
                 <div className="space-y-1">

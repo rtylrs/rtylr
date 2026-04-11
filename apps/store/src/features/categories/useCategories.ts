@@ -20,7 +20,8 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<CreateCategoryInput> & { id: number }) => unwrap(storeApi.updateCategory(data)),
+    mutationFn: (data: Partial<CreateCategoryInput> & { id: number }) =>
+      unwrap(storeApi.updateCategory(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-categories'] }),
   });
 }

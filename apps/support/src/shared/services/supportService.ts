@@ -9,8 +9,13 @@ export const supportService = {
     safe.put(`/support/conversations/${id}/assign`, { assigneeId }),
 
   // Tickets
-  getTickets: (params?: { status?: string; assignee?: string; search?: string; limit?: number; offset?: number }) =>
-    safe.get('/support/tickets', { params }),
+  getTickets: (params?: {
+    status?: string;
+    assignee?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }) => safe.get('/support/tickets', { params }),
   getTicket: (id: number) => safe.get(`/support/tickets/${id}`),
   createTicket: (data: any) => safe.post('/support/tickets', data),
   updateTicket: (id: number, data: any) => safe.put(`/support/tickets/${id}`, data),

@@ -17,14 +17,47 @@ export interface OnboardingChecklistProps {
 }
 
 const DEFAULT_STEPS: OnboardingStep[] = [
-  { id: 'pos',    label: 'Set up Point of Sale',  description: 'Configure your first register and kitchen display.',  href: 'https://pos.rtylr.com',   done: false },
-  { id: 'team',   label: 'Invite your team',      description: 'Add your first staff member and assign apps.',         href: '/team/invite',           done: false },
-  { id: 'bank',   label: 'Connect your bank',     description: 'Link your bank account to accept payouts.',             href: '/integrations',          done: false },
-  { id: 'brand',  label: 'Add your brand',        description: 'Upload your logo and choose brand colors.',             href: '/theme',                 done: false },
-  { id: 'menu',   label: 'Build your menu',       description: 'Add your first menu and a handful of items.',           href: '/menus',                 done: false },
+  {
+    id: 'pos',
+    label: 'Set up Point of Sale',
+    description: 'Configure your first register and kitchen display.',
+    href: 'https://pos.rtylr.com',
+    done: false,
+  },
+  {
+    id: 'team',
+    label: 'Invite your team',
+    description: 'Add your first staff member and assign apps.',
+    href: '/team/invite',
+    done: false,
+  },
+  {
+    id: 'bank',
+    label: 'Connect your bank',
+    description: 'Link your bank account to accept payouts.',
+    href: '/integrations',
+    done: false,
+  },
+  {
+    id: 'brand',
+    label: 'Add your brand',
+    description: 'Upload your logo and choose brand colors.',
+    href: '/theme',
+    done: false,
+  },
+  {
+    id: 'menu',
+    label: 'Build your menu',
+    description: 'Add your first menu and a handful of items.',
+    href: '/menus',
+    done: false,
+  },
 ];
 
-export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({ steps = DEFAULT_STEPS, onDismiss }) => {
+export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
+  steps = DEFAULT_STEPS,
+  onDismiss,
+}) => {
   const navigate = useNavigate();
   const doneCount = steps.filter((s) => s.done).length;
   const total = steps.length;
@@ -58,7 +91,10 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({ steps 
         )}
       </div>
 
-      <div className="mb-4 h-1 rounded-full overflow-hidden" style={{ background: 'var(--hub-hover)' }}>
+      <div
+        className="mb-4 h-1 rounded-full overflow-hidden"
+        style={{ background: 'var(--hub-hover)' }}
+      >
         <motion.div
           className="h-full"
           style={{ background: '#4583C4' }}
@@ -90,7 +126,11 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({ steps 
                   border: step.done ? 'none' : '1px solid var(--hub-border)',
                 }}
               >
-                {step.done ? <Check size={11} color="white" strokeWidth={3} /> : <Circle size={10} style={{ color: 'var(--hub-text-dim)' }} />}
+                {step.done ? (
+                  <Check size={11} color="white" strokeWidth={3} />
+                ) : (
+                  <Circle size={10} style={{ color: 'var(--hub-text-dim)' }} />
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p
@@ -107,7 +147,11 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({ steps 
                   {step.description}
                 </p>
               </div>
-              <ArrowRight size={12} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--hub-text-dim)' }} />
+              <ArrowRight
+                size={12}
+                className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: 'var(--hub-text-dim)' }}
+              />
             </button>
           );
         })}

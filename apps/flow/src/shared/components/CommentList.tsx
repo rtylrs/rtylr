@@ -57,10 +57,7 @@ function renderBody(body: string): React.ReactNode {
 export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
   if (comments.length === 0) {
     return (
-      <div
-        className="text-[12px] text-center py-6"
-        style={{ color: 'var(--flow-text-dim)' }}
-      >
+      <div className="text-[12px] text-center py-6" style={{ color: 'var(--flow-text-dim)' }}>
         No comments yet. Start the conversation.
       </div>
     );
@@ -72,10 +69,7 @@ export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
           <AssigneeAvatar name={c.author} initials={c.authorInitials} size={28} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span
-                className="text-[12px] font-semibold"
-                style={{ color: 'var(--flow-text)' }}
-              >
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {c.author}
               </span>
               <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>

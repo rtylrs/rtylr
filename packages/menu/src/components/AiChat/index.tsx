@@ -147,9 +147,7 @@ const AiChat: React.FC<AiChatProps> = ({
             </motion.span>
           )}
         </AnimatePresence>
-        {!isOpen && buttonLabel && (
-          <span className={styles.aiChat__fabLabel}>{buttonLabel}</span>
-        )}
+        {!isOpen && buttonLabel && <span className={styles.aiChat__fabLabel}>{buttonLabel}</span>}
       </button>
 
       {/* Chat panel */}
@@ -181,7 +179,13 @@ const AiChat: React.FC<AiChatProps> = ({
               ))}
 
               {loading && (
-                <div className={classNames(styles.aiChat__bubble, styles['aiChat__bubble--assistant'], styles['aiChat__bubble--typing'])}>
+                <div
+                  className={classNames(
+                    styles.aiChat__bubble,
+                    styles['aiChat__bubble--assistant'],
+                    styles['aiChat__bubble--typing']
+                  )}
+                >
                   <span />
                   <span />
                   <span />

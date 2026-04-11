@@ -11,14 +11,16 @@ const Team: React.FC = () => {
   const { data: members = [], isLoading } = useTeamWorkload();
   const navigate = useNavigate();
 
-  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading team...</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading team...
+      </div>
+    );
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
@@ -62,7 +64,10 @@ const Team: React.FC = () => {
                   >
                     <PriorityIcon priority={t.priority} size={11} />
                     <StatusIcon status={t.status} size={11} />
-                    <span className="text-[11px] flex-1 truncate" style={{ color: 'var(--flow-text)' }}>
+                    <span
+                      className="text-[11px] flex-1 truncate"
+                      style={{ color: 'var(--flow-text)' }}
+                    >
                       {t.title}
                     </span>
                     <span

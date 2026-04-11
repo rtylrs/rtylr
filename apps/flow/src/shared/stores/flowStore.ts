@@ -277,11 +277,17 @@ interface FlowState {
   clearSelection: () => void;
   selectAll: (ids: string[]) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
-  createTask: (data: Partial<Task> & { title: string; projectId: string; workspaceId: string }) => Task;
+  createTask: (
+    data: Partial<Task> & { title: string; projectId: string; workspaceId: string }
+  ) => Task;
   deleteTask: (id: string) => void;
   archiveTask: (id: string) => void;
   bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void;
-  addComment: (taskId: string, body: string, author?: { name: string; initials: string; id: string }) => void;
+  addComment: (
+    taskId: string,
+    body: string,
+    author?: { name: string; initials: string; id: string }
+  ) => void;
   toggleSubtask: (id: string) => void;
   addSubtask: (taskId: string, title: string) => void;
   markNotificationRead: (id: string) => void;
@@ -402,8 +408,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
     return newTask;
   },
 
-  deleteTask: (id) =>
-    set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+  deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 
   archiveTask: (id) =>
     set((s) => ({
@@ -435,24 +440,17 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
 
   toggleSubtask: (id) =>
     set((s) => ({
-      subtasks: s.subtasks.map((x) =>
-        x.id === id ? { ...x, completed: !x.completed } : x
-      ),
+      subtasks: s.subtasks.map((x) => (x.id === id ? { ...x, completed: !x.completed } : x)),
     })),
 
   addSubtask: (taskId, title) =>
     set((s) => ({
-      subtasks: [
-        ...s.subtasks,
-        { id: `s${Date.now()}`, taskId, title, completed: false },
-      ],
+      subtasks: [...s.subtasks, { id: `s${Date.now()}`, taskId, title, completed: false }],
     })),
 
   markNotificationRead: (id) =>
     set((s) => ({
-      notifications: s.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
+      notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
     })),
 
   markAllNotificationsRead: () =>

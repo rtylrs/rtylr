@@ -13,15 +13,16 @@ const ProjectSettings: React.FC = () => {
   const [description, setDescription] = useState(project?.description || '');
 
   if (!project) {
-    return <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>Project not found.</div>;
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Project not found.
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
           items={[
             { label: project.name, to: `/w/${project.workspaceId}/p/${project.id}/overview` },
@@ -111,8 +112,16 @@ const ProjectSettings: React.FC = () => {
 
         <Section title="Integrations">
           <div className="space-y-2">
-            <Integration icon={Slack} name="Slack" description="Post project updates to #flow-updates" />
-            <Integration icon={Github} name="GitHub" description="Link PRs to tasks automatically" />
+            <Integration
+              icon={Slack}
+              name="Slack"
+              description="Post project updates to #flow-updates"
+            />
+            <Integration
+              icon={Github}
+              name="GitHub"
+              description="Link PRs to tasks automatically"
+            />
             <Integration icon={Mail} name="Email" description="Send daily digests to members" />
           </div>
         </Section>

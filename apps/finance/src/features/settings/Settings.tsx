@@ -5,7 +5,14 @@ import { RotateCcw, Save, Image as ImageIcon } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settings';
 import { CURRENCY_OPTIONS } from '../../shared/lib/money';
-import { cardStyle, inputStyle, labelStyle, primaryBtn, ghostBtn, ACCENT } from '../../shared/lib/tokens';
+import {
+  cardStyle,
+  inputStyle,
+  labelStyle,
+  primaryBtn,
+  ghostBtn,
+  ACCENT,
+} from '../../shared/lib/tokens';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -22,7 +29,11 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Settings"
         actions={
@@ -40,15 +51,38 @@ const Settings: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <Card title="Company">
           <Field label="Company name">
-            <input value={settings.companyName} onChange={(e) => settings.setSetting('companyName', e.target.value)} style={inputStyle} />
+            <input
+              value={settings.companyName}
+              onChange={(e) => settings.setSetting('companyName', e.target.value)}
+              style={inputStyle}
+            />
           </Field>
           <Field label="Billing email">
-            <input value={settings.companyEmail} onChange={(e) => settings.setSetting('companyEmail', e.target.value)} style={inputStyle} />
+            <input
+              value={settings.companyEmail}
+              onChange={(e) => settings.setSetting('companyEmail', e.target.value)}
+              style={inputStyle}
+            />
           </Field>
           <Field label="Brand color">
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input type="color" value={settings.brandColor} onChange={(e) => settings.setSetting('brandColor', e.target.value)} style={{ width: 44, height: 32, border: 'none', borderRadius: 8, background: 'transparent' }} />
-              <input value={settings.brandColor} onChange={(e) => settings.setSetting('brandColor', e.target.value)} style={inputStyle} />
+              <input
+                type="color"
+                value={settings.brandColor}
+                onChange={(e) => settings.setSetting('brandColor', e.target.value)}
+                style={{
+                  width: 44,
+                  height: 32,
+                  border: 'none',
+                  borderRadius: 8,
+                  background: 'transparent',
+                }}
+              />
+              <input
+                value={settings.brandColor}
+                onChange={(e) => settings.setSetting('brandColor', e.target.value)}
+                style={inputStyle}
+              />
             </div>
           </Field>
           <Field label="Logo URL">
@@ -68,14 +102,20 @@ const Settings: React.FC = () => {
 
         <Card title="Invoicing">
           <Field label="Invoice prefix">
-            <input value={settings.invoicePrefix} onChange={(e) => settings.setSetting('invoicePrefix', e.target.value)} style={inputStyle} />
+            <input
+              value={settings.invoicePrefix}
+              onChange={(e) => settings.setSetting('invoicePrefix', e.target.value)}
+              style={inputStyle}
+            />
           </Field>
           <Field label="Default tax rate (%)">
             <input
               type="number"
               step="0.1"
               value={settings.defaultTaxRate}
-              onChange={(e) => settings.setSetting('defaultTaxRate', parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                settings.setSetting('defaultTaxRate', parseFloat(e.target.value) || 0)
+              }
               style={inputStyle}
             />
           </Field>
@@ -84,7 +124,9 @@ const Settings: React.FC = () => {
               type="number"
               step="0.1"
               value={settings.lateFeePercent}
-              onChange={(e) => settings.setSetting('lateFeePercent', parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                settings.setSetting('lateFeePercent', parseFloat(e.target.value) || 0)
+              }
               style={inputStyle}
             />
           </Field>
@@ -92,7 +134,9 @@ const Settings: React.FC = () => {
             <input
               type="number"
               value={settings.lateFeeGraceDays}
-              onChange={(e) => settings.setSetting('lateFeeGraceDays', parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                settings.setSetting('lateFeeGraceDays', parseInt(e.target.value) || 0)
+              }
               style={inputStyle}
             />
           </Field>
@@ -123,7 +167,9 @@ const Settings: React.FC = () => {
           <Field label="Fiscal year start">
             <select
               value={settings.fiscalYearStartMonth}
-              onChange={(e) => settings.setSetting('fiscalYearStartMonth', parseInt(e.target.value) || 1)}
+              onChange={(e) =>
+                settings.setSetting('fiscalYearStartMonth', parseInt(e.target.value) || 1)
+              }
               style={inputStyle}
             >
               {MONTHS.map((m, i) => (
@@ -150,7 +196,9 @@ const Settings: React.FC = () => {
 
 const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div style={{ ...cardStyle, padding: 20 }}>
-    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 14 }}>{title}</div>
+    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 14 }}>
+      {title}
+    </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
   </div>
 );
@@ -163,7 +211,15 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
 );
 
 const ShortcutRow: React.FC<{ label: string; keys: string[] }> = ({ label, keys }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--hub-border)' }}>
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '6px 0',
+      borderBottom: '1px solid var(--hub-border)',
+    }}
+  >
     <span style={{ fontSize: 13, color: 'var(--hub-text-muted)' }}>{label}</span>
     <div style={{ display: 'flex', gap: 4 }}>
       {keys.map((k) => (

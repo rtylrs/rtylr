@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Settings as SettingsIcon, Clock, Mail, Calendar, Loader2, Plus, Trash2 } from 'lucide-react';
-import { useInsightsSettings, useUpdateInsightsSettings, useScheduledReports, useCreateScheduledReport, useDeleteScheduledReport } from './useSettings';
+import {
+  Settings as SettingsIcon,
+  Clock,
+  Mail,
+  Calendar,
+  Loader2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import {
+  useInsightsSettings,
+  useUpdateInsightsSettings,
+  useScheduledReports,
+  useCreateScheduledReport,
+  useDeleteScheduledReport,
+} from './useSettings';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
@@ -35,7 +49,9 @@ const Settings: React.FC = () => {
   const deleteScheduled = useDeleteScheduledReport();
 
   const [defaultRange, setDefaultRange] = useState<string>(settings?.defaultDateRange ?? '30d');
-  const [emailRecipients, setEmailRecipients] = useState<string>(settings?.emailRecipients?.join(', ') ?? '');
+  const [emailRecipients, setEmailRecipients] = useState<string>(
+    settings?.emailRecipients?.join(', ') ?? ''
+  );
 
   if (isError) {
     return <ErrorState message="Failed to load settings." onRetry={refetch} />;
@@ -47,7 +63,10 @@ const Settings: React.FC = () => {
     try {
       await updateSettings.mutateAsync({
         defaultDateRange: defaultRange,
-        emailRecipients: emailRecipients.split(',').map((e: string) => e.trim()).filter(Boolean),
+        emailRecipients: emailRecipients
+          .split(',')
+          .map((e: string) => e.trim())
+          .filter(Boolean),
       });
       toast.success('Settings saved');
     } catch {
@@ -72,7 +91,9 @@ const Settings: React.FC = () => {
       className="space-y-6 max-w-3xl"
     >
       <motion.div variants={itemVariants}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>Settings</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+          Settings
+        </h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
           Report scheduling, email recipients, and defaults
         </p>
@@ -86,7 +107,9 @@ const Settings: React.FC = () => {
       >
         <div className="flex items-center gap-2 mb-4">
           <Calendar size={14} style={{ color: ACCENT }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Default Date Range</h3>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Default Date Range
+          </h3>
         </div>
         {settingsLoading ? (
           <CardSkeleton />
@@ -117,7 +140,9 @@ const Settings: React.FC = () => {
       >
         <div className="flex items-center gap-2 mb-4">
           <Mail size={14} style={{ color: ACCENT }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Email Recipients</h3>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Email Recipients
+          </h3>
         </div>
         {settingsLoading ? (
           <SkeletonRow cols={1} />
@@ -164,13 +189,22 @@ const Settings: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Clock size={14} style={{ color: ACCENT }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Scheduled Reports</h3>
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Scheduled Reports
+            </h3>
           </div>
         </div>
         {schedLoading ? (
-          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={3} />)}</div>
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
+          </div>
         ) : scheduledList.length === 0 ? (
-          <EmptyState title="No scheduled reports" description="Scheduled reports will appear here once configured." />
+          <EmptyState
+            title="No scheduled reports"
+            description="Scheduled reports will appear here once configured."
+          />
         ) : (
           <div className="space-y-1">
             {scheduledList.map((s: any) => (
@@ -180,15 +214,23 @@ const Settings: React.FC = () => {
                 style={{ background: 'var(--hub-hover)' }}
               >
                 <div>
-                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{s.name ?? s.reportName ?? 'Untitled'}</p>
-                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>{s.schedule ?? s.frequency ?? 'Manual'}</p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {s.name ?? s.reportName ?? 'Untitled'}
+                  </p>
+                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                    {s.schedule ?? s.frequency ?? 'Manual'}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleDeleteScheduled(s.id)}
                   className="h-6 w-6 rounded flex items-center justify-center transition-colors"
                   style={{ color: 'var(--hub-text-dim)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#f87171'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-dim)'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = '#f87171';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-dim)';
+                  }}
                 >
                   <Trash2 size={12} />
                 </button>

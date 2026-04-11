@@ -9,7 +9,9 @@ import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import InvoiceStatusFilter, { InvoiceFilterValue } from '../../shared/components/InvoiceStatusFilter';
+import InvoiceStatusFilter, {
+  InvoiceFilterValue,
+} from '../../shared/components/InvoiceStatusFilter';
 import DownloadPdfButton from '../../shared/components/DownloadPdfButton';
 import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
@@ -18,10 +20,10 @@ import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens
 type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 
 const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
-  Draft:   { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  Sent:    { background: 'rgba(59,130,246,0.12)',  color: '#3b82f6' },
-  Paid:    { background: 'rgba(16,185,129,0.12)',  color: '#10b981' },
-  Overdue: { background: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+  Draft: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
+  Sent: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
+  Paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
+  Overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
 };
 
 const Invoices: React.FC = () => {
@@ -40,7 +42,8 @@ const Invoices: React.FC = () => {
     Overdue: invoices.filter((i) => i.status === 'Overdue').length,
   };
 
-  const filtered = activeTab === 'All' ? invoices : invoices.filter((inv) => inv.status === activeTab);
+  const filtered =
+    activeTab === 'All' ? invoices : invoices.filter((inv) => inv.status === activeTab);
   const totalFiltered = filtered.reduce((s, inv) => s + inv.amount, 0);
 
   const toggle = (id: string) =>
@@ -61,12 +64,18 @@ const Invoices: React.FC = () => {
   }));
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Invoices"
         subtitle={
           <>
-            {filtered.length} invoice{filtered.length !== 1 ? 's' : ''} <>&middot;</> <MoneyDisplay amount={totalFiltered} /> total
+            {filtered.length} invoice{filtered.length !== 1 ? 's' : ''} <>&middot;</>{' '}
+            <MoneyDisplay amount={totalFiltered} /> total
           </>
         }
         actions={
@@ -95,7 +104,9 @@ const Invoices: React.FC = () => {
       <InvoiceStatusFilter value={activeTab} onChange={setActiveTab} counts={counts} />
 
       {loading ? (
-        <div style={{ ...cardStyle, padding: 20 }}><SkeletonRow /></div>
+        <div style={{ ...cardStyle, padding: 20 }}>
+          <SkeletonRow />
+        </div>
       ) : filtered.length === 0 ? (
         <EmptyState
           title="No invoices yet"
@@ -111,29 +122,33 @@ const Invoices: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['', 'Invoice #', 'Client', 'Amount', 'Status', 'Due Date', 'Actions'].map((h, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: '10px 16px',
-                      textAlign: 'left',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.07em',
-                      color: 'var(--hub-text-dim)',
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
+                {['', 'Invoice #', 'Client', 'Amount', 'Status', 'Due Date', 'Actions'].map(
+                  (h, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        padding: '10px 16px',
+                        textAlign: 'left',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.07em',
+                        color: 'var(--hub-text-dim)',
+                      }}
+                    >
+                      {h}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody>
               {filtered.map((inv, i) => (
                 <tr
                   key={inv.id}
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--hub-border)' : 'none' }}
+                  style={{
+                    borderBottom: i < filtered.length - 1 ? '1px solid var(--hub-border)' : 'none',
+                  }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hub-hover)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
@@ -146,32 +161,72 @@ const Invoices: React.FC = () => {
                     />
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
-                    <Link to={`/invoices/${inv.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--hub-text)', textDecoration: 'none' }}>
+                    <Link
+                      to={`/invoices/${inv.id}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        color: 'var(--hub-text)',
+                        textDecoration: 'none',
+                      }}
+                    >
                       <FileText size={13} style={{ color: 'var(--hub-text-dim)' }} />
                       {inv.id}
                     </Link>
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>{inv.client}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
+                    {inv.client}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--hub-text)',
+                    }}
+                  >
                     <MoneyDisplay amount={inv.amount} />
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, ...statusStyle[inv.status] }}>
+                    <span
+                      style={{
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        ...statusStyle[inv.status],
+                      }}
+                    >
                       {inv.status}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: inv.status === 'Overdue' ? '#ef4444' : 'var(--hub-text-muted)' }}>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 12,
+                      color: inv.status === 'Overdue' ? '#ef4444' : 'var(--hub-text-muted)',
+                    }}
+                  >
                     {inv.dueDate}
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <Link to={`/invoices/${inv.id}`} style={{ ...ghostBtn, padding: '4px 10px', textDecoration: 'none' }}>
+                      <Link
+                        to={`/invoices/${inv.id}`}
+                        style={{ ...ghostBtn, padding: '4px 10px', textDecoration: 'none' }}
+                      >
                         <Eye size={12} /> View
                       </Link>
                       <DownloadPdfButton invoiceId={inv.id} label="PDF" />
                       {inv.status === 'Draft' && (
                         <button
-                          style={{ ...ghostBtn, padding: '4px 10px', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.3)' }}
+                          style={{
+                            ...ghostBtn,
+                            padding: '4px 10px',
+                            color: '#3b82f6',
+                            borderColor: 'rgba(59,130,246,0.3)',
+                          }}
                           onClick={() => toast.success(`Sent ${inv.id}`)}
                         >
                           <Send size={12} /> Send
@@ -179,7 +234,12 @@ const Invoices: React.FC = () => {
                       )}
                       {(inv.status === 'Sent' || inv.status === 'Overdue') && (
                         <button
-                          style={{ ...ghostBtn, padding: '4px 10px', color: '#10b981', borderColor: 'rgba(16,185,129,0.3)' }}
+                          style={{
+                            ...ghostBtn,
+                            padding: '4px 10px',
+                            color: '#10b981',
+                            borderColor: 'rgba(16,185,129,0.3)',
+                          }}
                           onClick={() => toast.success(`Marked ${inv.id} paid`)}
                         >
                           <CheckCircle size={12} /> Paid

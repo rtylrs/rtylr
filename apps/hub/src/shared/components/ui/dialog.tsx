@@ -26,11 +26,7 @@ const Dialog: React.FC<DialogProps> = ({ open: controlledOpen, onOpenChange, chi
     onOpenChange?.(value);
   };
 
-  return (
-    <DialogContext.Provider value={{ open, setOpen }}>
-      {children}
-    </DialogContext.Provider>
-  );
+  return <DialogContext.Provider value={{ open, setOpen }}>{children}</DialogContext.Provider>;
 };
 
 interface DialogTriggerProps {
@@ -56,7 +52,9 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
   const { open, setOpen } = useContext(DialogContext);
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
     if (open) document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [open, setOpen]);
@@ -93,16 +91,26 @@ const DialogHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classNam
   <div className={cn('flex flex-col gap-1.5 p-6 pb-4', className)} {...props} />
 );
 
-const DialogTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, ...props }) => (
-  <h2 className={cn('text-lg font-semibold text-primary', className)} {...props} />
-);
+const DialogTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
+  className,
+  ...props
+}) => <h2 className={cn('text-lg font-semibold text-primary', className)} {...props} />;
 
-const DialogDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, ...props }) => (
-  <p className={cn('text-sm text-gray-500', className)} {...props} />
-);
+const DialogDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({
+  className,
+  ...props
+}) => <p className={cn('text-sm text-gray-500', className)} {...props} />;
 
-const DialogFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, style, ...props }) => (
-  <div className={cn('flex items-center justify-end gap-2 p-6 pt-4', className)} style={{ borderTop: '1px solid var(--hub-border)', ...style }} {...props} />
+const DialogFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  style,
+  ...props
+}) => (
+  <div
+    className={cn('flex items-center justify-end gap-2 p-6 pt-4', className)}
+    style={{ borderTop: '1px solid var(--hub-border)', ...style }}
+    {...props}
+  />
 );
 
 const DialogClose: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -115,4 +123,13 @@ const DialogClose: React.FC<{ children: React.ReactElement }> = ({ children }) =
   });
 };
 
-export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose };
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+};
