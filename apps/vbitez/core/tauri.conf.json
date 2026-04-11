@@ -1,62 +1,45 @@
 {
+  "productName": "rtylr POS",
+  "version": "0.1.0",
+  "identifier": "com.rtylr.pos",
   "build": {
     "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:5178",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:5175",
-    "distDir": "../dist",
-    "withGlobalTauri": false
+    "frontendDist": "../../dist/vbitez"
   },
-  "package": {
-    "productName": "Vbitez Dashboard",
-    "version": "0.0.1"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "window": {
-        "all": true
-      },
-      "dialog": {
-        "message": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.vbitez.dashboard",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
+        "title": "rtylr POS",
         "fullscreen": true,
-        "resizable": false,
-        "title": "Vbitez Dashboard",
+        "resizable": true,
         "width": 1600,
         "height": 1000,
         "minWidth": 800,
         "minHeight": 600,
-        "decorations": false,
-        "alwaysOnTop": false
+        "decorations": false
       }
     ],
-    "updater": {
-      "active": true,
-      "endpoints": ["https://releases.vbitez.com/{{target}}/{{current_version}}"],
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVGMTJBQ0U4RjdCQTQzMzkKUldTa3ZUWnF5VGFWYkh3RUNLek5MeElNVzd5cElQNm5xOUhoN0VjTU9zQ3RJRU53dUNsNlY4VBo="
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "shell": {
+      "open": true
     }
   }
 }

@@ -1579,244 +1579,97 @@ importers:
 
   apps/vbitez:
     dependencies:
-      '@aldabil/react-scheduler':
-        specifier: ^2.9.3
-        version: 2.9.5(27905fb5ddf9857bd449644a37764b3e)
       '@tanstack/react-query':
         specifier: ^5.89.0
         version: 5.90.9(react@19.2.0)
       '@tauri-apps/api':
-        specifier: ^1.5.3
-        version: 1.6.0
-      '@types/lodash':
-        specifier: ^4.17.20
-        version: 4.17.20
-      '@types/react-helmet':
-        specifier: ^6.1.11
-        version: 6.1.11
+        specifier: ^2.0.0
+        version: 2.10.1
+      '@tauri-apps/plugin-dialog':
+        specifier: ^2.0.0
+        version: 2.7.0
+      '@tauri-apps/plugin-process':
+        specifier: ^2.0.0
+        version: 2.3.1
+      '@tauri-apps/plugin-shell':
+        specifier: ^2.0.0
+        version: 2.3.5
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/components':
         specifier: workspace:*
         version: link:../../packages/components
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@voxire/menu':
-        specifier: workspace:*
-        version: link:../../packages/menu
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       axios:
         specifier: ^1.15.0
         version: 1.15.0
-      chart.js:
-        specifier: ^4.4.3
-        version: 4.5.1
-      driver.js:
-        specifier: ^1.3.6
-        version: 1.4.0
-      file-saver:
-        specifier: ^2.0.5
-        version: 2.0.5
-      firebase:
-        specifier: ^10.12.2
-        version: 10.14.1
-      google-maps-react:
-        specifier: ^2.0.6
-        version: 2.0.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      html2canvas:
-        specifier: ^1.4.1
-        version: 1.4.1
-      i18next:
-        specifier: ^23.11.5
-        version: 23.16.8
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
+      dexie:
+        specifier: ^4.4.0
+        version: 4.4.2
+      dexie-react-hooks:
+        specifier: ^4.4.0
+        version: 4.4.0(dexie@4.4.2)(react@19.2.0)
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.0)
       motion:
         specifier: ^12.0.0
         version: 12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      qrcode:
-        specifier: ^1.5.3
-        version: 1.5.4
       react:
         specifier: ^19.0.0
         version: 19.2.0
-      react-chartjs-2:
-        specifier: ^5.2.0
-        version: 5.3.1(chart.js@4.5.1)(react@19.2.0)
-      react-cookie:
-        specifier: ^7.1.4
-        version: 7.2.2(@types/react@18.3.3)(react@19.2.0)
-      react-csv:
-        specifier: ^2.2.2
-        version: 2.2.2
       react-dom:
         specifier: ^19.0.0
         version: 19.2.0(react@19.2.0)
-      react-dropzone:
-        specifier: ^14.2.3
-        version: 14.3.8(react@19.2.0)
-      react-helmet-async:
-        specifier: ^3.0.0
-        version: 3.0.0(react@19.2.0)
-      react-i18next:
-        specifier: ^14.1.2
-        version: 14.1.3(i18next@23.16.8)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react-icons:
-        specifier: ^5.2.1
-        version: 5.5.0(react@19.2.0)
-      react-icons-picker:
-        specifier: ^1.0.9
-        version: 1.0.9(react-dom@19.2.0(react@19.2.0))(react-icons@5.5.0(react@19.2.0))(react@19.2.0)
-      react-lazy-load-image-component:
-        specifier: ^1.6.0
-        version: 1.6.3(react@19.2.0)
-      react-loading-skeleton:
-        specifier: ^3.4.0
-        version: 3.5.0(react@19.2.0)
-      react-modal:
-        specifier: ^3.16.1
-        version: 3.16.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react-qrcode-logo:
-        specifier: ^3.0.0
-        version: 3.0.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react-quill:
-        specifier: ^2.0.0
-        version: 2.0.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-router-dom:
-        specifier: 6.29.0
-        version: 6.29.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react-slick:
-        specifier: ^0.30.2
-        version: 0.30.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      reactstrap:
-        specifier: ^9.2.2
-        version: 9.2.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      slick-carousel:
-        specifier: ^1.8.1
-        version: 1.8.1(jquery@3.7.1)
+        specifier: 6.30.3
+        version: 6.30.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       sonner:
         specifier: ^2.0.6
         version: 2.0.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      tslib:
-        specifier: ^2.3.0
-        version: 2.8.1
-      workbox-background-sync:
-        specifier: ^7.3.0
-        version: 7.4.0
-      workbox-core:
-        specifier: ^7.3.0
-        version: 7.4.0
-      workbox-routing:
-        specifier: ^7.3.0
-        version: 7.4.0
-      workbox-strategies:
-        specifier: ^7.3.0
-        version: 7.4.0
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
       zustand:
         specifier: ^5.0.8
-        version: 5.0.8(@types/react@18.3.3)(immer@10.2.0)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
+        version: 5.0.8(@types/react@19.2.5)(immer@10.2.0)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
-      '@swc-node/register':
-        specifier: ~1.9.1
-        version: 1.9.2(@swc/core@1.5.29(@swc/helpers@0.5.17))(@swc/types@0.1.25)(typescript@5.5.4)
-      '@swc/core':
-        specifier: ~1.5.7
-        version: 1.5.29(@swc/helpers@0.5.17)
-      '@swc/helpers':
-        specifier: ~0.5.11
-        version: 0.5.17
       '@tauri-apps/cli':
-        specifier: ^1.5.9
-        version: 1.6.3
-      '@types/file-saver':
-        specifier: ^2.0.7
-        version: 2.0.7
+        specifier: ^2.0.0
+        version: 2.10.1
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.25
       '@types/react':
-        specifier: 18.3.3
-        version: 18.3.3
+        specifier: ^19.2.0
+        version: 19.2.5
       '@types/react-dom':
-        specifier: 18.3.0
-        version: 18.3.0
-      '@types/react-modal':
-        specifier: ^3.16.3
-        version: 3.16.3
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^8.0.0
-        version: 8.46.4(@typescript-eslint/parser@8.46.4(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)
-      '@typescript-eslint/parser':
-        specifier: ^8.0.0
-        version: 8.46.4(eslint@9.8.0)(typescript@5.5.4)
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.5)
       '@vitejs/plugin-react':
         specifier: ^4.2.0
         version: 4.7.0(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
-      '@vitest/ui':
-        specifier: ^3.0.0
-        version: 3.2.4(vitest@3.2.4)
-      eslint:
-        specifier: ~9.8.0
-        version: 9.8.0
-      eslint-config-prettier:
-        specifier: ^9.0.0
-        version: 9.1.2(eslint@9.8.0)
-      eslint-plugin-import:
-        specifier: 2.30.0
-        version: 2.30.0(@typescript-eslint/parser@8.46.4(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)
-      eslint-plugin-jsx-a11y:
-        specifier: 6.9.0
-        version: 6.9.0(eslint@9.8.0)
-      eslint-plugin-react:
-        specifier: 7.35.0
-        version: 7.35.0(eslint@9.8.0)
-      eslint-plugin-react-hooks:
-        specifier: 4.6.2
-        version: 4.6.2(eslint@9.8.0)
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.7
-        version: 0.4.24(eslint@9.8.0)
-      jiti:
-        specifier: 2.4.2
-        version: 2.4.2
-      jsdom:
-        specifier: ~22.1.0
-        version: 22.1.0
-      prettier:
-        specifier: ^2.6.2
-        version: 2.8.8
-      rollup-plugin-visualizer:
-        specifier: ^5.12.0
-        version: 5.14.0(rollup@4.53.2)
-      sass:
-        specifier: ^1.55.0
-        version: 1.94.0
       typescript:
-        specifier: ~5.5.2
-        version: 5.5.4
-      typescript-eslint:
-        specifier: ^8.4.0
-        version: 8.46.4(eslint@9.8.0)(typescript@5.5.4)
+        specifier: ~5.9.3
+        version: 5.9.3
       vite:
         specifier: ^7.2.2
         version: 7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
-      vite-plugin-svgr:
-        specifier: ^4.2.0
-        version: 4.5.0(rollup@4.53.2)(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
       vite-tsconfig-paths:
         specifier: ^5.0.0
-        version: 5.1.4(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.4(@types/node@20.19.25)(@vitest/ui@3.2.4)(jiti@2.4.2)(jsdom@22.1.0)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
+        version: 5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1))
 
   packages/api:
     dependencies:
@@ -3890,8 +3743,17 @@ packages:
     resolution: {integrity: sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
 
+  '@tauri-apps/api@2.10.1':
+    resolution: {integrity: sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw==}
+
   '@tauri-apps/cli-darwin-arm64@1.6.3':
     resolution: {integrity: sha512-fQN6IYSL8bG4NvkdKE4sAGF4dF/QqqQq4hOAU+t8ksOzHJr0hUlJYfncFeJYutr/MMkdF7hYKadSb0j5EE9r0A==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tauri-apps/cli-darwin-arm64@2.10.1':
+    resolution: {integrity: sha512-Z2OjCXiZ+fbYZy7PmP3WRnOpM9+Fy+oonKDEmUE6MwN4IGaYqgceTjwHucc/kEEYZos5GICve35f7ZiizgqEnQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -3902,14 +3764,33 @@ packages:
     cpu: [x64]
     os: [darwin]
 
+  '@tauri-apps/cli-darwin-x64@2.10.1':
+    resolution: {integrity: sha512-V/irQVvjPMGOTQqNj55PnQPVuH4VJP8vZCN7ajnj+ZS8Kom1tEM2hR3qbbIRoS3dBKs5mbG8yg1WC+97dq17Pw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
   '@tauri-apps/cli-linux-arm-gnueabihf@1.6.3':
     resolution: {integrity: sha512-CjTEr9r9xgjcvos09AQw8QMRPuH152B1jvlZt4PfAsyJNPFigzuwed5/SF7XAd8bFikA7zArP4UT12RdBxrx7w==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
 
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.10.1':
+    resolution: {integrity: sha512-Hyzwsb4VnCWKGfTw+wSt15Z2pLw2f0JdFBfq2vHBOBhvg7oi6uhKiF87hmbXOBXUZaGkyRDkCHsdzJcIfoJC2w==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+
   '@tauri-apps/cli-linux-arm64-gnu@1.6.3':
     resolution: {integrity: sha512-G9EUUS4M8M/Jz1UKZqvJmQQCKOzgTb8/0jZKvfBuGfh5AjFBu8LHvlFpwkKVm1l4951Xg4ulUp6P9Q7WRJ9XSA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tauri-apps/cli-linux-arm64-gnu@2.10.1':
+    resolution: {integrity: sha512-OyOYs2t5GkBIvyWjA1+h4CZxTcdz1OZPCWAPz5DYEfB0cnWHERTnQ/SLayQzncrT0kwRoSfSz9KxenkyJoTelA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -3922,8 +3803,29 @@ packages:
     os: [linux]
     libc: [musl]
 
+  '@tauri-apps/cli-linux-arm64-musl@2.10.1':
+    resolution: {integrity: sha512-MIj78PDDGjkg3NqGptDOGgfXks7SYJwhiMh8SBoZS+vfdz7yP5jN18bNaLnDhsVIPARcAhE1TlsZe/8Yxo2zqg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@tauri-apps/cli-linux-riscv64-gnu@2.10.1':
+    resolution: {integrity: sha512-X0lvOVUg8PCVaoEtEAnpxmnkwlE1gcMDTqfhbefICKDnOTJ5Est3qL0SrWxizDackIOKBcvtpejrSiVpuJI1kw==}
+    engines: {node: '>= 10'}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
   '@tauri-apps/cli-linux-x64-gnu@1.6.3':
     resolution: {integrity: sha512-Uvi7M+NK3tAjCZEY1WGel+dFlzJmqcvu3KND+nqa22762NFmOuBIZ4KJR/IQHfpEYqKFNUhJfCGnpUDfiC3Oxg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tauri-apps/cli-linux-x64-gnu@2.10.1':
+    resolution: {integrity: sha512-2/12bEzsJS9fAKybxgicCDFxYD1WEI9kO+tlDwX5znWG2GwMBaiWcmhGlZ8fi+DMe9CXlcVarMTYc0L3REIRxw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -3936,8 +3838,21 @@ packages:
     os: [linux]
     libc: [musl]
 
+  '@tauri-apps/cli-linux-x64-musl@2.10.1':
+    resolution: {integrity: sha512-Y8J0ZzswPz50UcGOFuXGEMrxbjwKSPgXftx5qnkuMs2rmwQB5ssvLb6tn54wDSYxe7S6vlLob9vt0VKuNOaCIQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
   '@tauri-apps/cli-win32-arm64-msvc@1.6.3':
     resolution: {integrity: sha512-cSH2qOBYuYC4UVIFtrc1YsGfc5tfYrotoHrpTvRjUGu0VywvmyNk82+ZsHEnWZ2UHmu3l3lXIGRqSWveLln0xg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tauri-apps/cli-win32-arm64-msvc@2.10.1':
+    resolution: {integrity: sha512-iSt5B86jHYAPJa/IlYw++SXtFPGnWtFJriHn7X0NFBVunF6zu9+/zOn8OgqIWSl8RgzhLGXQEEtGBdR4wzpVgg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
@@ -3948,8 +3863,20 @@ packages:
     cpu: [ia32]
     os: [win32]
 
+  '@tauri-apps/cli-win32-ia32-msvc@2.10.1':
+    resolution: {integrity: sha512-gXyxgEzsFegmnWywYU5pEBURkcFN/Oo45EAwvZrHMh+zUSEAvO5E8TXsgPADYm31d1u7OQU3O3HsYfVBf2moHw==}
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+
   '@tauri-apps/cli-win32-x64-msvc@1.6.3':
     resolution: {integrity: sha512-HUkWZ+lYHI/Gjkh2QjHD/OBDpqLVmvjZGpLK9losur1Eg974Jip6k+vsoTUxQBCBDfj30eDBct9E1FvXOspWeg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@tauri-apps/cli-win32-x64-msvc@2.10.1':
+    resolution: {integrity: sha512-6Cn7YpPFwzChy0ERz6djKEmUehWrYlM+xTaNzGPgZocw3BD7OfwfWHKVWxXzdjEW2KfKkHddfdxK1XXTYqBRLg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -3958,6 +3885,20 @@ packages:
     resolution: {integrity: sha512-q46umd6QLRKDd4Gg6WyZBGa2fWvk0pbeUA5vFomm4uOs1/17LIciHv2iQ4UD+2Yv5H7AO8YiE1t50V0POiEGEw==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@tauri-apps/cli@2.10.1':
+    resolution: {integrity: sha512-jQNGF/5quwORdZSSLtTluyKQ+o6SMa/AUICfhf4egCGFdMHqWssApVgYSbg+jmrZoc8e1DscNvjTnXtlHLS11g==}
+    engines: {node: '>= 10'}
+    hasBin: true
+
+  '@tauri-apps/plugin-dialog@2.7.0':
+    resolution: {integrity: sha512-4nS/hfGMGCXiAS3LtVjH9AgsSAPJeG/7R+q8agTFqytjnMa4Zq95Bq8WzVDkckpanX+yyRHXnRtrKXkANKDHvw==}
+
+  '@tauri-apps/plugin-process@2.3.1':
+    resolution: {integrity: sha512-nCa4fGVaDL/B9ai03VyPOjfAHRHSBz5v6F/ObsB73r/dA3MHHhZtldaDMIc0V/pnUw9ehzr2iEG+XkSEyC0JJA==}
+
+  '@tauri-apps/plugin-shell@2.3.5':
+    resolution: {integrity: sha512-jewtULhiQ7lI7+owCKAjc8tYLJr92U16bPOeAa472LHJdgaibLP83NcfAF2e+wkEcA53FxKQAZ7byDzs2eeizg==}
 
   '@tiptap/core@3.22.3':
     resolution: {integrity: sha512-Dv9MKK5BDWCF0N2l6/Pxv3JNCce2kwuWf2cKMBc2bEetx0Pn6o7zlFmSxMvYK4UtG1Tw9Yg/ZHi6QOFWK0Zm9Q==}
@@ -9435,34 +9376,69 @@ snapshots:
 
   '@tauri-apps/api@1.6.0': {}
 
+  '@tauri-apps/api@2.10.1': {}
+
   '@tauri-apps/cli-darwin-arm64@1.6.3':
+    optional: true
+
+  '@tauri-apps/cli-darwin-arm64@2.10.1':
     optional: true
 
   '@tauri-apps/cli-darwin-x64@1.6.3':
     optional: true
 
+  '@tauri-apps/cli-darwin-x64@2.10.1':
+    optional: true
+
   '@tauri-apps/cli-linux-arm-gnueabihf@1.6.3':
+    optional: true
+
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.10.1':
     optional: true
 
   '@tauri-apps/cli-linux-arm64-gnu@1.6.3':
     optional: true
 
+  '@tauri-apps/cli-linux-arm64-gnu@2.10.1':
+    optional: true
+
   '@tauri-apps/cli-linux-arm64-musl@1.6.3':
+    optional: true
+
+  '@tauri-apps/cli-linux-arm64-musl@2.10.1':
+    optional: true
+
+  '@tauri-apps/cli-linux-riscv64-gnu@2.10.1':
     optional: true
 
   '@tauri-apps/cli-linux-x64-gnu@1.6.3':
     optional: true
 
+  '@tauri-apps/cli-linux-x64-gnu@2.10.1':
+    optional: true
+
   '@tauri-apps/cli-linux-x64-musl@1.6.3':
+    optional: true
+
+  '@tauri-apps/cli-linux-x64-musl@2.10.1':
     optional: true
 
   '@tauri-apps/cli-win32-arm64-msvc@1.6.3':
     optional: true
 
+  '@tauri-apps/cli-win32-arm64-msvc@2.10.1':
+    optional: true
+
   '@tauri-apps/cli-win32-ia32-msvc@1.6.3':
     optional: true
 
+  '@tauri-apps/cli-win32-ia32-msvc@2.10.1':
+    optional: true
+
   '@tauri-apps/cli-win32-x64-msvc@1.6.3':
+    optional: true
+
+  '@tauri-apps/cli-win32-x64-msvc@2.10.1':
     optional: true
 
   '@tauri-apps/cli@1.6.3':
@@ -9479,6 +9455,32 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 1.6.3
       '@tauri-apps/cli-win32-ia32-msvc': 1.6.3
       '@tauri-apps/cli-win32-x64-msvc': 1.6.3
+
+  '@tauri-apps/cli@2.10.1':
+    optionalDependencies:
+      '@tauri-apps/cli-darwin-arm64': 2.10.1
+      '@tauri-apps/cli-darwin-x64': 2.10.1
+      '@tauri-apps/cli-linux-arm-gnueabihf': 2.10.1
+      '@tauri-apps/cli-linux-arm64-gnu': 2.10.1
+      '@tauri-apps/cli-linux-arm64-musl': 2.10.1
+      '@tauri-apps/cli-linux-riscv64-gnu': 2.10.1
+      '@tauri-apps/cli-linux-x64-gnu': 2.10.1
+      '@tauri-apps/cli-linux-x64-musl': 2.10.1
+      '@tauri-apps/cli-win32-arm64-msvc': 2.10.1
+      '@tauri-apps/cli-win32-ia32-msvc': 2.10.1
+      '@tauri-apps/cli-win32-x64-msvc': 2.10.1
+
+  '@tauri-apps/plugin-dialog@2.7.0':
+    dependencies:
+      '@tauri-apps/api': 2.10.1
+
+  '@tauri-apps/plugin-process@2.3.1':
+    dependencies:
+      '@tauri-apps/api': 2.10.1
+
+  '@tauri-apps/plugin-shell@2.3.5':
+    dependencies:
+      '@tauri-apps/api': 2.10.1
 
   '@tiptap/core@3.22.3(@tiptap/pm@3.22.3)':
     dependencies:
@@ -13017,10 +13019,6 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsconfck@3.1.6(typescript@5.5.4):
-    optionalDependencies:
-      typescript: 5.5.4
-
   tsconfck@3.1.6(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
@@ -13274,17 +13272,6 @@ snapshots:
       vite: 7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
     transitivePeerDependencies:
       - rollup
-      - supports-color
-      - typescript
-
-  vite-tsconfig-paths@5.1.4(typescript@5.5.4)(vite@7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)):
-    dependencies:
-      debug: 4.4.3
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@5.5.4)
-    optionalDependencies:
-      vite: 7.2.2(@types/node@20.19.25)(jiti@2.4.2)(less@4.4.2)(sass-embedded@1.93.3)(sass@1.94.0)(terser@5.44.1)(yaml@2.8.1)
-    transitivePeerDependencies:
       - supports-color
       - typescript
 
