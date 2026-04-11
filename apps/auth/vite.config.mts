@@ -46,7 +46,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: './dist',
+    outDir: '../../dist/auth',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

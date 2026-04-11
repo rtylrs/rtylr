@@ -4,6 +4,7 @@ const path = require('path');
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
+  distDir: '../../dist/landing',
   trailingSlash: true,
 
   images: {

@@ -35,7 +35,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/vbitez",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

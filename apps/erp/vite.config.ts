@@ -42,7 +42,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: "./dist",
+    outDir: "../../dist/erp",
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,

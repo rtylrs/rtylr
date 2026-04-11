@@ -50,7 +50,7 @@ out/
 # Nx
 .nx/cache
 .nx/workspace-data
-apps/*/dist
+dist/
 apps/*/build
 apps/*/.next
 
