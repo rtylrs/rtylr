@@ -71,7 +71,6 @@ export default defineConfig(() => ({
             "framer-motion",
             "lucide-react",
           ],
-          styles: ["slick-carousel"],
         },
       },
     },
