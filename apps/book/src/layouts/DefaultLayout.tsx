@@ -17,6 +17,8 @@ import {
   LogOut,
   ArrowLeft,
   Bell,
+  Menu,
+  X,
 } from 'lucide-react';
 import { Toaster } from 'sonner';
 
@@ -126,12 +128,17 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     return (localStorage.getItem('rtylr-book-theme') as Theme) || 'dark';
   });
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const rawUser = (() => {
     try {
@@ -157,18 +164,56 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+      {/* Mobile top bar */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
+        style={{
+          background: 'var(--hub-surface)',
+          borderBottom: '1px solid var(--hub-border)',
+        }}
+      >
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="h-8 w-8 rounded-lg flex items-center justify-center"
+          style={{ color: 'var(--hub-text-muted)' }}
+        >
+          <Menu size={18} />
+        </button>
+        <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          {pageTitle}
+        </h1>
+        <div className="w-8" />
+      </div>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <aside
-        className="w-56 flex flex-col shrink-0 overflow-hidden"
+        className={`${
+          sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'
+        } md:flex w-56 flex-col shrink-0 overflow-hidden`}
         style={{
           background: 'var(--hub-surface)',
           borderRight: '1px solid var(--hub-border)',
         }}
       >
         <div
-          className="flex items-center gap-2.5 px-4 py-4"
+          className="flex items-center justify-between gap-2.5 px-4 py-4"
           style={{ borderBottom: '1px solid var(--hub-border)' }}
         >
           <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <X size={16} />
+          </button>
         </div>
 
         <div className="px-3 pt-3">
@@ -321,9 +366,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
         <header
-          className="h-11 flex items-center justify-between px-6 shrink-0"
+          className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
           style={{
             background: 'var(--hub-surface)',
             borderBottom: '1px solid var(--hub-border)',
