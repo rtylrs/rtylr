@@ -1,1 +1,0 @@
-import{j as s}from"./vendor-DEEwGpxA.js";const o="_page_tdoav_493",a="_code_tdoav_503",t="_msg_tdoav_510",e={page:o,code:a,msg:t},d=()=>s.jsxs("div",{className:e.page,children:[s.jsx("h1",{className:e.code,children:"404"}),s.jsx("p",{className:e.msg,children:"Page not found"})]});export{d as default};

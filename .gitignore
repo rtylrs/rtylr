@@ -53,3 +53,6 @@ out/
 apps/*/dist
 apps/*/build
 apps/*/.next
+
+# Turborepo
+.turbo/
