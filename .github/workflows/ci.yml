@@ -36,6 +36,46 @@ jobs:
       - name: Build
         run: pnpm turbo build
 
-  # Deploy jobs are disabled during development.
-  # Uncomment the deploy section below when ready to ship.
-  # See docs/frontend-configuration.md for the full deploy config.
+  # ── Detect which apps changed ──────────────────────────────────────
+  changes:
+    name: Detect changed apps
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      landing: ${{ steps.filter.outputs.landing }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            landing:
+              - 'apps/landing/**'
+              - 'packages/**'
+
+  # ── Deploy Landing ─────────────────────────────────────────────────
+  deploy-landing:
+    name: Deploy Landing
+    needs: [check, changes]
+    if: needs.changes.outputs.landing == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @rtylr/landing run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/landing/out --project-name=rtylr-landing
+
+  # Other app deploys are disabled during development.

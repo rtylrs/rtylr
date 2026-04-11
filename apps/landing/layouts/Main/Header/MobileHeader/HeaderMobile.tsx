@@ -249,6 +249,46 @@ const HeaderMobile: React.FC = () => {
                       Projects, tasks, and team workspaces for every department.
                     </span>
                   </Link>
+                  <Link
+                    href="/features/store"
+                    onClick={() => handleNavigation('/features/store')}
+                    className={styles['mobile-feature-link']}
+                  >
+                    <span className={styles['mobile-feature-title']}>Store</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Online storefront, products, orders, and checkout.
+                    </span>
+                  </Link>
+                  <Link
+                    href="/features/book"
+                    onClick={() => handleNavigation('/features/book')}
+                    className={styles['mobile-feature-link']}
+                  >
+                    <span className={styles['mobile-feature-title']}>Book</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Appointments, scheduling, and resource management.
+                    </span>
+                  </Link>
+                  <Link
+                    href="/features/support"
+                    onClick={() => handleNavigation('/features/support')}
+                    className={styles['mobile-feature-link']}
+                  >
+                    <span className={styles['mobile-feature-title']}>Support</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Help desk, tickets, shared inbox, and knowledge base.
+                    </span>
+                  </Link>
+                  <Link
+                    href="/features/insights"
+                    onClick={() => handleNavigation('/features/insights')}
+                    className={styles['mobile-feature-link']}
+                  >
+                    <span className={styles['mobile-feature-title']}>Insights</span>
+                    <span className={styles['mobile-feature-desc']}>
+                      Cross-app analytics, revenue trends, and reports.
+                    </span>
+                  </Link>
                 </div>
               )}
             </div>
