@@ -64,10 +64,16 @@ import (
 	posmanager "github.com/voxire/onion/internal/modules/pos_manager"
 	posmenu "github.com/voxire/onion/internal/modules/pos_menu"
 	posmodifiers "github.com/voxire/onion/internal/modules/pos_modifiers"
+	posaudit "github.com/voxire/onion/internal/modules/pos_audit"
 	posorders "github.com/voxire/onion/internal/modules/pos_orders"
 	posreceipts "github.com/voxire/onion/internal/modules/pos_receipts"
 	possessions "github.com/voxire/onion/internal/modules/pos_sessions"
 	postables "github.com/voxire/onion/internal/modules/pos_tables"
+	posterminals "github.com/voxire/onion/internal/modules/pos_terminals"
+	posfloors "github.com/voxire/onion/internal/modules/pos_floors"
+	poscashmovements "github.com/voxire/onion/internal/modules/pos_cash_movements"
+	posloyalty "github.com/voxire/onion/internal/modules/pos_loyalty"
+	posstockmovements "github.com/voxire/onion/internal/modules/pos_stock_movements"
 	"github.com/voxire/onion/internal/modules/products"
 	"github.com/voxire/onion/internal/modules/projects"
 	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
@@ -276,6 +282,12 @@ type apiModules struct {
 	PosReceipts          *posreceipts.Module
 	PosSessions          *possessions.Module
 	PosTables            *postables.Module
+	PosTerminals         *posterminals.Module
+	PosFloors            *posfloors.Module
+	PosAudit             *posaudit.Module
+	PosCashMovements     *poscashmovements.Module
+	PosLoyalty           *posloyalty.Module
+	PosStockMovements    *posstockmovements.Module
 	Products             *products.Module
 	Projects             *projects.Module
 	PurchaseOrders       *purchaseorders.Module
@@ -380,6 +392,12 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosReceipts:          posreceipts.NewModule(ctx),
 		PosSessions:          possessions.NewModule(ctx),
 		PosTables:            postables.NewModule(ctx),
+		PosTerminals:         posterminals.NewModule(ctx),
+		PosFloors:            posfloors.NewModule(ctx),
+		PosAudit:             posaudit.NewModule(ctx),
+		PosCashMovements:     poscashmovements.NewModule(ctx),
+		PosLoyalty:           posloyalty.NewModule(ctx),
+		PosStockMovements:    posstockmovements.NewModule(ctx),
 		Products:             products.NewModule(ctx),
 		Projects:             projects.NewModule(ctx),
 		PurchaseOrders:       purchaseorders.NewModule(ctx),
