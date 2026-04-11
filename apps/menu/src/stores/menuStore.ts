@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '../lib/api';
+import api from '../shared/lib/api';
 
 interface MenuItem {
   _id: string;

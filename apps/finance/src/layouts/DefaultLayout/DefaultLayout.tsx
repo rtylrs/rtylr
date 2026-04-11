@@ -26,7 +26,7 @@ import {
   Tag,
   FileCheck,
 } from 'lucide-react';
-import GlobalSearch from '../../components/GlobalSearch';
+import GlobalSearch from '../../shared/components/GlobalSearch';
 
 const ACCENT = '#10b981';
 

@@ -19,8 +19,10 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "./src"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@components": path.resolve(__dirname, "./src/shared/components"),
+      "@hooks": path.resolve(__dirname, "./src/shared/hooks"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
+      "@features": path.resolve(__dirname, "./src/features"),
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@styles": path.resolve(__dirname, "./src/styles"),
       "@interfaces": path.resolve(__dirname, "./src/interfaces"),

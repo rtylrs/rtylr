@@ -23,7 +23,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    import('./lib/api').then(({ default: api }) => {
+    import('./shared/lib/api').then(({ default: api }) => {
       api.get('/user/me')
         .then((res: any) => {
           const apps: string[] = res.data?.apps ?? [];

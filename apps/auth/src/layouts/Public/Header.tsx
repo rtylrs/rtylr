@@ -3,8 +3,8 @@ import { FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { ASSETS } from '@voxire/config';
 
-import { selectLanguage } from '../../services/i18next';
-import { getCookie } from '../../lib/cookies';
+import { selectLanguage } from '../../shared/services/i18next';
+import { getCookie } from '../../shared/lib/cookies';
 
 const Header: React.FC = () => {
   const [languageDropdown, setLanguageDropdown] = useState(false);

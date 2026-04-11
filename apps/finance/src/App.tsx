@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
-import api from './lib/api';
+import api from './shared/lib/api';
 
 const APP_ID = 'finance';
 const AUTH_COOKIE = 'token';

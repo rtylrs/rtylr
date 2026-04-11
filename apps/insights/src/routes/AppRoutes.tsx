@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
-import Dashboard from '../screens/Dashboard/Dashboard';
-import Revenue from '../screens/Revenue/Revenue';
-import Customers from '../screens/Customers/Customers';
-import Products from '../screens/Products/Products';
-import Operations from '../screens/Operations/Operations';
-import Financial from '../screens/Financial/Financial';
-import Reports from '../screens/Reports/Reports';
-import Settings from '../screens/Settings/Settings';
+import Dashboard from '../features/dashboard/Dashboard';
+import Revenue from '../features/revenue/Revenue';
+import Customers from '../features/customers/Customers';
+import Products from '../features/products/Products';
+import Operations from '../features/operations/Operations';
+import Financial from '../features/financial/Financial';
+import Reports from '../features/reports/Reports';
+import Settings from '../features/settings/Settings';
 
 const AppRoutes: React.FC = () => {
   return (

@@ -31,9 +31,9 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import CommandPalette from '../../components/CommandPalette';
-import GlobalShortcuts from '../../components/GlobalShortcuts';
-import { useMediaQuery } from '../../components/ui';
+import CommandPalette from '../../shared/components/CommandPalette';
+import GlobalShortcuts from '../../shared/components/GlobalShortcuts';
+import { useMediaQuery } from '../../shared/components/ui';
 
 /* ── Types ── */
 interface NavItem {

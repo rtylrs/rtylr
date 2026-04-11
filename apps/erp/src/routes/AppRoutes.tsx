@@ -1,26 +1,26 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
-import Dashboard from '../screens/Dashboard/Dashboard';
-import Inventory from '../screens/Inventory/Inventory';
-import Purchasing from '../screens/Purchasing/Purchasing';
-import Suppliers from '../screens/Suppliers/Suppliers';
-import Products from '../screens/Products/Products';
-import ProductDetail from '../screens/Products/ProductDetail';
-import Categories from '../screens/Categories/Categories';
-import Brands from '../screens/Brands/Brands';
-import Warehouses from '../screens/Warehouses/Warehouses';
-import StockTransfers from '../screens/StockTransfers/StockTransfers';
-import StockTakes from '../screens/StockTakes/StockTakes';
-import LowStockAlerts from '../screens/LowStockAlerts/LowStockAlerts';
-import Receiving from '../screens/Receiving/Receiving';
-import Reorder from '../screens/Reorder/Reorder';
-import PriceLists from '../screens/PriceLists/PriceLists';
-import Variants from '../screens/Variants/Variants';
-import Barcodes from '../screens/Barcodes/Barcodes';
-import Expiry from '../screens/Expiry/Expiry';
-import Valuation from '../screens/Valuation/Valuation';
-import Settings from '../screens/Settings/Settings';
+import Dashboard from '../features/dashboard/Dashboard';
+import Inventory from '../features/inventory/Inventory';
+import Purchasing from '../features/purchasing/Purchasing';
+import Suppliers from '../features/suppliers/Suppliers';
+import Products from '../features/products/Products';
+import ProductDetail from '../features/products/ProductDetail';
+import Categories from '../features/categories/Categories';
+import Brands from '../features/brands/Brands';
+import Warehouses from '../features/warehouses/Warehouses';
+import StockTransfers from '../features/stock-transfers/StockTransfers';
+import StockTakes from '../features/stock-takes/StockTakes';
+import LowStockAlerts from '../features/low-stock-alerts/LowStockAlerts';
+import Receiving from '../features/purchasing/Receiving';
+import Reorder from '../features/reorder/Reorder';
+import PriceLists from '../features/price-lists/PriceLists';
+import Variants from '../features/variants/Variants';
+import Barcodes from '../features/barcodes/Barcodes';
+import Expiry from '../features/expiry/Expiry';
+import Valuation from '../features/valuation/Valuation';
+import Settings from '../features/settings/Settings';
 
 const AppRoutes: React.FC = () => {
   return (

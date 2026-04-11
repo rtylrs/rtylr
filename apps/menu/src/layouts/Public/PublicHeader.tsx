@@ -8,10 +8,10 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@voxire/components';
-import useColors from '../../hooks/useColors';
+import useColors from '../../shared/hooks/useColors';
 import { useWindowDimensions } from '@voxire/utils';
-import { selectLanguage } from '../../services/i18next';
-import { getCookie } from '../../lib/cookies';
+import { selectLanguage } from '../../shared/services/i18next';
+import { getCookie } from '../../shared/lib/cookies';
 
 interface LinkWithColorProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {

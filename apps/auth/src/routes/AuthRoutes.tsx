@@ -2,14 +2,14 @@ import React from 'react';
 import Public from '../layouts/Public/public';
 import { AnimatedRoutes } from '@voxire/components';
 
-const Login = React.lazy(() => import('../screens/Login'));
-const Register = React.lazy(() => import('../screens/Register'));
-const ResetPassword = React.lazy(() => import('../screens/ResetPassword'));
+const Login = React.lazy(() => import('../features/login/Login'));
+const Register = React.lazy(() => import('../features/register/Register'));
+const ResetPassword = React.lazy(() => import('../features/reset-password/ResetPassword'));
 const EmailVerification = React.lazy(
-  () => import('../screens/EmailVerification')
+  () => import('../features/email-verification/EmailVerification')
 );
-const VerifyEmail = React.lazy(() => import('../screens/VerifyEmail'));
-const InviteAccept = React.lazy(() => import('../screens/InviteAccept'));
+const VerifyEmail = React.lazy(() => import('../features/email-verification/VerifyEmail'));
+const InviteAccept = React.lazy(() => import('../features/invite/InviteAccept'));
 
 const wrap = (node: React.ReactNode) => (
   <Public hasHeader={false} hasPadding={false}>

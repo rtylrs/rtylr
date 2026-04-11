@@ -1,11 +1,11 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DocsLayout from './layouts/DocsLayout/DocsLayout';
-import Home from './screens/Home';
-import Article from './screens/Article';
-import ApiReference from './screens/ApiReference';
-import Changelog from './screens/Changelog';
-import SearchResults from './screens/SearchResults';
+import Home from './features/home/Home';
+import Article from './features/article/Article';
+import ApiReference from './features/api-reference/ApiReference';
+import Changelog from './features/changelog/Changelog';
+import SearchResults from './features/search/SearchResults';
 
 const App: React.FC = () => {
   return (

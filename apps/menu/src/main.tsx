@@ -5,7 +5,7 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
 import { I18nextProvider } from 'react-i18next';
-import i18next from './services/i18next';
+import i18next from './shared/services/i18next';
 import './globals.css';
 
 injectTheme();
