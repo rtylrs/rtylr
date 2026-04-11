@@ -41,7 +41,7 @@ export function useUpdateLoyaltyTier() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<LoyaltyTier> }) =>
-      crmApi.updateLoyaltyTier(id, data),
+      unwrap(crmApi.updateLoyaltyTier(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['loyalty-tiers'] }),
   });
 }
@@ -65,7 +65,7 @@ export function useAwardPoints() {
       customerId: number;
       points: number;
       reason?: string;
-    }) => crmApi.awardPoints(customerId, points, reason),
+    }) => unwrap(crmApi.awardPoints(customerId, points, reason)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });
@@ -84,7 +84,7 @@ export function useRedeemPoints() {
       customerId: number;
       points: number;
       reason?: string;
-    }) => crmApi.redeemPoints(customerId, points, reason),
+    }) => unwrap(crmApi.redeemPoints(customerId, points, reason)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });

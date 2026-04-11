@@ -77,7 +77,7 @@ export function useMergeCustomers() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ primaryId, secondaryId }: { primaryId: number; secondaryId: number }) =>
-      crmApi.mergeCustomers(primaryId, secondaryId),
+      unwrap(crmApi.mergeCustomers(primaryId, secondaryId)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }

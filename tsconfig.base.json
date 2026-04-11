@@ -5,22 +5,13 @@
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "bundler",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2020",
     "module": "esnext",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@voxire/assets": ["packages/assets/src/index.ts"],
-      "@voxire/components": ["packages/components/src/index.ts"],
-      "@voxire/config": ["packages/config/src/index.ts"],
-      "@voxire/utils": ["packages/utils/src/index.ts"]
-    }
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules", "tmp"]
 }

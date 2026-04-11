@@ -102,12 +102,17 @@ function toApiError(error: unknown): ApiError {
 // Safe API client wrapper
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SafeApi {
-  get<T>(url: string, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
-  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
-  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
-  patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
-  delete<T>(url: string, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
+  get<T = any>(url: string, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
+  post<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
+  put<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
+  patch<T = any>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+  ): ResultAsync<T, ApiError>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): ResultAsync<T, ApiError>;
 }
 
 /**
@@ -181,7 +186,8 @@ export function safeFetch(client: AxiosInstance): SafeApi {
  * });
  * ```
  */
-export async function unwrap<T>(result: ResultAsync<T, ApiError>): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function unwrap<T = any>(result: ResultAsync<T, ApiError>): Promise<T> {
   const r = await result;
   if (r.isOk()) return r.value;
   throw r.error;

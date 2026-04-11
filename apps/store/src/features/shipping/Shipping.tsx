@@ -47,12 +47,12 @@ const Shipping: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-5xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Truck size={16} style={{ color: TEAL }} />
           <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -69,7 +69,7 @@ const Shipping: React.FC = () => {
       </motion.div>
 
       {/* Shipping zones */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>
           Shipping Zones
         </h3>
@@ -157,7 +157,7 @@ const Shipping: React.FC = () => {
 
       {/* Standalone methods */}
       {(methods ?? []).length > 0 && (
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants as any}>
           <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--hub-text)' }}>
             Shipping Methods
           </h3>

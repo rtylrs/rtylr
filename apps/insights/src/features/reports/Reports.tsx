@@ -52,12 +52,12 @@ const Reports: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Reports
         </h2>
@@ -67,7 +67,7 @@ const Reports: React.FC = () => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

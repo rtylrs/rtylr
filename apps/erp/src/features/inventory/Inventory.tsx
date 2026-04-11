@@ -72,13 +72,13 @@ const Inventory: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-5 max-w-6xl"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Inventory
         </h2>
@@ -98,7 +98,7 @@ const Inventory: React.FC = () => {
       </motion.div>
 
       {/* Search */}
-      <motion.div variants={itemVariants} className="relative max-w-sm">
+      <motion.div variants={itemVariants as any} className="relative max-w-sm">
         <Search
           size={14}
           className="absolute left-3 top-1/2 -translate-y-1/2"
@@ -126,7 +126,7 @@ const Inventory: React.FC = () => {
 
       {/* Table */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl overflow-hidden"
         style={{
           background: 'var(--hub-card)',

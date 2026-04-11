@@ -43,12 +43,12 @@ const Payments: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-4 max-w-5xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard size={16} style={{ color: TEAL }} />
           <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -64,7 +64,10 @@ const Payments: React.FC = () => {
           ))}
         </div>
       ) : (methods ?? []).length === 0 ? (
-        <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
+        <motion.div
+          variants={itemVariants as any}
+          className="flex flex-col items-center py-16 gap-3"
+        >
           <CreditCard size={32} style={{ color: 'var(--hub-text-dim)' }} />
           <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
             No payment methods configured
@@ -74,11 +77,14 @@ const Payments: React.FC = () => {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <motion.div
+          variants={containerVariants as any}
+          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+        >
           {(methods ?? []).map((method) => (
             <motion.div
               key={method.id}
-              variants={itemVariants}
+              variants={itemVariants as any}
               className="rounded-xl p-4 transition-all"
               style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
             >

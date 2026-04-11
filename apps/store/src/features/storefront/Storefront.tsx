@@ -81,12 +81,12 @@ const Storefront: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-4xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Globe size={16} style={{ color: TEAL }} />
           <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -115,7 +115,10 @@ const Storefront: React.FC = () => {
           ))}
         </div>
       ) : !config ? (
-        <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
+        <motion.div
+          variants={itemVariants as any}
+          className="flex flex-col items-center py-16 gap-3"
+        >
           <Globe size={32} style={{ color: 'var(--hub-text-dim)' }} />
           <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
             No storefront configuration found
@@ -131,7 +134,7 @@ const Storefront: React.FC = () => {
             return (
               <motion.div
                 key={section.title}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >

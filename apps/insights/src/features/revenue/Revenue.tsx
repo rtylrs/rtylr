@@ -41,12 +41,12 @@ const Revenue: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
             Revenue
@@ -80,9 +80,12 @@ const Revenue: React.FC = () => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <motion.div
+          variants={containerVariants as any}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+        >
           <motion.div
-            variants={itemVariants}
+            variants={itemVariants as any}
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -107,7 +110,7 @@ const Revenue: React.FC = () => {
             </div>
           </motion.div>
           <motion.div
-            variants={itemVariants}
+            variants={itemVariants as any}
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -119,7 +122,7 @@ const Revenue: React.FC = () => {
             </p>
           </motion.div>
           <motion.div
-            variants={itemVariants}
+            variants={itemVariants as any}
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -135,7 +138,7 @@ const Revenue: React.FC = () => {
 
       {/* Revenue Chart Data */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -178,7 +181,7 @@ const Revenue: React.FC = () => {
 
       {/* By App Breakdown */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

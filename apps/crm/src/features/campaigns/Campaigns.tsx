@@ -135,7 +135,7 @@ function CampaignCard({
           >
             <ChannelIcon
               size={16}
-              style={{ color: channelColor[campaign.channel] } as React.CSSProperties}
+              {...({ style: { color: channelColor[campaign.channel] } } as any)}
             />
           </div>
           <div style={{ minWidth: 0 }}>

@@ -43,12 +43,12 @@ const Products: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Products
         </h2>
@@ -65,7 +65,10 @@ const Products: React.FC = () => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={containerVariants as any}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           {[
             {
               label: 'Total Products',
@@ -96,7 +99,7 @@ const Products: React.FC = () => {
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -123,7 +126,7 @@ const Products: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Best Sellers */}
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -171,7 +174,7 @@ const Products: React.FC = () => {
 
         {/* Slow Movers */}
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -215,7 +218,7 @@ const Products: React.FC = () => {
 
       {/* Category Breakdown */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

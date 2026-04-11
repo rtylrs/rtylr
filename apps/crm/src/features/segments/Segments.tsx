@@ -370,7 +370,7 @@ function SegmentCard({
               flexShrink: 0,
             }}
           >
-            <Icon size={17} style={{ color: segment.color } as React.CSSProperties} />
+            <Icon size={17} {...({ style: { color: segment.color } } as any)} />
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>

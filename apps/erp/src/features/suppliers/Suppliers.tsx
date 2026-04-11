@@ -83,13 +83,13 @@ const Suppliers: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-5 max-w-5xl"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
             Suppliers
@@ -139,7 +139,10 @@ const Suppliers: React.FC = () => {
       </motion.div>
 
       {showScorecards && (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <motion.div
+          variants={itemVariants as any}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-3"
+        >
           {suppliers.map((s) => (
             <SupplierScorecard key={s.id} supplier={s} />
           ))}
@@ -148,7 +151,7 @@ const Suppliers: React.FC = () => {
 
       {/* Supplier cards grid */}
       <motion.div
-        variants={containerVariants}
+        variants={containerVariants as any}
         className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
       >
         {isLoading
@@ -159,7 +162,7 @@ const Suppliers: React.FC = () => {
               return (
                 <motion.div
                   key={supplier.id}
-                  variants={itemVariants}
+                  variants={itemVariants as any}
                   className="rounded-xl p-5 flex flex-col gap-4 transition-colors cursor-pointer"
                   style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
                   whileHover={{ scale: 1.015, transition: { duration: 0.15 } }}

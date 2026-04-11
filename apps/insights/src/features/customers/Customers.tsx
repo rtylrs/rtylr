@@ -46,12 +46,12 @@ const Customers: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Customers
         </h2>
@@ -67,7 +67,10 @@ const Customers: React.FC = () => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={containerVariants as any}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           {[
             {
               label: 'Total Customers',
@@ -98,7 +101,7 @@ const Customers: React.FC = () => {
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -124,7 +127,7 @@ const Customers: React.FC = () => {
 
       {/* Average LTV */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -141,7 +144,7 @@ const Customers: React.FC = () => {
 
       {/* Top Customers */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

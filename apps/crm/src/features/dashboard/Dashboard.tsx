@@ -90,7 +90,7 @@ const defaultCampaigns = [
   { name: 'VIP Exclusive Preview', channel: 'Push', sent: 540, openRate: '38%', revenue: '$3,700' },
 ];
 
-function StatCard({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
+function StatCard({ stat, index }: { stat: (typeof defaultStats)[0]; index: number }) {
   const Icon = stat.icon;
   return (
     <motion.div
