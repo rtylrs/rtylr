@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { injectTheme } from '@voxire/config';
 import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -28,13 +28,6 @@ function MyApp({ Component, pageProps }: AppProps) {
         },
       })
   );
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const Modal = require('react-modal');
-      Modal.setAppElement('#__next');
-    }
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

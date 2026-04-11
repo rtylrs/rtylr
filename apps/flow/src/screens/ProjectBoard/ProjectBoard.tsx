@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
 import {
   Plus,
   List,
@@ -8,7 +7,7 @@ import {
   Activity,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import { useFlowStore, Task, STATUS_LABELS } from '../../stores/flowStore';
+import { useFlowStore, Task } from '../../stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../lib/personalWorkspace';
 import TaskCard from '../../components/TaskCard';
 
@@ -55,7 +54,6 @@ const ProjectBoard: React.FC = () => {
     const t = projectTasks.find((x) => x.id === id);
     if (t && t.status !== status) {
       updateTask(id, { status });
-      toast.success(`Moved to ${STATUS_LABELS[status]}`);
     }
     setDragOver(null);
   };
