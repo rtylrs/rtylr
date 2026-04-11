@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
@@ -20,6 +20,8 @@ import {
   MessageSquare,
   Settings as SettingsIcon,
   Search,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 
@@ -150,8 +152,13 @@ const DefaultLayout: React.FC = () => {
   const { openPalette } = useShortcuts();
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const handleTheme = (t: Theme) => {
     setThemeState(t);
@@ -164,19 +171,41 @@ const DefaultLayout: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        overflow: 'hidden',
-        background: 'var(--hub-bg)',
-      }}
-    >
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+      {/* Mobile top bar */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
+        style={{
+          background: 'var(--hub-surface)',
+          borderBottom: '1px solid var(--hub-border)',
+        }}
+      >
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="h-8 w-8 rounded-lg flex items-center justify-center"
+          style={{ color: 'var(--hub-text-muted)' }}
+        >
+          <Menu size={18} />
+        </button>
+        <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)', margin: 0 }}>
+          {pageTitle}
+        </h1>
+        <div className="w-8" />
+      </div>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
+        className={`${sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'} md:flex`}
         style={{
           width: '220px',
-          display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
           overflow: 'hidden',
@@ -189,12 +218,20 @@ const DefaultLayout: React.FC = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: '10px',
             padding: '16px',
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
           <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <X size={16} />
+          </button>
         </div>
 
         {/* Hub back link */}
@@ -413,12 +450,12 @@ const DefaultLayout: React.FC = () => {
       </aside>
 
       {/* Main area */}
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+      <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
         {/* Topbar */}
         <header
+          className="hidden md:flex"
           style={{
             height: '44px',
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 24px',

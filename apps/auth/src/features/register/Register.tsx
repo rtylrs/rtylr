@@ -61,7 +61,8 @@ const Register: React.FC = () => {
     clearError();
   }, [clearError]);
   useEffect(() => {
-    if (isAuthenticated) navigate(role === 'business' ? '/auth/questionnaire' : '/');
+    const hasToken = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
+    if (isAuthenticated && hasToken) navigate(role === 'business' ? '/auth/questionnaire' : '/');
   }, [isAuthenticated, navigate, role]);
 
   const errorMessage =
