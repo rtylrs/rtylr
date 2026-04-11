@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { Customer } from '../../shared/types/pos';
@@ -18,9 +19,9 @@ export function useCustomerLookup(initialQuery = '') {
       setLoading(true);
       setError(null);
       try {
-        const res = await posService.searchCustomers(query.trim());
+        const res = await unwrap(posService.searchCustomers(query.trim()));
         if (cancelled) return;
-        const raw = res?.data?.customers ?? res?.data ?? [];
+        const raw = res?.customers ?? res?.data ?? [];
         const mapped: Customer[] = (Array.isArray(raw) ? raw : []).map((c: any) => ({
           id: String(c.id ?? Math.random().toString(36).slice(2)),
           name: c.name ?? 'Customer',

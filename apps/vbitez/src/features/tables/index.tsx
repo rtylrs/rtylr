@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -26,8 +27,8 @@ const TablesScreen: React.FC = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await posService.getTables();
-        const raw = res?.data?.tables ?? res?.data ?? [];
+        const res = await unwrap(posService.getTables());
+        const raw = res?.tables ?? res?.data ?? [];
         const mapped: TableRow[] = (Array.isArray(raw) ? raw : []).map((t: any) => ({
           id: Number(t.id),
           number: String(t.number ?? t.name ?? t.id),

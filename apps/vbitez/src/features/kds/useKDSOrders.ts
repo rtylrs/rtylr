@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 
@@ -20,8 +21,8 @@ export function useKDSOrders(station?: string) {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getKDSOrders(station);
-      const raw = res?.data?.orders ?? res?.data ?? [];
+      const res = await unwrap(posService.getKDSOrders(station));
+      const raw = res?.orders ?? res?.data ?? [];
       const mapped: KDSOrder[] = (Array.isArray(raw) ? raw : []).map((o: any) => ({
         id: String(o.id ?? Math.random().toString(36).slice(2)),
         number: String(o.number ?? o.id ?? ''),
@@ -56,7 +57,7 @@ export function useKDSOrders(station?: string) {
   const setStatus = async (id: string, status: KDSOrder['status']) => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
-      await posService.updateKDSStatus(id, { status });
+      await unwrap(posService.updateKDSStatus(id, { status }));
     } catch {
       // leave local state updated; real sync handled by reload
     }

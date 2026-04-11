@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -17,10 +18,10 @@ const DiscountScreen: React.FC = () => {
 
   const submit = async () => {
     try {
-      await posService.applyDiscount(orderId!, {
+      await unwrap(posService.applyDiscount(orderId!, {
         mode,
         value: Number(value),
-      });
+      }));
       toast.success('Discount applied');
       navigate(-1);
     } catch {

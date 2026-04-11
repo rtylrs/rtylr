@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { Combo } from '../../shared/types/pos';
@@ -11,8 +12,8 @@ export function useCombos() {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getCombos();
-      const raw = res?.data?.combos ?? res?.data ?? [];
+      const res = await unwrap(posService.getCombos());
+      const raw = res?.combos ?? res?.data ?? [];
       const mapped: Combo[] = (Array.isArray(raw) ? raw : []).map((c: any) => ({
         id: String(c.id ?? Math.random().toString(36).slice(2)),
         name: c.name ?? 'Combo',

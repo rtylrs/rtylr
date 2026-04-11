@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useCallback, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useGiftCardStore } from '../../shared/stores/giftCardStore';
@@ -12,7 +13,7 @@ export function useGiftCards() {
     setLoading(true);
     setError(null);
     try {
-      await posService.getGiftCards();
+      await unwrap(posService.getGiftCards());
     } catch (e: any) {
       setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load gift cards');
     } finally {
@@ -22,7 +23,7 @@ export function useGiftCards() {
 
   const checkBalance = useCallback(async (code: string): Promise<GiftCard | null> => {
     try {
-      const res = await posService.getGiftCardBalance(code);
+      const res = await unwrap(posService.getGiftCardBalance(code));
       return (res?.data ?? null) as GiftCard | null;
     } catch {
       const local = useGiftCardStore.getState().findByCode(code);

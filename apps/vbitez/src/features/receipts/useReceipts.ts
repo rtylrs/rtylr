@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useCallback, useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
@@ -15,8 +16,8 @@ export function useReceipts() {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getReceipts();
-      const raw = res?.data?.receipts ?? res?.data ?? [];
+      const res = await unwrap(posService.getReceipts());
+      const raw = res?.receipts ?? res?.data ?? [];
       setRemote(Array.isArray(raw) ? raw : []);
     } catch (e: any) {
       setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load receipts');
@@ -32,7 +33,7 @@ export function useReceipts() {
   const email = useCallback(
     async (id: string, address: string) => {
       try {
-        await posService.emailReceipt(id, address);
+        await unwrap(posService.emailReceipt(id, address));
         markEmailed(id);
         return true;
       } catch {
