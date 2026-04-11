@@ -12,7 +12,14 @@ interface CurrencyInputProps {
   style?: React.CSSProperties;
 }
 
-const CurrencyInput: React.FC<CurrencyInputProps> = ({ value, onChange, currency, placeholder = '0.00', disabled, style }) => {
+const CurrencyInput: React.FC<CurrencyInputProps> = ({
+  value,
+  onChange,
+  currency,
+  placeholder = '0.00',
+  disabled,
+  style,
+}) => {
   const settingsCurrency = useSettings((s) => s.currency);
   const c = currency ?? settingsCurrency;
   const symbol = getCurrencySymbol(c);

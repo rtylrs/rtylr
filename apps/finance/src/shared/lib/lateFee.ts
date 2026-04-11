@@ -17,7 +17,14 @@ export interface LateFeeResult {
   totalOwed: number;
 }
 
-export function computeLateFee({ amount, dueDate, today = new Date(), feePercent, graceDays, compoundingMonthly = true }: LateFeeInput): LateFeeResult {
+export function computeLateFee({
+  amount,
+  dueDate,
+  today = new Date(),
+  feePercent,
+  graceDays,
+  compoundingMonthly = true,
+}: LateFeeInput): LateFeeResult {
   const days = daysBetween(dueDate, today);
   const daysLate = days - graceDays;
   if (daysLate <= 0) {

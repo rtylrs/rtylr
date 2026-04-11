@@ -44,7 +44,11 @@ const Customers: React.FC = () => {
       {isLoading && (
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+            <div
+              key={i}
+              className="h-14 rounded-lg animate-pulse"
+              style={{ background: 'var(--hub-hover)' }}
+            />
           ))}
         </div>
       )}
@@ -52,7 +56,11 @@ const Customers: React.FC = () => {
       {isError && (
         <div
           className="flex items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           Failed to load customers. Please try again.
         </div>
@@ -61,7 +69,11 @@ const Customers: React.FC = () => {
       {!isLoading && !isError && customers.length === 0 && (
         <div
           className="flex flex-col items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           <Users size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
           <p>No customers found</p>
@@ -76,10 +88,42 @@ const Customers: React.FC = () => {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--hub-card)' }}>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Name</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Email</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Tickets</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Last Contact</th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Name
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Email
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Tickets
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Last Contact
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -88,8 +132,12 @@ const Customers: React.FC = () => {
                   key={customer.id}
                   className="transition-colors"
                   style={{ borderBottom: '1px solid var(--hub-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
@@ -105,13 +153,19 @@ const Customers: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    <div
+                      className="flex items-center gap-1.5 text-xs"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
                       <Mail size={11} />
                       {customer.email}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    <div
+                      className="flex items-center gap-1.5 text-xs"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
                       <Ticket size={11} />
                       {customer.ticketCount ?? 0}
                     </div>

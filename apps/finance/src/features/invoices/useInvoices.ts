@@ -28,7 +28,8 @@ export function useCreateInvoice() {
 export function useUpdateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }) => unwrap(financeApi.updateInvoice(id, data)),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }) =>
+      unwrap(financeApi.updateInvoice(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -53,7 +54,8 @@ export function useUpdateInvoiceStatus() {
 export function useRecordPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) => unwrap(financeApi.recordPayment(id, amount)),
+    mutationFn: ({ id, amount }: { id: string; amount: number }) =>
+      unwrap(financeApi.recordPayment(id, amount)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }

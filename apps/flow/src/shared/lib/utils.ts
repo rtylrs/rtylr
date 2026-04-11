@@ -4,7 +4,12 @@ export function cn(...classes: (string | undefined | null | false | 0)[]) {
 
 export function getInitials(name?: string | null): string {
   if (!name) return '?';
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function formatDate(date: string): string {

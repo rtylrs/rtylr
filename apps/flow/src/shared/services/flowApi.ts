@@ -114,13 +114,12 @@ export interface ApiRoadmap {
 
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
-    safe.get<DashboardStats>('/flow/dashboard', { params: workspaceId ? { workspaceId } : undefined })
-      ,
-
+    safe.get<DashboardStats>('/flow/dashboard', {
+      params: workspaceId ? { workspaceId } : undefined,
+    }),
   // -- Workspaces ---------------------------------------------------------
 
-  getWorkspaces: () =>
-    safe.get<ApiWorkspace[]>('/flow/workspaces'),
+  getWorkspaces: () => safe.get<ApiWorkspace[]>('/flow/workspaces'),
 
   createWorkspace: (data: { name: string; color: string }) =>
     safe.post<ApiWorkspace>('/flow/workspaces', data),
@@ -128,8 +127,7 @@ export const flowApi = {
   updateWorkspace: (id: string, data: Partial<{ name: string; color: string }>) =>
     safe.post<ApiWorkspace>(`/flow/workspaces/${id}`, data),
 
-  deleteWorkspace: (id: string) =>
-    safe.post(`/flow/workspaces/${id}/delete`),
+  deleteWorkspace: (id: string) => safe.post(`/flow/workspaces/${id}/delete`),
 
   addWorkspaceMember: (data: { workspaceId: string; userId: string; role?: string }) =>
     safe.post('/flow/workspaces/member', data),
@@ -148,19 +146,16 @@ export const flowApi = {
   updateProject: (id: string, data: Partial<{ name: string; color: string }>) =>
     safe.post<ApiProject>(`/flow/projects/${id}`, data),
 
-  deleteProject: (id: string) =>
-    safe.post(`/flow/projects/${id}/delete`),
+  deleteProject: (id: string) => safe.post(`/flow/projects/${id}/delete`),
 
   // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
     safe.get<ApiTask[]>('/flow/tasks', { params }),
 
-  getMyTasks: () =>
-    safe.get<ApiTask[]>('/flow/tasks/my'),
+  getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
 
-  getTaskDetail: (id: string) =>
-    safe.get<ApiTask>('/flow/tasks/detail', { params: { id } }),
+  getTaskDetail: (id: string) => safe.get<ApiTask>('/flow/tasks/detail', { params: { id } }),
 
   createTask: (data: {
     projectId: string;
@@ -170,31 +165,24 @@ export const flowApi = {
     priority?: ApiTask['priority'];
     assigneeId?: string;
     dueDate?: string;
-  }) =>
-    safe.post<ApiTask>('/flow/tasks', data),
+  }) => safe.post<ApiTask>('/flow/tasks', data),
 
-  updateTask: (id: string, data: Partial<ApiTask>) =>
-    safe.post<ApiTask>(`/flow/tasks/${id}`, data),
+  updateTask: (id: string, data: Partial<ApiTask>) => safe.post<ApiTask>(`/flow/tasks/${id}`, data),
 
-  deleteTask: (id: string) =>
-    safe.post(`/flow/tasks/${id}/delete`),
+  deleteTask: (id: string) => safe.post(`/flow/tasks/${id}/delete`),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
     safe.post('/flow/tasks/status', { id, status }),
 
-  addComment: (data: { taskId: string; content: string }) =>
-    safe.post('/flow/tasks/comment', data),
+  addComment: (data: { taskId: string; content: string }) => safe.post('/flow/tasks/comment', data),
 
-  deleteComment: (id: string) =>
-    safe.delete(`/flow/tasks/comment/${id}`),
+  deleteComment: (id: string) => safe.delete(`/flow/tasks/comment/${id}`),
 
   // -- Labels -------------------------------------------------------------
 
-  getLabels: () =>
-    safe.get<ApiLabel[]>('/flow/labels'),
+  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
 
-  createLabel: (data: { name: string; color: string }) =>
-    safe.post<ApiLabel>('/flow/labels', data),
+  createLabel: (data: { name: string; color: string }) => safe.post<ApiLabel>('/flow/labels', data),
 
   // -- Milestones ---------------------------------------------------------
 
@@ -212,25 +200,20 @@ export const flowApi = {
   getCycles: (workspaceId?: string) =>
     safe.get<ApiCycle[]>('/flow/cycles', { params: workspaceId ? { workspaceId } : undefined }),
 
-  createCycle: (data: Partial<ApiCycle>) =>
-    safe.post<ApiCycle>('/flow/cycles', data),
+  createCycle: (data: Partial<ApiCycle>) => safe.post<ApiCycle>('/flow/cycles', data),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
     safe.put<ApiCycle>(`/flow/cycles/${id}`, data),
 
   // -- Views --------------------------------------------------------------
 
-  getViews: () =>
-    safe.get<ApiView[]>('/flow/views'),
+  getViews: () => safe.get<ApiView[]>('/flow/views'),
 
-  createView: (data: Partial<ApiView>) =>
-    safe.post<ApiView>('/flow/views', data),
+  createView: (data: Partial<ApiView>) => safe.post<ApiView>('/flow/views', data),
 
-  updateView: (id: string, data: Partial<ApiView>) =>
-    safe.put<ApiView>(`/flow/views/${id}`, data),
+  updateView: (id: string, data: Partial<ApiView>) => safe.put<ApiView>(`/flow/views/${id}`, data),
 
-  deleteView: (id: string) =>
-    safe.delete(`/flow/views/${id}`),
+  deleteView: (id: string) => safe.delete(`/flow/views/${id}`),
 
   // -- Insights -----------------------------------------------------------
 
@@ -239,11 +222,9 @@ export const flowApi = {
 
   // -- Team workload ------------------------------------------------------
 
-  getTeamWorkload: () =>
-    safe.get<ApiTeamWorkload[]>('/flow/team/workload'),
+  getTeamWorkload: () => safe.get<ApiTeamWorkload[]>('/flow/team/workload'),
 
   // -- Roadmap ------------------------------------------------------------
 
-  getRoadmap: () =>
-    safe.get<ApiRoadmap[]>('/flow/roadmap'),
+  getRoadmap: () => safe.get<ApiRoadmap[]>('/flow/roadmap'),
 };

@@ -3,16 +3,16 @@ function DemoBanner() {
     <div
       id="demo"
       style={{
-        zIndex: "1000",
+        zIndex: '1000',
       }}
     >
       This is a demo - Check Out Our
       <a
         style={{
-          color: "var(--primary)",
-          textDecoration: "underline",
-          marginLeft: "5px",
-          cursor: "pointer",
+          color: 'var(--primary)',
+          textDecoration: 'underline',
+          marginLeft: '5px',
+          cursor: 'pointer',
         }}
         href="https://voxire.com"
         target="_blank"

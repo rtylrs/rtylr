@@ -52,7 +52,9 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
             marginBottom: 20,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--hub-text)' }}>{title}</h2>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--hub-text)' }}>
+            {title}
+          </h2>
           <button
             onClick={onClose}
             style={{
@@ -68,7 +70,9 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
         </div>
         <div>{children}</div>
         {footer && (
-          <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>{footer}</div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
+            {footer}
+          </div>
         )}
       </motion.div>
     </div>

@@ -39,39 +39,39 @@ const AppRoutes: AppRoute[] = [
     path: '/',
     element: <DefaultLayout />,
     children: [
-      { index: true,                              element: <Dashboard /> },
+      { index: true, element: <Dashboard /> },
 
       // Invoices
-      { path: 'invoices',                         element: <Invoices /> },
-      { path: 'invoices/new',                     element: <NewInvoice /> },
-      { path: 'invoices/recurring',               element: <RecurringInvoices /> },
-      { path: 'invoices/:id',                     element: <InvoiceDetail /> },
-      { path: 'quotes',                           element: <Quotes /> },
+      { path: 'invoices', element: <Invoices /> },
+      { path: 'invoices/new', element: <NewInvoice /> },
+      { path: 'invoices/recurring', element: <RecurringInvoices /> },
+      { path: 'invoices/:id', element: <InvoiceDetail /> },
+      { path: 'quotes', element: <Quotes /> },
 
       // Expenses
-      { path: 'expenses',                         element: <Expenses /> },
-      { path: 'expenses/new',                     element: <NewExpense /> },
-      { path: 'expenses/:id',                     element: <ExpenseDetail /> },
-      { path: 'categories',                       element: <Categories /> },
+      { path: 'expenses', element: <Expenses /> },
+      { path: 'expenses/new', element: <NewExpense /> },
+      { path: 'expenses/:id', element: <ExpenseDetail /> },
+      { path: 'categories', element: <Categories /> },
 
       // Bills & bank
-      { path: 'bills',                            element: <Bills /> },
-      { path: 'bank',                             element: <BankFeeds /> },
-      { path: 'reconcile',                        element: <Reconcile /> },
+      { path: 'bills', element: <Bills /> },
+      { path: 'bank', element: <BankFeeds /> },
+      { path: 'reconcile', element: <Reconcile /> },
 
       // Reports
-      { path: 'pl',                               element: <ProfitLoss /> },
-      { path: 'reports/balance-sheet',            element: <BalanceSheet /> },
-      { path: 'reports/cash-flow',                element: <CashFlow /> },
-      { path: 'reports/tax',                      element: <TaxReport /> },
+      { path: 'pl', element: <ProfitLoss /> },
+      { path: 'reports/balance-sheet', element: <BalanceSheet /> },
+      { path: 'reports/cash-flow', element: <CashFlow /> },
+      { path: 'reports/tax', element: <TaxReport /> },
 
       // Accounting
-      { path: 'journal',                          element: <Journal /> },
-      { path: 'accounts',                         element: <ChartOfAccounts /> },
+      { path: 'journal', element: <Journal /> },
+      { path: 'accounts', element: <ChartOfAccounts /> },
 
       // Tax & settings
-      { path: 'tax',                              element: <Tax /> },
-      { path: 'settings',                         element: <Settings /> },
+      { path: 'tax', element: <Tax /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
 ];

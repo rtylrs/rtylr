@@ -1,15 +1,15 @@
-import { List as Menu, House as Home, ArrowClockwise as RotateCw, X, User } from "phosphor-react";
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from '../stores/userStore";
-import { useFullscreen } from '../hooks/useFullscreen";
+import { List as Menu, House as Home, ArrowClockwise as RotateCw, X, User } from 'phosphor-react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '../stores/userStore';
+import { useFullscreen } from '../hooks/useFullscreen';
 
 const getPlatform = () => {
   const ua = navigator.userAgent;
-  if (/Windows/.test(ua)) return "Windows";
-  if (/Mac/.test(ua)) return "Mac";
-  if (/Linux/.test(ua)) return "Linux";
-  return "Unknown";
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Mac/.test(ua)) return 'Mac';
+  if (/Linux/.test(ua)) return 'Linux';
+  return 'Unknown';
 };
 
 const useFPS = (): number => {
@@ -31,7 +31,9 @@ const useFPS = (): number => {
       animationId.current = requestAnimationFrame(calculateFPS);
     };
     animationId.current = requestAnimationFrame(calculateFPS);
-    return () => { if (animationId.current) cancelAnimationFrame(animationId.current); };
+    return () => {
+      if (animationId.current) cancelAnimationFrame(animationId.current);
+    };
   }, []);
 
   return fps;
@@ -40,15 +42,18 @@ const useFPS = (): number => {
 const ToolBarContent: React.FC = () => {
   const { user } = useUserStore();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<string>(localStorage.getItem("mode") || "prod");
+  const [mode, setMode] = useState<string>(localStorage.getItem('mode') || 'prod');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const fps = useFPS();
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
-  const [memoryUsage, setMemoryUsage] = useState("N/A");
+  const [memoryUsage, setMemoryUsage] = useState('N/A');
 
-  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const isLocalhost =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-  useEffect(() => { localStorage.setItem("mode", mode); }, [mode]);
+  useEffect(() => {
+    localStorage.setItem('mode', mode);
+  }, [mode]);
 
   useEffect(() => {
     const updateMemoryUsage = () => {
@@ -63,30 +68,53 @@ const ToolBarContent: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const toolbarNavigate = (path: string) => { setMenuOpen(false); navigate(path); };
+  const toolbarNavigate = (path: string) => {
+    setMenuOpen(false);
+    navigate(path);
+  };
 
   const handleClearStorage = () => {
-    if (window.confirm("Are you sure you want to clear the local storage? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        'Are you sure you want to clear the local storage? This action cannot be undone.'
+      )
+    ) {
       localStorage.clear();
       window.location.reload();
     }
   };
 
-  const itemCls = "w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white cursor-pointer transition-colors";
+  const itemCls =
+    'w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white cursor-pointer transition-colors';
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <div className="flex items-center gap-1 bg-gray-900/95 backdrop-blur-sm border border-white/10 rounded-xl px-2 py-1.5 shadow-xl">
-        <div className={itemCls} onClick={() => toolbarNavigate("/")} title="Home"><Home size={14} /></div>
-        <div className={itemCls} onClick={() => toolbarNavigate("/app/business/")} title="Dashboard"><User size={14} /></div>
-        <div className={itemCls} onClick={() => window.location.reload()} title="Reload"><RotateCw size={14} /></div>
+        <div className={itemCls} onClick={() => toolbarNavigate('/')} title="Home">
+          <Home size={14} />
+        </div>
+        <div
+          className={itemCls}
+          onClick={() => toolbarNavigate('/app/business/')}
+          title="Dashboard"
+        >
+          <User size={14} />
+        </div>
+        <div className={itemCls} onClick={() => window.location.reload()} title="Reload">
+          <RotateCw size={14} />
+        </div>
 
         <div className="w-px h-4 bg-white/15 mx-0.5" />
 
         <label className="flex items-center gap-1.5 cursor-pointer">
           <span className="text-[10px] text-white/50">DEV</span>
           <div className="relative">
-            <input type="checkbox" className="sr-only peer" checked={mode === "dev"} onChange={() => setMode(m => m === "dev" ? "prod" : "dev")} />
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={mode === 'dev'}
+              onChange={() => setMode((m) => (m === 'dev' ? 'prod' : 'dev'))}
+            />
             <div className="w-7 h-3.5 bg-white/15 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-2.5 after:h-2.5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-3.5" />
           </div>
         </label>
@@ -96,16 +124,31 @@ const ToolBarContent: React.FC = () => {
         <span className="text-[10px] text-white/50 px-1">FPS: {fps}</span>
         <span className="text-[10px] text-white/50 px-1">RAM: {memoryUsage}</span>
 
-        <div className={itemCls} onClick={() => setMenuOpen(v => !v)}>
+        <div className={itemCls} onClick={() => setMenuOpen((v) => !v)}>
           {menuOpen ? <X size={14} /> : <Menu size={14} />}
         </div>
 
         {menuOpen && (
           <div className="absolute bottom-full left-0 mb-2 w-40 bg-gray-900 border border-white/10 rounded-xl overflow-hidden shadow-xl">
             <div className="p-1">
-              <div className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer" onClick={() => toolbarNavigate("/")}>Home</div>
-              <div className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer" onClick={() => toolbarNavigate("/app/business/")}>Statistics</div>
-              <div className="px-3 py-2 text-sm text-red-400 font-semibold hover:bg-white/8 rounded-lg cursor-pointer" onClick={handleClearStorage}>Clear Storage</div>
+              <div
+                className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
+                onClick={() => toolbarNavigate('/')}
+              >
+                Home
+              </div>
+              <div
+                className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
+                onClick={() => toolbarNavigate('/app/business/')}
+              >
+                Statistics
+              </div>
+              <div
+                className="px-3 py-2 text-sm text-red-400 font-semibold hover:bg-white/8 rounded-lg cursor-pointer"
+                onClick={handleClearStorage}
+              >
+                Clear Storage
+              </div>
             </div>
           </div>
         )}
@@ -116,27 +159,28 @@ const ToolBarContent: React.FC = () => {
 
 const ToolBar: React.FC = () => {
   const [showToolbar, setShowToolbar] = useState<boolean>(
-    localStorage.getItem("showToolbar") === "true"
+    localStorage.getItem('showToolbar') === 'true'
   );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = getPlatform() === "Mac";
-      const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key.toLowerCase() === "t";
-      const isCmdOptTPressed = e.metaKey && e.ctrlKey && e.key.toLowerCase() === "t";
+      const isMac = getPlatform() === 'Mac';
+      const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key.toLowerCase() === 't';
+      const isCmdOptTPressed = e.metaKey && e.ctrlKey && e.key.toLowerCase() === 't';
       if (isCtrlAltTPressed || (isMac && isCmdOptTPressed)) {
-        setShowToolbar(prev => {
+        setShowToolbar((prev) => {
           const next = !prev;
-          localStorage.setItem("showToolbar", next.toString());
+          localStorage.setItem('showToolbar', next.toString());
           return next;
         });
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const isProduction = window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+  const isProduction =
+    window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
   if (!showToolbar || isProduction) return null;
 

@@ -58,7 +58,9 @@ const Reports: React.FC = () => {
       className="space-y-6 max-w-7xl"
     >
       <motion.div variants={itemVariants}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>Reports</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+          Reports
+        </h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
           Pre-built report templates with CSV and PDF export
         </p>
@@ -71,15 +73,22 @@ const Reports: React.FC = () => {
       >
         <div className="flex items-center gap-2 mb-4">
           <FileText size={14} style={{ color: ACCENT }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Available Reports</h3>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Available Reports
+          </h3>
         </div>
 
         {isLoading ? (
           <div className="space-y-2">
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} cols={3} />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
           </div>
         ) : templateList.length === 0 ? (
-          <EmptyState title="No report templates" description="Report templates will appear here once configured." />
+          <EmptyState
+            title="No report templates"
+            description="Report templates will appear here once configured."
+          />
         ) : (
           <div className="space-y-1">
             {templateList.map((t: any) => {
@@ -108,7 +117,11 @@ const Reports: React.FC = () => {
                       className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors"
                       style={{ background: 'var(--hub-active)', color: 'var(--hub-text-muted)' }}
                     >
-                      {isExporting ? <Loader2 size={10} className="animate-spin" /> : <FileSpreadsheet size={10} />}
+                      {isExporting ? (
+                        <Loader2 size={10} className="animate-spin" />
+                      ) : (
+                        <FileSpreadsheet size={10} />
+                      )}
                       CSV
                     </button>
                     <button
@@ -117,7 +130,11 @@ const Reports: React.FC = () => {
                       className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors"
                       style={{ background: 'var(--hub-active)', color: 'var(--hub-text-muted)' }}
                     >
-                      {isExporting ? <Loader2 size={10} className="animate-spin" /> : <Download size={10} />}
+                      {isExporting ? (
+                        <Loader2 size={10} className="animate-spin" />
+                      ) : (
+                        <Download size={10} />
+                      )}
                       PDF
                     </button>
                   </div>

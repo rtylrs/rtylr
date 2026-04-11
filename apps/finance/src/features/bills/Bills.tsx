@@ -10,10 +10,10 @@ import { useBills } from './useBills';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  unpaid:    { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  paid:      { background: 'rgba(16,185,129,0.12)',  color: '#10b981' },
-  overdue:   { background: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
-  scheduled: { background: 'rgba(59,130,246,0.12)',  color: '#3b82f6' },
+  unpaid: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
+  paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
+  overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
+  scheduled: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
 };
 
 const Bills: React.FC = () => {
@@ -37,7 +37,11 @@ const Bills: React.FC = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Bills to Pay"
         subtitle={
@@ -102,21 +106,43 @@ const Bills: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{b.id}</td>
                   <td style={{ padding: '12px 16px', fontSize: 13 }}>{b.vendor}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{b.category}</td>
+                  <td
+                    style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                  >
+                    {b.category}
+                  </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
                     <MoneyDisplay amount={b.amount} />
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: b.status === 'overdue' ? '#ef4444' : 'var(--hub-text-muted)' }}>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 12,
+                      color: b.status === 'overdue' ? '#ef4444' : 'var(--hub-text-muted)',
+                    }}
+                  >
                     {b.dueDate}
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, textTransform: 'capitalize', ...STATUS_STYLE[b.status] }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        textTransform: 'capitalize',
+                        ...STATUS_STYLE[b.status],
+                      }}
+                    >
                       {b.status}
                     </span>
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
-                      <button style={{ ...ghostBtn, padding: '4px 10px' }} onClick={() => toast.success(`Scheduled ${b.id}`)}>
+                      <button
+                        style={{ ...ghostBtn, padding: '4px 10px' }}
+                        onClick={() => toast.success(`Scheduled ${b.id}`)}
+                      >
                         <Clock size={12} /> Schedule
                       </button>
                     ) : (

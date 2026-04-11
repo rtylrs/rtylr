@@ -6,11 +6,11 @@ import { toast } from 'sonner';
 
 const INDIGO = '#6366f1';
 
-const Section: React.FC<{ title: string; icon: React.ComponentType<{ size?: number; style?: any }>; children: React.ReactNode }> = ({
-  title,
-  icon: Icon,
-  children,
-}) => (
+const Section: React.FC<{
+  title: string;
+  icon: React.ComponentType<{ size?: number; style?: any }>;
+  children: React.ReactNode;
+}> = ({ title, icon: Icon, children }) => (
   <div
     className="rounded-xl p-5 space-y-4"
     style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
@@ -25,7 +25,11 @@ const Section: React.FC<{ title: string; icon: React.ComponentType<{ size?: numb
   </div>
 );
 
-const Field: React.FC<{ label: string; description?: string; children: React.ReactNode }> = ({ label, description, children }) => (
+const Field: React.FC<{ label: string; description?: string; children: React.ReactNode }> = ({
+  label,
+  description,
+  children,
+}) => (
   <div className="flex items-center justify-between gap-4">
     <div className="flex-1">
       <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
@@ -41,7 +45,10 @@ const Field: React.FC<{ label: string; description?: string; children: React.Rea
   </div>
 );
 
-const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({ value, onChange }) => (
+const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
+  value,
+  onChange,
+}) => (
   <button
     onClick={() => onChange(!value)}
     className="relative h-5 w-9 rounded-full transition-colors"
@@ -74,8 +81,12 @@ const Settings: React.FC = () => {
         className="space-y-5 max-w-3xl"
       >
         <div>
-          <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>Settings</h2>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>Configure booking preferences</p>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Settings
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+            Configure booking preferences
+          </p>
         </div>
         <SkeletonBlock />
         <SkeletonBlock />
@@ -91,11 +102,17 @@ const Settings: React.FC = () => {
         className="space-y-5 max-w-3xl"
       >
         <div>
-          <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>Settings</h2>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Settings
+          </h2>
         </div>
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load settings. Please try again later.
         </div>
@@ -110,8 +127,12 @@ const Settings: React.FC = () => {
       className="space-y-5 max-w-3xl"
     >
       <div>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>Settings</h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>Configure booking preferences</p>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+          Settings
+        </h2>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          Configure booking preferences
+        </p>
       </div>
 
       <Section title="Booking Page" icon={Globe}>
@@ -120,11 +141,18 @@ const Settings: React.FC = () => {
             type="text"
             defaultValue={settings?.bookingUrl ?? ''}
             className="w-64 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
             readOnly
           />
         </Field>
-        <Field label="Allow Online Booking" description="Let customers book directly from the booking page">
+        <Field
+          label="Allow Online Booking"
+          description="Let customers book directly from the booking page"
+        >
           <Toggle value={settings?.onlineBookingEnabled ?? true} onChange={() => {}} />
         </Field>
       </Section>
@@ -135,7 +163,11 @@ const Settings: React.FC = () => {
             type="number"
             defaultValue={settings?.slotDuration ?? 30}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
         <Field label="Buffer Time (min)" description="Gap between consecutive appointments">
@@ -143,7 +175,11 @@ const Settings: React.FC = () => {
             type="number"
             defaultValue={settings?.bufferTime ?? 10}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
         <Field label="Business Hours Start" description="When your day begins">
@@ -151,7 +187,11 @@ const Settings: React.FC = () => {
             type="time"
             defaultValue={settings?.businessHoursStart ?? '09:00'}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
         <Field label="Business Hours End" description="When your day ends">
@@ -159,7 +199,11 @@ const Settings: React.FC = () => {
             type="time"
             defaultValue={settings?.businessHoursEnd ?? '18:00'}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
       </Section>
@@ -168,12 +212,19 @@ const Settings: React.FC = () => {
         <Field label="Allow Cancellations" description="Let customers cancel appointments online">
           <Toggle value={settings?.allowCancellations ?? true} onChange={() => {}} />
         </Field>
-        <Field label="Cancellation Window (hours)" description="Minimum hours before appointment to allow cancellation">
+        <Field
+          label="Cancellation Window (hours)"
+          description="Minimum hours before appointment to allow cancellation"
+        >
           <input
             type="number"
             defaultValue={settings?.cancellationWindow ?? 24}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
       </Section>
@@ -190,7 +241,11 @@ const Settings: React.FC = () => {
             type="number"
             defaultValue={settings?.reminderAdvance ?? 24}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
       </Section>

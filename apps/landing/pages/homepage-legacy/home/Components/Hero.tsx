@@ -46,11 +46,7 @@ const Hero: React.FC<{}> = () => {
           >
             {isAuthenticated ? t('Hero.My Account') : t('Hero.Create Account')}
           </Button>
-          <Button
-            onClick={() => router.push('/uses')}
-            variant="outline"
-            suffix={<HiArrowRight />}
-          >
+          <Button onClick={() => router.push('/uses')} variant="outline" suffix={<HiArrowRight />}>
             {t('Hero.Learn More')}
           </Button>
         </div>
@@ -60,8 +56,7 @@ const Hero: React.FC<{}> = () => {
             marginTop: 10,
           }}
         >
-          <HiStar color={secondary} /> Rated 4.7/5 - from
-          over 500+ reviews
+          <HiStar color={secondary} /> Rated 4.7/5 - from over 500+ reviews
         </h5>
       </div>
       <div className={styles['hero-image']}>{memoizedQRCode}</div>

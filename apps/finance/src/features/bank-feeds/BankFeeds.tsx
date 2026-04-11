@@ -8,7 +8,10 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBankAccounts, useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
-const iconFor: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
+const iconFor: Record<
+  string,
+  React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+> = {
   checking: Building2,
   savings: PiggyBank,
   credit: CreditCard,
@@ -22,12 +25,17 @@ const BankFeeds: React.FC = () => {
   const total = accounts.reduce((s, a) => s + a.balance, 0);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Bank Feeds"
         subtitle={
           <>
-            {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} /> total balance
+            {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} /> total
+            balance
           </>
         }
         actions={
@@ -38,10 +46,18 @@ const BankFeeds: React.FC = () => {
       />
 
       {isLoading ? (
-        <div style={{ ...cardStyle, padding: 20 }}><SkeletonRow /></div>
+        <div style={{ ...cardStyle, padding: 20 }}>
+          <SkeletonRow />
+        </div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 14,
+            }}
+          >
             {accounts.map((a) => {
               const Icon = iconFor[a.type] ?? Building2;
               return (
@@ -56,7 +72,14 @@ const BankFeeds: React.FC = () => {
                     borderColor: selected === a.id ? ACCENT : 'var(--hub-border)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 10,
+                    }}
+                  >
                     <span
                       style={{
                         display: 'flex',
@@ -71,12 +94,30 @@ const BankFeeds: React.FC = () => {
                     >
                       <Icon size={16} />
                     </span>
-                    <span style={{ fontSize: 11, color: 'var(--hub-text-dim)', textTransform: 'uppercase' }}>{a.type}</span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--hub-text-dim)',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {a.type}
+                    </span>
                   </div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-                    {a.institution} <>&middot;</><>&middot;</><>&middot;</><>&middot;</> {a.mask}
+                    {a.institution} <>&middot;</>
+                    <>&middot;</>
+                    <>&middot;</>
+                    <>&middot;</> {a.mask}
                   </div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: a.balance < 0 ? '#ef4444' : 'var(--hub-text)', marginTop: 6 }}>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: a.balance < 0 ? '#ef4444' : 'var(--hub-text)',
+                      marginTop: 6,
+                    }}
+                  >
                     <MoneyDisplay amount={a.balance} />
                   </div>
                 </button>
@@ -85,7 +126,14 @@ const BankFeeds: React.FC = () => {
           </div>
 
           <div style={{ ...cardStyle, overflow: 'hidden' }}>
-            <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--hub-border)', fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            <div
+              style={{
+                padding: '14px 16px',
+                borderBottom: '1px solid var(--hub-border)',
+                fontSize: 12,
+                color: 'var(--hub-text-muted)',
+              }}
+            >
               {selected ? 'Account transactions' : 'All recent transactions'}
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -112,10 +160,28 @@ const BankFeeds: React.FC = () => {
               <tbody>
                 {transactions.map((t) => (
                   <tr key={t.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                    <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{t.date}</td>
-                    <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--hub-text)' }}>{t.description}</td>
-                    <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{t.category}</td>
-                    <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600, textAlign: 'right', color: t.amount >= 0 ? ACCENT : 'var(--hub-text)' }}>
+                    <td
+                      style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                    >
+                      {t.date}
+                    </td>
+                    <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
+                      {t.description}
+                    </td>
+                    <td
+                      style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                    >
+                      {t.category}
+                    </td>
+                    <td
+                      style={{
+                        padding: '10px 16px',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        textAlign: 'right',
+                        color: t.amount >= 0 ? ACCENT : 'var(--hub-text)',
+                      }}
+                    >
                       <MoneyDisplay amount={t.amount} signed />
                     </td>
                     <td style={{ padding: '10px 16px', fontSize: 11 }}>

@@ -58,8 +58,18 @@ const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
         </span>
       </div>
       <div className="flex gap-4">
-        <Metric label="On-Time" value={onTime} color={onTime >= 90 ? '#10b981' : '#f59e0b'} icon={Truck} />
-        <Metric label="Accuracy" value={accuracy} color={accuracy >= 95 ? '#10b981' : '#f59e0b'} icon={Target} />
+        <Metric
+          label="On-Time"
+          value={onTime}
+          color={onTime >= 90 ? '#10b981' : '#f59e0b'}
+          icon={Truck}
+        />
+        <Metric
+          label="Accuracy"
+          value={accuracy}
+          color={accuracy >= 95 ? '#10b981' : '#f59e0b'}
+          icon={Target}
+        />
         <Metric label="Lead Days" value={leadTime} suffix="d" color="#60a5fa" icon={Clock} />
       </div>
     </div>

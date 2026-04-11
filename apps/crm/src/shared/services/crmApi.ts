@@ -205,12 +205,10 @@ export interface Settings {
 
 export const crmApi = {
   // Dashboard
-  getDashboard: () =>
-    safe.get<DashboardStats>('/crm/dashboard'),
+  getDashboard: () => safe.get<DashboardStats>('/crm/dashboard'),
 
   // Customers
-  getCustomers: (params?: CustomersParams) =>
-    safe.get<Customer[]>('/crm/customers', { params }),
+  getCustomers: (params?: CustomersParams) => safe.get<Customer[]>('/crm/customers', { params }),
 
   getCustomerDetail: (id: number) =>
     safe.get<Customer>('/crm/customers/detail', { params: { id } }),
@@ -218,26 +216,21 @@ export const crmApi = {
   getCustomerTimeline: (id: number) =>
     safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }),
 
-  createCustomer: (data: Partial<Customer>) =>
-    safe.post<Customer>('/crm/customers', data),
+  createCustomer: (data: Partial<Customer>) => safe.post<Customer>('/crm/customers', data),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
     safe.post<Customer>('/crm/customers', { id, ...data }),
 
-  deleteCustomer: (id: number) =>
-    safe.post('/crm/customers', { id, _action: 'delete' }),
+  deleteCustomer: (id: number) => safe.post('/crm/customers', { id, _action: 'delete' }),
 
-  recordVisit: (customerId: number) =>
-    safe.post('/crm/customers/record-visit', { customerId }),
+  recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
-  importCustomers: (rows: any[]) =>
-    safe.post('/crm/customers/import', { rows }),
+  importCustomers: (rows: any[]) => safe.post('/crm/customers/import', { rows }),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     safe.post('/crm/customers/merge', { primaryId, secondaryId }),
 
-  exportCustomerData: (id: number) =>
-    safe.get('/crm/customers/export', { params: { id } }),
+  exportCustomerData: (id: number) => safe.get('/crm/customers/export', { params: { id } }),
 
   // Loyalty
   awardPoints: (customerId: number, points: number, reason?: string) =>
@@ -246,58 +239,46 @@ export const crmApi = {
   redeemPoints: (customerId: number, points: number, reason?: string) =>
     safe.post('/crm/loyalty/redeem', { customerId, points, reason }),
 
-  getLoyaltyConfig: () =>
-    safe.get<LoyaltyConfig>('/crm/loyalty/config'),
+  getLoyaltyConfig: () => safe.get<LoyaltyConfig>('/crm/loyalty/config'),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
     safe.post<LoyaltyConfig>('/crm/loyalty/config', config),
 
-  getLoyaltyTransactions: () =>
-    safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
+  getLoyaltyTransactions: () => safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
 
-  getLoyaltyMembers: () =>
-    safe.get<LoyaltyMember[]>('/crm/loyalty/members'),
+  getLoyaltyMembers: () => safe.get<LoyaltyMember[]>('/crm/loyalty/members'),
 
-  getLoyaltyRewards: () =>
-    safe.get<LoyaltyReward[]>('/crm/loyalty/rewards'),
+  getLoyaltyRewards: () => safe.get<LoyaltyReward[]>('/crm/loyalty/rewards'),
 
-  getLoyaltyTiers: () =>
-    safe.get<LoyaltyTier[]>('/crm/loyalty/tiers'),
+  getLoyaltyTiers: () => safe.get<LoyaltyTier[]>('/crm/loyalty/tiers'),
 
   updateLoyaltyTier: (id: number, data: Partial<LoyaltyTier>) =>
     safe.post('/crm/loyalty/tiers', { id, ...data }),
 
   // Segments
-  getSegments: () =>
-    safe.get<Segment[]>('/crm/segments'),
+  getSegments: () => safe.get<Segment[]>('/crm/segments'),
 
-  getSegmentById: (id: number) =>
-    safe.get<Segment>('/crm/segments/detail', { params: { id } }),
+  getSegmentById: (id: number) => safe.get<Segment>('/crm/segments/detail', { params: { id } }),
 
   getSegmentCustomers: (id: number) =>
     safe.get<Customer[]>('/crm/segments/customers', { params: { id } }),
 
-  createSegment: (data: Partial<Segment>) =>
-    safe.post<Segment>('/crm/segments', data),
+  createSegment: (data: Partial<Segment>) => safe.post<Segment>('/crm/segments', data),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
     safe.post<Segment>('/crm/segments', { id, ...data }),
 
-  deleteSegment: (id: number) =>
-    safe.post('/crm/segments', { id, _action: 'delete' }),
+  deleteSegment: (id: number) => safe.post('/crm/segments', { id, _action: 'delete' }),
 
   // Campaigns
-  getCampaigns: () =>
-    safe.get<Campaign[]>('/crm/campaigns'),
+  getCampaigns: () => safe.get<Campaign[]>('/crm/campaigns'),
 
-  getCampaignById: (id: number) =>
-    safe.get<Campaign>('/crm/campaigns/detail', { params: { id } }),
+  getCampaignById: (id: number) => safe.get<Campaign>('/crm/campaigns/detail', { params: { id } }),
 
   getCampaignStats: (id: number) =>
     safe.get<CampaignStats>('/crm/campaigns/stats', { params: { id } }),
 
-  createCampaign: (data: Partial<Campaign>) =>
-    safe.post<Campaign>('/crm/campaigns', data),
+  createCampaign: (data: Partial<Campaign>) => safe.post<Campaign>('/crm/campaigns', data),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
     safe.post<Campaign>('/crm/campaigns', { id, ...data }),
@@ -306,30 +287,23 @@ export const crmApi = {
     safe.post('/crm/campaigns/status', { id, status }),
 
   // Automations
-  getAutomations: () =>
-    safe.get<Automation[]>('/crm/automations'),
+  getAutomations: () => safe.get<Automation[]>('/crm/automations'),
 
-  createAutomation: (data: Partial<Automation>) =>
-    safe.post<Automation>('/crm/automations', data),
+  createAutomation: (data: Partial<Automation>) => safe.post<Automation>('/crm/automations', data),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
     safe.post<Automation>('/crm/automations', { id, ...data }),
 
   // Templates
-  getTemplates: () =>
-    safe.get<Template[]>('/crm/templates'),
+  getTemplates: () => safe.get<Template[]>('/crm/templates'),
 
-  createTemplate: (data: Partial<Template>) =>
-    safe.post<Template>('/crm/templates', data),
+  createTemplate: (data: Partial<Template>) => safe.post<Template>('/crm/templates', data),
 
   // Feedback
-  getFeedback: () =>
-    safe.get<FeedbackItem[]>('/crm/feedback'),
+  getFeedback: () => safe.get<FeedbackItem[]>('/crm/feedback'),
 
   // Settings
-  getSettings: () =>
-    safe.get<Settings>('/crm/settings'),
+  getSettings: () => safe.get<Settings>('/crm/settings'),
 
-  updateSettings: (data: Partial<Settings>) =>
-    safe.post<Settings>('/crm/settings', data),
+  updateSettings: (data: Partial<Settings>) => safe.post<Settings>('/crm/settings', data),
 };

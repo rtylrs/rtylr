@@ -8,7 +8,10 @@ export const SkeletonBlock: React.FC<{ className?: string }> = ({ className = ''
 );
 
 export const SkeletonRow: React.FC<{ cols?: number }> = ({ cols = 3 }) => (
-  <div className="flex gap-3 items-center px-3 py-3 rounded-lg" style={{ background: 'var(--hub-hover)' }}>
+  <div
+    className="flex gap-3 items-center px-3 py-3 rounded-lg"
+    style={{ background: 'var(--hub-hover)' }}
+  >
     {Array.from({ length: cols }).map((_, i) => (
       <div
         key={i}

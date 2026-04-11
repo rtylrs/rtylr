@@ -117,9 +117,7 @@ const routeLabels: Record<string, string> = {
 
 function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find(
-    (key) => pathname.startsWith(key) && key !== '/'
-  );
+  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'ERP';
 }
 
@@ -147,8 +145,7 @@ function applyTheme(theme: Theme) {
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
-  const isActive =
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   return (
     <Link
@@ -233,9 +230,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isTyping =
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable;
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
       // cmd+k or ctrl+k
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -337,8 +332,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             to="/settings"
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
             style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
           >
             <SettingsIcon size={12} /> Settings
           </Link>
@@ -376,7 +375,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   </span>
                 )}
               </div>
-              <ChevronRight size={12} className="shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
+              <ChevronRight
+                size={12}
+                className="shrink-0"
+                style={{ color: 'var(--hub-text-dim)' }}
+              />
             </button>
 
             <AnimatePresence>
@@ -466,7 +469,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <button
               onClick={() => setPaletteOpen(true)}
               className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
-              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+              style={{
+                background: 'var(--hub-hover)',
+                color: 'var(--hub-text-muted)',
+                border: '1px solid var(--hub-border)',
+              }}
             >
               <SearchIcon size={11} />
               <span>Search...</span>
@@ -481,8 +488,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
               className="h-7 w-7 rounded-lg flex items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             </button>
@@ -490,8 +501,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               onClick={() => setShortcutsOpen(true)}
               className="h-7 w-7 rounded-lg flex items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Keyboard size={14} />
             </button>
@@ -528,7 +543,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
 
-      <Toaster theme={theme === 'light' ? 'light' : 'dark'} position="bottom-right" richColors closeButton />
+      <Toaster
+        theme={theme === 'light' ? 'light' : 'dark'}
+        position="bottom-right"
+        richColors
+        closeButton
+      />
     </div>
   );
 };

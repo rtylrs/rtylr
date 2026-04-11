@@ -43,7 +43,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChange }) =>
         className="bg-transparent text-xs outline-none"
         style={{ color: 'var(--hub-text)' }}
       />
-      <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>to</span>
+      <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+        to
+      </span>
       <input
         type="date"
         value={value.to}
@@ -58,8 +60,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChange }) =>
             onClick={() => applyPreset(p.days)}
             className="text-[10px] px-2 py-1 rounded"
             style={{ color: 'var(--hub-text-muted)' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-active)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--hub-active)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
           >
             {p.label}
           </button>

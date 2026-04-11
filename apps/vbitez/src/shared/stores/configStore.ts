@@ -80,15 +80,8 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
       fetchConfigData: async () => {
         try {
           const response = await api.get('/config');
-          const {
-            maintanance,
-            aboutContent,
-            count,
-            contactEmail,
-            contactNumber,
-            faqs,
-            news,
-          } = response.data.config;
+          const { maintanance, aboutContent, count, contactEmail, contactNumber, faqs, news } =
+            response.data.config;
 
           set({
             aboutContent,

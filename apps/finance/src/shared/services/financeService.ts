@@ -8,7 +8,8 @@ export const financeService = {
   getInvoice: (id: number) => safe.get(`/finance/invoices/${id}`),
   updateInvoice: (id: number, data: any) => safe.put(`/finance/invoices/${id}`, data),
   deleteInvoice: (id: number) => safe.delete(`/finance/invoices/${id}`),
-  updateInvoiceStatus: (id: number, status: string) => safe.put(`/finance/invoices/${id}/status`, { status }),
+  updateInvoiceStatus: (id: number, status: string) =>
+    safe.put(`/finance/invoices/${id}/status`, { status }),
   recordPayment: (id: number, data: any) => safe.post(`/finance/invoices/${id}/payment`, data),
 
   getExpenses: (params?: any) => safe.get('/finance/expenses', { params }),

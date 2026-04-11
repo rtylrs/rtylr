@@ -10,7 +10,7 @@ export const useAllMenus = (restaurantId: string) => {
     queryKey: ['allMenus', restaurantId],
     queryFn: async () => {
       const response = await api.get(`/menu/menus/${restaurantId}`);
-      if (response.data.message === "No menus found") {
+      if (response.data.message === 'No menus found') {
         return [];
       }
       return response.data;
@@ -90,7 +90,7 @@ export const useSetActiveMenu = () => {
 
   return useMutation({
     mutationFn: async ({ restaurantId, menuId }: { restaurantId: string; menuId: string }) => {
-      await api.post("/menu/set-active-menu", { restaurantId, menuId });
+      await api.post('/menu/set-active-menu', { restaurantId, menuId });
       return { restaurantId, menuId };
     },
     onSuccess: ({ menuId }) => {
@@ -107,7 +107,7 @@ export const useCreateMenu = () => {
 
   return useMutation({
     mutationFn: async ({ restaurantId, menuName }: { restaurantId: string; menuName: string }) => {
-      const response = await api.post("/menu/createNewMenu", { restaurantId, menuName });
+      const response = await api.post('/menu/createNewMenu', { restaurantId, menuName });
       return response.data;
     },
     onSuccess: (newMenu: Menu) => {
@@ -140,7 +140,7 @@ export const useAddMenuItem = () => {
       });
 
       const response = await api.post(`/menu/category/${categoryId}/item`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       return { categoryId, item: response.data };
     },
@@ -192,7 +192,7 @@ export const useAddCategory = () => {
 
   return useMutation({
     mutationFn: async (category: Partial<Category>) => {
-      const response = await api.post("/menu/category", category);
+      const response = await api.post('/menu/category', category);
       return response.data;
     },
     onSuccess: (newCategory: Category) => {
@@ -208,7 +208,13 @@ export const useEditCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ categoryId, category }: { categoryId: string; category: Partial<Category> }) => {
+    mutationFn: async ({
+      categoryId,
+      category,
+    }: {
+      categoryId: string;
+      category: Partial<Category>;
+    }) => {
       const response = await api.put(`/menu/category/${categoryId}`, category);
       return { categoryId, category: response.data };
     },
@@ -260,8 +266,8 @@ export const useAddBanner = () => {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post("/menu/banner", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await api.post('/menu/banner', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       return response.data;
     },

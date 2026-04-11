@@ -57,8 +57,9 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
             <span
               className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium uppercase"
               style={{
-                background: member.status === 'invited' ? 'rgba(245,158,11,0.15)' : 'rgba(107,114,128,0.15)',
-                color:      member.status === 'invited' ? '#f59e0b' : '#6b7280',
+                background:
+                  member.status === 'invited' ? 'rgba(245,158,11,0.15)' : 'rgba(107,114,128,0.15)',
+                color: member.status === 'invited' ? '#f59e0b' : '#6b7280',
               }}
             >
               {member.status}
@@ -74,7 +75,9 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
           <AppBadge key={a} app={a} size="xs" showLabel={false} />
         ))}
         {member.apps.length > 4 && (
-          <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>+{member.apps.length - 4}</span>
+          <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+            +{member.apps.length - 4}
+          </span>
         )}
       </div>
       <button

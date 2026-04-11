@@ -3,7 +3,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useStaff } from '../staff/useStaff';
 import { useSubmitTimeOff } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Textarea, Select, Breadcrumbs, useIsMobile } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Label,
+  Input,
+  Textarea,
+  Select,
+  Breadcrumbs,
+  useIsMobile,
+} from '../../shared/components/ui';
 
 const TYPES = ['Vacation', 'Sick', 'Personal', 'Bereavement', 'Unpaid'] as const;
 
@@ -38,7 +48,7 @@ const TimeOffNew: React.FC = () => {
           nav('/time-off');
         },
         onError: () => toast.error('Failed to submit'),
-      },
+      }
     );
   };
 
@@ -53,17 +63,28 @@ const TimeOffNew: React.FC = () => {
             <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
               <option value={0}>Select employee</option>
               {(staff ?? []).map((s) => (
-                <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.role})
+                </option>
               ))}
             </Select>
           </div>
           <div>
             <Label>Type</Label>
-            <Select value={type} onChange={(e) => setType(e.target.value as (typeof TYPES)[number])}>
-              {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+            <Select
+              value={type}
+              onChange={(e) => setType(e.target.value as (typeof TYPES)[number])}
+            >
+              {TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </Select>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}
+          >
             <div>
               <Label>Start date</Label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -75,10 +96,18 @@ const TimeOffNew: React.FC = () => {
           </div>
           <div>
             <Label>Reason</Label>
-            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Brief reason for request" />
+            <Textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Brief reason for request"
+            />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <Link to="/time-off"><Button type="button" variant="ghost">Cancel</Button></Link>
+            <Link to="/time-off">
+              <Button type="button" variant="ghost">
+                Cancel
+              </Button>
+            </Link>
             <Button type="submit" variant="primary" disabled={submit.isPending}>
               {submit.isPending ? 'Submitting...' : 'Submit request'}
             </Button>

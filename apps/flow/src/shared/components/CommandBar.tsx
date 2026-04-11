@@ -32,8 +32,14 @@ interface CommandItem {
 
 export const CommandBar: React.FC = () => {
   const navigate = useNavigate();
-  const { tasks, projects, commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
-    useFlowStore();
+  const {
+    tasks,
+    projects,
+    commandBarOpen,
+    setCommandBarOpen,
+    setQuickCreateOpen,
+    activeWorkspaceId,
+  } = useFlowStore();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,20 +54,100 @@ export const CommandBar: React.FC = () => {
 
   const items = useMemo<CommandItem[]>(() => {
     const navItems: CommandItem[] = [
-      { id: 'nav-inbox', label: 'Go to Inbox', icon: Inbox, action: () => navigate('/inbox'), group: 'nav', hint: 'G I' },
-      { id: 'nav-my', label: 'My tasks', icon: ListTodo, action: () => navigate('/my-issues'), group: 'nav', hint: 'G M' },
-      { id: 'nav-dash', label: 'Workspace Dashboard', icon: LayoutGrid, action: () => navigate(`/w/${activeWorkspaceId}`), group: 'nav' },
-      { id: 'nav-cal', label: 'Calendar', icon: Calendar, action: () => navigate('/calendar'), group: 'nav' },
-      { id: 'nav-timeline', label: 'Timeline', icon: Timer, action: () => navigate('/timeline'), group: 'nav' },
-      { id: 'nav-cycles', label: 'Cycles', icon: Timer, action: () => navigate('/cycles'), group: 'nav' },
-      { id: 'nav-milestones', label: 'Milestones', icon: Milestone, action: () => navigate('/milestones'), group: 'nav' },
-      { id: 'nav-roadmap', label: 'Roadmap', icon: Map, action: () => navigate('/roadmap'), group: 'nav' },
-      { id: 'nav-insights', label: 'Insights', icon: BarChart3, action: () => navigate('/insights'), group: 'nav' },
+      {
+        id: 'nav-inbox',
+        label: 'Go to Inbox',
+        icon: Inbox,
+        action: () => navigate('/inbox'),
+        group: 'nav',
+        hint: 'G I',
+      },
+      {
+        id: 'nav-my',
+        label: 'My tasks',
+        icon: ListTodo,
+        action: () => navigate('/my-issues'),
+        group: 'nav',
+        hint: 'G M',
+      },
+      {
+        id: 'nav-dash',
+        label: 'Workspace Dashboard',
+        icon: LayoutGrid,
+        action: () => navigate(`/w/${activeWorkspaceId}`),
+        group: 'nav',
+      },
+      {
+        id: 'nav-cal',
+        label: 'Calendar',
+        icon: Calendar,
+        action: () => navigate('/calendar'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-timeline',
+        label: 'Timeline',
+        icon: Timer,
+        action: () => navigate('/timeline'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-cycles',
+        label: 'Cycles',
+        icon: Timer,
+        action: () => navigate('/cycles'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-milestones',
+        label: 'Milestones',
+        icon: Milestone,
+        action: () => navigate('/milestones'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-roadmap',
+        label: 'Roadmap',
+        icon: Map,
+        action: () => navigate('/roadmap'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-insights',
+        label: 'Insights',
+        icon: BarChart3,
+        action: () => navigate('/insights'),
+        group: 'nav',
+      },
       { id: 'nav-team', label: 'Team', icon: Users, action: () => navigate('/team'), group: 'nav' },
-      { id: 'nav-triage', label: 'Triage', icon: Eye, action: () => navigate('/triage'), group: 'nav' },
-      { id: 'nav-archive', label: 'Archive', icon: Archive, action: () => navigate('/archive'), group: 'nav' },
-      { id: 'nav-views', label: 'Views', icon: Eye, action: () => navigate('/views'), group: 'nav' },
-      { id: 'nav-settings', label: 'Settings', icon: Settings, action: () => navigate('/settings'), group: 'nav' },
+      {
+        id: 'nav-triage',
+        label: 'Triage',
+        icon: Eye,
+        action: () => navigate('/triage'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-archive',
+        label: 'Archive',
+        icon: Archive,
+        action: () => navigate('/archive'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-views',
+        label: 'Views',
+        icon: Eye,
+        action: () => navigate('/views'),
+        group: 'nav',
+      },
+      {
+        id: 'nav-settings',
+        label: 'Settings',
+        icon: Settings,
+        action: () => navigate('/settings'),
+        group: 'nav',
+      },
     ];
     const actionItems: CommandItem[] = [
       {

@@ -11,10 +11,7 @@ function getWindowDimensions() {
   };
 }
 
-function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): T {
+function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T {
   let inThrottle: boolean;
   return ((...args: any[]) => {
     if (!inThrottle) {

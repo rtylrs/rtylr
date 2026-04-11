@@ -129,8 +129,7 @@ const DemoPage = (): JSX.Element => {
             <div className={styles.formWrapper}>
               <h1 className={styles.title}>Book a Rtylr demo</h1>
               <p className={styles.subtitle}>
-                New to Rtylr? Schedule a 1:1 session with an expert from our
-                team to learn more.
+                New to Rtylr? Schedule a 1:1 session with an expert from our team to learn more.
               </p>
 
               <form onSubmit={handleSubmit} className={styles.form}>
@@ -140,9 +139,7 @@ const DemoPage = (): JSX.Element => {
                     label="WORK EMAIL"
                     placeholder="Your work email"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     error={!!errors.email}
                     helperText={errors.email}
                     required
@@ -156,9 +153,7 @@ const DemoPage = (): JSX.Element => {
                     placeholder="Select your country"
                     options={countryOptions}
                     value={formData.country}
-                    onChange={(value) =>
-                      setFormData({ ...formData, country: value })
-                    }
+                    onChange={(value) => setFormData({ ...formData, country: value })}
                     error={!!errors.country}
                     helperText={errors.country}
                     required
@@ -172,9 +167,7 @@ const DemoPage = (): JSX.Element => {
                     placeholder="Select reason"
                     options={reasonOptions}
                     value={formData.reason}
-                    onChange={(value) =>
-                      setFormData({ ...formData, reason: value })
-                    }
+                    onChange={(value) => setFormData({ ...formData, reason: value })}
                     error={!!errors.reason}
                     helperText={errors.reason}
                     required
@@ -188,9 +181,7 @@ const DemoPage = (): JSX.Element => {
                     placeholder="Select company size"
                     options={companySizeOptions}
                     value={formData.companySize}
-                    onChange={(value) =>
-                      setFormData({ ...formData, companySize: value })
-                    }
+                    onChange={(value) => setFormData({ ...formData, companySize: value })}
                     error={!!errors.companySize}
                     helperText={errors.companySize}
                     required
@@ -200,11 +191,7 @@ const DemoPage = (): JSX.Element => {
 
                 <p className={styles.privacyText}>
                   By submitting this form, you agree to our{' '}
-                  <a
-                    href="/legal/privacy-policy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
                     privacy policy
                   </a>{' '}
                   and consent to receiving marketing communications from Rtylr.

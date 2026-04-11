@@ -29,10 +29,26 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
         return;
       }
       if (isTyping()) return;
-      if (e.key === '/') { e.preventDefault(); setPaletteOpen(true); return; }
-      if (e.key === 'n' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); navigate('/customers/new'); return; }
-      if (e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); navigate('/segments'); return; }
-      if (e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); navigate('/campaigns'); return; }
+      if (e.key === '/') {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        navigate('/customers/new');
+        return;
+      }
+      if (e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        navigate('/segments');
+        return;
+      }
+      if (e.shiftKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        navigate('/campaigns');
+        return;
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);

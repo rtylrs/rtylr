@@ -33,11 +33,15 @@ const Chat: React.FC = () => {
     setIsTyping(true);
 
     setTimeout(() => {
-      setMessages((p) => [...p, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Caret AI is coming soon. When ready, I will be able to answer questions about your revenue, inventory, staff, customers, and more by querying your live business data across all rtylr apps.',
-      }]);
+      setMessages((p) => [
+        ...p,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content:
+            'Caret AI is coming soon. When ready, I will be able to answer questions about your revenue, inventory, staff, customers, and more by querying your live business data across all rtylr apps.',
+        },
+      ]);
       setIsTyping(false);
     }, 1500);
   };
@@ -65,7 +69,10 @@ const Chat: React.FC = () => {
               <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--hub-text)' }}>
                 Chat with Caret
               </h1>
-              <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--hub-text-muted)' }}>
+              <p
+                className="text-sm leading-relaxed mb-8"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
                 Your AI assistant with access to all your business data.
               </p>
 
@@ -140,7 +147,10 @@ const Chat: React.FC = () => {
                 >
                   <Sparkles size={14} style={{ color: '#8b5cf6' }} />
                 </div>
-                <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+                <div
+                  className="flex items-center gap-1.5 px-4 py-3 rounded-2xl"
+                  style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+                >
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={i}
@@ -161,7 +171,10 @@ const Chat: React.FC = () => {
       {/* Input bar */}
       <div className="px-6 pb-6 pt-2">
         <form
-          onSubmit={(e) => { e.preventDefault(); send(input); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(input);
+          }}
           className="max-w-2xl mx-auto relative"
         >
           <input
@@ -174,8 +187,12 @@ const Chat: React.FC = () => {
               border: '1px solid var(--hub-border)',
               color: 'var(--hub-text)',
             }}
-            onFocus={(e) => { (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)'; }}
-            onBlur={(e) => { (e.target as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+            onFocus={(e) => {
+              (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+            }}
+            onBlur={(e) => {
+              (e.target as HTMLElement).style.borderColor = 'var(--hub-border)';
+            }}
           />
           <button
             type="submit"

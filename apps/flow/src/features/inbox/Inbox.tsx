@@ -31,11 +31,10 @@ interface Notification {
   taskTitle: string;
 }
 
-
 const TYPE_ICONS: Record<Notification['type'], React.ReactNode> = {
-  assigned:      <CheckCircle2 size={14} style={{ color: ACCENT }} />,
-  mention:       <AtSign size={14} style={{ color: '#f59e0b' }} />,
-  comment:       <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
+  assigned: <CheckCircle2 size={14} style={{ color: ACCENT }} />,
+  mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
+  comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
   status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
 };
 
@@ -93,25 +92,17 @@ const NotificationRow: React.FC<{
           <span
             className="text-[12px] font-semibold"
             style={{
-              color: notification.read
-                ? 'var(--flow-text-muted)'
-                : 'var(--flow-text)',
+              color: notification.read ? 'var(--flow-text-muted)' : 'var(--flow-text)',
             }}
           >
             {notification.title}
           </span>
-          <span
-            className="text-[11px] ml-auto shrink-0"
-            style={{ color: 'var(--flow-text-dim)' }}
-          >
+          <span className="text-[11px] ml-auto shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
             {formatTimestamp(notification.timestamp)}
           </span>
         </div>
 
-        <p
-          className="text-[12px] mb-1"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
+        <p className="text-[12px] mb-1" style={{ color: 'var(--flow-text-muted)' }}>
           {notification.description}
         </p>
 
@@ -126,10 +117,7 @@ const NotificationRow: React.FC<{
           <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
             ·
           </span>
-          <span
-            className="text-[11px] truncate"
-            style={{ color: 'var(--flow-text-dim)' }}
-          >
+          <span className="text-[11px] truncate" style={{ color: 'var(--flow-text-dim)' }}>
             {notification.taskTitle}
           </span>
         </div>
@@ -167,10 +155,7 @@ const Inbox: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
-          <h1
-            className="text-[18px] font-bold"
-            style={{ color: 'var(--flow-text)' }}
-          >
+          <h1 className="text-[18px] font-bold" style={{ color: 'var(--flow-text)' }}>
             Inbox
           </h1>
           {unreadCount > 0 && (
@@ -207,10 +192,8 @@ const Inbox: React.FC = () => {
             onClick={() => setActiveFilter(id)}
             className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
             style={{
-              background:
-                activeFilter === id ? `${ACCENT}18` : 'transparent',
-              color:
-                activeFilter === id ? ACCENT : 'var(--flow-text-muted)',
+              background: activeFilter === id ? `${ACCENT}18` : 'transparent',
+              color: activeFilter === id ? ACCENT : 'var(--flow-text-muted)',
             }}
           >
             {label}

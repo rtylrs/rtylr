@@ -64,7 +64,7 @@ export const useLayoutPresetsStore = create<LayoutPresetsState>()(
       deletePreset: (id) => {
         set((s) => {
           const remaining = s.presets.filter((p) => p.id !== id);
-          const newActive = s.activePresetId === id ? (remaining[0]?.id ?? null) : s.activePresetId;
+          const newActive = s.activePresetId === id ? remaining[0]?.id ?? null : s.activePresetId;
           const activePreset = remaining.find((p) => p.id === newActive);
           return {
             presets: remaining,

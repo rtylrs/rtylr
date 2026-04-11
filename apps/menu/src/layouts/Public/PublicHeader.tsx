@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  FaBars,
-  FaChevronDown,
-  FaSignOutAlt,
-  FaTimes,
-} from 'react-icons/fa';
+import { FaBars, FaChevronDown, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@voxire/components';
@@ -13,8 +8,7 @@ import { useWindowDimensions } from '@voxire/utils';
 import { selectLanguage } from '../../shared/services/i18next';
 import { getCookie } from '../../shared/lib/cookies';
 
-interface LinkWithColorProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface LinkWithColorProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   color?: string;
   to: string;
 }
@@ -297,9 +291,7 @@ const Header: React.FC = () => {
             <p>Login</p>
           </Button>
 
-          <Button onClick={handleClick}>
-            {token ? 'Dashboard' : 'Register Now'}
-          </Button>
+          <Button onClick={handleClick}>{token ? 'Dashboard' : 'Register Now'}</Button>
         </div>
       )}
     </header>

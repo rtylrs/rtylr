@@ -27,7 +27,10 @@ export interface Invoice {
   pdfUrl?: string;
 }
 
-const PLAN_LIMITS: Record<string, { seats: number; orders: number; apiCalls: number; storageGb: number }> = {
+const PLAN_LIMITS: Record<
+  string,
+  { seats: number; orders: number; apiCalls: number; storageGb: number }
+> = {
   free: { seats: 5, orders: 500, apiCalls: 10000, storageGb: 1 },
   pro: { seats: 20, orders: 5000, apiCalls: 100000, storageGb: 10 },
   scale: { seats: 999, orders: 999999, apiCalls: 999999, storageGb: 100 },

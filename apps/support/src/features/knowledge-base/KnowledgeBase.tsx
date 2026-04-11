@@ -56,11 +56,17 @@ const KnowledgeBase: React.FC = () => {
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="h-9 px-3 rounded-lg text-sm outline-none"
-          style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+          style={{
+            background: 'var(--hub-input-bg)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text)',
+          }}
         >
           <option value="">All categories</option>
           {categoryList.map((cat: any) => (
-            <option key={cat.id || cat.name} value={cat.name}>{cat.name}</option>
+            <option key={cat.id || cat.name} value={cat.name}>
+              {cat.name}
+            </option>
           ))}
         </select>
       </div>
@@ -68,7 +74,11 @@ const KnowledgeBase: React.FC = () => {
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-32 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+            <div
+              key={i}
+              className="h-32 rounded-xl animate-pulse"
+              style={{ background: 'var(--hub-hover)' }}
+            />
           ))}
         </div>
       )}
@@ -76,7 +86,11 @@ const KnowledgeBase: React.FC = () => {
       {isError && (
         <div
           className="flex items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           Failed to load articles. Please try again.
         </div>
@@ -85,7 +99,11 @@ const KnowledgeBase: React.FC = () => {
       {!isLoading && !isError && articles.length === 0 && (
         <div
           className="flex flex-col items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           <BookOpen size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
           <p>No articles found</p>
@@ -98,18 +116,18 @@ const KnowledgeBase: React.FC = () => {
       {!isLoading && !isError && articles.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {articles.map((article: any) => (
-            <Link
-              key={article.id}
-              to={`/knowledge/${article.id}/edit`}
-              className="no-underline"
-            >
+            <Link key={article.id} to={`/knowledge/${article.id}/edit`} className="no-underline">
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-xl p-4 transition-colors cursor-pointer"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-card)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-card)';
+                }}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <Folder size={12} style={{ color: '#4583C4' }} />

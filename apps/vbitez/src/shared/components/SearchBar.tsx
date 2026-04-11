@@ -27,7 +27,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const startVoice = () => {
     // Web Speech API stub: does not throw if unavailable (Tauri webviews may not expose it)
     const SpeechRecognition =
-      (typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)) || null;
+      (typeof window !== 'undefined' &&
+        ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)) ||
+      null;
     if (!SpeechRecognition) {
       setListening(false);
       return;
@@ -68,7 +70,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
           type="button"
           onClick={startVoice}
           className={`absolute right-2 w-8 h-8 flex items-center justify-center rounded-lg transition ${
-            listening ? 'bg-destructive text-white animate-pulse' : 'text-pos-muted hover:bg-white/10'
+            listening
+              ? 'bg-destructive text-white animate-pulse'
+              : 'text-pos-muted hover:bg-white/10'
           }`}
           aria-label="Voice search"
           title="Voice search"

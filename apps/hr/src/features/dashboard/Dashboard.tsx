@@ -19,7 +19,11 @@ import {
 } from 'lucide-react';
 import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
-import { useExpiringDocuments, useOvertimeAlerts, useEmployeeProfile } from '../../shared/hooks/useHrExtras';
+import {
+  useExpiringDocuments,
+  useOvertimeAlerts,
+  useEmployeeProfile,
+} from '../../shared/hooks/useHrExtras';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
 import { Card, StatCard, useIsMobile } from '../../shared/components/ui';
@@ -34,13 +38,18 @@ const defaultStats = {
 };
 
 const quickActions = [
-  { label: 'Add Staff Member', icon: UserPlus,    color: ACCENT,    bg: 'rgba(139,92,246,0.12)'  },
-  { label: 'Schedule Shift',   icon: CalendarPlus, color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  { label: 'Run Payroll',      icon: Play,         color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
+  { label: 'Add Staff Member', icon: UserPlus, color: ACCENT, bg: 'rgba(139,92,246,0.12)' },
+  { label: 'Schedule Shift', icon: CalendarPlus, color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+  { label: 'Run Payroll', icon: Play, color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
 ];
 
 function getInitials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 const container = {
@@ -49,7 +58,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 12 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
 const Dashboard: React.FC = () => {
@@ -70,7 +79,11 @@ const Dashboard: React.FC = () => {
     monthlyPayroll: dashboard?.monthlyPayroll ?? defaultStats.monthlyPayroll,
   };
   const recentActivity: any[] = dashboard?.recentActivity || [];
-  const todayAtGlance = dashboard?.todayAtGlance || { shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 };
+  const todayAtGlance = dashboard?.todayAtGlance || {
+    shiftsScheduled: 0,
+    newApplications: 0,
+    pendingApprovals: 0,
+  };
 
   const stats = [
     {
@@ -84,7 +97,10 @@ const Dashboard: React.FC = () => {
     {
       label: 'On Shift Today',
       value: loading ? '…' : String(dashData.onShiftToday),
-      change: dashData.totalStaff > 0 ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}% of team` : '-',
+      change:
+        dashData.totalStaff > 0
+          ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}% of team`
+          : '-',
       trend: 'neutral',
       icon: Clock,
       color: '#10b981',
@@ -108,10 +124,20 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '16px',
+        }}
+      >
         {stats.map((s) => (
           <motion.div
             key={s.label}
@@ -127,7 +153,9 @@ const Dashboard: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)', fontWeight: 500 }}>{s.label}</span>
+              <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)', fontWeight: 500 }}>
+                {s.label}
+              </span>
               <span
                 style={{
                   display: 'flex',
@@ -144,8 +172,32 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
             <div>
-              <p style={{ fontSize: '26px', fontWeight: 700, color: 'var(--hr-text)', margin: 0, lineHeight: 1.1 }}>{s.value}</p>
-              <p style={{ fontSize: '11px', color: s.trend === 'up' ? '#10b981' : s.trend === 'down' ? '#ef4444' : 'var(--hr-text-muted)', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <p
+                style={{
+                  fontSize: '26px',
+                  fontWeight: 700,
+                  color: 'var(--hr-text)',
+                  margin: 0,
+                  lineHeight: 1.1,
+                }}
+              >
+                {s.value}
+              </p>
+              <p
+                style={{
+                  fontSize: '11px',
+                  color:
+                    s.trend === 'up'
+                      ? '#10b981'
+                      : s.trend === 'down'
+                      ? '#ef4444'
+                      : 'var(--hr-text-muted)',
+                  margin: '4px 0 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                }}
+              >
                 {s.trend === 'up' && <TrendingUp size={11} />}
                 {s.change}
               </p>
@@ -155,8 +207,13 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Bottom grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px', gap: '16px' }}>
-
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px',
+          gap: '16px',
+        }}
+      >
         {/* Recent activity */}
         <motion.div
           variants={item}
@@ -167,9 +224,30 @@ const Dashboard: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>Recent Activity</h2>
-            <span style={{ fontSize: '11px', color: ACCENT, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <div
+            style={{
+              padding: '16px 20px',
+              borderBottom: '1px solid var(--hr-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              flexWrap: 'wrap',
+            }}
+          >
+            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+              Recent Activity
+            </h2>
+            <span
+              style={{
+                fontSize: '11px',
+                color: ACCENT,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+              }}
+            >
               View all <ArrowUpRight size={11} />
             </span>
           </div>
@@ -183,7 +261,8 @@ const Dashboard: React.FC = () => {
                   flexDirection: isMobile ? 'column' : 'row',
                   gap: '12px',
                   padding: '12px 20px',
-                  borderBottom: i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
+                  borderBottom:
+                    i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
                 }}
               >
                 {/* Avatar */}
@@ -205,10 +284,29 @@ const Dashboard: React.FC = () => {
                   {getInitials(a.name)}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>{a.name}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--hr-text-muted)' }}>{a.role}</p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--hr-text)',
+                    }}
+                  >
+                    {a.name}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--hr-text-muted)' }}>
+                    {a.role}
+                  </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexShrink: 0,
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <span
                     style={{
                       display: 'flex',
@@ -240,7 +338,9 @@ const Dashboard: React.FC = () => {
           }}
         >
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>Quick Actions</h2>
+            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+              Quick Actions
+            </h2>
           </div>
           <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {quickActions.map((a) => (
@@ -268,16 +368,54 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Summary */}
-          <div style={{ margin: '0 12px 12px', padding: '14px 16px', borderRadius: '10px', background: 'var(--hr-hover)', border: '1px solid var(--hr-border)' }}>
-            <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--hr-text-dim)' }}>Today at a Glance</p>
+          <div
+            style={{
+              margin: '0 12px 12px',
+              padding: '14px 16px',
+              borderRadius: '10px',
+              background: 'var(--hr-hover)',
+              border: '1px solid var(--hr-border)',
+            }}
+          >
+            <p
+              style={{
+                margin: '0 0 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: 'var(--hr-text-dim)',
+              }}
+            >
+              Today at a Glance
+            </p>
             {[
-              { label: 'Shifts scheduled', value: loading ? '…' : String(todayAtGlance.shiftsScheduled) },
-              { label: 'New applications', value: loading ? '…' : String(todayAtGlance.newApplications) },
-              { label: 'Pending approvals', value: loading ? '…' : String(todayAtGlance.pendingApprovals) },
+              {
+                label: 'Shifts scheduled',
+                value: loading ? '…' : String(todayAtGlance.shiftsScheduled),
+              },
+              {
+                label: 'New applications',
+                value: loading ? '…' : String(todayAtGlance.newApplications),
+              },
+              {
+                label: 'Pending approvals',
+                value: loading ? '…' : String(todayAtGlance.pendingApprovals),
+              },
             ].map((row) => (
-              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+              <div
+                key={row.label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '6px',
+                }}
+              >
                 <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)' }}>{row.label}</span>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>{row.value}</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>
+                  {row.value}
+                </span>
               </div>
             ))}
           </div>
@@ -285,31 +423,87 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* HR metrics dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-        <StatCard label="Headcount" value={staff.length} sub="Total active" icon={<Users size={14} />} />
-        <StatCard label="Avg tenure" value={`${avgTenureYears} yrs`} sub="Across all staff" icon={<Clock size={14} />} color="#10b981" />
-        <StatCard label="Turnover" value={`${turnoverRate}%`} sub="Last 12 months" icon={<TrendingUp size={14} />} color="#f59e0b" />
-        <StatCard label="Open positions" value={dashboard?.openPositions ?? 0} sub="Being filled" icon={<Briefcase size={14} />} color="#ef4444" />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 16,
+        }}
+      >
+        <StatCard
+          label="Headcount"
+          value={staff.length}
+          sub="Total active"
+          icon={<Users size={14} />}
+        />
+        <StatCard
+          label="Avg tenure"
+          value={`${avgTenureYears} yrs`}
+          sub="Across all staff"
+          icon={<Clock size={14} />}
+          color="#10b981"
+        />
+        <StatCard
+          label="Turnover"
+          value={`${turnoverRate}%`}
+          sub="Last 12 months"
+          icon={<TrendingUp size={14} />}
+          color="#f59e0b"
+        />
+        <StatCard
+          label="Open positions"
+          value={dashboard?.openPositions ?? 0}
+          sub="Being filled"
+          icon={<Briefcase size={14} />}
+          color="#ef4444"
+        />
       </div>
 
       {/* Widgets row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 16,
+        }}
+      >
         <BirthdayWidget />
         <AnniversaryWidget />
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ padding: 6, borderRadius: 8, background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+            <span
+              style={{
+                padding: 6,
+                borderRadius: 8,
+                background: 'rgba(16,185,129,0.15)',
+                color: '#10b981',
+              }}
+            >
               <Sparkles size={14} />
             </span>
-            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Recent hires</h3>
+            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+              Recent hires
+            </h3>
           </div>
           {recentHires.length === 0 ? (
             <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>None yet.</p>
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
               {recentHires.map((s) => (
                 <li key={s.id} style={{ fontSize: 12 }}>
-                  <Link to={`/staff/${s.id}`} style={{ textDecoration: 'none', color: 'var(--hr-text)' }}>
+                  <Link
+                    to={`/staff/${s.id}`}
+                    style={{ textDecoration: 'none', color: 'var(--hr-text)' }}
+                  >
                     <div style={{ fontWeight: 600 }}>{s.name}</div>
                     <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{s.role}</div>
                   </Link>
@@ -322,9 +516,17 @@ const Dashboard: React.FC = () => {
 
       {/* Alerts row */}
       {(expiring.length > 0 || overtimeAlerts.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 16,
+          }}
+        >
           {expiring.length > 0 && (
-            <Card style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }}>
+            <Card
+              style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
                 <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
@@ -337,10 +539,14 @@ const Dashboard: React.FC = () => {
             </Card>
           )}
           {overtimeAlerts.length > 0 && (
-            <Card style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.06)' }}>
+            <Card
+              style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.06)' }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Timer size={14} style={{ color: '#ef4444' }} />
-                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>Overtime alerts</h3>
+                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                  Overtime alerts
+                </h3>
               </div>
               <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
                 {overtimeAlerts.length} employees exceeded weekly hours.

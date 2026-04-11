@@ -55,9 +55,9 @@ export function useUpdateCycle() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ApiCycle> }) => {
       if (isFlowLocal()) {
-        const cycles = useFlowStore.getState().cycles.map((c) =>
-          c.id === id ? { ...c, ...data } : c
-        );
+        const cycles = useFlowStore
+          .getState()
+          .cycles.map((c) => (c.id === id ? { ...c, ...data } : c));
         useFlowStore.setState({ cycles });
         return Promise.resolve();
       }

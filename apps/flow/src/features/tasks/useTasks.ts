@@ -6,7 +6,11 @@ import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import { isTaskMine } from '../../shared/lib/currentUser';
 import { useFlowStore, type Task } from '../../shared/stores/flowStore';
 
-export function useTasks(params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) {
+export function useTasks(params: {
+  projectId?: string;
+  status?: ApiTask['status'];
+  assigneeId?: string;
+}) {
   const tasks = useFlowStore((s) => s.tasks);
   const localList = useMemo(() => {
     let list = tasks.filter((t) => !t.archived);

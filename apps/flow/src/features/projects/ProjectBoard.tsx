@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  Plus,
-  List,
-  LayoutGrid,
-  Activity,
-  Settings as SettingsIcon,
-} from 'lucide-react';
+import { Plus, List, LayoutGrid, Activity, Settings as SettingsIcon } from 'lucide-react';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import TaskCard from '../../shared/components/TaskCard';
@@ -141,23 +135,13 @@ const ProjectBoard: React.FC = () => {
                 onDrop={(e) => handleDrop(e, col.id)}
                 className="flex w-[min(260px,calc(100vw-2rem))] min-w-[min(260px,calc(100vw-2rem))] flex-col rounded-lg p-2 sm:w-[260px] sm:min-w-[260px]"
                 style={{
-                  background:
-                    dragOver === col.id ? col.bgColor : 'transparent',
-                  border:
-                    dragOver === col.id
-                      ? `1px dashed ${col.color}`
-                      : '1px solid transparent',
+                  background: dragOver === col.id ? col.bgColor : 'transparent',
+                  border: dragOver === col.id ? `1px dashed ${col.color}` : '1px solid transparent',
                 }}
               >
                 <div className="flex items-center gap-2 px-2 py-2 mb-2">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ background: col.color }}
-                  />
-                  <span
-                    className="text-[12px] font-semibold flex-1"
-                    style={{ color: col.color }}
-                  >
+                  <span className="h-2 w-2 rounded-full" style={{ background: col.color }} />
+                  <span className="text-[12px] font-semibold flex-1" style={{ color: col.color }}>
                     {col.label}
                   </span>
                   <span

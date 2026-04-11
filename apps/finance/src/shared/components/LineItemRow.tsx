@@ -45,7 +45,11 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
         />
       </td>
       <td style={{ padding: 8, width: 140 }}>
-        <CurrencyInput value={item.unitPrice} onChange={(v) => onChange({ ...item, unitPrice: v })} disabled={disabled} />
+        <CurrencyInput
+          value={item.unitPrice}
+          onChange={(v) => onChange({ ...item, unitPrice: v })}
+          disabled={disabled}
+        />
       </td>
       <td style={{ padding: 8, width: 90 }}>
         <input
@@ -57,14 +61,29 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
           style={{ ...inputStyle, textAlign: 'right' }}
         />
       </td>
-      <td style={{ padding: 8, width: 120, textAlign: 'right', fontSize: 13, color: 'var(--hub-text)', fontWeight: 600 }}>
+      <td
+        style={{
+          padding: 8,
+          width: 120,
+          textAlign: 'right',
+          fontSize: 13,
+          color: 'var(--hub-text)',
+          fontWeight: 600,
+        }}
+      >
         <MoneyDisplay amount={total} />
       </td>
       <td style={{ padding: 8, width: 32 }}>
         <button
           onClick={onRemove}
           disabled={disabled}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 4 }}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: '#ef4444',
+            padding: 4,
+          }}
           title="Remove line"
         >
           <Trash2 size={14} />

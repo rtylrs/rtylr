@@ -8,13 +8,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:   'bg-primary text-white hover:opacity-90 active:opacity-80',
+        primary: 'bg-primary text-white hover:opacity-90 active:opacity-80',
         secondary: 'bg-secondary text-white hover:opacity-90 active:opacity-80',
-        accent:    'bg-accent text-white hover:opacity-90 active:opacity-80',
-        outline:   'border border-current bg-transparent hover:bg-black/5 active:bg-black/10',
-        ghost:     'bg-transparent hover:bg-black/5 active:bg-black/8',
-        soft:      'bg-primary/10 text-primary hover:bg-primary/15',
-        danger:    'bg-destructive text-white hover:opacity-90',
+        accent: 'bg-accent text-white hover:opacity-90 active:opacity-80',
+        outline: 'border border-current bg-transparent hover:bg-black/5 active:bg-black/10',
+        ghost: 'bg-transparent hover:bg-black/5 active:bg-black/8',
+        soft: 'bg-primary/10 text-primary hover:bg-primary/15',
+        danger: 'bg-destructive text-white hover:opacity-90',
         'dark-outline': 'border border-white/20 text-white bg-transparent hover:bg-white/8',
       },
       size: {
@@ -43,7 +43,22 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, asChild, loading, prefix, suffix, children, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      fullWidth,
+      asChild,
+      loading,
+      prefix,
+      suffix,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp

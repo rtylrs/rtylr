@@ -32,7 +32,10 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, o
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--hub-text)' }}>
+          <h3
+            className="text-sm font-semibold flex items-center gap-2"
+            style={{ color: 'var(--hub-text)' }}
+          >
             <Keyboard size={14} style={{ color: '#f59e0b' }} />
             Keyboard Shortcuts
           </h3>

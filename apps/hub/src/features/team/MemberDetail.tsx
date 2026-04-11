@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Mail, Shield, Clock, UserX } from 'lucide-react';
-import { Avatar, Button } from "../../shared/components/ui";
+import { Avatar, Button } from '../../shared/components/ui';
 import {
   Breadcrumbs,
   RoleBadge,
@@ -11,13 +11,18 @@ import {
   ActivityEntryRow,
   ConfirmDialog,
   EmptyState,
-} from "../../shared/components/hub";
-import { useMember, useDeactivateMember } from "../../shared/hooks/queries/useTeam";
-import { useActivity } from "../../shared/hooks/queries/useActivity";
+} from '../../shared/components/hub';
+import { useMember, useDeactivateMember } from '../../shared/hooks/queries/useTeam';
+import { useActivity } from '../../shared/hooks/queries/useActivity';
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 const MemberDetail: React.FC = () => {
@@ -31,7 +36,9 @@ const MemberDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-3xl">
-        <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>Loading member...</p>
+        <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
+          Loading member...
+        </p>
       </div>
     );
   }
@@ -39,7 +46,6 @@ const MemberDetail: React.FC = () => {
   if (!member) {
     return (
       <div className="max-w-3xl space-y-4">
-        
         <EmptyState
           icon={UserX}
           title="Member not found"
@@ -55,7 +61,6 @@ const MemberDetail: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-4xl">
-
       <div className="flex items-center gap-4">
         <Avatar
           initials={getInitials(member.name)}
@@ -65,52 +70,87 @@ const MemberDetail: React.FC = () => {
         />
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>{member.name}</h1>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+              {member.name}
+            </h1>
             <RoleBadge role={member.role} />
           </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{member.email}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            {member.email}
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl p-4" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--hub-text-dim)' }}>
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div
+            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             <Mail size={11} /> Email
           </div>
-          <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>{member.email}</p>
+          <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+            {member.email}
+          </p>
         </div>
-        <div className="rounded-xl p-4" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--hub-text-dim)' }}>
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div
+            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             <Shield size={11} /> Role
           </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>{member.role}</p>
+          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>
+            {member.role}
+          </p>
         </div>
-        <div className="rounded-xl p-4" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--hub-text-dim)' }}>
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div
+            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+            style={{ color: 'var(--hub-text-dim)' }}
+          >
             <Clock size={11} /> Status
           </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>{member.status}</p>
+          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>
+            {member.status}
+          </p>
         </div>
       </div>
 
       <SettingSection title="App access" description="Apps this member can launch.">
         <div className="flex flex-wrap gap-2">
           {(member.apps ?? []).length === 0 ? (
-            <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>No apps assigned.</p>
+            <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+              No apps assigned.
+            </p>
           ) : (
             (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
           )}
         </div>
       </SettingSection>
 
-      <SettingSection title="Recent activity" description="Recent actions performed by this member.">
+      <SettingSection
+        title="Recent activity"
+        description="Recent actions performed by this member."
+      >
         {memberActivity.length === 0 ? (
           <p className="text-xs text-center py-6" style={{ color: 'var(--hub-text-dim)' }}>
             No recent activity
           </p>
         ) : (
           <div className="-mx-5">
-            {memberActivity.map((a) => <ActivityEntryRow key={a.id} entry={a} />)}
+            {memberActivity.map((a) => (
+              <ActivityEntryRow key={a.id} entry={a} />
+            ))}
           </div>
         )}
       </SettingSection>

@@ -12,9 +12,17 @@ const LoyaltyTiers: React.FC = () => {
       <PageHeader title="Loyalty tiers" subtitle="Configure your tier structure and perks" />
 
       {isLoading ? (
-        <Card><SkeletonList count={4} /></Card>
+        <Card>
+          <SkeletonList count={4} />
+        </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '14px',
+          }}
+        >
           {tiers.map((t) => (
             <div
               key={t.id}
@@ -52,8 +60,25 @@ const LoyaltyTiers: React.FC = () => {
               >
                 <Award size={22} />
               </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: '0 0 4px' }}>{t.name}</h3>
-              <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+              <h3
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: 'var(--hub-text)',
+                  margin: '0 0 4px',
+                }}
+              >
+                {t.name}
+              </h3>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 600,
+                }}
+              >
                 {t.threshold === 0 ? 'Starting tier' : `${t.threshold}+ points`}
               </div>
               <div
@@ -69,9 +94,20 @@ const LoyaltyTiers: React.FC = () => {
               >
                 {t.multiplier}x points multiplier
               </div>
-              <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div
+                style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}
+              >
                 {t.perks.map((p) => (
-                  <div key={p} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  <div
+                    key={p}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '6px',
+                      fontSize: '12px',
+                      color: 'var(--hub-text-muted)',
+                    }}
+                  >
                     <Check size={12} style={{ color: t.color, flexShrink: 0, marginTop: '2px' }} />
                     {p}
                   </div>

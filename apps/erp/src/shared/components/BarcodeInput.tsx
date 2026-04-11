@@ -7,7 +7,11 @@ interface BarcodeInputProps {
   autoFocus?: boolean;
 }
 
-const BarcodeInput: React.FC<BarcodeInputProps> = ({ onScan, placeholder = 'Scan or type barcode…', autoFocus = true }) => {
+const BarcodeInput: React.FC<BarcodeInputProps> = ({
+  onScan,
+  placeholder = 'Scan or type barcode…',
+  autoFocus = true,
+}) => {
   const [value, setValue] = useState('');
   const ref = useRef<HTMLInputElement>(null);
 

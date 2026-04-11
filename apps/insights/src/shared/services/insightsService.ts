@@ -15,8 +15,7 @@ export const insightsService = {
 
   // Customers
   getCustomerAnalytics: () => safe.get('/insights/customers'),
-  getTopCustomers: (params?: { limit?: number }) =>
-    safe.get('/insights/customers/top', { params }),
+  getTopCustomers: (params?: { limit?: number }) => safe.get('/insights/customers/top', { params }),
   getCustomerChurn: () => safe.get('/insights/customers/churn'),
   getCustomerLtv: () => safe.get('/insights/customers/ltv'),
 
@@ -39,8 +38,7 @@ export const insightsService = {
   getHrDashboard: () => safe.get('/hr/dashboard'),
 
   // Financial
-  getProfitLoss: (params?: { start?: string; end?: string }) =>
-    safe.get('/finance/pl', { params }),
+  getProfitLoss: (params?: { start?: string; end?: string }) => safe.get('/finance/pl', { params }),
   getExpenseBreakdown: (params?: { start?: string; end?: string }) =>
     safe.get('/insights/financial/expenses', { params }),
   getInvoiceAging: () => safe.get('/insights/financial/invoice-aging'),
@@ -52,13 +50,18 @@ export const insightsService = {
   generateReport: (templateId: string, params?: Record<string, string>) =>
     safe.post(`/insights/reports/generate/${templateId}`, params),
   exportReport: (templateId: string, format: 'csv' | 'pdf', params?: Record<string, string>) =>
-    safe.post(`/insights/reports/export/${templateId}`, { format, ...params }, { responseType: 'blob' }),
+    safe.post(
+      `/insights/reports/export/${templateId}`,
+      { format, ...params },
+      { responseType: 'blob' }
+    ),
 
   // Settings
   getInsightsSettings: () => safe.get('/insights/settings'),
   updateInsightsSettings: (data: any) => safe.put('/insights/settings', data),
   getScheduledReports: () => safe.get('/insights/settings/scheduled-reports'),
-  updateScheduledReport: (id: string, data: any) => safe.put(`/insights/settings/scheduled-reports/${id}`, data),
+  updateScheduledReport: (id: string, data: any) =>
+    safe.put(`/insights/settings/scheduled-reports/${id}`, data),
   createScheduledReport: (data: any) => safe.post('/insights/settings/scheduled-reports', data),
   deleteScheduledReport: (id: string) => safe.delete(`/insights/settings/scheduled-reports/${id}`),
 };

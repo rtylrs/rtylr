@@ -20,17 +20,17 @@ const ACCENT = '#64C5B9';
 
 const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   urgent: { color: '#ef4444', label: 'Urgent' },
-  high:   { color: '#f97316', label: 'High'   },
-  medium: { color: '#3b82f6', label: 'Medium'  },
-  low:    { color: '#6b7280', label: 'Low'     },
+  high: { color: '#f97316', label: 'High' },
+  medium: { color: '#3b82f6', label: 'Medium' },
+  low: { color: '#6b7280', label: 'Low' },
   no_priority: { color: '#4b5563', label: 'No priority' },
 };
 
 const STATUS_GROUPS: { id: Task['status']; label: string; color: string }[] = [
-  { id: 'todo',        label: 'Todo',        color: '#6b7280' },
+  { id: 'todo', label: 'Todo', color: '#6b7280' },
   { id: 'in_progress', label: 'In Progress', color: '#3b82f6' },
-  { id: 'in_review',   label: 'In Review',   color: '#f59e0b' },
-  { id: 'done',        label: 'Done',        color: '#22c55e' },
+  { id: 'in_review', label: 'In Review', color: '#f59e0b' },
+  { id: 'done', label: 'Done', color: '#22c55e' },
 ];
 
 interface TaskRowProps {
@@ -87,10 +87,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* Title */}
       <span
-        className={cn(
-          'flex-1 text-[13px] font-medium truncate',
-          checked ? 'line-through' : ''
-        )}
+        className={cn('flex-1 text-[13px] font-medium truncate', checked ? 'line-through' : '')}
         style={{ color: checked ? 'var(--flow-text-dim)' : 'var(--flow-text)' }}
       >
         {task.title}
@@ -136,7 +133,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 };
 
 const StatusGroup: React.FC<{
-  group: typeof STATUS_GROUPS[number];
+  group: (typeof STATUS_GROUPS)[number];
   tasks: Task[];
 }> = ({ group, tasks }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -153,20 +150,11 @@ const StatusGroup: React.FC<{
           className={cn('transition-transform', collapsed ? '-rotate-90' : '')}
           style={{ color: 'var(--flow-text-dim)' }}
         />
-        <span
-          className="h-2 w-2 rounded-full"
-          style={{ background: group.color }}
-        />
-        <span
-          className="text-[12px] font-semibold"
-          style={{ color: group.color }}
-        >
+        <span className="h-2 w-2 rounded-full" style={{ background: group.color }} />
+        <span className="text-[12px] font-semibold" style={{ color: group.color }}>
           {group.label}
         </span>
-        <span
-          className="text-[11px] ml-1"
-          style={{ color: 'var(--flow-text-dim)' }}
-        >
+        <span className="text-[11px] ml-1" style={{ color: 'var(--flow-text-dim)' }}>
           {tasks.length}
         </span>
       </button>
@@ -189,7 +177,10 @@ const StatusGroup: React.FC<{
               className="flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors cursor-pointer opacity-50 hover:opacity-100"
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
-              <div className="h-4 w-4 rounded border flex items-center justify-center" style={{ borderColor: 'var(--flow-border)' }}>
+              <div
+                className="h-4 w-4 rounded border flex items-center justify-center"
+                style={{ borderColor: 'var(--flow-border)' }}
+              >
                 <Plus size={10} style={{ color: 'var(--flow-text-dim)' }} />
               </div>
               <span className="text-[13px]" style={{ color: 'var(--flow-text-dim)' }}>
@@ -216,10 +207,7 @@ const ProjectList: React.FC = () => {
   const projectTasks = (apiTasks ?? tasks.filter((t) => t.projectId === projectId)) as Task[];
 
   const projectSections = useMemo(
-    () =>
-      sections
-        .filter((s) => s.projectId === projectId)
-        .sort((a, b) => a.order - b.order),
+    () => sections.filter((s) => s.projectId === projectId).sort((a, b) => a.order - b.order),
     [sections, projectId]
   );
 
@@ -252,14 +240,8 @@ const ProjectList: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div className="flex items-center gap-3">
-          <span
-            className="h-3 w-3 rounded-full"
-            style={{ background: project.color }}
-          />
-          <h1
-            className="text-[15px] font-semibold"
-            style={{ color: 'var(--flow-text)' }}
-          >
+          <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
+          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
             {project.name}
           </h1>
         </div>
@@ -312,40 +294,38 @@ const ProjectList: React.FC = () => {
 
       {/* Sections + status groups */}
       <div className="flex-1 overflow-y-auto">
-        {sectionBlocks ? (
-          sectionBlocks.map((block) => (
-            <div key={block.id} className="mb-4">
-              <div
-                className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider sticky top-0 z-[1]"
-                style={{
-                  background: 'var(--flow-bg)',
-                  borderBottom: '1px solid var(--flow-border)',
-                  color: 'var(--flow-text-muted)',
-                }}
-              >
-                {block.title}
-                <span className="ml-2 font-normal" style={{ color: 'var(--flow-text-dim)' }}>
-                  {block.tasks.length}
-                </span>
+        {sectionBlocks
+          ? sectionBlocks.map((block) => (
+              <div key={block.id} className="mb-4">
+                <div
+                  className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider sticky top-0 z-[1]"
+                  style={{
+                    background: 'var(--flow-bg)',
+                    borderBottom: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text-muted)',
+                  }}
+                >
+                  {block.title}
+                  <span className="ml-2 font-normal" style={{ color: 'var(--flow-text-dim)' }}>
+                    {block.tasks.length}
+                  </span>
+                </div>
+                {STATUS_GROUPS.map((group) => (
+                  <StatusGroup
+                    key={`${block.id}-${group.id}`}
+                    group={group}
+                    tasks={block.tasks.filter((t) => t.status === group.id)}
+                  />
+                ))}
               </div>
-              {STATUS_GROUPS.map((group) => (
-                <StatusGroup
-                  key={`${block.id}-${group.id}`}
-                  group={group}
-                  tasks={block.tasks.filter((t) => t.status === group.id)}
-                />
-              ))}
-            </div>
-          ))
-        ) : (
-          STATUS_GROUPS.map((group) => (
-            <StatusGroup
-              key={group.id}
-              group={group}
-              tasks={projectTasks.filter((t) => t.status === group.id)}
-            />
-          ))
-        )}
+            ))
+          : STATUS_GROUPS.map((group) => (
+              <StatusGroup
+                key={group.id}
+                group={group}
+                tasks={projectTasks.filter((t) => t.status === group.id)}
+              />
+            ))}
       </div>
     </div>
   );

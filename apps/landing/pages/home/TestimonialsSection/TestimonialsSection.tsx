@@ -88,12 +88,8 @@ const TestimonialsSection: React.FC = () => {
                       className={styles.authorImage}
                     />
                     <div className={styles.authorDetails}>
-                      <div className={styles.authorName}>
-                        {testimonial.author}
-                      </div>
-                      <div className={styles.authorRole}>
-                        {testimonial.role}
-                      </div>
+                      <div className={styles.authorName}>{testimonial.author}</div>
+                      <div className={styles.authorRole}>{testimonial.role}</div>
                     </div>
                   </div>
                 </div>
@@ -112,12 +108,8 @@ const TestimonialsSection: React.FC = () => {
                       className={styles.authorImage}
                     />
                     <div className={styles.authorDetails}>
-                      <div className={styles.authorName}>
-                        {testimonial.author}
-                      </div>
-                      <div className={styles.authorRole}>
-                        {testimonial.role}
-                      </div>
+                      <div className={styles.authorName}>{testimonial.author}</div>
+                      <div className={styles.authorRole}>{testimonial.role}</div>
                     </div>
                   </div>
                 </div>

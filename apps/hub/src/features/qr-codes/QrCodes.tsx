@@ -14,7 +14,7 @@ import {
   TableHead,
   TableCell,
   Badge,
-} from "../../shared/components/ui";
+} from '../../shared/components/ui';
 
 const QrCodes: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +53,10 @@ const QrCodes: React.FC = () => {
               <TableRow>
                 <TableCell colSpan={5}>
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'var(--hub-hover)' }}>
+                    <div
+                      className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4"
+                      style={{ background: 'var(--hub-hover)' }}
+                    >
                       <QrCodeIcon size={28} className="text-gray-300" />
                     </div>
                     <p className="text-sm font-medium text-gray-400">No QR codes yet</p>

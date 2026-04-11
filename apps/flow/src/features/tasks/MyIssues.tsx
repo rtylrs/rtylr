@@ -1,6 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { ListTodo, Filter, ArrowUpDown, Sun, CalendarDays, CalendarRange, Layers } from 'lucide-react';
+import {
+  ListTodo,
+  Filter,
+  ArrowUpDown,
+  Sun,
+  CalendarDays,
+  CalendarRange,
+  Layers,
+} from 'lucide-react';
 import { useMyIssues } from './useMyIssues';
 import { Task, STATUS_LABELS, PRIORITY_ORDER } from '../../shared/stores/flowStore';
 import TaskRow from '../../shared/components/TaskRow';
@@ -48,7 +56,8 @@ const MyIssues: React.FC = () => {
         bucket,
       }));
     }
-    if (groupBy === 'none') return [{ label: 'All', icon: null, tasks: sorted, bucket: null as MyTaskBucket | null }];
+    if (groupBy === 'none')
+      return [{ label: 'All', icon: null, tasks: sorted, bucket: null as MyTaskBucket | null }];
     const map: Record<string, Task[]> = {};
     sorted.forEach((t) => {
       let key = 'All';

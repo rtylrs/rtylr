@@ -69,9 +69,7 @@ const MenuCart: React.FC<MenuCartProps> = ({
                     <li key={item.id} className={styles.cart__item}>
                       <div className={styles.cart__itemInfo}>
                         <span className={styles.cart__itemName}>{item.name}</span>
-                        <span className={styles.cart__itemPrice}>
-                          {formatPrice(item.price)}
-                        </span>
+                        <span className={styles.cart__itemPrice}>{formatPrice(item.price)}</span>
                       </div>
                       <div className={styles.cart__itemControls}>
                         <button
@@ -102,10 +100,7 @@ const MenuCart: React.FC<MenuCartProps> = ({
                   <span>Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
-                <button
-                  className={styles.cart__checkoutBtn}
-                  onClick={() => onCheckout(items)}
-                >
+                <button className={styles.cart__checkoutBtn} onClick={() => onCheckout(items)}>
                   Place Order · {formatPrice(subtotal)}
                 </button>
               </div>

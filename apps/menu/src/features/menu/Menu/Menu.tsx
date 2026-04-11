@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
-import { GridLayout, ListLayout, MinimalLayout, MenuCategoryData, BusinessInfo, ChatMessage } from '@voxire/menu';
+import {
+  GridLayout,
+  ListLayout,
+  MinimalLayout,
+  MenuCategoryData,
+  BusinessInfo,
+  ChatMessage,
+} from '@voxire/menu';
 import useAsync from '../../../hooks/useAsync';
 import { menuApi } from '../../../api';
 
@@ -113,7 +120,10 @@ const Menu: React.FC = () => {
         <p className="text-sm text-gray-500">Please try refreshing the page.</p>
         <button
           className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:opacity-90 transition-opacity"
-          onClick={() => { setStatus('loading'); getMenu.main({ id }); }}
+          onClick={() => {
+            setStatus('loading');
+            getMenu.main({ id });
+          }}
         >
           Retry
         </button>

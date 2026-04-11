@@ -32,7 +32,7 @@ const MOCK_BUSINESS: BusinessInfo = {
   hours: 'Mon–Sat 11am–11pm',
   website: 'https://goldenfork.com',
   story:
-    'Founded in 2010, The Golden Fork started as a small corner bistro with a big dream: to serve honest, seasonal food that brings people together. Today we work with over 30 local farms and producers to bring the best of what\'s around to your table.',
+    "Founded in 2010, The Golden Fork started as a small corner bistro with a big dream: to serve honest, seasonal food that brings people together. Today we work with over 30 local farms and producers to bring the best of what's around to your table.",
   socials: {
     instagram: 'thegoldenfork',
     facebook: 'TheGoldenFork',
@@ -55,21 +55,24 @@ const MOCK_BUSINESS: BusinessInfo = {
       id: 'r1',
       author: 'Sarah M.',
       rating: 5,
-      comment: 'Absolutely incredible! The truffle fries alone are worth the trip. Warm atmosphere, attentive staff.',
+      comment:
+        'Absolutely incredible! The truffle fries alone are worth the trip. Warm atmosphere, attentive staff.',
       date: 'March 2025',
     },
     {
       id: 'r2',
       author: 'James K.',
       rating: 4,
-      comment: 'Great food and a lovely setting. The wild mushroom risotto was perfect. Will definitely be back.',
+      comment:
+        'Great food and a lovely setting. The wild mushroom risotto was perfect. Will definitely be back.',
       date: 'February 2025',
     },
     {
       id: 'r3',
       author: 'Priya N.',
       rating: 5,
-      comment: 'Best burger in the city, hands down. The brioche bun is always fresh and the caramelised onions are chef\u2019s kiss.',
+      comment:
+        'Best burger in the city, hands down. The brioche bun is always fresh and the caramelised onions are chef\u2019s kiss.',
       date: 'January 2025',
     },
   ],
@@ -77,7 +80,8 @@ const MOCK_BUSINESS: BusinessInfo = {
     {
       id: 'o1',
       title: 'Happy Hour: 50% Off Drinks',
-      description: 'Every weekday from 4–6pm. All house cocktails, wine, and draft beers half price.',
+      description:
+        'Every weekday from 4–6pm. All house cocktails, wine, and draft beers half price.',
       image: PH(800, 350, 'c8a96e', 'Happy+Hour'),
       badge: 'Daily',
       validUntil: '31 Dec 2025',
@@ -85,7 +89,8 @@ const MOCK_BUSINESS: BusinessInfo = {
     {
       id: 'o2',
       title: 'Sunday Brunch Set',
-      description: '3-course brunch with free-flow mimosas for $45 per person. Reservation required.',
+      description:
+        '3-course brunch with free-flow mimosas for $45 per person. Reservation required.',
       image: PH(800, 350, '2d4a3a', 'Sunday+Brunch'),
       badge: 'Weekends',
       validUntil: '31 Dec 2025',
@@ -313,7 +318,12 @@ const Toggle = ({
   <label className="flex items-center justify-between cursor-pointer py-0.5">
     <span className="text-xs text-gray-600">{label}</span>
     <div className="relative">
-      <input type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <input
+        type="checkbox"
+        className="sr-only peer"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-4" />
     </div>
   </label>
@@ -332,7 +342,13 @@ const DevMenu: React.FC = () => {
   const [cfg, setCfg] = useState<MenuLayoutConfig>({
     ...DEFAULT_LAYOUT_CONFIG,
     pages: { menu: true, about: true, gallery: false, reviews: false, offers: false, book: false },
-    header: { coverHeight: 'md', showLogo: true, showDescription: true, showMeta: true, sticky: true },
+    header: {
+      coverHeight: 'md',
+      showLogo: true,
+      showDescription: true,
+      showMeta: true,
+      sticky: true,
+    },
     nav: { style: 'underline', size: 'md' },
     items: {
       layout: 'grid',
@@ -410,11 +426,31 @@ const DevMenu: React.FC = () => {
             >
               <Section label="Pages">
                 <div className="space-y-1">
-                  <Toggle checked={!!cfg.pages.about} onChange={(v) => patchPages({ about: v })} label="About" />
-                  <Toggle checked={!!cfg.pages.gallery} onChange={(v) => patchPages({ gallery: v })} label="Gallery" />
-                  <Toggle checked={!!cfg.pages.reviews} onChange={(v) => patchPages({ reviews: v })} label="Reviews" />
-                  <Toggle checked={!!cfg.pages.offers} onChange={(v) => patchPages({ offers: v })} label="Offers" />
-                  <Toggle checked={!!cfg.pages.book} onChange={(v) => patchPages({ book: v })} label="Book" />
+                  <Toggle
+                    checked={!!cfg.pages.about}
+                    onChange={(v) => patchPages({ about: v })}
+                    label="About"
+                  />
+                  <Toggle
+                    checked={!!cfg.pages.gallery}
+                    onChange={(v) => patchPages({ gallery: v })}
+                    label="Gallery"
+                  />
+                  <Toggle
+                    checked={!!cfg.pages.reviews}
+                    onChange={(v) => patchPages({ reviews: v })}
+                    label="Reviews"
+                  />
+                  <Toggle
+                    checked={!!cfg.pages.offers}
+                    onChange={(v) => patchPages({ offers: v })}
+                    label="Offers"
+                  />
+                  <Toggle
+                    checked={!!cfg.pages.book}
+                    onChange={(v) => patchPages({ book: v })}
+                    label="Book"
+                  />
                 </div>
               </Section>
 
@@ -423,15 +459,36 @@ const DevMenu: React.FC = () => {
               <Section label="Header">
                 <SubLabel>Cover height</SubLabel>
                 <BtnGroup<CoverHeight>
-                  options={[{ label: 'None', value: 'none' }, { label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
+                  options={[
+                    { label: 'None', value: 'none' },
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
                   value={cfg.header.coverHeight}
                   onChange={(v) => patchHeader({ coverHeight: v })}
                 />
                 <div className="space-y-1 mt-1">
-                  <Toggle checked={cfg.header.sticky} onChange={(v) => patchHeader({ sticky: v })} label="Sticky" />
-                  <Toggle checked={cfg.header.showLogo} onChange={(v) => patchHeader({ showLogo: v })} label="Logo" />
-                  <Toggle checked={cfg.header.showDescription} onChange={(v) => patchHeader({ showDescription: v })} label="Description" />
-                  <Toggle checked={cfg.header.showMeta} onChange={(v) => patchHeader({ showMeta: v })} label="Address / Hours" />
+                  <Toggle
+                    checked={cfg.header.sticky}
+                    onChange={(v) => patchHeader({ sticky: v })}
+                    label="Sticky"
+                  />
+                  <Toggle
+                    checked={cfg.header.showLogo}
+                    onChange={(v) => patchHeader({ showLogo: v })}
+                    label="Logo"
+                  />
+                  <Toggle
+                    checked={cfg.header.showDescription}
+                    onChange={(v) => patchHeader({ showDescription: v })}
+                    label="Description"
+                  />
+                  <Toggle
+                    checked={cfg.header.showMeta}
+                    onChange={(v) => patchHeader({ showMeta: v })}
+                    label="Address / Hours"
+                  />
                 </div>
               </Section>
 
@@ -440,13 +497,21 @@ const DevMenu: React.FC = () => {
               <Section label="Nav Tabs">
                 <SubLabel>Style</SubLabel>
                 <BtnGroup<NavStyle>
-                  options={[{ label: 'Underline', value: 'underline' }, { label: 'Pill', value: 'pill' }, { label: 'Flat', value: 'flat' }]}
+                  options={[
+                    { label: 'Underline', value: 'underline' },
+                    { label: 'Pill', value: 'pill' },
+                    { label: 'Flat', value: 'flat' },
+                  ]}
                   value={cfg.nav.style}
                   onChange={(v) => patchNav({ style: v })}
                 />
                 <SubLabel>Size</SubLabel>
                 <BtnGroup<NavSize>
-                  options={[{ label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
+                  options={[
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
                   value={cfg.nav.size}
                   onChange={(v) => patchNav({ size: v })}
                 />
@@ -457,7 +522,11 @@ const DevMenu: React.FC = () => {
               <Section label="Cards">
                 <SubLabel>Layout</SubLabel>
                 <BtnGroup<ItemLayout>
-                  options={[{ label: 'Grid', value: 'grid' }, { label: 'List', value: 'list' }, { label: 'Minimal', value: 'minimal' }]}
+                  options={[
+                    { label: 'Grid', value: 'grid' },
+                    { label: 'List', value: 'list' },
+                    { label: 'Minimal', value: 'minimal' },
+                  ]}
                   value={cfg.items.layout}
                   onChange={(v) => patchItems({ layout: v })}
                 />
@@ -465,7 +534,11 @@ const DevMenu: React.FC = () => {
                   <>
                     <SubLabel>Columns</SubLabel>
                     <BtnGroup<number>
-                      options={[{ label: '2', value: 2 }, { label: '3', value: 3 }, { label: '4', value: 4 }]}
+                      options={[
+                        { label: '2', value: 2 },
+                        { label: '3', value: 3 },
+                        { label: '4', value: 4 },
+                      ]}
                       value={cfg.items.columns}
                       onChange={(v) => patchItems({ columns: v as 2 | 3 | 4 })}
                     />
@@ -475,13 +548,22 @@ const DevMenu: React.FC = () => {
                   <>
                     <SubLabel>Image position</SubLabel>
                     <BtnGroup<ImagePosition>
-                      options={[{ label: 'Top', value: 'top' }, { label: 'Right', value: 'right' }, { label: 'Left', value: 'left' }, { label: 'None', value: 'none' }]}
+                      options={[
+                        { label: 'Top', value: 'top' },
+                        { label: 'Right', value: 'right' },
+                        { label: 'Left', value: 'left' },
+                        { label: 'None', value: 'none' },
+                      ]}
                       value={cfg.items.imagePosition}
                       onChange={(v) => patchItems({ imagePosition: v })}
                     />
                     <SubLabel>Image size</SubLabel>
                     <BtnGroup<ImageSize>
-                      options={[{ label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
+                      options={[
+                        { label: 'S', value: 'sm' },
+                        { label: 'M', value: 'md' },
+                        { label: 'L', value: 'lg' },
+                      ]}
                       value={cfg.items.imageSize}
                       onChange={(v) => patchItems({ imageSize: v })}
                     />
@@ -489,13 +571,26 @@ const DevMenu: React.FC = () => {
                 )}
                 <SubLabel>Corner radius</SubLabel>
                 <BtnGroup<CardRadius>
-                  options={[{ label: '0', value: 'none' }, { label: 'S', value: 'sm' }, { label: 'M', value: 'md' }, { label: 'L', value: 'lg' }]}
+                  options={[
+                    { label: '0', value: 'none' },
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
                   value={cfg.items.cardRadius}
                   onChange={(v) => patchItems({ cardRadius: v })}
                 />
                 <div className="space-y-1 mt-1">
-                  <Toggle checked={cfg.items.showDescription} onChange={(v) => patchItems({ showDescription: v })} label="Description" />
-                  <Toggle checked={cfg.items.showBadges} onChange={(v) => patchItems({ showBadges: v })} label="Badges" />
+                  <Toggle
+                    checked={cfg.items.showDescription}
+                    onChange={(v) => patchItems({ showDescription: v })}
+                    label="Description"
+                  />
+                  <Toggle
+                    checked={cfg.items.showBadges}
+                    onChange={(v) => patchItems({ showBadges: v })}
+                    label="Badges"
+                  />
                 </div>
               </Section>
 
@@ -506,7 +601,11 @@ const DevMenu: React.FC = () => {
                   {ACCENT_OPTIONS.map((a) => (
                     <button
                       key={a.value}
-                      className={`w-7 h-7 rounded-full transition-all ${accent.value === a.value ? 'ring-2 ring-offset-1 ring-gray-900 scale-110' : 'hover:scale-105'}`}
+                      className={`w-7 h-7 rounded-full transition-all ${
+                        accent.value === a.value
+                          ? 'ring-2 ring-offset-1 ring-gray-900 scale-110'
+                          : 'hover:scale-105'
+                      }`}
                       style={{ background: a.value }}
                       onClick={() => setAccent(a)}
                       title={a.label}
@@ -533,7 +632,9 @@ const DevMenu: React.FC = () => {
           aria-label="Toggle dev toolbar"
         >
           {open ? '✕' : '⚙'}
-          <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-amber-400 text-gray-900 rounded-full px-1 py-0.5 leading-none">DEV</span>
+          <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-amber-400 text-gray-900 rounded-full px-1 py-0.5 leading-none">
+            DEV
+          </span>
         </button>
       </div>
     </div>

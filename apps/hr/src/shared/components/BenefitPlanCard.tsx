@@ -27,10 +27,20 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
         </span>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>{plan.name}</div>
-          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{plan.carrier} • {plan.category}</div>
+          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
+            {plan.carrier} • {plan.category}
+          </div>
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid var(--hr-border)' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 8,
+          borderTop: '1px solid var(--hr-border)',
+        }}
+      >
         <div>
           <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>Monthly</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
@@ -39,10 +49,24 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
         </div>
         <div>
           <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>Enrolled</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>{plan.enrolledCount}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+            {plan.enrolledCount}
+          </div>
         </div>
         {enrolled ? (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 8, background: 'rgba(16,185,129,0.15)', color: '#10b981', fontSize: 11, fontWeight: 600 }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '4px 10px',
+              borderRadius: 8,
+              background: 'rgba(16,185,129,0.15)',
+              color: '#10b981',
+              fontSize: 11,
+              fontWeight: 600,
+            }}
+          >
             <Check size={12} /> Enrolled
           </span>
         ) : (

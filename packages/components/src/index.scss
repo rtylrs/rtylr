@@ -1,12 +1,12 @@
-@use "sass:meta";
+@use 'sass:meta';
 
-@include meta.load-css("./styles/_variables.scss");
+@include meta.load-css('./styles/_variables.scss');
 
-@include meta.load-css("./Button/Button.scss");
-@include meta.load-css("./Input/Input.scss");
-@include meta.load-css("./Modal/Modal.scss");
-@include meta.load-css("./LoadingSpinner/LoadingSpinner.scss");
-@include meta.load-css("./Select/Select.scss");
+@include meta.load-css('./Button/Button.scss');
+@include meta.load-css('./Input/Input.scss');
+@include meta.load-css('./Modal/Modal.scss');
+@include meta.load-css('./LoadingSpinner/LoadingSpinner.scss');
+@include meta.load-css('./Select/Select.scss');
 
 // Icon loading animation
 @keyframes pulse {

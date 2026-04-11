@@ -67,11 +67,21 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>To</label>
-          <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@example.com" style={inputStyle} />
+          <input
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            placeholder="client@example.com"
+            style={inputStyle}
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>CC</label>
-          <input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="optional" style={inputStyle} />
+          <input
+            value={cc}
+            onChange={(e) => setCc(e.target.value)}
+            placeholder="optional"
+            style={inputStyle}
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>Subject</label>

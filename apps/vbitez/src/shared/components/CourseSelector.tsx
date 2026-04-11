@@ -23,9 +23,7 @@ const CourseSelector: React.FC<CourseSelectorProps> = ({ value, onChange }) => (
         type="button"
         onClick={() => onChange(c.id)}
         className={`flex flex-col items-center gap-1 p-2 rounded-lg text-xs font-semibold transition min-h-[4rem] ${
-          value === c.id
-            ? 'bg-pos-text text-pos-bg'
-            : 'bg-white/8 text-pos-text hover:bg-white/14'
+          value === c.id ? 'bg-pos-text text-pos-bg' : 'bg-white/8 text-pos-text hover:bg-white/14'
         }`}
       >
         <span className="text-lg">{c.icon}</span>

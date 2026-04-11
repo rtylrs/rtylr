@@ -58,7 +58,11 @@ const Settings: React.FC = () => {
     return (
       <div className="space-y-4 max-w-2xl">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+          <div
+            key={i}
+            className="h-24 rounded-xl animate-pulse"
+            style={{ background: 'var(--hub-hover)' }}
+          />
         ))}
       </div>
     );
@@ -68,7 +72,11 @@ const Settings: React.FC = () => {
     return (
       <div
         className="flex items-center justify-center py-16 rounded-xl text-sm"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+        style={{
+          background: 'var(--hub-card)',
+          border: '1px solid var(--hub-border)',
+          color: 'var(--hub-text-muted)',
+        }}
       >
         Failed to load settings. Please try again.
       </div>
@@ -129,7 +137,10 @@ const Settings: React.FC = () => {
                 disabled={!autoAssign}
                 className="rounded"
               />
-              <span className="text-sm" style={{ color: autoAssign ? 'var(--hub-text)' : 'var(--hub-text-dim)' }}>
+              <span
+                className="text-sm"
+                style={{ color: autoAssign ? 'var(--hub-text)' : 'var(--hub-text-dim)' }}
+              >
                 Use round-robin assignment
               </span>
             </label>
@@ -170,7 +181,11 @@ const Settings: React.FC = () => {
                   onChange={(e) => setSlaFirstResponse(e.target.value)}
                   placeholder="60"
                   className="w-full h-9 px-3 rounded-lg text-sm outline-none"
-                  style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+                  style={{
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text)',
+                  }}
                 />
               </div>
               <div>
@@ -183,7 +198,11 @@ const Settings: React.FC = () => {
                   onChange={(e) => setSlaResolution(e.target.value)}
                   placeholder="1440"
                   className="w-full h-9 px-3 rounded-lg text-sm outline-none"
-                  style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+                  style={{
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text)',
+                  }}
                 />
               </div>
             </div>
@@ -203,23 +222,35 @@ const Settings: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs mb-1" style={{ color: 'var(--hub-text-muted)' }}>Start</label>
+              <label className="block text-xs mb-1" style={{ color: 'var(--hub-text-muted)' }}>
+                Start
+              </label>
               <input
                 type="time"
                 value={businessHoursStart}
                 onChange={(e) => setBusinessHoursStart(e.target.value)}
                 className="w-full h-9 px-3 rounded-lg text-sm outline-none"
-                style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                }}
               />
             </div>
             <div>
-              <label className="block text-xs mb-1" style={{ color: 'var(--hub-text-muted)' }}>End</label>
+              <label className="block text-xs mb-1" style={{ color: 'var(--hub-text-muted)' }}>
+                End
+              </label>
               <input
                 type="time"
                 value={businessHoursEnd}
                 onChange={(e) => setBusinessHoursEnd(e.target.value)}
                 className="w-full h-9 px-3 rounded-lg text-sm outline-none"
-                style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                }}
               />
             </div>
           </div>
@@ -233,7 +264,11 @@ const Settings: React.FC = () => {
               onChange={(e) => setBusinessDays(e.target.value)}
               placeholder="mon,tue,wed,thu,fri"
               className="w-full h-9 px-3 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
             />
           </div>
         </div>

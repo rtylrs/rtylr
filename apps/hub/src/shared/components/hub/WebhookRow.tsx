@@ -8,8 +8,8 @@ export interface WebhookRowProps {
 }
 
 const STATUS_META = {
-  active:  { icon: CheckCircle2,  color: '#10b981', label: 'Active' },
-  paused:  { icon: PauseCircle,   color: '#6b7280', label: 'Paused' },
+  active: { icon: CheckCircle2, color: '#10b981', label: 'Active' },
+  paused: { icon: PauseCircle, color: '#6b7280', label: 'Paused' },
   failing: { icon: AlertTriangle, color: '#ef4444', label: 'Failing' },
 } as const;
 
@@ -31,7 +31,10 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
     <div className="flex items-start gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <code className="text-sm font-mono font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
+          <code
+            className="text-sm font-mono font-semibold truncate"
+            style={{ color: 'var(--hub-text)' }}
+          >
             {webhook.url}
           </code>
           <span

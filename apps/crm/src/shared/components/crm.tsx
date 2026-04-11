@@ -1,8 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import {
-  Star, X, TrendingUp, TrendingDown, Plus, Minus, Mail, MessageSquare,
-  ShoppingBag, Gift, StickyNote, Award, Clock, Check, Search as SearchIcon, User,
+  Star,
+  X,
+  TrendingUp,
+  TrendingDown,
+  Plus,
+  Minus,
+  Mail,
+  MessageSquare,
+  ShoppingBag,
+  Gift,
+  StickyNote,
+  Award,
+  Clock,
+  Check,
+  Search as SearchIcon,
+  User,
 } from 'lucide-react';
 import { Tier, tierColor, getTier, pointsToNextTier } from '../lib/tiers';
 import { ACCENT, Input, Select, Button } from './ui';
@@ -82,11 +96,17 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
         <Icon size={14} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{entry.title}</div>
+        <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+          {entry.title}
+        </div>
         {entry.description && (
-          <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>{entry.description}</div>
+          <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+            {entry.description}
+          </div>
         )}
-        <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginTop: '3px' }}>{entry.at}</div>
+        <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginTop: '3px' }}>
+          {entry.at}
+        </div>
       </div>
     </div>
   );
@@ -193,12 +213,37 @@ export const NotesPanel: React.FC<{
         padding: '14px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notes</h4>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '8px',
+        }}
+      >
+        <h4
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            margin: 0,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Notes
+        </h4>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            style={{ background: 'transparent', border: 'none', color: ACCENT, fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: ACCENT,
+              fontSize: '12px',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
           >
             Edit
           </button>
@@ -223,17 +268,41 @@ export const NotesPanel: React.FC<{
               outline: 'none',
             }}
           />
-          <div style={{ display: 'flex', gap: '6px', marginTop: '8px', justifyContent: 'flex-end' }}>
-            <Button variant="outline" style={{ padding: '6px 12px' }} onClick={() => { setValue(notes); setEditing(false); }}>
+          <div
+            style={{ display: 'flex', gap: '6px', marginTop: '8px', justifyContent: 'flex-end' }}
+          >
+            <Button
+              variant="outline"
+              style={{ padding: '6px 12px' }}
+              onClick={() => {
+                setValue(notes);
+                setEditing(false);
+              }}
+            >
               Cancel
             </Button>
-            <Button variant="primary" style={{ padding: '6px 12px' }} onClick={() => { onSave(value); setEditing(false); }}>
+            <Button
+              variant="primary"
+              style={{ padding: '6px 12px' }}
+              onClick={() => {
+                onSave(value);
+                setEditing(false);
+              }}
+            >
               Save
             </Button>
           </div>
         </>
       ) : (
-        <p style={{ fontSize: '13px', color: notes ? 'var(--hub-text)' : 'var(--hub-text-dim)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+        <p
+          style={{
+            fontSize: '13px',
+            color: notes ? 'var(--hub-text)' : 'var(--hub-text-dim)',
+            margin: 0,
+            lineHeight: 1.6,
+            whiteSpace: 'pre-wrap',
+          }}
+        >
           {notes || 'No notes yet.'}
         </p>
       )}
@@ -257,7 +326,9 @@ export const EmailEditor: React.FC<{
         placeholder="Your subject line..."
       />
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>Insert:</span>
+        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>
+          Insert:
+        </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
           <button
             key={v}
@@ -278,7 +349,17 @@ export const EmailEditor: React.FC<{
         ))}
       </div>
       <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Body</span>
+        <span
+          style={{
+            fontSize: '11px',
+            color: 'var(--hub-text-dim)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontWeight: 600,
+          }}
+        >
+          Body
+        </span>
         <textarea
           value={body}
           onChange={(e) => onChange(subject, e.target.value)}
@@ -312,7 +393,9 @@ export const SMSComposer: React.FC<{
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>Insert:</span>
+        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginRight: '4px' }}>
+          Insert:
+        </span>
         {['first_name', 'points', 'business_name'].map((v) => (
           <button
             key={v}
@@ -353,7 +436,12 @@ export const SMSComposer: React.FC<{
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
         <span style={{ color: 'var(--hub-text-dim)' }}>SMS single message: 160 chars</span>
-        <span style={{ color: tooLong ? '#ef4444' : remaining < 20 ? '#f59e0b' : 'var(--hub-text-muted)', fontWeight: 600 }}>
+        <span
+          style={{
+            color: tooLong ? '#ef4444' : remaining < 20 ? '#f59e0b' : 'var(--hub-text-muted)',
+            fontWeight: 600,
+          }}
+        >
           {body.length}/160
         </span>
       </div>
@@ -391,14 +479,26 @@ export const SegmentRuleRow: React.FC<{
       border: '1px solid var(--hub-border)',
     }}
   >
-    <Select value={rule.field} onChange={(e) => onChange({ ...rule, field: e.target.value })} style={{ flex: 1 }}>
+    <Select
+      value={rule.field}
+      onChange={(e) => onChange({ ...rule, field: e.target.value })}
+      style={{ flex: 1 }}
+    >
       {FIELDS.map((f) => (
-        <option key={f.value} value={f.value}>{f.label}</option>
+        <option key={f.value} value={f.value}>
+          {f.label}
+        </option>
       ))}
     </Select>
-    <Select value={rule.operator} onChange={(e) => onChange({ ...rule, operator: e.target.value })} style={{ width: '130px' }}>
+    <Select
+      value={rule.operator}
+      onChange={(e) => onChange({ ...rule, operator: e.target.value })}
+      style={{ width: '130px' }}
+    >
       {OPERATORS.map((o) => (
-        <option key={o.value} value={o.value}>{o.label}</option>
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
       ))}
     </Select>
     <Input
@@ -487,7 +587,9 @@ export const AutomationNode: React.FC<{
       </div>
       <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>{label}</div>
       {description && (
-        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>{description}</div>
+        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+          {description}
+        </div>
       )}
     </div>
   );
@@ -511,9 +613,24 @@ export const CampaignStatsCard: React.FC<{
         padding: '14px',
       }}
     >
-      <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginBottom: '6px' }}>{label}</div>
+      <div
+        style={{
+          fontSize: '11px',
+          color: 'var(--hub-text-dim)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          fontWeight: 600,
+          marginBottom: '6px',
+        }}
+      >
+        {label}
+      </div>
       <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)' }}>{value}</div>
-      {subValue && <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>{subValue}</div>}
+      {subValue && (
+        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+          {subValue}
+        </div>
+      )}
       {sparkline && (
         <svg width="100%" height="28" style={{ marginTop: '8px', display: 'block' }}>
           {sparkline.map((v, i) => {
@@ -557,7 +674,18 @@ export const LoyaltyPointsInput: React.FC<{
         gap: '10px',
       }}
     >
-      <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Adjust Points</h4>
+      <h4
+        style={{
+          fontSize: '12px',
+          fontWeight: 600,
+          color: 'var(--hub-text)',
+          margin: 0,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        Adjust Points
+      </h4>
       <Input
         type="number"
         placeholder="Amount"
@@ -573,7 +701,13 @@ export const LoyaltyPointsInput: React.FC<{
         <Button
           variant="primary"
           disabled={points <= 0}
-          onClick={() => { if (points > 0) { onAward(points, reason); setPoints(0); setReason(''); } }}
+          onClick={() => {
+            if (points > 0) {
+              onAward(points, reason);
+              setPoints(0);
+              setReason('');
+            }
+          }}
           style={{ flex: 1, justifyContent: 'center' }}
         >
           <Plus size={13} /> Award
@@ -581,7 +715,13 @@ export const LoyaltyPointsInput: React.FC<{
         <Button
           variant="outline"
           disabled={points <= 0}
-          onClick={() => { if (points > 0) { onDeduct(points, reason); setPoints(0); setReason(''); } }}
+          onClick={() => {
+            if (points > 0) {
+              onDeduct(points, reason);
+              setPoints(0);
+              setReason('');
+            }
+          }}
           style={{ flex: 1, justifyContent: 'center' }}
         >
           <Minus size={13} /> Deduct
@@ -628,7 +768,9 @@ export const ConsentBanner: React.FC<{
           >
             {it.allowed ? <Check size={10} /> : <X size={10} />}
           </div>
-          <span style={{ fontSize: '12px', color: 'var(--hub-text)', fontWeight: 500 }}>{it.label}</span>
+          <span style={{ fontSize: '12px', color: 'var(--hub-text)', fontWeight: 500 }}>
+            {it.label}
+          </span>
           <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
             {it.allowed ? 'opted in' : 'opted out'}
           </span>
@@ -656,25 +798,49 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
         <CustomerAvatar initials={customer.initials} points={customer.loyaltyPoints} size={44} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>{customer.name}</div>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
+            {customer.name}
+          </div>
           <TierBadge tier={tier} />
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}
+      >
         <div>
-          <div style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}>Spent</div>
-          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>${customer.totalSpent.toLocaleString()}</div>
+          <div
+            style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
+          >
+            Spent
+          </div>
+          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
+            ${customer.totalSpent.toLocaleString()}
+          </div>
         </div>
         <div>
-          <div style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}>Visits</div>
+          <div
+            style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
+          >
+            Visits
+          </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.visits}</div>
         </div>
         <div>
-          <div style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}>Points</div>
-          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.loyaltyPoints.toLocaleString()}</div>
+          <div
+            style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
+          >
+            Points
+          </div>
+          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
+            {customer.loyaltyPoints.toLocaleString()}
+          </div>
         </div>
         <div>
-          <div style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}>Last seen</div>
+          <div
+            style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}
+          >
+            Last seen
+          </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.lastVisit}</div>
         </div>
       </div>
@@ -697,9 +863,10 @@ export const SearchableCustomerSelect: React.FC<{
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const selected = customers.find((c) => c.id === value);
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase()),
+  const filtered = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.email.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -763,14 +930,25 @@ export const SearchableCustomerSelect: React.FC<{
           />
           <div style={{ overflowY: 'auto', flex: 1, maxHeight: '240px' }}>
             {filtered.length === 0 && (
-              <div style={{ padding: '20px', textAlign: 'center', fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+              <div
+                style={{
+                  padding: '20px',
+                  textAlign: 'center',
+                  fontSize: '12px',
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
                 No results
               </div>
             )}
             {filtered.map((c) => (
               <button
                 key={c.id}
-                onClick={() => { onChange(c.id); setOpen(false); setSearch(''); }}
+                onClick={() => {
+                  onChange(c.id);
+                  setOpen(false);
+                  setSearch('');
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -784,8 +962,12 @@ export const SearchableCustomerSelect: React.FC<{
                   fontSize: '13px',
                   textAlign: 'left',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
                 <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={26} />
                 <div style={{ flex: 1, minWidth: 0 }}>

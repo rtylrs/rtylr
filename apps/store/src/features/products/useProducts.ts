@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
-import { storeApi, CreateProductInput, UpdateProductInput, StoreProduct } from '../../shared/services/storeService';
+import {
+  storeApi,
+  CreateProductInput,
+  UpdateProductInput,
+  StoreProduct,
+} from '../../shared/services/storeService';
 
 export interface ProductFilters {
   search?: string;
@@ -13,13 +18,16 @@ export interface ProductFilters {
 export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ['store-products', filters],
-    queryFn: () => unwrap(storeApi.listProducts({
-      search: filters?.search,
-      categoryId: filters?.categoryId,
-      status: filters?.status,
-      limit: filters?.limit,
-      offset: filters?.offset,
-    })),
+    queryFn: () =>
+      unwrap(
+        storeApi.listProducts({
+          search: filters?.search,
+          categoryId: filters?.categoryId,
+          status: filters?.status,
+          limit: filters?.limit,
+          offset: filters?.offset,
+        })
+      ),
   });
 }
 

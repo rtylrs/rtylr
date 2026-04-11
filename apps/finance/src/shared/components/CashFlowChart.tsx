@@ -20,11 +20,17 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
   const step = (width - pad * 2) / Math.max(data.length - 1, 1);
 
   const inflowPath = data
-    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${pad + i * step},${pad + chartH - (d.inflow / max) * chartH}`)
+    .map(
+      (d, i) =>
+        `${i === 0 ? 'M' : 'L'} ${pad + i * step},${pad + chartH - (d.inflow / max) * chartH}`
+    )
     .join(' ');
 
   const outflowPath = data
-    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${pad + i * step},${pad + chartH - (d.outflow / max) * chartH}`)
+    .map(
+      (d, i) =>
+        `${i === 0 ? 'M' : 'L'} ${pad + i * step},${pad + chartH - (d.outflow / max) * chartH}`
+    )
     .join(' ');
 
   return (
@@ -50,13 +56,7 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
           <g key={i}>
             <circle cx={x} cy={y1} r={4} fill={ACCENT} />
             <circle cx={x} cy={y2} r={4} fill="#ef4444" />
-            <text
-              x={x}
-              y={height - 6}
-              textAnchor="middle"
-              fontSize={10}
-              fill="var(--hub-text-dim)"
-            >
+            <text x={x} y={height - 6} textAnchor="middle" fontSize={10} fill="var(--hub-text-dim)">
               {d.month}
             </text>
           </g>

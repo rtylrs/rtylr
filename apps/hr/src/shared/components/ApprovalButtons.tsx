@@ -9,7 +9,12 @@ interface Props {
   size?: 'sm' | 'md';
 }
 
-const ApprovalButtons: React.FC<Props> = ({ onApprove, onReject, allowNote = false, size = 'sm' }) => {
+const ApprovalButtons: React.FC<Props> = ({
+  onApprove,
+  onReject,
+  allowNote = false,
+  size = 'sm',
+}) => {
   const [note, setNote] = useState('');
   const [open, setOpen] = useState(false);
   const pad = size === 'md' ? '8px 14px' : '5px 10px';
@@ -18,7 +23,12 @@ const ApprovalButtons: React.FC<Props> = ({ onApprove, onReject, allowNote = fal
   if (allowNote && open) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <Textarea placeholder="Optional note" value={note} onChange={(e) => setNote(e.target.value)} style={{ minHeight: 60 }} />
+        <Textarea
+          placeholder="Optional note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          style={{ minHeight: 60 }}
+        />
         <div style={{ display: 'flex', gap: 4 }}>
           <button
             onClick={() => {

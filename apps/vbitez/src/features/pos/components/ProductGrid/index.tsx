@@ -2,10 +2,21 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 
-interface Product { id: string; name: string; price: number; category: string; image?: string; available?: boolean; }
-interface ProductGridProps { products: Product[]; categories: string[]; }
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image?: string;
+  available?: boolean;
+}
+interface ProductGridProps {
+  products: Product[];
+  categories: string[];
+}
 
-const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+const fmt = (n: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -34,7 +45,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
           {allCategories.map((cat) => (
             <button
               key={cat}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${activeCategory === cat ? 'bg-pos-text text-pos-bg' : 'bg-white/6 text-pos-muted hover:bg-white/10'}`}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                activeCategory === cat
+                  ? 'bg-pos-text text-pos-bg'
+                  : 'bg-white/6 text-pos-muted hover:bg-white/10'
+              }`}
               onClick={() => setActiveCategory(cat)}
             >
               {cat}
@@ -46,21 +61,38 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
       {/* Grid */}
       <div className="flex-1 overflow-y-auto p-3">
         {filtered.length === 0 ? (
-          <div className="flex items-center justify-center h-40 text-pos-muted text-sm">No items found</div>
+          <div className="flex items-center justify-center h-40 text-pos-muted text-sm">
+            No items found
+          </div>
         ) : (
           <div className="grid grid-cols-3 gap-2.5">
             {filtered.map((product) => (
               <motion.button
                 key={product.id}
-                className={`flex flex-col p-3 rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${product.available === false ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`flex flex-col p-3 rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${
+                  product.available === false ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={() => product.available !== false && addItem(product)}
                 whileTap={{ scale: 0.96 }}
                 disabled={product.available === false}
               >
-                {product.image && <img src={product.image} alt={product.name} className="w-full aspect-square object-cover rounded-lg mb-2" loading="lazy" />}
-                <span className="text-sm font-medium text-pos-text leading-tight">{product.name}</span>
+                {product.image && (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full aspect-square object-cover rounded-lg mb-2"
+                    loading="lazy"
+                  />
+                )}
+                <span className="text-sm font-medium text-pos-text leading-tight">
+                  {product.name}
+                </span>
                 <span className="text-xs text-pos-muted mt-1">{fmt(product.price)}</span>
-                {product.available === false && <span className="mt-1 text-[10px] text-destructive font-semibold">Out of stock</span>}
+                {product.available === false && (
+                  <span className="mt-1 text-[10px] text-destructive font-semibold">
+                    Out of stock
+                  </span>
+                )}
               </motion.button>
             ))}
           </div>

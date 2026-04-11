@@ -1,8 +1,8 @@
-import React from "react";
-import { useLayout } from "../shared/hooks/useLayout";
-import DefaultLayout from "./DefaultLayout";
-import NoSidebarLayout from "./NoSidebarLayout";
-import CustomSidebarLayout from "./CustomSidebarLayout";
+import React from 'react';
+import { useLayout } from '../shared/hooks/useLayout';
+import DefaultLayout from './DefaultLayout';
+import NoSidebarLayout from './NoSidebarLayout';
+import CustomSidebarLayout from './CustomSidebarLayout';
 
 const AppLayout: React.FC<{
   children?: React.ReactNode;
@@ -12,15 +12,15 @@ const AppLayout: React.FC<{
   const layoutType = useLayout();
 
   switch (layoutType) {
-    case "no-sidebar":
+    case 'no-sidebar':
       return <NoSidebarLayout>{children}</NoSidebarLayout>;
-    case "custom-sidebar":
+    case 'custom-sidebar':
       return (
         <CustomSidebarLayout sidebar={customSidebar} navbar={customNavbar}>
           {children}
         </CustomSidebarLayout>
       );
-    case "default":
+    case 'default':
     default:
       return <DefaultLayout>{children}</DefaultLayout>;
   }

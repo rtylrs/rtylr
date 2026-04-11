@@ -9,14 +9,23 @@ interface StockBadgeProps {
 
 const AMBER = '#f59e0b';
 
-export function getStockLevel(stock: number, lowStock = 10, excessThreshold = 500): 'out' | 'low' | 'good' | 'excess' {
+export function getStockLevel(
+  stock: number,
+  lowStock = 10,
+  excessThreshold = 500
+): 'out' | 'low' | 'good' | 'excess' {
   if (stock <= 0) return 'out';
   if (stock < lowStock) return 'low';
   if (stock > excessThreshold) return 'excess';
   return 'good';
 }
 
-const StockBadge: React.FC<StockBadgeProps> = ({ stock, lowStock = 10, excessThreshold = 500, showLabel = true }) => {
+const StockBadge: React.FC<StockBadgeProps> = ({
+  stock,
+  lowStock = 10,
+  excessThreshold = 500,
+  showLabel = true,
+}) => {
   const level = getStockLevel(stock, lowStock, excessThreshold);
   const cfg = {
     out: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', label: 'Out of Stock' },

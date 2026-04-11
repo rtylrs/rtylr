@@ -23,7 +23,8 @@ const ProtectedApp: React.FC = () => {
     }
 
     // Check if user has access to this app
-    api.get('/user/me')
+    api
+      .get('/user/me')
       .then((res) => {
         const apps: string[] = res.data?.apps ?? [];
         const role: string = res.data?.role ?? '';
@@ -42,18 +43,50 @@ const ProtectedApp: React.FC = () => {
 
   if (allowed === null) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff' }}>
-        <div style={{ width: 24, height: 24, border: '2px solid #e5e5e5', borderTopColor: '#14b8a6', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /><style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#fff',
+        }}
+      >
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            border: '2px solid #e5e5e5',
+            borderTopColor: '#14b8a6',
+            borderRadius: '50%',
+            animation: 'spin 0.6s linear infinite',
+          }}
+        />
+        <style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
       </div>
     );
   }
 
   if (allowed === false) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', color: '#111', gap: '12px', fontSize: '14px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#fff',
+          color: '#111',
+          gap: '12px',
+          fontSize: '14px',
+        }}
+      >
         <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
         <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
-        <a href={APP_URLS.hub} style={{ color: '#14b8a6', fontSize: '13px' }}>Go to Hub</a>
+        <a href={APP_URLS.hub} style={{ color: '#14b8a6', fontSize: '13px' }}>
+          Go to Hub
+        </a>
       </div>
     );
   }

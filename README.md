@@ -10,37 +10,37 @@ Frontend monorepo with 14 apps and 10 shared packages. pnpm workspaces + Turbore
 
 ## Apps
 
-| App | Port | Package | Description |
-|-----|------|---------|-------------|
-| Hub | 5175 | `hub` | Owner command center, dashboard, team management, settings |
-| Auth | 5176 | `@rtylr/auth` | Login, register, password reset, invite accept |
-| Menu | 5177 | `@rtylr/menu` | Customer-facing digital menu with QR codes |
-| POS | 5178 | `vbitez` | Point of sale terminal (Tauri desktop) |
-| ERP | 5179 | `@rtylr/erp` | Inventory, suppliers, purchasing, stock management |
-| HR | 5180 | `@rtylr/hr` | Staff, shifts, payroll, time off, reviews |
-| CRM | 5181 | `@rtylr/crm` | Customers, loyalty, campaigns, segments |
-| Finance | 5182 | `@rtylr/finance` | Invoices, expenses, P&L, tax, reconciliation |
-| Flow | 5183 | `@rtylr/flow` | Projects, tasks, roadmaps, cycles, team workload |
-| Store | 5184 | `@rtylr/store` | Online storefront, products, orders, checkout |
-| Book | 5185 | `@rtylr/book` | Appointments, scheduling, resources, waitlist |
-| Support | 5186 | `@rtylr/support` | Help desk, tickets, shared inbox, knowledge base |
-| Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports |
-| Landing | 4200 | `@rtylr/landing` | Marketing site (Next.js 15) |
+| App      | Port | Package           | Description                                                |
+| -------- | ---- | ----------------- | ---------------------------------------------------------- |
+| Hub      | 5175 | `hub`             | Owner command center, dashboard, team management, settings |
+| Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept             |
+| Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                 |
+| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri desktop)                     |
+| ERP      | 5179 | `@rtylr/erp`      | Inventory, suppliers, purchasing, stock management         |
+| HR       | 5180 | `@rtylr/hr`       | Staff, shifts, payroll, time off, reviews                  |
+| CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                    |
+| Finance  | 5182 | `@rtylr/finance`  | Invoices, expenses, P&L, tax, reconciliation               |
+| Flow     | 5183 | `@rtylr/flow`     | Projects, tasks, roadmaps, cycles, team workload           |
+| Store    | 5184 | `@rtylr/store`    | Online storefront, products, orders, checkout              |
+| Book     | 5185 | `@rtylr/book`     | Appointments, scheduling, resources, waitlist              |
+| Support  | 5186 | `@rtylr/support`  | Help desk, tickets, shared inbox, knowledge base           |
+| Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports          |
+| Landing  | 4200 | `@rtylr/landing`  | Marketing site (Next.js 15)                                |
 
 ## Shared Packages
 
-| Package | Purpose |
-|---------|---------|
-| `@voxire/api` | Axios client factory, neverthrow `safeFetch` wrapper, `unwrap()` for React Query |
-| `@voxire/config` | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors |
-| `@voxire/types` | `UserRole`, `AppId`, `User` interface |
-| `@voxire/ui` | Radix-based primitives (Dialog, Select, Switch, etc.) |
-| `@voxire/components` | HelmetContainer, Button, Modal, Spinner, FullScreenLoader |
-| `@voxire/auth` | Cookie helpers, auth guards, user store |
-| `@voxire/utils` | `useDebounce`, `useMediaQuery`, `useLocalStorage`, formatting, validation |
-| `@voxire/assets` | Shared SCSS variables and static assets |
-| `@voxire/menu` | Customer-facing menu page components |
-| `@voxire/tailwind-config` | Shared Tailwind CSS preset |
+| Package                   | Purpose                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `@voxire/api`             | Axios client factory, neverthrow `safeFetch` wrapper, `unwrap()` for React Query |
+| `@voxire/config`          | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors                          |
+| `@voxire/types`           | `UserRole`, `AppId`, `User` interface                                            |
+| `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
+| `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
+| `@voxire/auth`            | Cookie helpers, auth guards, user store                                          |
+| `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useLocalStorage`, formatting, validation        |
+| `@voxire/assets`          | Shared SCSS variables and static assets                                          |
+| `@voxire/menu`            | Customer-facing menu page components                                             |
+| `@voxire/tailwind-config` | Shared Tailwind CSS preset                                                       |
 
 ## Project Structure (per app)
 
@@ -85,21 +85,23 @@ interface SafeApi {
 }
 
 interface ApiError {
-  status: number;                    // HTTP status (0 for network errors)
-  code: ApiErrorCode;                // NETWORK_ERROR | UNAUTHORIZED | VALIDATION | ...
-  message: string;                   // User-friendly message
+  status: number; // HTTP status (0 for network errors)
+  code: ApiErrorCode; // NETWORK_ERROR | UNAUTHORIZED | VALIDATION | ...
+  message: string; // User-friendly message
 }
 ```
 
 Each app's `lib/api.ts`:
+
 ```typescript
 import { createApiClient, safeFetch } from '@voxire/api';
-const api = createApiClient('store');    // raw axios (backwards compat)
-export const safe = safeFetch(api);      // neverthrow-wrapped
+const api = createApiClient('store'); // raw axios (backwards compat)
+export const safe = safeFetch(api); // neverthrow-wrapped
 export default api;
 ```
 
 Hooks use `unwrap()` to bridge with React Query:
+
 ```typescript
 import { unwrap } from '@voxire/api';
 
@@ -136,4 +138,3 @@ pnpm turbo typecheck
 # Build + typecheck a single app
 pnpm --filter @rtylr/crm build
 ```
-

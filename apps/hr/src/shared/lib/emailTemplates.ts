@@ -20,7 +20,9 @@ export const emailTemplates = {
 
   anniversary: ({ name, years = 1, company = 'rtylr' }: TemplateContext) => ({
     subject: `${years} year${years === 1 ? '' : 's'} at ${company}! Thank you, ${name}`,
-    body: `Hi ${name},\n\nToday marks ${years} year${years === 1 ? '' : 's'} since you joined ${company}. Thank you for everything you bring to the team.\n\nHere's to many more.\n\nThe ${company} team`,
+    body: `Hi ${name},\n\nToday marks ${years} year${
+      years === 1 ? '' : 's'
+    } since you joined ${company}. Thank you for everything you bring to the team.\n\nHere's to many more.\n\nThe ${company} team`,
   }),
 
   documentExpiring: ({ name, documentName = 'a document', expiresOn = '' }: TemplateContext) => ({

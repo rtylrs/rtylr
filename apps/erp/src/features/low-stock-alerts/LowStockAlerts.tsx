@@ -43,7 +43,9 @@ const LowStockAlerts: React.FC = () => {
 
       {isLoading ? (
         <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={5} />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonRow key={i} cols={5} />
+          ))}
         </div>
       ) : items.length === 0 ? (
         <EmptyState

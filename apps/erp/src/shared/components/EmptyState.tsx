@@ -8,7 +8,12 @@ interface EmptyStateProps {
   action?: React.ReactNode;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon = PackageOpen, title, description, action }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({
+  icon: Icon = PackageOpen,
+  title,
+  description,
+  action,
+}) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div

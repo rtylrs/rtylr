@@ -3,7 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   html {
     font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
     background-color: #ffffff;

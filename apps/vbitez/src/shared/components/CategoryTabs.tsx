@@ -25,9 +25,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
             aria-selected={isActive}
             onClick={() => onChange(cat)}
             className={`shrink-0 h-11 px-4 rounded-full text-sm font-semibold transition-colors ${
-              isActive
-                ? 'bg-pos-text text-pos-bg'
-                : 'bg-white/8 text-pos-muted hover:bg-white/14'
+              isActive ? 'bg-pos-text text-pos-bg' : 'bg-white/8 text-pos-muted hover:bg-white/14'
             }`}
           >
             {cat}

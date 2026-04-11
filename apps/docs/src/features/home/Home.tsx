@@ -54,8 +54,11 @@ const Home: React.FC = () => {
         {/* Search */}
         <form onSubmit={handleSearch} className="max-w-lg">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2"
-              style={{ color: 'var(--docs-text-dim)' }} />
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--docs-text-dim)' }}
+            />
             <input
               type="text"
               placeholder="Search the docs..."
@@ -74,8 +77,10 @@ const Home: React.FC = () => {
 
       {/* Featured Guides */}
       <div className="mb-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4"
-          style={{ color: 'var(--docs-text-muted)' }}>
+        <h2
+          className="text-sm font-semibold uppercase tracking-wider mb-4"
+          style={{ color: 'var(--docs-text-muted)' }}
+        >
           Getting Started
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -91,8 +96,11 @@ const Home: React.FC = () => {
                 <span className="text-sm font-medium" style={{ color: 'var(--docs-text)' }}>
                   {guide.title}
                 </span>
-                <ArrowRight size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: 'var(--docs-text-dim)' }} />
+                <ArrowRight
+                  size={14}
+                  className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: 'var(--docs-text-dim)' }}
+                />
               </div>
               <p className="text-sm" style={{ color: 'var(--docs-text-muted)' }}>
                 {guide.description}
@@ -104,8 +112,10 @@ const Home: React.FC = () => {
 
       {/* Quick Links */}
       <div>
-        <h2 className="text-sm font-semibold uppercase tracking-wider mb-4"
-          style={{ color: 'var(--docs-text-muted)' }}>
+        <h2
+          className="text-sm font-semibold uppercase tracking-wider mb-4"
+          style={{ color: 'var(--docs-text-muted)' }}
+        >
           Popular Topics
         </h2>
         <div className="flex flex-col gap-1">

@@ -38,7 +38,7 @@ export const useThemeStore = create<ThemeStore>()(
 export function initTheme() {
   try {
     const raw = localStorage.getItem('hub-theme');
-    const theme: Theme = raw ? (JSON.parse(raw).state?.theme ?? 'light') : 'light';
+    const theme: Theme = raw ? JSON.parse(raw).state?.theme ?? 'light' : 'light';
     applyTheme(theme);
 
     if (theme === 'system') {

@@ -16,11 +16,7 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
   size = 'md',
 }) => {
   const cls =
-    size === 'lg'
-      ? 'w-11 h-11 text-lg'
-      : size === 'sm'
-      ? 'w-7 h-7 text-xs'
-      : 'w-9 h-9 text-sm';
+    size === 'lg' ? 'w-11 h-11 text-lg' : size === 'sm' ? 'w-7 h-7 text-xs' : 'w-9 h-9 text-sm';
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
   return (

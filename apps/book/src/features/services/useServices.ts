@@ -34,7 +34,8 @@ export function useCreateService() {
 export function useUpdateService() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => unwrap(bookService.updateService(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      unwrap(bookService.updateService(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
   });
 }

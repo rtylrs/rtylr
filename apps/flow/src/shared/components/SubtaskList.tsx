@@ -59,9 +59,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, on
                 <span
                   className="text-[12px] flex-1"
                   style={{
-                    color: s.completed
-                      ? 'var(--flow-text-dim)'
-                      : 'var(--flow-text)',
+                    color: s.completed ? 'var(--flow-text-dim)' : 'var(--flow-text)',
                     textDecoration: s.completed ? 'line-through' : undefined,
                   }}
                 >

@@ -19,7 +19,10 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
       className="rounded-xl"
       style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.3)' }}
     >
-      <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
+      <div
+        className="px-5 py-4 flex items-center gap-2"
+        style={{ borderBottom: '1px solid rgba(239,68,68,0.2)' }}
+      >
         <AlertTriangle size={16} style={{ color: '#ef4444' }} />
         <p className="text-sm font-semibold" style={{ color: '#ef4444' }}>
           Danger zone
@@ -33,15 +36,14 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
             style={{ borderTop: i > 0 ? '1px solid rgba(239,68,68,0.15)' : undefined }}
           >
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{a.label}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>{a.description}</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                {a.label}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+                {a.description}
+              </p>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={a.onClick}
-              className="shrink-0"
-            >
+            <Button variant="destructive" size="sm" onClick={a.onClick} className="shrink-0">
               {a.buttonLabel}
             </Button>
           </div>

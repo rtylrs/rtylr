@@ -1,1 +1,1 @@
-export { FullScreenLoader } from "./FullScreenLoader";
+export { FullScreenLoader } from './FullScreenLoader';

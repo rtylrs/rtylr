@@ -9,9 +9,9 @@ const AMBER = '#f59e0b';
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const statusConfig: Record<Product['status'], { color: string; bg: string }> = {
-  'In Stock':      { color: '#10b981', bg: 'rgba(16,185,129,0.1)'  },
-  'Low Stock':     { color: AMBER,     bg: 'rgba(245,158,11,0.1)'  },
-  'Out of Stock':  { color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+  'In Stock': { color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+  'Low Stock': { color: AMBER, bg: 'rgba(245,158,11,0.1)' },
+  'Out of Stock': { color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
 };
 
 // ─── Animation variants ───────────────────────────────────────────────────────
@@ -26,7 +26,16 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };
 
-const columns = ['Name', 'SKU', 'Category', 'Stock', 'Low Stock', 'Cost Price', 'Sale Price', 'Status'];
+const columns = [
+  'Name',
+  'SKU',
+  'Category',
+  'Stock',
+  'Low Stock',
+  'Cost Price',
+  'Sale Price',
+  'Status',
+];
 
 // ─── Skeleton row ─────────────────────────────────────────────────────────────
 
@@ -76,8 +85,12 @@ const Inventory: React.FC = () => {
         <button
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{ background: AMBER, color: '#000' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.9';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
         >
           <Plus size={14} />
           Add Product
@@ -102,8 +115,12 @@ const Inventory: React.FC = () => {
             border: '1px solid var(--hub-border)',
             color: 'var(--hub-text)',
           }}
-          onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.5)'; }}
-          onBlur={(e)  => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+          onFocus={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.5)';
+          }}
+          onBlur={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+          }}
         />
       </motion.div>
 
@@ -140,7 +157,10 @@ const Inventory: React.FC = () => {
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
           ) : filtered.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            <div
+              className="px-4 py-8 text-center text-sm"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
               No products found.
             </div>
           ) : (
@@ -151,8 +171,12 @@ const Inventory: React.FC = () => {
                   key={product.id}
                   className="grid px-4 py-3 items-center transition-colors"
                   style={{ gridTemplateColumns: '2fr 1fr 1fr 0.7fr 0.7fr 1fr 1fr 0.9fr' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
                     {product.name}

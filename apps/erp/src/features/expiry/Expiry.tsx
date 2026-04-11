@@ -13,9 +13,7 @@ const AMBER = '#f59e0b';
 const Expiry: React.FC = () => {
   const { data: items = [], isLoading } = useExpiry();
 
-  const sorted = [...items].sort(
-    (a, b) => daysUntil(a.expiryDate) - daysUntil(b.expiryDate)
-  );
+  const sorted = [...items].sort((a, b) => daysUntil(a.expiryDate) - daysUntil(b.expiryDate));
 
   return (
     <motion.div
@@ -59,7 +57,11 @@ const Expiry: React.FC = () => {
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : sorted.length === 0 ? (
-          <EmptyState icon={CalendarX} title="No expiring items" description="No batches with expiry dates tracked" />
+          <EmptyState
+            icon={CalendarX}
+            title="No expiring items"
+            description="No batches with expiry dates tracked"
+          />
         ) : (
           sorted.map((item, i) => {
             const days = daysUntil(item.expiryDate);

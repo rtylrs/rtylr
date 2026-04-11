@@ -37,9 +37,7 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
   {
     label: 'Overview',
-    items: [
-      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-    ],
+    items: [{ label: 'Dashboard', path: '/', icon: LayoutDashboard }],
   },
   {
     label: 'Catalog',
@@ -50,15 +48,11 @@ const navGroups: NavGroup[] = [
   },
   {
     label: 'Sales',
-    items: [
-      { label: 'Orders', path: '/orders', icon: ShoppingCart },
-    ],
+    items: [{ label: 'Orders', path: '/orders', icon: ShoppingCart }],
   },
   {
     label: 'Channels',
-    items: [
-      { label: 'Storefront', path: '/storefront', icon: Globe },
-    ],
+    items: [{ label: 'Storefront', path: '/storefront', icon: Globe }],
   },
   {
     label: 'Configuration',
@@ -82,9 +76,7 @@ const routeLabels: Record<string, string> = {
 
 function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find(
-    (key) => pathname.startsWith(key) && key !== '/'
-  );
+  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'Store';
 }
 
@@ -112,8 +104,7 @@ function applyTheme(theme: Theme) {
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
-  const isActive =
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   return (
     <Link
@@ -245,8 +236,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             to="/settings"
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
             style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
           >
             <SettingsIcon size={12} /> Settings
           </Link>
@@ -284,7 +279,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   </span>
                 )}
               </div>
-              <ChevronRight size={12} className="shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
+              <ChevronRight
+                size={12}
+                className="shrink-0"
+                style={{ color: 'var(--hub-text-dim)' }}
+              />
             </button>
 
             <AnimatePresence>
@@ -375,8 +374,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
               className="h-7 w-7 rounded-lg flex items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             </button>
@@ -409,7 +412,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </AnimatePresence>
       </div>
 
-      <Toaster theme={theme === 'light' ? 'light' : 'dark'} position="bottom-right" richColors closeButton />
+      <Toaster
+        theme={theme === 'light' ? 'light' : 'dark'}
+        position="bottom-right"
+        richColors
+        closeButton
+      />
     </div>
   );
 };

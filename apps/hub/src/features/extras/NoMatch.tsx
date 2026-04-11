@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "../../shared/components/ui";
+import { Button } from '../../shared/components/ui';
 
 const NoMatch = (): JSX.Element => {
   const navigate = useNavigate();

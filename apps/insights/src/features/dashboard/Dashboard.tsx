@@ -1,13 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Briefcase,
-  TrendingUp,
-  Package,
-} from 'lucide-react';
+import { DollarSign, ShoppingCart, Users, Briefcase, TrendingUp, Package } from 'lucide-react';
 import { useKpis, useDashboardSummary } from './useDashboard';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
@@ -34,14 +27,32 @@ const today = new Date().toLocaleDateString('en-US', {
 });
 
 const Dashboard: React.FC = () => {
-  const { data: kpis, isLoading: kpisLoading, isError: kpisError, refetch: refetchKpis } = useKpis();
-  const { data: summary, isLoading: summaryLoading, isError: summaryError, refetch: refetchSummary } = useDashboardSummary();
+  const {
+    data: kpis,
+    isLoading: kpisLoading,
+    isError: kpisError,
+    refetch: refetchKpis,
+  } = useKpis();
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    isError: summaryError,
+    refetch: refetchSummary,
+  } = useDashboardSummary();
 
   const isLoading = kpisLoading || summaryLoading;
   const isError = kpisError && summaryError;
 
   if (isError) {
-    return <ErrorState message="Failed to load dashboard data." onRetry={() => { refetchKpis(); refetchSummary(); }} />;
+    return (
+      <ErrorState
+        message="Failed to load dashboard data."
+        onRetry={() => {
+          refetchKpis();
+          refetchSummary();
+        }}
+      />
+    );
   }
 
   const totalRevenue = kpis?.totalRevenue ?? summary?.totalRevenue ?? 0;
@@ -137,10 +148,7 @@ const Dashboard: React.FC = () => {
                     <Icon size={14} style={{ color: ACCENT }} />
                   </span>
                 </div>
-                <p
-                  className="text-2xl font-bold truncate"
-                  style={{ color: 'var(--hub-text)' }}
-                >
+                <p className="text-2xl font-bold truncate" style={{ color: 'var(--hub-text)' }}>
                   {stat.value}
                 </p>
                 <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>

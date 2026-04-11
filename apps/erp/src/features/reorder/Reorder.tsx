@@ -26,7 +26,11 @@ const Reorder: React.FC = () => {
             onClick={() => toast.success(`Created ${suggestions.length} reorder drafts`)}
             disabled={suggestions.length === 0}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000', opacity: suggestions.length === 0 ? 0.5 : 1 }}
+            style={{
+              background: AMBER,
+              color: '#000',
+              opacity: suggestions.length === 0 ? 0.5 : 1,
+            }}
           >
             <ShoppingCart size={14} /> Create All Orders
           </button>
@@ -70,7 +74,11 @@ const Reorder: React.FC = () => {
         ) : (
           suggestions.map((s) => {
             const confColor =
-              s.confidence === 'high' ? '#10b981' : s.confidence === 'medium' ? AMBER : 'var(--hub-text-dim)';
+              s.confidence === 'high'
+                ? '#10b981'
+                : s.confidence === 'medium'
+                ? AMBER
+                : 'var(--hub-text-dim)';
             return (
               <div
                 key={s.productId}
@@ -88,10 +96,16 @@ const Reorder: React.FC = () => {
                     {s.sku}
                   </p>
                 </div>
-                <span className="text-sm font-semibold" style={{ color: s.currentStock === 0 ? '#f87171' : 'var(--hub-text)' }}>
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: s.currentStock === 0 ? '#f87171' : 'var(--hub-text)' }}
+                >
                   {s.currentStock}
                 </span>
-                <span className="text-xs flex items-center gap-1" style={{ color: 'var(--hub-text-muted)' }}>
+                <span
+                  className="text-xs flex items-center gap-1"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
                   <TrendingUp size={11} /> {s.avgDailySales}/day
                 </span>
                 <span className="text-sm font-bold" style={{ color: AMBER }}>

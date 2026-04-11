@@ -15,7 +15,7 @@ interface Node {
 
 const triggers = [
   { label: 'New customer', description: 'When a customer is created' },
-  { label: 'Birthday', description: 'On the customer\'s birthday' },
+  { label: 'Birthday', description: "On the customer's birthday" },
   { label: 'Inactive 60 days', description: 'When inactive for 60+ days' },
   { label: 'Post visit', description: 'After a customer visit' },
   { label: 'Tier upgrade', description: 'When tier changes' },
@@ -25,7 +25,12 @@ const actions = [
   { label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
   { label: 'Award points', description: 'Adds loyalty points', icon: Gift },
   { label: 'Wait 3 days', description: 'Delays next step', icon: Clock, type: 'delay' as const },
-  { label: 'If opted in', description: 'Branch on condition', icon: GitBranch, type: 'condition' as const },
+  {
+    label: 'If opted in',
+    description: 'Branch on condition',
+    icon: GitBranch,
+    type: 'condition' as const,
+  },
 ];
 
 const AutomationBuilder: React.FC = () => {
@@ -36,11 +41,11 @@ const AutomationBuilder: React.FC = () => {
     { id: 'n1', type: 'trigger', label: 'New customer', description: 'When a customer is created' },
   ]);
 
-  const addTrigger = (t: typeof triggers[number]) => {
+  const addTrigger = (t: (typeof triggers)[number]) => {
     setNodes([{ id: 'n1', type: 'trigger', label: t.label, description: t.description }]);
   };
 
-  const addAction = (a: typeof actions[number]) => {
+  const addAction = (a: (typeof actions)[number]) => {
     setNodes((n) => [
       ...n,
       {
@@ -58,23 +63,26 @@ const AutomationBuilder: React.FC = () => {
   };
 
   const handleSave = () => {
-    create.mutate({
-      name,
-      description: `${nodes[0]?.label} -> ${nodes.length - 1} step(s)`,
-      trigger: nodes[0]?.label,
-      status: 'draft',
-      enrolled: 0,
-      completed: 0,
-    }, {
-      onSuccess: () => {
-        toast.success('Automation saved');
-        navigate('/automations');
+    create.mutate(
+      {
+        name,
+        description: `${nodes[0]?.label} -> ${nodes.length - 1} step(s)`,
+        trigger: nodes[0]?.label,
+        status: 'draft',
+        enrolled: 0,
+        completed: 0,
       },
-      onError: () => {
-        toast.success('Automation saved');
-        navigate('/automations');
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success('Automation saved');
+          navigate('/automations');
+        },
+        onError: () => {
+          toast.success('Automation saved');
+          navigate('/automations');
+        },
+      }
+    );
   };
 
   return (
@@ -83,16 +91,38 @@ const AutomationBuilder: React.FC = () => {
       <PageHeader
         title="New automation"
         subtitle="Drag triggers and actions to build a workflow"
-        actions={<Button variant="primary" onClick={handleSave} disabled={!name}><Save size={13} />Save</Button>}
+        actions={
+          <Button variant="primary" onClick={handleSave} disabled={!name}>
+            <Save size={13} />
+            Save
+          </Button>
+        }
       />
 
-      <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Welcome series" style={{ maxWidth: '320px', marginBottom: '16px' }} />
+      <Input
+        label="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Welcome series"
+        style={{ maxWidth: '320px', marginBottom: '16px' }}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '16px' }}>
         {/* Palette */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <Card>
-            <h4 style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, margin: '0 0 10px' }}>Triggers</h4>
+            <h4
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+                margin: '0 0 10px',
+              }}
+            >
+              Triggers
+            </h4>
             {triggers.map((t) => (
               <button
                 key={t.label}
@@ -119,7 +149,18 @@ const AutomationBuilder: React.FC = () => {
             ))}
           </Card>
           <Card>
-            <h4 style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, margin: '0 0 10px' }}>Actions</h4>
+            <h4
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+                margin: '0 0 10px',
+              }}
+            >
+              Actions
+            </h4>
             {actions.map((a) => {
               const Icon = a.icon;
               return (
@@ -152,8 +193,21 @@ const AutomationBuilder: React.FC = () => {
 
         {/* Canvas */}
         <Card style={{ minHeight: '500px' }}>
-          <h4 style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, margin: '0 0 14px' }}>Workflow</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <h4
+            style={{
+              fontSize: '11px',
+              color: 'var(--hub-text-dim)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontWeight: 700,
+              margin: '0 0 14px',
+            }}
+          >
+            Workflow
+          </h4>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
+          >
             {nodes.map((node, i) => (
               <React.Fragment key={node.id}>
                 <AutomationNode

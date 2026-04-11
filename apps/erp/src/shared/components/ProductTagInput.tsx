@@ -7,7 +7,11 @@ interface ProductTagInputProps {
   placeholder?: string;
 }
 
-const ProductTagInput: React.FC<ProductTagInputProps> = ({ value, onChange, placeholder = 'Add tag…' }) => {
+const ProductTagInput: React.FC<ProductTagInputProps> = ({
+  value,
+  onChange,
+  placeholder = 'Add tag…',
+}) => {
   const [input, setInput] = useState('');
 
   const add = () => {

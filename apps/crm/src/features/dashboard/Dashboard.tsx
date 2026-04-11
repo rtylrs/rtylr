@@ -1,7 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Users, UserPlus, Gift, Megaphone, TrendingUp, TrendingDown, AlertTriangle, DollarSign, PieChart, Activity, ArrowRight } from 'lucide-react';
+import {
+  Users,
+  UserPlus,
+  Gift,
+  Megaphone,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  DollarSign,
+  PieChart,
+  Activity,
+  ArrowRight,
+} from 'lucide-react';
 import { type DashboardStats } from '../../shared/services/crmApi';
 import { useCRMDashboard } from './useDashboard';
 import { useCustomers } from '../customers/useCustomers';
@@ -46,27 +58,39 @@ const defaultStats = [
 ];
 
 const defaultTopCustomers = [
-  { name: 'Sarah Johnson',   spend: '$4,820', visits: 34, tier: 'Platinum' },
-  { name: 'Michael Chen',    spend: '$3,640', visits: 28, tier: 'Gold'     },
-  { name: 'Emily Rodriguez', spend: '$2,910', visits: 22, tier: 'Gold'     },
-  { name: 'James Wilson',    spend: '$1,870', visits: 17, tier: 'Silver'   },
-  { name: 'Aisha Patel',     spend: '$1,420', visits: 14, tier: 'Silver'   },
+  { name: 'Sarah Johnson', spend: '$4,820', visits: 34, tier: 'Platinum' },
+  { name: 'Michael Chen', spend: '$3,640', visits: 28, tier: 'Gold' },
+  { name: 'Emily Rodriguez', spend: '$2,910', visits: 22, tier: 'Gold' },
+  { name: 'James Wilson', spend: '$1,870', visits: 17, tier: 'Silver' },
+  { name: 'Aisha Patel', spend: '$1,420', visits: 14, tier: 'Silver' },
 ];
 
 const tierColor: Record<string, string> = {
   Platinum: '#e879f9',
-  Gold:     '#f59e0b',
-  Silver:   '#94a3b8',
-  Bronze:   '#b45309',
+  Gold: '#f59e0b',
+  Silver: '#94a3b8',
+  Bronze: '#b45309',
 };
 
 const defaultCampaigns = [
-  { name: 'Summer Loyalty Blast', channel: 'Email', sent: 3200, openRate: '42%', revenue: '$8,400' },
-  { name: 'Win-Back: 30-Day Inactive', channel: 'SMS', sent: 980, openRate: '61%', revenue: '$2,100' },
+  {
+    name: 'Summer Loyalty Blast',
+    channel: 'Email',
+    sent: 3200,
+    openRate: '42%',
+    revenue: '$8,400',
+  },
+  {
+    name: 'Win-Back: 30-Day Inactive',
+    channel: 'SMS',
+    sent: 980,
+    openRate: '61%',
+    revenue: '$2,100',
+  },
   { name: 'VIP Exclusive Preview', channel: 'Push', sent: 540, openRate: '38%', revenue: '$3,700' },
 ];
 
-function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
+function StatCard({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
   const Icon = stat.icon;
   return (
     <motion.div
@@ -102,7 +126,9 @@ function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-        <span style={{ fontSize: '26px', fontWeight: 700, color: 'var(--hub-text)', lineHeight: 1 }}>
+        <span
+          style={{ fontSize: '26px', fontWeight: 700, color: 'var(--hub-text)', lineHeight: 1 }}
+        >
           {stat.value}
         </span>
         <span
@@ -149,21 +175,60 @@ const Dashboard: React.FC = () => {
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
 
-  const ltv = customersPool.length > 0 ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length) : 0;
+  const ltv =
+    customersPool.length > 0
+      ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
+      : 0;
   const atRisk = customersPool.filter((c) => /month|weeks/.test(c.lastVisit)).slice(0, 4);
-  const churnRate = customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
-  const topSegment = segmentsPool.length > 0 ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0]) : null;
+  const churnRate =
+    customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
+  const topSegment =
+    segmentsPool.length > 0
+      ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0])
+      : null;
 
   const stats = dashboardData
     ? [
-        { label: 'Total Customers',       value: (dashboardData as DashboardStats).totalCustomers.toLocaleString(),       change: dashboardData.totalCustomersChange,       up: dashboardData.totalCustomersChange?.startsWith('+'),       icon: Users,    color: '#3b82f6' },
-        { label: 'New This Month',        value: dashboardData.newThisMonth.toLocaleString(),          change: dashboardData.newThisMonthChange,          up: dashboardData.newThisMonthChange?.startsWith('+'),          icon: UserPlus, color: '#10b981' },
-        { label: 'Active Loyalty Members',value: dashboardData.activeLoyaltyMembers.toLocaleString(), change: dashboardData.activeLoyaltyMembersChange, up: dashboardData.activeLoyaltyMembersChange?.startsWith('+'), icon: Gift,     color: '#f59e0b' },
-        { label: 'Campaign Reach',        value: dashboardData.campaignReach.toLocaleString(),         change: dashboardData.campaignReachChange,         up: dashboardData.campaignReachChange?.startsWith('+'),         icon: Megaphone,color: '#8b5cf6' },
+        {
+          label: 'Total Customers',
+          value: (dashboardData as DashboardStats).totalCustomers.toLocaleString(),
+          change: dashboardData.totalCustomersChange,
+          up: dashboardData.totalCustomersChange?.startsWith('+'),
+          icon: Users,
+          color: '#3b82f6',
+        },
+        {
+          label: 'New This Month',
+          value: dashboardData.newThisMonth.toLocaleString(),
+          change: dashboardData.newThisMonthChange,
+          up: dashboardData.newThisMonthChange?.startsWith('+'),
+          icon: UserPlus,
+          color: '#10b981',
+        },
+        {
+          label: 'Active Loyalty Members',
+          value: dashboardData.activeLoyaltyMembers.toLocaleString(),
+          change: dashboardData.activeLoyaltyMembersChange,
+          up: dashboardData.activeLoyaltyMembersChange?.startsWith('+'),
+          icon: Gift,
+          color: '#f59e0b',
+        },
+        {
+          label: 'Campaign Reach',
+          value: dashboardData.campaignReach.toLocaleString(),
+          change: dashboardData.campaignReachChange,
+          up: dashboardData.campaignReachChange?.startsWith('+'),
+          icon: Megaphone,
+          color: '#8b5cf6',
+        },
       ]
     : defaultStats;
-  const topCustomers = dashboardData?.topCustomers?.length ? dashboardData.topCustomers : defaultTopCustomers;
-  const campaigns = dashboardData?.recentCampaigns?.length ? dashboardData.recentCampaigns : defaultCampaigns;
+  const topCustomers = dashboardData?.topCustomers?.length
+    ? dashboardData.topCustomers
+    : defaultTopCustomers;
+  const campaigns = dashboardData?.recentCampaigns?.length
+    ? dashboardData.recentCampaigns
+    : defaultCampaigns;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
@@ -187,14 +252,46 @@ const Dashboard: React.FC = () => {
             padding: '16px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Avg LTV</span>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(16,185,129,0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+              }}
+            >
+              Avg LTV
+            </span>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'rgba(16,185,129,0.12)',
+                color: '#10b981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <DollarSign size={13} />
             </div>
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>${ltv.toLocaleString()}</div>
-          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>per customer</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
+            ${ltv.toLocaleString()}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+            per customer
+          </div>
         </motion.div>
 
         <motion.div
@@ -210,14 +307,46 @@ const Dashboard: React.FC = () => {
             cursor: 'pointer',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>New This Month</span>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(59,130,246,0.12)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+              }}
+            >
+              New This Month
+            </span>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'rgba(59,130,246,0.12)',
+                color: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <UserPlus size={13} />
             </div>
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>{dashboardData?.newThisMonth || 184}</div>
-          <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>+8% vs last month</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
+            {dashboardData?.newThisMonth || 184}
+          </div>
+          <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>
+            +8% vs last month
+          </div>
         </motion.div>
 
         <motion.div
@@ -231,14 +360,46 @@ const Dashboard: React.FC = () => {
             padding: '16px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Churn Rate</span>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(239,68,68,0.12)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+              }}
+            >
+              Churn Rate
+            </span>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'rgba(239,68,68,0.12)',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Activity size={13} />
             </div>
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>{churnRate}%</div>
-          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>customers at risk</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
+            {churnRate}%
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
+            customers at risk
+          </div>
         </motion.div>
 
         <motion.div
@@ -254,14 +415,53 @@ const Dashboard: React.FC = () => {
             cursor: topSegment ? 'pointer' : 'default',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Top Segment</span>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(232,121,249,0.12)', color: '#e879f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+              }}
+            >
+              Top Segment
+            </span>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'rgba(232,121,249,0.12)',
+                color: '#e879f9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <PieChart size={13} />
             </div>
           </div>
-          <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)', marginTop: '2px' }}>{topSegment?.name || 'VIP Customers'}</div>
-          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{topSegment?.customerCount.toLocaleString() || 0} members</div>
+          <div
+            style={{
+              fontSize: '16px',
+              fontWeight: 700,
+              color: 'var(--hub-text)',
+              marginTop: '2px',
+            }}
+          >
+            {topSegment?.name || 'VIP Customers'}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+            {topSegment?.customerCount.toLocaleString() || 0} members
+          </div>
         </motion.div>
       </div>
 
@@ -277,11 +477,23 @@ const Dashboard: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--hub-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            padding: '14px 20px',
+            borderBottom: '1px solid var(--hub-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>At-risk customers</span>
-            <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>not visited in 30+ days</span>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              At-risk customers
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+              not visited in 30+ days
+            </span>
           </div>
           <button
             onClick={() => navigate('/campaigns/email?segment=atrisk')}
@@ -300,22 +512,48 @@ const Dashboard: React.FC = () => {
             Send win-back <ArrowRight size={12} />
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '10px', padding: '14px 20px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '10px',
+            padding: '14px 20px',
+          }}
+        >
           {atRisk.slice(0, 4).map((c) => (
             <div
               key={c.id}
               onClick={() => navigate(`/customers/${c.id}`)}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderRadius: '8px', cursor: 'pointer', background: 'var(--hub-hover)' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: 'var(--hub-hover)',
+              }}
             >
               <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>{c.name}</div>
-                <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>Last: {c.lastVisit}</div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                  {c.name}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
+                  Last: {c.lastVisit}
+                </div>
               </div>
             </div>
           ))}
           {atRisk.length === 0 && (
-            <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', textAlign: 'center', padding: '10px' }}>
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--hub-text-muted)',
+                textAlign: 'center',
+                padding: '10px',
+              }}
+            >
               No at-risk customers right now.
             </div>
           )}
@@ -336,7 +574,9 @@ const Dashboard: React.FC = () => {
           }}
         >
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>Top Customers</span>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              Top Customers
+            </span>
           </div>
           <div>
             {topCustomers.map((c, i) => (
@@ -347,7 +587,8 @@ const Dashboard: React.FC = () => {
                   alignItems: 'center',
                   gap: '12px',
                   padding: '12px 20px',
-                  borderBottom: i < topCustomers.length - 1 ? '1px solid var(--hub-border)' : 'none',
+                  borderBottom:
+                    i < topCustomers.length - 1 ? '1px solid var(--hub-border)' : 'none',
                 }}
               >
                 {/* Avatar */}
@@ -366,14 +607,23 @@ const Dashboard: React.FC = () => {
                     flexShrink: 0,
                   }}
                 >
-                  {c.name.split(' ').map((n) => n[0]).join('')}
+                  {c.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{c.name}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.visits} visits</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+                    {c.name}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                    {c.visits} visits
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>{c.spend}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                    {c.spend}
+                  </div>
                   <span
                     style={{
                       display: 'inline-block',
@@ -406,7 +656,9 @@ const Dashboard: React.FC = () => {
           }}
         >
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>Recent Campaign Performance</span>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              Recent Campaign Performance
+            </span>
           </div>
           <div>
             {campaigns.map((c, i) => (
@@ -417,18 +669,35 @@ const Dashboard: React.FC = () => {
                   borderBottom: i < campaigns.length - 1 ? '1px solid var(--hub-border)' : 'none',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '8px',
+                  }}
+                >
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{c.name}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.channel} · {c.sent.toLocaleString()} sent</div>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+                      {c.name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                      {c.channel} · {c.sent.toLocaleString()} sent
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#10b981' }}>{c.revenue}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.openRate} open</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#10b981' }}>
+                      {c.revenue}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                      {c.openRate} open
+                    </div>
                   </div>
                 </div>
                 {/* Open rate bar */}
-                <div style={{ height: '4px', borderRadius: '9999px', background: 'var(--hub-border)' }}>
+                <div
+                  style={{ height: '4px', borderRadius: '9999px', background: 'var(--hub-border)' }}
+                >
                   <div
                     style={{
                       height: '100%',

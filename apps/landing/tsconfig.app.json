@@ -19,5 +19,16 @@
     "**/*.spec.jsx",
     "**/*.test.jsx"
   ],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "pages/**/*", "components/**/*", "layouts/**/*", "stores/**/*", "services/**/*", "styles/**/*"]
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "pages/**/*",
+    "components/**/*",
+    "layouts/**/*",
+    "stores/**/*",
+    "services/**/*",
+    "styles/**/*"
+  ]
 }

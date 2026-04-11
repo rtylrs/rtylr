@@ -2,8 +2,13 @@ import { safe } from '../lib/api';
 
 export const bookService = {
   // Appointments
-  getAppointments: (params?: { search?: string; status?: string; date?: string; limit?: number; offset?: number }) =>
-    safe.get('/book/appointments', { params }),
+  getAppointments: (params?: {
+    search?: string;
+    status?: string;
+    date?: string;
+    limit?: number;
+    offset?: number;
+  }) => safe.get('/book/appointments', { params }),
   getAppointment: (id: number) => safe.get(`/book/appointments/${id}`),
   createAppointment: (data: any) => safe.post('/book/appointments', data),
   updateAppointment: (id: number, data: any) => safe.put(`/book/appointments/${id}`, data),

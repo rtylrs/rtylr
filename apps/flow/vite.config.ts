@@ -1,21 +1,21 @@
 /// <reference types='vitest' />
-import { defineConfig } from "vite";
-import path from "path";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import path from 'path';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: "./node_modules/.vite",
-  base: "/",
+  cacheDir: './node_modules/.vite',
+  base: '/',
   plugins: [react()],
   resolve: {
     alias: {
-      "@app": path.resolve(__dirname, "./src"),
-      "@screens": path.resolve(__dirname, "./src/screens"),
-      "@layouts": path.resolve(__dirname, "./src/layouts"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@stores": path.resolve(__dirname, "./src/stores"),
-      "@lib": path.resolve(__dirname, "./src/lib"),
+      '@app': path.resolve(__dirname, './src'),
+      '@screens': path.resolve(__dirname, './src/screens'),
+      '@layouts': path.resolve(__dirname, './src/layouts'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@stores': path.resolve(__dirname, './src/stores'),
+      '@lib': path.resolve(__dirname, './src/lib'),
     },
   },
   server: {
@@ -28,16 +28,16 @@ export default defineConfig(() => ({
   },
   preview: {
     port: 5183,
-    host: "localhost",
+    host: 'localhost',
     strictPort: true,
   },
   build: {
-    outDir: "../../dist/flow",
+    outDir: '../../dist/flow',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
-    target: "esnext",
-    minify: "esbuild" as const,
+    target: 'esnext',
+    minify: 'esbuild' as const,
     cssMinify: true,
     cssCodeSplit: true,
     modulePreload: true,
@@ -48,30 +48,16 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       output: {
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: [
-            "react",
-            "react-dom",
-            "react-router-dom",
-            "zustand",
-            "motion",
-            "lucide-react",
-          ],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "zustand",
-      "motion",
-      "lucide-react",
-    ],
+    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
   },
 }));

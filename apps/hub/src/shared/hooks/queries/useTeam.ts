@@ -38,7 +38,12 @@ export const useMember = (id: string | undefined) => {
       const res = await unwrap(safe.get(`/team/members/${id}`));
       const m = res?.user ?? res;
       if (!m) return undefined;
-      return { ...m, name: m.fullName || m.name || m.email, apps: m.apps ?? [], status: m.isActive ? 'active' : 'inactive' } as TeamMember;
+      return {
+        ...m,
+        name: m.fullName || m.name || m.email,
+        apps: m.apps ?? [],
+        status: m.isActive ? 'active' : 'inactive',
+      } as TeamMember;
     },
     enabled: !!id,
   });
@@ -47,7 +52,12 @@ export const useMember = (id: string | undefined) => {
 export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { email: string; fullName: string; role: TeamMember['role']; apps: string[] }) => {
+    mutationFn: async (payload: {
+      email: string;
+      fullName: string;
+      role: TeamMember['role'];
+      apps: string[];
+    }) => {
       const res = await unwrap(safe.post('/team/invite', payload));
       return res;
     },

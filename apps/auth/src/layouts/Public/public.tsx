@@ -7,31 +7,29 @@ const Public: React.FC<{
   hasPadding?: boolean;
   paddingTop?: string;
   hasHeader?: boolean;
-}> = React.memo(
-  ({ children, hasPadding = true, paddingTop = '30px', hasHeader = true }) => {
-    const marginTop = useMemo(() => {
-      const pathname = document.location.pathname;
-      if (pathname === '/') {
-        return '0px';
-      }
-      return hasPadding ? paddingTop : '0px';
-    }, [hasPadding, paddingTop]);
+}> = React.memo(({ children, hasPadding = true, paddingTop = '30px', hasHeader = true }) => {
+  const marginTop = useMemo(() => {
+    const pathname = document.location.pathname;
+    if (pathname === '/') {
+      return '0px';
+    }
+    return hasPadding ? paddingTop : '0px';
+  }, [hasPadding, paddingTop]);
 
-    const contentStyle = useMemo(
-      () => ({
-        marginTop,
-      }),
-      [marginTop]
-    );
+  const contentStyle = useMemo(
+    () => ({
+      marginTop,
+    }),
+    [marginTop]
+  );
 
-    return (
-      <div>
-        <HelmetContainer title="Rtylr Auth" />
-        {hasHeader && <Header />}
-        <div style={contentStyle}>{children}</div>
-      </div>
-    );
-  }
-);
+  return (
+    <div>
+      <HelmetContainer title="Rtylr Auth" />
+      {hasHeader && <Header />}
+      <div style={contentStyle}>{children}</div>
+    </div>
+  );
+});
 
 export default Public;

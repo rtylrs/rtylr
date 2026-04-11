@@ -74,7 +74,10 @@ const Products: React.FC = () => {
         description={`${products.length} products in your catalog`}
         actions={
           <>
-            <ImportCSV onImport={(rows) => toast.success(`${rows.length} rows queued`)} expectedColumns={['name', 'sku', 'category', 'stock']} />
+            <ImportCSV
+              onImport={(rows) => toast.success(`${rows.length} rows queued`)}
+              expectedColumns={['name', 'sku', 'category', 'stock']}
+            />
             <ExportButton data={exportable} filename="products.csv" />
             <button
               onClick={() => setShowAdd(true)}
@@ -192,12 +195,7 @@ const Products: React.FC = () => {
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {products.map((p) => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              selected={selected.has(p.id)}
-              onToggle={toggle}
-            />
+            <ProductCard key={p.id} product={p} selected={selected.has(p.id)} onToggle={toggle} />
           ))}
         </div>
       ) : (
@@ -230,8 +228,12 @@ const Products: React.FC = () => {
                 style={{
                   gridTemplateColumns: '0.2fr 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
                 <input
                   type="checkbox"
@@ -258,7 +260,8 @@ const Products: React.FC = () => {
                 <span
                   className="text-sm font-semibold"
                   style={{
-                    color: p.stock === 0 ? '#f87171' : p.stock < p.lowStock ? AMBER : 'var(--hub-text)',
+                    color:
+                      p.stock === 0 ? '#f87171' : p.stock < p.lowStock ? AMBER : 'var(--hub-text)',
                   }}
                 >
                   {p.stock}
@@ -279,14 +282,21 @@ const Products: React.FC = () => {
         onReset={() => setFilters({})}
       >
         <div>
-          <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="text-xs font-semibold mb-1 block"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Category
           </label>
           <select
             value={filters.category || ''}
             onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -297,14 +307,21 @@ const Products: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="text-xs font-semibold mb-1 block"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Brand
           </label>
           <select
             value={filters.brand || ''}
             onChange={(e) => setFilters({ ...filters, brand: e.target.value || undefined })}
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             <option value="">All brands</option>
             {brands.map((b) => (
@@ -315,14 +332,23 @@ const Products: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="text-xs font-semibold mb-1 block"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Status
           </label>
           <select
             value={filters.status || ''}
-            onChange={(e) => setFilters({ ...filters, status: (e.target.value as any) || undefined })}
+            onChange={(e) =>
+              setFilters({ ...filters, status: (e.target.value as any) || undefined })
+            }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             <option value="">All statuses</option>
             <option value="In Stock">In Stock</option>

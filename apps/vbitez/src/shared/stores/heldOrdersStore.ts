@@ -48,6 +48,6 @@ export const useHeldOrdersStore = create<HeldOrdersState & HeldOrdersActions>()(
           orders: s.orders.map((o) => (o.id === id ? { ...o, note } : o)),
         })),
     }),
-    { name: 'pos-held-orders' },
-  ),
+    { name: 'pos-held-orders' }
+  )
 );

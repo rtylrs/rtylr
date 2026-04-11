@@ -35,7 +35,7 @@ export const useMarkNotificationRead = () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });
       const prev = qc.getQueryData<Notification[]>(['notifications']);
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
-        (old ?? []).map((n) => (n.id === id ? { ...n, read: true } : n)),
+        (old ?? []).map((n) => (n.id === id ? { ...n, read: true } : n))
       );
       return { prev };
     },
@@ -54,7 +54,7 @@ export const useMarkAllNotificationsRead = () => {
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
-        (old ?? []).map((n) => ({ ...n, read: true })),
+        (old ?? []).map((n) => ({ ...n, read: true }))
       );
     },
   });

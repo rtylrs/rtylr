@@ -13,7 +13,11 @@ const Categories: React.FC = () => {
   const { data = [], isLoading } = useExpenseCategories();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Expense Categories"
         subtitle={`${data.length} categories`}
@@ -29,27 +33,63 @@ const Categories: React.FC = () => {
           <SkeletonRow />
         </div>
       ) : data.length === 0 ? (
-        <EmptyState icon={Tag} title="No categories yet" description="Create categories to organize expenses and set budgets." />
+        <EmptyState
+          icon={Tag}
+          title="No categories yet"
+          description="Create categories to organize expenses and set budgets."
+        />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 14,
+          }}
+        >
           {data.map((c) => {
             const pct = Math.min(100, Math.round((c.spent / c.budget) * 100));
             const over = c.spent > c.budget;
             return (
               <div key={c.id} style={{ ...cardStyle, padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 10,
+                  }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 10, height: 10, borderRadius: 5, background: c.color }} />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>{c.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                      {c.name}
+                    </span>
                   </div>
-                  <span style={{ fontSize: 11, color: over ? '#ef4444' : 'var(--hub-text-dim)' }}>{pct}%</span>
+                  <span style={{ fontSize: 11, color: over ? '#ef4444' : 'var(--hub-text-dim)' }}>
+                    {pct}%
+                  </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--hub-text-muted)', marginBottom: 8 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: 12,
+                    color: 'var(--hub-text-muted)',
+                    marginBottom: 8,
+                  }}
+                >
                   <span>
                     <MoneyDisplay amount={c.spent} /> of <MoneyDisplay amount={c.budget} />
                   </span>
                 </div>
-                <div style={{ height: 6, background: 'var(--hub-hover)', borderRadius: 3, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: 6,
+                    background: 'var(--hub-hover)',
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                  }}
+                >
                   <div
                     style={{
                       width: `${pct}%`,

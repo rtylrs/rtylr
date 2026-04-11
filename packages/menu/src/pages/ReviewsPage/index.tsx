@@ -8,12 +8,12 @@ interface ReviewsPageProps {
   reviewCount?: number;
 }
 
-const StarRow: React.FC<{ rating: number; max?: number; interactive?: boolean; onChange?: (r: number) => void }> = ({
-  rating,
-  max = 5,
-  interactive = false,
-  onChange,
-}) => {
+const StarRow: React.FC<{
+  rating: number;
+  max?: number;
+  interactive?: boolean;
+  onChange?: (r: number) => void;
+}> = ({ rating, max = 5, interactive = false, onChange }) => {
   const [hovered, setHovered] = useState(0);
   return (
     <div className={styles.stars}>
@@ -43,9 +43,9 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
   const [newName, setNewName] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const avg = averageRating ?? (reviews.length > 0
-    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-    : 0);
+  const avg =
+    averageRating ??
+    (reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0);
   const total = reviewCount ?? reviews.length;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -61,7 +61,9 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
         <span className={styles.reviews__avgNum}>{avg.toFixed(1)}</span>
         <div className={styles.reviews__avgRight}>
           <StarRow rating={Math.round(avg)} />
-          <span className={styles.reviews__count}>{total} review{total !== 1 ? 's' : ''}</span>
+          <span className={styles.reviews__count}>
+            {total} review{total !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 

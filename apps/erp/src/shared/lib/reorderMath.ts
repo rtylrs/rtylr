@@ -18,11 +18,7 @@ export function calculateReorderPoint(
  * Economic Order Quantity (EOQ) = sqrt((2 × D × S) / H)
  * D = annual demand, S = order cost, H = holding cost per unit per year
  */
-export function calculateEOQ(
-  annualDemand: number,
-  orderCost: number,
-  holdingCost: number
-): number {
+export function calculateEOQ(annualDemand: number, orderCost: number, holdingCost: number): number {
   if (annualDemand <= 0 || orderCost <= 0 || holdingCost <= 0) return 0;
   return Math.ceil(Math.sqrt((2 * annualDemand * orderCost) / holdingCost));
 }

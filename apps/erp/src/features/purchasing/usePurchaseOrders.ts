@@ -20,7 +20,8 @@ export function useCreatePurchaseOrder() {
 export function useUpdatePurchaseOrderStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => unwrap(erpApi.updatePurchaseOrderStatus(id, status)),
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      unwrap(erpApi.updatePurchaseOrderStatus(id, status)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
   });
 }

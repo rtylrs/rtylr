@@ -4,49 +4,53 @@
 
 /* ── Brand accent (Voxire logo palette) ──────────────────────── */
 :root {
-  --accent:           #4583C4;
-  --accent-muted:     rgba(69,131,196,0.12);
-  --accent-border:    rgba(69,131,196,0.3);
-  --accent-focus:     rgba(69,131,196,0.5);
+  --accent: #4583c4;
+  --accent-muted: rgba(69, 131, 196, 0.12);
+  --accent-border: rgba(69, 131, 196, 0.3);
+  --accent-focus: rgba(69, 131, 196, 0.5);
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
-:root[data-theme="dark"] {
-  --hub-bg:           #0a0a0a;
-  --hub-surface:      #111111;
-  --hub-card:         #161616;
-  --hub-border:       rgba(255,255,255,0.07);
+:root[data-theme='dark'] {
+  --hub-bg: #0a0a0a;
+  --hub-surface: #111111;
+  --hub-card: #161616;
+  --hub-border: rgba(255, 255, 255, 0.07);
   --hub-border-focus: var(--accent-focus);
-  --hub-text:         rgba(240,240,238,0.92);
-  --hub-text-muted:   rgba(240,240,238,0.5);
-  --hub-text-dim:     rgba(240,240,238,0.28);
-  --hub-hover:        rgba(255,255,255,0.05);
-  --hub-active:       rgba(255,255,255,0.08);
-  --hub-input-bg:     rgba(255,255,255,0.04);
-  --hub-scrollbar:    rgba(255,255,255,0.12);
-  --hub-shadow:       0 8px 32px rgba(0,0,0,0.5);
+  --hub-text: rgba(240, 240, 238, 0.92);
+  --hub-text-muted: rgba(240, 240, 238, 0.5);
+  --hub-text-dim: rgba(240, 240, 238, 0.28);
+  --hub-hover: rgba(255, 255, 255, 0.05);
+  --hub-active: rgba(255, 255, 255, 0.08);
+  --hub-input-bg: rgba(255, 255, 255, 0.04);
+  --hub-scrollbar: rgba(255, 255, 255, 0.12);
+  --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Light mode ──────────────────────────────────────────────── */
-:root[data-theme="light"] {
-  --hub-bg:           #f4f4f5;
-  --hub-surface:      #ffffff;
-  --hub-card:         #ffffff;
-  --hub-border:       rgba(0,0,0,0.08);
+:root[data-theme='light'] {
+  --hub-bg: #f4f4f5;
+  --hub-surface: #ffffff;
+  --hub-card: #ffffff;
+  --hub-border: rgba(0, 0, 0, 0.08);
   --hub-border-focus: var(--accent-focus);
-  --hub-text:         rgb(9,9,11);
-  --hub-text-muted:   rgba(9,9,11,0.5);
-  --hub-text-dim:     rgba(9,9,11,0.35);
-  --hub-hover:        rgba(0,0,0,0.05);
-  --hub-active:       rgba(0,0,0,0.09);
-  --hub-input-bg:     #ffffff;
-  --hub-scrollbar:    rgba(0,0,0,0.15);
-  --hub-shadow:       0 8px 32px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  --hub-text: rgb(9, 9, 11);
+  --hub-text-muted: rgba(9, 9, 11, 0.5);
+  --hub-text-dim: rgba(9, 9, 11, 0.35);
+  --hub-hover: rgba(0, 0, 0, 0.05);
+  --hub-active: rgba(0, 0, 0, 0.09);
+  --hub-input-bg: #ffffff;
+  --hub-scrollbar: rgba(0, 0, 0, 0.15);
+  --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   html {
     font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
     background: var(--hub-bg);
@@ -66,24 +70,32 @@
     overflow: hidden;
   }
 
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--hub-scrollbar); border-radius: 9999px; }
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--hub-scrollbar);
+    border-radius: 9999px;
+  }
 }
 
 /* ── Legacy CSS vars for @voxire/menu SCSS ───────────────────── */
 :root {
   --admin-bg: var(--hub-bg);
   --primary-color: var(--hub-text);
-  --accent-color: #4583C4;
+  --accent-color: #4583c4;
   --primary-font: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
 }
 
 /* Shepherd.js tour overrides */
 .shepherd-element {
   border-radius: 12px !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   max-width: 340px !important;
 }
 .shepherd-text {
@@ -105,7 +117,7 @@
   padding: 6px 16px !important;
 }
 .shepherd-button:not(.shepherd-button-secondary) {
-  background: #4583C4 !important;
+  background: #4583c4 !important;
   color: #fff !important;
 }
 .shepherd-button-secondary {
@@ -118,7 +130,6 @@
 .shepherd-arrow:before {
   background: #fff !important;
 }
-
 
 /* react-grid-layout overrides */
 .react-grid-item.react-grid-placeholder {
@@ -138,4 +149,3 @@
 .react-grid-item > .react-resizable-handle::after {
   border-color: var(--hub-text-dim) !important;
 }
-

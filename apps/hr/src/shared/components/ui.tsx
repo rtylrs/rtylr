@@ -31,7 +31,11 @@ export function useIsMobile(maxWidth = 768): boolean {
 }
 
 /* ── Card ── */
-export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ style, children, ...rest }) => (
+export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  style,
+  children,
+  ...rest
+}) => (
   <div
     style={{
       background: 'var(--hr-card)',
@@ -47,17 +51,44 @@ export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ style, ch
 );
 
 /* ── Section header ── */
-export const SectionHeader: React.FC<{ title: string; subtitle?: string; right?: React.ReactNode }> = ({ title, subtitle, right }) => {
+export const SectionHeader: React.FC<{
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}> = ({ title, subtitle, right }) => {
   const stacked = useIsMobile(720);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 4,
+      }}
+    >
       <div>
-        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>{title}</h2>
-        {subtitle && <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>{subtitle}</p>}
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>
+          {title}
+        </h2>
+        {subtitle && (
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>
+            {subtitle}
+          </p>
+        )}
       </div>
       {right && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: stacked ? '100%' : 'auto', justifyContent: stacked ? 'flex-start' : 'flex-end' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+            width: stacked ? '100%' : 'auto',
+            justifyContent: stacked ? 'flex-start' : 'flex-end',
+          }}
+        >
           {right}
         </div>
       )}
@@ -68,7 +99,10 @@ export const SectionHeader: React.FC<{ title: string; subtitle?: string; right?:
 /* ── Button ── */
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export const Button: React.FC<
-  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; icon?: React.ReactNode }
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: ButtonVariant;
+    icon?: React.ReactNode;
+  }
 > = ({ variant = 'secondary', icon, children, style, ...rest }) => {
   const base: React.CSSProperties = {
     display: 'inline-flex',
@@ -107,7 +141,10 @@ export const Button: React.FC<
 };
 
 /* ── Input ── */
-export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ style, ...rest }) => (
+export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
+  style,
+  ...rest
+}) => (
   <input
     style={{
       width: '100%',
@@ -124,7 +161,10 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ s
   />
 );
 
-export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({ style, ...rest }) => (
+export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({
+  style,
+  ...rest
+}) => (
   <textarea
     style={{
       width: '100%',
@@ -144,7 +184,11 @@ export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement
   />
 );
 
-export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = ({ style, children, ...rest }) => (
+export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = ({
+  style,
+  children,
+  ...rest
+}) => (
   <select
     style={{
       width: '100%',
@@ -164,7 +208,11 @@ export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
 );
 
 /* ── Label ── */
-export const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({ children, style, ...rest }) => (
+export const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({
+  children,
+  style,
+  ...rest
+}) => (
   <label
     style={{
       display: 'block',
@@ -183,7 +231,11 @@ export const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({ c
 );
 
 /* ── Pill / Badge ── */
-export const Pill: React.FC<{ color?: string; children: React.ReactNode; style?: React.CSSProperties }> = ({ color = ACCENT, children, style }) => (
+export const Pill: React.FC<{
+  color?: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}> = ({ color = ACCENT, children, style }) => (
   <span
     style={{
       display: 'inline-flex',
@@ -203,7 +255,12 @@ export const Pill: React.FC<{ color?: string; children: React.ReactNode; style?:
 );
 
 /* ── EmptyState ── */
-export const EmptyState: React.FC<{ icon?: React.ReactNode; title: string; description?: string; action?: React.ReactNode }> = ({ icon, title, description, action }) => (
+export const EmptyState: React.FC<{
+  icon?: React.ReactNode;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}> = ({ icon, title, description, action }) => (
   <div
     style={{
       padding: 'clamp(24px, 6vw, 48px)',
@@ -213,21 +270,43 @@ export const EmptyState: React.FC<{ icon?: React.ReactNode; title: string; descr
       borderRadius: 12,
     }}
   >
-    {icon && <div style={{ display: 'inline-flex', padding: 12, borderRadius: 12, background: 'var(--hr-hover)', color: 'var(--hr-text-muted)', marginBottom: 12 }}>{icon}</div>}
+    {icon && (
+      <div
+        style={{
+          display: 'inline-flex',
+          padding: 12,
+          borderRadius: 12,
+          background: 'var(--hr-hover)',
+          color: 'var(--hr-text-muted)',
+          marginBottom: 12,
+        }}
+      >
+        {icon}
+      </div>
+    )}
     <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>{title}</p>
-    {description && <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>{description}</p>}
+    {description && (
+      <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
+        {description}
+      </p>
+    )}
     {action && <div style={{ marginTop: 16 }}>{action}</div>}
   </div>
 );
 
 /* ── Skeleton loader ── */
-export const Skeleton: React.FC<{ height?: number | string; width?: number | string; style?: React.CSSProperties }> = ({ height = 16, width = '100%', style }) => (
+export const Skeleton: React.FC<{
+  height?: number | string;
+  width?: number | string;
+  style?: React.CSSProperties;
+}> = ({ height = 16, width = '100%', style }) => (
   <div
     style={{
       height,
       width,
       borderRadius: 8,
-      background: 'linear-gradient(90deg, var(--hr-hover) 25%, var(--hr-active) 50%, var(--hr-hover) 75%)',
+      background:
+        'linear-gradient(90deg, var(--hr-hover) 25%, var(--hr-active) 50%, var(--hr-hover) 75%)',
       backgroundSize: '200% 100%',
       animation: 'hr-shimmer 1.5s ease-in-out infinite',
       ...style,
@@ -236,7 +315,13 @@ export const Skeleton: React.FC<{ height?: number | string; width?: number | str
 );
 
 /* ── Modal ── */
-export const Modal: React.FC<{ open: boolean; onClose: () => void; title?: string; children?: React.ReactNode; width?: number }> = ({ open, onClose, title, children, width = 480 }) => {
+export const Modal: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  children?: React.ReactNode;
+  width?: number;
+}> = ({ open, onClose, title, children, width = 480 }) => {
   if (!open) return null;
   return (
     <div
@@ -266,7 +351,13 @@ export const Modal: React.FC<{ open: boolean; onClose: () => void; title?: strin
           boxShadow: 'var(--hr-shadow)',
         }}
       >
-        {title && <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>{title}</h3>}
+        {title && (
+          <h3
+            style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}
+          >
+            {title}
+          </h3>
+        )}
         {children}
       </div>
     </div>
@@ -282,19 +373,47 @@ export const ConfirmDialog: React.FC<{
   variant?: 'danger' | 'primary';
   onConfirm: () => void;
   onCancel: () => void;
-}> = ({ open, title, description, confirmLabel = 'Confirm', variant = 'primary', onConfirm, onCancel }) => (
+}> = ({
+  open,
+  title,
+  description,
+  confirmLabel = 'Confirm',
+  variant = 'primary',
+  onConfirm,
+  onCancel,
+}) => (
   <Modal open={open} onClose={onCancel} title={title} width={380}>
-    {description && <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>{description}</p>}
+    {description && (
+      <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>
+        {description}
+      </p>
+    )}
     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-      <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-      <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel}</Button>
+      <Button variant="ghost" onClick={onCancel}>
+        Cancel
+      </Button>
+      <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
+        {confirmLabel}
+      </Button>
     </div>
   </Modal>
 );
 
 /* ── Breadcrumbs ── */
-export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string }> }> = ({ items }) => (
-  <nav style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 11, color: 'var(--hr-text-muted)', marginBottom: 12 }}>
+export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string }> }> = ({
+  items,
+}) => (
+  <nav
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      flexWrap: 'wrap',
+      fontSize: 11,
+      color: 'var(--hr-text-muted)',
+      marginBottom: 12,
+    }}
+  >
     {items.map((item, i) => {
       const last = i === items.length - 1;
       return (
@@ -304,7 +423,14 @@ export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string
               {item.label}
             </a>
           ) : (
-            <span style={{ color: last ? 'var(--hr-text)' : 'var(--hr-text-muted)', fontWeight: last ? 600 : 400 }}>{item.label}</span>
+            <span
+              style={{
+                color: last ? 'var(--hr-text)' : 'var(--hr-text-muted)',
+                fontWeight: last ? 600 : 400,
+              }}
+            >
+              {item.label}
+            </span>
           )}
           {!last && <span style={{ color: 'var(--hr-text-dim)' }}>/</span>}
         </React.Fragment>
@@ -323,8 +449,25 @@ export const StatCard: React.FC<{
   color?: string;
 }> = ({ label, value, sub, icon, trend, color = ACCENT }) => (
   <Card>
-    <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: 8 }}>
-      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--hr-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'start',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: 'var(--hr-text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        {label}
+      </span>
       {icon && (
         <span style={{ padding: 6, borderRadius: 8, background: `${color}22`, color }}>{icon}</span>
       )}
@@ -332,7 +475,14 @@ export const StatCard: React.FC<{
     <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>{value}</div>
     {sub && <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 4 }}>{sub}</div>}
     {trend && (
-      <div style={{ fontSize: 11, color: trend.value >= 0 ? '#10b981' : '#ef4444', marginTop: 4, fontWeight: 600 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: trend.value >= 0 ? '#10b981' : '#ef4444',
+          marginTop: 4,
+          fontWeight: 600,
+        }}
+      >
         {trend.value >= 0 ? '+' : ''}
         {trend.value}% {trend.label}
       </div>
@@ -341,8 +491,21 @@ export const StatCard: React.FC<{
 );
 
 /* ── Tabs ── */
-export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: string) => void }> = ({ tabs, active, onChange }) => (
-  <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid var(--hr-border)', marginBottom: 16 }}>
+export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: string) => void }> = ({
+  tabs,
+  active,
+  onChange,
+}) => (
+  <div
+    style={{
+      display: 'flex',
+      gap: 4,
+      overflowX: 'auto',
+      paddingBottom: 4,
+      borderBottom: '1px solid var(--hr-border)',
+      marginBottom: 16,
+    }}
+  >
     {tabs.map((tab) => (
       <button
         key={tab}
@@ -367,8 +530,21 @@ export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: stri
 );
 
 /* ── Checkbox ── */
-export const Checkbox: React.FC<{ checked: boolean; onChange: (v: boolean) => void; label?: string }> = ({ checked, onChange, label }) => (
-  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: 'var(--hr-text)' }}>
+export const Checkbox: React.FC<{
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label?: string;
+}> = ({ checked, onChange, label }) => (
+  <label
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 8,
+      cursor: 'pointer',
+      fontSize: 12,
+      color: 'var(--hr-text)',
+    }}
+  >
     <span
       onClick={() => onChange(!checked)}
       style={{

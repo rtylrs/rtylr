@@ -20,7 +20,11 @@ const RecurringInvoices: React.FC = () => {
   const { data = [], isLoading } = useRecurringInvoices();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Recurring Invoices"
         subtitle={`${data.length} active subscriptions`}
@@ -67,16 +71,37 @@ const RecurringInvoices: React.FC = () => {
             </thead>
             <tbody>
               {data.map((r) => (
-                <tr
-                  key={r.id}
-                  style={{ borderBottom: '1px solid var(--hub-border)' }}
-                >
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>{r.client}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{cadenceLabel[r.cadence]}</td>
-                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                <tr key={r.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--hub-text)',
+                    }}
+                  >
+                    {r.client}
+                  </td>
+                  <td
+                    style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                  >
+                    {cadenceLabel[r.cadence]}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--hub-text)',
+                    }}
+                  >
                     <MoneyDisplay amount={r.amount} />
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>{r.nextDate}</td>
+                  <td
+                    style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
+                  >
+                    {r.nextDate}
+                  </td>
                   <td style={{ padding: '12px 16px' }}>
                     <span
                       style={{
@@ -84,7 +109,8 @@ const RecurringInvoices: React.FC = () => {
                         fontWeight: 600,
                         padding: '3px 10px',
                         borderRadius: 20,
-                        background: r.status === 'active' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                        background:
+                          r.status === 'active' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
                         color: r.status === 'active' ? ACCENT : '#f59e0b',
                       }}
                     >
@@ -96,7 +122,9 @@ const RecurringInvoices: React.FC = () => {
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         onClick={() =>
-                          toast.success(r.status === 'active' ? `Paused ${r.client}` : `Resumed ${r.client}`)
+                          toast.success(
+                            r.status === 'active' ? `Paused ${r.client}` : `Resumed ${r.client}`
+                          )
                         }
                       >
                         {r.status === 'active' ? <Pause size={12} /> : <Play size={12} />}

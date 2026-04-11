@@ -1,25 +1,23 @@
-import React, { useMemo, useCallback } from "react";
-import { useTranslation } from "react-i18next";
-import styles from "./ticker.module.scss";
+import React, { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import styles from './ticker.module.scss';
 
-const TickerItem: React.FC<{ text: string; emoji: string }> = React.memo(
-  ({ text, emoji }) => (
-    <div className={styles['ticker-item']}>
-      <p>{text}</p>
-      <p>{emoji}</p>
-    </div>
-  )
-);
+const TickerItem: React.FC<{ text: string; emoji: string }> = React.memo(({ text, emoji }) => (
+  <div className={styles['ticker-item']}>
+    <p>{text}</p>
+    <p>{emoji}</p>
+  </div>
+));
 
-TickerItem.displayName = "TickerItem";
+TickerItem.displayName = 'TickerItem';
 
 const Ticker: React.FC = () => {
   const { t } = useTranslation();
 
   const tickerData = useMemo(
     () => ({
-      text: t("Ticker.banner_text"),
-      emoji: "🔥",
+      text: t('Ticker.banner_text'),
+      emoji: '🔥',
     }),
     [t]
   );

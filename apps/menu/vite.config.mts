@@ -73,25 +73,19 @@ export default defineConfig(() => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'zustand',
-            'motion',
-          ],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion'],
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'zustand',
-      'motion',
+    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion'],
+    exclude: [
+      '@voxire/components',
+      '@voxire/config',
+      '@voxire/menu',
+      '@voxire/ui',
+      '@voxire/tailwind-config',
     ],
-    exclude: ['@voxire/components', '@voxire/config', '@voxire/menu', '@voxire/ui', '@voxire/tailwind-config'],
   },
 }));

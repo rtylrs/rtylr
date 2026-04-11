@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Select, Skeleton, useIsMobile } from '../../shared/components/ui';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Label,
+  Input,
+  Select,
+  Skeleton,
+  useIsMobile,
+} from '../../shared/components/ui';
 import { HrSettings } from '../../shared/services/hrExtras';
 
 const Settings: React.FC = () => {
@@ -27,29 +36,53 @@ const Settings: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
       <SectionHeader title="HR Settings" subtitle="Work week, overtime, PTO policy, and currency" />
       <Card>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+        <div
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
+        >
           <div>
             <Label>Work week starts on</Label>
-            <Select value={form.workWeekStart} onChange={(e) => setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })}>
+            <Select
+              value={form.workWeekStart}
+              onChange={(e) =>
+                setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })
+              }
+            >
               <option value="Monday">Monday</option>
               <option value="Sunday">Sunday</option>
             </Select>
           </div>
           <div>
             <Label>Weekly hours</Label>
-            <Input type="number" value={form.weeklyHours} onChange={(e) => setForm({ ...form, weeklyHours: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={form.weeklyHours}
+              onChange={(e) => setForm({ ...form, weeklyHours: Number(e.target.value) })}
+            />
           </div>
           <div>
             <Label>Overtime after (hrs/week)</Label>
-            <Input type="number" value={form.overtimeAfterHours} onChange={(e) => setForm({ ...form, overtimeAfterHours: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={form.overtimeAfterHours}
+              onChange={(e) => setForm({ ...form, overtimeAfterHours: Number(e.target.value) })}
+            />
           </div>
           <div>
             <Label>PTO policy (days/year)</Label>
-            <Input type="number" value={form.ptoPolicyDays} onChange={(e) => setForm({ ...form, ptoPolicyDays: Number(e.target.value) })} />
+            <Input
+              type="number"
+              value={form.ptoPolicyDays}
+              onChange={(e) => setForm({ ...form, ptoPolicyDays: Number(e.target.value) })}
+            />
           </div>
           <div>
             <Label>Currency</Label>
-            <Select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value as HrSettings['currency'] })}>
+            <Select
+              value={form.currency}
+              onChange={(e) =>
+                setForm({ ...form, currency: e.target.value as HrSettings['currency'] })
+              }
+            >
               <option value="USD">USD - US Dollar</option>
               <option value="EUR">EUR - Euro</option>
               <option value="GBP">GBP - Pound</option>
@@ -57,7 +90,9 @@ const Settings: React.FC = () => {
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
-          <Button variant="primary" onClick={save}>Save settings</Button>
+          <Button variant="primary" onClick={save}>
+            Save settings
+          </Button>
         </div>
       </Card>
     </div>

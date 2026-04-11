@@ -51,22 +51,28 @@ const tiers: Tier[] = [
     minPoints: 2500,
     discount: 20,
     memberCount: 98,
-    perks: ['20% discount', 'Dedicated concierge', 'Quarterly gift', 'VIP events', 'Free delivery (unlimited)'],
+    perks: [
+      '20% discount',
+      'Dedicated concierge',
+      'Quarterly gift',
+      'VIP events',
+      'Free delivery (unlimited)',
+    ],
   },
 ];
 
 const defaultActivityLog: LoyaltyTransaction[] = [
-  { customer: 'Sarah Johnson',   action: 'Earned 240 points',   time: '2 hours ago', type: 'earn' },
-  { customer: 'Michael Chen',    action: 'Redeemed 500 points', time: '5 hours ago', type: 'redeem' },
-  { customer: 'Emily Rodriguez', action: 'Upgraded to Gold',    time: '1 day ago',   type: 'upgrade' },
-  { customer: 'James Wilson',    action: 'Earned 120 points',   time: '1 day ago',   type: 'earn' },
-  { customer: 'Aisha Patel',     action: 'Earned 80 points',    time: '2 days ago',  type: 'earn' },
-  { customer: 'David Kim',       action: 'Redeemed 200 points', time: '3 days ago',  type: 'redeem' },
+  { customer: 'Sarah Johnson', action: 'Earned 240 points', time: '2 hours ago', type: 'earn' },
+  { customer: 'Michael Chen', action: 'Redeemed 500 points', time: '5 hours ago', type: 'redeem' },
+  { customer: 'Emily Rodriguez', action: 'Upgraded to Gold', time: '1 day ago', type: 'upgrade' },
+  { customer: 'James Wilson', action: 'Earned 120 points', time: '1 day ago', type: 'earn' },
+  { customer: 'Aisha Patel', action: 'Earned 80 points', time: '2 days ago', type: 'earn' },
+  { customer: 'David Kim', action: 'Redeemed 200 points', time: '3 days ago', type: 'redeem' },
 ];
 
 const activityColor: Record<string, string> = {
-  earn:    '#10b981',
-  redeem:  ACCENT,
+  earn: '#10b981',
+  redeem: ACCENT,
   upgrade: '#f59e0b',
 };
 
@@ -86,14 +92,17 @@ const Loyalty: React.FC = () => {
     }
   }, [config]);
 
-  const activityLog: LoyaltyTransaction[] = transactions && transactions.length ? transactions : defaultActivityLog;
+  const activityLog: LoyaltyTransaction[] =
+    transactions && transactions.length ? transactions : defaultActivityLog;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>Loyalty Program</h2>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+            Loyalty Program
+          </h2>
           <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
             Configure tiers, point rules, and member rewards
           </p>
@@ -134,27 +143,87 @@ const Loyalty: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
           <Gift size={16} style={{ color: ACCENT }} />
-          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>Program Configuration</span>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
+            Program Configuration
+          </span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--hub-text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--hub-text-muted)',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               Points per $1 spent
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => setPointsPerDollar((v) => Math.max(1, v - 1))}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--hub-border)', background: 'var(--hub-hover)', color: 'var(--hub-text)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >−</button>
-              <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--hub-text)', minWidth: '40px', textAlign: 'center' }}>{pointsPerDollar}</span>
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-hover)',
+                  color: 'var(--hub-text)',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                −
+              </button>
+              <span
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: 'var(--hub-text)',
+                  minWidth: '40px',
+                  textAlign: 'center',
+                }}
+              >
+                {pointsPerDollar}
+              </span>
               <button
                 onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--hub-border)', background: 'var(--hub-hover)', color: 'var(--hub-text)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >+</button>
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-hover)',
+                  color: 'var(--hub-text)',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                +
+              </button>
             </div>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--hub-text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--hub-text-muted)',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               Points expiry (days)
             </label>
             <select
@@ -180,7 +249,17 @@ const Loyalty: React.FC = () => {
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--hub-text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--hub-text-muted)',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               Redemption rate
             </label>
             <div style={{ fontSize: '13px', color: 'var(--hub-text)', lineHeight: '36px' }}>
@@ -192,7 +271,17 @@ const Loyalty: React.FC = () => {
 
       {/* Tier cards */}
       <div>
-        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', marginBottom: '12px', marginTop: 0 }}>Loyalty Tiers</h3>
+        <h3
+          style={{
+            fontSize: '14px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            marginBottom: '12px',
+            marginTop: 0,
+          }}
+        >
+          Loyalty Tiers
+        </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
           {tiers.map((tier, i) => {
             const Icon = tier.icon;
@@ -212,7 +301,9 @@ const Loyalty: React.FC = () => {
                   gap: '12px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <div
                     style={{
                       width: '36px',
@@ -240,9 +331,15 @@ const Loyalty: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>{tier.name}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
-                    {tier.minPoints === 0 ? 'Starting tier' : `From ${tier.minPoints.toLocaleString()} pts`}
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                    {tier.name}
+                  </div>
+                  <div
+                    style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}
+                  >
+                    {tier.minPoints === 0
+                      ? 'Starting tier'
+                      : `From ${tier.minPoints.toLocaleString()} pts`}
                   </div>
                 </div>
                 <div
@@ -253,12 +350,28 @@ const Loyalty: React.FC = () => {
                     border: `1px solid ${tier.color}25`,
                   }}
                 >
-                  <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>{tier.discount}%</span>
-                  <span style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginLeft: '4px' }}>discount</span>
+                  <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>
+                    {tier.discount}%
+                  </span>
+                  <span
+                    style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginLeft: '4px' }}
+                  >
+                    discount
+                  </span>
                 </div>
-                <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <ul
+                  style={{
+                    margin: 0,
+                    padding: '0 0 0 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                  }}
+                >
                   {tier.perks.map((perk) => (
-                    <li key={perk} style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{perk}</li>
+                    <li key={perk} style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                      {perk}
+                    </li>
                   ))}
                 </ul>
               </motion.div>
@@ -279,9 +392,19 @@ const Loyalty: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--hub-border)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
           <Clock size={14} style={{ color: ACCENT }} />
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>Points Activity Log</span>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+            Points Activity Log
+          </span>
         </div>
         {activityLog.map((entry, i) => (
           <div
@@ -304,8 +427,12 @@ const Loyalty: React.FC = () => {
               }}
             />
             <div style={{ flex: 1 }}>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{entry.customer}</span>
-              <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>: {entry.action}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+                {entry.customer}
+              </span>
+              <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>
+                : {entry.action}
+              </span>
             </div>
             <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{entry.time}</span>
           </div>

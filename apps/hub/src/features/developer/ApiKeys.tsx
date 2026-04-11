@@ -11,17 +11,24 @@ import {
   DialogFooter,
   Input,
   Label,
-} from "../../shared/components/ui";
-import { ApiKeyRow, Breadcrumbs, ConfirmDialog, EmptyState, PermissionCheckbox, SkeletonList } from "../../shared/components/hub";
+} from '../../shared/components/ui';
+import {
+  ApiKeyRow,
+  Breadcrumbs,
+  ConfirmDialog,
+  EmptyState,
+  PermissionCheckbox,
+  SkeletonList,
+} from '../../shared/components/hub';
 import {
   useApiKeys,
   useCreateApiKey,
   useRevokeApiKey,
   type ApiKey,
-} from "../../shared/hooks/queries/useApiKeys";
+} from '../../shared/hooks/queries/useApiKeys';
 
 const SCOPE_OPTIONS = [
-  { key: 'read',  label: 'Read',  description: 'Read access to all resources' },
+  { key: 'read', label: 'Read', description: 'Read access to all resources' },
   { key: 'write', label: 'Write', description: 'Create and update resources' },
   { key: 'admin', label: 'Admin', description: 'Full workspace access' },
 ];
@@ -48,14 +55,18 @@ const ApiKeys: React.FC = () => {
 
   return (
     <div className="space-y-5 max-w-4xl">
-      
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(69,131,196,0.15)' }}>
+          <div
+            className="h-9 w-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(69,131,196,0.15)' }}
+          >
             <KeyRound size={16} style={{ color: '#4583C4' }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>API keys</h1>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+              API keys
+            </h1>
             <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
               Keys grant programmatic access to your workspace data.
             </p>
@@ -67,9 +78,14 @@ const ApiKeys: React.FC = () => {
         </Button>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
         {isLoading ? (
-          <div className="p-2"><SkeletonList rows={3} withAvatar={false} /></div>
+          <div className="p-2">
+            <SkeletonList rows={3} withAvatar={false} />
+          </div>
         ) : data.length === 0 ? (
           <div className="p-4">
             <EmptyState
@@ -82,7 +98,13 @@ const ApiKeys: React.FC = () => {
           </div>
         ) : (
           <div className="p-2">
-            {data.map((k) => <ApiKeyRow key={k.id} apiKey={k} onRevoke={(id) => setToRevoke(data.find((x) => x.id === id) ?? null)} />)}
+            {data.map((k) => (
+              <ApiKeyRow
+                key={k.id}
+                apiKey={k}
+                onRevoke={(id) => setToRevoke(data.find((x) => x.id === id) ?? null)}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -96,7 +118,12 @@ const ApiKeys: React.FC = () => {
           <div className="px-6 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="key-name">Name</Label>
-              <Input id="key-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Production server" />
+              <Input
+                id="key-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Production server"
+              />
             </div>
             <div className="space-y-2">
               <Label>Scopes</Label>
@@ -107,18 +134,28 @@ const ApiKeys: React.FC = () => {
                 >
                   <PermissionCheckbox
                     checked={scopes.includes(opt.key)}
-                    onChange={(v) => setScopes((prev) => (v ? [...prev, opt.key] : prev.filter((s) => s !== opt.key)))}
+                    onChange={(v) =>
+                      setScopes((prev) =>
+                        v ? [...prev, opt.key] : prev.filter((s) => s !== opt.key)
+                      )
+                    }
                   />
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>{opt.label}</p>
-                    <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>{opt.description}</p>
+                    <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                      {opt.label}
+                    </p>
+                    <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      {opt.description}
+                    </p>
                   </div>
                 </label>
               ))}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setCreateOpen(false)}>Cancel</Button>
+            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={submitCreate} disabled={create.isPending || !name.trim()}>
               Create key
             </Button>
@@ -130,12 +167,18 @@ const ApiKeys: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Your new API key</DialogTitle>
-            <DialogDescription>Copy it now — you won&apos;t be able to see it again.</DialogDescription>
+            <DialogDescription>
+              Copy it now — you won&apos;t be able to see it again.
+            </DialogDescription>
           </DialogHeader>
           <div className="px-6 pb-4">
             <div
               className="flex items-center gap-2 p-3 rounded-lg font-mono text-xs break-all"
-              style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+              style={{
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
             >
               {showKey}
             </div>

@@ -4,4 +4,3 @@ export const ASSETS = {
     light: 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp',
   },
 };
-

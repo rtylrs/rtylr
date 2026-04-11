@@ -49,8 +49,12 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             <Sparkles size={18} style={{ color: '#4583C4' }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{title}</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>{description}</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              {title}
+            </p>
+            <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+              {description}
+            </p>
             {onCta && (
               <button
                 onClick={onCta}

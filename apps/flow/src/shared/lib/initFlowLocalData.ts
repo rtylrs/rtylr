@@ -66,8 +66,7 @@ export function initFlowLocalData(): void {
         id: 'tpl-shutdown',
         name: 'End-of-day shutdown',
         title: 'Shutdown: ',
-        description:
-          'Close loops (inbox, waiting-on). Note tomorrow\'s first move in one line.',
+        description: "Close loops (inbox, waiting-on). Note tomorrow's first move in one line.",
         priority: 'low',
         status: 'todo',
         estimate: 0.25,

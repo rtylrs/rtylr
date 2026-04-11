@@ -11,7 +11,9 @@ export const BulkEditBar: React.FC = () => {
 
   const act = (patch: Partial<Task>) => {
     bulkUpdateTasks(selectedTaskIds, patch);
-    toast.success(`Updated ${selectedTaskIds.length} task${selectedTaskIds.length !== 1 ? 's' : ''}`);
+    toast.success(
+      `Updated ${selectedTaskIds.length} task${selectedTaskIds.length !== 1 ? 's' : ''}`
+    );
     clearSelection();
   };
 
@@ -29,16 +31,10 @@ export const BulkEditBar: React.FC = () => {
           boxShadow: 'var(--flow-shadow)',
         }}
       >
-        <span
-          className="text-[11px] font-semibold px-2"
-          style={{ color: 'var(--flow-text)' }}
-        >
+        <span className="text-[11px] font-semibold px-2" style={{ color: 'var(--flow-text)' }}>
           {selectedTaskIds.length} selected
         </span>
-        <div
-          className="h-4 w-px mx-1"
-          style={{ background: 'var(--flow-border)' }}
-        />
+        <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
           onClick={() => act({ status: 'done' })}
           className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)]"
@@ -75,10 +71,7 @@ export const BulkEditBar: React.FC = () => {
         >
           <Trash2 size={11} /> Delete
         </button>
-        <div
-          className="h-4 w-px mx-1"
-          style={{ background: 'var(--flow-border)' }}
-        />
+        <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
           onClick={clearSelection}
           className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

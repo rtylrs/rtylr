@@ -14,7 +14,14 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   onValueChange?: (value: string) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({ value: controlledValue, defaultValue = '', onValueChange, children, className, ...props }) => {
+const Tabs: React.FC<TabsProps> = ({
+  value: controlledValue,
+  defaultValue = '',
+  onValueChange,
+  children,
+  className,
+  ...props
+}) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
@@ -33,7 +40,11 @@ const Tabs: React.FC<TabsProps> = ({ value: controlledValue, defaultValue = '', 
   );
 };
 
-const TabsList: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, style, ...props }) => (
+const TabsList: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  style,
+  ...props
+}) => (
   <div
     className={cn('inline-flex items-center rounded-lg p-1 gap-0.5', className)}
     style={{ background: 'var(--hub-hover)', ...style }}
@@ -45,7 +56,13 @@ interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   value: string;
 }
 
-const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, className, style, children, ...props }) => {
+const TabsTrigger: React.FC<TabsTriggerProps> = ({
+  value,
+  className,
+  style,
+  children,
+  ...props
+}) => {
   const { value: activeValue, onValueChange } = useContext(TabsContext);
   const isActive = activeValue === value;
 
@@ -53,12 +70,12 @@ const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, className, style, chil
     <button
       className={cn(
         'inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md transition-all',
-        isActive
-          ? 'shadow-sm'
-          : 'text-gray-500 hover:text-primary',
+        isActive ? 'shadow-sm' : 'text-gray-500 hover:text-primary',
         className
       )}
-      style={isActive ? { background: 'var(--hub-card)', color: 'var(--hub-text)', ...style } : style}
+      style={
+        isActive ? { background: 'var(--hub-card)', color: 'var(--hub-text)', ...style } : style
+      }
       onClick={() => onValueChange(value)}
       {...props}
     >

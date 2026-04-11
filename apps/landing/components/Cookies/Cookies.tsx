@@ -39,9 +39,8 @@ const Cookies: React.FC = () => {
 
         <div className={styles['cookies-content']}>
           <p>
-            We use cookies to enhance your browsing experience, analyze site
-            traffic, and personalize content. By continuing to use our site, you
-            consent to our use of cookies.
+            We use cookies to enhance your browsing experience, analyze site traffic, and
+            personalize content. By continuing to use our site, you consent to our use of cookies.
           </p>
         </div>
 

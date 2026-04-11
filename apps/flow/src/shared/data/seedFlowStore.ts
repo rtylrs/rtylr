@@ -48,10 +48,38 @@ export const SEED_WORKSPACES: Workspace[] = [
 ];
 
 export const SEED_MEMBERS: Member[] = [
-  { id: DEMO_USER_ID, name: 'Alex Chen', email: 'alex@acme.test', initials: 'AC', role: 'admin', capacity: 40 },
-  { id: 'u2', name: 'Sam Rivera', email: 'sam@acme.test', initials: 'SR', role: 'member', capacity: 40 },
-  { id: 'u3', name: 'Jordan Lee', email: 'jordan@acme.test', initials: 'JL', role: 'member', capacity: 32 },
-  { id: 'u4', name: 'Riley Park', email: 'riley@acme.test', initials: 'RP', role: 'viewer', capacity: 20 },
+  {
+    id: DEMO_USER_ID,
+    name: 'Alex Chen',
+    email: 'alex@acme.test',
+    initials: 'AC',
+    role: 'admin',
+    capacity: 40,
+  },
+  {
+    id: 'u2',
+    name: 'Sam Rivera',
+    email: 'sam@acme.test',
+    initials: 'SR',
+    role: 'member',
+    capacity: 40,
+  },
+  {
+    id: 'u3',
+    name: 'Jordan Lee',
+    email: 'jordan@acme.test',
+    initials: 'JL',
+    role: 'member',
+    capacity: 32,
+  },
+  {
+    id: 'u4',
+    name: 'Riley Park',
+    email: 'riley@acme.test',
+    initials: 'RP',
+    role: 'viewer',
+    capacity: 20,
+  },
 ];
 
 export const SEED_PROJECTS: Project[] = [
@@ -440,5 +468,12 @@ export const SEED_NOTIFICATIONS: Notification[] = [
 ];
 
 export const SEED_TIMELOGS: TimeLog[] = [
-  { id: 'tl-1', taskId: 'task-1', userId: DEMO_USER_ID, minutes: 90, loggedAt: isoFull(addDays(today, -1)), note: 'Illustration review' },
+  {
+    id: 'tl-1',
+    taskId: 'task-1',
+    userId: DEMO_USER_ID,
+    minutes: 90,
+    loggedAt: isoFull(addDays(today, -1)),
+    note: 'Illustration review',
+  },
 ];

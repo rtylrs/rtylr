@@ -1,16 +1,16 @@
-import { Suspense } from "react";
+import { Suspense } from 'react';
 import { injectTheme } from '@voxire/config';
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { BrowserRouter } from "react-router-dom";
-import { I18nextProvider } from "react-i18next";
-import i18next from "./shared/services/i18next";
-import { Toaster } from "sonner";
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { BrowserRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import i18next from './shared/services/i18next';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 injectTheme();
 
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(

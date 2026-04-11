@@ -12,7 +12,9 @@ const ErrorState: React.FC<ErrorStateProps> = ({
 }) => (
   <div className="flex flex-col items-center justify-center py-16 gap-3">
     <AlertTriangle size={28} style={{ color: '#f87171' }} />
-    <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>{message}</p>
+    <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+      {message}
+    </p>
     {onRetry && (
       <button
         onClick={onRetry}

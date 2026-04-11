@@ -148,32 +148,31 @@ export interface DashboardStats {
 
 export const storeApi = {
   // Dashboard
-  getDashboardStats: () =>
-    safe.get<DashboardStats>('/store/dashboard'),
+  getDashboardStats: () => safe.get<DashboardStats>('/store/dashboard'),
 
   // Products
-  listProducts: (params?: { search?: string; categoryId?: number; status?: string; limit?: number; offset?: number }) =>
-    safe.get<StoreProduct[]>('/store/products', { params }),
-  getProduct: (id: number) =>
-    safe.get<StoreProduct>(`/store/products/${id}`),
-  createProduct: (data: CreateProductInput) =>
-    safe.post<StoreProduct>('/store/products', data),
-  updateProduct: (data: UpdateProductInput) =>
-    safe.post<StoreProduct>('/store/products', data),
+  listProducts: (params?: {
+    search?: string;
+    categoryId?: number;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => safe.get<StoreProduct[]>('/store/products', { params }),
+  getProduct: (id: number) => safe.get<StoreProduct>(`/store/products/${id}`),
+  createProduct: (data: CreateProductInput) => safe.post<StoreProduct>('/store/products', data),
+  updateProduct: (data: UpdateProductInput) => safe.post<StoreProduct>('/store/products', data),
   deleteProduct: (id: number) =>
     safe.post<{ success: boolean }>('/store/products', { id, _action: 'delete' }),
 
   // Orders
   listOrders: (params?: { status?: string; search?: string; limit?: number; offset?: number }) =>
     safe.get<StoreOrder[]>('/store/orders', { params }),
-  getOrder: (id: number) =>
-    safe.get<StoreOrder>(`/store/orders/${id}`),
+  getOrder: (id: number) => safe.get<StoreOrder>(`/store/orders/${id}`),
   updateOrderStatus: (id: number, status: StoreOrder['status']) =>
     safe.post<StoreOrder>('/store/orders/status', { id, status }),
 
   // Categories
-  listCategories: () =>
-    safe.get<StoreCategory[]>('/store/categories'),
+  listCategories: () => safe.get<StoreCategory[]>('/store/categories'),
   createCategory: (data: CreateCategoryInput) =>
     safe.post<StoreCategory>('/store/categories', data),
   updateCategory: (data: Partial<CreateCategoryInput> & { id: number }) =>
@@ -182,30 +181,25 @@ export const storeApi = {
     safe.post<{ success: boolean }>('/store/categories', { id, _action: 'delete' }),
 
   // Shipping
-  listShippingZones: () =>
-    safe.get<ShippingZone[]>('/store/shipping/zones'),
+  listShippingZones: () => safe.get<ShippingZone[]>('/store/shipping/zones'),
   createShippingZone: (data: CreateShippingZoneInput) =>
     safe.post<ShippingZone>('/store/shipping/zones', data),
   updateShippingZone: (data: Partial<CreateShippingZoneInput> & { id: number }) =>
     safe.post<ShippingZone>('/store/shipping/zones', data),
-  listShippingMethods: () =>
-    safe.get<ShippingMethod[]>('/store/shipping/methods'),
+  listShippingMethods: () => safe.get<ShippingMethod[]>('/store/shipping/methods'),
 
   // Payments
-  listPaymentMethods: () =>
-    safe.get<PaymentMethod[]>('/store/payments/methods'),
+  listPaymentMethods: () => safe.get<PaymentMethod[]>('/store/payments/methods'),
   updatePaymentMethod: (data: Partial<PaymentMethod> & { id: number }) =>
     safe.post<PaymentMethod>('/store/payments/methods', data),
 
   // Storefront
-  getStorefrontConfig: () =>
-    safe.get<StorefrontConfig>('/store/storefront'),
+  getStorefrontConfig: () => safe.get<StorefrontConfig>('/store/storefront'),
   updateStorefrontConfig: (data: Partial<StorefrontConfig>) =>
     safe.post<StorefrontConfig>('/store/storefront', data),
 
   // Settings
-  getSettings: () =>
-    safe.get<StoreSettings>('/store/settings'),
+  getSettings: () => safe.get<StoreSettings>('/store/settings'),
   updateSettings: (data: Partial<StoreSettings>) =>
     safe.post<StoreSettings>('/store/settings', data),
 };

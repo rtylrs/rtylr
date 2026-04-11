@@ -14,9 +14,7 @@ const Price: React.FC = () => {
   return (
     <div className={styles['Prices']}>
       <h1 className={`rtylr-title ${styles['price-text']}`}>{t('PricingSection.title')}</h1>
-      <p className={styles['rtylr-text-price-text']}>
-        {t('PricingSection.description')}
-      </p>
+      <p className={styles['rtylr-text-price-text']}>{t('PricingSection.description')}</p>
       <div className={styles['price-container']}>
         <div className={styles['price-card']}>
           <div className="prices-container">
@@ -32,21 +30,15 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 {t('PricingSection.Section1_star1')}
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 {t('PricingSection.Section1_star2')}
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 Basic widget customization
               </li>
             </ul>
@@ -75,21 +67,15 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 Unlimited chats & websites
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 60-day conversations history
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 Basic widget customization
               </li>
             </ul>
@@ -119,21 +105,15 @@ const Price: React.FC = () => {
             <hr style={{ border: '1px solid grey', margin: '20px 0' }} />
             <ul>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 Unlimited chats & websites
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 60-day conversations history
               </li>
               <li>
-                <HiStar
-                  style={{ color: 'black', marginRight: '8px' }}
-                />
+                <HiStar style={{ color: 'black', marginRight: '8px' }} />
                 Basic widget customization
               </li>
             </ul>

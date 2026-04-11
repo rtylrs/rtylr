@@ -28,8 +28,10 @@ const Views: React.FC = () => {
         }}
       >
         <div className="flex items-center justify-between px-2 mb-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--flow-text-muted)' }}>
+          <h2
+            className="text-[11px] font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
             Saved Views
           </h2>
           <button
@@ -61,8 +63,7 @@ const Views: React.FC = () => {
         </div>
       </aside>
       <div className="flex-1 overflow-y-auto">
-        <div className="px-6 py-4"
-          style={{ borderBottom: '1px solid var(--flow-border)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--flow-border)' }}>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
             {selected?.name || 'Pick a view'}
           </h1>

@@ -8,15 +8,23 @@ interface Props {
   hint?: string;
 }
 
-const DocumentUpload: React.FC<Props> = ({ accept = '.pdf,.doc,.docx,.png,.jpg', onFile, hint }) => {
+const DocumentUpload: React.FC<Props> = ({
+  accept = '.pdf,.doc,.docx,.png,.jpg',
+  onFile,
+  hint,
+}) => {
   const [dragOver, setDragOver] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
     (f: File) => {
-      onFile({ name: f.name, sizeKb: Math.round(f.size / 1024), type: f.type || 'application/octet-stream' });
+      onFile({
+        name: f.name,
+        sizeKb: Math.round(f.size / 1024),
+        type: f.type || 'application/octet-stream',
+      });
     },
-    [onFile],
+    [onFile]
   );
 
   return (
@@ -55,7 +63,9 @@ const DocumentUpload: React.FC<Props> = ({ accept = '.pdf,.doc,.docx,.png,.jpg',
       >
         {dragOver ? <Upload size={20} /> : <FileText size={20} />}
       </div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>Drag and drop file here</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+        Drag and drop file here
+      </div>
       <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 4 }}>
         {hint ?? `or click to browse (${accept})`}
       </div>

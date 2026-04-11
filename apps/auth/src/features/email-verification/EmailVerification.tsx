@@ -69,9 +69,7 @@ const EmailVerification = () => {
             <div className="h-14 w-14 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto">
               <AlertCircle className="h-7 w-7 text-red-500" />
             </div>
-            <h3 className="mt-5 text-lg font-semibold text-[#111]">
-              Verification failed
-            </h3>
+            <h3 className="mt-5 text-lg font-semibold text-[#111]">Verification failed</h3>
             <p className="mt-2 text-sm text-[#666] leading-relaxed">{message}</p>
             <div className="mt-6">
               <Button

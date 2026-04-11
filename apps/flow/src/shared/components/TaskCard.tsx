@@ -51,28 +51,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           navigate(`/task/${task.id}`);
         }
       }}
-      className={cn(
-        'rounded-lg cursor-pointer group relative',
-        compact ? 'p-2.5' : 'p-3.5'
-      )}
+      className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3.5')}
       style={{
         background: 'var(--flow-card)',
-        border: selected
-          ? '1px solid #64C5B9'
-          : '1px solid var(--flow-border)',
-        boxShadow: selected
-          ? '0 0 0 3px rgba(100,197,185,0.15)'
-          : '0 1px 3px rgba(0,0,0,0.15)',
+        border: selected ? '1px solid #64C5B9' : '1px solid var(--flow-border)',
+        boxShadow: selected ? '0 0 0 3px rgba(100,197,185,0.15)' : '0 1px 3px rgba(0,0,0,0.15)',
       }}
       whileHover={{ y: -1 }}
     >
       {/* Header row */}
       <div className="flex items-start gap-2 mb-2">
         <PriorityIcon priority={task.priority} />
-        <span
-          className="text-[10px] font-mono shrink-0"
-          style={{ color: 'var(--flow-text-dim)' }}
-        >
+        <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
           {task.identifier}
         </span>
       </div>
@@ -97,11 +87,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       {/* Footer */}
       <div className="flex items-center justify-between mt-1">
         <div className="flex items-center gap-2">
-          <AssigneeAvatar
-            name={task.assignee}
-            initials={task.assigneeInitials}
-            size={18}
-          />
+          <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
           {taskSubtasks.length > 0 && (
             <span
               className="flex items-center gap-0.5 text-[10px]"

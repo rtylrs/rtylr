@@ -47,7 +47,9 @@ const Barcodes: React.FC = () => {
               className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg"
               style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
             >
-              <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>COPIES</span>
+              <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                COPIES
+              </span>
               <input
                 type="number"
                 min="1"
@@ -76,36 +78,37 @@ const Barcodes: React.FC = () => {
           <p className="text-xs font-semibold mb-2 px-2" style={{ color: 'var(--hub-text-muted)' }}>
             PRODUCTS
           </p>
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 mb-1" />)
-          ) : (
-            products.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => toggle(p.id)}
-                className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left"
-                style={{ background: selected.has(p.id) ? 'var(--hub-active)' : 'transparent' }}
-              >
-                <div
-                  className="h-4 w-4 rounded flex items-center justify-center"
-                  style={{
-                    background: selected.has(p.id) ? AMBER : 'var(--hub-hover)',
-                    border: '1px solid var(--hub-border)',
-                  }}
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 mb-1" />)
+            : products.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => toggle(p.id)}
+                  className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left"
+                  style={{ background: selected.has(p.id) ? 'var(--hub-active)' : 'transparent' }}
                 >
-                  {selected.has(p.id) && <Check size={10} style={{ color: '#000' }} />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
-                    {p.name}
-                  </p>
-                  <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                    {p.sku}
-                  </p>
-                </div>
-              </button>
-            ))
-          )}
+                  <div
+                    className="h-4 w-4 rounded flex items-center justify-center"
+                    style={{
+                      background: selected.has(p.id) ? AMBER : 'var(--hub-hover)',
+                      border: '1px solid var(--hub-border)',
+                    }}
+                  >
+                    {selected.has(p.id) && <Check size={10} style={{ color: '#000' }} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-xs font-medium truncate"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
+                      {p.name}
+                    </p>
+                    <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+                      {p.sku}
+                    </p>
+                  </div>
+                </button>
+              ))}
         </div>
 
         <div className="lg:col-span-2">

@@ -2,9 +2,10 @@ import React from 'react';
 import { getCookie } from '../cookies';
 import type { AppId } from '../types';
 
-const AUTH_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  ? 'http://localhost:5176'
-  : 'https://auth.rtylr.com';
+const AUTH_URL =
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:5176'
+    : 'https://auth.rtylr.com';
 
 interface ProtectedRouteProps {
   appId: AppId;

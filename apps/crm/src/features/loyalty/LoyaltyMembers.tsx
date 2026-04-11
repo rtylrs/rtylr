@@ -33,16 +33,29 @@ const LoyaltyMembers: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search members..."
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: '13px', color: 'var(--hub-text)' }}
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              fontSize: '13px',
+              color: 'var(--hub-text)',
+            }}
           />
         </div>
       </div>
 
       <Card padded={false}>
         {isLoading ? (
-          <div style={{ padding: '16px' }}><SkeletonList count={6} /></div>
+          <div style={{ padding: '16px' }}>
+            <SkeletonList count={6} />
+          </div>
         ) : filtered.length === 0 ? (
-          <EmptyState icon={Users} title="No members found" description="Try a different search term." />
+          <EmptyState
+            icon={Users}
+            title="No members found"
+            description="Try a different search term."
+          />
         ) : (
           <div>
             {filtered.map((m, i) => (
@@ -69,7 +82,9 @@ const LoyaltyMembers: React.FC = () => {
                 </span>
                 <CustomerAvatar initials={m.initials} points={m.points} size={36} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>{m.name}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                    {m.name}
+                  </div>
                   <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
                     {m.visits} visits • last active {m.lastActive}
                   </div>

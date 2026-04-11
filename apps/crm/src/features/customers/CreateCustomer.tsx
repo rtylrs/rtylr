@@ -27,11 +27,18 @@ const CreateCustomer: React.FC = () => {
   const create = useCreateCustomer();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>({
-    name: '', email: '', phone: '', birthday: '', address: '',
-    consentEmail: true, consentSms: false, consentMarketing: true,
+    name: '',
+    email: '',
+    phone: '',
+    birthday: '',
+    address: '',
+    consentEmail: true,
+    consentSms: false,
+    consentMarketing: true,
   });
 
-  const set = <K extends keyof FormData>(k: K, v: FormData[K]) => setData((d) => ({ ...d, [k]: v }));
+  const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
+    setData((d) => ({ ...d, [k]: v }));
 
   const canNext = () => {
     if (step === 0) return data.name.trim().length > 0;
@@ -40,27 +47,39 @@ const CreateCustomer: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    create.mutate({
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      initials: data.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase(),
-      totalSpent: 0,
-      visits: 0,
-      loyaltyPoints: 0,
-      lastVisit: 'Never',
-      birthday: data.birthday,
-      consent: { email: data.consentEmail, sms: data.consentSms, marketing: data.consentMarketing },
-    }, {
-      onSuccess: () => {
-        toast.success('Customer created');
-        navigate('/customers');
+    create.mutate(
+      {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        initials: data.name
+          .split(' ')
+          .map((p) => p[0])
+          .join('')
+          .slice(0, 2)
+          .toUpperCase(),
+        totalSpent: 0,
+        visits: 0,
+        loyaltyPoints: 0,
+        lastVisit: 'Never',
+        birthday: data.birthday,
+        consent: {
+          email: data.consentEmail,
+          sms: data.consentSms,
+          marketing: data.consentMarketing,
+        },
       },
-      onError: () => {
-        toast.success('Customer created');
-        navigate('/customers');
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success('Customer created');
+          navigate('/customers');
+        },
+        onError: () => {
+          toast.success('Customer created');
+          navigate('/customers');
+        },
+      }
+    );
   };
 
   return (
@@ -89,7 +108,8 @@ const CreateCustomer: React.FC = () => {
                 width: '22px',
                 height: '22px',
                 borderRadius: '50%',
-                background: i < step ? '#3b82f6' : i === step ? 'rgba(59,130,246,0.2)' : 'var(--hub-hover)',
+                background:
+                  i < step ? '#3b82f6' : i === step ? 'rgba(59,130,246,0.2)' : 'var(--hub-hover)',
                 color: i < step ? '#fff' : i === step ? '#3b82f6' : 'var(--hub-text-muted)',
                 display: 'flex',
                 alignItems: 'center',
@@ -100,7 +120,13 @@ const CreateCustomer: React.FC = () => {
             >
               {i < step ? <Check size={12} /> : i + 1}
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: i <= step ? 'var(--hub-text)' : 'var(--hub-text-muted)' }}>
+            <span
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: i <= step ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+              }}
+            >
               {s.label}
             </span>
           </div>
@@ -110,23 +136,62 @@ const CreateCustomer: React.FC = () => {
       <Card>
         {step === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <Input label="Full name" value={data.name} onChange={(e) => set('name', e.target.value)} placeholder="Jane Doe" />
-            <Input label="Birthday" type="date" value={data.birthday} onChange={(e) => set('birthday', e.target.value)} />
-            <Input label="Address" value={data.address} onChange={(e) => set('address', e.target.value)} placeholder="Street, city, zip" />
+            <Input
+              label="Full name"
+              value={data.name}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Jane Doe"
+            />
+            <Input
+              label="Birthday"
+              type="date"
+              value={data.birthday}
+              onChange={(e) => set('birthday', e.target.value)}
+            />
+            <Input
+              label="Address"
+              value={data.address}
+              onChange={(e) => set('address', e.target.value)}
+              placeholder="Street, city, zip"
+            />
           </div>
         )}
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <Input label="Email" type="email" value={data.email} onChange={(e) => set('email', e.target.value)} placeholder="jane@example.com" />
-            <Input label="Phone" type="tel" value={data.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 555-000-0000" />
+            <Input
+              label="Email"
+              type="email"
+              value={data.email}
+              onChange={(e) => set('email', e.target.value)}
+              placeholder="jane@example.com"
+            />
+            <Input
+              label="Phone"
+              type="tel"
+              value={data.phone}
+              onChange={(e) => set('phone', e.target.value)}
+              placeholder="+1 555-000-0000"
+            />
           </div>
         )}
         {step === 2 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[
-              { key: 'consentEmail' as const, label: 'Email updates', desc: 'Order confirmations, product news' },
-              { key: 'consentSms' as const, label: 'SMS updates', desc: 'Text reminders and alerts' },
-              { key: 'consentMarketing' as const, label: 'Marketing', desc: 'Promotional offers and campaigns' },
+              {
+                key: 'consentEmail' as const,
+                label: 'Email updates',
+                desc: 'Order confirmations, product news',
+              },
+              {
+                key: 'consentSms' as const,
+                label: 'SMS updates',
+                desc: 'Text reminders and alerts',
+              },
+              {
+                key: 'consentMarketing' as const,
+                label: 'Marketing',
+                desc: 'Promotional offers and campaigns',
+              },
             ].map((c) => (
               <label
                 key={c.key}
@@ -148,7 +213,9 @@ const CreateCustomer: React.FC = () => {
                   style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }}
                 />
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>{c.label}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                    {c.label}
+                  </div>
                   <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.desc}</div>
                 </div>
               </label>
@@ -161,7 +228,7 @@ const CreateCustomer: React.FC = () => {
         <Button
           variant="outline"
           disabled={step === 0}
-          onClick={() => step > 0 ? setStep(step - 1) : navigate('/customers')}
+          onClick={() => (step > 0 ? setStep(step - 1) : navigate('/customers'))}
         >
           <ArrowLeft size={13} />
           {step === 0 ? 'Cancel' : 'Back'}

@@ -53,7 +53,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     setCartItems((prev) => {
       const existing = prev.find((c) => c.id === item.id);
       if (existing) {
-        return prev.map((c) => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
+        return prev.map((c) => (c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c));
       }
       return [...prev, { ...item, quantity: 1 }];
     });
@@ -63,7 +63,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     if (qty <= 0) {
       setCartItems((prev) => prev.filter((c) => c.id !== itemId));
     } else {
-      setCartItems((prev) => prev.map((c) => c.id === itemId ? { ...c, quantity: qty } : c));
+      setCartItems((prev) => prev.map((c) => (c.id === itemId ? { ...c, quantity: qty } : c)));
     }
   };
 
@@ -121,10 +121,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         {activePage === 'about' && <AboutPage business={business} />}
 
         {activePage === 'gallery' && (
-          <GalleryPage
-            photos={business.photos ?? []}
-            businessName={business.name}
-          />
+          <GalleryPage photos={business.photos ?? []} businessName={business.name} />
         )}
 
         {activePage === 'reviews' && (
@@ -135,9 +132,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           />
         )}
 
-        {activePage === 'offers' && (
-          <OffersPage offers={business.offers ?? []} />
-        )}
+        {activePage === 'offers' && <OffersPage offers={business.offers ?? []} />}
 
         {activePage === 'book' && (
           <div className={styles.layout__bookPlaceholder}>

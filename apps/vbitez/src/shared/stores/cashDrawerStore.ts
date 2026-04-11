@@ -62,6 +62,6 @@ export const useCashDrawerStore = create<CashDrawerState & CashDrawerActions>()(
         return s.openingFloat + delta;
       },
     }),
-    { name: 'pos-cash-drawer' },
-  ),
+    { name: 'pos-cash-drawer' }
+  )
 );

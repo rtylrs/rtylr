@@ -19,13 +19,7 @@ export const scorePassword = (pw: string): Strength => {
 };
 
 const LABELS = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
-const COLORS = [
-  'bg-[#e5e5e5]',
-  'bg-red-400',
-  'bg-amber-400',
-  'bg-sky-400',
-  'bg-green-500',
-];
+const COLORS = ['bg-[#e5e5e5]', 'bg-red-400', 'bg-amber-400', 'bg-sky-400', 'bg-green-500'];
 
 const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({
   password,

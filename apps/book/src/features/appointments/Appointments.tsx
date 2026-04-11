@@ -24,7 +24,11 @@ const Appointments: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const { data: appointments, isLoading, isError } = useAppointments({
+  const {
+    data: appointments,
+    isLoading,
+    isError,
+  } = useAppointments({
     search: search || undefined,
     status: statusFilter !== 'all' ? statusFilter : undefined,
   });
@@ -82,7 +86,11 @@ const Appointments: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load appointments. Please try again later.
         </div>
@@ -106,7 +114,9 @@ const Appointments: React.FC = () => {
 
         {isLoading && (
           <div className="p-3 space-y-2">
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 
@@ -117,7 +127,9 @@ const Appointments: React.FC = () => {
               No appointments found
             </p>
             <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-              {search || statusFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first appointment to get started'}
+              {search || statusFilter !== 'all'
+                ? 'Try adjusting your filters'
+                : 'Create your first appointment to get started'}
             </p>
           </div>
         )}
@@ -131,17 +143,33 @@ const Appointments: React.FC = () => {
                   key={appt.id}
                   className="grid grid-cols-6 items-center px-4 py-3 transition-colors"
                   style={{ borderBottom: '1px solid var(--hub-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <div>
-                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{appt.date}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{appt.time}</p>
+                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                      {appt.date}
+                    </p>
+                    <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      {appt.time}
+                    </p>
                   </div>
-                  <p className="text-xs truncate" style={{ color: 'var(--hub-text)' }}>{appt.customerName}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>{appt.serviceName}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>{appt.staffName}</p>
-                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{appt.duration} min</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--hub-text)' }}>
+                    {appt.customerName}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                    {appt.serviceName}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                    {appt.staffName}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {appt.duration} min
+                  </p>
                   <div className="flex justify-end">
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize"

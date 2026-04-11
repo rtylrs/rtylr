@@ -36,7 +36,8 @@ export function useCreateSegment() {
 export function useUpdateSegment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Segment> }) => unwrap(crmApi.updateSegment(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Segment> }) =>
+      unwrap(crmApi.updateSegment(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['segments'] }),
   });
 }

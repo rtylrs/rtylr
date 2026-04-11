@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import { useArticle, useCreateArticle, useUpdateArticle, useArticleCategories } from './useKnowledgeBase';
+import {
+  useArticle,
+  useCreateArticle,
+  useUpdateArticle,
+  useArticleCategories,
+} from './useKnowledgeBase';
 import { toast } from 'sonner';
 
 const ArticleEditor: React.FC = () => {
@@ -63,7 +68,10 @@ const ArticleEditor: React.FC = () => {
   if (isEdit && isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 rounded animate-pulse" style={{ background: 'var(--hub-hover)' }} />
+        <div
+          className="h-8 w-48 rounded animate-pulse"
+          style={{ background: 'var(--hub-hover)' }}
+        />
         <div className="h-64 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
       </div>
     );
@@ -95,7 +103,10 @@ const ArticleEditor: React.FC = () => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="block text-xs font-medium mb-1.5"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Title
           </label>
           <input
@@ -113,7 +124,10 @@ const ArticleEditor: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="block text-xs font-medium mb-1.5"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Category
           </label>
           <select
@@ -128,13 +142,18 @@ const ArticleEditor: React.FC = () => {
           >
             <option value="">Select category</option>
             {categoryList.map((cat: any) => (
-              <option key={cat.id || cat.name} value={cat.name}>{cat.name}</option>
+              <option key={cat.id || cat.name} value={cat.name}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <label
+            className="block text-xs font-medium mb-1.5"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
             Body
           </label>
           <textarea

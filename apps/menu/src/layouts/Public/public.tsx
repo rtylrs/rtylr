@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
-import Header from "./PublicHeader";
-import Footer from "./PublicFooter/PublicFooter";
+import React, { useMemo } from 'react';
+import Header from './PublicHeader';
+import Footer from './PublicFooter/PublicFooter';
 
 const Public: React.FC<{
   children: React.ReactNode;
@@ -9,19 +9,13 @@ const Public: React.FC<{
   hasHeader?: boolean;
   hasFooter?: boolean;
 }> = React.memo(
-  ({
-    children,
-    hasPadding = true,
-    paddingTop = "30px",
-    hasHeader = true,
-    hasFooter = true,
-  }) => {
+  ({ children, hasPadding = true, paddingTop = '30px', hasHeader = true, hasFooter = true }) => {
     const marginTop = useMemo(() => {
       const pathname = document.location.pathname;
-      if (pathname === "/") {
-        return "0px";
+      if (pathname === '/') {
+        return '0px';
       }
-      return hasPadding ? paddingTop : "0px";
+      return hasPadding ? paddingTop : '0px';
     }, [hasPadding, paddingTop]);
 
     const contentStyle = useMemo(
@@ -41,6 +35,6 @@ const Public: React.FC<{
   }
 );
 
-Public.displayName = "Public";
+Public.displayName = 'Public';
 
 export default Public;

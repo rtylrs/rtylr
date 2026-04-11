@@ -36,7 +36,8 @@ export function useCreateCampaign() {
 export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Campaign> }) => unwrap(crmApi.updateCampaign(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Campaign> }) =>
+      unwrap(crmApi.updateCampaign(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }
@@ -44,7 +45,8 @@ export function useUpdateCampaign() {
 export function useUpdateCampaignStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => unwrap(crmApi.updateCampaignStatus(id, status)),
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      unwrap(crmApi.updateCampaignStatus(id, status)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }

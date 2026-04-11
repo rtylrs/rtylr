@@ -8,7 +8,12 @@ interface BarcodeSvgProps {
 }
 
 // Simple Code-128-ish visual barcode (not scannable but good for print layout previews)
-const BarcodeSvg: React.FC<BarcodeSvgProps> = ({ value, width = 180, height = 60, showText = true }) => {
+const BarcodeSvg: React.FC<BarcodeSvgProps> = ({
+  value,
+  width = 180,
+  height = 60,
+  showText = true,
+}) => {
   const bars: number[] = [];
   for (let i = 0; i < value.length; i++) {
     const code = value.charCodeAt(i);
@@ -26,7 +31,16 @@ const BarcodeSvg: React.FC<BarcodeSvgProps> = ({ value, width = 180, height = 60
   const rects: React.ReactElement[] = [];
   bars.forEach((b, i) => {
     if (i % 2 === 0) {
-      rects.push(<rect key={i} x={x} y={0} width={b * unitWidth} height={height - (showText ? 12 : 0)} fill="#000" />);
+      rects.push(
+        <rect
+          key={i}
+          x={x}
+          y={0}
+          width={b * unitWidth}
+          height={height - (showText ? 12 : 0)}
+          fill="#000"
+        />
+      );
     }
     x += b * unitWidth;
   });

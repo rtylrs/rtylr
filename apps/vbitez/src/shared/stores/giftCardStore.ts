@@ -34,9 +34,7 @@ export const useGiftCardStore = create<GiftCardState & GiftCardActions>()(
         if (!card.active) return { ok: false, error: 'Card is inactive' };
         if (card.balance < amount) return { ok: false, error: 'Insufficient balance' };
         set((s) => ({
-          cards: s.cards.map((c) =>
-            c.code === code ? { ...c, balance: c.balance - amount } : c,
-          ),
+          cards: s.cards.map((c) => (c.code === code ? { ...c, balance: c.balance - amount } : c)),
         }));
         return { ok: true, remaining: card.balance - amount };
       },
@@ -50,6 +48,6 @@ export const useGiftCardStore = create<GiftCardState & GiftCardActions>()(
         })),
       findByCode: (code) => get().cards.find((c) => c.code === code),
     }),
-    { name: 'pos-gift-cards' },
-  ),
+    { name: 'pos-gift-cards' }
+  )
 );

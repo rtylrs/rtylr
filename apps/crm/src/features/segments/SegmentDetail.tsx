@@ -10,19 +10,31 @@ const SegmentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const segmentId = Number(id);
-  const { data: fetched, isLoading: segmentLoading, error: segmentError } = useSegmentById(segmentId);
+  const {
+    data: fetched,
+    isLoading: segmentLoading,
+    error: segmentError,
+  } = useSegmentById(segmentId);
   const { data: fetchedCustomers, isLoading } = useSegmentCustomers(segmentId);
   const segment = fetched;
   const customers = fetchedCustomers ?? [];
 
   if (segmentLoading) {
-    return <div style={{ maxWidth: '1100px' }}><SkeletonList count={6} /></div>;
+    return (
+      <div style={{ maxWidth: '1100px' }}>
+        <SkeletonList count={6} />
+      </div>
+    );
   }
 
   if (segmentError || !segment) {
     return (
       <div style={{ maxWidth: '1100px' }}>
-        <EmptyState icon={PieChart} title="Segment not found" description="This segment could not be loaded." />
+        <EmptyState
+          icon={PieChart}
+          title="Segment not found"
+          description="This segment could not be loaded."
+        />
       </div>
     );
   }
@@ -65,8 +77,12 @@ const SegmentDetail: React.FC = () => {
             <PieChart size={20} />
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>{segment.name}</h2>
-            <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>{segment.description}</p>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              {segment.name}
+            </h2>
+            <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+              {segment.description}
+            </p>
             <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
               {segment.rules.map((r) => (
                 <span
@@ -87,35 +103,82 @@ const SegmentDetail: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <Button variant="outline" onClick={() => navigate(`/campaigns/email?segment=${segment.id}`)}>
-              <Mail size={13} />Email
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/campaigns/email?segment=${segment.id}`)}
+            >
+              <Mail size={13} />
+              Email
             </Button>
-            <Button variant="primary" onClick={() => navigate(`/campaigns/sms?segment=${segment.id}`)}>
-              <MessageSquare size={13} />SMS
+            <Button
+              variant="primary"
+              onClick={() => navigate(`/campaigns/sms?segment=${segment.id}`)}
+            >
+              <MessageSquare size={13} />
+              SMS
             </Button>
           </div>
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '12px',
+          marginBottom: '20px',
+        }}
+      >
         {[
           { label: 'Customers', value: segment.customerCount.toLocaleString() },
           { label: 'Trend', value: segment.trend },
           { label: 'Avg Spend', value: '$1,240' },
         ].map((s) => (
           <Card key={s.label}>
-            <div style={{ fontSize: '10px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>{s.label}</div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)', marginTop: '4px' }}>{s.value}</div>
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'var(--hub-text-dim)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: 700,
+              }}
+            >
+              {s.label}
+            </div>
+            <div
+              style={{
+                fontSize: '22px',
+                fontWeight: 700,
+                color: 'var(--hub-text)',
+                marginTop: '4px',
+              }}
+            >
+              {s.value}
+            </div>
           </Card>
         ))}
       </div>
 
       <Card padded={false}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--hub-border)' }}>
-          <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Customers in this segment</h4>
+          <h4
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--hub-text)',
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Customers in this segment
+          </h4>
         </div>
         {isLoading ? (
-          <div style={{ padding: '16px' }}><SkeletonList count={5} /></div>
+          <div style={{ padding: '16px' }}>
+            <SkeletonList count={5} />
+          </div>
         ) : customers.length === 0 ? (
           <EmptyState icon={PieChart} title="No customers" description="This segment is empty." />
         ) : (
@@ -132,16 +195,29 @@ const SegmentDetail: React.FC = () => {
                   cursor: 'pointer',
                   borderBottom: i < customers.length - 1 ? '1px solid var(--hub-border)' : 'none',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
                 <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={32} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>{c.name}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+                    {c.name}
+                  </div>
                   <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.email}</div>
                 </div>
                 <TierBadge tier={getTier(c.loyaltyPoints)} />
-                <span style={{ fontSize: '12px', color: 'var(--hub-text-muted)', minWidth: '80px', textAlign: 'right' }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--hub-text-muted)',
+                    minWidth: '80px',
+                    textAlign: 'right',
+                  }}
+                >
                   ${c.totalSpent.toLocaleString()}
                 </span>
               </div>

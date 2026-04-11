@@ -1,8 +1,33 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Calendar, Briefcase, FileText, Heart, Shield, ChevronLeft } from 'lucide-react';
-import { useStaffById, useEmployeeProfile, useDocuments, useTrainingProgress, useBenefitEnrollments } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Pill, Skeleton, Breadcrumbs, ACCENT, EmptyState, useIsMobile } from '../../shared/components/ui';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Briefcase,
+  FileText,
+  Heart,
+  Shield,
+  ChevronLeft,
+} from 'lucide-react';
+import {
+  useStaffById,
+  useEmployeeProfile,
+  useDocuments,
+  useTrainingProgress,
+  useBenefitEnrollments,
+} from '../../shared/hooks/useHrExtras';
+import {
+  Card,
+  SectionHeader,
+  Pill,
+  Skeleton,
+  Breadcrumbs,
+  ACCENT,
+  EmptyState,
+  useIsMobile,
+} from '../../shared/components/ui';
 import TrainingProgress from '../../shared/components/TrainingProgress';
 import { initials, paletteFor } from '../../shared/components/EmployeeCard';
 
@@ -31,7 +56,11 @@ const EmployeeProfile: React.FC = () => {
         icon={<Briefcase size={20} />}
         title="Employee not found"
         description="The employee you're looking for may have been removed."
-        action={<Link to="/staff" style={{ color: ACCENT, fontSize: 12, textDecoration: 'none' }}>Back to staff</Link>}
+        action={
+          <Link to="/staff" style={{ color: ACCENT, fontSize: 12, textDecoration: 'none' }}>
+            Back to staff
+          </Link>
+        }
       />
     );
   }
@@ -46,7 +75,15 @@ const EmployeeProfile: React.FC = () => {
       <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
 
       {/* Hero */}
-      <Card style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 20, padding: 24 }}>
+      <Card
+        style={{
+          display: 'flex',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: 20,
+          padding: 24,
+        }}
+      >
         <Link to="/staff" style={{ color: 'var(--hr-text-muted)' }}>
           <ChevronLeft size={16} />
         </Link>
@@ -68,7 +105,9 @@ const EmployeeProfile: React.FC = () => {
           {initials(staff.name)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>{staff.name}</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
+            {staff.name}
+          </h1>
           <p style={{ margin: '4px 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>
             {staff.role} • {staff.department}
           </p>
@@ -83,7 +122,15 @@ const EmployeeProfile: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <Card>
           <SectionHeader title="Contact" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12, fontSize: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              marginTop: 12,
+              fontSize: 12,
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Mail size={13} style={{ color: 'var(--hr-text-muted)' }} />
               <span style={{ color: 'var(--hr-text)' }}>{staff.email}</span>
@@ -105,7 +152,15 @@ const EmployeeProfile: React.FC = () => {
 
         <Card>
           <SectionHeader title="Employment" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12, fontSize: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              marginTop: 12,
+              fontSize: 12,
+            }}
+          >
             {profile?.hiredAt && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Calendar size={13} style={{ color: 'var(--hr-text-muted)' }} />
@@ -128,18 +183,29 @@ const EmployeeProfile: React.FC = () => {
           <SectionHeader title="Emergency contact" />
           {profile?.emergency ? (
             <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.7 }}>
-              <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>{profile.emergency.name}</div>
+              <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>
+                {profile.emergency.name}
+              </div>
               <div style={{ color: 'var(--hr-text-muted)' }}>{profile.emergency.relation}</div>
               <div style={{ color: 'var(--hr-text-muted)' }}>{profile.emergency.phone}</div>
             </div>
           ) : (
-            <p style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 12 }}>Not provided</p>
+            <p style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 12 }}>
+              Not provided
+            </p>
           )}
         </Card>
 
         <Card>
           <SectionHeader title="About" />
-          <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--hr-text-muted)', lineHeight: 1.6 }}>
+          <p
+            style={{
+              margin: '10px 0 0',
+              fontSize: 12,
+              color: 'var(--hr-text-muted)',
+              lineHeight: 1.6,
+            }}
+          >
             {profile?.bio ?? 'No bio.'}
           </p>
           {profile?.skills && profile.skills.length > 0 && (
@@ -156,9 +222,21 @@ const EmployeeProfile: React.FC = () => {
       <Card>
         <SectionHeader title="Documents" subtitle={`${myDocs.length} files`} />
         <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {myDocs.length === 0 && <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No documents on file.</p>}
+          {myDocs.length === 0 && (
+            <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No documents on file.</p>
+          )}
           {myDocs.map((d) => (
-            <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, borderRadius: 8, background: 'var(--hr-hover)' }}>
+            <div
+              key={d.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: 8,
+                borderRadius: 8,
+                background: 'var(--hr-hover)',
+              }}
+            >
               <FileText size={14} style={{ color: 'var(--hr-text-muted)' }} />
               <div style={{ flex: 1, fontSize: 12 }}>
                 <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>{d.name}</div>
@@ -175,7 +253,9 @@ const EmployeeProfile: React.FC = () => {
       <Card>
         <SectionHeader title="Training" />
         <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {myTraining.length === 0 && <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No courses yet.</p>}
+          {myTraining.length === 0 && (
+            <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No courses yet.</p>
+          )}
           {myTraining.map((t) => (
             <TrainingProgress key={t.id} progress={t.progress} label={t.courseName} />
           ))}
@@ -186,9 +266,24 @@ const EmployeeProfile: React.FC = () => {
       <Card>
         <SectionHeader title="Benefits" />
         <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {myBenefits.length === 0 && <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No active benefit enrollments.</p>}
+          {myBenefits.length === 0 && (
+            <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
+              No active benefit enrollments.
+            </p>
+          )}
           {myBenefits.map((b) => (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'var(--hr-hover)', borderRadius: 8, fontSize: 11 }}>
+            <div
+              key={b.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 10px',
+                background: 'var(--hr-hover)',
+                borderRadius: 8,
+                fontSize: 11,
+              }}
+            >
               <Shield size={12} style={{ color: ACCENT }} /> {b.planName}
             </div>
           ))}

@@ -1,10 +1,9 @@
 import { Switch } from '@voxire/components';
-import { HiMenu, HiHome, HiArrowPath, HiX, HiUserCircle } from "react-icons/hi2";
-import { useEffect, useState, useRef } from "react";
+import { HiMenu, HiHome, HiArrowPath, HiX, HiUserCircle } from 'react-icons/hi2';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useUserStore } from '../../stores/userStore';
-import styles from "./ToolBar.module.scss";
-
+import styles from './ToolBar.module.scss';
 
 const useFPS = (): number => {
   const [fps, setFps] = useState(0);
@@ -42,29 +41,26 @@ const useFPS = (): number => {
 const getPlatform = () => {
   const userAgent = navigator.userAgent;
   if (/Windows/.test(userAgent)) {
-    return "Windows";
+    return 'Windows';
   } else if (/Mac/.test(userAgent)) {
-    return "Mac";
+    return 'Mac';
   } else if (/Linux/.test(userAgent)) {
-    return "Linux";
+    return 'Linux';
   } else {
-    return "Unknown";
+    return 'Unknown';
   }
 };
 
 const ToolBarContent: React.FC = () => {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
-  const [mode, setMode] = useState<string>(
-    localStorage.getItem("mode") || "prod"
-  );
+  const [mode, setMode] = useState<string>(localStorage.getItem('mode') || 'prod');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const fps = useFPS();
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === 'admin';
   const isLocalhost =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const showAdminItems = isAdmin || !isLocalhost;
 
   const handleMenuToggle = () => {
@@ -72,14 +68,14 @@ const ToolBarContent: React.FC = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem("mode", mode);
+    localStorage.setItem('mode', mode);
   }, [mode]);
 
   const handleModeChange = () => {
-    setMode((prevMode) => (prevMode === "dev" ? "prod" : "dev"));
+    setMode((prevMode) => (prevMode === 'dev' ? 'prod' : 'dev'));
   };
 
-  const [memoryUsage, setMemoryUsage] = useState("N/A");
+  const [memoryUsage, setMemoryUsage] = useState('N/A');
 
   useEffect(() => {
     const updateMemoryUsage = () => {
@@ -104,7 +100,7 @@ const ToolBarContent: React.FC = () => {
   const handleClearStorage = () => {
     if (
       window.confirm(
-        "Are you sure you want to clear the local storage? This action cannot be undone."
+        'Are you sure you want to clear the local storage? This action cannot be undone.'
       )
     ) {
       localStorage.clear();
@@ -118,7 +114,7 @@ const ToolBarContent: React.FC = () => {
         <div
           className="toolbar-item"
           onClick={() => {
-            toolbarNavigate("/");
+            toolbarNavigate('/');
           }}
           title="Home"
         >
@@ -128,7 +124,7 @@ const ToolBarContent: React.FC = () => {
           <div
             className="toolbar-item"
             onClick={() => {
-              toolbarNavigate("/app/business/");
+              toolbarNavigate('/app/business/');
             }}
           >
             <HiUserCircle />
@@ -144,7 +140,7 @@ const ToolBarContent: React.FC = () => {
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
-          <Switch checked={mode === "dev"} onChange={handleModeChange} />
+          <Switch checked={mode === 'dev'} onChange={handleModeChange} />
         </div>
         <div className="vertical-line"></div>
         <div className="toolbar-item">
@@ -161,33 +157,21 @@ const ToolBarContent: React.FC = () => {
 
         {menuOpen && (
           <div className="dropdown-menu">
-            <div className="dropdown-item" onClick={() => toolbarNavigate("/")}>
+            <div className="dropdown-item" onClick={() => toolbarNavigate('/')}>
               Home
             </div>
             {showAdminItems && (
               <>
-                <div
-                  className="dropdown-item"
-                  onClick={() => toolbarNavigate("/app/business/")}
-                >
+                <div className="dropdown-item" onClick={() => toolbarNavigate('/app/business/')}>
                   Statistics
                 </div>
-                <div
-                  className="dropdown-item"
-                  onClick={() => toolbarNavigate("/manage")}
-                >
+                <div className="dropdown-item" onClick={() => toolbarNavigate('/manage')}>
                   Restaurants
                 </div>
-                <div
-                  className="dropdown-item"
-                  onClick={() => toolbarNavigate("/manage")}
-                >
+                <div className="dropdown-item" onClick={() => toolbarNavigate('/manage')}>
                   Contacts
                 </div>
-                <div
-                  className="dropdown-item"
-                  onClick={() => toolbarNavigate("/manage")}
-                >
+                <div className="dropdown-item" onClick={() => toolbarNavigate('/manage')}>
                   Settings
                 </div>
               </>
@@ -196,8 +180,8 @@ const ToolBarContent: React.FC = () => {
               className="dropdown-item"
               onClick={handleClearStorage}
               style={{
-                color: "#ff0000",
-                fontWeight: "bold",
+                color: '#ff0000',
+                fontWeight: 'bold',
               }}
             >
               Clear Storage
@@ -211,37 +195,34 @@ const ToolBarContent: React.FC = () => {
 
 const ToolBar: React.FC = () => {
   const [showToolbar, setShowToolbar] = useState<boolean>(
-    localStorage.getItem("showToolbar") === "true"
+    localStorage.getItem('showToolbar') === 'true'
   );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const os = getPlatform();
-      const isMac = os === "Mac";
+      const isMac = os === 'Mac';
 
-      const isCtrlAltTPressed =
-        e.ctrlKey && e.altKey && e.key.toLowerCase() === "t";
-      const isCmdOptTPressed =
-        e.metaKey && e.ctrlKey && e.key.toLowerCase() === "t";
+      const isCtrlAltTPressed = e.ctrlKey && e.altKey && e.key.toLowerCase() === 't';
+      const isCmdOptTPressed = e.metaKey && e.ctrlKey && e.key.toLowerCase() === 't';
 
       if (isCtrlAltTPressed || (isMac && isCmdOptTPressed)) {
         setShowToolbar((prev) => {
           const newShowToolbar = !prev;
-          localStorage.setItem("showToolbar", newShowToolbar.toString());
+          localStorage.setItem('showToolbar', newShowToolbar.toString());
           return newShowToolbar;
         });
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   const isProduction =
-    window.location.hostname !== "localhost" &&
-    window.location.hostname !== "127.0.0.1";
+    window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
   if (!showToolbar || isProduction) {
     return null;

@@ -1,6 +1,6 @@
 // Sonner.js
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 const message = (message: string) => {
   toast(message);

@@ -73,16 +73,17 @@ const TaskDetail: React.FC = () => {
   const [depId, setDepId] = useState('');
 
   if (isLoading) {
-    return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading task...</div>;
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading task...
+      </div>
+    );
   }
 
   if (!taskData) {
     return (
       <div className="p-10 text-center">
-        <p
-          className="text-[13px]"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
+        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
           Task not found.
         </p>
       </div>
@@ -117,7 +118,14 @@ const TaskDetail: React.FC = () => {
   const totalMinutes = taskTimelogs.reduce((s, t) => s + t.minutes, 0);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
-  const statuses: Task['status'][] = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'];
+  const statuses: Task['status'][] = [
+    'backlog',
+    'todo',
+    'in_progress',
+    'in_review',
+    'done',
+    'cancelled',
+  ];
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
@@ -137,7 +145,10 @@ const TaskDetail: React.FC = () => {
             </button>
             <Breadcrumbs
               items={[
-                { label: project?.name || 'Project', to: `/w/${task.workspaceId}/p/${task.projectId}` },
+                {
+                  label: project?.name || 'Project',
+                  to: `/w/${task.workspaceId}/p/${task.projectId}`,
+                },
                 { label: task.identifier },
               ]}
             />
@@ -342,7 +353,12 @@ const TaskDetail: React.FC = () => {
               value={task.assigneeId}
               onChange={(e) => {
                 const m = members.find((m) => m.id === e.target.value);
-                if (m) updateTask(task.id, { assigneeId: m.id, assignee: m.name, assigneeInitials: m.initials });
+                if (m)
+                  updateTask(task.id, {
+                    assigneeId: m.id,
+                    assignee: m.name,
+                    assigneeInitials: m.initials,
+                  });
               }}
               className="bg-transparent text-[12px] outline-none flex-1"
               style={{ color: 'var(--flow-text)' }}
@@ -357,7 +373,10 @@ const TaskDetail: React.FC = () => {
         </DetailField>
 
         <DetailField icon={CalendarIcon} label="Due date">
-          <DueDatePicker value={task.dueDate} onChange={(d) => updateTask(task.id, { dueDate: d })} />
+          <DueDatePicker
+            value={task.dueDate}
+            onChange={(d) => updateTask(task.id, { dueDate: d })}
+          />
         </DetailField>
 
         <DetailField icon={Clock} label="Estimate">
@@ -395,7 +414,9 @@ const TaskDetail: React.FC = () => {
                   background: task.effortMinutes === m ? `${ACCENT}28` : 'transparent',
                   color: 'var(--flow-text)',
                   border:
-                    task.effortMinutes === m ? `1px solid ${ACCENT}66` : '1px solid var(--flow-border)',
+                    task.effortMinutes === m
+                      ? `1px solid ${ACCENT}66`
+                      : '1px solid var(--flow-border)',
                 }}
                 title={`${m} minutes`}
               >

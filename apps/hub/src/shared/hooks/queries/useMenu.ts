@@ -62,9 +62,11 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
   const query = useQuery({
     queryKey: ['menu', userId, disabled],
     queryFn: async () => {
-      const response = await unwrap(safe.get(`/menu/${userId}`, {
-        params: { disabled },
-      }));
+      const response = await unwrap(
+        safe.get(`/menu/${userId}`, {
+          params: { disabled },
+        })
+      );
       return response;
     },
     enabled: !!userId,
@@ -121,10 +123,12 @@ export const useCreateMenu = () => {
 
   return useMutation({
     mutationFn: async ({ restaurantId, menuName }: { restaurantId: string; menuName: string }) => {
-      return unwrap(safe.post('/menu/createNewMenu', {
-        restaurantId,
-        menuName,
-      }));
+      return unwrap(
+        safe.post('/menu/createNewMenu', {
+          restaurantId,
+          menuName,
+        })
+      );
     },
     onSuccess: (data, variables) => {
       setAllMenus([...allMenus, data]);
@@ -178,11 +182,13 @@ export const useAddMenuItem = () => {
         }
       });
 
-      const created = await unwrap(safe.post(`/menu/category/${categoryId}/item`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }));
+      const created = await unwrap(
+        safe.post(`/menu/category/${categoryId}/item`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      );
       return { categoryId, item: created };
     },
     onSuccess: (data) => {
@@ -292,13 +298,21 @@ export const useEditCategory = () => {
   const { items, setItems } = useMenuStore();
 
   return useMutation({
-    mutationFn: async ({ categoryId, category }: { categoryId: string; category: Partial<Category> }) => {
+    mutationFn: async ({
+      categoryId,
+      category,
+    }: {
+      categoryId: string;
+      category: Partial<Category>;
+    }) => {
       const response = await unwrap(safe.put(`/menu/category/${categoryId}`, category));
       return { categoryId, category: response };
     },
     onSuccess: (data) => {
       const updatedItems = items.map((item) =>
-        'type' in item && item.type === 'category' && item._id === data.categoryId ? data.category : item
+        'type' in item && item.type === 'category' && item._id === data.categoryId
+          ? data.category
+          : item
       );
       setItems(updatedItems);
       queryClient.invalidateQueries({ queryKey: ['menu'] });
@@ -369,11 +383,13 @@ export const useAddBanner = () => {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      return unwrap(safe.post('/menu/banner', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }));
+      return unwrap(
+        safe.post('/menu/banner', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      );
     },
     onSuccess: (data) => {
       setItems([...items, data]);
@@ -386,4 +402,3 @@ export const useAddBanner = () => {
     },
   });
 };
-

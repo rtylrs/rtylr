@@ -1,13 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  Package,
-  ShoppingCart,
-  DollarSign,
-  Eye,
-  TrendingUp,
-  ArrowRight,
-} from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Eye, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDashboardStats } from './useDashboard';
 import { useOrders } from '../orders/useOrders';
@@ -45,7 +38,11 @@ function getOrderStatusColor(status: string): string {
 
 const Dashboard: React.FC = () => {
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats();
-  const { data: recentOrders, isLoading: ordersLoading, error: ordersError } = useOrders({ limit: 5 });
+  const {
+    data: recentOrders,
+    isLoading: ordersLoading,
+    error: ordersError,
+  } = useOrders({ limit: 5 });
   const { data: products, isLoading: productsLoading } = useProducts({ limit: 5 });
 
   const isLoading = statsLoading || ordersLoading || productsLoading;
@@ -130,11 +127,18 @@ const Dashboard: React.FC = () => {
                       border: '1px solid var(--hub-border)',
                       textDecoration: 'none',
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.3)'; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                    }}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
                         {stat.label}
                       </span>
                       <span
@@ -176,44 +180,47 @@ const Dashboard: React.FC = () => {
             </Link>
           </div>
           <div className="space-y-1">
-            {ordersLoading
-              ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
-              : (recentOrders ?? []).length === 0
-                ? (
-                    <p className="text-xs py-6 text-center" style={{ color: 'var(--hub-text-dim)' }}>
-                      No orders yet
+            {ordersLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
+            ) : (recentOrders ?? []).length === 0 ? (
+              <p className="text-xs py-6 text-center" style={{ color: 'var(--hub-text-dim)' }}>
+                No orders yet
+              </p>
+            ) : (
+              (recentOrders ?? []).slice(0, 5).map((order) => {
+                const statusColor = getOrderStatusColor(order.status);
+                return (
+                  <div
+                    key={order.id}
+                    className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
+                    style={{ background: 'var(--hub-hover)' }}
+                  >
+                    <div>
+                      <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                        {order.orderNumber}
+                      </p>
+                    </div>
+                    <p className="text-xs truncate pr-2" style={{ color: 'var(--hub-text-muted)' }}>
+                      {order.customerName}
                     </p>
-                  )
-                : (recentOrders ?? []).slice(0, 5).map((order) => {
-                    const statusColor = getOrderStatusColor(order.status);
-                    return (
-                      <div
-                        key={order.id}
-                        className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
-                        style={{ background: 'var(--hub-hover)' }}
+                    <p
+                      className="text-xs font-semibold text-right"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
+                      {formatCurrency(order.total)}
+                    </p>
+                    <div className="flex justify-end">
+                      <span
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize"
+                        style={{ background: `${statusColor}18`, color: statusColor }}
                       >
-                        <div>
-                          <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                            {order.orderNumber}
-                          </p>
-                        </div>
-                        <p className="text-xs truncate pr-2" style={{ color: 'var(--hub-text-muted)' }}>
-                          {order.customerName}
-                        </p>
-                        <p className="text-xs font-semibold text-right" style={{ color: 'var(--hub-text)' }}>
-                          {formatCurrency(order.total)}
-                        </p>
-                        <div className="flex justify-end">
-                          <span
-                            className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize"
-                            style={{ background: `${statusColor}18`, color: statusColor }}
-                          >
-                            {order.status}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </motion.div>
 
@@ -238,31 +245,37 @@ const Dashboard: React.FC = () => {
             </Link>
           </div>
           <div className="space-y-1.5">
-            {productsLoading
-              ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={3} />)
-              : (products ?? []).length === 0
-                ? (
-                    <p className="text-xs py-6 text-center" style={{ color: 'var(--hub-text-dim)' }}>
-                      No products yet
-                    </p>
-                  )
-                : (products ?? []).map((p, i) => (
-                    <div
-                      key={p.id}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                      style={{ background: 'var(--hub-hover)' }}
-                    >
-                      <span className="text-[10px] w-4 shrink-0" style={{ color: 'var(--hub-text-dim)' }}>
-                        {i + 1}
-                      </span>
-                      <span className="text-xs flex-1 truncate" style={{ color: 'var(--hub-text)' }}>
-                        {p.name}
-                      </span>
-                      <span className="text-xs font-medium shrink-0" style={{ color: 'var(--hub-text-muted)' }}>
-                        {formatCurrency(p.price)}
-                      </span>
-                    </div>
-                  ))}
+            {productsLoading ? (
+              Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={3} />)
+            ) : (products ?? []).length === 0 ? (
+              <p className="text-xs py-6 text-center" style={{ color: 'var(--hub-text-dim)' }}>
+                No products yet
+              </p>
+            ) : (
+              (products ?? []).map((p, i) => (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                  style={{ background: 'var(--hub-hover)' }}
+                >
+                  <span
+                    className="text-[10px] w-4 shrink-0"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-xs flex-1 truncate" style={{ color: 'var(--hub-text)' }}>
+                    {p.name}
+                  </span>
+                  <span
+                    className="text-xs font-medium shrink-0"
+                    style={{ color: 'var(--hub-text-muted)' }}
+                  >
+                    {formatCurrency(p.price)}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>

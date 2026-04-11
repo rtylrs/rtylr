@@ -39,7 +39,7 @@ export function useReceipts() {
         return false;
       }
     },
-    [markEmailed],
+    [markEmailed]
   );
 
   const all = [...local, ...remote.filter((r) => !local.some((l) => l.id === r.id))];

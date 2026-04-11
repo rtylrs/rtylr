@@ -299,8 +299,7 @@
   &:hover {
     transform: translateY(-3px);
     transition: 0.4s;
-    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1),
-      12px 12px 0px var(--primary-color);
+    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1), 12px 12px 0px var(--primary-color);
   }
 
   &:not(:hover) {
@@ -436,15 +435,13 @@
   &.popular {
     transform: translateY(-3px);
     transition: 0.4s;
-    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1),
-      12px 12px 0px var(--primary-color);
+    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1), 12px 12px 0px var(--primary-color);
   }
 
   &:hover {
     transform: translateY(-3px);
     transition: 0.4s;
-    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1),
-      12px 12px 0px var(--primary-color);
+    box-shadow: 0 20px 20px 0 rgba(0, 0, 0, 0.1), 12px 12px 0px var(--primary-color);
   }
 
   &:not(:hover) {

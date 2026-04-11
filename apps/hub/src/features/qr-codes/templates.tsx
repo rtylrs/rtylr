@@ -1,5 +1,5 @@
-import React from "react";
-import { QRCode } from "react-qrcode-logo";
+import React from 'react';
+import { QRCode } from 'react-qrcode-logo';
 
 export interface QrOptions {
   name?: string;
@@ -12,7 +12,7 @@ export interface QrOptions {
   logoWidth: number;
   logoHeight: number;
   eyeRadius: number;
-  qrStyle: "squares" | "dots" | "fluid" | undefined;
+  qrStyle: 'squares' | 'dots' | 'fluid' | undefined;
   backgroundColor?: string;
   url?: string;
   textColor?: string;
@@ -21,95 +21,95 @@ export interface QrOptions {
 
 export const QrCodeTemplates: QrOptions[] = [
   {
-    name: "template1",
-    text: "",
-    description: "",
+    name: 'template1',
+    text: '',
+    description: '',
     size: 50,
-    fgColor: "#000000",
-    bgColor: "#ffffff",
+    fgColor: '#000000',
+    bgColor: '#ffffff',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
-    backgroundColor: "#ffffff",
+    qrStyle: 'squares',
+    backgroundColor: '#ffffff',
     logoImage: false,
   },
   {
-    name: "template2",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template2',
+    text: 'Table',
+    description: 'Scan Me',
     size: 50,
-    fgColor: "#000000",
-    bgColor: "#ffffff",
+    fgColor: '#000000',
+    bgColor: '#ffffff',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: false,
   },
   {
-    name: "template3",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template3',
+    text: 'Table',
+    description: 'Scan Me',
     size: 50,
-    fgColor: "#000000",
-    bgColor: "#ffeb3b",
+    fgColor: '#000000',
+    bgColor: '#ffeb3b',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: false,
   },
   {
-    name: "template4",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template4',
+    text: 'Table',
+    description: 'Scan Me',
     size: 50,
-    fgColor: "#000000",
-    bgColor: "#ffeb3b",
+    fgColor: '#000000',
+    bgColor: '#ffeb3b',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: false,
   },
   {
-    name: "template5",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template5',
+    text: 'Table',
+    description: 'Scan Me',
     size: 50,
-    fgColor: "#000000",
-    bgColor: "#ffeb3b",
+    fgColor: '#000000',
+    bgColor: '#ffeb3b',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: false,
   },
   {
-    name: "template6",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template6',
+    text: 'Table',
+    description: 'Scan Me',
     size: 80,
-    fgColor: "#000000",
-    bgColor: "#ffeb3b",
+    fgColor: '#000000',
+    bgColor: '#ffeb3b',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: true,
   },
   {
-    name: "template7",
-    text: "Table",
-    description: "Scan Me",
+    name: 'template7',
+    text: 'Table',
+    description: 'Scan Me',
     size: 80,
-    fgColor: "#000000",
-    bgColor: "#ffffff",
+    fgColor: '#000000',
+    bgColor: '#ffffff',
     logoWidth: 50,
     logoHeight: 50,
     eyeRadius: 10,
-    qrStyle: "squares",
+    qrStyle: 'squares',
     logoImage: true,
   },
 ];
@@ -141,9 +141,9 @@ export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
           width: 100,
           height: 100,
           backgroundColor: backgroundColor || bgColor,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <QRCode
@@ -156,7 +156,7 @@ export const QrCodeTemplate: React.FC<QrCodeTemplateProps> = ({
           eyeRadius={eyeRadius}
           qrStyle={qrStyle}
           logoPadding={5}
-          logoImage={logoImage ? logo : ""}
+          logoImage={logoImage ? logo : ''}
           removeQrCodeBehindLogo
         />
       </div>

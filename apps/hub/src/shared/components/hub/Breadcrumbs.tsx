@@ -3,36 +3,36 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 
 const ROUTE_LABELS: Record<string, string> = {
-  '':            'Hub',
-  'team':        'Team',
-  'invite':      'Invite',
-  'permissions': 'Permissions',
-  'roles':       'Roles',
-  'apps':        'Apps',
-  'activity':    'Activity',
-  'notifications': 'Notifications',
-  'account':     'Account',
-  'billing':     'Billing',
-  'integrations':'Integrations',
-  'api-keys':    'API Keys',
-  'webhooks':    'Webhooks',
-  'audit':       'Audit',
-  'security':    'Security',
-  'settings':    'Settings',
-  'menus':       'Menus',
-  'menu':        'Menu',
-  'orders':      'Orders',
-  'qr-codes':    'QR Codes',
-  'design':      'Design',
-  'analytics':   'Analytics',
-  'marketplace': 'Marketplace',
-  'changelog':   "What's new",
-  'flags':       'Feature Flags',
-  'help':        'Help Center',
-  'referrals':   'Referrals',
-  'export':      'Export Data',
-  'import':      'Import Data',
-  'theme':       'Theme',
+  '': 'Hub',
+  team: 'Team',
+  invite: 'Invite',
+  permissions: 'Permissions',
+  roles: 'Roles',
+  apps: 'Apps',
+  activity: 'Activity',
+  notifications: 'Notifications',
+  account: 'Account',
+  billing: 'Billing',
+  integrations: 'Integrations',
+  'api-keys': 'API Keys',
+  webhooks: 'Webhooks',
+  audit: 'Audit',
+  security: 'Security',
+  settings: 'Settings',
+  menus: 'Menus',
+  menu: 'Menu',
+  orders: 'Orders',
+  'qr-codes': 'QR Codes',
+  design: 'Design',
+  analytics: 'Analytics',
+  marketplace: 'Marketplace',
+  changelog: "What's new",
+  flags: 'Feature Flags',
+  help: 'Help Center',
+  referrals: 'Referrals',
+  export: 'Export Data',
+  import: 'Import Data',
+  theme: 'Theme',
 };
 
 export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => {
@@ -58,9 +58,13 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
               <ChevronRight size={11} className="shrink-0" />
               <li>
                 {isLast ? (
-                  <span style={{ color: 'var(--hub-text)' }} className="font-medium">{label}</span>
+                  <span style={{ color: 'var(--hub-text)' }} className="font-medium">
+                    {label}
+                  </span>
                 ) : (
-                  <Link to={path} className="hover:opacity-70 transition-opacity">{label}</Link>
+                  <Link to={path} className="hover:opacity-70 transition-opacity">
+                    {label}
+                  </Link>
                 )}
               </li>
             </React.Fragment>

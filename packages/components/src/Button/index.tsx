@@ -1,23 +1,14 @@
-import React, { CSSProperties, MouseEvent, ButtonHTMLAttributes } from "react";
-import classNames from "classnames";
-import LoadingSpinner from "../LoadingSpinner";
-import "./Button.scss";
+import React, { CSSProperties, MouseEvent, ButtonHTMLAttributes } from 'react';
+import classNames from 'classnames';
+import LoadingSpinner from '../LoadingSpinner';
+import './Button.scss';
 
 interface ButtonProps
-  extends Omit<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    "onClick" | "prefix" | "suffix"
-  > {
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'prefix' | 'suffix'> {
   children: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
-  variant?:
-    | "primary"
-    | "secondary"
-    | "outline"
-    | "ghost"
-    | "soft"
-    | "dark-outline";
-  size?: "sm" | "md" | "lg";
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'soft' | 'dark-outline';
+  size?: 'sm' | 'md' | 'lg';
   color?: string;
   secondaryColor?: string;
   hidden?: boolean;
@@ -52,8 +43,8 @@ interface ButtonProps
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
-  variant = "primary",
-  size = "md",
+  variant = 'primary',
+  size = 'md',
   hidden = false,
   disabled = false,
   loading = false,
@@ -69,38 +60,34 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const buttonClassName = classNames(
-    "voxire-button",
+    'voxire-button',
     `voxire-button-${variant}`,
     `voxire-button-${size}`,
     {
-      "voxire-button-disabled": disabled,
-      "voxire-button-loading": loading,
-      "voxire-button-full-width": fullWidth,
+      'voxire-button-disabled': disabled,
+      'voxire-button-loading': loading,
+      'voxire-button-full-width': fullWidth,
     },
     className
   );
 
   const buttonStyle: CSSProperties = {
-    ...(color && variant === "primary"
-      ? { backgroundColor: color, borderColor: color }
-      : {}),
-    ...(secondaryColor && variant === "secondary"
+    ...(color && variant === 'primary' ? { backgroundColor: color, borderColor: color } : {}),
+    ...(secondaryColor && variant === 'secondary'
       ? { backgroundColor: secondaryColor, borderColor: secondaryColor }
       : {}),
-    ...(color && variant === "outline" ? { borderColor: color, color } : {}),
-    ...(color && variant === "ghost" ? { color } : {}),
-    ...(width
-      ? { width: typeof width === "number" ? `${width}px` : width }
-      : {}),
+    ...(color && variant === 'outline' ? { borderColor: color, color } : {}),
+    ...(color && variant === 'ghost' ? { color } : {}),
+    ...(width ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
     ...(height
       ? {
-          height: typeof height === "number" ? `${height}px` : height,
-          minHeight: typeof height === "number" ? `${height}px` : height,
-          maxHeight: typeof height === "number" ? `${height}px` : height,
+          height: typeof height === 'number' ? `${height}px` : height,
+          minHeight: typeof height === 'number' ? `${height}px` : height,
+          maxHeight: typeof height === 'number' ? `${height}px` : height,
         }
       : {}),
     ...styles,
-    display: hidden ? "none" : "inline-flex",
+    display: hidden ? 'none' : 'inline-flex',
   };
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {

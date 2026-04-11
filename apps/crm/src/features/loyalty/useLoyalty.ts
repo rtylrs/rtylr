@@ -57,8 +57,15 @@ export function useUpdateLoyaltyConfig() {
 export function useAwardPoints() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ customerId, points, reason }: { customerId: number; points: number; reason?: string }) =>
-      crmApi.awardPoints(customerId, points, reason),
+    mutationFn: ({
+      customerId,
+      points,
+      reason,
+    }: {
+      customerId: number;
+      points: number;
+      reason?: string;
+    }) => crmApi.awardPoints(customerId, points, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });
@@ -69,8 +76,15 @@ export function useAwardPoints() {
 export function useRedeemPoints() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ customerId, points, reason }: { customerId: number; points: number; reason?: string }) =>
-      crmApi.redeemPoints(customerId, points, reason),
+    mutationFn: ({
+      customerId,
+      points,
+      reason,
+    }: {
+      customerId: number;
+      points: number;
+      reason?: string;
+    }) => crmApi.redeemPoints(customerId, points, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });

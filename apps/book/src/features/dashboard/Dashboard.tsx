@@ -101,7 +101,11 @@ const Dashboard: React.FC = () => {
       {statsError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load dashboard stats. Please try again later.
         </div>
@@ -120,8 +124,12 @@ const Dashboard: React.FC = () => {
                   border: '1px solid var(--hub-border)',
                   textDecoration: 'none',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(99,102,241,0.3)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(99,102,241,0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
@@ -168,7 +176,9 @@ const Dashboard: React.FC = () => {
 
         {!todayError && isLoading && (
           <div className="space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 

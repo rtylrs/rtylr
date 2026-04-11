@@ -46,7 +46,9 @@ const OrgNode: React.FC<NodeProps> = ({ node, depth = 0 }) => {
           {initials(node.staff.name)}
         </span>
         <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--hr-text)' }}>{node.staff.name}</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--hr-text)' }}>
+            {node.staff.name}
+          </div>
           <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{node.staff.role}</div>
         </div>
       </div>

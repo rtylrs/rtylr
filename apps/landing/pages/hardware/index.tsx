@@ -107,9 +107,8 @@ const HardwarePage = (): JSX.Element => {
             <div className={styles.header}>
               <h1 className={styles.title}>Hardware Solutions</h1>
               <p className={styles.subtitle}>
-                Complete hardware ecosystem designed to integrate seamlessly with
-                Rtylr POS. All equipment is tested and optimized for peak
-                performance.
+                Complete hardware ecosystem designed to integrate seamlessly with Rtylr POS. All
+                equipment is tested and optimized for peak performance.
               </p>
             </div>
 
@@ -117,11 +116,7 @@ const HardwarePage = (): JSX.Element => {
               {hardwareItems.map((item, index) => (
                 <div key={index} className={styles.card}>
                   <div className={styles.imageContainer}>
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className={styles.image}
-                    />
+                    <img src={item.imageUrl} alt={item.name} className={styles.image} />
                   </div>
                   <div className={styles.content}>
                     <h3 className={styles.cardTitle}>{item.name}</h3>
@@ -134,22 +129,13 @@ const HardwarePage = (): JSX.Element => {
             <div className={styles.ctaSection}>
               <h2 className={styles.ctaTitle}>Ready to Get Started?</h2>
               <p className={styles.ctaDescription}>
-                Connect with our team to discuss hardware solutions tailored to
-                your business needs.
+                Connect with our team to discuss hardware solutions tailored to your business needs.
               </p>
               <div className={styles.ctaButtons}>
-                <Button
-                  variant="dark-outline"
-                  onClick={handleBookDemo}
-                  size="lg"
-                >
+                <Button variant="dark-outline" onClick={handleBookDemo} size="lg">
                   Book a Demo
                 </Button>
-                <Button
-                  variant="soft"
-                  onClick={handleContactSales}
-                  size="lg"
-                >
+                <Button variant="soft" onClick={handleContactSales} size="lg">
                   Contact Sales
                 </Button>
               </div>
@@ -162,4 +148,3 @@ const HardwarePage = (): JSX.Element => {
 };
 
 export default HardwarePage;
-

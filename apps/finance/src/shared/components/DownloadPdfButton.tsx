@@ -8,11 +8,16 @@ interface DownloadPdfButtonProps {
   label?: string;
 }
 
-const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({ invoiceId, label = 'Download PDF' }) => {
+const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
+  invoiceId,
+  label = 'Download PDF',
+}) => {
   const handle = () => {
     // Create a simple "fake" text blob as a placeholder for a PDF.
     const blob = new Blob(
-      [`Invoice ${invoiceId}\nGenerated ${new Date().toLocaleString()}\n\nThis is a placeholder PDF export.`],
+      [
+        `Invoice ${invoiceId}\nGenerated ${new Date().toLocaleString()}\n\nThis is a placeholder PDF export.`,
+      ],
       { type: 'application/pdf' }
     );
     const url = URL.createObjectURL(blob);

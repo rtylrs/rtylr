@@ -79,9 +79,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
       }));
 
     const orderResults: Result[] = (orders || [])
-      .filter(
-        (o) => String(o.id).includes(qq) || o.supplier.toLowerCase().includes(qq)
-      )
+      .filter((o) => String(o.id).includes(qq) || o.supplier.toLowerCase().includes(qq))
       .slice(0, 3)
       .map((o) => ({
         type: 'order',
@@ -91,9 +89,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
         icon: ShoppingCart,
       }));
 
-    const navResults: Result[] = NAV_ITEMS.filter((n) =>
-      n.label.toLowerCase().includes(qq)
-    ).slice(0, 4);
+    const navResults: Result[] = NAV_ITEMS.filter((n) => n.label.toLowerCase().includes(qq)).slice(
+      0,
+      4
+    );
 
     return [...productResults, ...supplierResults, ...orderResults, ...navResults];
   }, [q, products, suppliers, orders]);
@@ -185,7 +184,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
                 >
                   <Icon size={14} style={{ color: '#f59e0b' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                    <p
+                      className="text-sm font-medium truncate"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
                       {r.label}
                     </p>
                     {r.sub && (

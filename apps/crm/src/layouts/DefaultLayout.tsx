@@ -32,43 +32,41 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard',   path: '/',            icon: LayoutDashboard },
-  { label: 'Customers',   path: '/customers',   icon: Users },
-  { label: 'Loyalty',     path: '/loyalty',     icon: Gift },
-  { label: 'Campaigns',   path: '/campaigns',   icon: Megaphone },
-  { label: 'Segments',    path: '/segments',    icon: PieChart },
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Customers', path: '/customers', icon: Users },
+  { label: 'Loyalty', path: '/loyalty', icon: Gift },
+  { label: 'Campaigns', path: '/campaigns', icon: Megaphone },
+  { label: 'Segments', path: '/segments', icon: PieChart },
   { label: 'Automations', path: '/automations', icon: Zap },
-  { label: 'Templates',   path: '/templates',   icon: FileText },
-  { label: 'Feedback',    path: '/feedback',    icon: MessageSquare },
-  { label: 'Settings',    path: '/settings',    icon: SettingsIcon },
+  { label: 'Templates', path: '/templates', icon: FileText },
+  { label: 'Feedback', path: '/feedback', icon: MessageSquare },
+  { label: 'Settings', path: '/settings', icon: SettingsIcon },
 ];
 
 const routeLabels: Record<string, string> = {
-  '/':            'Dashboard',
-  '/customers':   'Customers',
+  '/': 'Dashboard',
+  '/customers': 'Customers',
   '/customers/new': 'New customer',
   '/customers/import': 'Import customers',
-  '/loyalty':     'Loyalty',
+  '/loyalty': 'Loyalty',
   '/loyalty/members': 'Loyalty members',
   '/loyalty/rewards': 'Rewards catalog',
   '/loyalty/tiers': 'Loyalty tiers',
-  '/campaigns':   'Campaigns',
+  '/campaigns': 'Campaigns',
   '/campaigns/email': 'New email campaign',
   '/campaigns/sms': 'New SMS campaign',
-  '/segments':    'Segments',
+  '/segments': 'Segments',
   '/segments/new': 'New segment',
   '/automations': 'Automations',
   '/automations/new': 'New automation',
-  '/templates':   'Templates',
-  '/feedback':    'Feedback & NPS',
-  '/settings':    'Settings',
+  '/templates': 'Templates',
+  '/feedback': 'Feedback & NPS',
+  '/settings': 'Settings',
 };
 
 function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find(
-    (key) => pathname.startsWith(key) && key !== '/'
-  );
+  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'CRM';
 }
 
@@ -79,17 +77,19 @@ function getStoredTheme(): Theme {
 }
 
 function applyTheme(theme: Theme) {
-  const resolved = theme === 'system'
-    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : theme;
+  const resolved =
+    theme === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : theme;
   document.documentElement.setAttribute('data-theme', resolved);
   localStorage.setItem('crm-theme', theme);
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
-  const isActive =
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   return (
     <Link
@@ -212,8 +212,12 @@ const DefaultLayout: React.FC = () => {
               textDecoration: 'none',
               transition: 'background 0.15s',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
           >
             <ArrowLeft size={13} />
             <span>Hub</span>
@@ -221,7 +225,16 @@ const DefaultLayout: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <nav
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '4px 8px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+          }}
+        >
           <p
             style={{
               padding: '4px 12px 6px',
@@ -241,7 +254,9 @@ const DefaultLayout: React.FC = () => {
         </nav>
 
         {/* Footer — user */}
-        <div style={{ padding: '8px', borderTop: '1px solid var(--hub-border)', position: 'relative' }}>
+        <div
+          style={{ padding: '8px', borderTop: '1px solid var(--hub-border)', position: 'relative' }}
+        >
           <button
             onClick={() => setUserMenuOpen((v) => !v)}
             style={{
@@ -256,8 +271,12 @@ const DefaultLayout: React.FC = () => {
               cursor: 'pointer',
               transition: 'background 0.15s',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }}
           >
             <div
               style={{
@@ -277,7 +296,16 @@ const DefaultLayout: React.FC = () => {
               U
             </div>
             <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-              <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--hub-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  color: 'var(--hub-text)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 My Account
               </div>
             </div>
@@ -305,15 +333,25 @@ const DefaultLayout: React.FC = () => {
                 }}
               >
                 <div style={{ marginBottom: '8px' }}>
-                  <p style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hub-text-dim)', marginBottom: '6px', padding: '0 4px' }}>
+                  <p
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: 'var(--hub-text-dim)',
+                      marginBottom: '6px',
+                      padding: '0 4px',
+                    }}
+                  >
                     Appearance
                   </p>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    {([
+                    {[
                       { value: 'light' as Theme, icon: Sun, label: 'Light' },
                       { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
                       { value: 'system' as Theme, icon: Monitor, label: 'System' },
-                    ]).map(({ value, icon: Icon, label }) => (
+                    ].map(({ value, icon: Icon, label }) => (
                       <button
                         key={value}
                         onClick={() => handleTheme(value)}
@@ -328,8 +366,10 @@ const DefaultLayout: React.FC = () => {
                           fontSize: '10px',
                           fontWeight: 500,
                           cursor: 'pointer',
-                          border: theme === value ? `1px solid ${ACCENT}40` : '1px solid transparent',
-                          background: theme === value ? 'rgba(59,130,246,0.12)' : 'var(--hub-hover)',
+                          border:
+                            theme === value ? `1px solid ${ACCENT}40` : '1px solid transparent',
+                          background:
+                            theme === value ? 'rgba(59,130,246,0.12)' : 'var(--hub-hover)',
                           color: theme === value ? ACCENT : 'var(--hub-text-muted)',
                         }}
                       >
@@ -356,8 +396,12 @@ const DefaultLayout: React.FC = () => {
                     cursor: 'pointer',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <LogOut size={13} />
                   Sign out
@@ -433,8 +477,12 @@ const DefaultLayout: React.FC = () => {
                 color: 'var(--hub-text-muted)',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <Bell size={14} />
             </button>

@@ -26,7 +26,11 @@ const Reconcile: React.FC = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+    >
       <PageHeader
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
@@ -40,18 +44,43 @@ const Reconcile: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {unmatched.map((t) => (
           <div key={t.id} style={{ ...cardStyle, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+              }}
+            >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>{t.description}</div>
-                <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{t.date} <>&middot;</> {t.category}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                  {t.description}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                  {t.date} <>&middot;</> {t.category}
+                </div>
               </div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: t.amount >= 0 ? ACCENT : 'var(--hub-text)' }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: t.amount >= 0 ? ACCENT : 'var(--hub-text)',
+                }}
+              >
                 <MoneyDisplay amount={t.amount} signed />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {CANDIDATES.filter((c) => Math.abs(c.amount) === Math.abs(t.amount) || Math.abs(Math.abs(c.amount) - Math.abs(t.amount)) < 500).map((c) => (
-                <button key={c.id} style={{ ...ghostBtn, padding: '6px 12px' }} onClick={() => match(t.id, c.id)}>
+              {CANDIDATES.filter(
+                (c) =>
+                  Math.abs(c.amount) === Math.abs(t.amount) ||
+                  Math.abs(Math.abs(c.amount) - Math.abs(t.amount)) < 500
+              ).map((c) => (
+                <button
+                  key={c.id}
+                  style={{ ...ghostBtn, padding: '6px 12px' }}
+                  onClick={() => match(t.id, c.id)}
+                >
                   <Link2 size={12} /> {c.label}
                 </button>
               ))}
@@ -59,7 +88,15 @@ const Reconcile: React.FC = () => {
           </div>
         ))}
         {unmatched.length === 0 && (
-          <div style={{ ...cardStyle, padding: 30, textAlign: 'center', color: 'var(--hub-text-muted)', fontSize: 13 }}>
+          <div
+            style={{
+              ...cardStyle,
+              padding: 30,
+              textAlign: 'center',
+              color: 'var(--hub-text-muted)',
+              fontSize: 13,
+            }}
+          >
             All transactions reconciled.
           </div>
         )}

@@ -60,7 +60,8 @@ const Tickets: React.FC = () => {
               style={{
                 background: statusFilter === s ? 'var(--hub-active)' : 'transparent',
                 color: statusFilter === s ? 'var(--hub-text)' : 'var(--hub-text-muted)',
-                border: statusFilter === s ? '1px solid var(--hub-border)' : '1px solid transparent',
+                border:
+                  statusFilter === s ? '1px solid var(--hub-border)' : '1px solid transparent',
               }}
             >
               {s === '' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -84,7 +85,11 @@ const Tickets: React.FC = () => {
       {isError && (
         <div
           className="flex items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           Failed to load tickets. Please try again.
         </div>
@@ -93,7 +98,11 @@ const Tickets: React.FC = () => {
       {!isLoading && !isError && tickets.length === 0 && (
         <div
           className="flex flex-col items-center justify-center py-16 rounded-xl text-sm"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-muted)' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text-muted)',
+          }}
         >
           <Ticket size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
           <p>No tickets found</p>
@@ -108,12 +117,60 @@ const Tickets: React.FC = () => {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: 'var(--hub-card)' }}>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>ID</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Subject</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Customer</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Status</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Assignee</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium" style={{ color: 'var(--hub-text-muted)', borderBottom: '1px solid var(--hub-border)' }}>Updated</th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  ID
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Subject
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Customer
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Status
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Assignee
+                </th>
+                <th
+                  className="text-left px-4 py-2.5 text-xs font-medium"
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
+                >
+                  Updated
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -122,16 +179,28 @@ const Tickets: React.FC = () => {
                   key={ticket.id}
                   className="transition-colors cursor-pointer"
                   style={{ borderBottom: '1px solid var(--hub-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <td className="px-4 py-3">
-                    <Link to={`/tickets/${ticket.id}`} className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}>
+                    <Link
+                      to={`/tickets/${ticket.id}`}
+                      className="text-xs font-mono"
+                      style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+                    >
                       #{ticket.id}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <Link to={`/tickets/${ticket.id}`} className="text-sm font-medium" style={{ color: 'var(--hub-text)', textDecoration: 'none' }}>
+                    <Link
+                      to={`/tickets/${ticket.id}`}
+                      className="text-sm font-medium"
+                      style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
+                    >
                       {ticket.subject}
                     </Link>
                   </td>

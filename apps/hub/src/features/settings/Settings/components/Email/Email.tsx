@@ -94,12 +94,20 @@ interface NotificationRowProps {
 }
 
 const NotificationRow: React.FC<NotificationRowProps> = ({
-  id, label, description, checked, onChange,
+  id,
+  label,
+  description,
+  checked,
+  onChange,
 }) => (
   <div className="flex items-center justify-between gap-4 py-3">
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>{label}</p>
-      <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{description}</p>
+      <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+        {label}
+      </p>
+      <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+        {description}
+      </p>
     </div>
     <ToggleSwitch id={id} checked={checked} onChange={onChange} />
   </div>
@@ -212,9 +220,7 @@ const Email: React.FC = () => {
             <Mail size={15} style={{ color: 'var(--hub-text-dim)' }} />
             <CardTitle>Sender Identity</CardTitle>
           </div>
-          <CardDescription>
-            Control how your business appears in outgoing emails.
-          </CardDescription>
+          <CardDescription>Control how your business appears in outgoing emails.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <div className="space-y-1.5">
@@ -286,11 +292,7 @@ const Email: React.FC = () => {
                 Send emails through your own mail server
               </p>
             </div>
-            <ToggleSwitch
-              id="smtp-toggle"
-              checked={useSmtp}
-              onChange={setUseSmtp}
-            />
+            <ToggleSwitch id="smtp-toggle" checked={useSmtp} onChange={setUseSmtp} />
           </div>
 
           {useSmtp && (
@@ -370,11 +372,7 @@ const Email: React.FC = () => {
                     'Test Connection'
                   )}
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveSmtp}
-                  disabled={savingSmtp || testingSmtp}
-                >
+                <Button size="sm" onClick={handleSaveSmtp} disabled={savingSmtp || testingSmtp}>
                   {savingSmtp ? (
                     <>
                       <Loader2 size={12} className="animate-spin" />
@@ -397,9 +395,7 @@ const Email: React.FC = () => {
             <Bell size={15} style={{ color: 'var(--hub-text-dim)' }} />
             <CardTitle>Email Notifications</CardTitle>
           </div>
-          <CardDescription>
-            Choose which events trigger an email notification.
-          </CardDescription>
+          <CardDescription>Choose which events trigger an email notification.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--hub-border)' }}>
           <NotificationRow

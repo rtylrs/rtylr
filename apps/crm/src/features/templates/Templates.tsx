@@ -13,9 +13,13 @@ const Templates: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'email' | 'sms'>('all');
   const filtered = filter === 'all' ? templates : templates.filter((t) => t.channel === filter);
 
-  const useTemplate = (t: typeof templates[number]) => {
+  const useTemplate = (t: (typeof templates)[number]) => {
     if (t.channel === 'email') {
-      navigate(`/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(t.subject || '')}&body=${encodeURIComponent(t.body)}`);
+      navigate(
+        `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
+          t.subject || ''
+        )}&body=${encodeURIComponent(t.body)}`
+      );
     } else {
       navigate('/campaigns/sms');
     }
@@ -28,7 +32,12 @@ const Templates: React.FC = () => {
       <PageHeader
         title="Templates library"
         subtitle="Reusable email and SMS templates"
-        actions={<Button variant="primary"><Plus size={13} />New template</Button>}
+        actions={
+          <Button variant="primary">
+            <Plus size={13} />
+            New template
+          </Button>
+        }
       />
 
       <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
@@ -54,11 +63,25 @@ const Templates: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <Card><SkeletonList count={4} /></Card>
+        <Card>
+          <SkeletonList count={4} />
+        </Card>
       ) : filtered.length === 0 ? (
-        <Card><EmptyState icon={FileText} title="No templates" description="Create one to get started." /></Card>
+        <Card>
+          <EmptyState
+            icon={FileText}
+            title="No templates"
+            description="Create one to get started."
+          />
+        </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '14px',
+          }}
+        >
           {filtered.map((t) => {
             const Icon = t.channel === 'email' ? Mail : MessageSquare;
             const color = t.channel === 'email' ? '#3b82f6' : '#f59e0b';
@@ -75,7 +98,9 @@ const Templates: React.FC = () => {
                   gap: '10px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <div
                     style={{
                       width: '36px',
@@ -105,17 +130,51 @@ const Templates: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)', margin: '0 0 4px' }}>{t.name}</h3>
-                  {t.subject && <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', fontWeight: 500 }}>{t.subject}</div>}
-                  <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '6px 0 0', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <h3
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      color: 'var(--hub-text)',
+                      margin: '0 0 4px',
+                    }}
+                  >
+                    {t.name}
+                  </h3>
+                  {t.subject && (
+                    <div
+                      style={{ fontSize: '11px', color: 'var(--hub-text-dim)', fontWeight: 500 }}
+                    >
+                      {t.subject}
+                    </div>
+                  )}
+                  <p
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--hub-text-muted)',
+                      margin: '6px 0 0',
+                      lineHeight: 1.5,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
                     {t.body}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', marginTop: 'auto' }}>
-                  <Button variant="outline" style={{ flex: 1, justifyContent: 'center', padding: '6px' }} onClick={() => duplicate(t.name)}>
+                  <Button
+                    variant="outline"
+                    style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
+                    onClick={() => duplicate(t.name)}
+                  >
                     <Copy size={11} /> Duplicate
                   </Button>
-                  <Button variant="primary" style={{ flex: 1, justifyContent: 'center', padding: '6px' }} onClick={() => useTemplate(t)}>
+                  <Button
+                    variant="primary"
+                    style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
+                    onClick={() => useTemplate(t)}
+                  >
                     Use
                   </Button>
                 </div>

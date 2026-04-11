@@ -31,7 +31,11 @@ const OrgChart: React.FC = () => {
       {isLoading ? (
         <Skeleton height={260} />
       ) : !root ? (
-        <EmptyState icon={<Network size={20} />} title="No employees" description="Add employees to see the org chart." />
+        <EmptyState
+          icon={<Network size={20} />}
+          title="No employees"
+          description="Add employees to see the org chart."
+        />
       ) : (
         <Card style={{ overflowX: 'auto', padding: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'center' }}>

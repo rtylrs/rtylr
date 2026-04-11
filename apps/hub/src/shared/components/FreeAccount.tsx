@@ -1,6 +1,6 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const FreeAccount: React.FC<{}> = () => {
   const [open, setOpen] = React.useState<boolean>(true);
@@ -10,7 +10,7 @@ const FreeAccount: React.FC<{}> = () => {
     <div
       className="free-account-popup"
       style={{
-        height: open ? "auto" : "50px",
+        height: open ? 'auto' : '50px',
       }}
     >
       <div className="free-account-header">
@@ -20,16 +20,13 @@ const FreeAccount: React.FC<{}> = () => {
       </div>
       <div
         style={{
-          display: open ? "block" : "none",
+          display: open ? 'block' : 'none',
         }}
       >
         <div className="free-account-content">
           <p>You are currently using a free tier.</p>
         </div>
-        <button
-          className="upgrade-button"
-          onClick={() => navigate("/app/business/billing")}
-        >
+        <button className="upgrade-button" onClick={() => navigate('/app/business/billing')}>
           Select a Plan
         </button>
       </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import api from "../shared/lib/api";
+import api from '../shared/lib/api';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -31,15 +31,22 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { useUserStore } from "../shared/stores/userStore";
-import { useThemeStore } from "../shared/stores/themeStore";
-import { cn } from "../shared/lib/utils";
-import { Avatar, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../shared/components/ui";
-import { SearchCommand } from "../shared/components/hub";
-import { useCommandPalette } from "../shared/stores/commandPaletteStore";
-import { useKeyboardShortcuts } from "../shared/hooks/useKeyboardShortcuts";
-import { useOnboardingTour } from "../shared/hooks/useOnboardingTour";
-import { useNotifications } from "../shared/hooks/queries/useNotifications";
+import { useUserStore } from '../shared/stores/userStore';
+import { useThemeStore } from '../shared/stores/themeStore';
+import { cn } from '../shared/lib/utils';
+import {
+  Avatar,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '../shared/components/ui';
+import { SearchCommand } from '../shared/components/hub';
+import { useCommandPalette } from '../shared/stores/commandPaletteStore';
+import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
+import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
+import { useNotifications } from '../shared/hooks/queries/useNotifications';
 
 interface NavItem {
   label: string;
@@ -48,79 +55,81 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard',     path: '/',                  icon: LayoutDashboard },
-  { label: 'Team',          path: '/team',              icon: Users },
-  { label: 'Apps',          path: '/apps',              icon: Grid3x3 },
-  { label: 'Activity',      path: '/activity',          icon: ActivityIcon },
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Team', path: '/team', icon: Users },
+  { label: 'Apps', path: '/apps', icon: Grid3x3 },
+  { label: 'Activity', path: '/activity', icon: ActivityIcon },
 ];
 
 const menuSubItems: NavItem[] = [
-  { label: 'Menus',         path: '/menus',             icon: UtensilsCrossed },
-  { label: 'Orders',        path: '/orders',            icon: ClipboardList },
-  { label: 'QR Codes',      path: '/qr-codes',          icon: QrCode },
-  { label: 'Design',        path: '/design',            icon: Palette },
+  { label: 'Menus', path: '/menus', icon: UtensilsCrossed },
+  { label: 'Orders', path: '/orders', icon: ClipboardList },
+  { label: 'QR Codes', path: '/qr-codes', icon: QrCode },
+  { label: 'Design', path: '/design', icon: Palette },
 ];
 
 const routeLabels: Record<string, string> = {
-  '/':                       'Dashboard',
-  '/chat':                   '__caret__',
-  '/menus':                  'Menus',
-  '/orders':                 'Orders',
-  '/qr-codes':               'QR Codes',
-  '/design':                 'Design',
-  '/analytics':              'Analytics',
-  '/menu':                   'Menu',
-  '/create-item':            'Create Item',
-  '/create-banner':          'Create Banner',
-  '/team':                   'Team',
-  '/team/invite':            'Invite member',
-  '/permissions':            'Permissions',
-  '/roles':                  'Roles',
-  '/apps':                   'Apps',
-  '/activity':               'Activity',
-  '/audit':                  'Audit log',
-  '/notifications':          'Notifications',
-  '/account':                'Account',
-  '/billing':                'Billing',
-  '/integrations':           'Integrations',
-  '/api-keys':               'API Keys',
-  '/webhooks':               'Webhooks',
-  '/security':               'Security',
-  '/marketplace':            'Marketplace',
-  '/changelog':              "What's new",
-  '/flags':                  'Feature flags',
-  '/theme':                  'Theme',
-  '/referrals':              'Referrals',
-  '/help':                   'Help center',
-  '/export':                 'Export data',
-  '/import':                 'Import data',
-  '/settings':               'Settings',
-  '/settings/account':       'Account',
-  '/settings/general':       'General',
-  '/settings/industry':      'Industry',
-  '/settings/domain':        'Custom Domain',
-  '/settings/email':         'Email Settings',
-  '/settings/billing':       'Billing',
-  '/settings/addons':        'Addons',
+  '/': 'Dashboard',
+  '/chat': '__caret__',
+  '/menus': 'Menus',
+  '/orders': 'Orders',
+  '/qr-codes': 'QR Codes',
+  '/design': 'Design',
+  '/analytics': 'Analytics',
+  '/menu': 'Menu',
+  '/create-item': 'Create Item',
+  '/create-banner': 'Create Banner',
+  '/team': 'Team',
+  '/team/invite': 'Invite member',
+  '/permissions': 'Permissions',
+  '/roles': 'Roles',
+  '/apps': 'Apps',
+  '/activity': 'Activity',
+  '/audit': 'Audit log',
+  '/notifications': 'Notifications',
+  '/account': 'Account',
+  '/billing': 'Billing',
+  '/integrations': 'Integrations',
+  '/api-keys': 'API Keys',
+  '/webhooks': 'Webhooks',
+  '/security': 'Security',
+  '/marketplace': 'Marketplace',
+  '/changelog': "What's new",
+  '/flags': 'Feature flags',
+  '/theme': 'Theme',
+  '/referrals': 'Referrals',
+  '/help': 'Help center',
+  '/export': 'Export data',
+  '/import': 'Import data',
+  '/settings': 'Settings',
+  '/settings/account': 'Account',
+  '/settings/general': 'General',
+  '/settings/industry': 'Industry',
+  '/settings/domain': 'Custom Domain',
+  '/settings/email': 'Email Settings',
+  '/settings/billing': 'Billing',
+  '/settings/addons': 'Addons',
 };
 
 function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find(
-    (key) => pathname.startsWith(key) && key !== '/'
-  );
+  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'Hub';
 }
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
-  const isActive =
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   return (
     <Link
@@ -152,7 +161,11 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   );
 };
 
-const SidebarSection: React.FC<{ label: string; icon: React.ComponentType<{ size?: number; className?: string }>; items: NavItem[] }> = ({ label, icon: Icon, items }) => {
+const SidebarSection: React.FC<{
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  items: NavItem[];
+}> = ({ label, icon: Icon, items }) => {
   const location = useLocation();
   const isActive = items.some((item) => location.pathname.startsWith(item.path));
   const [open, setOpen] = React.useState(isActive);
@@ -169,10 +182,17 @@ const SidebarSection: React.FC<{ label: string; icon: React.ComponentType<{ size
       >
         <Icon size={16} className="shrink-0" />
         <span className="flex-1 text-left">{label}</span>
-        <ChevronRight size={12} className={cn('shrink-0 transition-transform', open && 'rotate-90')} style={{ color: 'var(--hub-text-dim)' }} />
+        <ChevronRight
+          size={12}
+          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
+          style={{ color: 'var(--hub-text-dim)' }}
+        />
       </button>
       {open && (
-        <div className="ml-5 pl-2 mt-0.5 space-y-0.5" style={{ borderLeft: '1px solid var(--hub-border)' }}>
+        <div
+          className="ml-5 pl-2 mt-0.5 space-y-0.5"
+          style={{ borderLeft: '1px solid var(--hub-border)' }}
+        >
           {items.map((item) => (
             <SidebarNavItem key={item.path} {...item} />
           ))}
@@ -206,7 +226,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   useKeyboardShortcuts();
   useOnboardingTour();
 
-  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read).length : 0;
+  const unreadCount = Array.isArray(notifications)
+    ? notifications.filter((n: any) => !n.read).length
+    : 0;
   const pageTitle = getPageTitle(location.pathname);
   const userEmail = user?.email || user?.emailAddress || null;
   const userName = user?.name || user?.firstName || userEmail || 'User';
@@ -227,7 +249,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           borderRight: '1px solid var(--hub-border)',
         }}
       >
-
         {/* Logo */}
         <div
           className="flex items-center gap-2.5 px-4 py-4"
@@ -237,7 +258,13 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             src="/logo.png"
             alt="rtylr"
             className="h-6 w-auto"
-            style={{ filter: (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'brightness(0) invert(1)' : 'brightness(0)' }}
+            style={{
+              filter:
+                theme === 'dark' ||
+                (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? 'brightness(0) invert(1)'
+                  : 'brightness(0)',
+            }}
           />
         </div>
 
@@ -251,7 +278,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {menuAddonEnabled && (
             <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
           )}
-
         </nav>
 
         {/* Footer */}
@@ -261,9 +287,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             data-tour="settings"
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 mb-0.5',
-              location.pathname.startsWith('/settings') ? 'bg-[var(--hub-active)]' : 'hover:bg-[var(--hub-hover)]'
+              location.pathname.startsWith('/settings')
+                ? 'bg-[var(--hub-active)]'
+                : 'hover:bg-[var(--hub-hover)]'
             )}
-            style={{ color: location.pathname.startsWith('/settings') ? 'var(--hub-text)' : 'var(--hub-text-muted)' }}
+            style={{
+              color: location.pathname.startsWith('/settings')
+                ? 'var(--hub-text)'
+                : 'var(--hub-text-muted)',
+            }}
           >
             <Settings size={16} />
             <span>Settings</span>
@@ -271,9 +303,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button
-                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--hub-hover)]"
-              >
+              <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--hub-hover)]">
                 <Avatar
                   initials={getInitials(userName)}
                   size="sm"
@@ -281,30 +311,45 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
-                  <span className="text-xs font-medium truncate w-full text-left" style={{ color: 'var(--hub-text)' }}>
+                  <span
+                    className="text-xs font-medium truncate w-full text-left"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
                     {userName}
                   </span>
                   {userEmail && (
-                    <span className="text-[10px] truncate w-full text-left" style={{ color: 'var(--hub-text-muted)' }}>
+                    <span
+                      className="text-[10px] truncate w-full text-left"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
                       {userEmail}
                     </span>
                   )}
                 </div>
-                <ChevronRight size={12} className="shrink-0" style={{ color: 'var(--hub-text-dim)' }} />
+                <ChevronRight
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="top" className="w-52">
               {/* Theme selector */}
               <div className="px-2 py-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--hub-text-dim)' }}>
+                <p
+                  className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                >
                   Appearance
                 </p>
                 <div className="flex gap-1">
-                  {([
-                    { value: 'light',  icon: Sun,     label: 'Light'  },
-                    { value: 'dark',   icon: Moon,    label: 'Dark'   },
-                    { value: 'system', icon: Monitor, label: 'System' },
-                  ] as const).map(({ value, icon: Icon, label }) => (
+                  {(
+                    [
+                      { value: 'light', icon: Sun, label: 'Light' },
+                      { value: 'dark', icon: Moon, label: 'Dark' },
+                      { value: 'system', icon: Monitor, label: 'System' },
+                    ] as const
+                  ).map(({ value, icon: Icon, label }) => (
                     <button
                       key={value}
                       onClick={() => setTheme(value)}
@@ -312,7 +357,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       style={{
                         background: theme === value ? 'rgba(69,131,196,0.15)' : 'var(--hub-hover)',
                         color: theme === value ? '#4583C4' : 'var(--hub-text-muted)',
-                        border: theme === value ? '1px solid rgba(69,131,196,0.3)' : '1px solid transparent',
+                        border:
+                          theme === value
+                            ? '1px solid rgba(69,131,196,0.3)'
+                            : '1px solid transparent',
                       }}
                     >
                       <Icon size={13} />
@@ -343,11 +391,21 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           {pageTitle === '__caret__' ? (
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.1)' }}>
+              <div
+                className="h-6 w-6 rounded-lg flex items-center justify-center"
+                style={{ background: 'rgba(139,92,246,0.1)' }}
+              >
                 <Sparkles size={13} style={{ color: '#8b5cf6' }} />
               </div>
-              <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>Caret</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}>AI</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                Caret
+              </span>
+              <span
+                className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+              >
+                AI
+              </span>
             </div>
           ) : (
             <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -373,9 +431,17 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <button
               onClick={() => navigate('/chat')}
               className="h-7 rounded-lg flex items-center gap-1.5 px-3 transition-all duration-150"
-              style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.2)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.18)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)'; }}
+              style={{
+                background: 'rgba(139,92,246,0.1)',
+                color: '#8b5cf6',
+                border: '1px solid rgba(139,92,246,0.2)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.18)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)';
+              }}
               aria-label="Chat with Caret"
               data-tour="caret"
             >

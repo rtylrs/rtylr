@@ -2,10 +2,7 @@ import { format, formatDistance, formatRelative } from 'date-fns';
 
 export const formatting = {
   // Date formatting
-  formatDate: (
-    date: Date | string,
-    formatString: string = 'MMM dd, yyyy'
-  ): string => {
+  formatDate: (date: Date | string, formatString: string = 'MMM dd, yyyy'): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return format(dateObj, formatString);
   },
@@ -21,11 +18,7 @@ export const formatting = {
   },
 
   // Number formatting
-  formatCurrency: (
-    amount: number,
-    currency: string = 'USD',
-    locale: string = 'en-US'
-  ): string => {
+  formatCurrency: (amount: number, currency: string = 'USD', locale: string = 'en-US'): string => {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,
@@ -52,11 +45,7 @@ export const formatting = {
       .join(' ');
   },
 
-  truncate: (
-    text: string,
-    maxLength: number,
-    suffix: string = '...'
-  ): string => {
+  truncate: (text: string, maxLength: number, suffix: string = '...'): string => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength - suffix.length) + suffix;
   },

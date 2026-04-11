@@ -30,7 +30,10 @@ const SearchResults: React.FC = () => {
           const idx = bodyText.toLowerCase().indexOf(q);
           const start = Math.max(0, idx - 60);
           const end = Math.min(bodyText.length, idx + query.length + 60);
-          snippet = (start > 0 ? '...' : '') + bodyText.slice(start, end).trim() + (end < bodyText.length ? '...' : '');
+          snippet =
+            (start > 0 ? '...' : '') +
+            bodyText.slice(start, end).trim() +
+            (end < bodyText.length ? '...' : '');
         } else {
           snippet = bodyText.slice(0, 120).trim() + '...';
         }
@@ -75,7 +78,11 @@ const SearchResults: React.FC = () => {
             className="flex items-start gap-3 p-4 rounded-lg border no-underline transition-colors"
             style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-bg)' }}
           >
-            <FileText size={16} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--docs-accent)' }} />
+            <FileText
+              size={16}
+              className="mt-0.5 flex-shrink-0"
+              style={{ color: 'var(--docs-accent)' }}
+            />
             <div>
               <span className="text-sm font-medium" style={{ color: 'var(--docs-text)' }}>
                 {result.title}

@@ -19,15 +19,13 @@ const Triage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Triage
         </h1>
         <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          {needsTriage.length} tasks need attention · Capture → set priority & date → move out of backlog
+          {needsTriage.length} tasks need attention · Capture → set priority & date → move out of
+          backlog
         </p>
       </div>
       <div className="flex-1 overflow-y-auto">

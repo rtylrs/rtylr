@@ -4,7 +4,10 @@ import { useEffect } from 'react';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
-export const useGetAnalytics = (businessId: string | null, dateRange?: { start: string; end: string }) => {
+export const useGetAnalytics = (
+  businessId: string | null,
+  dateRange?: { start: string; end: string }
+) => {
   const query = useQuery({
     queryKey: ['analytics', businessId, dateRange],
     queryFn: async () => {
@@ -25,12 +28,17 @@ export const useGetAnalytics = (businessId: string | null, dateRange?: { start: 
   return query;
 };
 
-export const useGetRevenue = (businessId: string | null, dateRange?: { start: string; end: string }) => {
+export const useGetRevenue = (
+  businessId: string | null,
+  dateRange?: { start: string; end: string }
+) => {
   const query = useQuery({
     queryKey: ['revenue', businessId, dateRange],
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
-      const response = await unwrap(safe.get(`/business/${businessId}/analytics/revenue`, { params }));
+      const response = await unwrap(
+        safe.get(`/business/${businessId}/analytics/revenue`, { params })
+      );
       return response.data;
     },
     enabled: !!businessId,
@@ -45,12 +53,17 @@ export const useGetRevenue = (businessId: string | null, dateRange?: { start: st
   return query;
 };
 
-export const useGetOrders = (businessId: string | null, dateRange?: { start: string; end: string }) => {
+export const useGetOrders = (
+  businessId: string | null,
+  dateRange?: { start: string; end: string }
+) => {
   const query = useQuery({
     queryKey: ['orders', businessId, dateRange],
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
-      const response = await unwrap(safe.get(`/business/${businessId}/analytics/orders`, { params }));
+      const response = await unwrap(
+        safe.get(`/business/${businessId}/analytics/orders`, { params })
+      );
       return response.data;
     },
     enabled: !!businessId,
@@ -64,4 +77,3 @@ export const useGetOrders = (businessId: string | null, dateRange?: { start: str
 
   return query;
 };
-

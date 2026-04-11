@@ -27,9 +27,7 @@ const HelpOverlay: React.FC = () => {
       >
         <div>
           <h2 className="text-lg font-bold text-pos-text">Keyboard shortcuts</h2>
-          <p className="text-xs text-pos-muted mt-1">
-            Work faster with the keyboard.
-          </p>
+          <p className="text-xs text-pos-muted mt-1">Work faster with the keyboard.</p>
         </div>
         <ul className="space-y-1.5">
           {SHORTCUTS.map((s) => (

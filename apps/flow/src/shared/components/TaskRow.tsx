@@ -14,12 +14,7 @@ interface TaskRowProps {
   onSelect?: (e: React.MouseEvent) => void;
 }
 
-export const TaskRow: React.FC<TaskRowProps> = ({
-  task,
-  showProject,
-  selected,
-  onSelect,
-}) => {
+export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
   const navigate = useNavigate();
   const { labels, projects } = useFlowStore();
   const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
@@ -87,11 +82,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
           {formatDate(task.dueDate)}
         </span>
       )}
-      <AssigneeAvatar
-        name={task.assignee}
-        initials={task.assigneeInitials}
-        size={20}
-      />
+      <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={20} />
     </div>
   );
 };

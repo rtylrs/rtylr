@@ -1,8 +1,10 @@
 import axios, { type AxiosInstance } from 'axios';
 
 const getBaseUrl = (): string => {
-  return (import.meta as ImportMeta & { env: Record<string, string> }).env
-    .VITE_API_URL ?? 'https://api.voxire.dev/';
+  return (
+    (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_API_URL ??
+    'https://api.voxire.dev/'
+  );
 };
 
 const getToken = (): string | null => {
@@ -21,11 +23,8 @@ const clearTokenCookie = (): void => {
 
 const getAuthUrl = (appId: string): string => {
   const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  const base = isLocalhost
-    ? 'http://localhost:5176'
-    : 'https://auth.rtylr.com';
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const base = isLocalhost ? 'http://localhost:5176' : 'https://auth.rtylr.com';
   return `${base}?redirect=${appId}`;
 };
 

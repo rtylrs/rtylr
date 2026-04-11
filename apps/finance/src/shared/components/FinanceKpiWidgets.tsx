@@ -24,10 +24,34 @@ const DEFAULT_KPIS = {
 const FinanceKpiWidgets: React.FC<{ data?: Partial<typeof DEFAULT_KPIS> }> = ({ data }) => {
   const d = { ...DEFAULT_KPIS, ...data };
   const kpis: Kpi[] = [
-    { label: 'MRR', value: <MoneyDisplay amount={d.mrr} fractionDigits={0} />, hint: d.mrrChange, icon: TrendingUp, color: ACCENT },
-    { label: 'Burn', value: <MoneyDisplay amount={d.burn} fractionDigits={0} />, hint: 'per month', icon: TrendingDown, color: '#ef4444' },
-    { label: 'Runway', value: `${d.runway} mo`, hint: 'at current burn', icon: Calendar, color: '#3b82f6' },
-    { label: 'Overdue', value: <MoneyDisplay amount={d.overdue} fractionDigits={0} />, hint: `${d.overdueCount} invoices`, icon: Clock, color: '#f59e0b' },
+    {
+      label: 'MRR',
+      value: <MoneyDisplay amount={d.mrr} fractionDigits={0} />,
+      hint: d.mrrChange,
+      icon: TrendingUp,
+      color: ACCENT,
+    },
+    {
+      label: 'Burn',
+      value: <MoneyDisplay amount={d.burn} fractionDigits={0} />,
+      hint: 'per month',
+      icon: TrendingDown,
+      color: '#ef4444',
+    },
+    {
+      label: 'Runway',
+      value: `${d.runway} mo`,
+      hint: 'at current burn',
+      icon: Calendar,
+      color: '#3b82f6',
+    },
+    {
+      label: 'Overdue',
+      value: <MoneyDisplay amount={d.overdue} fractionDigits={0} />,
+      hint: `${d.overdueCount} invoices`,
+      icon: Clock,
+      color: '#f59e0b',
+    },
   ];
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
@@ -35,8 +59,23 @@ const FinanceKpiWidgets: React.FC<{ data?: Partial<typeof DEFAULT_KPIS> }> = ({ 
         const Icon = k.icon;
         return (
           <div key={k.label} style={{ ...cardStyle, padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}
+              >
                 {k.label}
               </span>
               <span
@@ -55,7 +94,11 @@ const FinanceKpiWidgets: React.FC<{ data?: Partial<typeof DEFAULT_KPIS> }> = ({ 
               </span>
             </div>
             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)' }}>{k.value}</div>
-            {k.hint && <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', marginTop: 4 }}>{k.hint}</div>}
+            {k.hint && (
+              <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', marginTop: 4 }}>
+                {k.hint}
+              </div>
+            )}
           </div>
         );
       })}

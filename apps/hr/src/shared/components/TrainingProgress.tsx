@@ -2,7 +2,7 @@ import React from 'react';
 import { ACCENT } from './ui';
 
 interface Props {
-  progress: number;      // 0-100
+  progress: number; // 0-100
   label?: string;
   modules?: number;
 }

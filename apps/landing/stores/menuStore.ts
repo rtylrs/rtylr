@@ -9,7 +9,7 @@ interface MenuItem {
 interface Category {
   _id: string;
   name: string;
-  type: "category";
+  type: 'category';
   menuItems: MenuItem[];
   [key: string]: any;
 }
@@ -59,7 +59,7 @@ interface MenuState {
 }
 
 function isCategory(item: Category | Banner): item is Category {
-  return (item as Category).type === "category";
+  return (item as Category).type === 'category';
 }
 
 const initialState = {
@@ -81,84 +81,80 @@ export const useMenuStore = create<MenuState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 
-  addMenuItem: (categoryId, item) => set((state) => {
-    const newItems = [...state.items];
-    const categoryIndex = newItems.findIndex(
-      (cat) => isCategory(cat) && cat._id === categoryId
-    );
-    if (categoryIndex !== -1) {
-      const category = newItems[categoryIndex] as Category;
-      category.menuItems.push(item);
-    }
-    return { items: newItems };
-  }),
-
-  editMenuItem: (itemId, updatedItem) => set((state) => {
-    const newItems = [...state.items];
-    const category = newItems.find(
-      (cat) =>
-        isCategory(cat) &&
-        cat.menuItems.some((menuItem) => menuItem._id === itemId)
-    ) as Category;
-    if (category) {
-      const itemIndex = category.menuItems.findIndex(
-        (menuItem) => menuItem._id === itemId
-      );
-      if (itemIndex !== -1) {
-        category.menuItems[itemIndex] = updatedItem;
+  addMenuItem: (categoryId, item) =>
+    set((state) => {
+      const newItems = [...state.items];
+      const categoryIndex = newItems.findIndex((cat) => isCategory(cat) && cat._id === categoryId);
+      if (categoryIndex !== -1) {
+        const category = newItems[categoryIndex] as Category;
+        category.menuItems.push(item);
       }
-    }
-    return { items: newItems };
-  }),
+      return { items: newItems };
+    }),
 
-  deleteMenuItem: (categoryId, itemId) => set((state) => {
-    const newItems = [...state.items];
-    const category = newItems.find(
-      (cat) => isCategory(cat) && cat._id === categoryId
-    ) as Category;
-    if (category) {
-      category.menuItems = category.menuItems.filter(
-        (item) => item._id !== itemId
-      );
-    }
-    return { items: newItems };
-  }),
+  editMenuItem: (itemId, updatedItem) =>
+    set((state) => {
+      const newItems = [...state.items];
+      const category = newItems.find(
+        (cat) => isCategory(cat) && cat.menuItems.some((menuItem) => menuItem._id === itemId)
+      ) as Category;
+      if (category) {
+        const itemIndex = category.menuItems.findIndex((menuItem) => menuItem._id === itemId);
+        if (itemIndex !== -1) {
+          category.menuItems[itemIndex] = updatedItem;
+        }
+      }
+      return { items: newItems };
+    }),
 
-  addCategory: (category) => set((state) => ({
-    items: [...state.items, category]
-  })),
+  deleteMenuItem: (categoryId, itemId) =>
+    set((state) => {
+      const newItems = [...state.items];
+      const category = newItems.find(
+        (cat) => isCategory(cat) && cat._id === categoryId
+      ) as Category;
+      if (category) {
+        category.menuItems = category.menuItems.filter((item) => item._id !== itemId);
+      }
+      return { items: newItems };
+    }),
 
-  editCategory: (categoryId, updatedCategory) => set((state) => {
-    const newItems = [...state.items];
-    const categoryIndex = newItems.findIndex(
-      (cat) => isCategory(cat) && cat._id === categoryId
-    );
-    if (categoryIndex !== -1) {
-      newItems[categoryIndex] = updatedCategory;
-    }
-    return { items: newItems };
-  }),
+  addCategory: (category) =>
+    set((state) => ({
+      items: [...state.items, category],
+    })),
 
-  deleteCategory: (categoryId) => set((state) => ({
-    items: state.items.filter(
-      (item) => !(isCategory(item) && item._id === categoryId)
-    )
-  })),
+  editCategory: (categoryId, updatedCategory) =>
+    set((state) => {
+      const newItems = [...state.items];
+      const categoryIndex = newItems.findIndex((cat) => isCategory(cat) && cat._id === categoryId);
+      if (categoryIndex !== -1) {
+        newItems[categoryIndex] = updatedCategory;
+      }
+      return { items: newItems };
+    }),
 
-  renameCategory: (categoryId, newName) => set((state) => {
-    const newItems = [...state.items];
-    const category = newItems.find(
-      (cat) => isCategory(cat) && cat._id === categoryId
-    ) as Category;
-    if (category) {
-      category.name = newName;
-    }
-    return { items: newItems };
-  }),
+  deleteCategory: (categoryId) =>
+    set((state) => ({
+      items: state.items.filter((item) => !(isCategory(item) && item._id === categoryId)),
+    })),
 
-  addBanner: (banner) => set((state) => ({
-    items: [...state.items, banner]
-  })),
+  renameCategory: (categoryId, newName) =>
+    set((state) => {
+      const newItems = [...state.items];
+      const category = newItems.find(
+        (cat) => isCategory(cat) && cat._id === categoryId
+      ) as Category;
+      if (category) {
+        category.name = newName;
+      }
+      return { items: newItems };
+    }),
+
+  addBanner: (banner) =>
+    set((state) => ({
+      items: [...state.items, banner],
+    })),
 
   reset: () => set(initialState),
 }));

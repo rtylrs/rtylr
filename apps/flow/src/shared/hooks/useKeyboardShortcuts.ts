@@ -6,8 +6,13 @@ import { useFlowStore } from '../stores/flowStore';
 // c = new task, / = search, g i = inbox, g m = my tasks, cmd+k = command bar
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
-  const { setCommandBarOpen, setQuickCreateOpen, commandBarOpen, quickCreateOpen, activeWorkspaceId } =
-    useFlowStore();
+  const {
+    setCommandBarOpen,
+    setQuickCreateOpen,
+    commandBarOpen,
+    quickCreateOpen,
+    activeWorkspaceId,
+  } = useFlowStore();
 
   useEffect(() => {
     let lastKey = '';
@@ -101,5 +106,12 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate, setCommandBarOpen, setQuickCreateOpen, commandBarOpen, quickCreateOpen, activeWorkspaceId]);
+  }, [
+    navigate,
+    setCommandBarOpen,
+    setQuickCreateOpen,
+    commandBarOpen,
+    quickCreateOpen,
+    activeWorkspaceId,
+  ]);
 }

@@ -1,7 +1,10 @@
 import React from 'react';
 import { Skeleton } from '../ui';
 
-export const SkeletonList: React.FC<{ rows?: number; withAvatar?: boolean }> = ({ rows = 5, withAvatar = true }) => {
+export const SkeletonList: React.FC<{ rows?: number; withAvatar?: boolean }> = ({
+  rows = 5,
+  withAvatar = true,
+}) => {
   return (
     <div className="space-y-1">
       {Array.from({ length: rows }).map((_, i) => (
@@ -18,9 +21,15 @@ export const SkeletonList: React.FC<{ rows?: number; withAvatar?: boolean }> = (
   );
 };
 
-export const SkeletonGrid: React.FC<{ cols?: number; rows?: number }> = ({ cols = 3, rows = 2 }) => {
+export const SkeletonGrid: React.FC<{ cols?: number; rows?: number }> = ({
+  cols = 3,
+  rows = 2,
+}) => {
   return (
-    <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div
+      className={`grid gap-4`}
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
       {Array.from({ length: cols * rows }).map((_, i) => (
         <div
           key={i}

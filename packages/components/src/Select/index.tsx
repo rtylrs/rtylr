@@ -70,11 +70,7 @@ const Select: React.FC<SelectProps & { isSearchable?: boolean }> = ({
       borderColor: error ? '#d32f2f' : '#1a1a1a',
       borderWidth: '1px',
       borderRadius: '0',
-      boxShadow: state.isFocused
-        ? error
-          ? '0 0 0 1px #d32f2f'
-          : '0 0 0 1px #1a1a1a'
-        : 'none',
+      boxShadow: state.isFocused ? (error ? '0 0 0 1px #d32f2f' : '0 0 0 1px #1a1a1a') : 'none',
       '&:hover': {
         borderColor: error ? '#d32f2f' : '#1a1a1a',
       },

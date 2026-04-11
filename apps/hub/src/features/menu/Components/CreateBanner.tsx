@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import { useMenuStore } from "../../../shared/stores/menuStore";
-import { useUserStore } from "../../../shared/stores/userStore";
-import Dropzone from "../../../shared/components/Dropzone";
+import React, { useState } from 'react';
+import { useMenuStore } from '../../../shared/stores/menuStore';
+import { useUserStore } from '../../../shared/stores/userStore';
+import Dropzone from '../../../shared/components/Dropzone';
 
 const CreateBanner = (): JSX.Element => {
   const { addBanner } = useMenuStore();
   const { userId: restaurantId } = useUserStore();
 
   const [formData, setFormData] = useState({
-    title: "",
+    title: '',
     image: null as File | null,
   });
 
@@ -30,14 +30,14 @@ const CreateBanner = (): JSX.Element => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!restaurantId) {
-      console.error("Restaurant ID is required");
+      console.error('Restaurant ID is required');
       return;
     }
     const bannerData = new FormData();
-    bannerData.append("title", formData.title);
-    bannerData.append("restaurantId", restaurantId);
+    bannerData.append('title', formData.title);
+    bannerData.append('restaurantId', restaurantId);
     if (formData.image) {
-      bannerData.append("bannerImage", formData.image);
+      bannerData.append('bannerImage', formData.image);
     }
 
     addBanner(bannerData);

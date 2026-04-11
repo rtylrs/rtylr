@@ -1,11 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  fadeInUp,
-  staggerContainer,
-  scaleIn,
-  viewportOnce,
-} from '../../../lib/animations';
+import { fadeInUp, staggerContainer, scaleIn, viewportOnce } from '../../../lib/animations';
 import styles from './IntegrationsSection.module.scss';
 
 interface Integration {
@@ -107,8 +102,8 @@ const IntegrationsSection: React.FC = () => {
             already use.
           </h2>
           <p className={styles.sectionDescription}>
-            Connect rtylr to the tools your team already loves. Set up in
-            minutes, no engineering required.
+            Connect rtylr to the tools your team already loves. Set up in minutes, no engineering
+            required.
           </p>
         </motion.div>
 
@@ -139,9 +134,7 @@ const IntegrationsSection: React.FC = () => {
               >
                 {integration.icon}
               </div>
-              <span className={styles.integrationName}>
-                {integration.name}
-              </span>
+              <span className={styles.integrationName}>{integration.name}</span>
             </motion.div>
           ))}
         </motion.div>

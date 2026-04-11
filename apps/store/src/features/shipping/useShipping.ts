@@ -27,7 +27,8 @@ export function useCreateShippingZone() {
 export function useUpdateShippingZone() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<CreateShippingZoneInput> & { id: number }) => unwrap(storeApi.updateShippingZone(data)),
+    mutationFn: (data: Partial<CreateShippingZoneInput> & { id: number }) =>
+      unwrap(storeApi.updateShippingZone(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['store-shipping-zones'] }),
   });
 }

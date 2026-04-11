@@ -40,7 +40,8 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Customer> }) => unwrap(crmApi.updateCustomer(id, data)),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Customer> }) =>
+      unwrap(crmApi.updateCustomer(id, data)),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['customers'] });
       qc.invalidateQueries({ queryKey: ['customer', vars.id] });

@@ -8,7 +8,15 @@ export interface Crumb {
 }
 
 const Breadcrumbs: React.FC<{ items: Crumb[] }> = ({ items }) => (
-  <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--hub-text-muted)' }}>
+  <nav
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      fontSize: 12,
+      color: 'var(--hub-text-muted)',
+    }}
+  >
     {items.map((item, i) => (
       <React.Fragment key={i}>
         {item.to ? (
@@ -18,7 +26,9 @@ const Breadcrumbs: React.FC<{ items: Crumb[] }> = ({ items }) => (
         ) : (
           <span style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{item.label}</span>
         )}
-        {i < items.length - 1 && <ChevronRight size={12} style={{ color: 'var(--hub-text-dim)' }} />}
+        {i < items.length - 1 && (
+          <ChevronRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
+        )}
       </React.Fragment>
     ))}
   </nav>

@@ -35,7 +35,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
           style={{ background: 'var(--hub-hover)' }}
         >
           {product.imageUrl ? (
-            <img src={product.imageUrl} alt={product.name} className="h-12 w-12 rounded-lg object-cover" />
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="h-12 w-12 rounded-lg object-cover"
+            />
           ) : (
             <Package size={18} style={{ color: 'var(--hub-text-dim)' }} />
           )}

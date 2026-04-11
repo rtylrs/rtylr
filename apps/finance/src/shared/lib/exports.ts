@@ -11,7 +11,9 @@ export interface InvoiceExport {
 }
 
 function downloadCsv(filename: string, rows: string[][]) {
-  const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const csv = rows
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -29,7 +31,15 @@ export function exportQuickbooksInvoices(invoices: InvoiceExport[]) {
   const header = ['InvoiceNo', 'Customer', 'InvoiceDate', 'DueDate', 'Amount', 'Memo', 'Class'];
   const rows = [
     header,
-    ...invoices.map((i) => [i.id, i.client, i.issuedDate, i.dueDate, i.amount.toFixed(2), i.status, 'Finance']),
+    ...invoices.map((i) => [
+      i.id,
+      i.client,
+      i.issuedDate,
+      i.dueDate,
+      i.amount.toFixed(2),
+      i.status,
+      'Finance',
+    ]),
   ];
   downloadCsv('quickbooks_invoices.csv', rows);
 }

@@ -32,17 +32,23 @@ export const StatCard: React.FC<StatCardProps> = ({
       className={cn(
         'rounded-xl p-4 transition-colors',
         onClick && 'cursor-pointer hover:bg-[var(--hub-hover)]',
-        className,
+        className
       )}
       style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--hub-text-dim)' }}>
+        <p
+          className="text-[11px] font-medium uppercase tracking-wider"
+          style={{ color: 'var(--hub-text-dim)' }}
+        >
           {label}
         </p>
         {Icon && (
-          <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${accent}18` }}>
+          <div
+            className="h-7 w-7 rounded-lg flex items-center justify-center"
+            style={{ background: `${accent}18` }}
+          >
             <Icon size={14} style={{ color: accent }} />
           </div>
         )}
@@ -58,7 +64,13 @@ export const StatCard: React.FC<StatCardProps> = ({
               color: trendPositive ? '#10b981' : trendNegative ? '#ef4444' : 'var(--hub-text-dim)',
             }}
           >
-            {trendPositive ? <ArrowUpRight size={11} /> : trendNegative ? <ArrowDownRight size={11} /> : <Minus size={11} />}
+            {trendPositive ? (
+              <ArrowUpRight size={11} />
+            ) : trendNegative ? (
+              <ArrowDownRight size={11} />
+            ) : (
+              <Minus size={11} />
+            )}
             {Math.abs(trendPct ?? 0).toFixed(1)}%
           </span>
         )}

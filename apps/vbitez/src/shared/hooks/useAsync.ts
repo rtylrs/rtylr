@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { debounce } from "lodash";
+import { useCallback, useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
 type AsyncFunction<T> = (data: any) => Promise<T>;
 type CallbackFunction = () => void;

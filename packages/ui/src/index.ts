@@ -15,14 +15,27 @@ export type { AlertProps } from './components/Alert';
 export { Switch } from './components/Switch';
 
 export {
-  Dialog, DialogTrigger, DialogPortal, DialogOverlay,
-  DialogClose, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogTrigger,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from './components/Dialog';
 
 export {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
-  DropdownMenuGroup, DropdownMenuSub, DropdownMenuRadioGroup,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuRadioGroup,
 } from './components/DropdownMenu';
 
 export { AnimatedRoutes } from './components/AnimatedRoutes';

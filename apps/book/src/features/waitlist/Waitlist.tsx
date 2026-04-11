@@ -20,7 +20,11 @@ function getStatusColor(status: string): string {
 
 const Waitlist: React.FC = () => {
   const [search, setSearch] = useState('');
-  const { data: waitlist, isLoading, isError } = useWaitlist({
+  const {
+    data: waitlist,
+    isLoading,
+    isError,
+  } = useWaitlist({
     search: search || undefined,
   });
 
@@ -70,7 +74,11 @@ const Waitlist: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load waitlist. Please try again later.
         </div>
@@ -94,13 +102,19 @@ const Waitlist: React.FC = () => {
 
         {isLoading && (
           <div className="p-3 space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         )}
 
         {!isLoading && !isError && (!waitlist || waitlist.length === 0) && (
           <div className="py-12 text-center">
-            <ListOrdered size={32} className="mx-auto mb-2" style={{ color: 'var(--hub-text-dim)' }} />
+            <ListOrdered
+              size={32}
+              className="mx-auto mb-2"
+              style={{ color: 'var(--hub-text-dim)' }}
+            />
             <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
               No one on the waitlist
             </p>
@@ -119,19 +133,35 @@ const Waitlist: React.FC = () => {
                   key={entry.id}
                   className="grid grid-cols-6 items-center px-4 py-3 transition-colors"
                   style={{ borderBottom: '1px solid var(--hub-border)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
                 >
                   <div>
-                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>{entry.customerName}</p>
-                    {entry.email && <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>{entry.email}</p>}
+                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                      {entry.customerName}
+                    </p>
+                    {entry.email && (
+                      <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                        {entry.email}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>{entry.serviceName}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
+                    {entry.serviceName}
+                  </p>
                   <div className="flex items-center gap-1">
                     <Clock size={11} style={{ color: 'var(--hub-text-dim)' }} />
-                    <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{entry.preferredTime ?? '-'}</span>
+                    <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                      {entry.preferredTime ?? '-'}
+                    </span>
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>{entry.addedAt ?? entry.createdAt}</p>
+                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {entry.addedAt ?? entry.createdAt}
+                  </p>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize w-fit"
                     style={{ background: `${statusColor}18`, color: statusColor }}

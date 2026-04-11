@@ -75,12 +75,20 @@ const CalendarScreen: React.FC = () => {
 
   const headerLabel = useMemo(() => {
     if (view === 'day') {
-      return currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      return currentDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      });
     }
     if (view === 'week') {
       const ws = startOfWeek(currentDate);
       const we = addDays(ws, 6);
-      return `${ws.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${we.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${ws.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      })} - ${we.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     }
     return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }, [view, currentDate]);
@@ -116,7 +124,10 @@ const CalendarScreen: React.FC = () => {
           >
             <ChevronLeft size={14} />
           </button>
-          <h2 className="text-sm font-semibold min-w-[220px] text-center" style={{ color: 'var(--hub-text)' }}>
+          <h2
+            className="text-sm font-semibold min-w-[220px] text-center"
+            style={{ color: 'var(--hub-text)' }}
+          >
             {headerLabel}
           </h2>
           <button
@@ -155,7 +166,11 @@ const CalendarScreen: React.FC = () => {
       {isError && (
         <div
           className="rounded-xl p-4 text-sm"
-          style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            color: '#ef4444',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
         >
           Failed to load calendar events. Please try again later.
         </div>
@@ -170,21 +185,37 @@ const CalendarScreen: React.FC = () => {
         >
           <div className="grid grid-cols-7">
             {DAY_NAMES.map((d) => (
-              <div key={d} className="px-2 py-2 text-center text-[10px] font-semibold uppercase" style={{ color: 'var(--hub-text-dim)', borderBottom: '1px solid var(--hub-border)' }}>
+              <div
+                key={d}
+                className="px-2 py-2 text-center text-[10px] font-semibold uppercase"
+                style={{
+                  color: 'var(--hub-text-dim)',
+                  borderBottom: '1px solid var(--hub-border)',
+                }}
+              >
                 {d}
               </div>
             ))}
           </div>
           <div className="grid grid-cols-7">
             {monthDays.map((day, i) => {
-              const isToday = day != null && formatDateISO(new Date(currentDate.getFullYear(), currentDate.getMonth(), day)) === formatDateISO(new Date());
-              const dateStr = day != null ? formatDateISO(new Date(currentDate.getFullYear(), currentDate.getMonth(), day)) : '';
+              const isToday =
+                day != null &&
+                formatDateISO(new Date(currentDate.getFullYear(), currentDate.getMonth(), day)) ===
+                  formatDateISO(new Date());
+              const dateStr =
+                day != null
+                  ? formatDateISO(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))
+                  : '';
               const dayEvents = (events ?? []).filter((e: any) => e.date === dateStr);
               return (
                 <div
                   key={i}
                   className="min-h-[80px] p-1"
-                  style={{ borderBottom: '1px solid var(--hub-border)', borderRight: (i + 1) % 7 !== 0 ? '1px solid var(--hub-border)' : 'none' }}
+                  style={{
+                    borderBottom: '1px solid var(--hub-border)',
+                    borderRight: (i + 1) % 7 !== 0 ? '1px solid var(--hub-border)' : 'none',
+                  }}
                 >
                   {day != null && (
                     <>
@@ -201,7 +232,10 @@ const CalendarScreen: React.FC = () => {
                         <div
                           key={j}
                           className="mt-0.5 px-1 py-0.5 rounded text-[9px] truncate"
-                          style={{ background: `${getStatusColor(ev.status)}18`, color: getStatusColor(ev.status) }}
+                          style={{
+                            background: `${getStatusColor(ev.status)}18`,
+                            color: getStatusColor(ev.status),
+                          }}
                         >
                           {ev.time} {ev.customerName}
                         </div>
@@ -233,9 +267,15 @@ const CalendarScreen: React.FC = () => {
                 <div
                   key={i}
                   className="px-2 py-2 text-center"
-                  style={{ borderBottom: '1px solid var(--hub-border)', borderLeft: '1px solid var(--hub-border)' }}
+                  style={{
+                    borderBottom: '1px solid var(--hub-border)',
+                    borderLeft: '1px solid var(--hub-border)',
+                  }}
                 >
-                  <p className="text-[10px] font-semibold uppercase" style={{ color: 'var(--hub-text-dim)' }}>
+                  <p
+                    className="text-[10px] font-semibold uppercase"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                  >
                     {DAY_NAMES[d.getDay()]}
                   </p>
                   <p
@@ -253,7 +293,10 @@ const CalendarScreen: React.FC = () => {
               <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] min-h-[48px]">
                 <div
                   className="px-2 py-1 text-[10px] font-medium text-right pr-3"
-                  style={{ color: 'var(--hub-text-dim)', borderBottom: '1px solid var(--hub-border)' }}
+                  style={{
+                    color: 'var(--hub-text-dim)',
+                    borderBottom: '1px solid var(--hub-border)',
+                  }}
                 >
                   {hour > 12 ? `${hour - 12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                 </div>
@@ -267,13 +310,19 @@ const CalendarScreen: React.FC = () => {
                     <div
                       key={i}
                       className="relative p-0.5"
-                      style={{ borderBottom: '1px solid var(--hub-border)', borderLeft: '1px solid var(--hub-border)' }}
+                      style={{
+                        borderBottom: '1px solid var(--hub-border)',
+                        borderLeft: '1px solid var(--hub-border)',
+                      }}
                     >
                       {hourEvents.map((ev: any, j: number) => (
                         <div
                           key={j}
                           className="px-1 py-0.5 rounded text-[9px] truncate mb-0.5"
-                          style={{ background: `${getStatusColor(ev.status)}18`, color: getStatusColor(ev.status) }}
+                          style={{
+                            background: `${getStatusColor(ev.status)}18`,
+                            color: getStatusColor(ev.status),
+                          }}
                         >
                           {ev.customerName} - {ev.serviceName}
                         </div>
@@ -300,8 +349,15 @@ const CalendarScreen: React.FC = () => {
                 (e: any) => e.date === dateStr && e.time?.startsWith(hourStr)
               );
               return (
-                <div key={hour} className="grid grid-cols-[80px_1fr] min-h-[56px]" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                  <div className="px-3 py-2 text-xs font-medium text-right pr-4" style={{ color: 'var(--hub-text-dim)' }}>
+                <div
+                  key={hour}
+                  className="grid grid-cols-[80px_1fr] min-h-[56px]"
+                  style={{ borderBottom: '1px solid var(--hub-border)' }}
+                >
+                  <div
+                    className="px-3 py-2 text-xs font-medium text-right pr-4"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                  >
                     {hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? '12:00 PM' : `${hour}:00 AM`}
                   </div>
                   <div className="p-1" style={{ borderLeft: '1px solid var(--hub-border)' }}>
@@ -309,10 +365,17 @@ const CalendarScreen: React.FC = () => {
                       <div
                         key={j}
                         className="px-2 py-1.5 rounded-lg text-xs mb-1"
-                        style={{ background: `${getStatusColor(ev.status)}18`, borderLeft: `3px solid ${getStatusColor(ev.status)}` }}
+                        style={{
+                          background: `${getStatusColor(ev.status)}18`,
+                          borderLeft: `3px solid ${getStatusColor(ev.status)}`,
+                        }}
                       >
-                        <p className="font-medium" style={{ color: 'var(--hub-text)' }}>{ev.customerName}</p>
-                        <p style={{ color: 'var(--hub-text-muted)' }}>{ev.serviceName} - {ev.duration} min</p>
+                        <p className="font-medium" style={{ color: 'var(--hub-text)' }}>
+                          {ev.customerName}
+                        </p>
+                        <p style={{ color: 'var(--hub-text-muted)' }}>
+                          {ev.serviceName} - {ev.duration} min
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -325,7 +388,11 @@ const CalendarScreen: React.FC = () => {
 
       {!isLoading && !isError && (!events || events.length === 0) && (
         <div className="py-12 text-center">
-          <CalendarIcon size={36} className="mx-auto mb-3" style={{ color: 'var(--hub-text-dim)' }} />
+          <CalendarIcon
+            size={36}
+            className="mx-auto mb-3"
+            style={{ color: 'var(--hub-text-dim)' }}
+          />
           <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
             No events in this period
           </p>

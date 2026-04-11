@@ -37,12 +37,20 @@ const StockTakes: React.FC = () => {
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={5} />)
         ) : stockTakes.length === 0 ? (
-          <EmptyState icon={ClipboardList} title="No stock takes" description="Start a count to find discrepancies" />
+          <EmptyState
+            icon={ClipboardList}
+            title="No stock takes"
+            description="Start a count to find discrepancies"
+          />
         ) : (
           stockTakes.map((st) => {
             const pct = st.totalItems > 0 ? Math.round((st.itemsCounted / st.totalItems) * 100) : 0;
             const statusColor =
-              st.status === 'Completed' ? '#10b981' : st.status === 'In Progress' ? AMBER : 'var(--hub-text-dim)';
+              st.status === 'Completed'
+                ? '#10b981'
+                : st.status === 'In Progress'
+                ? AMBER
+                : 'var(--hub-text-dim)';
             return (
               <div
                 key={st.id}

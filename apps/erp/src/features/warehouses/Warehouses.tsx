@@ -40,7 +40,10 @@ const Warehouses: React.FC = () => {
           ))}
         </div>
       ) : warehouses.length === 0 ? (
-        <EmptyState title="No warehouses" description="Create your first warehouse to track stock locations" />
+        <EmptyState
+          title="No warehouses"
+          description="Create your first warehouse to track stock locations"
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {warehouses.map((w) => {
@@ -75,10 +78,16 @@ const Warehouses: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-1.5 mb-4">
-                  <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  <div
+                    className="flex items-center gap-2 text-xs"
+                    style={{ color: 'var(--hub-text-muted)' }}
+                  >
                     <MapPin size={11} /> {w.address}
                   </div>
-                  <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  <div
+                    className="flex items-center gap-2 text-xs"
+                    style={{ color: 'var(--hub-text-muted)' }}
+                  >
                     <User size={11} /> Managed by {w.manager}
                   </div>
                 </div>

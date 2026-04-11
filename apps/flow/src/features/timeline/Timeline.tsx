@@ -19,7 +19,8 @@ const Timeline: React.FC = () => {
     for (let t = s; t <= e; t += DAY_MS) {
       const dt = new Date(t);
       d.push({
-        label: dt.getDate() === 1 ? dt.toLocaleString('default', { month: 'short' }) : `${dt.getDate()}`,
+        label:
+          dt.getDate() === 1 ? dt.toLocaleString('default', { month: 'short' }) : `${dt.getDate()}`,
         time: t,
         isMonth: dt.getDate() === 1,
       });
@@ -31,10 +32,7 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: 'Timeline' }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
           Timeline
@@ -57,18 +55,20 @@ const Timeline: React.FC = () => {
               Project
             </div>
             <div className="flex-1 flex text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-              {days.filter((d, i) => i % 3 === 0).map((d) => (
-                <div
-                  key={d.time}
-                  className="flex-1 min-w-[24px] text-center py-2"
-                  style={{
-                    borderLeft: d.isMonth ? '1px solid var(--flow-border)' : undefined,
-                    fontWeight: d.isMonth ? 600 : 400,
-                  }}
-                >
-                  {d.label}
-                </div>
-              ))}
+              {days
+                .filter((d, i) => i % 3 === 0)
+                .map((d) => (
+                  <div
+                    key={d.time}
+                    className="flex-1 min-w-[24px] text-center py-2"
+                    style={{
+                      borderLeft: d.isMonth ? '1px solid var(--flow-border)' : undefined,
+                      fontWeight: d.isMonth ? 600 : 400,
+                    }}
+                  >
+                    {d.label}
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -80,15 +80,16 @@ const Timeline: React.FC = () => {
             const widthPct = Math.max(2, ((e - s) / total) * 100);
             const pMilestones = milestones.filter((m) => m.projectId === p.id);
             return (
-              <div key={p.id} className="flex" style={{ borderBottom: '1px solid var(--flow-border)' }}>
+              <div
+                key={p.id}
+                className="flex"
+                style={{ borderBottom: '1px solid var(--flow-border)' }}
+              >
                 <div
                   className="w-48 shrink-0 px-4 py-3 flex items-center gap-2"
                   style={{ borderRight: '1px solid var(--flow-border)' }}
                 >
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ background: p.color }}
-                  />
+                  <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
                   <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
                     {p.name}
                   </span>
@@ -104,10 +105,7 @@ const Timeline: React.FC = () => {
                       border: `1px solid ${p.color}66`,
                     }}
                   >
-                    <span
-                      className="text-[10px] font-semibold truncate"
-                      style={{ color: p.color }}
-                    >
+                    <span className="text-[10px] font-semibold truncate" style={{ color: p.color }}>
                       {p.progress}%
                     </span>
                   </div>

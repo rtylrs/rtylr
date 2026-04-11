@@ -31,9 +31,7 @@ const nextConfig = {
 
   // Experimental features
   experimental: {
-    optimizePackageImports: [
-      'react-icons',
-    ],
+    optimizePackageImports: ['react-icons'],
   },
 
   // Transpile packages if needed

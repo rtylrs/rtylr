@@ -29,12 +29,7 @@ interface AuthShellProps {
  * On mobile the showcase collapses and the right panel becomes full-width,
  * still on the same dark background for brand consistency.
  */
-const AuthShell: React.FC<AuthShellProps> = ({
-  children,
-  title,
-  subtitle,
-  footer,
-}) => {
+const AuthShell: React.FC<AuthShellProps> = ({ children, title, subtitle, footer }) => {
   return (
     <div className="min-h-screen w-full flex antialiased">
       <AuthShowcase />
@@ -68,9 +63,7 @@ const AuthShell: React.FC<AuthShellProps> = ({
               <h2 className="text-3xl sm:text-[32px] font-semibold tracking-tight text-[#111]">
                 {title}
               </h2>
-              {subtitle && (
-                <p className="mt-2 text-[15px] text-[#666]">{subtitle}</p>
-              )}
+              {subtitle && <p className="mt-2 text-[15px] text-[#666]">{subtitle}</p>}
             </motion.div>
 
             {children}

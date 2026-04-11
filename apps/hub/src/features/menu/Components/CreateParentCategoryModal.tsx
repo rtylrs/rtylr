@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import { useMenuStore } from "../../../shared/stores/menuStore";
-import { useUserStore } from "../../../shared/stores/userStore";
+import { useState, useEffect } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import { useMenuStore } from '../../../shared/stores/menuStore';
+import { useUserStore } from '../../../shared/stores/userStore';
 
 interface CreateParentCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  addOrEdit: "add" | "edit";
+  addOrEdit: 'add' | 'edit';
   categoryData?: {
     _id: string;
     name: string;
@@ -22,19 +22,17 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
   addOrEdit,
   categoryData,
 }) => {
-  const [category, setCategory] = useState(categoryData?.name || "");
-  const [description, setDescription] = useState(
-    categoryData?.description || ""
-  );
-  const [iconURL, setIconURL] = useState(categoryData?.icon || "");
+  const [category, setCategory] = useState(categoryData?.name || '');
+  const [description, setDescription] = useState(categoryData?.description || '');
+  const [iconURL, setIconURL] = useState(categoryData?.icon || '');
   const { addCategory, editCategory } = useMenuStore();
   const { userId: restaurantId } = useUserStore();
 
   useEffect(() => {
     if (isOpen && categoryData) {
-      setCategory(categoryData.name || "");
-      setDescription(categoryData.description || "");
-      setIconURL(categoryData.icon || "");
+      setCategory(categoryData.name || '');
+      setDescription(categoryData.description || '');
+      setIconURL(categoryData.icon || '');
     }
   }, [isOpen, categoryData]);
 
@@ -49,18 +47,18 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
         icon: iconURL,
       };
 
-      if (addOrEdit === "add") {
+      if (addOrEdit === 'add') {
         addCategory(categoryPayload);
-      } else if (addOrEdit === "edit" && categoryData) {
+      } else if (addOrEdit === 'edit' && categoryData) {
         editCategory(categoryData?._id, categoryPayload);
       }
 
-      setCategory("");
-      setDescription("");
-      setIconURL("");
+      setCategory('');
+      setDescription('');
+      setIconURL('');
       onClose();
     } else {
-      alert("Category name cannot be empty.");
+      alert('Category name cannot be empty.');
     }
   };
 
@@ -71,7 +69,7 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
         <Dialog.Content className="category-modal">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Dialog.Title asChild>
-              <h2>{addOrEdit === "add" ? "Create" : "Edit"} Parent Category</h2>
+              <h2>{addOrEdit === 'add' ? 'Create' : 'Edit'} Parent Category</h2>
             </Dialog.Title>
             <Dialog.Close asChild>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>

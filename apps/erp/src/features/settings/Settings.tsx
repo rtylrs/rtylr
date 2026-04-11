@@ -8,11 +8,11 @@ import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
-const Section: React.FC<{ title: string; icon: React.ComponentType<{ size?: number; style?: any }>; children: React.ReactNode }> = ({
-  title,
-  icon: Icon,
-  children,
-}) => (
+const Section: React.FC<{
+  title: string;
+  icon: React.ComponentType<{ size?: number; style?: any }>;
+  children: React.ReactNode;
+}> = ({ title, icon: Icon, children }) => (
   <div
     className="rounded-xl p-5 space-y-4"
     style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
@@ -27,7 +27,11 @@ const Section: React.FC<{ title: string; icon: React.ComponentType<{ size?: numb
   </div>
 );
 
-const Field: React.FC<{ label: string; description?: string; children: React.ReactNode }> = ({ label, description, children }) => (
+const Field: React.FC<{ label: string; description?: string; children: React.ReactNode }> = ({
+  label,
+  description,
+  children,
+}) => (
   <div className="flex items-center justify-between gap-4">
     <div className="flex-1">
       <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
@@ -43,7 +47,10 @@ const Field: React.FC<{ label: string; description?: string; children: React.Rea
   </div>
 );
 
-const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({ value, onChange }) => (
+const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
+  value,
+  onChange,
+}) => (
   <button
     onClick={() => onChange(!value)}
     className="relative h-5 w-9 rounded-full transition-colors"
@@ -76,7 +83,11 @@ const Settings: React.FC = () => {
             value={settings.currency}
             onChange={(e) => settings.setCurrency(e.target.value)}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
@@ -92,7 +103,11 @@ const Settings: React.FC = () => {
             value={settings.taxRate}
             onChange={(e) => settings.setTaxRate(parseFloat(e.target.value) || 0)}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
         <Field label="Default Warehouse" description="Used for new products and transfers">
@@ -100,7 +115,11 @@ const Settings: React.FC = () => {
             value={settings.defaultWarehouseId}
             onChange={(e) => settings.setDefaultWarehouseId(parseInt(e.target.value))}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           >
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>
@@ -112,19 +131,29 @@ const Settings: React.FC = () => {
       </Section>
 
       <Section title="Inventory" icon={Database}>
-        <Field label="Default Low Stock Threshold" description="Used when a product does not specify one">
+        <Field
+          label="Default Low Stock Threshold"
+          description="Used when a product does not specify one"
+        >
           <input
             type="number"
             value={settings.lowStockThreshold}
             onChange={(e) => settings.setLowStockThreshold(parseInt(e.target.value) || 0)}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
-            style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)', color: 'var(--hub-text)' }}
+            style={{
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+            }}
           />
         </Field>
       </Section>
 
       <Section title="Notifications" icon={Bell}>
-        <Field label="Low Stock Alerts" description="Get notified when products fall below threshold">
+        <Field
+          label="Low Stock Alerts"
+          description="Get notified when products fall below threshold"
+        >
           <Toggle value={settings.notifyOnLowStock} onChange={settings.setNotifyOnLowStock} />
         </Field>
         <Field label="Expiry Alerts" description="Get notified when items approach expiry">

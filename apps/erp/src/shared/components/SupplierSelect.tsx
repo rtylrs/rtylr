@@ -8,7 +8,11 @@ interface SupplierSelectProps {
   placeholder?: string;
 }
 
-const SupplierSelect: React.FC<SupplierSelectProps> = ({ value, onChange, placeholder = 'Select supplier…' }) => {
+const SupplierSelect: React.FC<SupplierSelectProps> = ({
+  value,
+  onChange,
+  placeholder = 'Select supplier…',
+}) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const { data: suppliers = [] } = useSuppliers();
@@ -71,8 +75,12 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({ value, onChange, placeh
               }}
               className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-sm text-left"
               style={{ color: 'var(--hub-text)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
             >
               <span className="truncate">{s.name}</span>
               {value === s.id && <Check size={12} style={{ color: '#f59e0b' }} />}

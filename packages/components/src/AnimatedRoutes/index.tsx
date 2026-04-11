@@ -1,13 +1,7 @@
 import { motion } from 'motion/react';
 import React from 'react';
 
-type AnimationType =
-  | 'slide'
-  | 'fade'
-  | 'scale'
-  | 'slideUp'
-  | 'slideDown'
-  | 'none';
+type AnimationType = 'slide' | 'fade' | 'scale' | 'slideUp' | 'slideDown' | 'none';
 
 interface AnimatedRoutesProps {
   children: React.ReactNode;

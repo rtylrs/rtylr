@@ -114,30 +114,85 @@ const ImportCustomers: React.FC = () => {
       {headers.length > 0 && (
         <>
           <Card style={{ marginBottom: '16px' }}>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               Column mapping
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {REQUIRED.map((req) => (
-                <div key={req} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--hub-text)', fontWeight: 600, textTransform: 'capitalize' }}>{req}</div>
-                  <Select value={mapping[req] || ''} onChange={(e) => setMapping((m) => ({ ...m, [req]: e.target.value }))}>
+                <div
+                  key={req}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '120px 1fr',
+                    gap: '12px',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--hub-text)',
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {req}
+                  </div>
+                  <Select
+                    value={mapping[req] || ''}
+                    onChange={(e) => setMapping((m) => ({ ...m, [req]: e.target.value }))}
+                  >
                     <option value="">Select column...</option>
                     {headers.map((h) => (
-                      <option key={h} value={h}>{h}</option>
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
                     ))}
                   </Select>
                 </div>
               ))}
             </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '12px', color: 'var(--hub-text)', cursor: 'pointer' }}>
-              <input type="checkbox" checked={dedupe} onChange={(e) => setDedupe(e.target.checked)} style={{ accentColor: '#3b82f6' }} />
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '14px',
+                fontSize: '12px',
+                color: 'var(--hub-text)',
+                cursor: 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={dedupe}
+                onChange={(e) => setDedupe(e.target.checked)}
+                style={{ accentColor: '#3b82f6' }}
+              />
               Deduplicate by email
             </label>
           </Card>
 
           <Card>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               Preview ({rows.length} rows)
             </h4>
             <div style={{ maxHeight: '240px', overflow: 'auto' }}>
@@ -145,7 +200,16 @@ const ImportCustomers: React.FC = () => {
                 <thead>
                   <tr>
                     {headers.map((h) => (
-                      <th key={h} style={{ textAlign: 'left', padding: '6px 8px', color: 'var(--hub-text-dim)', borderBottom: '1px solid var(--hub-border)', fontWeight: 600 }}>
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: 'left',
+                          padding: '6px 8px',
+                          color: 'var(--hub-text-dim)',
+                          borderBottom: '1px solid var(--hub-border)',
+                          fontWeight: 600,
+                        }}
+                      >
                         {h}
                       </th>
                     ))}
@@ -155,7 +219,9 @@ const ImportCustomers: React.FC = () => {
                   {rows.slice(0, 10).map((r, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                       {r.map((c, j) => (
-                        <td key={j} style={{ padding: '6px 8px', color: 'var(--hub-text)' }}>{c}</td>
+                        <td key={j} style={{ padding: '6px 8px', color: 'var(--hub-text)' }}>
+                          {c}
+                        </td>
                       ))}
                     </tr>
                   ))}
@@ -164,8 +230,12 @@ const ImportCustomers: React.FC = () => {
             </div>
           </Card>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
-            <Button variant="outline" onClick={() => navigate('/customers')}>Cancel</Button>
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}
+          >
+            <Button variant="outline" onClick={() => navigate('/customers')}>
+              Cancel
+            </Button>
             <Button variant="primary" onClick={handleImport}>
               <Check size={13} />
               Import {rows.length} customers

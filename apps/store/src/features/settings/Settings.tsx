@@ -22,8 +22,12 @@ const Settings: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load settings</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load settings
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
@@ -44,33 +48,60 @@ const Settings: React.FC = () => {
       fields: [
         { label: 'Currency', value: settings?.currency, type: 'text' as const },
         { label: 'Tax Rate (%)', value: settings?.taxRate?.toString(), type: 'text' as const },
-        { label: 'Tax Inclusive', value: settings?.taxInclusive ? 'Yes' : 'No', type: 'text' as const },
+        {
+          label: 'Tax Inclusive',
+          value: settings?.taxInclusive ? 'Yes' : 'No',
+          type: 'text' as const,
+        },
       ],
     },
     {
       title: 'Inventory',
       icon: Globe,
       fields: [
-        { label: 'Low Stock Threshold', value: settings?.lowStockThreshold?.toString(), type: 'text' as const },
+        {
+          label: 'Low Stock Threshold',
+          value: settings?.lowStockThreshold?.toString(),
+          type: 'text' as const,
+        },
       ],
     },
     {
       title: 'Notifications',
       icon: Bell,
       fields: [
-        { label: 'Email Notifications', value: settings?.emailNotifications ? 'Enabled' : 'Disabled', type: 'text' as const },
-        { label: 'Order Confirmation', value: settings?.orderConfirmationEmail ? 'Enabled' : 'Disabled', type: 'text' as const },
-        { label: 'Shipping Updates', value: settings?.shippingNotificationEmail ? 'Enabled' : 'Disabled', type: 'text' as const },
+        {
+          label: 'Email Notifications',
+          value: settings?.emailNotifications ? 'Enabled' : 'Disabled',
+          type: 'text' as const,
+        },
+        {
+          label: 'Order Confirmation',
+          value: settings?.orderConfirmationEmail ? 'Enabled' : 'Disabled',
+          type: 'text' as const,
+        },
+        {
+          label: 'Shipping Updates',
+          value: settings?.shippingNotificationEmail ? 'Enabled' : 'Disabled',
+          type: 'text' as const,
+        },
       ],
     },
   ];
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 max-w-4xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6 max-w-4xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SettingsIcon size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Store Settings</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Store Settings
+          </h2>
         </div>
         <button
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
@@ -83,7 +114,11 @@ const Settings: React.FC = () => {
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl p-5 space-y-3" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+            <div
+              key={i}
+              className="rounded-xl p-5 space-y-3"
+              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            >
               <SkeletonRow cols={2} />
               <SkeletonRow cols={2} />
               <SkeletonRow cols={2} />
@@ -93,8 +128,12 @@ const Settings: React.FC = () => {
       ) : !settings ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
           <SettingsIcon size={32} style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No settings found</p>
-          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>Configure your store settings to get started.</p>
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            No settings found
+          </p>
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Configure your store settings to get started.
+          </p>
         </motion.div>
       ) : (
         <div className="space-y-4">
@@ -116,7 +155,10 @@ const Settings: React.FC = () => {
                 <div className="space-y-3">
                   {section.fields.map((field) => (
                     <div key={field.label} className="flex items-center gap-4">
-                      <label className="text-xs font-medium w-40 shrink-0" style={{ color: 'var(--hub-text-muted)' }}>
+                      <label
+                        className="text-xs font-medium w-40 shrink-0"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
                         {field.label}
                       </label>
                       <input
@@ -128,8 +170,13 @@ const Settings: React.FC = () => {
                           border: '1px solid var(--hub-border)',
                           color: 'var(--hub-text)',
                         }}
-                        onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.5)'; }}
-                        onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                        onFocus={(e) => {
+                          (e.currentTarget as HTMLElement).style.borderColor =
+                            'rgba(20,184,166,0.5)';
+                        }}
+                        onBlur={(e) => {
+                          (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                        }}
                       />
                     </div>
                   ))}

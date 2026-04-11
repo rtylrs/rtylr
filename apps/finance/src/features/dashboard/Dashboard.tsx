@@ -27,23 +27,55 @@ const cardStyle: React.CSSProperties = {
   padding: 20,
 };
 
-interface StatCardProps { label: string; value: string; change: string; up: boolean | null; icon: React.ComponentType<any>; color: string }
+interface StatCardProps {
+  label: string;
+  value: string;
+  change: string;
+  up: boolean | null;
+  icon: React.ComponentType<any>;
+  color: string;
+}
 const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Icon, color }) => (
   <div style={cardStyle}>
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+      }}
+    >
       <span style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>{label}</span>
-      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, background: `${color}18` }}>
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          background: `${color}18`,
+        }}
+      >
         <Icon size={15} style={{ color }} />
       </span>
     </div>
-    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 6 }}>{value}</div>
+    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 6 }}>
+      {value}
+    </div>
     <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-      {up !== null && (
-        up
-          ? <ArrowUpRight size={13} style={{ color: '#10b981' }} />
-          : <ArrowDownRight size={13} style={{ color: '#ef4444' }} />
-      )}
-      <span style={{ color: up === null ? 'var(--hub-text-muted)' : up ? '#10b981' : '#ef4444', fontWeight: 500 }}>
+      {up !== null &&
+        (up ? (
+          <ArrowUpRight size={13} style={{ color: '#10b981' }} />
+        ) : (
+          <ArrowDownRight size={13} style={{ color: '#ef4444' }} />
+        ))}
+      <span
+        style={{
+          color: up === null ? 'var(--hub-text-muted)' : up ? '#10b981' : '#ef4444',
+          fontWeight: 500,
+        }}
+      >
         {change}
       </span>
       {up !== null && <span style={{ color: 'var(--hub-text-dim)' }}>vs last month</span>}
@@ -61,11 +93,7 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
   const totalW = barData.length * (groupW + groupGap) - groupGap;
 
   return (
-    <svg
-      viewBox={`0 0 ${totalW + 40} ${chartH + 32}`}
-      width="100%"
-      style={{ overflow: 'visible' }}
-    >
+    <svg viewBox={`0 0 ${totalW + 40} ${chartH + 32}`} width="100%" style={{ overflow: 'visible' }}>
       {/* Grid lines */}
       {[0, 0.25, 0.5, 0.75, 1].map((f) => (
         <line
@@ -123,9 +151,13 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
       {/* Legend */}
       <g transform={`translate(${totalW - 100}, ${chartH + 28})`}>
         <rect x={0} y={-6} width={10} height={10} rx={2} fill="#10b981" opacity={0.85} />
-        <text x={14} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">Revenue</text>
+        <text x={14} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
+          Revenue
+        </text>
         <rect x={60} y={-6} width={10} height={10} rx={2} fill="#ef4444" opacity={0.7} />
-        <text x={74} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">Expenses</text>
+        <text x={74} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
+          Expenses
+        </text>
       </g>
     </svg>
   );
@@ -153,7 +185,9 @@ const Dashboard: React.FC = () => {
     },
     {
       label: 'Net Profit',
-      value: loading ? '…' : fmt((dashData?.totalRevenueMTD ?? 0) - (dashData?.totalExpensesMTD ?? 0)),
+      value: loading
+        ? '…'
+        : fmt((dashData?.totalRevenueMTD ?? 0) - (dashData?.totalExpensesMTD ?? 0)),
       change: dashData?.netProfitChange ?? '+0%',
       up: true,
       icon: TrendingUp,
@@ -162,7 +196,9 @@ const Dashboard: React.FC = () => {
     {
       label: 'Outstanding Invoices',
       value: loading ? '…' : fmt(dashData?.outstandingInvoicesTotal ?? 0),
-      change: dashData?.outstandingInvoicesCount ? `${dashData.outstandingInvoicesCount} invoices` : '0 invoices',
+      change: dashData?.outstandingInvoicesCount
+        ? `${dashData.outstandingInvoicesCount} invoices`
+        : '0 invoices',
       up: null,
       icon: FileText,
       color: '#f59e0b',
@@ -195,11 +231,23 @@ const Dashboard: React.FC = () => {
         >
           <AlertTriangle size={16} style={{ color: '#ef4444', flexShrink: 0, marginTop: 1 }} />
           <div>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#ef4444',
+                marginBottom: 4,
+              }}
+            >
               {overdueInvoices.length} Overdue Invoice{overdueInvoices.length > 1 ? 's' : ''}
             </p>
             <p style={{ margin: 0, fontSize: 12, color: 'var(--hub-text-muted)' }}>
-              {overdueInvoices.map((inv) => `${inv.id} – ${inv.client} (${inv.amount}, ${inv.daysOverdue}d overdue)`).join(' · ')}
+              {overdueInvoices
+                .map(
+                  (inv) => `${inv.id} – ${inv.client} (${inv.amount}, ${inv.daysOverdue}d overdue)`
+                )
+                .join(' · ')}
             </p>
           </div>
         </div>
@@ -219,13 +267,31 @@ const Dashboard: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
         {barData.length > 0 ? (
           <div style={{ ...cardStyle, padding: 20 }}>
-            <h2 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
+            <h2
+              style={{
+                margin: '0 0 20px',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+              }}
+            >
               Revenue vs Expenses
             </h2>
             <BarChart barData={barData} />
           </div>
         ) : (
-          <div style={{ ...cardStyle, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hub-text-dim)', fontSize: 13, minHeight: 180 }}>
+          <div
+            style={{
+              ...cardStyle,
+              padding: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--hub-text-dim)',
+              fontSize: 13,
+              minHeight: 180,
+            }}
+          >
             {loading ? 'Loading chart...' : 'No chart data available'}
           </div>
         )}
@@ -257,8 +323,12 @@ const Dashboard: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 500 }}>{t.description}</span>
-                <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{t.id} · {t.date}</span>
+                <span style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 500 }}>
+                  {t.description}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                  {t.id} · {t.date}
+                </span>
               </div>
               <span
                 style={{

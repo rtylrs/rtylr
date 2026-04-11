@@ -10,14 +10,16 @@ import Breadcrumbs from '../../shared/components/Breadcrumbs';
 const Roadmap: React.FC = () => {
   const { data: projects = [], isLoading } = useRoadmap();
 
-  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading roadmap...</div>;
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading roadmap...
+      </div>
+    );
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
+      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: 'Roadmap' }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
           Roadmap
@@ -82,8 +84,10 @@ const Roadmap: React.FC = () => {
                   style={{ width: `${p.progress}%`, background: p.color }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px]"
-                style={{ color: 'var(--flow-text-dim)' }}>
+              <div
+                className="flex items-center justify-between text-[10px]"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
                 <span>Start: {formatDate(p.startDate)}</span>
                 <span>Target: {formatDate(p.targetDate)}</span>
               </div>

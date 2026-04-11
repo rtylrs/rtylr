@@ -48,10 +48,7 @@ export const platformConfig = {
 };
 
 // Utility to conditionally execute code based on platform
-export const whenPlatform = <T>(
-  platform: PlatformType,
-  callback: () => T
-): T | undefined => {
+export const whenPlatform = <T>(platform: PlatformType, callback: () => T): T | undefined => {
   return getPlatform() === platform ? callback() : undefined;
 };
 
@@ -63,4 +60,3 @@ export const platformSwitch = <T>(handlers: {
   const handler = handlers.web || handlers.default;
   return handler ? handler() : undefined;
 };
-

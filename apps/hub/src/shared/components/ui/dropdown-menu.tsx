@@ -31,7 +31,9 @@ const DropdownMenu: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   );
 };
 
-const DropdownMenuTrigger: React.FC<{ children: React.ReactElement; asChild?: boolean }> = ({ children }) => {
+const DropdownMenuTrigger: React.FC<{ children: React.ReactElement; asChild?: boolean }> = ({
+  children,
+}) => {
   const { open, setOpen } = useContext(DropdownContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
@@ -57,11 +59,16 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
   if (!open) return null;
 
   const alignClasses = { start: 'left-0', end: 'right-0', center: 'left-1/2 -translate-x-1/2' };
-  const sideClasses  = { bottom: 'top-full mt-1', top: 'bottom-full mb-1' };
+  const sideClasses = { bottom: 'top-full mt-1', top: 'bottom-full mb-1' };
 
   return (
     <div
-      className={cn('absolute z-50 min-w-[160px] rounded-xl py-1', alignClasses[align], sideClasses[side], className)}
+      className={cn(
+        'absolute z-50 min-w-[160px] rounded-xl py-1',
+        alignClasses[align],
+        sideClasses[side],
+        className
+      )}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',
@@ -77,7 +84,13 @@ interface DropdownMenuItemProps extends React.HTMLAttributes<HTMLDivElement> {
   destructive?: boolean;
 }
 
-const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({ className, destructive, onClick, style, ...props }) => {
+const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
+  className,
+  destructive,
+  onClick,
+  style,
+  ...props
+}) => {
   const { setOpen } = useContext(DropdownContext);
   return (
     <div
@@ -96,11 +109,21 @@ const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({ className, destruct
   );
 };
 
-const DropdownMenuSeparator: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => (
-  <div className={cn('h-px my-1 mx-1', className)} style={{ background: 'var(--hub-border)' }} {...props} />
+const DropdownMenuSeparator: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => (
+  <div
+    className={cn('h-px my-1 mx-1', className)}
+    style={{ background: 'var(--hub-border)' }}
+    {...props}
+  />
 );
 
-const DropdownMenuLabel: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => (
+const DropdownMenuLabel: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => (
   <div
     className={cn('px-3 py-1.5 text-xs font-semibold uppercase tracking-wider', className)}
     style={{ color: 'var(--hub-text-dim)' }}
@@ -108,4 +131,11 @@ const DropdownMenuLabel: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ cla
   />
 );
 
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel };
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+};

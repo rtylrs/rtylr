@@ -6,11 +6,9 @@ import { X, Loader2 } from 'lucide-react';
 export const ACCENT = '#3b82f6';
 
 // ── Card ─────────────────────────────────────────────────────────
-export const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties; padded?: boolean }>> = ({
-  children,
-  style,
-  padded = true,
-}) => (
+export const Card: React.FC<
+  React.PropsWithChildren<{ style?: React.CSSProperties; padded?: boolean }>
+> = ({ children, style, padded = true }) => (
   <div
     style={{
       background: 'var(--hub-card)',
@@ -30,22 +28,34 @@ export const PageHeader: React.FC<{
   subtitle?: string;
   actions?: React.ReactNode;
 }> = ({ title, subtitle, actions }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '20px',
+    }}
+  >
     <div>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>{subtitle}</p>}
+      <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+        {title}
+      </h2>
+      {subtitle && (
+        <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+          {subtitle}
+        </p>
+      )}
     </div>
     {actions && <div style={{ display: 'flex', gap: '8px' }}>{actions}</div>}
   </div>
 );
 
 // ── Button ───────────────────────────────────────────────────────
-export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger' | 'outline' }> = ({
-  variant = 'primary',
-  style,
-  children,
-  ...props
-}) => {
+export const Button: React.FC<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: 'primary' | 'ghost' | 'danger' | 'outline';
+  }
+> = ({ variant = 'primary', style, children, ...props }) => {
   const base: React.CSSProperties = {
     padding: '8px 14px',
     borderRadius: '8px',
@@ -62,7 +72,11 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
   const variants: Record<string, React.CSSProperties> = {
     primary: { background: ACCENT, color: '#fff' },
     ghost: { background: 'transparent', color: 'var(--hub-text-muted)' },
-    outline: { background: 'transparent', color: 'var(--hub-text)', border: '1px solid var(--hub-border)' },
+    outline: {
+      background: 'transparent',
+      color: 'var(--hub-text)',
+      border: '1px solid var(--hub-border)',
+    },
     danger: { background: '#ef4444', color: '#fff' },
   };
   return (
@@ -79,7 +93,19 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
   ...props
 }) => (
   <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
-    {label && <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</span>}
+    {label && (
+      <span
+        style={{
+          fontSize: '11px',
+          color: 'var(--hub-text-dim)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </span>
+    )}
     <input
       {...props}
       style={{
@@ -98,13 +124,23 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
 );
 
 // ── Textarea ─────────────────────────────────────────────────────
-export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string }> = ({
-  label,
-  style,
-  ...props
-}) => (
+export const Textarea: React.FC<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string }
+> = ({ label, style, ...props }) => (
   <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
-    {label && <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</span>}
+    {label && (
+      <span
+        style={{
+          fontSize: '11px',
+          color: 'var(--hub-text-dim)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </span>
+    )}
     <textarea
       {...props}
       style={{
@@ -125,14 +161,23 @@ export const Textarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement
 );
 
 // ── Select ───────────────────────────────────────────────────────
-export const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string }> = ({
-  label,
-  style,
-  children,
-  ...props
-}) => (
+export const Select: React.FC<
+  React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string }
+> = ({ label, style, children, ...props }) => (
   <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
-    {label && <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</span>}
+    {label && (
+      <span
+        style={{
+          fontSize: '11px',
+          color: 'var(--hub-text-dim)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </span>
+    )}
     <select
       {...props}
       style={{
@@ -204,7 +249,9 @@ export const Modal: React.FC<{
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>{title}</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+            {title}
+          </h3>
           <button
             onClick={onClose}
             style={{
@@ -249,7 +296,15 @@ export const ConfirmModal: React.FC<{
   description?: string;
   confirmLabel?: string;
   variant?: 'primary' | 'danger';
-}> = ({ open, onClose, onConfirm, title, description, confirmLabel = 'Confirm', variant = 'primary' }) => (
+}> = ({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmLabel = 'Confirm',
+  variant = 'primary',
+}) => (
   <Modal
     open={open}
     onClose={onClose}
@@ -260,13 +315,23 @@ export const ConfirmModal: React.FC<{
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant={variant} onClick={() => { onConfirm(); onClose(); }}>
+        <Button
+          variant={variant}
+          onClick={() => {
+            onConfirm();
+            onClose();
+          }}
+        >
           {confirmLabel}
         </Button>
       </>
     }
   >
-    {description && <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, lineHeight: 1.6 }}>{description}</p>}
+    {description && (
+      <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, lineHeight: 1.6 }}>
+        {description}
+      </p>
+    )}
   </Modal>
 );
 
@@ -304,26 +369,31 @@ export const EmptyState: React.FC<{
         <Icon size={22} />
       </div>
     )}
-    <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>{title}</h4>
+    <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+      {title}
+    </h4>
     {description && (
-      <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, maxWidth: '340px' }}>{description}</p>
+      <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, maxWidth: '340px' }}>
+        {description}
+      </p>
     )}
     {action && <div style={{ marginTop: '8px' }}>{action}</div>}
   </div>
 );
 
 // ── Skeleton ─────────────────────────────────────────────────────
-export const Skeleton: React.FC<{ width?: string | number; height?: string | number; style?: React.CSSProperties }> = ({
-  width = '100%',
-  height = '14px',
-  style,
-}) => (
+export const Skeleton: React.FC<{
+  width?: string | number;
+  height?: string | number;
+  style?: React.CSSProperties;
+}> = ({ width = '100%', height = '14px', style }) => (
   <div
     style={{
       width,
       height,
       borderRadius: '6px',
-      background: 'linear-gradient(90deg, var(--hub-hover) 0%, var(--hub-active) 50%, var(--hub-hover) 100%)',
+      background:
+        'linear-gradient(90deg, var(--hub-hover) 0%, var(--hub-active) 50%, var(--hub-hover) 100%)',
       backgroundSize: '200% 100%',
       animation: 'crm-skeleton 1.4s ease-in-out infinite',
       ...style,
@@ -347,8 +417,19 @@ export const SkeletonList: React.FC<{ count?: number }> = ({ count = 4 }) => (
 );
 
 // ── Breadcrumbs ──────────────────────────────────────────────────
-export const Breadcrumbs: React.FC<{ items: Array<{ label: string; to?: string }> }> = ({ items }) => (
-  <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--hub-text-muted)', marginBottom: '12px' }}>
+export const Breadcrumbs: React.FC<{ items: Array<{ label: string; to?: string }> }> = ({
+  items,
+}) => (
+  <nav
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      fontSize: '12px',
+      color: 'var(--hub-text-muted)',
+      marginBottom: '12px',
+    }}
+  >
     {items.map((item, i) => (
       <React.Fragment key={i}>
         {item.to ? (

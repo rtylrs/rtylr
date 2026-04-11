@@ -130,7 +130,11 @@ const Receiving: React.FC = () => {
           </button>
         </div>
       ) : open.length === 0 ? (
-        <EmptyState icon={PackageCheck} title="No open orders to receive" description="All orders have been received" />
+        <EmptyState
+          icon={PackageCheck}
+          title="No open orders to receive"
+          description="All orders have been received"
+        />
       ) : (
         <div className="space-y-2">
           {open.map((o) => (
@@ -142,8 +146,12 @@ const Receiving: React.FC = () => {
                 background: 'var(--hub-card)',
                 border: '1px solid var(--hub-border)',
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.4)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.4)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+              }}
             >
               <div
                 className="h-9 w-9 rounded-lg flex items-center justify-center"

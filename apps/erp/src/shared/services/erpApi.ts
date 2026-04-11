@@ -207,14 +207,15 @@ export interface ActivityItem {
 
 export const erpApi = {
   // Products
-  listProducts: (params?: { search?: string; categoryId?: number; limit?: number; offset?: number }) =>
-    safe.get<Product[]>('/erp/products', { params }),
-  getProduct: (id: number) =>
-    safe.get<Product>(`/erp/products/${id}`),
-  createProduct: (data: CreateProductInput) =>
-    safe.post<Product>('/erp/products', data),
-  updateProduct: (data: UpdateProductInput) =>
-    safe.post<Product>('/erp/products', data),
+  listProducts: (params?: {
+    search?: string;
+    categoryId?: number;
+    limit?: number;
+    offset?: number;
+  }) => safe.get<Product[]>('/erp/products', { params }),
+  getProduct: (id: number) => safe.get<Product>(`/erp/products/${id}`),
+  createProduct: (data: CreateProductInput) => safe.post<Product>('/erp/products', data),
+  updateProduct: (data: UpdateProductInput) => safe.post<Product>('/erp/products', data),
   deleteProduct: (id: number) =>
     safe.post<{ success: boolean }>('/erp/products', { id, _action: 'delete' }),
   lookupBarcode: (code: string) =>
@@ -241,40 +242,30 @@ export const erpApi = {
   createStockTake: (data: any) => safe.post<StockTake>('/erp/stock-takes', data),
 
   // Suppliers
-  listSuppliers: () =>
-    safe.get<Supplier[]>('/erp/suppliers'),
-  createSupplier: (data: CreateSupplierInput) =>
-    safe.post<Supplier>('/erp/suppliers', data),
-  updateSupplier: (data: UpdateSupplierInput) =>
-    safe.post<Supplier>('/erp/suppliers', data),
+  listSuppliers: () => safe.get<Supplier[]>('/erp/suppliers'),
+  createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
+  updateSupplier: (data: UpdateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
 
   // Purchase Orders
-  listPurchaseOrders: () =>
-    safe.get<PurchaseOrder[]>('/erp/purchase-orders'),
-  createPurchaseOrder: (data: any) =>
-    safe.post<PurchaseOrder>('/erp/purchase-orders', data),
+  listPurchaseOrders: () => safe.get<PurchaseOrder[]>('/erp/purchase-orders'),
+  createPurchaseOrder: (data: any) => safe.post<PurchaseOrder>('/erp/purchase-orders', data),
   updatePurchaseOrderStatus: (id: number, status: string) =>
     safe.post<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
   approvePurchaseOrder: (id: number) =>
     safe.post<PurchaseOrder>(`/erp/purchase-orders/${id}/approve`, {}),
 
   // Inventory
-  getInventoryReport: () =>
-    safe.get<InventoryReportItem[]>('/erp/inventory/report'),
-  getLowStock: () =>
-    safe.get<LowStockItem[]>('/erp/inventory/low-stock'),
-  adjustInventory: (data: any) =>
-    safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
+  getInventoryReport: () => safe.get<InventoryReportItem[]>('/erp/inventory/report'),
+  getLowStock: () => safe.get<LowStockItem[]>('/erp/inventory/low-stock'),
+  adjustInventory: (data: any) => safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
   getValuation: (method: 'FIFO' | 'LIFO' | 'WAC' = 'WAC') =>
     safe.get<any>('/erp/inventory/valuation', { params: { method } }),
 
   // Reorder / forecasting
-  getReorderSuggestions: () =>
-    safe.get<ReorderSuggestion[]>('/erp/reorder-suggestions'),
+  getReorderSuggestions: () => safe.get<ReorderSuggestion[]>('/erp/reorder-suggestions'),
 
   // Expiry
-  getExpiryItems: () =>
-    safe.get<ExpiryItem[]>('/erp/expiry'),
+  getExpiryItems: () => safe.get<ExpiryItem[]>('/erp/expiry'),
 
   // Price lists
   listPriceLists: () => safe.get<PriceList[]>('/erp/price-lists'),
@@ -284,10 +275,8 @@ export const erpApi = {
     safe.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
 
   // Activity log
-  listActivity: (limit = 20) =>
-    safe.get<ActivityItem[]>('/erp/activity', { params: { limit } }),
+  listActivity: (limit = 20) => safe.get<ActivityItem[]>('/erp/activity', { params: { limit } }),
 
   // Dashboard (combines multiple endpoints)
-  getDashboardStats: () =>
-    safe.get<DashboardStats>('/erp/dashboard'),
+  getDashboardStats: () => safe.get<DashboardStats>('/erp/dashboard'),
 };

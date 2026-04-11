@@ -32,25 +32,28 @@ const EmailCampaign: React.FC = () => {
   };
 
   const handleSave = (send: boolean) => {
-    create.mutate({
-      name,
-      description: subject,
-      channel: 'Email',
-      status: send ? 'Active' : 'Draft',
-      audience: segments.find((s) => s.id === segmentId)?.customerCount || 0,
-      subject,
-      body,
-      segmentId,
-    }, {
-      onSuccess: () => {
-        toast.success(send ? 'Campaign sent' : 'Draft saved');
-        navigate('/campaigns');
+    create.mutate(
+      {
+        name,
+        description: subject,
+        channel: 'Email',
+        status: send ? 'Active' : 'Draft',
+        audience: segments.find((s) => s.id === segmentId)?.customerCount || 0,
+        subject,
+        body,
+        segmentId,
       },
-      onError: () => {
-        toast.success(send ? 'Campaign queued to send' : 'Draft saved');
-        navigate('/campaigns');
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success(send ? 'Campaign sent' : 'Draft saved');
+          navigate('/campaigns');
+        },
+        onError: () => {
+          toast.success(send ? 'Campaign queued to send' : 'Draft saved');
+          navigate('/campaigns');
+        },
+      }
+    );
   };
 
   const segment = segments.find((s) => s.id === segmentId);
@@ -60,54 +63,132 @@ const EmailCampaign: React.FC = () => {
       <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: 'New email' }]} />
       <PageHeader
         title="New email campaign"
-        actions={(
+        actions={
           <>
-            <Button variant="outline" onClick={() => setPreviewOpen(true)}><Eye size={13} />Preview</Button>
-            <Button variant="outline" onClick={() => handleSave(false)}><Save size={13} />Save draft</Button>
-            <Button variant="primary" onClick={() => handleSave(true)}><Send size={13} />Send now</Button>
+            <Button variant="outline" onClick={() => setPreviewOpen(true)}>
+              <Eye size={13} />
+              Preview
+            </Button>
+            <Button variant="outline" onClick={() => handleSave(false)}>
+              <Save size={13} />
+              Save draft
+            </Button>
+            <Button variant="primary" onClick={() => handleSave(true)}>
+              <Send size={13} />
+              Send now
+            </Button>
           </>
-        )}
+        }
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Card>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-              <Input label="Campaign name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Spring promo" />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '14px',
+              }}
+            >
+              <Input
+                label="Campaign name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Spring promo"
+              />
               <Select label="Start from template" onChange={(e) => applyTemplate(e.target.value)}>
                 <option value="">Blank</option>
                 {templates.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
                 ))}
               </Select>
             </div>
             <EmailEditor
               subject={subject}
               body={body}
-              onChange={(s, b) => { setSubject(s); setBody(b); }}
+              onChange={(s, b) => {
+                setSubject(s);
+                setBody(b);
+              }}
             />
           </Card>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Card>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Audience</h4>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Audience
+            </h4>
             <Select value={segmentId} onChange={(e) => setSegmentId(Number(e.target.value))}>
               {segments.map((s) => (
-                <option key={s.id} value={s.id}>{s.name} ({s.customerCount})</option>
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.customerCount})
+                </option>
               ))}
             </Select>
             {segment && (
-              <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(59,130,246,0.08)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', textTransform: 'uppercase', fontWeight: 700 }}>Recipients</div>
-                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)' }}>{segment.customerCount.toLocaleString()}</div>
-                <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{segment.description}</div>
+              <div
+                style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: 'rgba(59,130,246,0.08)',
+                  borderRadius: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    fontWeight: 700,
+                  }}
+                >
+                  Recipients
+                </div>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                  {segment.customerCount.toLocaleString()}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                  {segment.description}
+                </div>
               </div>
             )}
           </Card>
           <Card>
-            <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tips</h4>
-            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '12px', color: 'var(--hub-text-muted)', lineHeight: 1.7 }}>
+            <h4
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                margin: '0 0 8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Tips
+            </h4>
+            <ul
+              style={{
+                margin: 0,
+                paddingLeft: '16px',
+                fontSize: '12px',
+                color: 'var(--hub-text-muted)',
+                lineHeight: 1.7,
+              }}
+            >
               <li>Keep subject lines under 60 characters</li>
               <li>Use first_name for personalization</li>
               <li>Include a clear call to action</li>
@@ -142,9 +223,13 @@ const EmailCampaign: React.FC = () => {
               fontFamily: 'system-ui',
             }}
           >
-            <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>From: hello@rtylr.com</div>
+            <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>
+              From: hello@rtylr.com
+            </div>
             <h2 style={{ fontSize: '18px', margin: '0 0 16px' }}>{subject || '(no subject)'}</h2>
-            <div style={{ fontSize: '14px', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{body || '(empty)'}</div>
+            <div style={{ fontSize: '14px', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              {body || '(empty)'}
+            </div>
           </div>
         </div>
       )}

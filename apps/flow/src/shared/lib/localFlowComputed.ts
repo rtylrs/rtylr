@@ -16,7 +16,9 @@ export function buildDashboardStats(
     .slice(0, 12);
 
   const openTasks = wsTasks.filter((t) => t.status === 'todo' || t.status === 'backlog').length;
-  const inProgress = wsTasks.filter((t) => t.status === 'in_progress' || t.status === 'in_review').length;
+  const inProgress = wsTasks.filter(
+    (t) => t.status === 'in_progress' || t.status === 'in_review'
+  ).length;
   const completedThisWeek = wsTasks.filter((t) => {
     if (t.status !== 'done') return false;
     return new Date(t.updatedAt) >= weekAgo;
@@ -26,9 +28,7 @@ export function buildDashboardStats(
     return new Date(t.dueDate) < now;
   }).length;
 
-  const recentProjects = projects
-    .filter((p) => p.workspaceId === workspaceId)
-    .slice(0, 6);
+  const recentProjects = projects.filter((p) => p.workspaceId === workspaceId).slice(0, 6);
 
   return {
     openTasks,

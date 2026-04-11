@@ -6,14 +6,8 @@ import { useConfigStore } from '../../stores/configStore';
 import { toast } from 'sonner';
 
 export const useGetConfig = () => {
-  const {
-    setAboutContent,
-    setMaintanance,
-    setBusinessCount,
-    setContactInfo,
-    setFaqs,
-    setNews,
-  } = useConfigStore();
+  const { setAboutContent, setMaintanance, setBusinessCount, setContactInfo, setFaqs, setNews } =
+    useConfigStore();
 
   const query = useQuery({
     queryKey: ['config'],
@@ -25,15 +19,8 @@ export const useGetConfig = () => {
 
   useEffect(() => {
     if (query.data) {
-      const {
-        maintanance,
-        aboutContent,
-        count,
-        contactEmail,
-        contactNumber,
-        faqs,
-        news,
-      } = query.data;
+      const { maintanance, aboutContent, count, contactEmail, contactNumber, faqs, news } =
+        query.data;
 
       setAboutContent(aboutContent);
       setMaintanance(maintanance);
@@ -45,7 +32,15 @@ export const useGetConfig = () => {
       setFaqs(faqs);
       setNews(news);
     }
-  }, [query.data, setAboutContent, setMaintanance, setBusinessCount, setContactInfo, setFaqs, setNews]);
+  }, [
+    query.data,
+    setAboutContent,
+    setMaintanance,
+    setBusinessCount,
+    setContactInfo,
+    setFaqs,
+    setNews,
+  ]);
 
   useEffect(() => {
     if (query.error) {
@@ -103,4 +98,3 @@ export const useGetFaqs = () => {
 
   return query;
 };
-

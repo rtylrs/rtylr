@@ -13,9 +13,24 @@ interface RecordPaymentModalProps {
   onRecorded?: (amount: number) => void;
 }
 
-const METHODS = ['Bank Transfer', 'Credit Card', 'Cash', 'Check', 'ACH', 'Wire', 'PayPal', 'Stripe'];
+const METHODS = [
+  'Bank Transfer',
+  'Credit Card',
+  'Cash',
+  'Check',
+  'ACH',
+  'Wire',
+  'PayPal',
+  'Stripe',
+];
 
-const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ open, onClose, invoiceId, amount, onRecorded }) => {
+const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
+  open,
+  onClose,
+  invoiceId,
+  amount,
+  onRecorded,
+}) => {
   const [value, setValue] = useState(amount);
   const [method, setMethod] = useState(METHODS[0]);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -27,7 +42,9 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ open, onClose, 
       return;
     }
     onRecorded?.(value);
-    toast.success(`Recorded ${value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} payment`);
+    toast.success(
+      `Recorded ${value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} payment`
+    );
     onClose();
   };
 
@@ -64,11 +81,21 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ open, onClose, 
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>Date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            style={inputStyle}
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>Reference</label>
-          <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Optional txn ID" style={inputStyle} />
+          <input
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="Optional txn ID"
+            style={inputStyle}
+          />
         </div>
       </div>
     </Modal>

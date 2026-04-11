@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useMenuStore } from "../../../shared/stores/menuStore";
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useMenuStore } from '../../../shared/stores/menuStore';
 
 function CreateItem() {
   const navigate = useNavigate();
   const location = useLocation();
   const { addMenuItem } = useMenuStore();
   const categoryId = location.state?.categoryId;
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [images, setImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [isAvailable, setIsAvailable] = useState(true);
-  const [availability, setAvailability] = useState("");
+  const [availability, setAvailability] = useState('');
   const [allergens, setAllergens] = useState([]);
   const [tags, setTags] = useState([]);
   const [isVeg, setIsVeg] = useState(false);
@@ -27,7 +27,7 @@ function CreateItem() {
   }, [categoryId, navigate]);
 
   const handleInputChange = (e, setState) => {
-    setState(e.target.value.split(",").map((item) => item.trim()));
+    setState(e.target.value.split(',').map((item) => item.trim()));
   };
 
   const handleFileChange = (e, setState) => {
@@ -102,22 +102,19 @@ function CreateItem() {
           <input
             type="text"
             placeholder=""
-            value={tags.join(", ")}
+            value={tags.join(', ')}
             onChange={(e) => handleInputChange(e, setTags)}
           />
         </div>
         <div className="form-group">
           <label>Cover Image</label>
-          <input
-            type="file"
-            onChange={(e) => handleFileChange(e, setCoverImage)}
-          />
+          <input type="file" onChange={(e) => handleFileChange(e, setCoverImage)} />
         </div>
         <div className="form-group">
           <label>Images URLs (comma separated)</label>
           <input
             type="text"
-            value={images.join(", ")}
+            value={images.join(', ')}
             onChange={(e) => handleInputChange(e, setImages)}
           />
         </div>
@@ -125,7 +122,7 @@ function CreateItem() {
           <label>Ingredients (comma separated)</label>
           <input
             type="text"
-            value={ingredients.join(", ")}
+            value={ingredients.join(', ')}
             onChange={(e) => handleInputChange(e, setIngredients)}
           />
         </div>
@@ -133,7 +130,7 @@ function CreateItem() {
           <label>Allergens (comma separated)</label>
           <input
             type="text"
-            value={allergens.join(", ")}
+            value={allergens.join(', ')}
             onChange={(e) => handleInputChange(e, setAllergens)}
           />
         </div>
@@ -158,11 +155,7 @@ function CreateItem() {
         <div className="form-group">
           <label>
             Vegetarian:
-            <input
-              type="checkbox"
-              checked={isVeg}
-              onChange={(e) => setIsVeg(e.target.checked)}
-            />
+            <input type="checkbox" checked={isVeg} onChange={(e) => setIsVeg(e.target.checked)} />
           </label>
         </div>
         <div className="form-group">

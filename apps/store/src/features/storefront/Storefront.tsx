@@ -22,8 +22,12 @@ const Storefront: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>Failed to load storefront config</p>
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>Please check your connection and try again.</p>
+        <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
+          Failed to load storefront config
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Please check your connection and try again.
+        </p>
       </div>
     );
   }
@@ -50,9 +54,7 @@ const Storefront: React.FC = () => {
     {
       title: 'Domain',
       icon: Globe,
-      fields: [
-        { label: 'Custom Domain', value: config?.customDomain },
-      ],
+      fields: [{ label: 'Custom Domain', value: config?.customDomain }],
     },
     {
       title: 'SEO',
@@ -73,18 +75,23 @@ const Storefront: React.FC = () => {
     {
       title: 'Footer',
       icon: MessageSquare,
-      fields: [
-        { label: 'Footer Text', value: config?.footerText },
-      ],
+      fields: [{ label: 'Footer Text', value: config?.footerText }],
     },
   ];
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 max-w-4xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6 max-w-4xl"
+    >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Globe size={16} style={{ color: TEAL }} />
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>Storefront Builder</h2>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            Storefront Builder
+          </h2>
         </div>
         <button
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
@@ -97,7 +104,11 @@ const Storefront: React.FC = () => {
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl p-5 space-y-3" style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}>
+            <div
+              key={i}
+              className="rounded-xl p-5 space-y-3"
+              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            >
               <SkeletonRow cols={2} />
               <SkeletonRow cols={2} />
             </div>
@@ -106,8 +117,12 @@ const Storefront: React.FC = () => {
       ) : !config ? (
         <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
           <Globe size={32} style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>No storefront configuration found</p>
-          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>Set up your online storefront to get started.</p>
+          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+            No storefront configuration found
+          </p>
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Set up your online storefront to get started.
+          </p>
         </motion.div>
       ) : (
         <div className="space-y-4">
@@ -128,11 +143,16 @@ const Storefront: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                   {section.fields.length === 0 ? (
-                    <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>Not configured</p>
+                    <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                      Not configured
+                    </p>
                   ) : (
                     section.fields.map((field) => (
                       <div key={field.label} className="flex items-center gap-4">
-                        <label className="text-xs font-medium w-36 shrink-0" style={{ color: 'var(--hub-text-muted)' }}>
+                        <label
+                          className="text-xs font-medium w-36 shrink-0"
+                          style={{ color: 'var(--hub-text-muted)' }}
+                        >
                           {field.label}
                         </label>
                         <input
@@ -144,8 +164,14 @@ const Storefront: React.FC = () => {
                             border: '1px solid var(--hub-border)',
                             color: 'var(--hub-text)',
                           }}
-                          onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(20,184,166,0.5)'; }}
-                          onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)'; }}
+                          onFocus={(e) => {
+                            (e.currentTarget as HTMLElement).style.borderColor =
+                              'rgba(20,184,166,0.5)';
+                          }}
+                          onBlur={(e) => {
+                            (e.currentTarget as HTMLElement).style.borderColor =
+                              'var(--hub-border)';
+                          }}
                         />
                       </div>
                     ))

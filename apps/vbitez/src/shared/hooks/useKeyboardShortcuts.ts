@@ -21,7 +21,9 @@ export function useKeyboardShortcuts() {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
       const isInput =
-        tag === 'input' || tag === 'textarea' || (e.target as HTMLElement | null)?.isContentEditable;
+        tag === 'input' ||
+        tag === 'textarea' ||
+        (e.target as HTMLElement | null)?.isContentEditable;
 
       // cmd/ctrl+k toggles command palette
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {

@@ -20,7 +20,10 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
   const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
-    api.get<Client[]>('/crm/customers').then((r) => setClients(r.data ?? [])).catch(() => {});
+    api
+      .get<Client[]>('/crm/customers')
+      .then((r) => setClients(r.data ?? []))
+      .catch(() => {});
   }, []);
 
   const filtered = useMemo(
@@ -67,14 +70,31 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
             boxShadow: '0 10px 28px rgba(0,0,0,0.3)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', marginBottom: 6, background: 'var(--hub-hover)', borderRadius: 6 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 8px',
+              marginBottom: 6,
+              background: 'var(--hub-hover)',
+              borderRadius: 6,
+            }}
+          >
             <Search size={13} style={{ color: 'var(--hub-text-dim)' }} />
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search clients"
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--hub-text)', fontSize: 12, flex: 1 }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'var(--hub-text)',
+                fontSize: 12,
+                flex: 1,
+              }}
             />
           </div>
           {filtered.map((c) => (
@@ -101,7 +121,14 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
             </button>
           ))}
           {filtered.length === 0 && (
-            <div style={{ padding: 10, textAlign: 'center', fontSize: 12, color: 'var(--hub-text-dim)' }}>
+            <div
+              style={{
+                padding: 10,
+                textAlign: 'center',
+                fontSize: 12,
+                color: 'var(--hub-text-dim)',
+              }}
+            >
               No clients found
             </div>
           )}

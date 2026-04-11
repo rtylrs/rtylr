@@ -17,25 +17,41 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   const content = (
     <>
       <div className="flex items-start justify-between">
-        <div className="h-11 w-11 rounded-xl flex items-center justify-center" style={{ background: app.bg }}>
+        <div
+          className="h-11 w-11 rounded-xl flex items-center justify-center"
+          style={{ background: app.bg }}
+        >
           <Icon size={22} style={{ color: app.color }} />
         </div>
         <div className="flex items-center gap-1.5">
           {app.status === 'beta' && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase" style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}>
+            <span
+              className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
+              style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}
+            >
               Beta
             </span>
           )}
           {isComingSoon && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
+            <span
+              className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+            >
               Soon
             </span>
           )}
-          {!isComingSoon && (isExternal ? <ExternalLink size={13} style={{ color: 'var(--hub-text-dim)' }} /> : <ArrowRight size={13} style={{ color: 'var(--hub-text-dim)' }} />)}
+          {!isComingSoon &&
+            (isExternal ? (
+              <ExternalLink size={13} style={{ color: 'var(--hub-text-dim)' }} />
+            ) : (
+              <ArrowRight size={13} style={{ color: 'var(--hub-text-dim)' }} />
+            ))}
         </div>
       </div>
       <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>{app.label}</p>
+        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          {app.label}
+        </p>
         <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--hub-text-muted)' }}>
           {app.description}
         </p>
