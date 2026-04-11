@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
-import InboxScreen from '../screens/Inbox/Inbox';
-import Tickets from '../screens/Tickets/Tickets';
-import TicketDetail from '../screens/TicketDetail/TicketDetail';
-import Customers from '../screens/Customers/Customers';
-import KnowledgeBase from '../screens/KnowledgeBase/KnowledgeBase';
-import ArticleEditor from '../screens/ArticleEditor/ArticleEditor';
-import CannedResponses from '../screens/CannedResponses/CannedResponses';
-import Settings from '../screens/Settings/Settings';
+import InboxScreen from '../features/inbox/Inbox';
+import Tickets from '../features/tickets/Tickets';
+import TicketDetail from '../features/tickets/TicketDetail';
+import Customers from '../features/customers/Customers';
+import KnowledgeBase from '../features/knowledge-base/KnowledgeBase';
+import ArticleEditor from '../features/knowledge-base/ArticleEditor';
+import CannedResponses from '../features/canned-responses/CannedResponses';
+import Settings from '../features/settings/Settings';
 
 const AppRoutes: React.FC = () => {
   return (

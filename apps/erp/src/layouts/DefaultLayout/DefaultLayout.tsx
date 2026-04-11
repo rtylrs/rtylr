@@ -32,9 +32,9 @@ import {
   Tag,
 } from 'lucide-react';
 import { Toaster } from 'sonner';
-import CommandPalette from '../../components/CommandPalette';
-import KeyboardShortcutsModal from '../../components/KeyboardShortcutsModal';
-import QuickAddProductModal from '../../components/QuickAddProductModal';
+import CommandPalette from '../../shared/components/CommandPalette';
+import KeyboardShortcutsModal from '../../shared/components/KeyboardShortcutsModal';
+import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 
 interface NavItem {
   label: string;

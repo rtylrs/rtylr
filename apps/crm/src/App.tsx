@@ -3,8 +3,8 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
-import { ShortcutsProvider } from './components/ShortcutsProvider';
-import api from './lib/api';
+import { ShortcutsProvider } from './shared/components/ShortcutsProvider';
+import api from './shared/lib/api';
 
 const APP_ID = 'crm';
 const AUTH_COOKIE = 'token';

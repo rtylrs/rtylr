@@ -1,0 +1,142 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
+import { useCategories } from './useCategories';
+import PageHeader from '../../shared/components/PageHeader';
+import EmptyState from '../../shared/components/EmptyState';
+import { SkeletonRow } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
+import { toast } from 'sonner';
+
+const AMBER = '#f59e0b';
+
+const Categories: React.FC = () => {
+  const { data: categories = [], isLoading } = useCategories();
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [newName, setNewName] = useState('');
+
+  const handleCreate = () => {
+    if (!newName.trim()) return;
+    toast.success(`Category "${newName}" created`);
+    setNewName('');
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-5 max-w-4xl"
+    >
+      <PageHeader
+        title="Categories"
+        description="Organize products into hierarchical categories"
+      />
+
+      <div
+        className="rounded-xl p-4 flex items-center gap-2"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+          placeholder="New category name…"
+          className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+          style={{
+            background: 'var(--hub-input-bg)',
+            border: '1px solid var(--hub-border)',
+            color: 'var(--hub-text)',
+          }}
+        />
+        <button
+          onClick={handleCreate}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
+          style={{ background: AMBER, color: '#000' }}
+        >
+          <Plus size={14} /> Add
+        </button>
+      </div>
+
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        {isLoading ? (
+          <div className="p-4 space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={3} />)}
+          </div>
+        ) : categories.length === 0 ? (
+          <EmptyState title="No categories yet" description="Create your first category to organize products" />
+        ) : (
+          categories.map((cat, i) => (
+            <div
+              key={cat.id}
+              className="flex items-center gap-3 px-4 py-3"
+              style={{
+                borderBottom: i < categories.length - 1 ? '1px solid var(--hub-border)' : 'none',
+              }}
+            >
+              <button className="cursor-grab" style={{ color: 'var(--hub-text-dim)' }}>
+                <GripVertical size={14} />
+              </button>
+              <div
+                className="flex items-center justify-center h-8 w-8 rounded-lg"
+                style={{ background: 'rgba(245,158,11,0.1)' }}
+              >
+                <Folder size={14} style={{ color: AMBER }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {cat.name}
+                </p>
+                {cat.description && (
+                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                    {cat.description}
+                  </p>
+                )}
+              </div>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                {cat.productCount} products
+              </span>
+              <button
+                className="h-7 w-7 rounded-lg flex items-center justify-center"
+                style={{ color: 'var(--hub-text-muted)' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              >
+                <Edit3 size={12} />
+              </button>
+              <button
+                onClick={() => setConfirmDelete(cat.id)}
+                className="h-7 w-7 rounded-lg flex items-center justify-center"
+                style={{ color: '#f87171' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      <ConfirmModal
+        open={confirmDelete !== null}
+        title="Delete category?"
+        description="Products in this category will not be deleted, but they will become uncategorized."
+        danger
+        confirmLabel="Delete"
+        onConfirm={() => {
+          toast.success('Category deleted');
+          setConfirmDelete(null);
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
+    </motion.div>
+  );
+};
+
+export default Categories;

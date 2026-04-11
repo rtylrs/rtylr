@@ -21,7 +21,7 @@ import {
   Settings as SettingsIcon,
   Search,
 } from 'lucide-react';
-import { useShortcuts } from '../../components/ShortcutsProvider';
+import { useShortcuts } from '../../shared/components/ShortcutsProvider';
 
 const ACCENT = '#3b82f6';
 

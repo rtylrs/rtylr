@@ -2,14 +2,14 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
 
-const Dashboard = lazy(() => import('../screens/Dashboard/Dashboard'));
-const CalendarScreen = lazy(() => import('../screens/Calendar/Calendar'));
-const Appointments = lazy(() => import('../screens/Appointments/Appointments'));
-const Services = lazy(() => import('../screens/Services/Services'));
-const Resources = lazy(() => import('../screens/Resources/Resources'));
-const Waitlist = lazy(() => import('../screens/Waitlist/Waitlist'));
-const Customers = lazy(() => import('../screens/Customers/Customers'));
-const Settings = lazy(() => import('../screens/Settings/Settings'));
+const Dashboard = lazy(() => import('../features/dashboard/Dashboard'));
+const CalendarScreen = lazy(() => import('../features/calendar/Calendar'));
+const Appointments = lazy(() => import('../features/appointments/Appointments'));
+const Services = lazy(() => import('../features/services/Services'));
+const Resources = lazy(() => import('../features/resources/Resources'));
+const Waitlist = lazy(() => import('../features/waitlist/Waitlist'));
+const Customers = lazy(() => import('../features/customers/Customers'));
+const Settings = lazy(() => import('../features/settings/Settings'));
 
 const LazyFallback: React.FC = () => (
   <div className="flex items-center justify-center h-full">

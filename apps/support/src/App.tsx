@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
-import api from './lib/api';
+import api from './shared/lib/api';
 
 const APP_ID = 'support';
 

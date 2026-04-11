@@ -1,0 +1,126 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+} from 'lucide-react';
+
+import { auth } from '../../firebase';
+import { ASSETS } from '@voxire/config';
+import { Button } from '@voxire/components';
+
+const ResetPassword: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+
+  const handleReset = async () => {
+    setLoading(true);
+    try {
+      await auth.sendPasswordResetEmail(email);
+      setRequestSent(true);
+      setMessage('Password reset email sent. Check your inbox.');
+    } catch (error) {
+      setMessage(`${(error as any).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <img
+            src={ASSETS.logos.dark}
+            alt="rtylr"
+            className="h-8 w-auto select-none"
+            draggable={false}
+          />
+        </div>
+
+        <h2 className="text-xl font-semibold text-[#111] mb-1">Forgot password?</h2>
+        <p className="text-sm text-[#666] mb-6">
+          Enter your email and we'll send you a reset link.
+        </p>
+
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleReset(); }}
+          className="flex flex-col gap-4"
+        >
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="reset-email" className="text-sm font-medium text-[#111]">
+              Email
+            </label>
+            <input
+              id="reset-email"
+              type="email"
+              placeholder="you@company.com"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              disabled={requestSent}
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20 disabled:bg-[#f5f5f5] disabled:text-[#999]"
+            />
+          </div>
+
+          {message && (
+            <div
+              className={[
+                'flex items-start gap-2 rounded-lg px-3 py-2.5 border',
+                requestSent
+                  ? 'border-green-200 bg-green-50'
+                  : 'border-red-200 bg-red-50',
+              ].join(' ')}
+              role="alert"
+            >
+              {requestSent ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              )}
+              <p
+                className={[
+                  'text-xs leading-relaxed',
+                  requestSent ? 'text-green-700' : 'text-red-600',
+                ].join(' ')}
+              >
+                {message}
+              </p>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            loading={loading}
+            disabled={requestSent}
+            height={40}
+          >
+            {requestSent ? 'Email sent' : 'Send reset link'}
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-1.5 text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResetPassword;
