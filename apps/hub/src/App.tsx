@@ -17,28 +17,28 @@ import {
 //Routes
 import AppRoutes from "./routes/AppRoutes";
 
-import i18next from "./services/i18next";
+import i18next from "./shared/services/i18next";
 
 //Components
-import Cookies from "./components/Cookies/Cookies";
-import Maintanance from "./screens/Maintanance";
-import NoMatch from "./screens/Extras/NoMatch";
+import Cookies from "./shared/components/Cookies/Cookies";
+import Maintanance from "./features/extras/Maintanance";
+import NoMatch from "./features/extras/NoMatch";
 
 //Utilities
-import { getCookie } from "./lib/cookies";
-import HelmetContainer from "./components/HelmetContainer";
+import { getCookie } from "./shared/lib/cookies";
+import HelmetContainer from "./shared/components/HelmetContainer";
 
 //Hooks
-import useColors from "./hooks/useColors";
-import { useFullscreen } from "./hooks/useFullscreen";
+import useColors from "./shared/hooks/useColors";
+import { useFullscreen } from "./shared/hooks/useFullscreen";
 
 // Route Checks
-import { BusinessRoute } from "./utils/BusinessRoute";
+import { BusinessRoute } from "./shared/utils/BusinessRoute";
 
 // Store imports
-import { useConfigStore } from "./stores/configStore";
-import { useUserStore } from "./stores/userStore";
-import { useGetConfig } from "./hooks/queries/useConfig";
+import { useConfigStore } from "./shared/stores/configStore";
+import { useUserStore } from "./shared/stores/userStore";
+import { useGetConfig } from "./shared/hooks/queries/useConfig";
 
 ChartJS.register(
   LineElement,

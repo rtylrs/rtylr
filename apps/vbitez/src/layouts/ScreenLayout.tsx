@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import POSLayout from './POSLayout';
-import QuickAccessSidebar from '../components/QuickAccessSidebar';
-import OfflineBadge from '../components/OfflineBadge';
+import QuickAccessSidebar from '../shared/components/QuickAccessSidebar';
+import OfflineBadge from '../shared/components/OfflineBadge';
 
 interface ScreenLayoutProps {
   title: string;

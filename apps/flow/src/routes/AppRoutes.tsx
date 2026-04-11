@@ -1,40 +1,40 @@
 import React, { Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
-import FlowLayout from '../layouts/FlowLayout/FlowLayout';
-import { PERSONAL_WORKSPACE_ID } from '../lib/personalWorkspace';
+import FlowLayout from '../layouts/FlowLayout';
+import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 
 const WorkspaceDashboard = React.lazy(
-  () => import('../screens/WorkspaceDashboard/WorkspaceDashboard')
+  () => import('../features/workspace-dashboard/WorkspaceDashboard')
 );
 const ProjectBoard = React.lazy(
-  () => import('../screens/ProjectBoard/ProjectBoard')
+  () => import('../features/projects/ProjectBoard')
 );
 const ProjectList = React.lazy(
-  () => import('../screens/ProjectList/ProjectList')
+  () => import('../features/projects/ProjectList')
 );
 const ProjectOverview = React.lazy(
-  () => import('../screens/ProjectOverview/ProjectOverview')
+  () => import('../features/projects/ProjectOverview')
 );
 const ProjectSettings = React.lazy(
-  () => import('../screens/ProjectSettings/ProjectSettings')
+  () => import('../features/projects/ProjectSettings')
 );
-const Inbox = React.lazy(() => import('../screens/Inbox/Inbox'));
+const Inbox = React.lazy(() => import('../features/inbox/Inbox'));
 const FlowSettings = React.lazy(
-  () => import('../screens/FlowSettings/FlowSettings')
+  () => import('../features/settings/FlowSettings')
 );
-const TaskDetail = React.lazy(() => import('../screens/TaskDetail/TaskDetail'));
-const MyIssues = React.lazy(() => import('../screens/MyIssues/MyIssues'));
-const Timeline = React.lazy(() => import('../screens/Timeline/Timeline'));
-const CalendarView = React.lazy(() => import('../screens/Calendar/Calendar'));
-const Milestones = React.lazy(() => import('../screens/Milestones/Milestones'));
-const Cycles = React.lazy(() => import('../screens/Cycles/Cycles'));
-const Views = React.lazy(() => import('../screens/Views/Views'));
-const Roadmap = React.lazy(() => import('../screens/Roadmap/Roadmap'));
-const Insights = React.lazy(() => import('../screens/Insights/Insights'));
-const Team = React.lazy(() => import('../screens/Team/Team'));
-const Triage = React.lazy(() => import('../screens/Triage/Triage'));
-const FocusToday = React.lazy(() => import('../screens/FocusToday/FocusToday'));
-const Archive = React.lazy(() => import('../screens/Archive/Archive'));
+const TaskDetail = React.lazy(() => import('../features/tasks/TaskDetail'));
+const MyIssues = React.lazy(() => import('../features/tasks/MyIssues'));
+const Timeline = React.lazy(() => import('../features/timeline/Timeline'));
+const CalendarView = React.lazy(() => import('../features/calendar/Calendar'));
+const Milestones = React.lazy(() => import('../features/milestones/Milestones'));
+const Cycles = React.lazy(() => import('../features/cycles/Cycles'));
+const Views = React.lazy(() => import('../features/views/Views'));
+const Roadmap = React.lazy(() => import('../features/roadmap/Roadmap'));
+const Insights = React.lazy(() => import('../features/insights/Insights'));
+const Team = React.lazy(() => import('../features/team/Team'));
+const Triage = React.lazy(() => import('../features/triage/Triage'));
+const FocusToday = React.lazy(() => import('../features/focus-today/FocusToday'));
+const Archive = React.lazy(() => import('../features/archive/Archive'));
 
 function withLayout(element: React.ReactNode): React.ReactNode {
   return (

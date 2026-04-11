@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 const Dashboard        = React.lazy(() => import('../features/dashboard/Dashboard'));
 const Staff            = React.lazy(() => import('../features/staff/Staff'));

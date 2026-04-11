@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 const Dashboard = lazy(() => import('../features/dashboard/Dashboard'));
 const CalendarScreen = lazy(() => import('../features/calendar/Calendar'));
