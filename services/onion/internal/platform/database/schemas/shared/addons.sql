@@ -33,4 +33,14 @@ VALUES
     ('ai_chat', 'AI Chat', 'AI-powered chat assistant for customer support and recommendations.', 'message-square', 0.00, true, false, 3),
     ('analytics', 'Advanced Analytics', 'Deep insights into sales, customer behavior, and menu performance.', 'bar-chart-2', 19.00, false, false, 4),
     ('custom_branding', 'Custom Branding', 'Fully customize your customer-facing experience with your brand.', 'paintbrush', 7.00, false, false, 5),
-    ('multi_language', 'Multi-Language', 'Serve your menu and communications in multiple languages.', 'globe', 14.00, false, false, 6);
+    ('multi_language', 'Multi-Language', 'Serve your menu and communications in multiple languages.', 'globe', 14.00, false, false, 6),
+    ('custom_domain', 'Custom Domain', 'Use your own domain for your customer-facing menu and ordering page.', 'globe', 9.00, false, false, 7),
+    ('email_marketing', 'Email Marketing', 'Send campaigns, newsletters, and automated emails to your customers.', 'mail', 15.00, false, false, 8),
+    ('sms', 'SMS Notifications', 'Send order updates and promotions via SMS to customers.', 'message-square', 12.00, false, false, 9),
+    ('reservations', 'Reservations', 'Let customers book tables online with a reservation widget.', 'calendar', 0.00, true, false, 10),
+    ('online_ordering', 'Online Ordering', 'Accept pickup and delivery orders from your website.', 'shopping-cart', 19.00, false, false, 11),
+    ('kds', 'Kitchen Display', 'Real-time kitchen display system for order management.', 'monitor', 0.00, true, false, 12),
+    ('api_access', 'API Access', 'Full REST API access for custom integrations and automation.', 'code', 29.00, false, false, 13),
+    ('white_label', 'White Label', 'Remove rtylr branding from all customer-facing pages.', 'eye-off', 24.00, false, false, 14),
+    ('priority_support', 'Priority Support', 'Dedicated support channel with guaranteed response times.', 'headphones', 19.00, false, false, 15),
+    ('data_export', 'Data Export', 'Export all your business data in CSV, JSON, or Excel format.', 'download', 0.00, true, false, 16);
