@@ -41,7 +41,7 @@ const ICON_MAP: Record<string, any> = {
   book: CalendarCheck,
   support: Headphones,
   insights: BarChart3,
-  docs: FileText,
+
   storefront: Store,
   analytics: BarChart3,
   market: ShoppingBag,
@@ -59,7 +59,7 @@ const APP_META: Record<string, { href: string; color: string; bg: string; catego
   book:    { href: 'https://book.rtylr.com',    color: '#0ea5e9', bg: 'rgba(14,165,233,0.12)',  category: 'operations' },
   support: { href: 'https://support.rtylr.com', color: '#4583C4', bg: 'rgba(69,131,196,0.12)',  category: 'growth' },
   insights:{ href: 'https://insights.rtylr.com',color: '#6366f1', bg: 'rgba(99,102,241,0.12)',  category: 'core' },
-  docs:    { href: 'https://docs.rtylr.com',    color: '#71717a', bg: 'rgba(113,113,122,0.12)', category: 'core' },
+
 };
 
 export const useApps = () => {

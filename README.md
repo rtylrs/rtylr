@@ -1,10 +1,10 @@
 # rtylr
 
-All-in-one business operating system for SMBs. 15 apps, 10 shared packages.
+All-in-one business operating system for SMBs. 14 apps, 10 shared packages.
 
 ## Architecture
 
-Frontend monorepo with 15 apps and 10 shared packages. pnpm workspaces + Turborepo.
+Frontend monorepo with 14 apps and 10 shared packages. pnpm workspaces + Turborepo.
 
 **Stack:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
@@ -25,7 +25,6 @@ Frontend monorepo with 15 apps and 10 shared packages. pnpm workspaces + Turbore
 | Book | 5185 | `@rtylr/book` | Appointments, scheduling, resources, waitlist |
 | Support | 5186 | `@rtylr/support` | Help desk, tickets, shared inbox, knowledge base |
 | Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports |
-| Docs | 5188 | `@rtylr/docs` | Public documentation (no auth required) |
 | Landing | 4200 | `@rtylr/landing` | Marketing site (Next.js 15) |
 
 ## Shared Packages
