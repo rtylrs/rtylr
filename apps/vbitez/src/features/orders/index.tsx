@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -21,8 +22,8 @@ const OrdersScreen: React.FC = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await posService.getOrders();
-        const raw = res?.data?.orders ?? res?.data ?? [];
+        const res = await unwrap(posService.getOrders());
+        const raw = res?.orders ?? res?.data ?? [];
         const mapped: Order[] = (Array.isArray(raw) ? raw : []).map((o: any) => ({
           id: String(o.id),
           number: o.number,

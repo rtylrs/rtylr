@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -42,7 +43,7 @@ const ProductQuickEditScreen: React.FC = () => {
   const save = async (item: MenuItem) => {
     const draft = drafts[item.id];
     try {
-      await posService.updateItem(item.id, draft);
+      await unwrap(posService.updateItem(item.id, draft));
       toast.success(`Updated ${item.name}`);
       reload();
     } catch {

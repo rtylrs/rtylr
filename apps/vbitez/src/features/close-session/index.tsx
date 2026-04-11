@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -21,11 +22,11 @@ const CloseSessionScreen: React.FC = () => {
   const close = async () => {
     setBusy(true);
     try {
-      await posService.closeSession('current', {
+      await unwrap(posService.closeSession('current', {
         expected,
         actual,
         variance,
-      });
+      }));
       closeDrawer();
       toast.success('Session closed');
       navigate('/day-summary');

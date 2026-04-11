@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
@@ -14,7 +15,7 @@ export function useDaySummary(date?: string) {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getDaySummary(date);
+      const res = await unwrap(posService.getDaySummary(date));
       const raw = res?.data ?? {};
       const mapped: DaySummary = {
         date: raw.date ?? date ?? new Date().toISOString().slice(0, 10),

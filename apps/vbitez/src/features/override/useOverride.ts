@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useCallback, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 
@@ -9,8 +10,8 @@ export function useOverride() {
     setVerifying(true);
     setError(null);
     try {
-      const res = await posService.verifyManagerPin(pin);
-      const ok = !!(res?.data?.ok ?? res?.data?.verified ?? res?.data?.success);
+      const res = await unwrap(posService.verifyManagerPin(pin));
+      const ok = !!(res?.ok ?? res?.verified ?? res?.success);
       if (!ok) setError('Incorrect manager PIN');
       return ok;
     } catch (e: any) {

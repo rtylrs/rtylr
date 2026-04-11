@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { ModifierGroup } from '../../shared/types/pos';
@@ -11,8 +12,8 @@ export function useModifiers() {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getModifiers();
-      const raw = res?.data?.groups ?? res?.data ?? [];
+      const res = await unwrap(posService.getModifiers());
+      const raw = res?.groups ?? res?.data ?? [];
       const mapped: ModifierGroup[] = (Array.isArray(raw) ? raw : []).map((g: any) => ({
         id: String(g.id ?? Math.random().toString(36).slice(2)),
         name: g.name ?? 'Modifiers',

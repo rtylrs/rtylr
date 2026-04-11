@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -52,7 +53,7 @@ const MultiPaymentScreen: React.FC = () => {
     setBusy(true);
     try {
       if (orderId) {
-        await posService.chargeOrder(orderId, { payments, tip, total });
+        await unwrap(posService.chargeOrder(orderId, { payments, tip, total }));
       }
       toast.success('Payment complete');
       clear();

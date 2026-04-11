@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -27,11 +28,11 @@ const RefundScreen: React.FC = () => {
   const submit = async () => {
     setBusy(true);
     try {
-      await posService.refundOrder(orderId!, {
+      await unwrap(posService.refundOrder(orderId!, {
         amount: fullRefund ? null : Number(amount),
         reason,
         full: fullRefund,
-      });
+      }));
       toast.success('Refund processed');
       navigate('/receipts');
     } catch (e: any) {

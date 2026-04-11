@@ -1,3 +1,4 @@
+import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { MenuItem } from '../../shared/types/pos';
@@ -19,8 +20,8 @@ export function useMenuItems(): UseMenuItemsResult {
     setLoading(true);
     setError(null);
     try {
-      const res = await posService.getMenuItems();
-      const raw = res?.data?.items ?? res?.data ?? [];
+      const res = await unwrap(posService.getMenuItems());
+      const raw = res?.items ?? res?.data ?? [];
       const mapped: MenuItem[] = (Array.isArray(raw) ? raw : []).map((it: any) => ({
         id: String(it.id ?? it.sku ?? Math.random().toString(36).slice(2)),
         name: it.name ?? 'Item',
