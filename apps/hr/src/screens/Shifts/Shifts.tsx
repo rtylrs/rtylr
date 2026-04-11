@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CalendarPlus, Clock, CheckCircle2, Play, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Shift } from '../../services/hrApi';
 import { useShifts } from '../../hooks/useShifts';
+import { useIsMobile } from '../../components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -23,6 +24,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } 
 const rowAnim   = { hidden: { opacity: 0, x: -8 }, show: { opacity: 1, x: 0, transition: { duration: 0.2 } } };
 
 const Shifts: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const [selectedDay, setSelectedDay] = useState(todayIdx);
   const { data: fetchedShifts } = useShifts();
   const shifts: Shift[] = fetchedShifts || [];
@@ -37,12 +39,12 @@ const Shifts: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>Shifts</h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>Week of April 7 – 13, 2026</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
           <button style={{ padding: '8px', borderRadius: '8px', background: 'var(--hr-surface)', border: '1px solid var(--hr-border)', color: 'var(--hr-text-muted)', cursor: 'pointer' }}>
             <ChevronLeft size={14} />
           </button>
@@ -71,7 +73,7 @@ const Shifts: React.FC = () => {
           { label: 'Completed',    value: completed,  color: '#6b7280',  bg: 'rgba(107,114,128,0.12)' },
         ];
         return (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             {statItems.map((s) => (
               <div key={s.label} style={{ background: s.bg, borderRadius: '10px', padding: '14px 18px', border: `1px solid ${s.color}30` }}>
                 <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: s.color }}>{s.value}</p>
@@ -83,7 +85,7 @@ const Shifts: React.FC = () => {
       })()}
 
       {/* Week selector */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(72px, 1fr))', gap: '6px', overflowX: 'auto' }}>
         {days.map((day, i) => {
           const count = shifts.filter((s) => s.day === day).length;
           const isToday = i === todayIdx;
@@ -146,7 +148,8 @@ const Shifts: React.FC = () => {
                 variants={rowAnim}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  flexDirection: isMobile ? 'column' : 'row',
                   gap: '14px',
                   padding: '14px 20px',
                   borderBottom: i < dayShifts.length - 1 ? '1px solid var(--hr-border)' : 'none',
@@ -169,7 +172,7 @@ const Shifts: React.FC = () => {
                   <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--hr-text-muted)' }}>{s.role}</p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--hr-text-muted)', fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--hr-text-muted)', fontSize: '13px', flexWrap: 'wrap' }}>
                   <Clock size={13} style={{ color: 'var(--hr-text-dim)' }} />
                   {s.start} – {s.end}
                 </div>

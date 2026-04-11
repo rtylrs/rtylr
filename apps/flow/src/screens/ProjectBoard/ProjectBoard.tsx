@@ -63,10 +63,10 @@ const ProjectBoard: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <div
-        className="flex items-center justify-between px-6 py-4 shrink-0"
+        className="flex flex-col gap-3 px-4 py-3 shrink-0 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
             {project.name}
@@ -82,7 +82,7 @@ const ProjectBoard: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setQuickCreateOpen(true)}
             className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold"
@@ -128,8 +128,8 @@ const ProjectBoard: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        <div className="flex gap-4 p-6 h-full min-w-max">
+      <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex h-full min-w-max gap-3 p-4 sm:gap-4 sm:p-6">
           {COLUMNS.map((col) => {
             const colTasks = projectTasks.filter((t) => t.status === col.id);
             return (
@@ -141,7 +141,7 @@ const ProjectBoard: React.FC = () => {
                 }}
                 onDragLeave={() => setDragOver(null)}
                 onDrop={(e) => handleDrop(e, col.id)}
-                className="flex flex-col min-w-[260px] w-[260px] rounded-lg p-2"
+                className="flex w-[min(260px,calc(100vw-2rem))] min-w-[min(260px,calc(100vw-2rem))] flex-col rounded-lg p-2 sm:w-[260px] sm:min-w-[260px]"
                 style={{
                   background:
                     dragOver === col.id ? col.bgColor : 'transparent',

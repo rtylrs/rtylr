@@ -3,10 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useStaff } from '../../hooks/useStaff';
 import { useCreateReview } from '../../hooks/useHrExtras';
-import { Card, SectionHeader, Button, Label, Input, Select, Textarea, Breadcrumbs } from '../../components/ui';
+import { Card, SectionHeader, Button, Label, Input, Select, Textarea, Breadcrumbs, useIsMobile } from '../../components/ui';
 import RatingStars from '../../components/RatingStars';
 
 const ReviewForm: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const nav = useNavigate();
   const { data: staff = [] } = useStaff();
   const create = useCreateReview();
@@ -59,7 +60,7 @@ const ReviewForm: React.FC = () => {
       <SectionHeader title="New Performance Review" subtitle="Rate goals, values, and skills" />
       <Card>
         <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
             <div>
               <Label>Employee</Label>
               <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
@@ -79,7 +80,7 @@ const ReviewForm: React.FC = () => {
             <Label>Period</Label>
             <Input value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="e.g. Q2 2026" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 10 }}>
             <div>
               <Label>Goals</Label>
               <RatingStars value={goals} onChange={setGoals} />
@@ -101,7 +102,7 @@ const ReviewForm: React.FC = () => {
             <span style={{ color: 'var(--hr-text-muted)' }}>Overall rating</span>
             <RatingStars value={overall} readOnly />
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             <Link to="/reviews"><Button type="button" variant="ghost">Cancel</Button></Link>
             <Button type="submit" variant="primary">Submit review</Button>
           </div>

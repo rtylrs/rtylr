@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   CheckCircle2,
   Clock,
@@ -8,14 +9,18 @@ import {
   TrendingUp,
   ArrowRight,
   Calendar,
+  Gauge,
+  Flame,
 } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useFlowStore } from '../../stores/flowStore';
 import { cn, formatDate } from '../../lib/utils';
-import { isTaskMine } from '../../lib/currentUser';
 import { type DashboardStats } from '../../services/flowApi';
 import { useFlowDashboard } from '../../hooks/useDashboard';
 import { PERSONAL_WORKSPACE_ID } from '../../lib/personalWorkspace';
+import { getCurrentUserId, isTaskMine } from '../../lib/currentUser';
+import { isDueThisCalendarWeek } from '../../lib/lifeRhythm';
+import { getWeeklyReviewStreak, recordWeeklyReviewDone } from '../../lib/weeklyReviewStreak';
 
 const ACCENT = '#64C5B9';
 
@@ -89,7 +94,7 @@ const statCard = (
 const WorkspaceDashboard: React.FC = () => {
   const { workspaceId = PERSONAL_WORKSPACE_ID } = useParams<{ workspaceId: string }>();
   const { user } = useUserStore();
-  const { tasks, projects, workspaces } = useFlowStore();
+  const { tasks, projects, workspaces, members } = useFlowStore();
 
   const { data: apiStats } = useFlowDashboard(workspaceId);
 
@@ -116,8 +121,44 @@ const WorkspaceDashboard: React.FC = () => {
     return d < new Date() && t.status !== 'done';
   }).length;
 
+  const uid = getCurrentUserId();
+  const myCapacityHours = members.find((m) => m.id === uid)?.capacity ?? 40;
+
+  const weekLoad = useMemo(() => {
+    const mine = workspaceTasks.filter(
+      (t) =>
+        isTaskMine(t.assigneeId) &&
+        isDueThisCalendarWeek(t.dueDate) &&
+        t.status !== 'done' &&
+        t.status !== 'cancelled'
+    );
+    const minutes = mine.reduce((sum, t) => {
+      if (t.effortMinutes && t.effortMinutes > 0) return sum + t.effortMinutes;
+      if (t.estimate != null && t.estimate > 0) return sum + t.estimate * 60;
+      return sum;
+    }, 0);
+    return { minutes, count: mine.length };
+  }, [workspaceTasks]);
+
+  const weekLoadPct = Math.min(
+    100,
+    myCapacityHours > 0 ? (weekLoad.minutes / (myCapacityHours * 60)) * 100 : 0
+  );
+
+  const [reviewStreak, setReviewStreak] = useState(() => getWeeklyReviewStreak().streak);
+
+  const onWeeklyReviewDone = useCallback(() => {
+    const { streak, alreadyLogged } = recordWeeklyReviewDone();
+    setReviewStreak(streak);
+    if (alreadyLogged) {
+      toast.message('Already logged this week', { description: `Streak: ${streak} week(s)` });
+    } else {
+      toast.success('Weekly review logged', { description: `${streak} week streak` });
+    }
+  }, []);
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto p-4 pb-6 sm:p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
@@ -141,7 +182,7 @@ const WorkspaceDashboard: React.FC = () => {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-3 mb-8 sm:gap-4 xl:grid-cols-4">
         {statCard(
           <TrendingUp size={15} style={{ color: '#3b82f6' }} />,
           'Open Tasks',
@@ -172,24 +213,112 @@ const WorkspaceDashboard: React.FC = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, delay: 0.08 }}
+          className="rounded-xl p-4 flex flex-col gap-3"
+          style={{
+            background: 'var(--flow-card)',
+            border: '1px solid var(--flow-border)',
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className="text-[12px] font-medium"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Week load (your tasks due this week)
+            </span>
+            <Gauge size={15} style={{ color: ACCENT }} />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold" style={{ color: 'var(--flow-text)' }}>
+              {Math.round(weekLoad.minutes / 60)}
+            </span>
+            <span className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+              h scheduled
+            </span>
+            <span className="text-[12px] ml-auto" style={{ color: 'var(--flow-text-muted)' }}>
+              of ~{myCapacityHours}h capacity
+            </span>
+          </div>
+          <div
+            className="w-full rounded-full h-2"
+            style={{ background: 'var(--flow-hover)' }}
+          >
+            <div
+              className="h-2 rounded-full transition-all duration-500"
+              style={{
+                width: `${weekLoadPct}%`,
+                background: weekLoadPct > 95 ? '#f97316' : ACCENT,
+              }}
+            />
+          </div>
+          <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text-dim)' }}>
+            Uses effort chips or estimate hours on tasks. Planned backlog stays visible in projects;
+            this is only what you already scheduled for the week.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, delay: 0.1 }}
+          className="rounded-xl p-4 flex flex-col gap-3"
+          style={{
+            background: 'var(--flow-card)',
+            border: '1px solid var(--flow-border)',
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className="text-[12px] font-medium"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Weekly review streak
+            </span>
+            <Flame size={15} style={{ color: '#f97316' }} />
+          </div>
+          <p className="text-3xl font-bold" style={{ color: 'var(--flow-text)' }}>
+            {reviewStreak}
+            <span className="text-[14px] font-medium ml-1" style={{ color: 'var(--flow-text-dim)' }}>
+              weeks
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={onWeeklyReviewDone}
+            className="text-[12px] font-semibold py-2 px-3 rounded-lg w-fit transition-opacity hover:opacity-90"
+            style={{ background: ACCENT, color: '#0a0a0a' }}
+          >
+            I did my review this week
+          </button>
+          <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text-dim)' }}>
+            Honest ritual, not app opens. Tap once after you finish your weekly close-out.
+          </p>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-6">
         {/* My Tasks */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22, delay: 0.12 }}
-          className="col-span-3 rounded-xl overflow-hidden"
+          className="rounded-xl overflow-hidden lg:col-span-3"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
           }}
         >
           <div
-            className="flex items-center justify-between px-5 py-4"
+            className="flex items-center justify-between px-4 py-4 sm:px-5"
             style={{ borderBottom: '1px solid var(--flow-border)' }}
           >
             <h2
-              className="text-[14px] font-semibold"
+              className="text-[13px] sm:text-[14px] font-semibold"
               style={{ color: 'var(--flow-text)' }}
             >
               My Tasks
@@ -212,30 +341,30 @@ const WorkspaceDashboard: React.FC = () => {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.18, delay: 0.15 + i * 0.05 }}
-                className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
+                className="flex flex-col gap-2 px-4 py-3.5 hover:bg-[var(--flow-hover)] transition-colors cursor-pointer sm:flex-row sm:items-center sm:gap-3 sm:px-5"
               >
-                {/* Priority dot */}
-                <span
-                  className="h-2 w-2 rounded-full shrink-0"
-                  style={{ background: PRIORITY_COLORS[task.priority] }}
-                />
-
-                <div className="flex-1 min-w-0">
-                  <p
-                    className="text-[13px] font-medium truncate"
-                    style={{ color: 'var(--flow-text)' }}
-                  >
-                    {task.title}
-                  </p>
-                  <p
-                    className="text-[11px] mt-0.5"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {task.projectName}
-                  </p>
+                <div className="flex items-start gap-3 min-w-0 sm:items-center sm:flex-1">
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0 mt-1.5 sm:mt-0"
+                    style={{ background: PRIORITY_COLORS[task.priority] }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-[13px] font-medium line-clamp-2 sm:truncate"
+                      style={{ color: 'var(--flow-text)' }}
+                    >
+                      {task.title}
+                    </p>
+                    <p
+                      className="text-[11px] mt-0.5"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {task.projectName}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 shrink-0">
+                <div className="flex items-center gap-2.5 shrink-0 pl-5 sm:pl-0">
                   <span
                     className="text-[11px] flex items-center gap-1"
                     style={{ color: 'var(--flow-text-dim)' }}
@@ -244,7 +373,7 @@ const WorkspaceDashboard: React.FC = () => {
                     {formatDate(task.dueDate)}
                   </span>
                   <span
-                    className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                    className="text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
                     style={{
                       background: STATUS_COLORS[task.status].bg,
                       color: STATUS_COLORS[task.status].text,
@@ -263,7 +392,7 @@ const WorkspaceDashboard: React.FC = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22, delay: 0.16 }}
-          className="col-span-2 rounded-xl overflow-hidden"
+          className="rounded-xl overflow-hidden lg:col-span-2"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',

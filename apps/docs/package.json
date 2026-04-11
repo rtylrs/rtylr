@@ -1,0 +1,29 @@
+{
+  "name": "@rtylr/docs",
+  "version": "0.0.0",
+  "description": "rtylr Public Documentation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@voxire/tailwind-config": "workspace:*",
+    "lucide-react": "^0.544.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.29.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "jiti": "2.4.2",
+    "typescript": "~5.5.2",
+    "vite": "^6.0.0",
+    "vite-plugin-svgr": "^4.2.0"
+  }
+}

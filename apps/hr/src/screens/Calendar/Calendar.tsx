@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTimeOff } from '../../hooks/useHrExtras';
-import { Card, SectionHeader, Button, ACCENT } from '../../components/ui';
+import { Card, SectionHeader, Button, ACCENT, useIsMobile } from '../../components/ui';
 
 function startOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -17,6 +17,7 @@ function dayStr(date: Date) {
 }
 
 const CalendarScreen: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const [view, setView] = useState(new Date(2026, 3, 1));
   const { data: timeOff = [] } = useTimeOff();
 
@@ -41,20 +42,21 @@ const CalendarScreen: React.FC = () => {
         title="Time Off Calendar"
         subtitle="Approved absences across the team"
         right={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Button icon={<ChevronLeft size={13} />} onClick={() => setView(new Date(view.getFullYear(), view.getMonth() - 1, 1))} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', minWidth: 140, textAlign: 'center' }}>{formatMonth(view)}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', minWidth: isMobile ? 'auto' : 140, textAlign: 'center' }}>{formatMonth(view)}</span>
             <Button icon={<ChevronRight size={13} />} onClick={() => setView(new Date(view.getFullYear(), view.getMonth() + 1, 1))} />
           </div>
         }
       />
       <Card style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--hr-hover)' }}>
+        <div style={{ overflowX: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(96px, 1fr))', minWidth: 672, background: 'var(--hr-hover)' }}>
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
             <div key={d} style={{ padding: '8px 12px', fontSize: 11, fontWeight: 600, color: 'var(--hr-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d}</div>
           ))}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(96px, 1fr))', minWidth: 672 }}>
           {cells.map((cell, idx) => (
             <div
               key={idx}
@@ -96,6 +98,7 @@ const CalendarScreen: React.FC = () => {
               )}
             </div>
           ))}
+        </div>
         </div>
       </Card>
     </div>

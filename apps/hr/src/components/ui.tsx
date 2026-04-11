@@ -6,6 +6,30 @@ import React from 'react';
 
 export const ACCENT = '#8b5cf6';
 
+export function useMediaQuery(query: string): boolean {
+  const getMatch = () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false);
+  const [matches, setMatches] = React.useState<boolean>(getMatch);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia(query);
+    const listener = () => setMatches(media.matches);
+    listener();
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+    media.addListener(listener);
+    return () => media.removeListener(listener);
+  }, [query]);
+
+  return matches;
+}
+
+export function useIsMobile(maxWidth = 768): boolean {
+  return useMediaQuery(`(max-width: ${maxWidth}px)`);
+}
+
 /* ── Card ── */
 export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ style, children, ...rest }) => (
   <div
@@ -23,15 +47,23 @@ export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ style, ch
 );
 
 /* ── Section header ── */
-export const SectionHeader: React.FC<{ title: string; subtitle?: string; right?: React.ReactNode }> = ({ title, subtitle, right }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-    <div>
-      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>{title}</h2>
-      {subtitle && <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>{subtitle}</p>}
+export const SectionHeader: React.FC<{ title: string; subtitle?: string; right?: React.ReactNode }> = ({ title, subtitle, right }) => {
+  const stacked = useIsMobile(720);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
+      <div>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>{title}</h2>
+        {subtitle && <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>{subtitle}</p>}
+      </div>
+      {right && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: stacked ? '100%' : 'auto', justifyContent: stacked ? 'flex-start' : 'flex-end' }}>
+          {right}
+        </div>
+      )}
     </div>
-    {right}
-  </div>
-);
+  );
+};
 
 /* ── Button ── */
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -41,8 +73,10 @@ export const Button: React.FC<
   const base: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    padding: '6px 12px',
+    minHeight: 36,
+    padding: '8px 12px',
     borderRadius: 8,
     fontSize: 12,
     fontWeight: 600,
@@ -51,6 +85,7 @@ export const Button: React.FC<
     border: '1px solid var(--hr-border)',
     background: 'transparent',
     color: 'var(--hr-text)',
+    whiteSpace: 'nowrap',
   };
   if (variant === 'primary') {
     base.background = ACCENT;
@@ -171,7 +206,7 @@ export const Pill: React.FC<{ color?: string; children: React.ReactNode; style?:
 export const EmptyState: React.FC<{ icon?: React.ReactNode; title: string; description?: string; action?: React.ReactNode }> = ({ icon, title, description, action }) => (
   <div
     style={{
-      padding: 48,
+      padding: 'clamp(24px, 6vw, 48px)',
       textAlign: 'center',
       background: 'var(--hr-card)',
       border: '1px dashed var(--hr-border)',
@@ -213,6 +248,7 @@ export const Modal: React.FC<{ open: boolean; onClose: () => void; title?: strin
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        padding: 12,
         zIndex: 100,
       }}
       onClick={onClose}
@@ -220,7 +256,7 @@ export const Modal: React.FC<{ open: boolean; onClose: () => void; title?: strin
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width,
+          width: `min(calc(100vw - 24px), ${width}px)`,
           maxHeight: '85vh',
           overflowY: 'auto',
           background: 'var(--hr-card)',
@@ -258,7 +294,7 @@ export const ConfirmDialog: React.FC<{
 
 /* ── Breadcrumbs ── */
 export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string }> }> = ({ items }) => (
-  <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--hr-text-muted)', marginBottom: 12 }}>
+  <nav style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 11, color: 'var(--hr-text-muted)', marginBottom: 12 }}>
     {items.map((item, i) => {
       const last = i === items.length - 1;
       return (
@@ -306,7 +342,7 @@ export const StatCard: React.FC<{
 
 /* ── Tabs ── */
 export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: string) => void }> = ({ tabs, active, onChange }) => (
-  <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--hr-border)', marginBottom: 16 }}>
+  <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4, borderBottom: '1px solid var(--hr-border)', marginBottom: 16 }}>
     {tabs.map((tab) => (
       <button
         key={tab}
@@ -320,6 +356,8 @@ export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: stri
           borderBottom: active === tab ? `2px solid ${ACCENT}` : '2px solid transparent',
           color: active === tab ? 'var(--hr-text)' : 'var(--hr-text-muted)',
           cursor: 'pointer',
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
         }}
       >
         {tab}

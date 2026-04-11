@@ -33,6 +33,7 @@ const Roadmap = React.lazy(() => import('../screens/Roadmap/Roadmap'));
 const Insights = React.lazy(() => import('../screens/Insights/Insights'));
 const Team = React.lazy(() => import('../screens/Team/Team'));
 const Triage = React.lazy(() => import('../screens/Triage/Triage'));
+const FocusToday = React.lazy(() => import('../screens/FocusToday/FocusToday'));
 const Archive = React.lazy(() => import('../screens/Archive/Archive'));
 
 function withLayout(element: React.ReactNode): React.ReactNode {
@@ -67,6 +68,7 @@ const appRoutes: RouteObject[] = [
   { path: '/w/:workspaceId/p/:projectId/settings', element: withLayout(<ProjectSettings />) },
   { path: '/task/:id', element: withLayout(<TaskDetail />) },
   { path: '/my-issues', element: withLayout(<MyIssues />) },
+  { path: '/today', element: withLayout(<FocusToday />) },
   { path: '/timeline', element: withLayout(<Timeline />) },
   { path: '/calendar', element: withLayout(<CalendarView />) },
   { path: '/milestones', element: withLayout(<Milestones />) },

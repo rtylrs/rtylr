@@ -19,6 +19,10 @@ import {
   LayoutList,
   Link2,
   ListChecks,
+  Gauge,
+  Hourglass,
+  Pin,
+  Lightbulb,
 } from 'lucide-react';
 import { useTask } from '../../hooks/useTask';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../stores/flowStore';
@@ -33,6 +37,7 @@ import AssigneeAvatar from '../../components/AssigneeAvatar';
 import LabelChip from '../../components/LabelChip';
 import DueDatePicker from '../../components/DueDatePicker';
 import { getInitials } from '../../lib/utils';
+import { EFFORT_PRESETS, formatEffortMinutes } from '../../lib/effortPresets';
 
 const ACCENT = '#64C5B9';
 
@@ -115,14 +120,14 @@ const TaskDetail: React.FC = () => {
   const statuses: Task['status'][] = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'];
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         <div
-          className="px-6 py-3 flex items-center justify-between shrink-0"
+          className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 sm:px-6"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => navigate(-1)}
               className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -137,16 +142,17 @@ const TaskDetail: React.FC = () => {
               ]}
             />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <button
               onClick={() => {
                 navigator.clipboard?.writeText(task.identifier);
                 toast.success(`Copied ${task.identifier}`);
               }}
-              className="flex items-center gap-1 h-7 px-2 rounded text-[11px] hover:bg-[var(--flow-hover)]"
+              className="flex h-8 items-center gap-1 rounded px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
+              title="Copy ID"
             >
-              <Copy size={11} /> Copy ID
+              <Copy size={11} /> <span className="hidden sm:inline">Copy ID</span>
             </button>
             <button
               onClick={() => {
@@ -179,16 +185,15 @@ const TaskDetail: React.FC = () => {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18 }}
-          className="flex-1 overflow-y-auto"
+          className="min-h-0 flex-1 overflow-y-auto lg:min-h-0"
         >
-          <div className="max-w-3xl mx-auto px-8 py-8">
+          <div className="max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
             {/* Title */}
             <input
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
-              className="w-full bg-transparent outline-none font-bold mb-4"
+              className="w-full bg-transparent outline-none font-bold mb-4 text-xl sm:text-2xl"
               style={{
-                fontSize: 24,
                 color: 'var(--flow-text)',
               }}
             />
@@ -284,18 +289,26 @@ const TaskDetail: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Side panel */}
+      {/* Side panel — below main on small screens */}
       <aside
-        className="w-64 shrink-0 overflow-y-auto px-5 py-6"
+        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-l lg:border-t-0"
         style={{
           background: 'var(--flow-surface)',
-          borderLeft: '1px solid var(--flow-border)',
         }}
       >
         <DetailField icon={CircleDot} label="Status">
           <select
             value={task.status}
-            onChange={(e) => updateTask(task.id, { status: e.target.value as Task['status'] })}
+            onChange={(e) => {
+              const next = e.target.value as Task['status'];
+              if (next === 'done' && task.status !== 'done') {
+                toast.success('Nice work!', {
+                  description: 'Task marked complete.',
+                  icon: '🎉',
+                });
+              }
+              updateTask(task.id, { status: next });
+            }}
             className="bg-transparent text-[12px] outline-none w-full"
             style={{ color: 'var(--flow-text)' }}
           >
@@ -356,6 +369,76 @@ const TaskDetail: React.FC = () => {
             className="bg-transparent text-[12px] outline-none w-full"
             style={{ color: 'var(--flow-text)' }}
           />
+        </DetailField>
+
+        <DetailField icon={Gauge} label="Effort">
+          <div className="flex flex-wrap gap-1">
+            <button
+              type="button"
+              onClick={() => updateTask(task.id, { effortMinutes: undefined })}
+              className="text-[10px] px-2 py-1 rounded-md"
+              style={{
+                background: !task.effortMinutes ? 'var(--flow-hover)' : 'transparent',
+                color: 'var(--flow-text-muted)',
+                border: '1px solid var(--flow-border)',
+              }}
+            >
+              —
+            </button>
+            {EFFORT_PRESETS.map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => updateTask(task.id, { effortMinutes: m })}
+                className="text-[10px] px-2 py-1 rounded-md transition-colors"
+                style={{
+                  background: task.effortMinutes === m ? `${ACCENT}28` : 'transparent',
+                  color: 'var(--flow-text)',
+                  border:
+                    task.effortMinutes === m ? `1px solid ${ACCENT}66` : '1px solid var(--flow-border)',
+                }}
+                title={`${m} minutes`}
+              >
+                {formatEffortMinutes(m)}
+              </button>
+            ))}
+          </div>
+        </DetailField>
+
+        <DetailField icon={Hourglass} label="Waiting on">
+          <input
+            value={task.waitingOn || ''}
+            onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
+            placeholder="Person, team, approval…"
+            className="bg-transparent text-[12px] outline-none w-full placeholder:opacity-50"
+            style={{ color: 'var(--flow-text)' }}
+          />
+        </DetailField>
+
+        <DetailField icon={Lightbulb} label="Decision">
+          <textarea
+            value={task.decisionNote || ''}
+            onChange={(e) => updateTask(task.id, { decisionNote: e.target.value || undefined })}
+            placeholder="Why this approach (one line)"
+            rows={2}
+            className="w-full bg-transparent text-[12px] outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5"
+            style={{ border: '1px solid var(--flow-border)', color: 'var(--flow-text)' }}
+          />
+        </DetailField>
+
+        <DetailField icon={Pin} label="Today">
+          <button
+            type="button"
+            onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
+            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-left transition-colors"
+            style={{
+              background: task.focusPin ? `${ACCENT}22` : 'var(--flow-hover)',
+              color: 'var(--flow-text)',
+              border: task.focusPin ? `1px solid ${ACCENT}55` : '1px solid transparent',
+            }}
+          >
+            {task.focusPin ? 'Pinned to Today view' : 'Pin to Today view'}
+          </button>
         </DetailField>
 
         <DetailField icon={Timer} label="Time tracked">

@@ -153,6 +153,14 @@ export interface Task {
   dueDate: string;
   startDate?: string;
   estimate?: number; // hours
+  /** Quick effort (minutes) for capacity and “small win” picking — distinct from estimate hours. */
+  effortMinutes?: number;
+  /** Waiting on someone/something — clears mental “open loop” when named. */
+  waitingOn?: string;
+  /** One-line decision log to reduce second-guessing later. */
+  decisionNote?: string;
+  /** Pinned to Today / Focus view alongside due-today tasks. */
+  focusPin?: boolean;
   subtaskCount: number;
   completedSubtasks?: number;
   projectName: string;
@@ -376,6 +384,11 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       completedSubtasks: 0,
       projectName: project?.name || '',
       labels: data.labels || [],
+      estimate: data.estimate,
+      effortMinutes: data.effortMinutes,
+      waitingOn: data.waitingOn,
+      decisionNote: data.decisionNote,
+      focusPin: data.focusPin,
       cycleId: data.cycleId,
       milestoneId: data.milestoneId,
       sectionId: data.sectionId,

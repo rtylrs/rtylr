@@ -2,11 +2,12 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Calendar, Briefcase, FileText, Heart, Shield, ChevronLeft } from 'lucide-react';
 import { useStaffById, useEmployeeProfile, useDocuments, useTrainingProgress, useBenefitEnrollments } from '../../hooks/useHrExtras';
-import { Card, SectionHeader, Pill, Skeleton, Breadcrumbs, ACCENT, EmptyState } from '../../components/ui';
+import { Card, SectionHeader, Pill, Skeleton, Breadcrumbs, ACCENT, EmptyState, useIsMobile } from '../../components/ui';
 import TrainingProgress from '../../components/TrainingProgress';
 import { initials, paletteFor } from '../../components/EmployeeCard';
 
 const EmployeeProfile: React.FC = () => {
+  const isMobile = useIsMobile(900);
   const { id } = useParams<{ id: string }>();
   const staffId = id ? parseInt(id, 10) : undefined;
   const { data: staff, isLoading } = useStaffById(staffId);
@@ -45,7 +46,7 @@ const EmployeeProfile: React.FC = () => {
       <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
 
       {/* Hero */}
-      <Card style={{ display: 'flex', alignItems: 'center', gap: 20, padding: 24 }}>
+      <Card style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 20, padding: 24 }}>
         <Link to="/staff" style={{ color: 'var(--hr-text-muted)' }}>
           <ChevronLeft size={16} />
         </Link>
@@ -71,7 +72,7 @@ const EmployeeProfile: React.FC = () => {
           <p style={{ margin: '4px 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>
             {staff.role} • {staff.department}
           </p>
-          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
             <Pill color="#8b5cf6">{staff.employmentType}</Pill>
             <Pill color={staff.status === 'Active' ? '#10b981' : '#ef4444'}>{staff.status}</Pill>
           </div>
@@ -79,7 +80,7 @@ const EmployeeProfile: React.FC = () => {
       </Card>
 
       {/* Contact + Employment */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <Card>
           <SectionHeader title="Contact" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12, fontSize: 12 }}>
@@ -122,7 +123,7 @@ const EmployeeProfile: React.FC = () => {
       </div>
 
       {/* Emergency contact + bio */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <Card>
           <SectionHeader title="Emergency contact" />
           {profile?.emergency ? (

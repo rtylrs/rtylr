@@ -52,7 +52,6 @@ const navItems: NavItem[] = [
   { label: 'Team',          path: '/team',              icon: Users },
   { label: 'Apps',          path: '/apps',              icon: Grid3x3 },
   { label: 'Activity',      path: '/activity',          icon: ActivityIcon },
-  { label: 'Analytics',     path: '/analytics',         icon: BarChart3 },
 ];
 
 const menuSubItems: NavItem[] = [

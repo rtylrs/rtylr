@@ -163,6 +163,8 @@ export const SEED_TASKS: Task[] = [
     identifier: 'WEB-101',
     customFieldValues: { 'cf-web-team': 'Design', 'cf-web-pts': 5 },
     dependencies: ['task-2'],
+    effortMinutes: 60,
+    focusPin: true,
   }),
   T({
     id: 'task-2',
@@ -217,6 +219,7 @@ export const SEED_TASKS: Task[] = [
     sectionId: 'sec-web-c',
     identifier: 'WEB-104',
     customFieldValues: { 'cf-web-team': 'Product', 'cf-web-pts': 1 },
+    waitingOn: 'Legal counsel',
   }),
   T({
     id: 'task-5',

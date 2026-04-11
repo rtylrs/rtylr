@@ -21,8 +21,9 @@ export const BulkEditBar: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-xl px-3 py-2"
+        className="fixed left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-xl px-3 py-2"
         style={{
+          bottom: 'max(1.5rem, env(safe-area-inset-bottom))',
           background: 'var(--flow-card)',
           border: '1px solid var(--flow-border)',
           boxShadow: 'var(--flow-shadow)',
