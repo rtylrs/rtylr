@@ -21,7 +21,7 @@ export function useUpdateAutomation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<Automation> }) =>
-      crmApi.updateAutomation(id, data),
+      unwrap(crmApi.updateAutomation(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['automations'] }),
   });
 }

@@ -54,12 +54,12 @@ const Products: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-4 max-w-7xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Package size={16} style={{ color: TEAL }} />
           <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -84,7 +84,7 @@ const Products: React.FC = () => {
       </motion.div>
 
       {/* Filters */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
+      <motion.div variants={itemVariants as any} className="flex items-center gap-3">
         <div
           className="flex items-center gap-2 flex-1 max-w-sm px-3 py-2 rounded-lg"
           style={{ background: 'var(--hub-input-bg)', border: '1px solid var(--hub-border)' }}
@@ -148,14 +148,17 @@ const Products: React.FC = () => {
           ))}
         </div>
       ) : (products ?? []).length === 0 ? (
-        <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
+        <motion.div
+          variants={itemVariants as any}
+          className="flex flex-col items-center py-16 gap-3"
+        >
           <Package size={32} style={{ color: 'var(--hub-text-dim)' }} />
           <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
             No products found
           </p>
         </motion.div>
       ) : viewMode === 'list' ? (
-        <motion.div variants={containerVariants} className="space-y-1">
+        <motion.div variants={containerVariants as any} className="space-y-1">
           <div
             className="grid grid-cols-6 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
             style={{ color: 'var(--hub-text-dim)' }}
@@ -171,7 +174,7 @@ const Products: React.FC = () => {
             return (
               <motion.div
                 key={product.id}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="grid grid-cols-6 gap-2 items-center px-3 py-2.5 rounded-lg cursor-pointer"
                 style={{ background: 'var(--hub-hover)' }}
               >
@@ -213,7 +216,7 @@ const Products: React.FC = () => {
         </motion.div>
       ) : (
         <motion.div
-          variants={containerVariants}
+          variants={containerVariants as any}
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
         >
           {(products ?? []).map((product) => {
@@ -221,7 +224,7 @@ const Products: React.FC = () => {
             return (
               <motion.div
                 key={product.id}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="rounded-xl p-4 cursor-pointer transition-all"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
                 onMouseEnter={(e) => {

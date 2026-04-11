@@ -107,12 +107,12 @@ const Dashboard: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants} className="flex items-start justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
             Inventory Overview
@@ -132,11 +132,14 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* Stat cards */}
-      <motion.div variants={containerVariants} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <motion.div
+        variants={containerVariants as any}
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      >
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div key={stat.label} variants={itemVariants}>
+            <motion.div key={stat.label} variants={itemVariants as any}>
               <Link
                 to={stat.to}
                 className="block rounded-xl p-4 transition-all"
@@ -179,9 +182,12 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* Extra widgets row */}
-      <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <motion.div
+        variants={containerVariants as any}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+      >
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -200,7 +206,7 @@ const Dashboard: React.FC = () => {
         </motion.div>
 
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -228,7 +234,7 @@ const Dashboard: React.FC = () => {
         </motion.div>
 
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -269,7 +275,7 @@ const Dashboard: React.FC = () => {
       {/* Two column grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -317,7 +323,7 @@ const Dashboard: React.FC = () => {
         </motion.div>
 
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >

@@ -40,12 +40,12 @@ const Financial: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Financial
         </h2>
@@ -62,7 +62,10 @@ const Financial: React.FC = () => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={containerVariants as any}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           {[
             {
               label: 'Revenue',
@@ -93,7 +96,7 @@ const Financial: React.FC = () => {
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants}
+                variants={itemVariants as any}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -120,7 +123,7 @@ const Financial: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Expense Breakdown */}
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -157,7 +160,7 @@ const Financial: React.FC = () => {
 
         {/* Invoice Aging */}
         <motion.div
-          variants={itemVariants}
+          variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -203,7 +206,7 @@ const Financial: React.FC = () => {
 
       {/* Cash Flow Trend */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

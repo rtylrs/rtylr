@@ -70,12 +70,12 @@ const Purchasing: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-5 max-w-6xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Purchase Orders
         </h2>
@@ -103,7 +103,7 @@ const Purchasing: React.FC = () => {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <motion.div variants={itemVariants as any} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {(Object.entries(statusCounts) as [PurchaseOrder['status'], number][]).map(
           ([status, count]) => {
             const sc = statusConfig[status];
@@ -141,7 +141,7 @@ const Purchasing: React.FC = () => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl overflow-hidden"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

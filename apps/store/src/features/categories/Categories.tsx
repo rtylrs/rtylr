@@ -34,12 +34,12 @@ const Categories: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-4 max-w-5xl"
     >
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Folder size={16} style={{ color: TEAL }} />
           <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -70,7 +70,10 @@ const Categories: React.FC = () => {
           ))}
         </div>
       ) : (categories ?? []).length === 0 ? (
-        <motion.div variants={itemVariants} className="flex flex-col items-center py-16 gap-3">
+        <motion.div
+          variants={itemVariants as any}
+          className="flex flex-col items-center py-16 gap-3"
+        >
           <Folder size={32} style={{ color: 'var(--hub-text-dim)' }} />
           <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
             No categories yet
@@ -80,7 +83,7 @@ const Categories: React.FC = () => {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={containerVariants} className="space-y-1">
+        <motion.div variants={containerVariants as any} className="space-y-1">
           <div
             className="grid grid-cols-4 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider font-semibold"
             style={{ color: 'var(--hub-text-dim)' }}
@@ -93,7 +96,7 @@ const Categories: React.FC = () => {
           {(categories ?? []).map((cat) => (
             <motion.div
               key={cat.id}
-              variants={itemVariants}
+              variants={itemVariants as any}
               className="grid grid-cols-4 gap-2 items-center px-3 py-2.5 rounded-lg cursor-pointer"
               style={{ background: 'var(--hub-hover)' }}
             >

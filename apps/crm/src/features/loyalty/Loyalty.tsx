@@ -315,7 +315,7 @@ const Loyalty: React.FC = () => {
                       justifyContent: 'center',
                     }}
                   >
-                    <Icon size={18} style={{ color: tier.color } as React.CSSProperties} />
+                    <Icon size={18} {...({ style: { color: tier.color } } as any)} />
                   </div>
                   <span
                     style={{

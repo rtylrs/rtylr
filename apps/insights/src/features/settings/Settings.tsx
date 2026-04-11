@@ -85,12 +85,12 @@ const Settings: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants as any}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-3xl"
     >
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Settings
         </h2>
@@ -101,7 +101,7 @@ const Settings: React.FC = () => {
 
       {/* Default Date Range */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -134,7 +134,7 @@ const Settings: React.FC = () => {
 
       {/* Email Recipients */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -168,7 +168,7 @@ const Settings: React.FC = () => {
       </motion.div>
 
       {/* Save Button */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants as any}>
         <button
           onClick={handleSave}
           disabled={updateSettings.isPending}
@@ -182,7 +182,7 @@ const Settings: React.FC = () => {
 
       {/* Scheduled Reports */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
