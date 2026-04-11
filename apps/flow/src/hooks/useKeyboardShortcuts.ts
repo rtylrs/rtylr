@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFlowStore } from '../stores/flowStore';
 
-// Linear-style keyboard shortcuts: global.
-// c = new task, / = search, g i = goto inbox, g m = my issues, cmd+k = command bar
+// Keyboard shortcuts: global.
+// c = new task, / = search, g i = inbox, g m = my tasks, cmd+k = command bar
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
   const { setCommandBarOpen, setQuickCreateOpen, commandBarOpen, quickCreateOpen, activeWorkspaceId } =

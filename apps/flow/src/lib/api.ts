@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FLOW_API_BASE_URL } from './flowApiConfig';
 
 function getToken(): string | undefined {
   const cookies = document.cookie.split(';');
@@ -11,7 +12,7 @@ function getToken(): string | undefined {
 }
 
 const api = axios.create({
-  baseURL: 'https://api.voxire.dev/',
+  baseURL: FLOW_API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 

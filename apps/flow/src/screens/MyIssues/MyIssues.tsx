@@ -1,32 +1,54 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ListTodo, Filter, ArrowUpDown } from 'lucide-react';
+import { ListTodo, Filter, ArrowUpDown, Sun, CalendarDays, CalendarRange, Layers } from 'lucide-react';
 import { useMyIssues } from '../../hooks/useMyIssues';
-import { useFlowStore, Task, STATUS_LABELS, PRIORITY_ORDER } from '../../stores/flowStore';
+import { Task, STATUS_LABELS, PRIORITY_ORDER } from '../../stores/flowStore';
 import TaskRow from '../../components/TaskRow';
 import EmptyState from '../../components/EmptyState';
+import {
+  bucketForMyTask,
+  MY_TASK_BUCKET_LABEL,
+  MY_TASK_BUCKET_ORDER,
+  type MyTaskBucket,
+} from '../../lib/myTasksBuckets';
 
-type GroupBy = 'status' | 'priority' | 'project' | 'none';
+/** `schedule` = grouped by due window (Recently assigned, Today, Upcoming, Later). */
+type GroupBy = 'schedule' | 'status' | 'priority' | 'project' | 'none';
 type SortBy = 'priority' | 'dueDate' | 'updated';
 
+const BUCKET_ICONS: Record<MyTaskBucket, React.ReactNode> = {
+  recently_assigned: <Layers size={12} />,
+  today: <Sun size={12} />,
+  upcoming: <CalendarDays size={12} />,
+  later: <CalendarRange size={12} />,
+};
+
 const MyIssues: React.FC = () => {
-  const { data: tasks = [], isLoading } = useMyIssues();
-  const { projects } = useFlowStore();
-  const [groupBy, setGroupBy] = useState<GroupBy>('status');
+  const { data: rawTasks = [], isLoading } = useMyIssues();
+  const tasks = rawTasks as Task[];
+  const [groupBy, setGroupBy] = useState<GroupBy>('schedule');
   const [sortBy, setSortBy] = useState<SortBy>('priority');
 
   const sorted = useMemo(() => {
     const arr = [...tasks];
     arr.sort((a, b) => {
       if (sortBy === 'priority') return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
-      if (sortBy === 'dueDate') return a.dueDate.localeCompare(b.dueDate);
+      if (sortBy === 'dueDate') return (a.dueDate || '').localeCompare(b.dueDate || '');
       return a.updatedAt.localeCompare(b.updatedAt);
     });
     return arr;
   }, [tasks, sortBy]);
 
   const groups = useMemo(() => {
-    if (groupBy === 'none') return [{ label: 'All', tasks: sorted }];
+    if (groupBy === 'schedule') {
+      return MY_TASK_BUCKET_ORDER.map((bucket) => ({
+        label: MY_TASK_BUCKET_LABEL[bucket],
+        icon: BUCKET_ICONS[bucket],
+        tasks: sorted.filter((t) => bucketForMyTask(t) === bucket),
+        bucket,
+      }));
+    }
+    if (groupBy === 'none') return [{ label: 'All', icon: null, tasks: sorted, bucket: null as MyTaskBucket | null }];
     const map: Record<string, Task[]> = {};
     sorted.forEach((t) => {
       let key = 'All';
@@ -36,7 +58,12 @@ const MyIssues: React.FC = () => {
       if (!map[key]) map[key] = [];
       map[key].push(t);
     });
-    return Object.entries(map).map(([label, tasks]) => ({ label, tasks }));
+    return Object.entries(map).map(([label, taskList]) => ({
+      label,
+      icon: null,
+      tasks: taskList,
+      bucket: null as MyTaskBucket | null,
+    }));
   }, [sorted, groupBy]);
 
   return (
@@ -47,10 +74,10 @@ const MyIssues: React.FC = () => {
       >
         <div>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            My Issues
+            My tasks
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {tasks.length} tasks assigned to you
+            {isLoading ? 'Loading…' : `${tasks.length} tasks assigned to you`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -71,10 +98,11 @@ const MyIssues: React.FC = () => {
             value={groupBy}
             onChange={(v) => setGroupBy(v as GroupBy)}
             options={[
+              { value: 'schedule', label: 'Schedule' },
               { value: 'status', label: 'Status' },
               { value: 'priority', label: 'Priority' },
               { value: 'project', label: 'Project' },
-              { value: 'none', label: 'No grouping' },
+              { value: 'none', label: 'None' },
             ]}
           />
         </div>
@@ -88,7 +116,7 @@ const MyIssues: React.FC = () => {
             description="Nothing is on your plate right now. Nice work!"
           />
         ) : (
-          groups.map(({ label, tasks: taskList }) => (
+          groups.map(({ label, tasks: taskList, icon, bucket }) => (
             <motion.div
               key={label}
               initial={{ opacity: 0, y: 4 }}
@@ -102,6 +130,11 @@ const MyIssues: React.FC = () => {
                   borderBottom: '1px solid var(--flow-border)',
                 }}
               >
+                {icon && (
+                  <span style={{ color: 'var(--flow-text-muted)' }} className="flex items-center">
+                    {icon}
+                  </span>
+                )}
                 <span
                   className="text-[11px] font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--flow-text-muted)' }}
@@ -117,6 +150,11 @@ const MyIssues: React.FC = () => {
                 >
                   {taskList.length}
                 </span>
+                {groupBy === 'schedule' && bucket === 'today' && (
+                  <span className="text-[10px] ml-1" style={{ color: 'var(--flow-text-dim)' }}>
+                    Includes overdue
+                  </span>
+                )}
               </div>
               {taskList.map((t) => (
                 <TaskRow key={t.id} task={t} showProject />
@@ -149,7 +187,7 @@ const ToolbarSelect: React.FC<{
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-transparent outline-none text-[11px]"
+      className="bg-transparent outline-none text-[11px] max-w-[160px]"
       style={{ color: 'var(--flow-text)' }}
     >
       {options.map((o) => (

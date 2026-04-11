@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { ResponsiveGridLayout, useContainerWidth } from 'react-grid-layout';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ResponsiveGridLayout } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings2, X, Plus, GripVertical, Check } from 'lucide-react';
+import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { useUserStore } from '../../../stores/userStore';
 import {
   getWidgetComponent,
@@ -25,11 +26,23 @@ const AdminDashboard: React.FC = () => {
   const { user } = useUserStore();
   const businessName = (user as any)?.businessName || 'Dashboard';
   const containerRef = useRef<HTMLDivElement>(null);
-  const { width: containerWidth } = useContainerWidth(containerRef);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    ro.observe(el);
+    setContainerWidth(el.clientWidth);
+    return () => ro.disconnect();
+  }, []);
 
   const [layouts, setLayouts] = useState(() => ({ lg: loadLayout() }));
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
-  const [editing, setEditing] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
 
   const handleLayoutChange = useCallback((_: any, allLayouts: any) => {
@@ -72,13 +85,21 @@ const AdminDashboard: React.FC = () => {
   }, [layouts, activeWidgets]);
 
   const resetLayout = useCallback(() => {
-    const { DEFAULT_LAYOUT } = require('./widgets/registry');
-    const defaultIds = DEFAULT_LAYOUT.map((l: any) => l.i);
-    setLayouts({ lg: DEFAULT_LAYOUT });
-    setActiveWidgets(defaultIds);
-    saveLayout(DEFAULT_LAYOUT);
-    saveActiveWidgets(defaultIds);
-    setEditing(false);
+    const dl = [
+      { i: 'kpi-revenue', x: 0, y: 0, w: 1, h: 2 },
+      { i: 'kpi-orders',  x: 1, y: 0, w: 1, h: 2 },
+      { i: 'kpi-team',    x: 2, y: 0, w: 1, h: 2 },
+      { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
+      { i: 'activity',    x: 0, y: 2, w: 2, h: 4 },
+      { i: 'changelog',   x: 2, y: 2, w: 1, h: 4 },
+      { i: 'quick-actions', x: 3, y: 2, w: 1, h: 4 },
+    ];
+    const ids = dl.map((l) => l.i);
+    setLayouts({ lg: dl });
+    setActiveWidgets(ids);
+    saveLayout(dl);
+    saveActiveWidgets(ids);
+    setShowCatalog(false);
   }, []);
 
   const availableToAdd = useMemo(() => {
@@ -94,10 +115,7 @@ const AdminDashboard: React.FC = () => {
           <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>{today}</p>
         </div>
         <button
-          onClick={() => {
-            if (editing) { setEditing(false); setShowCatalog(false); }
-            else setShowCatalog(true);
-          }}
+          onClick={() => setShowCatalog(true)}
           className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
           style={{ color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)'; }}
@@ -118,8 +136,8 @@ const AdminDashboard: React.FC = () => {
           rowHeight={80}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}
-          isDraggable={editing}
-          isResizable={editing}
+          isDraggable={showCatalog}
+          isResizable={showCatalog}
           draggableHandle=".widget-drag-handle"
           containerPadding={[0, 0]}
           margin={[12, 12]}
@@ -134,10 +152,10 @@ const AdminDashboard: React.FC = () => {
                 className="rounded-xl overflow-hidden relative"
                 style={{
                   background: 'var(--hub-card)',
-                  border: editing ? '1px dashed rgba(69,131,196,0.4)' : '1px solid var(--hub-border)',
+                  border: showCatalog ? '1px dashed rgba(69,131,196,0.4)' : '1px solid var(--hub-border)',
                 }}
               >
-                {editing && (
+                {showCatalog && (
                   <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
                     <div className="widget-drag-handle cursor-grab h-6 w-6 rounded-md flex items-center justify-center" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
                       <GripVertical size={12} />
@@ -160,7 +178,8 @@ const AdminDashboard: React.FC = () => {
         </ResponsiveGridLayout>
       )}
 
-      {/* Widget catalog modal */}
+      {/* Widget catalog modal (portaled to body) */}
+      {createPortal(
       <AnimatePresence>
         {showCatalog && (
           <motion.div
@@ -191,21 +210,6 @@ const AdminDashboard: React.FC = () => {
                   style={{ color: 'var(--hub-text-muted)' }}
                 >
                   <X size={16} />
-                </button>
-              </div>
-
-              {/* Toggle edit mode */}
-              <div className="px-6 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                <button
-                  onClick={() => { setEditing(!editing); if (!editing) setShowCatalog(false); }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full transition-colors"
-                  style={{
-                    background: editing ? 'rgba(69,131,196,0.1)' : 'var(--hub-hover)',
-                    color: editing ? '#4583C4' : 'var(--hub-text-muted)',
-                    border: editing ? '1px solid rgba(69,131,196,0.3)' : '1px solid var(--hub-border)',
-                  }}
-                >
-                  {editing ? <><Check size={14} /> Done rearranging</> : <><GripVertical size={14} /> Drag to rearrange</>}
                 </button>
               </div>
 
@@ -259,7 +263,9 @@ const AdminDashboard: React.FC = () => {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

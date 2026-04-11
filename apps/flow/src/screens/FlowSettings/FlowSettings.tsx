@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  User,
-  Bell,
-  Palette,
-  Shield,
-  Globe,
-  Keyboard,
-  CreditCard,
-  ChevronRight,
-} from 'lucide-react';
-import { useUserStore } from '../../stores/userStore';
+import { Bell, Palette, Keyboard } from 'lucide-react';
 import { useThemeStore } from '../../stores/themeStore';
-import { getInitials } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 
 const ACCENT = '#64C5B9';
 
@@ -23,96 +13,10 @@ interface SettingsSection {
 }
 
 const SECTIONS: SettingsSection[] = [
-  { id: 'profile',       label: 'Profile',          icon: User     },
-  { id: 'notifications', label: 'Notifications',    icon: Bell     },
-  { id: 'appearance',    label: 'Appearance',       icon: Palette  },
-  { id: 'privacy',       label: 'Privacy & Security', icon: Shield },
-  { id: 'integrations',  label: 'Integrations',     icon: Globe    },
-  { id: 'shortcuts',     label: 'Keyboard Shortcuts', icon: Keyboard},
-  { id: 'billing',       label: 'Billing',          icon: CreditCard},
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
 ];
-
-const ProfileSection: React.FC = () => {
-  const { user } = useUserStore();
-  const userName = user?.name || 'User';
-  const userEmail = user?.email || '';
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Profile
-        </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Manage your personal information.
-        </p>
-      </div>
-
-      {/* Avatar */}
-      <div className="flex items-center gap-4">
-        <span
-          className="h-16 w-16 rounded-full flex items-center justify-center text-[20px] font-bold"
-          style={{ background: `${ACCENT}22`, color: ACCENT }}
-        >
-          {getInitials(userName)}
-        </span>
-        <div>
-          <p className="text-[14px] font-medium" style={{ color: 'var(--flow-text)' }}>
-            {userName}
-          </p>
-          <p className="text-[12px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
-            {userEmail}
-          </p>
-          <button
-            className="mt-2 text-[12px] px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
-            style={{ color: ACCENT, border: `1px solid ${ACCENT}44` }}
-          >
-            Change avatar
-          </button>
-        </div>
-      </div>
-
-      {/* Fields */}
-      {[
-        { label: 'Full name', value: userName, placeholder: 'Your name' },
-        { label: 'Email address', value: userEmail, placeholder: 'your@email.com' },
-        { label: 'Display name', value: userName.split(' ')[0], placeholder: 'Display name' },
-      ].map((field) => (
-        <div key={field.label}>
-          <label
-            className="block text-[12px] font-medium mb-1.5"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            {field.label}
-          </label>
-          <input
-            defaultValue={field.value}
-            placeholder={field.placeholder}
-            className="w-full px-3 py-2 rounded-lg text-[13px] outline-none transition-colors"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
-              color: 'var(--flow-text)',
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = `${ACCENT}66`;
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = 'var(--flow-border)';
-            }}
-          />
-        </div>
-      ))}
-
-      <button
-        className="px-4 py-2 rounded-lg text-[13px] font-medium transition-colors"
-        style={{ background: ACCENT, color: '#0a0a0a' }}
-      >
-        Save changes
-      </button>
-    </div>
-  );
-};
 
 const NotificationsSection: React.FC = () => {
   const [settings, setSettings] = useState({
@@ -163,17 +67,25 @@ const NotificationsSection: React.FC = () => {
               </p>
             </div>
             <button
+              type="button"
+              role="switch"
+              aria-checked={settings[item.key]}
               onClick={() => toggle(item.key)}
-              className="relative h-5 w-9 rounded-full transition-colors shrink-0"
+              className={cn(
+                'flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full p-0.5',
+                'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64C5B9]/45',
+                'focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--flow-bg)]'
+              )}
               style={{
                 background: settings[item.key] ? ACCENT : 'var(--flow-hover)',
               }}
             >
               <span
-                className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform shadow-sm"
-                style={{
-                  transform: settings[item.key] ? 'translateX(16px)' : 'translateX(2px)',
-                }}
+                className={cn(
+                  'pointer-events-none h-4 w-4 shrink-0 rounded-full bg-white shadow-sm',
+                  'transition-[margin] duration-200 ease-out',
+                  settings[item.key] ? 'ml-auto' : 'ml-0'
+                )}
               />
             </button>
           </div>
@@ -311,10 +223,9 @@ const ShortcutsSection: React.FC = () => {
 };
 
 const SECTION_CONTENT: Record<string, React.FC> = {
-  profile:       ProfileSection,
   notifications: NotificationsSection,
-  appearance:    AppearanceSection,
-  shortcuts:     ShortcutsSection,
+  appearance: AppearanceSection,
+  shortcuts: ShortcutsSection,
 };
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
@@ -329,7 +240,7 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
 );
 
 const FlowSettings: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('profile');
+  const [activeSection, setActiveSection] = useState('notifications');
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] ||
@@ -339,7 +250,7 @@ const FlowSettings: React.FC = () => {
     <div className="flex h-full">
       {/* Settings sidebar */}
       <div
-        className="w-52 shrink-0 overflow-y-auto"
+        className="w-[236px] shrink-0 overflow-y-auto"
         style={{ borderRight: '1px solid var(--flow-border)' }}
       >
         <div className="p-4">
@@ -356,18 +267,19 @@ const FlowSettings: React.FC = () => {
               return (
                 <button
                   key={section.id}
+                  type="button"
                   onClick={() => setActiveSection(section.id)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] text-left transition-colors"
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-[13px] text-left transition-colors min-w-0"
                   style={{
                     background: isActive ? 'var(--flow-active)' : 'transparent',
                     color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)',
                   }}
                 >
-                  <Icon size={14} />
-                  <span className="flex-1">{section.label}</span>
+                  <Icon size={14} className="shrink-0" />
+                  <span className="flex-1 min-w-0 truncate">{section.label}</span>
                   {isActive && (
                     <span
-                      className="h-1.5 w-1.5 rounded-full"
+                      className="h-1.5 w-1.5 rounded-full shrink-0"
                       style={{ background: ACCENT }}
                     />
                   )}

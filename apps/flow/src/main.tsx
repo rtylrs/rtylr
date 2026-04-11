@@ -5,10 +5,12 @@ import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { initTheme } from './stores/themeStore';
+import { initFlowLocalData } from './lib/initFlowLocalData';
 import './globals.css';
 
 // Apply persisted theme before first render to prevent flash
 initTheme();
+initFlowLocalData();
 
 const queryClient = new QueryClient({
   defaultOptions: {

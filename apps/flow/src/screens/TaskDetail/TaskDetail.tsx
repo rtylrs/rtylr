@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   Copy,
-  MoreHorizontal,
   Tag,
   User as UserIcon,
   Calendar as CalendarIcon,
@@ -17,26 +16,31 @@ import {
   Trash2,
   Archive,
   GitBranch,
+  LayoutList,
+  Link2,
+  ListChecks,
 } from 'lucide-react';
 import { useTask } from '../../hooks/useTask';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../stores/flowStore';
+import { useUserStore } from '../../stores/userStore';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import CommentList from '../../components/CommentList';
 import CommentInput from '../../components/CommentInput';
 import SubtaskList from '../../components/SubtaskList';
 import ActivityFeed from '../../components/ActivityFeed';
 import AttachmentUpload from '../../components/AttachmentUpload';
-import PriorityIcon from '../../components/PriorityIcon';
-import StatusIcon from '../../components/StatusIcon';
 import AssigneeAvatar from '../../components/AssigneeAvatar';
 import LabelChip from '../../components/LabelChip';
 import DueDatePicker from '../../components/DueDatePicker';
-import { formatDate } from '../../lib/utils';
+import { getInitials } from '../../lib/utils';
+
+const ACCENT = '#64C5B9';
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: task, isLoading } = useTask(id);
+  const { data: taskData, isLoading } = useTask(id);
+  const user = useUserStore((s) => s.user);
   const {
     updateTask,
     addComment,
@@ -55,15 +59,19 @@ const TaskDetail: React.FC = () => {
     attachments,
     timelogs,
     projects,
+    tasks: allTasks,
+    sections,
+    customFieldDefinitions,
   } = useFlowStore();
 
   const [tab, setTab] = useState<'activity' | 'comments'>('comments');
+  const [depId, setDepId] = useState('');
 
   if (isLoading) {
     return <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>Loading task...</div>;
   }
 
-  if (!task) {
+  if (!taskData) {
     return (
       <div className="p-10 text-center">
         <p
@@ -76,15 +84,31 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const project = projects.find((p) => p.id === (task as any).projectId);
+  const task = taskData as Task;
+  const project = projects.find((p) => p.id === task.projectId);
+  const projectSections = sections
+    .filter((s) => s.projectId === task.projectId)
+    .sort((a, b) => a.order - b.order);
+  const fieldDefs = customFieldDefinitions
+    .filter((f) => f.projectId === task.projectId)
+    .sort((a, b) => a.order - b.order);
+  const dependencyTasks = (task.dependencies ?? [])
+    .map((tid) => allTasks.find((ot) => ot.id === tid))
+    .filter((ot): ot is Task => !!ot);
+  const dependencyCandidates = allTasks.filter(
+    (ot) =>
+      ot.workspaceId === task.workspaceId &&
+      ot.id !== task.id &&
+      !(task.dependencies ?? []).includes(ot.id)
+  );
   const taskComments = comments.filter((c) => c.taskId === task.id);
   const taskActivity = activity.filter((a) => a.taskId === task.id);
   const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);
   const taskAttachments = attachments.filter((a) => a.taskId === task.id);
-  const taskTimelogs = timelogs.filter((t) => t.taskId === task.id);
-  const taskLabels = labels.filter((l) => (task as any).labels?.includes(l.id));
-  const cycle = cycles.find((c) => c.id === (task as any).cycleId);
-  const milestone = milestones.find((m) => m.id === (task as any).milestoneId);
+  const taskTimelogs = timelogs.filter((tl) => tl.taskId === task.id);
+  const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
+  const cycle = cycles.find((c) => c.id === task.cycleId);
+  const milestone = milestones.find((m) => m.id === task.milestoneId);
   const totalMinutes = taskTimelogs.reduce((s, t) => s + t.minutes, 0);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
@@ -242,7 +266,17 @@ const TaskDetail: React.FC = () => {
                 <div className="mb-4">
                   <CommentList comments={taskComments} />
                 </div>
-                <CommentInput onSubmit={(body) => addComment(task.id, body)} />
+                <CommentInput
+                  onSubmit={(body) =>
+                    addComment(
+                      task.id,
+                      body,
+                      user
+                        ? { id: user.id, name: user.name, initials: getInitials(user.name) }
+                        : { id: 'local', name: 'You', initials: 'YO' }
+                    )
+                  }
+                />
               </div>
             )}
             {tab === 'activity' && <ActivityFeed entries={taskActivity} />}
@@ -357,6 +391,141 @@ const TaskDetail: React.FC = () => {
             </span>
           </DetailField>
         )}
+
+        {projectSections.length > 0 && (
+          <DetailField icon={LayoutList} label="Section">
+            <select
+              value={task.sectionId ?? ''}
+              onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
+              className="bg-transparent text-[12px] outline-none w-full"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              <option value="">No section</option>
+              {projectSections.map((s) => (
+                <option key={s.id} value={s.id} style={{ background: 'var(--flow-card)' }}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </DetailField>
+        )}
+
+        {fieldDefs.map((def) => (
+          <DetailField key={def.id} icon={ListChecks} label={def.name}>
+            {def.type === 'dropdown' ? (
+              <select
+                value={String(task.customFieldValues?.[def.id] ?? '')}
+                onChange={(e) =>
+                  updateTask(task.id, {
+                    customFieldValues: {
+                      ...(task.customFieldValues ?? {}),
+                      [def.id]: e.target.value,
+                    },
+                  })
+                }
+                className="bg-transparent text-[12px] outline-none w-full"
+                style={{ color: 'var(--flow-text)' }}
+              >
+                <option value="">—</option>
+                {(def.options ?? []).map((opt) => (
+                  <option key={opt} value={opt} style={{ background: 'var(--flow-card)' }}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            ) : def.type === 'number' ? (
+              <input
+                type="number"
+                value={task.customFieldValues?.[def.id] ?? ''}
+                onChange={(e) =>
+                  updateTask(task.id, {
+                    customFieldValues: {
+                      ...(task.customFieldValues ?? {}),
+                      [def.id]: e.target.value === '' ? '' : Number(e.target.value),
+                    },
+                  })
+                }
+                className="bg-transparent text-[12px] outline-none w-full"
+                style={{ color: 'var(--flow-text)' }}
+              />
+            ) : (
+              <input
+                value={String(task.customFieldValues?.[def.id] ?? '')}
+                onChange={(e) =>
+                  updateTask(task.id, {
+                    customFieldValues: {
+                      ...(task.customFieldValues ?? {}),
+                      [def.id]: e.target.value,
+                    },
+                  })
+                }
+                className="bg-transparent text-[12px] outline-none w-full"
+                style={{ color: 'var(--flow-text)' }}
+              />
+            )}
+          </DetailField>
+        ))}
+
+        <DetailField icon={Link2} label="Dependencies">
+          <div className="space-y-1.5">
+            {dependencyTasks.map((dt) => (
+              <div key={dt.id} className="flex items-center justify-between gap-1">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/task/${dt.id}`)}
+                  className="text-[11px] text-left truncate flex-1 hover:underline"
+                  style={{ color: ACCENT }}
+                >
+                  {dt.identifier} · {dt.title}
+                </button>
+                <button
+                  type="button"
+                  className="text-[10px] shrink-0"
+                  style={{ color: 'var(--flow-text-dim)' }}
+                  onClick={() =>
+                    updateTask(task.id, {
+                      dependencies: (task.dependencies ?? []).filter((x) => x !== dt.id),
+                    })
+                  }
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            {dependencyCandidates.length > 0 && (
+              <div className="flex gap-1 pt-1">
+                <select
+                  value={depId}
+                  onChange={(e) => setDepId(e.target.value)}
+                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded px-1"
+                  style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
+                >
+                  <option value="">Add dependency…</option>
+                  {dependencyCandidates.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.identifier} {c.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={!depId}
+                  onClick={() => {
+                    if (!depId) return;
+                    updateTask(task.id, {
+                      dependencies: [...(task.dependencies ?? []), depId],
+                    });
+                    setDepId('');
+                  }}
+                  className="text-[10px] px-1.5 py-0.5 rounded font-semibold disabled:opacity-40"
+                  style={{ background: ACCENT, color: '#0a0a0a' }}
+                >
+                  Add
+                </button>
+              </div>
+            )}
+          </div>
+        </DetailField>
 
         <DetailField icon={Tag} label="Labels">
           <div className="flex flex-wrap gap-1">

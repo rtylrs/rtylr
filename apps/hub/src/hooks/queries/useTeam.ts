@@ -5,10 +5,12 @@ import { toast } from 'sonner';
 export interface TeamMember {
   id: string;
   name: string;
+  fullName?: string;
   email: string;
-  role: 'owner' | 'admin' | 'manager' | 'staff' | 'viewer';
+  role: string;
   apps: string[];
-  status: 'active' | 'invited' | 'inactive';
+  status: string;
+  isActive?: boolean;
   avatarUrl?: string;
   lastActive?: string;
   createdAt?: string;
@@ -19,7 +21,9 @@ export const useTeam = () => {
     queryKey: ['team'],
     queryFn: async () => {
       const res = await api.get('/team/members');
-      return (res.data?.users ?? res.data?.members ?? res.data) as TeamMember[];
+      const raw = res.data?.users ?? res.data?.members ?? res.data;
+      if (!Array.isArray(raw)) return [];
+      return raw.map((m: any) => ({ ...m, name: m.fullName || m.name || m.email })) as TeamMember[];
     },
     staleTime: 30_000,
   });
@@ -31,7 +35,9 @@ export const useMember = (id: string | undefined) => {
     queryFn: async () => {
       if (!id) return undefined;
       const res = await api.get(`/team/members/${id}`);
-      return res.data as TeamMember;
+      const m = res.data?.user ?? res.data;
+      if (!m) return undefined;
+      return { ...m, name: m.fullName || m.name || m.email, apps: m.apps ?? [], status: m.isActive ? 'active' : 'inactive' } as TeamMember;
     },
     enabled: !!id,
   });

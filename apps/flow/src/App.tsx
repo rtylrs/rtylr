@@ -5,11 +5,11 @@ import { getCookie } from './lib/utils';
 import { useUserStore } from './stores/userStore';
 import appRoutes from './routes/AppRoutes';
 import api from './lib/api';
+import { mapMeResponseToFlowUser } from './lib/mapMeUser';
 
 const APP_ID = 'flow';
 
 const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, login } = useUserStore();
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -19,18 +19,18 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       return;
     }
 
-    api.get('/user/me')
-      .then((res: any) => {
-        const apps: string[] = res.data?.apps ?? [];
-        const role: string = res.data?.role ?? '';
-        const user = res.data;
-
-        if (!isAuthenticated && user) {
-          login(
-            { id: user.id, name: user.fullName || user.email, email: user.email },
-            token
-          );
+    api
+      .get('/user/me')
+      .then((res: { data?: Record<string, unknown> }) => {
+        const payload = res.data;
+        const mapped = mapMeResponseToFlowUser(payload);
+        if (mapped) {
+          // Always refresh profile from API (Hub-style) so persisted zustand state does not stay stale.
+          useUserStore.getState().login(mapped, token);
         }
+
+        const apps: string[] = (payload?.apps as string[]) ?? [];
+        const role: string = (payload?.role as string) ?? '';
 
         if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes(APP_ID)) {
           setAllowed(true);
