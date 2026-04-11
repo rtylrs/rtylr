@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Slack, Github, Mail, Trash2, Save } from 'lucide-react';
+import { MessageSquare, GitBranch, Mail, Trash2, Save } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 
@@ -113,12 +113,12 @@ const ProjectSettings: React.FC = () => {
         <Section title="Integrations">
           <div className="space-y-2">
             <Integration
-              icon={Slack}
+              icon={MessageSquare}
               name="Slack"
               description="Post project updates to #flow-updates"
             />
             <Integration
-              icon={Github}
+              icon={GitBranch}
               name="GitHub"
               description="Link PRs to tasks automatically"
             />

@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useFullscreenStore } from '../stores/fullscreenStore';
 import { usePlatform } from './usePlatform';
 
@@ -20,7 +20,7 @@ export const useFullscreen = () => {
       }
 
       try {
-        await appWindow.setFullscreen(shouldBeFullscreen);
+        await getCurrentWindow().setFullscreen(shouldBeFullscreen);
         setFullscreen(shouldBeFullscreen);
       } catch (error) {
         console.error('Failed to set fullscreen:', error);

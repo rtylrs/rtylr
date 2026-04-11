@@ -22,14 +22,16 @@ export const posService = {
   getTables: () => safe.get('/pos/tables'),
   createTable: (data: any) => safe.post('/pos/tables', data),
   updateTable: (id: number, data: any) => safe.put(`/pos/tables/${id}`, data),
-  updateTableStatus: (id: number, status: string) => safe.put(`/pos/tables/${id}/status`, { status }),
+  updateTableStatus: (id: number, status: string) =>
+    safe.put(`/pos/tables/${id}/status`, { status }),
   deleteTable: (id: number) => safe.delete(`/pos/tables/${id}`),
 
   // ── Orders ────────────────────────────────────────────────────
   getOrders: (params?: any) => safe.get('/pos/orders', { params }),
   getOrder: (id: number) => safe.get(`/pos/orders/${id}`),
   createOrder: (data: any) => safe.post('/pos/orders', data),
-  updateOrderStatus: (id: number, status: string) => safe.put(`/pos/orders/${id}/status`, { status }),
+  updateOrderStatus: (id: number, status: string) =>
+    safe.put(`/pos/orders/${id}/status`, { status }),
   chargeOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/payment`, data),
   voidOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/void`, data),
   refundOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/refund`, data),
@@ -57,7 +59,8 @@ export const posService = {
   closeSession: (data: any) => safe.post('/pos/sessions/close', data),
 
   // ── Cash movements ────────────────────────────────────────────
-  getCashMovements: (sessionId: number) => safe.get('/pos/cash/movements', { params: { session_id: sessionId } }),
+  getCashMovements: (sessionId: number) =>
+    safe.get('/pos/cash/movements', { params: { session_id: sessionId } }),
   cashDrop: (data: any) => safe.post('/pos/cash/drop', data),
   cashPickup: (data: any) => safe.post('/pos/cash/pickup', data),
   cashAdjust: (data: any) => safe.post('/pos/cash/adjust', data),
@@ -70,7 +73,8 @@ export const posService = {
 
   // ── KDS ────────────────────────────────────────────────────────
   getKDSOrders: (station?: string) => safe.get('/pos/kds/orders', { params: { station } }),
-  updateKDSItemStatus: (itemId: number, status: string) => safe.put(`/pos/kds/items/${itemId}`, { status }),
+  updateKDSItemStatus: (itemId: number, status: string) =>
+    safe.put(`/pos/kds/items/${itemId}`, { status }),
 
   // ── Customers ─────────────────────────────────────────────────
   searchCustomers: (q: string) => safe.get('/pos/customers', { params: { q } }),
@@ -90,13 +94,16 @@ export const posService = {
   // ── Loyalty ───────────────────────────────────────────────────
   getLoyaltyConfig: () => safe.get('/pos/loyalty/config'),
   updateLoyaltyConfig: (data: any) => safe.put('/pos/loyalty/config', data),
-  getLoyaltyBalance: (customerId: number) => safe.get('/pos/loyalty/balance', { params: { customer_id: customerId } }),
+  getLoyaltyBalance: (customerId: number) =>
+    safe.get('/pos/loyalty/balance', { params: { customer_id: customerId } }),
   earnLoyaltyPoints: (data: any) => safe.post('/pos/loyalty/earn', data),
   redeemLoyaltyPoints: (data: any) => safe.post('/pos/loyalty/redeem', data),
 
   // ── Stock / Inventory ─────────────────────────────────────────
-  getBranchInventory: (branchId: number) => safe.get('/pos/stock/inventory', { params: { branch_id: branchId } }),
-  getLowStock: (branchId: number) => safe.get('/pos/stock/low-stock', { params: { branch_id: branchId } }),
+  getBranchInventory: (branchId: number) =>
+    safe.get('/pos/stock/inventory', { params: { branch_id: branchId } }),
+  getLowStock: (branchId: number) =>
+    safe.get('/pos/stock/low-stock', { params: { branch_id: branchId } }),
   receiveStock: (data: any) => safe.post('/pos/stock/receive', data),
   adjustStock: (data: any) => safe.post('/pos/stock/adjust', data),
   wasteStock: (data: any) => safe.post('/pos/stock/waste', data),
@@ -106,7 +113,8 @@ export const posService = {
   getAuditLog: (params?: any) => safe.get('/pos/audit', { params }),
 
   // ── POS Users (cashiers/staff - PIN login) ────────────────────
-  getPOSUsers: (locationId?: number) => safe.get('/pos/users', { params: locationId ? { location_id: locationId } : {} }),
+  getPOSUsers: (locationId?: number) =>
+    safe.get('/pos/users', { params: locationId ? { location_id: locationId } : {} }),
   createPOSUser: (data: any) => safe.post('/pos/users', data),
   updatePOSUser: (data: any) => safe.post('/pos/users/update', data),
   deactivatePOSUser: (id: number) => safe.post('/pos/users/deactivate', { id }),

@@ -3,15 +3,15 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { APP_URLS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
-import { useUserStore } from './shared/stores/userStore';
+import { useUserStore } from './shared/stores';
 import { useEmployeeSessionStore } from './shared/stores/employeeSessionStore';
 import { useCartStore } from './shared/stores/cartStore';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
 import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
-import { useKeyboardShortcuts } from './shared/hooks/useKeyboardShortcuts';
-import { useAutoLogout } from './shared/hooks/useAutoLogout';
+import { useKeyboardShortcuts } from './shared/hooks';
+import { useAutoLogout } from './shared/hooks';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie

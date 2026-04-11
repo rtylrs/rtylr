@@ -86,17 +86,25 @@ export interface CartState {
 
 // ── Computed helpers ─────────────────────────────────────────────
 
-function generateLineId(productId: number, variantName?: string, modifiers?: CartItemModifier[]): string {
-  const modKey = (modifiers ?? []).map((m) => m.id).sort().join(',');
+function generateLineId(
+  productId: number,
+  variantName?: string,
+  modifiers?: CartItemModifier[]
+): string {
+  const modKey = (modifiers ?? [])
+    .map((m) => m.id)
+    .sort()
+    .join(',');
   return `${productId}:${variantName ?? ''}:${modKey}`;
 }
 
 function computeItemTotal(item: CartItem): number {
   const modifierTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
   const basePrice = (item.unitPrice + modifierTotal) * item.quantity;
-  const discountedPrice = item.discountPct > 0
-    ? basePrice * (1 - item.discountPct / 100)
-    : basePrice - item.discountAmount;
+  const discountedPrice =
+    item.discountPct > 0
+      ? basePrice * (1 - item.discountPct / 100)
+      : basePrice - item.discountAmount;
   return Math.max(0, discountedPrice);
 }
 
@@ -198,7 +206,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       if (existing) {
         return {
           items: state.items.map((i) =>
-            i.lineId === lineId ? { ...i, quantity: i.quantity + 1 } : i,
+            i.lineId === lineId ? { ...i, quantity: i.quantity + 1 } : i
           ),
         };
       }
@@ -243,7 +251,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
   setItemDiscount: (lineId, discountPct, discountAmount) =>
     set((state) => ({
       items: state.items.map((i) =>
-        i.lineId === lineId ? { ...i, discountPct, discountAmount } : i,
+        i.lineId === lineId ? { ...i, discountPct, discountAmount } : i
       ),
     })),
 
@@ -274,8 +282,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
   // ── Payments ──────────────────────────────────────────────────
 
-  addPayment: (payment) =>
-    set((state) => ({ payments: [...state.payments, payment] })),
+  addPayment: (payment) => set((state) => ({ payments: [...state.payments, payment] })),
 
   removePayment: (index) =>
     set((state) => ({ payments: state.payments.filter((_, i) => i !== index) })),
@@ -325,9 +332,10 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
     let orderDiscountAmount = 0;
     if (orderDiscount) {
       const sub = get().subtotal();
-      orderDiscountAmount = orderDiscount.type === 'percentage'
-        ? sub * (orderDiscount.value / 100)
-        : orderDiscount.value;
+      orderDiscountAmount =
+        orderDiscount.type === 'percentage'
+          ? sub * (orderDiscount.value / 100)
+          : orderDiscount.value;
     }
 
     return itemDiscounts + orderDiscountAmount;
@@ -337,7 +345,9 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
     const { items, orderDiscount } = get();
     const sub = get().subtotal();
     const orderDiscountRatio = orderDiscount
-      ? (orderDiscount.type === 'percentage' ? orderDiscount.value / 100 : orderDiscount.value / (sub || 1))
+      ? orderDiscount.type === 'percentage'
+        ? orderDiscount.value / 100
+        : orderDiscount.value / (sub || 1)
       : 0;
 
     return items.reduce((sum, item) => {
@@ -355,9 +365,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
     let orderDiscountAmount = 0;
     if (disc) {
-      orderDiscountAmount = disc.type === 'percentage'
-        ? sub * (disc.value / 100)
-        : disc.value;
+      orderDiscountAmount = disc.type === 'percentage' ? sub * (disc.value / 100) : disc.value;
     }
 
     return Math.max(0, sub - orderDiscountAmount + tax + tip);
