@@ -43,7 +43,7 @@ const MainHero: React.FC = () => {
             Book a Demo
           </button>
           <p className={styles.description}>
-            POS · ERP · HR · CRM · Finance · Flow. Built to work together from
+            POS · ERP · HR · CRM · Finance · Flow · Store · Book · Support · Insights. Built to work together from
             day one. Buy rtylr, get a whole business powered by AI.
           </p>
         </motion.div>

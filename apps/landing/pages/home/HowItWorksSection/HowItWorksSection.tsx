@@ -26,7 +26,7 @@ const steps = [
     number: '04',
     title: 'Launch',
     description:
-      'Go live across every department at once. POS, ERP, HR, CRM, Finance, and Flow all running together from day one.',
+      'Go live across every department at once. All 10 apps running together from day one.',
   },
 ];
 
