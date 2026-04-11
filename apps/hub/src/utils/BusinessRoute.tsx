@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { APP_URLS } from '@voxire/config';
-import { MonitorSpeaker, Package, UserCheck, Users, CreditCard, Layers, Lock } from 'lucide-react';
+import { MonitorSpeaker, Package, UserCheck, Users, CreditCard, Layers, Lock, Store, CalendarCheck, Headphones, BarChart3, FileText } from 'lucide-react';
 import { useUserStore } from '../stores/userStore';
 import api from '../lib/api';
 
@@ -21,6 +21,11 @@ const ALL_APPS = [
   { id: 'crm',     name: 'CRM',     desc: 'Customers and loyalty', color: '#8b5cf6', icon: Users,          href: APP_URLS.crm || 'https://crm.rtylr.com' },
   { id: 'finance', name: 'Finance', desc: 'Invoices and expenses', color: '#ef4444', icon: CreditCard,     href: APP_URLS.finance || 'https://finance.rtylr.com' },
   { id: 'flow',    name: 'Flow',    desc: 'Projects and tasks',    color: '#64C5B9', icon: Layers,         href: APP_URLS.flow || 'https://flow.rtylr.com' },
+  { id: 'store',   name: 'Store',   desc: 'Online store and orders', color: '#14b8a6', icon: Store,          href: APP_URLS.store || 'https://store.rtylr.com' },
+  { id: 'book',    name: 'Book',    desc: 'Appointments and scheduling', color: '#0ea5e9', icon: CalendarCheck,  href: APP_URLS.book || 'https://book.rtylr.com' },
+  { id: 'support', name: 'Support', desc: 'Help desk and tickets', color: '#4583C4', icon: Headphones,     href: APP_URLS.support || 'https://support.rtylr.com' },
+  { id: 'insights',name: 'Insights',desc: 'Analytics and reports', color: '#6366f1', icon: BarChart3,      href: APP_URLS.insights || 'https://insights.rtylr.com' },
+  { id: 'docs',    name: 'Docs',    desc: 'Documentation',         color: '#71717a', icon: FileText,       href: APP_URLS.docs || 'https://docs.rtylr.com' },
 ];
 
 function StaffView({ user }: { user: any }) {
