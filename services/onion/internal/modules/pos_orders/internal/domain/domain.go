@@ -173,8 +173,15 @@ type Order struct {
 	KitchenNotes   string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	PaidAt         *time.Time
-	Items          []OrderItem
+	PaidAt          *time.Time
+	Items           []OrderItem
+	TerminalID      int64
+	BranchID        int64
+	TipAmount       float64
+	VoidReason      string
+	VoidedBy        int64
+	VoidedAt        *time.Time
+	ExchangeOrderID int64
 }
 
 type OrderInput struct {

@@ -34,7 +34,8 @@ UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHER
 SELECT id, owner_id, location_id, staff_id, status,
        opening_cash, closing_cash, expected_cash, cash_difference,
        total_sales, total_orders, total_cash_sales, total_card_sales,
-       total_online_sales, total_refunds, opened_at, closed_at, notes
+       total_online_sales, total_refunds, opened_at, closed_at, notes,
+       terminal_id, business_id
 FROM pos_sessions
 WHERE owner_id = ? AND staff_id = ? AND status = 'open'
 LIMIT 1;
@@ -69,7 +70,8 @@ WHERE id = ?;
 SELECT id, owner_id, location_id, staff_id, status,
        opening_cash, closing_cash, expected_cash, cash_difference,
        total_sales, total_orders, total_cash_sales, total_card_sales,
-       total_online_sales, total_refunds, opened_at, closed_at, notes
+       total_online_sales, total_refunds, opened_at, closed_at, notes,
+       terminal_id, business_id
 FROM pos_sessions
 WHERE owner_id = ? AND id = ?;
 
@@ -81,7 +83,8 @@ SELECT id, owner_id, session_id, table_id, location_id,
        order_number, type, status, customer_id, customer_name,
        staff_id, subtotal, discount_amount, tax_amount, total,
        payment_method, payment_status, amount_paid, change_due,
-       notes, kitchen_notes, created_at, updated_at, paid_at
+       notes, kitchen_notes, created_at, updated_at, paid_at,
+       terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
 FROM pos_orders
 WHERE owner_id = ?
 ORDER BY created_at DESC;
@@ -91,7 +94,8 @@ SELECT id, owner_id, session_id, table_id, location_id,
        order_number, type, status, customer_id, customer_name,
        staff_id, subtotal, discount_amount, tax_amount, total,
        payment_method, payment_status, amount_paid, change_due,
-       notes, kitchen_notes, created_at, updated_at, paid_at
+       notes, kitchen_notes, created_at, updated_at, paid_at,
+       terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
 FROM pos_orders
 WHERE owner_id = ? AND id = ?;
 
@@ -116,7 +120,7 @@ UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
 -- name: GetOrderItems :many
 SELECT id, order_id, menu_item_id, name, sku,
        quantity, unit_price, discount_pct, discount_amount, tax_rate, total,
-       notes, status, created_at
+       notes, status, created_at, modifiers, combo_id, variant_name
 FROM pos_order_items
 WHERE order_id = ?;
 

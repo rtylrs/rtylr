@@ -398,7 +398,37 @@ func (r *Repository) GetOrder(ctx context.Context, ownerID, orderID int64) (*dom
 		return nil, err
 	}
 
-	o := orderFromRow(row)
+	o := domain.Order{
+		ID:             row.ID,
+		OwnerID:        row.OwnerID,
+		SessionID:      row.SessionID.Int64,
+		TableID:        row.TableID.Int64,
+		LocationID:     row.LocationID.Int64,
+		OrderNumber:    row.OrderNumber,
+		Type:           domain.OrderType(row.Type.PosOrdersType),
+		Status:         domain.OrderStatus(row.Status.PosOrdersStatus),
+		CustomerID:     row.CustomerID.Int64,
+		CustomerName:   row.CustomerName.String,
+		StaffID:        row.StaffID.Int64,
+		Subtotal:       decimalToFloat(row.Subtotal.String),
+		DiscountAmount: decimalToFloat(row.DiscountAmount.String),
+		TaxAmount:      decimalToFloat(row.TaxAmount.String),
+		Total:          decimalToFloat(row.Total.String),
+		PaymentMethod:  domain.PaymentMethod(row.PaymentMethod.PosOrdersPaymentMethod),
+		PaymentStatus:  domain.PaymentStatus(row.PaymentStatus.PosOrdersPaymentStatus),
+		AmountPaid:     decimalToFloat(row.AmountPaid.String),
+		ChangeDue:      decimalToFloat(row.ChangeDue.String),
+		Notes:          row.Notes.String,
+		KitchenNotes:   row.KitchenNotes.String,
+		CreatedAt:      row.CreatedAt.Time,
+		UpdatedAt:      row.UpdatedAt.Time,
+		TipAmount:      decimalToFloat(row.TipAmount.String),
+		TerminalID:     row.TerminalID.Int64,
+		BranchID:       row.BranchID.Int64,
+	}
+	if row.PaidAt.Valid {
+		o.PaidAt = &row.PaidAt.Time
+	}
 
 	items, err := r.GetOrderItems(ctx, o.ID)
 	if err != nil {
