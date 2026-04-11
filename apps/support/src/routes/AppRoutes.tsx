@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 import InboxScreen from '../features/inbox/Inbox';
 import Tickets from '../features/tickets/Tickets';
 import TicketDetail from '../features/tickets/TicketDetail';

@@ -1,5 +1,5 @@
 import React from 'react';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 import Dashboard from '../features/dashboard/Dashboard';
 import Customers from '../features/customers/Customers';
 import CustomerProfile from '../features/customers/CustomerProfile';

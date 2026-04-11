@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 const Dashboard = lazy(() => import('../features/dashboard/Dashboard'));
 const Products = lazy(() => import('../features/products/Products'));

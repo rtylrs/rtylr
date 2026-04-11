@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 import Dashboard from '../features/dashboard/Dashboard';
 import Inventory from '../features/inventory/Inventory';
 import Purchasing from '../features/purchasing/Purchasing';

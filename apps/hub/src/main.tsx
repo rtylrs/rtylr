@@ -3,19 +3,19 @@ import { injectTheme } from '@voxire/config';
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-import { FullScreenLoader } from "./components/FullScreenLoader";
+import { FullScreenLoader } from "./shared/components/FullScreenLoader";
 import { I18nextProvider } from "react-i18next";
-import i18next from "./services/i18next";
-import ScrollToTop from "./components/ScrollToTop";
+import i18next from "./shared/services/i18next";
+import ScrollToTop from "./shared/components/ScrollToTop";
 import { Toaster } from "sonner";
 import { CookiesProvider } from "react-cookie";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/react-query";
+import { queryClient } from "./shared/lib/react-query";
 import { HelmetProvider } from "react-helmet-async";
 
 import './globals.css';
 import "react-lazy-load-image-component/src/effects/blur.css";
-import { initTheme } from './stores/themeStore';
+import { initTheme } from "./shared/stores/themeStore";
 
 // Apply persisted theme before first render to prevent flash
 initTheme();

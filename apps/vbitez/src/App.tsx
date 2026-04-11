@@ -1,14 +1,14 @@
 import React, { useEffect, Suspense } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
-import NoMatch from './screens/Extras/NoMatch';
-import { useUserStore } from './stores/userStore';
-import { useEmployeeSessionStore } from './stores/employeeSessionStore';
-import PinLogin from './screens/Login';
-import CommandPalette from './components/CommandPalette';
-import HelpOverlay from './components/HelpOverlay';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useAutoLogout } from './hooks/useAutoLogout';
+import NoMatch from './features/extras/NoMatch';
+import { useUserStore } from './shared/stores/userStore';
+import { useEmployeeSessionStore } from './shared/stores/employeeSessionStore';
+import PinLogin from './features/login';
+import CommandPalette from './shared/components/CommandPalette';
+import HelpOverlay from './shared/components/HelpOverlay';
+import { useKeyboardShortcuts } from './shared/hooks/useKeyboardShortcuts';
+import { useAutoLogout } from './shared/hooks/useAutoLogout';
 
 const AppInner = (): JSX.Element => {
   useKeyboardShortcuts();

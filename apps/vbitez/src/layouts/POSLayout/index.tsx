@@ -1,7 +1,7 @@
 import React from 'react';
-import { useUserStore } from '../../stores/userStore';
-import { useThemeStore } from '../../stores/themeStore';
-import { useEmployeeSessionStore } from '../../stores/employeeSessionStore';
+import { useUserStore } from '../../shared/stores/userStore';
+import { useThemeStore } from '../../shared/stores/themeStore';
+import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 
 interface POSLayoutProps { children: React.ReactNode; }
 

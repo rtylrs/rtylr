@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 import { APP_URLS } from '@voxire/config';
-import { getCookie } from './lib/utils';
-import { useUserStore } from './stores/userStore';
+import { getCookie } from './shared/lib/utils';
+import { useUserStore } from './shared/stores/userStore';
 import appRoutes from './routes/AppRoutes';
-import api from './lib/api';
-import { mapMeResponseToFlowUser } from './lib/mapMeUser';
+import api from './shared/lib/api';
+import { mapMeResponseToFlowUser } from './shared/lib/mapMeUser';
 
 const APP_ID = 'flow';
 

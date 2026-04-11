@@ -1,5 +1,5 @@
 import React from 'react';
-import DefaultLayout from '../layouts/DefaultLayout/DefaultLayout';
+import DefaultLayout from '../layouts/DefaultLayout';
 import Dashboard from '../features/dashboard/Dashboard';
 import Invoices from '../features/invoices/Invoices';
 import InvoiceDetail from '../features/invoices/InvoiceDetail';

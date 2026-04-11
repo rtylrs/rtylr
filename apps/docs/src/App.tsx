@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import DocsLayout from './layouts/DocsLayout/DocsLayout';
+import DocsLayout from './layouts/DocsLayout';
 import Home from './features/home/Home';
 import Article from './features/article/Article';
 import ApiReference from './features/api-reference/ApiReference';
