@@ -5,9 +5,6 @@ import { erpApi, ReorderSuggestion } from '../../shared/services/erpApi';
 export function useReorderSuggestions() {
   return useQuery<ReorderSuggestion[]>({
     queryKey: ['reorder-suggestions'],
-    queryFn: async () => {
-      const res = await erpApi.getReorderSuggestions();
-      return res.data ?? [];
-    },
+    queryFn: () => unwrap(erpApi.getReorderSuggestions()),
   });
 }

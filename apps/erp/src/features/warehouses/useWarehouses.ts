@@ -5,9 +5,6 @@ import { erpApi, Warehouse } from '../../shared/services/erpApi';
 export function useWarehouses() {
   return useQuery<Warehouse[]>({
     queryKey: ['warehouses'],
-    queryFn: async () => {
-      const res = await erpApi.listWarehouses();
-      return res.data ?? [];
-    },
+    queryFn: () => unwrap(erpApi.listWarehouses()),
   });
 }

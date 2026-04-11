@@ -43,7 +43,7 @@ const ProductQuickEditScreen: React.FC = () => {
   const save = async (item: MenuItem) => {
     const draft = drafts[item.id];
     try {
-      await unwrap(posService.updateItem(item.id, draft));
+      await unwrap(posService.updateMenuItem(Number(item.id), draft));
       toast.success(`Updated ${item.name}`);
       reload();
     } catch {

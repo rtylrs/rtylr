@@ -72,7 +72,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                 className={`flex flex-col p-3 rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${
                   product.available === false ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                onClick={() => product.available !== false && addItem(product)}
+                onClick={() => product.available !== false && addItem(product as any)}
                 whileTap={{ scale: 0.96 }}
                 disabled={product.available === false}
               >

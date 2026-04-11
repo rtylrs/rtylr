@@ -39,8 +39,8 @@ export function useProjectOverview(projectId: string | undefined) {
     queryFn: async () => {
       if (!projectId) return null;
       const [taskList, ms] = await Promise.all([
-        flowApi.getTasks({ projectId }),
-        flowApi.getMilestones(projectId),
+        unwrap(flowApi.getTasks({ projectId })),
+        unwrap(flowApi.getMilestones(projectId)),
       ]);
       const done = taskList.filter((t) => t.status === 'done').length;
       const inProgress = taskList.filter((t) => t.status === 'in_progress').length;

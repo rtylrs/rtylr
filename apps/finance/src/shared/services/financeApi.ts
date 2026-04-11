@@ -40,10 +40,19 @@ export interface BarDataPoint {
 export interface Invoice {
   id: string;
   client: string;
+  clientEmail?: string;
   amount: number;
+  paid?: number;
   status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
   dueDate: string;
   issuedDate: string;
+  items?: any[];
+  notes?: string;
+  discount?: number;
+  tax?: number;
+  subtotal?: number;
+  number?: string;
+  history?: any[];
 }
 
 export interface Expense {
@@ -59,6 +68,9 @@ export interface ExpenseCategory {
   id: number;
   name: string;
   color: string;
+  spent?: number;
+  budget?: number;
+  count?: number;
 }
 
 export interface PLReport {

@@ -5,9 +5,6 @@ import { erpApi, StockTransfer } from '../../shared/services/erpApi';
 export function useStockTransfers() {
   return useQuery<StockTransfer[]>({
     queryKey: ['stock-transfers'],
-    queryFn: async () => {
-      const res = await erpApi.listStockTransfers();
-      return res.data ?? [];
-    },
+    queryFn: () => unwrap(erpApi.listStockTransfers()),
   });
 }

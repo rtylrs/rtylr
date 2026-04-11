@@ -2,6 +2,7 @@
  * Extended HR service layer backed by real API endpoints.
  */
 import { safe } from '../lib/api';
+import { unwrap } from '@voxire/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -227,12 +228,11 @@ export interface HrSettings {
 
 export const hrExtras = {
   // Profiles
-  getProfile: (id: number) =>
-    safe.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }).then((r) => r.data ?? null),
+  getProfile: (id: number) => safe.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }),
   upsertProfile: (p: EmployeeProfile) => safe.post<EmployeeProfile>('/hr/staff', p),
 
   // Time Off
-  listTimeOff: () => safe.get<TimeOffEntry[]>('/hr/time-off').then((r) => r.data ?? []),
+  listTimeOff: () => safe.get<TimeOffEntry[]>('/hr/time-off'),
   submitTimeOff: (data: Omit<TimeOffEntry, 'id' | 'status' | 'createdAt'>) =>
     safe.post<TimeOffEntry>('/hr/time-off', data),
   approveTimeOff: (id: number, approved: boolean, note?: string) =>
@@ -240,9 +240,7 @@ export const hrExtras = {
 
   // Schedule
   listSchedule: (weekStart?: string) =>
-    safe
-      .get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { weekStart } : {} })
-      .then((r) => r.data ?? []),
+    safe.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { weekStart } : {} }),
   upsertScheduleShift: (shift: Omit<ScheduleShift, 'id'> & { id?: number }) =>
     safe.post<{ success: boolean }>('/hr/shifts', shift),
   deleteScheduleShift: (id: number) =>
@@ -251,23 +249,23 @@ export const hrExtras = {
     safe.post<{ success: boolean }>('/hr/shifts', { weekStart, _action: 'publish' }),
 
   // Timesheets
-  listTimesheets: () => safe.get<TimesheetRow[]>('/hr/timesheets').then((r) => r.data ?? []),
+  listTimesheets: () => safe.get<TimesheetRow[]>('/hr/timesheets'),
   approveTimesheet: (id: number) =>
     safe.post<{ success: boolean }>('/hr/timesheets', { id, _action: 'approve' }),
   upsertTimesheet: (row: TimesheetRow) => safe.post<TimesheetRow>('/hr/timesheets', row),
 
   // Reviews
-  listReviews: () => safe.get<Review[]>('/hr/reviews').then((r) => r.data ?? []),
+  listReviews: () => safe.get<Review[]>('/hr/reviews'),
   createReview: (data: Omit<Review, 'id'>) => safe.post<Review>('/hr/reviews', data),
 
   // 1-on-1s
-  listOneOnOnes: () => safe.get<OneOnOne[]>('/hr/one-on-ones').then((r) => r.data ?? []),
+  listOneOnOnes: () => safe.get<OneOnOne[]>('/hr/one-on-ones'),
   createOneOnOne: (data: Omit<OneOnOne, 'id'>) => safe.post<OneOnOne>('/hr/one-on-ones', data),
   updateOneOnOne: (id: number, patch: Partial<OneOnOne>) =>
     safe.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
 
   // Onboarding
-  listOnboarding: () => safe.get<OnboardingTask[]>('/hr/training').then((r) => r.data ?? []),
+  listOnboarding: () => safe.get<OnboardingTask[]>('/hr/training'),
   toggleOnboardingTask: (id: number) =>
     safe.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle' }),
   addOnboardingTask: (task: Omit<OnboardingTask, 'id' | 'completed'>) =>
@@ -275,71 +273,53 @@ export const hrExtras = {
 
   // Offboarding
   listOffboarding: () =>
-    safe
-      .get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } })
-      .then((r) => r.data ?? []),
+    safe.get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } }),
   toggleOffboardingTask: (id: number) =>
     safe.post<{ success: boolean }>('/hr/training', { id, _action: 'toggle-offboarding' }),
 
   // Documents
-  listDocuments: () => safe.get<DocumentItem[]>('/hr/documents').then((r) => r.data ?? []),
+  listDocuments: () => safe.get<DocumentItem[]>('/hr/documents'),
   addDocument: (doc: Omit<DocumentItem, 'id' | 'uploadedAt'>) =>
     safe.post<DocumentItem>('/hr/documents', doc),
   deleteDocument: (id: number) =>
     safe.post<{ success: boolean }>('/hr/documents', { id, _action: 'delete' }),
   expiringDocuments: (daysAhead = 30) =>
-    safe
-      .get<DocumentItem[]>('/hr/documents', { params: { expiring: daysAhead } })
-      .then((r) => r.data ?? []),
+    safe.get<DocumentItem[]>('/hr/documents', { params: { expiring: daysAhead } }),
 
   // Benefits
-  listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits').then((r) => r.data ?? []),
+  listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits'),
   listBenefitEnrollments: () =>
-    safe
-      .get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } })
-      .then((r) => r.data ?? []),
+    safe.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }),
   enrollBenefit: (data: Omit<BenefitEnrollment, 'id' | 'startedAt' | 'status'>) =>
     safe.post<BenefitEnrollment>('/hr/benefits', data),
 
   // Training
-  listCourses: () =>
-    safe
-      .get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } })
-      .then((r) => r.data ?? []),
+  listCourses: () => safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
   listTrainingProgress: () =>
-    safe
-      .get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } })
-      .then((r) => r.data ?? []),
+    safe.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }),
   updateTrainingProgress: (id: number, progress: number) =>
     safe.post<{ success: boolean }>('/hr/training', { id, progress, _action: 'update-progress' }),
 
   // Birthdays & anniversaries
-  listBirthdays: () =>
-    safe.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }).then((r) => r.data ?? []),
+  listBirthdays: () => safe.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }),
   listAnniversaries: () =>
-    safe
-      .get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } })
-      .then((r) => r.data ?? []),
+    safe.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
 
   // Availability
   listAvailability: () =>
-    safe
-      .get<Availability[]>('/hr/shifts', { params: { view: 'availability' } })
-      .then((r) => r.data ?? []),
+    safe.get<Availability[]>('/hr/shifts', { params: { view: 'availability' } }),
   setAvailability: (row: Availability) =>
     safe.post<Availability>('/hr/shifts', { ...row, _action: 'set-availability' }),
 
   // Swaps
-  listSwaps: () =>
-    safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }).then((r) => r.data ?? []),
+  listSwaps: () => safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }),
   createSwap: (data: Omit<SwapRequest, 'id' | 'status'>) =>
     safe.post<SwapRequest>('/hr/shifts', { ...data, _action: 'create-swap' }),
   resolveSwap: (id: number, accepted: boolean) =>
     safe.post<{ success: boolean }>('/hr/shifts', { id, accepted, _action: 'resolve-swap' }),
 
   // Breaks
-  listBreaks: () =>
-    safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }).then((r) => r.data ?? []),
+  listBreaks: () => safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
   startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
     safe.post<BreakLog>('/hr/shifts/clock-in', {
       staffId,
@@ -352,22 +332,10 @@ export const hrExtras = {
 
   // Overtime
   listOvertimeAlerts: () =>
-    safe
-      .get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } })
-      .then((r) => r.data ?? []),
+    safe.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }),
 
   // Settings
-  getSettings: () =>
-    safe.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }).then(
-      (r) =>
-        r.data ?? {
-          workWeekStart: 'Monday' as const,
-          overtimeAfterHours: 40,
-          ptoPolicyDays: 15,
-          currency: 'USD' as const,
-          weeklyHours: 40,
-        }
-    ),
+  getSettings: () => safe.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }),
   updateSettings: (patch: Partial<HrSettings>) =>
     safe.post<HrSettings>('/hr/dashboard', { ...patch, _action: 'update-settings' }),
 };

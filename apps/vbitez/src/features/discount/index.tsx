@@ -19,7 +19,7 @@ const DiscountScreen: React.FC = () => {
   const submit = async () => {
     try {
       await unwrap(
-        posService.applyDiscount(orderId!, {
+        posService.applyDiscount(Number(orderId!), {
           mode,
           value: Number(value),
         })

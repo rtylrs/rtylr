@@ -451,7 +451,7 @@ const WorkspaceDashboard: React.FC = () => {
                             style={{
                               background: `${project.color}22`,
                               color: project.color,
-                              ringColor: 'var(--flow-card)',
+                              outlineColor: 'var(--flow-card)',
                             }}
                           >
                             {initials}

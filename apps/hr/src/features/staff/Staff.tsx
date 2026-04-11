@@ -33,7 +33,7 @@ const avatarColors = [
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const cardAnim = {
+const cardAnim: Record<string, any> = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };

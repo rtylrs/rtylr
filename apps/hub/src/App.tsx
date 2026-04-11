@@ -42,7 +42,7 @@ import { useGetConfig } from './shared/hooks/queries/useConfig';
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 
-const App = (): JSX.Element => {
+const App = (): React.JSX.Element => {
   //Hooks
   const location = useLocation();
   const { primary } = useColors();

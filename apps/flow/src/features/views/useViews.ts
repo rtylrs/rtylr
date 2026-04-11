@@ -42,7 +42,7 @@ export function useCreateView() {
         useFlowStore.setState({ views: [...useFlowStore.getState().views, row] });
         return Promise.resolve(row as any);
       }
-      return flowApi.createView(data as any);
+      return unwrap(flowApi.createView(data as any));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });
@@ -58,7 +58,7 @@ export function useDeleteView() {
         });
         return Promise.resolve();
       }
-      return flowApi.deleteView(id);
+      return unwrap(flowApi.deleteView(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });

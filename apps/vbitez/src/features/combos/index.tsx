@@ -12,7 +12,13 @@ const CombosScreen: React.FC = () => {
   const addItem = useCartStore((s) => s.addItem);
 
   const addCombo = (id: string, name: string, price: number) => {
-    addItem({ id: `combo_${id}`, name, price });
+    addItem({
+      id: `combo_${id}`,
+      productId: Number(id) || 0,
+      name,
+      unitPrice: price,
+      price,
+    } as any);
     toast.success(`Added combo: ${name}`);
   };
 

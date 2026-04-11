@@ -113,7 +113,7 @@ const SettingsLayout: React.FC = () => {
                       fontWeight: isActive ? 500 : undefined,
                     })}
                   >
-                    <Icon size={14} className="shrink-0" />
+                    <Icon size={14} {...({ className: 'shrink-0' } as any)} />
                     {label}
                   </NavLink>
                 ))}

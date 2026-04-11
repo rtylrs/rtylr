@@ -33,7 +33,7 @@ export function useCreateWorkspace() {
           ]);
         return Promise.resolve({ id, name: data.name, color: data.color });
       }
-      return flowApi.createWorkspace(data);
+      return unwrap(flowApi.createWorkspace(data));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
   });
@@ -50,7 +50,7 @@ export function useUpdateWorkspace() {
         useFlowStore.setState({ workspaces: ws });
         return Promise.resolve();
       }
-      return flowApi.updateWorkspace(id, data);
+      return unwrap(flowApi.updateWorkspace(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
   });
@@ -73,7 +73,7 @@ export function useDeleteWorkspace() {
         useFlowStore.setState({ workspaces: next, activeWorkspaceId: nextActive });
         return Promise.resolve();
       }
-      return flowApi.deleteWorkspace(id);
+      return unwrap(flowApi.deleteWorkspace(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
   });

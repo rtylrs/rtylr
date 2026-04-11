@@ -43,7 +43,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.18 }}
       draggable={draggable}
-      onDragStart={onDragStart}
+      onDragStart={onDragStart as any}
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey) {
           onSelect?.();

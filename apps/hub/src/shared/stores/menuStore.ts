@@ -31,6 +31,7 @@ interface MenuState {
   items: (Category | Banner)[];
   allMenus: Menu[];
   activeMenuId: string | null;
+  status: 'idle' | 'loading' | 'success' | 'error';
 }
 
 interface MenuActions {
@@ -38,6 +39,11 @@ interface MenuActions {
   setItems: (items: (Category | Banner)[]) => void;
   setAllMenus: (menus: Menu[]) => void;
   setActiveMenuId: (id: string | null) => void;
+  fetchMenu: (userId: string, force?: boolean) => Promise<void>;
+  addCategory: (category: Category) => void;
+  editCategory: (id: string, updates: Partial<Category>) => void;
+  deleteCategory: (id: string) => void;
+  addBanner: (banner: Banner) => void;
 }
 
 function isCategory(item: Category | Banner): item is Category {
@@ -49,6 +55,7 @@ const initialState: MenuState = {
   items: [],
   allMenus: [],
   activeMenuId: null,
+  status: 'idle',
 };
 
 export const useMenuStore = create<MenuState & MenuActions>()(
@@ -63,6 +70,32 @@ export const useMenuStore = create<MenuState & MenuActions>()(
       setAllMenus: (allMenus) => set({ allMenus }),
 
       setActiveMenuId: (activeMenuId) => set({ activeMenuId }),
+
+      fetchMenu: async (userId, force) => {
+        set({ status: 'loading' });
+        try {
+          // Placeholder - actual API call would go here
+          set({ status: 'success' });
+        } catch {
+          set({ status: 'error' });
+        }
+      },
+
+      addCategory: (category) => set((state) => ({ items: [...state.items, category] })),
+
+      editCategory: (id, updates) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            isCategory(item) && item.id === id ? { ...item, ...updates } : item
+          ),
+        })),
+
+      deleteCategory: (id) =>
+        set((state) => ({
+          items: state.items.filter((item) => !isCategory(item) || item.id !== id),
+        })),
+
+      addBanner: (banner) => set((state) => ({ items: [...state.items, banner] })),
     }),
     {
       name: 'menu-store',

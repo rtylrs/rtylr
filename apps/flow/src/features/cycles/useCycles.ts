@@ -44,7 +44,7 @@ export function useCreateCycle() {
         useFlowStore.setState({ cycles: [...useFlowStore.getState().cycles, row] });
         return Promise.resolve(row);
       }
-      return flowApi.createCycle(data);
+      return unwrap(flowApi.createCycle(data));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
   });
@@ -61,7 +61,7 @@ export function useUpdateCycle() {
         useFlowStore.setState({ cycles });
         return Promise.resolve();
       }
-      return flowApi.updateCycle(id, data);
+      return unwrap(flowApi.updateCycle(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
   });

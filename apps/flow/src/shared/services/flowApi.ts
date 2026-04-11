@@ -40,6 +40,7 @@ export interface ApiTask {
   dueDate: string;
   subtaskCount: number;
   projectName: string;
+  estimate?: number;
 }
 
 export interface ApiLabel {
@@ -54,8 +55,12 @@ export interface ApiMilestone {
   name: string;
   targetDate: string;
   progress: number;
+  computedProgress: number;
+  doneCount: number;
+  taskCount: number;
   status: 'planning' | 'active' | 'at_risk' | 'completed';
   description?: string;
+  project?: { name: string; color: string };
 }
 
 export interface ApiCycle {

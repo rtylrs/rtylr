@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useColors from '../../shared/hooks/useColors';
+// @ts-ignore
 import PackageJson from '@root/package.json';
 
 const Maintanance: React.FC = () => {

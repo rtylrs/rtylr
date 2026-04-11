@@ -20,7 +20,7 @@ const getTokenFromCookie = (): string | null =>
     .find((c) => c.startsWith('token='))
     ?.split('=')[1] ?? null;
 
-const AppInner = (): JSX.Element => {
+const AppInner = (): React.JSX.Element => {
   useKeyboardShortcuts();
   useAutoLogout();
   const location = useLocation();
@@ -38,7 +38,7 @@ const AppInner = (): JSX.Element => {
   );
 };
 
-const App = (): JSX.Element => {
+const App = (): React.JSX.Element => {
   const { token, getUserInfo } = useUserStore();
   const { isActive } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
@@ -77,7 +77,7 @@ const App = (): JSX.Element => {
   // Step 3: Set cart context with location + terminal + employee
   const employee = useEmployeeSessionStore.getState().employee;
   if (employee) {
-    setContext(locationId, terminalId, employee.id);
+    setContext(locationId as any, terminalId as any, employee.id as any);
   }
 
   // Step 4: Everything ready → main POS app

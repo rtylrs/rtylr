@@ -46,7 +46,7 @@ export function useCreateProject() {
         useFlowStore.setState({ projects: [...useFlowStore.getState().projects, row] });
         return Promise.resolve(row as any);
       }
-      return flowApi.createProject(data);
+      return unwrap(flowApi.createProject(data));
     },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['projects', variables.workspaceId] });
@@ -65,7 +65,7 @@ export function useUpdateProject() {
         useFlowStore.setState({ projects });
         return Promise.resolve();
       }
-      return flowApi.updateProject(id, data);
+      return unwrap(flowApi.updateProject(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });
@@ -81,7 +81,7 @@ export function useDeleteProject() {
         });
         return Promise.resolve();
       }
-      return flowApi.deleteProject(id);
+      return unwrap(flowApi.deleteProject(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });

@@ -38,10 +38,10 @@ const DropdownMenuTrigger: React.FC<{ children: React.ReactElement; asChild?: bo
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
       e.stopPropagation();
-      children.props.onClick?.(e);
+      (children.props as any).onClick?.(e);
       setOpen(!open);
     },
-  });
+  } as any);
 };
 
 interface DropdownMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {

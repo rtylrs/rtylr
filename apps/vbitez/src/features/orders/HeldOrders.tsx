@@ -18,7 +18,15 @@ const HeldOrdersScreen: React.FC = () => {
   const restore = (id: string) => {
     const order = release(id);
     if (!order) return;
-    order.items.forEach((it) => addItem({ id: it.id, name: it.name, price: it.price }));
+    order.items.forEach((it) =>
+      addItem({
+        id: it.id,
+        productId: Number(it.id) || 0,
+        name: it.name,
+        unitPrice: it.price,
+        price: it.price,
+      } as any)
+    );
     setTable(order.tableNumber ?? null);
     toast.success(`Released ${order.label}`);
     navigate('/');

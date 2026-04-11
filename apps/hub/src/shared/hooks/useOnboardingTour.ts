@@ -4,7 +4,7 @@ import 'shepherd.js/dist/css/shepherd.css';
 import { useUserStore } from '../stores/userStore';
 import api from '../lib/api';
 
-const TOUR_STEPS: Shepherd.Step.StepOptions[] = [
+const TOUR_STEPS: any[] = [
   {
     id: 'welcome',
     text: 'Welcome to rtylr! Let me show you around your command center.',
@@ -128,7 +128,7 @@ const TOUR_STEPS: Shepherd.Step.StepOptions[] = [
 
 export function useOnboardingTour() {
   const { user } = useUserStore();
-  const tourRef = useRef<Shepherd.Tour | null>(null);
+  const tourRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user || user.onboarded) return;

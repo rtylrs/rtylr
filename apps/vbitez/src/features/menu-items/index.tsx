@@ -23,7 +23,13 @@ const MenuItemsScreen: React.FC = () => {
   });
 
   const quickAdd = (item: MenuItem) => {
-    addItem({ id: item.id, name: item.name, price: item.price });
+    addItem({
+      id: item.id,
+      productId: Number(item.id) || 0,
+      name: item.name,
+      unitPrice: item.price,
+      price: item.price,
+    } as any);
     toast.success(`Added ${item.name}`);
   };
 

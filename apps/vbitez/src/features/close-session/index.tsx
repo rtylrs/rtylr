@@ -23,7 +23,8 @@ const CloseSessionScreen: React.FC = () => {
     setBusy(true);
     try {
       await unwrap(
-        posService.closeSession('current', {
+        posService.closeSession({
+          sessionId: 'current',
           expected,
           actual,
           variance,

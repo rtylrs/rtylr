@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../shared/lib/api';
+import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
   UtensilsCrossed,

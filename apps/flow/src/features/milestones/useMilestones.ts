@@ -30,19 +30,22 @@ export function useCreateMilestone() {
     mutationFn: (data: Partial<ApiMilestone>) => {
       if (isFlowLocal()) {
         const id = `mil-${Date.now()}`;
-        const row = {
+        const row: ApiMilestone = {
           id,
           projectId: data.projectId ?? '',
           name: data.name ?? 'Milestone',
           targetDate: data.targetDate ?? new Date().toISOString().slice(0, 10),
           progress: data.progress ?? 0,
+          computedProgress: data.computedProgress ?? 0,
+          doneCount: data.doneCount ?? 0,
+          taskCount: data.taskCount ?? 0,
           status: data.status ?? ('planning' as const),
           description: data.description,
         };
-        useFlowStore.setState({ milestones: [...useFlowStore.getState().milestones, row] });
+        useFlowStore.setState({ milestones: [...useFlowStore.getState().milestones, row as any] });
         return Promise.resolve(row);
       }
-      return flowApi.createMilestone(data);
+      return unwrap(flowApi.createMilestone(data));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['milestones'] }),
   });
@@ -59,7 +62,7 @@ export function useUpdateMilestone() {
         useFlowStore.setState({ milestones });
         return Promise.resolve();
       }
-      return flowApi.updateMilestone(id, data);
+      return unwrap(flowApi.updateMilestone(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['milestones'] }),
   });

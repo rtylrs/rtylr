@@ -33,10 +33,10 @@ const SheetTrigger: React.FC<{ children: React.ReactElement }> = ({ children }) 
   const { setOpen } = useContext(SheetContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
+      (children.props as any).onClick?.(e);
       setOpen(true);
     },
-  });
+  } as any);
 };
 
 interface SheetContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -125,10 +125,10 @@ const SheetClose: React.FC<{ children: React.ReactElement }> = ({ children }) =>
   const { setOpen } = useContext(SheetContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
+      (children.props as any).onClick?.(e);
       setOpen(false);
     },
-  });
+  } as any);
 };
 
 export {

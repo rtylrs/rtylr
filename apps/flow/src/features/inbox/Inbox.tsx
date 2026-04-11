@@ -11,31 +11,18 @@ import {
 } from 'lucide-react';
 import { cn, formatDate } from '../../shared/lib/utils';
 import { useUserStore } from '../../shared/stores/userStore';
-import { useFlowStore } from '../../shared/stores/flowStore';
+import { useFlowStore, type Notification } from '../../shared/stores/flowStore';
 
 const ACCENT = '#64C5B9';
 
 type FilterType = 'all' | 'unread' | 'assigned';
-
-interface Notification {
-  id: string;
-  type: 'assigned' | 'mention' | 'comment' | 'status_change';
-  read: boolean;
-  title: string;
-  description: string;
-  project: string;
-  projectColor: string;
-  actor: string;
-  actorInitials: string;
-  timestamp: string;
-  taskTitle: string;
-}
 
 const TYPE_ICONS: Record<Notification['type'], React.ReactNode> = {
   assigned: <CheckCircle2 size={14} style={{ color: ACCENT }} />,
   mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
   comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
   status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
+  due_soon: <Bell size={14} style={{ color: '#ef4444' }} />,
 };
 
 function formatTimestamp(ts: string): string {

@@ -30,8 +30,12 @@ export interface Milestone {
   name: string;
   targetDate: string;
   progress: number; // 0-100
+  computedProgress: number;
+  doneCount: number;
+  taskCount: number;
   status: 'planning' | 'active' | 'at_risk' | 'completed';
   description?: string;
+  project?: { name: string; color: string };
 }
 
 export interface Cycle {

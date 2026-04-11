@@ -3,7 +3,7 @@ import { useMenuStore } from '../../../shared/stores/menuStore';
 import { useUserStore } from '../../../shared/stores/userStore';
 import Dropzone from '../../../shared/components/Dropzone';
 
-const CreateBanner = (): JSX.Element => {
+const CreateBanner = (): React.JSX.Element => {
   const { addBanner } = useMenuStore();
   const { userId: restaurantId } = useUserStore();
 
@@ -40,7 +40,7 @@ const CreateBanner = (): JSX.Element => {
       bannerData.append('bannerImage', formData.image);
     }
 
-    addBanner(bannerData);
+    addBanner(bannerData as any);
   };
 
   return (

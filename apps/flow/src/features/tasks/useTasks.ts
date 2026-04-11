@@ -88,7 +88,7 @@ export function useCreateTask() {
         });
         return Promise.resolve(created as unknown as ApiTask);
       }
-      return flowApi.createTask(data);
+      return unwrap(flowApi.createTask(data));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
@@ -105,7 +105,7 @@ export function useUpdateTask() {
         useFlowStore.getState().updateTask(id, data as Partial<Task>);
         return Promise.resolve();
       }
-      return flowApi.updateTask(id, data);
+      return unwrap(flowApi.updateTask(id, data)).then(() => {});
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
@@ -123,7 +123,7 @@ export function useDeleteTask() {
         useFlowStore.getState().deleteTask(id);
         return Promise.resolve();
       }
-      return flowApi.deleteTask(id);
+      return unwrap(flowApi.deleteTask(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
@@ -140,7 +140,7 @@ export function useUpdateTaskStatus() {
         useFlowStore.getState().updateTask(id, { status: status as Task['status'] });
         return Promise.resolve();
       }
-      return flowApi.updateTaskStatus(id, status);
+      return unwrap(flowApi.updateTaskStatus(id, status));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });

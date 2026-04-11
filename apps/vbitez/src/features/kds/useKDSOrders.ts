@@ -57,7 +57,7 @@ export function useKDSOrders(station?: string) {
   const setStatus = async (id: string, status: KDSOrder['status']) => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
-      await unwrap(posService.updateKDSStatus(id, { status }));
+      await unwrap(posService.updateKDSItemStatus(Number(id), status));
     } catch {
       // leave local state updated; real sync handled by reload
     }

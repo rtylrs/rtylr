@@ -33,7 +33,7 @@ export function useReceipts() {
   const email = useCallback(
     async (id: string, address: string) => {
       try {
-        await unwrap(posService.emailReceipt(id, address));
+        await unwrap(posService.emailReceipt(Number(id), address));
         markEmailed(id);
         return true;
       } catch {
