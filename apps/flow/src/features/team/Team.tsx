@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
 import { useTeamWorkload } from './useTeamWorkload';
 import WorkloadBar from '../../shared/components/WorkloadBar';

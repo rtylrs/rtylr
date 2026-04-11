@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, Search, Mail, Ticket } from 'lucide-react';
 import { useDebounce } from '@voxire/utils';
 import { useCustomers } from './useCustomers';

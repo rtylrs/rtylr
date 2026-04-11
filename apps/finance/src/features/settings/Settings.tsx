@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { RotateCcw, Save, Image as ImageIcon } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';

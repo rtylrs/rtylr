@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { AlertTriangle, RefreshCw, ShoppingCart } from 'lucide-react';
 import { useLowStock } from '../inventory/useInventory';
 import PageHeader from '../../shared/components/PageHeader';

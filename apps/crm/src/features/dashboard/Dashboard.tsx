@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, UserPlus, Gift, Megaphone, TrendingUp, TrendingDown, AlertTriangle, DollarSign, PieChart, Activity, ArrowRight } from 'lucide-react';
 import { type DashboardStats } from '../../shared/services/crmApi';
 import { useCRMDashboard } from './useDashboard';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Package, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
 import { useProductPerformance, useBestSellers, useSlowMovers, useMarginAnalysis, useCategoryBreakdown } from './useProducts';
 import { formatCurrency, formatNumber, formatPercent } from '../../shared/lib/format';

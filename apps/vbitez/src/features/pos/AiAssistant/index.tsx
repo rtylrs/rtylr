@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
 interface Message { id: string; role: 'user' | 'assistant'; content: string; }

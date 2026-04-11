@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ListTodo, Filter, ArrowUpDown, Sun, CalendarDays, CalendarRange, Layers } from 'lucide-react';
 import { useMyIssues } from './useMyIssues';
 import { Task, STATUS_LABELS, PRIORITY_ORDER } from '../../shared/stores/flowStore';

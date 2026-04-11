@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DollarSign, BarChart3 } from 'lucide-react';
 import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';

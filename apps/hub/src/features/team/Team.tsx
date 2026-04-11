@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, UserPlus, Users, MoreHorizontal, Mail, Shield, Pencil, UserX, MonitorSpeaker, Package, UserCheck, CreditCard, Layers } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Button, Input } from "../../shared/components/ui";
 import api from "../../shared/lib/api";
 import {

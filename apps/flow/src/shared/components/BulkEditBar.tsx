@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
 import { useFlowStore, Task } from '../stores/flowStore';

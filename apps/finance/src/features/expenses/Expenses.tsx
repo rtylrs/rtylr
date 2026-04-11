@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses } from './useExpenses';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ListOrdered, Search, Bell, Clock } from 'lucide-react';
 import { useWaitlist, useNotifyWaitlist } from './useWaitlist';
 import { toast } from 'sonner';

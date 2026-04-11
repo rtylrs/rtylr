@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
 import { useCustomerAnalytics, useTopCustomers, useCustomerChurn, useCustomerLtv } from './useCustomers';
 import { formatCurrency, formatNumber, formatPercent } from '../../shared/lib/format';

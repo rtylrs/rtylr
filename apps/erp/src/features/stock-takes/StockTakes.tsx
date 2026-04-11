@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Plus, ClipboardList } from 'lucide-react';
 import { useStockTakes } from './useStockTakes';
 import PageHeader from '../../shared/components/PageHeader';

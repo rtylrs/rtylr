@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowLeft, Send, Lock, Circle, User } from 'lucide-react';
 import { useTicket, useTicketMessages, useSendTicketMessage, useUpdateTicketStatus } from './useTickets';
 

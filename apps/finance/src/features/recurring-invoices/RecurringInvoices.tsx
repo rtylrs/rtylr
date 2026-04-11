@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Calendar, Clock, XCircle, BarChart3, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDashboardStats, useTodayAppointments } from './useDashboard';

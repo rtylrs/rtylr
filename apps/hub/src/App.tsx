@@ -2,7 +2,7 @@ import React from "react";
 //Package imports
 import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Chart as ChartJS,
   LineElement,

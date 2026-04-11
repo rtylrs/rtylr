@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Bell, Palette, Keyboard, Sparkles } from 'lucide-react';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';

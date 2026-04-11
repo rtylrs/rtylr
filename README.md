@@ -6,7 +6,7 @@ All-in-one business operating system for SMBs. 15 apps, 10 shared packages.
 
 Frontend monorepo with 15 apps and 10 shared packages. pnpm workspaces + Turborepo.
 
-**Stack:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, framer-motion
+**Stack:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
 ## Apps
 

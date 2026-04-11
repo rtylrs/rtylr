@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { UserPlus, Mail, Search, Users } from 'lucide-react';
 import { StaffMember } from '../../shared/services/hrApi';

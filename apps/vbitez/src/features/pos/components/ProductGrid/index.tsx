@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 
 interface Product { id: string; name: string; price: number; category: string; image?: string; available?: boolean; }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DollarSign, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { useProfitLoss, useExpenseBreakdown, useInvoiceAging, useCashFlow } from './useFinancial';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';

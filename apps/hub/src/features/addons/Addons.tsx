@@ -6,7 +6,7 @@ import {
   ShoppingCart, Monitor, Code, EyeOff, Download, Mail,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Input } from "../../shared/components/ui";
 import api from "../../shared/lib/api";
 

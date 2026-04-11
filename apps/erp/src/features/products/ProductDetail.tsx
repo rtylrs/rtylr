@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Tag, Truck } from 'lucide-react';
 import { useProduct } from './useProducts';
 import { useVariants } from './useVariants';

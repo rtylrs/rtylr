@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';

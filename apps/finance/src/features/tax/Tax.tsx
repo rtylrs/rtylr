@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { TaxPeriod, TaxConfig as ApiTaxConfig } from '../../shared/services/financeApi';
 import { useTaxReport } from '../../shared/hooks/useTax';

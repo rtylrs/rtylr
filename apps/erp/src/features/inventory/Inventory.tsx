@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Search, Plus } from 'lucide-react';
 import { Product } from '../../shared/services/erpApi';
 import { useProducts } from '../products/useProducts';

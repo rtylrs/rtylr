@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { X, Loader2 } from 'lucide-react';
 
 export const ACCENT = '#3b82f6';

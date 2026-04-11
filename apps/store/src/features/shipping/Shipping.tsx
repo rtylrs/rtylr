@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Truck, Plus, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import { useShippingZones, useShippingMethods } from './useShipping';
 import { formatCurrency } from '../../shared/lib/format';
