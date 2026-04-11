@@ -10,6 +10,9 @@ import {
   BarChart3,
   ShoppingBag,
   Globe,
+  CalendarCheck,
+  Headphones,
+  FileText,
 } from 'lucide-react';
 import api from '../../lib/api';
 
@@ -33,6 +36,11 @@ const ICON_MAP: Record<string, any> = {
   crm: Users,
   finance: CreditCard,
   flow: Layers,
+  store: Store,
+  book: CalendarCheck,
+  support: Headphones,
+  insights: BarChart3,
+  docs: FileText,
   storefront: Store,
   analytics: BarChart3,
   market: ShoppingBag,
@@ -46,6 +54,11 @@ const APP_META: Record<string, { href: string; color: string; bg: string; catego
   crm:     { href: 'https://crm.rtylr.com',     color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  category: 'growth' },
   finance: { href: 'https://finance.rtylr.com', color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   category: 'finance' },
   flow:    { href: 'https://flow.rtylr.com',    color: '#64C5B9', bg: 'rgba(100,197,185,0.12)', category: 'core' },
+  store:   { href: 'https://store.rtylr.com',   color: '#14b8a6', bg: 'rgba(20,184,166,0.12)',  category: 'sales' },
+  book:    { href: 'https://book.rtylr.com',    color: '#0ea5e9', bg: 'rgba(14,165,233,0.12)',  category: 'operations' },
+  support: { href: 'https://support.rtylr.com', color: '#4583C4', bg: 'rgba(69,131,196,0.12)',  category: 'growth' },
+  insights:{ href: 'https://insights.rtylr.com',color: '#6366f1', bg: 'rgba(99,102,241,0.12)',  category: 'core' },
+  docs:    { href: 'https://docs.rtylr.com',    color: '#71717a', bg: 'rgba(113,113,122,0.12)', category: 'core' },
 };
 
 export const useApps = () => {

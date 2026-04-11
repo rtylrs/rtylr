@@ -28,7 +28,7 @@ const plans: Plan[] = [
     description: 'Trying rtylr with a small team',
     features: [
       'Up to 5 team members',
-      'All 6 apps (POS, ERP, HR, CRM, Finance, Flow)',
+      'All 11 apps included',
       'Basic support',
       'No credit card required',
     ],
@@ -42,7 +42,7 @@ const plans: Plan[] = [
     description: 'Small businesses getting started',
     features: [
       'Up to 20 team members',
-      'All 6 apps with advanced features',
+      'All 11 apps with advanced features',
       'Priority support',
       'AI assistant',
     ],
@@ -57,7 +57,7 @@ const plans: Plan[] = [
     description: 'Growing teams that outgrew Pro',
     features: [
       'For teams of 20+ members',
-      'All 6 apps + team analytics',
+      'All 11 apps + advanced analytics',
       'Dedicated support',
       'AI assistant',
       'SSO + audit logs',
