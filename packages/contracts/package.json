@@ -4,19 +4,40 @@
   "description": "Generated TypeScript types from voxie protobuf contracts",
   "type": "module",
   "exports": {
-    "./auth/*": "./src/auth/*.ts",
-    "./hub/*": "./src/hub/*.ts",
-    "./pos/*": "./src/pos/*.ts",
-    "./erp/*": "./src/erp/*.ts",
-    "./hr/*": "./src/hr/*.ts",
-    "./crm/*": "./src/crm/*.ts",
-    "./finance/*": "./src/finance/*.ts",
-    "./flow/*": "./src/flow/*.ts",
-    "./store/*": "./src/store/*.ts",
-    "./book/*": "./src/book/*.ts",
-    "./support/*": "./src/support/*.ts",
-    "./insights/*": "./src/insights/*.ts",
-    "./common/*": "./src/common/*.ts"
+    "./auth": "./src/auth/v1/index.ts",
+    "./hub": "./src/hub/v1/index.ts",
+    "./hub/apps": "./src/hub/v1/apps.ts",
+    "./hub/team": "./src/hub/v1/team.ts",
+    "./hub/user": "./src/hub/v1/user.ts",
+    "./hub/billing": "./src/hub/v1/billing.ts",
+    "./hub/dashboard": "./src/hub/v1/dashboard.ts",
+    "./hub/developer": "./src/hub/v1/developer.ts",
+    "./hub/config": "./src/hub/v1/config.ts",
+    "./hub/notifications": "./src/hub/v1/notifications.ts",
+    "./hub/activity": "./src/hub/v1/activity.ts",
+    "./hub/security": "./src/hub/v1/security.ts",
+    "./hub/permissions": "./src/hub/v1/permissions.ts",
+    "./hub/integrations": "./src/hub/v1/integrations.ts",
+    "./hub/menu": "./src/hub/v1/menu.ts",
+    "./hub/business": "./src/hub/v1/business.ts",
+    "./pos": "./src/pos/v1/index.ts",
+    "./store": "./src/store/v1/index.ts",
+    "./book": "./src/book/v1/index.ts",
+    "./crm": "./src/crm/v1/index.ts",
+    "./erp": "./src/erp/v1/index.ts",
+    "./finance": "./src/finance/v1/index.ts",
+    "./hr": "./src/hr/v1/index.ts",
+    "./flow": "./src/flow/v1/index.ts",
+    "./support": "./src/support/v1/index.ts",
+    "./insights": "./src/insights/v1/index.ts",
+    "./common": "./src/common/v1/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
   },
   "devDependencies": {
     "typescript": "~5.9.3"
