@@ -52,8 +52,9 @@ const InviteAccept: React.FC = () => {
     try {
       await api.post('/auth/invite/accept', { token, password });
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to set password');
+    } catch (err) {
+      const e = err as { response?: { data?: { error?: { message?: string } } } };
+      setError(e.response?.data?.error?.message || 'Failed to set password');
     } finally {
       setLoading(false);
     }
