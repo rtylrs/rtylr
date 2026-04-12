@@ -14,7 +14,7 @@ import {
   Headphones,
   BarChart3,
 } from 'lucide-react';
-import { useUserStore } from '../stores/userStore';
+import { useUserStore, type StoredUser } from '../stores/userStore';
 import api from '../lib/api';
 
 const getTokenFromCookie = (): string | null =>
@@ -109,7 +109,7 @@ const ALL_APPS = [
   },
 ];
 
-function StaffView({ user }: { user: any }) {
+function StaffView({ user }: { user: StoredUser }) {
   const userApps: string[] = user?.apps ?? [];
   const businessName = user?.businessName || '';
   const fullName = user?.fullName || user?.email || '';
@@ -135,7 +135,7 @@ function StaffView({ user }: { user: any }) {
 
   const initials = fullName
     .split(' ')
-    .map((n: any) => n[0])
+    .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);

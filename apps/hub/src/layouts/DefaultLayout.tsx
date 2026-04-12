@@ -214,7 +214,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { theme, setTheme } = useThemeStore();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { data: notifications = [] } = useNotifications();
-  const { data: addonsData } = useQuery({
+  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
       const res = await api.get('/addons');
@@ -222,13 +222,13 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     },
     staleTime: 60_000,
   });
-  const menuAddonEnabled = (addonsData ?? []).some((a: any) => a.id === 'menu' && a.isEnabled);
+  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
 
   useKeyboardShortcuts();
   useOnboardingTour();
 
   const unreadCount = Array.isArray(notifications)
-    ? notifications.filter((n: any) => !n.read).length
+    ? notifications.filter((n) => !n.read).length
     : 0;
   const pageTitle = getPageTitle(location.pathname);
   const userEmail = user?.email || user?.emailAddress || null;

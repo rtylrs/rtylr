@@ -1,35 +1,32 @@
 import { useCallback, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 
-type AsyncFunction<T> = (data: any) => Promise<T>;
+type AsyncFunction<T> = (data: unknown) => Promise<T>;
 type CallbackFunction = () => void;
-type ErrorMessageFunction = (error: any) => string;
+type ErrorMessageFunction = (error: unknown) => string;
 
 interface UseAsyncParams<T> {
   fn: AsyncFunction<T>;
   onSuccess?: CallbackFunction;
   onError?: CallbackFunction;
   callOnMount?: boolean;
-  callOnMountData?: any;
+  callOnMountData?: unknown;
   debounceTime?: number;
-  dependencies?: any[];
+  dependencies?: unknown[];
 }
 
 interface UseAsyncReturn<T> {
-  main: (data: any) => void;
+  main: (data: unknown) => void;
   error: string | null;
   success: boolean;
   loading: boolean;
   result: T | null;
-  requestData: any;
+  requestData: unknown;
 }
 
 const errorMessage: ErrorMessageFunction = (error) => {
-  return (
-    (error.response && error.response.data && error.response.data.message) ||
-    error.message ||
-    error.toString()
-  );
+  const err = error as { response?: { data?: { message?: string } }; message?: string };
+  return err?.response?.data?.message || err?.message || String(error);
 };
 
 export default function useAsync<T>({
@@ -45,7 +42,7 @@ export default function useAsync<T>({
   const [success, setSuccess] = useState<boolean>(false);
   const [result, setResult] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [requestData, setRequestData] = useState<any>(null);
+  const [requestData, setRequestData] = useState<unknown>(null);
 
   const debouncedMain = useCallback(
     debounce(async (data) => {

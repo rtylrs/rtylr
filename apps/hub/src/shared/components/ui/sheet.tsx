@@ -29,14 +29,16 @@ const Sheet: React.FC<SheetProps> = ({ open: controlledOpen, onOpenChange, child
   return <SheetContext.Provider value={{ open, setOpen }}>{children}</SheetContext.Provider>;
 };
 
-const SheetTrigger: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+const SheetTrigger: React.FC<{
+  children: React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>;
+}> = ({ children }) => {
   const { setOpen } = useContext(SheetContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      (children.props as any).onClick?.(e);
+      children.props.onClick?.(e);
       setOpen(true);
     },
-  } as any);
+  });
 };
 
 interface SheetContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -121,14 +123,16 @@ const SheetFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   />
 );
 
-const SheetClose: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+const SheetClose: React.FC<{
+  children: React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>;
+}> = ({ children }) => {
   const { setOpen } = useContext(SheetContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
-      (children.props as any).onClick?.(e);
+      children.props.onClick?.(e);
       setOpen(false);
     },
-  } as any);
+  });
 };
 
 export {

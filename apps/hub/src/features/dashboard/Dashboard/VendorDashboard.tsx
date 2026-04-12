@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ResponsiveGridLayout } from 'react-grid-layout';
+import { ResponsiveGridLayout, type Layout, type ResponsiveLayouts } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { useUserStore } from '../../../shared/stores/userStore';
@@ -52,10 +52,9 @@ const AdminDashboard: React.FC = () => {
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
   const [showCatalog, setShowCatalog] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleLayoutChange = useCallback((_: any, allLayouts: any) => {
-    setLayouts(allLayouts);
-    if (allLayouts.lg) saveLayout(allLayouts.lg);
+  const handleLayoutChange = useCallback((_: Layout[], allLayouts: ResponsiveLayouts) => {
+    setLayouts(allLayouts as unknown as { lg: Record<string, unknown>[] });
+    if (allLayouts.lg) saveLayout(allLayouts.lg as unknown as Record<string, unknown>[]);
   }, []);
 
   const addWidget = useCallback(

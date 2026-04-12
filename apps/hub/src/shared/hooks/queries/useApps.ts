@@ -1,3 +1,4 @@
+import React from 'react';
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -26,13 +27,16 @@ export interface RtylrApp {
   href: string;
   color: string;
   bg: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   category: 'core' | 'sales' | 'operations' | 'finance' | 'growth';
   status: 'active' | 'beta' | 'coming_soon';
 }
 
 /** Icon lookup used to hydrate server data with client-side icons */
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<
+  string,
+  React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+> = {
   pos: MonitorSpeaker,
   erp: Package,
   hr: UserCheck,

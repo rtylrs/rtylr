@@ -6,6 +6,30 @@ import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import CreateParentCategoryModal from './Components/CreateParentCategoryModal';
 
+interface StoreItemDetails {
+  name?: string;
+  description?: string;
+  image?: string;
+  price?: number;
+  isParentCategory?: boolean;
+  parentCategory?: string;
+  icon?: string;
+  menuItems?: StoreItem[];
+  banner?: { title?: string; bannerImage?: string };
+}
+
+interface StoreItem {
+  _id?: string;
+  itemId?: string;
+  type?: string;
+  details?: StoreItemDetails;
+}
+
+interface GroupedCategory {
+  parent: StoreItem | null;
+  children: StoreItem[];
+}
+
 const Menu: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
@@ -28,8 +52,8 @@ const Menu: React.FC<{}> = () => {
     deleteCategory(categoryId);
   };
 
-  const renderItems = (items: any) => {
-    return items.map((item: any) => (
+  const renderItems = (items: StoreItem[]) => {
+    return items.map((item) => (
       <div
         key={item._id}
         className="flex items-center justify-between p-3 border border-black/10 rounded-lg bg-white"
@@ -58,7 +82,7 @@ const Menu: React.FC<{}> = () => {
     ));
   };
 
-  const renderCategory = (category: any) => {
+  const renderCategory = (category: StoreItem) => {
     return (
       <div key={category._id} className="border border-black/10 rounded-xl p-4 bg-white mb-3">
         <div className="flex items-center justify-between mb-3">
@@ -85,18 +109,18 @@ const Menu: React.FC<{}> = () => {
             </button>
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              onClick={() => handleDeleteCategory(category.itemId)}
+              onClick={() => handleDeleteCategory(category.itemId ?? '')}
             >
               Delete
             </button>
           </div>
         </div>
-        <div className="space-y-2">{renderItems(category.details.menuItems)}</div>
+        <div className="space-y-2">{renderItems(category.details?.menuItems ?? [])}</div>
       </div>
     );
   };
 
-  const renderParentCategory = (parentCategory: any, childCategories: any) => {
+  const renderParentCategory = (parentCategory: StoreItem, childCategories: StoreItem[]) => {
     return (
       <div key={parentCategory._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -111,21 +135,9 @@ const Menu: React.FC<{}> = () => {
             )}
           </div>
           <div className="flex gap-2">
-            {!parentCategory && (
-              <button
-                className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90"
-                onClick={() => {
-                  navigate('/app/business/create-item', {
-                    state: { categoryId: parentCategory.itemId },
-                  });
-                }}
-              >
-                Add a product
-              </button>
-            )}
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              onClick={() => handleDeleteCategory(parentCategory.itemId)}
+              onClick={() => handleDeleteCategory(parentCategory.itemId ?? '')}
             >
               Delete
             </button>
@@ -136,26 +148,29 @@ const Menu: React.FC<{}> = () => {
     );
   };
 
-  const groupedCategories = items.reduce((acc: any, item: any) => {
-    if (item.type === 'category') {
-      if (item.details.isParentCategory) {
-        acc[item.itemId] = { parent: item, children: [] };
-      } else if (item.details.parentCategory) {
-        if (!acc[item.details.parentCategory]) {
-          acc[item.details.parentCategory] = { parent: null, children: [] };
+  const groupedCategories = (items as StoreItem[]).reduce(
+    (acc: Record<string, GroupedCategory | StoreItem>, item) => {
+      if (item.type === 'category') {
+        if (item.details?.isParentCategory) {
+          acc[item.itemId ?? ''] = { parent: item, children: [] };
+        } else if (item.details?.parentCategory) {
+          if (!acc[item.details.parentCategory]) {
+            acc[item.details.parentCategory] = { parent: null, children: [] };
+          }
+          (acc[item.details.parentCategory] as GroupedCategory).children.push(item);
+        } else {
+          acc[item.itemId ?? ''] = { parent: item, children: [] };
         }
-        acc[item.details.parentCategory].children.push(item);
-      } else {
-        acc[item.itemId] = { parent: item, children: [] };
+      } else if (item.type === 'banner') {
+        acc[item.itemId ?? ''] = item;
       }
-    } else if (item.type === 'banner') {
-      acc[item.itemId] = item;
-    }
-    return acc;
-  }, {});
+      return acc;
+    },
+    {}
+  );
 
-  const renderSections = (items: any) => {
-    return items.map((item: any) => {
+  const renderSections = (items: StoreItem[]) => {
+    return items.map((item) => {
       if (item.type === 'banner') {
         return (
           <div key={item._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
@@ -173,15 +188,16 @@ const Menu: React.FC<{}> = () => {
             <img
               style={{ width: '50%', height: '50%', objectFit: 'cover' }}
               src={item?.details?.banner?.bannerImage}
-              alt={item?.details?.title}
+              alt={item?.details?.banner?.title}
             />
           </div>
         );
       } else if (item.type === 'category') {
-        if (item.details.isParentCategory) {
-          const childCategories = groupedCategories[item.itemId].children;
+        if (item.details?.isParentCategory) {
+          const childCategories = (groupedCategories[item.itemId ?? ''] as GroupedCategory)
+            .children;
           return renderParentCategory(item, childCategories);
-        } else if (item.details.parentCategory) {
+        } else if (item.details?.parentCategory) {
           return null;
         } else {
           return renderCategory(item);
@@ -224,7 +240,7 @@ const Menu: React.FC<{}> = () => {
           </button>
         </div>
       </div>
-      <div>{renderSections(items)}</div>
+      <div>{renderSections(items as StoreItem[])}</div>
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setCreateCategoryModalOpen(false)}

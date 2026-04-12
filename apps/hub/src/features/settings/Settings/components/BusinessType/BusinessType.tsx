@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useBusinessStore } from '../../../../../shared/stores/businessStore';
+import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import {
@@ -96,8 +96,8 @@ const BusinessTypeSettings: React.FC = () => {
 
   const handleSave = async () => {
     if (!userId || !selected) return;
-    setBusinessType(selected as any);
-    const data: any = { businessType: selected };
+    setBusinessType(selected as BusinessType);
+    const data: Record<string, unknown> = { businessType: selected };
     if (selected === 'other' && customType) data.customBusinessType = customType;
     updateBusiness.mutate({ businessId: userId, data });
   };

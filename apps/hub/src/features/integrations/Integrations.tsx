@@ -26,8 +26,8 @@ const Integrations: React.FC = () => {
   const integrations = Array.isArray(data) ? data : [];
 
   const filtered = useMemo(() => {
-    return integrations.filter((i: any) => {
-      const name = i.name || i.provider || '';
+    return integrations.filter((i) => {
+      const name = i.name;
       const matchesQuery =
         !searchTerm.trim() || name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCat = cat === 'all' || i.category === cat;
@@ -101,13 +101,13 @@ const Integrations: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {filtered.map((i: any) => {
+          {filtered.map((i) => {
             const isConnected = i.status === 'connected';
-            const name = i.name || i.provider || 'Unknown';
+            const name = i.name;
 
             return (
               <div
-                key={i.id || i.provider}
+                key={i.id}
                 className="rounded-xl p-5 flex flex-col gap-4"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >

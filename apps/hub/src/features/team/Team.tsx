@@ -44,7 +44,7 @@ const Team: React.FC = () => {
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
-  const { data: addonsData } = useQuery({
+  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
       const res = await api.get('/addons');
@@ -52,7 +52,7 @@ const Team: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const menuAddonEnabled = (addonsData ?? []).some((a: any) => a.id === 'menu' && a.isEnabled);
+  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
 
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [page, setPage] = useState(0);

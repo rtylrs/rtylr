@@ -4,6 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../../../shared/lib/api';
 
+interface WidgetMember {
+  id?: string;
+  fullName?: string;
+  email?: string;
+  role?: string;
+  isActive?: boolean;
+}
+
 const TeamWidget: React.FC = () => {
   const navigate = useNavigate();
   const { data: raw } = useQuery({
@@ -14,7 +22,7 @@ const TeamWidget: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const members = Array.isArray(raw) ? raw : [];
+  const members: WidgetMember[] = Array.isArray(raw) ? (raw as WidgetMember[]) : [];
 
   return (
     <div className="flex flex-col h-full">
@@ -51,7 +59,7 @@ const TeamWidget: React.FC = () => {
             </button>
           </div>
         ) : (
-          members.slice(0, 5).map((m: any) => (
+          members.slice(0, 5).map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-2 py-1.5">
               <div
                 className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"

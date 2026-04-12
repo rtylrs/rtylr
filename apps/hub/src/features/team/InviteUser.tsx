@@ -40,7 +40,7 @@ const InviteUser: React.FC = () => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<TeamMember['role']>('staff');
   const [selectedApps, setSelectedApps] = useState<string[]>(['pos']);
-  const { data: addonsData } = useQuery({
+  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
       const res = await api.get('/addons');
@@ -48,7 +48,7 @@ const InviteUser: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const menuAddonEnabled = (addonsData ?? []).some((a: any) => a.id === 'menu' && a.isEnabled);
+  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
 
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
   const [password, setPassword] = useState('');
@@ -233,7 +233,7 @@ const InviteUser: React.FC = () => {
               <button
                 key={r.id}
                 type="button"
-                onClick={() => setRole(r.id as any)}
+                onClick={() => setRole(r.id as TeamMember['role'])}
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors"
                 style={{
                   background: role === r.id ? 'rgba(69,131,196,0.06)' : 'transparent',

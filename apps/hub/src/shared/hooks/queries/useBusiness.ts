@@ -20,7 +20,13 @@ export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ businessId, data }: { businessId: string; data: any }) => {
+    mutationFn: async ({
+      businessId,
+      data,
+    }: {
+      businessId: string;
+      data: Record<string, unknown>;
+    }) => {
       const response = await unwrap(safe.put(`/business/${businessId}`, data));
       return response.data;
     },
@@ -29,8 +35,9 @@ export const useUpdateBusiness = () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Business information updated successfully');
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Failed to update business information';
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      const message = err.response?.data?.message || 'Failed to update business information';
       toast.error(message);
       console.error('Error updating business:', error);
     },
@@ -42,7 +49,7 @@ export const useUpdateTheme = () => {
   const { user, setUser } = useUserStore();
 
   return useMutation({
-    mutationFn: async ({ id, themeData }: { id: string; themeData: any }) => {
+    mutationFn: async ({ id, themeData }: { id: string; themeData: Record<string, unknown> }) => {
       const response = await unwrap(safe.put(`/business/${id}/theme`, themeData));
       return response.data;
     },
@@ -54,8 +61,9 @@ export const useUpdateTheme = () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Theme updated successfully');
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Failed to update theme';
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      const message = err.response?.data?.message || 'Failed to update theme';
       toast.error(message);
       console.error('Error updating theme:', error);
     },

@@ -57,9 +57,12 @@ const ToolBarContent: React.FC = () => {
 
   useEffect(() => {
     const updateMemoryUsage = () => {
-      if ((performance as any).memory) {
-        const used = (performance as any).memory.usedJSHeapSize / 1024 / 1024;
-        const total = (performance as any).memory.totalJSHeapSize / 1024 / 1024;
+      const perf = performance as typeof performance & {
+        memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+      };
+      if (perf.memory) {
+        const used = perf.memory.usedJSHeapSize / 1024 / 1024;
+        const total = perf.memory.totalJSHeapSize / 1024 / 1024;
         setMemoryUsage(`${used.toFixed(1)}MB / ${total.toFixed(1)}MB`);
       }
     };

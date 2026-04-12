@@ -154,14 +154,14 @@ export function loadLayout() {
     if (!raw) return DEFAULT_LAYOUT;
     const parsed = JSON.parse(raw);
     // If old layout has 'kpis' (the combined widget), reset to default
-    if (parsed.some((l: any) => l.i === 'kpis')) return DEFAULT_LAYOUT;
+    if (parsed.some((l: Record<string, unknown>) => l.i === 'kpis')) return DEFAULT_LAYOUT;
     return parsed;
   } catch {
     return DEFAULT_LAYOUT;
   }
 }
 
-export function saveLayout(layout: any[]) {
+export function saveLayout(layout: Record<string, unknown>[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
 }
 
