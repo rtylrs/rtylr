@@ -42,6 +42,7 @@ import (
 	"github.com/voxire/onion/internal/modules/echo"
 	"github.com/voxire/onion/internal/modules/expenses"
 	"github.com/voxire/onion/internal/modules/feedback"
+	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	financereports "github.com/voxire/onion/internal/modules/finance_reports"
 	"github.com/voxire/onion/internal/modules/insights"
 	"github.com/voxire/onion/internal/modules/integrations"
@@ -258,6 +259,7 @@ type apiModules struct {
 	Echo                 *echo.Module
 	Expenses             *expenses.Module
 	Feedback             *feedback.Module
+	FlowInsights         *flowinsights.Module
 	FinanceReports       *financereports.Module
 	Insights             *insights.Module
 	Integrations         *integrations.Module
@@ -370,6 +372,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Echo:                 echo.NewModule(ctx, memoryModule),
 		Expenses:             expenses.NewModule(ctx),
 		Feedback:             feedback.NewModule(ctx),
+		FlowInsights:         flowinsights.NewModule(ctx),
 		FinanceReports:       financereports.NewModule(ctx),
 		Insights:             insights.NewModule(ctx),
 		Integrations:         integrations.NewModule(ctx),
