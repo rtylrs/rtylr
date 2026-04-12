@@ -40,10 +40,11 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
             loading: false,
             error: null,
           });
-        } catch (err: any) {
+        } catch (err) {
+          const e = err as { response?: { data?: { message?: string } } };
           set({
             loading: false,
-            error: err.response?.data?.message || 'Incorrect PIN',
+            error: e.response?.data?.message || 'Incorrect PIN',
           });
           throw err;
         }

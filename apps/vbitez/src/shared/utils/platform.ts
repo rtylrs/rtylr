@@ -80,6 +80,6 @@ export const platformSwitch = <T>(handlers: {
 // Declare global Tauri object for TypeScript
 declare global {
   interface Window {
-    __TAURI__?: any;
+    __TAURI__?: unknown;
   }
 }

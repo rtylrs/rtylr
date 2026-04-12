@@ -132,7 +132,7 @@ interface CartActions {
     modifiers?: CartItemModifier[];
     comboId?: number;
     variantName?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }) => void;
   removeItem: (lineId: string) => void;
   updateQuantity: (lineId: string, quantity: number) => void;

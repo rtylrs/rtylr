@@ -14,23 +14,25 @@ export function useSyncCache() {
     try {
       // Sync products
       const productsData = await unwrap(posService.getMenuItems());
-      const items = Array.isArray(productsData)
-        ? productsData
-        : ((productsData as any)?.items ?? []);
+      const items = (
+        Array.isArray(productsData)
+          ? productsData
+          : ((productsData as Record<string, unknown>)?.items ?? [])
+      ) as Record<string, unknown>[];
       if (items.length > 0) {
         await db.products.clear();
         await db.products.bulkPut(
-          items.map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            sku: p.sku ?? '',
-            barcode: p.barcode ?? undefined,
-            categoryId: p.categoryId ?? p.category_id ?? 0,
-            categoryName: p.categoryName ?? p.category ?? '',
-            price: p.price ?? p.salePrice ?? 0,
-            costPrice: p.costPrice ?? p.cost_price ?? 0,
-            taxClass: p.taxClass ?? 'standard',
-            imageUrl: p.image ?? p.imageUrl ?? undefined,
+          items.map((p) => ({
+            id: p.id as number,
+            name: (p.name as string) ?? '',
+            sku: (p.sku as string) ?? '',
+            barcode: (p.barcode as string) ?? undefined,
+            categoryId: (p.categoryId ?? p.category_id ?? 0) as number,
+            categoryName: (p.categoryName ?? p.category ?? '') as string,
+            price: (p.price ?? p.salePrice ?? 0) as number,
+            costPrice: (p.costPrice ?? p.cost_price ?? 0) as number,
+            taxClass: (p.taxClass as string) ?? 'standard',
+            imageUrl: (p.image ?? p.imageUrl ?? undefined) as string | undefined,
             available: p.available !== false && p.isActive !== false,
             syncedAt: Date.now(),
           }))
@@ -39,16 +41,20 @@ export function useSyncCache() {
 
       // Sync modifiers
       const modsData = await unwrap(posService.getModifiers());
-      const mods = Array.isArray(modsData) ? modsData : ((modsData as any)?.modifiers ?? []);
+      const mods = (
+        Array.isArray(modsData)
+          ? modsData
+          : ((modsData as Record<string, unknown>)?.modifiers ?? [])
+      ) as Record<string, unknown>[];
       if (mods.length > 0) {
         await db.modifiers.clear();
         await db.modifiers.bulkPut(
-          mods.map((m: any) => ({
-            id: m.id,
-            name: m.name,
-            groupName: m.groupName ?? m.group_name ?? '',
-            priceDelta: m.priceDelta ?? m.price_delta ?? 0,
-            isRequired: m.isRequired ?? m.is_required ?? false,
+          mods.map((m) => ({
+            id: m.id as number,
+            name: (m.name as string) ?? '',
+            groupName: (m.groupName ?? m.group_name ?? '') as string,
+            priceDelta: (m.priceDelta ?? m.price_delta ?? 0) as number,
+            isRequired: (m.isRequired ?? m.is_required ?? false) as boolean,
             syncedAt: Date.now(),
           }))
         );
@@ -56,16 +62,20 @@ export function useSyncCache() {
 
       // Sync combos
       const combosData = await unwrap(posService.getCombos());
-      const combos = Array.isArray(combosData) ? combosData : ((combosData as any)?.combos ?? []);
+      const combos = (
+        Array.isArray(combosData)
+          ? combosData
+          : ((combosData as Record<string, unknown>)?.combos ?? [])
+      ) as Record<string, unknown>[];
       if (combos.length > 0) {
         await db.combos.clear();
         await db.combos.bulkPut(
-          combos.map((c: any) => ({
-            id: c.id,
-            name: c.name,
-            description: c.description ?? '',
-            price: c.price ?? 0,
-            items: c.items ?? [],
+          combos.map((c) => ({
+            id: c.id as number,
+            name: (c.name as string) ?? '',
+            description: (c.description as string) ?? '',
+            price: (c.price as number) ?? 0,
+            items: (c.items ?? []) as { productId: number; name: string; quantity: number }[],
             isActive: c.isActive !== false,
             syncedAt: Date.now(),
           }))

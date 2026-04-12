@@ -6,10 +6,10 @@ const mockSetCookie = vi.fn();
 const mockGetDefaultCookieDomain = vi.fn(() => undefined);
 
 vi.mock('../lib/cookies', () => ({
-  setCookie: (...args: any[]) => mockSetCookie(...args),
-  removeCookie: (...args: any[]) => mockRemoveCookie(...args),
-  getCookie: (...args: any[]) => mockGetCookie(...args),
-  getDefaultCookieDomain: (...args: any[]) => mockGetDefaultCookieDomain(...args),
+  setCookie: (...args: unknown[]) => mockSetCookie(...args),
+  removeCookie: (...args: unknown[]) => mockRemoveCookie(...args),
+  getCookie: (...args: unknown[]) => mockGetCookie(...args),
+  getDefaultCookieDomain: (...args: unknown[]) => mockGetDefaultCookieDomain(...args),
 }));
 
 import { useUserStore } from './userStore';
