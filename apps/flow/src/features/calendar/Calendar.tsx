@@ -2,15 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useFlowStore, Task } from '../../shared/stores/flowStore';
+import type { Task } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
-import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 
 const Calendar: React.FC = () => {
-  const storeTasks = useFlowStore((s) => s.tasks);
   const { data: apiTasks } = useTasks({});
-  const tasks = (isFlowLocal() ? storeTasks : (apiTasks ?? storeTasks)) as Task[];
+  const tasks = (apiTasks ?? []) as Task[];
   const navigate = useNavigate();
   const [cursor, setCursor] = useState(() => new Date());
 

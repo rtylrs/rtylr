@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,24 +8,6 @@ vi.mock('../../shared/services/flowApi', () => ({
   flowApi: {
     getDashboard: vi.fn(),
   },
-}));
-
-vi.mock('../../shared/lib/flowLocalMode', () => ({
-  isFlowLocal: vi.fn(() => false),
-}));
-
-vi.mock('../../shared/lib/localFlowComputed', () => ({
-  buildDashboardStats: vi.fn(),
-}));
-
-vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: Object.assign(
-    vi.fn(() => []),
-    {
-      getState: vi.fn(() => ({ tasks: [], projects: [] })),
-      setState: vi.fn(),
-    }
-  ),
 }));
 
 vi.mock('@voxire/api', () => ({

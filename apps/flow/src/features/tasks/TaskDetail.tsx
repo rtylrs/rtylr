@@ -111,7 +111,7 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const task = taskData as Task;
+  const task = taskData as unknown as Task;
   const project = projects.find((p) => p.id === task.projectId);
   const projectSections = sections
     .filter((s) => s.projectId === task.projectId)

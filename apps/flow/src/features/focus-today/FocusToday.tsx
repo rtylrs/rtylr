@@ -6,7 +6,6 @@ import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { useMyIssues } from '../tasks/useMyIssues';
 import { isDueToday } from '../../shared/lib/lifeRhythm';
 import { isTaskMine } from '../../shared/lib/currentUser';
-import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import { formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { formatDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -17,9 +16,7 @@ const FocusToday: React.FC = () => {
   const storeTasks = useFlowStore((s) => s.tasks);
   const { projects, activeWorkspaceId } = useFlowStore();
   const { data: myTasks } = useMyIssues();
-  const tasks = (
-    isFlowLocal() ? storeTasks : ((myTasks as Task[] | undefined) ?? storeTasks)
-  ) as Task[];
+  const tasks = ((myTasks as Task[] | undefined) ?? storeTasks) as Task[];
 
   const focusTasks = useMemo(() => {
     const list = tasks.filter(

@@ -1,15 +1,13 @@
 import React, { useMemo } from 'react';
 import { Eye } from 'lucide-react';
-import { useFlowStore, Task } from '../../shared/stores/flowStore';
+import type { Task } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
-import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
 
 const Triage: React.FC = () => {
-  const storeTasks = useFlowStore((s) => s.tasks);
   const { data: apiTasks } = useTasks({});
-  const tasks = (isFlowLocal() ? storeTasks : (apiTasks ?? storeTasks)) as Task[];
+  const tasks = (apiTasks ?? []) as Task[];
 
   const needsTriage = useMemo(() => {
     return tasks.filter(
