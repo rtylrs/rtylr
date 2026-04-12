@@ -20,11 +20,11 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../lib/api', () => ({
   safe: {
-    get: (...args: any[]) => mockGet(...args),
-    post: (...args: any[]) => mockPost(...args),
+    get: (...args: unknown[]) => mockGet(...args),
+    post: (...args: unknown[]) => mockPost(...args),
   },
   default: {
-    patch: (...args: any[]) => mockPatch(...args),
+    patch: (...args: unknown[]) => mockPatch(...args),
   },
 }));
 

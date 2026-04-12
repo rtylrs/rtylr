@@ -11,7 +11,7 @@ vi.mock('@voxire/api', () => ({
 }));
 
 vi.mock('../../lib/api', () => ({
-  safe: { get: (...args: any[]) => mockGet(...args) },
+  safe: { get: (...args: unknown[]) => mockGet(...args) },
 }));
 
 function createWrapper() {

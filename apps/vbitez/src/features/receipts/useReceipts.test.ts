@@ -19,13 +19,13 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/posService', () => ({
   posService: {
-    getReceipts: (...args: any[]) => mockPosService.getReceipts(...args),
-    emailReceipt: (...args: any[]) => mockPosService.emailReceipt(...args),
+    getReceipts: (...args: unknown[]) => mockPosService.getReceipts(...args),
+    emailReceipt: (...args: unknown[]) => mockPosService.emailReceipt(...args),
   },
 }));
 
 vi.mock('../../shared/stores/receiptsStore', () => ({
-  useReceiptsStore: (selector: any) => {
+  useReceiptsStore: (selector: (s: typeof mockReceiptsStore) => unknown) => {
     const state = {
       receipts: mockReceiptsStore.receipts,
       add: mockReceiptsStore.add,

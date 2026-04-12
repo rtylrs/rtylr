@@ -14,7 +14,7 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/posService', () => ({
   posService: {
-    getMenuItems: (...args: any[]) => mockPosService.getMenuItems(...args),
+    getMenuItems: (...args: unknown[]) => mockPosService.getMenuItems(...args),
   },
 }));
 
