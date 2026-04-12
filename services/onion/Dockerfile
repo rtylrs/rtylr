@@ -12,12 +12,14 @@ RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.
 
 # Layer 3: deps — only reruns when go.mod / go.sum change
 COPY go.mod go.sum ./
+COPY voxie/go.mod voxie/go.sum* ./voxie/
 RUN go mod download && go mod verify
 
 # Layer 4: source — reruns on any code change but layers 1-3 are already cached
 COPY cmd ./cmd
 COPY internal ./internal
 COPY scripts ./scripts
+COPY voxie ./voxie
 
 RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
