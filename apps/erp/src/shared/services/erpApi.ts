@@ -224,23 +224,24 @@ export const erpApi = {
 
   // Categories
   listCategories: () => safe.get<Category[]>('/erp/categories'),
-  createCategory: (data: any) => safe.post<Category>('/erp/categories', data),
+  createCategory: (data: Partial<Category>) => safe.post<Category>('/erp/categories', data),
 
   // Brands
   listBrands: () => safe.get<Brand[]>('/erp/brands'),
-  createBrand: (data: any) => safe.post<Brand>('/erp/brands', data),
+  createBrand: (data: Partial<Brand>) => safe.post<Brand>('/erp/brands', data),
 
   // Warehouses
   listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
-  createWarehouse: (data: any) => safe.post<Warehouse>('/erp/warehouses', data),
+  createWarehouse: (data: Partial<Warehouse>) => safe.post<Warehouse>('/erp/warehouses', data),
 
   // Stock transfers
   listStockTransfers: () => safe.get<StockTransfer[]>('/erp/stock-transfers'),
-  createStockTransfer: (data: any) => safe.post<StockTransfer>('/erp/stock-transfers', data),
+  createStockTransfer: (data: Partial<StockTransfer>) =>
+    safe.post<StockTransfer>('/erp/stock-transfers', data),
 
   // Stock takes
   listStockTakes: () => safe.get<StockTake[]>('/erp/stock-takes'),
-  createStockTake: (data: any) => safe.post<StockTake>('/erp/stock-takes', data),
+  createStockTake: (data: Partial<StockTake>) => safe.post<StockTake>('/erp/stock-takes', data),
 
   // Suppliers
   listSuppliers: () => safe.get<Supplier[]>('/erp/suppliers'),

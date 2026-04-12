@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
 import { PurchaseOrder } from '../../shared/services/erpApi';
 import { usePurchaseOrders } from './usePurchaseOrders';
@@ -11,7 +11,11 @@ const AMBER = '#f59e0b';
 
 const statusConfig: Record<
   PurchaseOrder['status'],
-  { color: string; bg: string; icon: React.ComponentType<{ size?: number }> }
+  {
+    color: string;
+    bg: string;
+    icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  }
 > = {
   Draft: { color: 'var(--hub-text-muted)', bg: 'var(--hub-hover)', icon: FileText },
   'Pending Approval': { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: ClockIcon },
@@ -20,12 +24,12 @@ const statusConfig: Record<
   Received: { color: '#10b981', bg: 'rgba(16,185,129,0.1)', icon: CheckCircle },
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };
@@ -70,12 +74,12 @@ const Purchasing: React.FC = () => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-5 max-w-6xl"
     >
-      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Purchase Orders
         </h2>
@@ -103,7 +107,7 @@ const Purchasing: React.FC = () => {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants as any} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {(Object.entries(statusCounts) as [PurchaseOrder['status'], number][]).map(
           ([status, count]) => {
             const sc = statusConfig[status];
@@ -124,7 +128,7 @@ const Purchasing: React.FC = () => {
                   className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
                   style={{ background: sc.bg }}
                 >
-                  <Icon size={15} {...({ style: { color: sc.color } } as any)} />
+                  <Icon size={15} style={{ color: sc.color }} />
                 </span>
                 <div>
                   <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -141,7 +145,7 @@ const Purchasing: React.FC = () => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl overflow-hidden"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
