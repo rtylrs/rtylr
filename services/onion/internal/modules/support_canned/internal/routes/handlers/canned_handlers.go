@@ -4,35 +4,23 @@ import (
 	"context"
 	"net/http"
 
+	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
+
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type CannedPayload struct {
-	ID         int64  `json:"id"`
-	BusinessID int64  `json:"business_id"`
-	Name       string `json:"name"`
-	Body       string `json:"body"`
-	Category   string `json:"category"`
-	Shortcut   string `json:"shortcut"`
-	CreatedAt  string `json:"created_at"`
-}
-
-func ListCannedRoutes() []string  { return []string{"/support/canned"} }
+func ListCannedRoutes() []string   { return []string{"/support/canned"} }
 func CreateCannedRoutes() []string { return []string{"/support/canned"} }
 func UpdateCannedRoutes() []string { return []string{"/support/canned"} }
 func DeleteCannedRoutes() []string { return []string{"/support/canned"} }
 
-// -- LIST --------------------------------------------------------------------
-
 type ListCannedHandler struct{ Service *application.Service }
-
 type ListCannedRequest struct{}
-
 type ListCannedResponse struct {
-	CannedResponses []CannedPayload `json:"canned_responses"`
+	CannedResponses []*suppv1.CannedResponse `json:"canned_responses"`
 }
 
 func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (ListCannedResponse, *errorModels.ServerError) {
@@ -44,10 +32,10 @@ func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (Li
 	if err != nil {
 		return ListCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list canned responses"}
 	}
-	payloads := make([]CannedPayload, len(items))
+	payloads := make([]*suppv1.CannedResponse, len(items))
 	for i, c := range items {
-		payloads[i] = CannedPayload{
-			ID: c.ID, BusinessID: c.BusinessID, Name: c.Name,
+		payloads[i] = &suppv1.CannedResponse{
+			Id: c.ID, BusinessId: c.BusinessID, Name: c.Name,
 			Body: c.Body, Category: c.Category, Shortcut: c.Shortcut,
 			CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		}
@@ -55,17 +43,13 @@ func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (Li
 	return ListCannedResponse{CannedResponses: payloads}, nil
 }
 
-// -- CREATE ------------------------------------------------------------------
-
 type CreateCannedHandler struct{ Service *application.Service }
-
 type CreateCannedRequest struct {
 	Name     string `json:"name"`
 	Body     string `json:"body"`
 	Category string `json:"category"`
 	Shortcut string `json:"shortcut"`
 }
-
 type CreateCannedResponse struct {
 	CannedResponseID int64  `json:"canned_response_id"`
 	Message          string `json:"message"`
@@ -87,11 +71,8 @@ func (h *CreateCannedHandler) Serve(ctx context.Context, req *CreateCannedReques
 		return CreateCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Create(ctx, domain.CannedResponseInput{
-		BusinessID: device.User.UserID,
-		Name:       req.Name,
-		Body:       req.Body,
-		Category:   req.Category,
-		Shortcut:   req.Shortcut,
+		BusinessID: device.User.UserID, Name: req.Name, Body: req.Body,
+		Category: req.Category, Shortcut: req.Shortcut,
 	})
 	if err != nil {
 		return CreateCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create canned response"}
@@ -99,10 +80,7 @@ func (h *CreateCannedHandler) Serve(ctx context.Context, req *CreateCannedReques
 	return CreateCannedResponse{CannedResponseID: id, Message: "Canned response created"}, nil
 }
 
-// -- UPDATE ------------------------------------------------------------------
-
 type UpdateCannedHandler struct{ Service *application.Service }
-
 type UpdateCannedRequest struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
@@ -110,7 +88,6 @@ type UpdateCannedRequest struct {
 	Category string `json:"category"`
 	Shortcut string `json:"shortcut"`
 }
-
 type UpdateCannedResponse struct {
 	Message string `json:"message"`
 }
@@ -128,10 +105,7 @@ func (h *UpdateCannedHandler) Serve(ctx context.Context, req *UpdateCannedReques
 		return UpdateCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	err := h.Service.Update(ctx, device.User.UserID, req.ID, domain.CannedResponseInput{
-		Name:     req.Name,
-		Body:     req.Body,
-		Category: req.Category,
-		Shortcut: req.Shortcut,
+		Name: req.Name, Body: req.Body, Category: req.Category, Shortcut: req.Shortcut,
 	})
 	if err != nil {
 		return UpdateCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update canned response"}
@@ -139,14 +113,10 @@ func (h *UpdateCannedHandler) Serve(ctx context.Context, req *UpdateCannedReques
 	return UpdateCannedResponse{Message: "Canned response updated"}, nil
 }
 
-// -- DELETE ------------------------------------------------------------------
-
 type DeleteCannedHandler struct{ Service *application.Service }
-
 type DeleteCannedRequest struct {
 	ID int64 `json:"id"`
 }
-
 type DeleteCannedResponse struct {
 	Message string `json:"message"`
 }

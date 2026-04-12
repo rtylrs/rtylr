@@ -4,20 +4,24 @@ import (
 	"context"
 	"net/http"
 
+	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
+
 	"github.com/voxire/onion/internal/modules/support_customers/internal/application"
+	"github.com/voxire/onion/internal/modules/support_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type CustomerPayload struct {
-	ID           int64  `json:"id"`
-	BusinessID   int64  `json:"business_id"`
-	Name         string `json:"name"`
-	Email        string `json:"email"`
-	Phone        string `json:"phone"`
-	TotalTickets int    `json:"total_tickets"`
-	LastTicketAt string `json:"last_ticket_at"`
-	CreatedAt    string `json:"created_at"`
+func toCustomerPayload(c domain.Customer) *suppv1.SupportCustomer {
+	p := &suppv1.SupportCustomer{
+		Id: c.ID, BusinessId: c.BusinessID, Name: c.Name,
+		Email: c.Email, Phone: c.Phone, TotalTickets: int64(c.TotalTickets),
+		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if c.LastTicketAt != nil {
+		p.LastTicketAt = c.LastTicketAt.Format("2006-01-02T15:04:05Z")
+	}
+	return p
 }
 
 // -- LIST --------------------------------------------------------------------
@@ -32,10 +36,10 @@ type ListCustomersRequest struct {
 }
 
 type ListCustomersResponse struct {
-	Customers []CustomerPayload `json:"customers"`
-	Total     int               `json:"total"`
-	Page      int               `json:"page"`
-	PageSize  int               `json:"page_size"`
+	Customers []*suppv1.SupportCustomer `json:"customers"`
+	Total     int                       `json:"total"`
+	Page      int                       `json:"page"`
+	PageSize  int                       `json:"page_size"`
 }
 
 func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequest) (ListCustomersResponse, *errorModels.ServerError) {
@@ -53,17 +57,9 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 	if err != nil {
 		return ListCustomersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support customers"}
 	}
-	payloads := make([]CustomerPayload, len(items))
+	payloads := make([]*suppv1.SupportCustomer, len(items))
 	for i, c := range items {
-		p := CustomerPayload{
-			ID: c.ID, BusinessID: c.BusinessID, Name: c.Name,
-			Email: c.Email, Phone: c.Phone, TotalTickets: c.TotalTickets,
-			CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		}
-		if c.LastTicketAt != nil {
-			p.LastTicketAt = c.LastTicketAt.Format("2006-01-02T15:04:05Z")
-		}
-		payloads[i] = p
+		payloads[i] = toCustomerPayload(c)
 	}
 	return ListCustomersResponse{Customers: payloads, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
@@ -79,7 +75,7 @@ type GetCustomerRequest struct {
 }
 
 type GetCustomerResponse struct {
-	Customer CustomerPayload `json:"customer"`
+	Customer *suppv1.SupportCustomer `json:"customer"`
 }
 
 func (h *GetCustomerHandler) Validate(_ context.Context, req *GetCustomerRequest) *errorModels.ServerError {
@@ -98,13 +94,5 @@ func (h *GetCustomerHandler) Serve(ctx context.Context, req *GetCustomerRequest)
 	if err != nil {
 		return GetCustomerResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support customer"}
 	}
-	p := CustomerPayload{
-		ID: c.ID, BusinessID: c.BusinessID, Name: c.Name,
-		Email: c.Email, Phone: c.Phone, TotalTickets: c.TotalTickets,
-		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	if c.LastTicketAt != nil {
-		p.LastTicketAt = c.LastTicketAt.Format("2006-01-02T15:04:05Z")
-	}
-	return GetCustomerResponse{Customer: p}, nil
+	return GetCustomerResponse{Customer: toCustomerPayload(*c)}, nil
 }

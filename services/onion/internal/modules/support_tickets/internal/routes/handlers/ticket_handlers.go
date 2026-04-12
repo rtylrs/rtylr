@@ -4,39 +4,17 @@ import (
 	"context"
 	"net/http"
 
+	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
+
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/application"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type TicketPayload struct {
-	ID            int64  `json:"id"`
-	BusinessID    int64  `json:"business_id"`
-	CustomerName  string `json:"customer_name"`
-	CustomerEmail string `json:"customer_email"`
-	Subject       string `json:"subject"`
-	Status        string `json:"status"`
-	Priority      string `json:"priority"`
-	AssignedTo    *int64 `json:"assigned_to"`
-	Channel       string `json:"channel"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
-}
-
-type MessagePayload struct {
-	ID         int64  `json:"id"`
-	TicketID   int64  `json:"ticket_id"`
-	SenderType string `json:"sender_type"`
-	SenderName string `json:"sender_name"`
-	Body       string `json:"body"`
-	IsInternal bool   `json:"is_internal"`
-	CreatedAt  string `json:"created_at"`
-}
-
-func toTicketPayload(t domain.Ticket) TicketPayload {
-	return TicketPayload{
-		ID: t.ID, BusinessID: t.BusinessID, CustomerName: t.CustomerName,
+func toTicketPayload(t domain.Ticket) *suppv1.Ticket {
+	return &suppv1.Ticket{
+		Id: t.ID, BusinessId: t.BusinessID, CustomerName: t.CustomerName,
 		CustomerEmail: t.CustomerEmail, Subject: t.Subject, Status: t.Status,
 		Priority: t.Priority, AssignedTo: t.AssignedTo, Channel: t.Channel,
 		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -57,10 +35,10 @@ type ListTicketsRequest struct {
 }
 
 type ListTicketsResponse struct {
-	Tickets  []TicketPayload `json:"tickets"`
-	Total    int             `json:"total"`
-	Page     int             `json:"page"`
-	PageSize int             `json:"page_size"`
+	Tickets  []*suppv1.Ticket `json:"tickets"`
+	Total    int              `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
 }
 
 func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest) (ListTicketsResponse, *errorModels.ServerError) {
@@ -78,7 +56,7 @@ func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest)
 	if err != nil {
 		return ListTicketsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support tickets"}
 	}
-	payloads := make([]TicketPayload, len(items))
+	payloads := make([]*suppv1.Ticket, len(items))
 	for i, t := range items {
 		payloads[i] = toTicketPayload(t)
 	}
@@ -96,8 +74,8 @@ type GetTicketRequest struct {
 }
 
 type GetTicketResponse struct {
-	Ticket   TicketPayload    `json:"ticket"`
-	Messages []MessagePayload `json:"messages"`
+	Ticket   *suppv1.Ticket          `json:"ticket"`
+	Messages []*suppv1.TicketMessage `json:"messages"`
 }
 
 func (h *GetTicketHandler) Validate(_ context.Context, req *GetTicketRequest) *errorModels.ServerError {
@@ -120,10 +98,10 @@ func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (Ge
 	if err != nil {
 		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list ticket messages"}
 	}
-	msgPayloads := make([]MessagePayload, len(msgs))
+	msgPayloads := make([]*suppv1.TicketMessage, len(msgs))
 	for i, m := range msgs {
-		msgPayloads[i] = MessagePayload{
-			ID: m.ID, TicketID: m.TicketID, SenderType: m.SenderType,
+		msgPayloads[i] = &suppv1.TicketMessage{
+			Id: m.ID, TicketId: m.TicketID, SenderType: m.SenderType,
 			SenderName: m.SenderName, Body: m.Body, IsInternal: m.IsInternal,
 			CreatedAt: m.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		}

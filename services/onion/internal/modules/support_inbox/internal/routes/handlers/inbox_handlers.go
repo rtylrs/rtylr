@@ -4,23 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
+
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-type InboxPayload struct {
-	TicketID      int64  `json:"ticket_id"`
-	CustomerName  string `json:"customer_name"`
-	CustomerEmail string `json:"customer_email"`
-	Subject       string `json:"subject"`
-	Status        string `json:"status"`
-	Priority      string `json:"priority"`
-	Channel       string `json:"channel"`
-	LastMessage   string `json:"last_message"`
-	LastMessageAt string `json:"last_message_at"`
-	MessageCount  int    `json:"message_count"`
-}
 
 // -- LIST INBOX --------------------------------------------------------------
 
@@ -34,10 +23,10 @@ type ListInboxRequest struct {
 }
 
 type ListInboxResponse struct {
-	Inbox    []InboxPayload `json:"inbox"`
-	Total    int            `json:"total"`
-	Page     int            `json:"page"`
-	PageSize int            `json:"page_size"`
+	Inbox    []*suppv1.InboxItem `json:"inbox"`
+	Total    int                 `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 }
 
 func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (ListInboxResponse, *errorModels.ServerError) {
@@ -55,13 +44,13 @@ func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (Li
 	if err != nil {
 		return ListInboxResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inbox"}
 	}
-	payloads := make([]InboxPayload, len(items))
+	payloads := make([]*suppv1.InboxItem, len(items))
 	for i, item := range items {
-		payloads[i] = InboxPayload{
-			TicketID: item.TicketID, CustomerName: item.CustomerName,
+		payloads[i] = &suppv1.InboxItem{
+			TicketId: item.TicketID, CustomerName: item.CustomerName,
 			CustomerEmail: item.CustomerEmail, Subject: item.Subject,
 			Status: item.Status, Priority: item.Priority, Channel: item.Channel,
-			LastMessage: item.LastMessage, MessageCount: item.MessageCount,
+			LastMessage: item.LastMessage, MessageCount: int64(item.MessageCount),
 			LastMessageAt: item.LastMessageAt.Format("2006-01-02T15:04:05Z"),
 		}
 	}
