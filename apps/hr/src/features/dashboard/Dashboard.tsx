@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
     openPositions: dashboard?.openPositions ?? defaultStats.openPositions,
     monthlyPayroll: dashboard?.monthlyPayroll ?? defaultStats.monthlyPayroll,
   };
-  const recentActivity: any[] = dashboard?.recentActivity || [];
+  const recentActivity = dashboard?.recentActivity || [];
   const todayAtGlance = dashboard?.todayAtGlance || {
     shiftsScheduled: 0,
     newApplications: 0,
