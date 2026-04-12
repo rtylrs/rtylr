@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import {
   storeApi,
@@ -6,6 +7,7 @@ import {
   UpdateProductInput,
   StoreProduct,
 } from '../../shared/services/storeService';
+import { storeProductSchema } from '../../shared/schemas/products';
 
 export interface ProductFilters {
   search?: string;
@@ -18,8 +20,8 @@ export interface ProductFilters {
 export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: ['store-products', filters],
-    queryFn: () =>
-      unwrap(
+    queryFn: async () => {
+      const res = await unwrap(
         storeApi.listProducts({
           search: filters?.search,
           categoryId: filters?.categoryId,
@@ -27,15 +29,21 @@ export function useProducts(filters?: ProductFilters) {
           limit: filters?.limit,
           offset: filters?.offset,
         })
-      ),
+      );
+      const raw = (res as any)?.products ?? res;
+      return z.array(storeProductSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useProduct(id: number | undefined) {
-  return useQuery<StoreProduct | null>({
+  return useQuery({
     queryKey: ['store-product', id],
     enabled: !!id,
-    queryFn: () => unwrap(storeApi.getProduct(id!)),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.getProduct(id!));
+      return storeProductSchema.parse(res);
+    },
   });
 }
 

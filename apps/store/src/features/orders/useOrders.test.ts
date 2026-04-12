@@ -31,8 +31,36 @@ function createWrapper() {
 }
 
 const sampleOrders = [
-  { id: 1, orderNumber: 'ORD-001', customerName: 'Alice', status: 'pending', total: 99.99 },
-  { id: 2, orderNumber: 'ORD-002', customerName: 'Bob', status: 'shipped', total: 49.99 },
+  {
+    id: 1,
+    orderNumber: 'ORD-001',
+    customerName: 'Alice',
+    customerEmail: 'alice@test.com',
+    status: 'pending',
+    total: 99.99,
+    subtotal: 89.99,
+    shippingCost: 5.0,
+    tax: 5.0,
+    itemCount: 2,
+    paymentMethod: 'card',
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 2,
+    orderNumber: 'ORD-002',
+    customerName: 'Bob',
+    customerEmail: 'bob@test.com',
+    status: 'shipped',
+    total: 49.99,
+    subtotal: 44.99,
+    shippingCost: 3.0,
+    tax: 2.0,
+    itemCount: 1,
+    paymentMethod: 'card',
+    createdAt: '2026-01-02T00:00:00Z',
+    updatedAt: '2026-01-02T00:00:00Z',
+  },
 ];
 
 describe('useOrders', () => {

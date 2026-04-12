@@ -27,10 +27,10 @@ function createWrapper() {
 }
 
 const sampleStats = {
-  totalRevenue: 15000,
-  totalOrders: 120,
-  averageOrderValue: 125,
-  topProducts: [{ name: 'T-Shirt', sold: 50 }],
+  totalProducts: 120,
+  ordersToday: 15,
+  revenueToday: 1500,
+  activeVisitors: 42,
 };
 
 describe('useDashboardStats', () => {
