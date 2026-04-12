@@ -41,8 +41,9 @@ export function useKDSOrders(station?: string) {
         elapsedSeconds: o.elapsedSeconds,
       }));
       setOrders(mapped);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load KDS orders');
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load KDS orders');
       setOrders([]);
     } finally {
       setLoading(false);

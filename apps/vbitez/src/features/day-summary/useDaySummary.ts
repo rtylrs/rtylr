@@ -26,8 +26,9 @@ export function useDaySummary(date?: string) {
       });
       const mapped: DaySummary = parsed;
       setSummary(mapped);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load day summary');
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load day summary');
       setSummary({
         date: date ?? new Date().toISOString().slice(0, 10),
         grossSales: 0,

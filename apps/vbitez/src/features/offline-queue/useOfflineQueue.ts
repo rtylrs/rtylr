@@ -13,10 +13,11 @@ export function useOfflineQueue() {
         useOfflineQueueStore.getState().retry(entry.id);
         await unwrap(posService.createOrder(entry.order));
         useOfflineQueueStore.getState().markSynced(entry.id);
-      } catch (e: any) {
+      } catch (e) {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
         useOfflineQueueStore
           .getState()
-          .markFailed(entry.id, e?.response?.data?.message ?? e?.message ?? 'Sync failed');
+          .markFailed(entry.id, err?.response?.data?.message ?? err?.message ?? 'Sync failed');
       }
     }
   }, []);
@@ -29,10 +30,11 @@ export function useOfflineQueue() {
       await unwrap(posService.createOrder(entry.order));
       useOfflineQueueStore.getState().markSynced(id);
       return true;
-    } catch (e: any) {
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
       useOfflineQueueStore
         .getState()
-        .markFailed(id, e?.response?.data?.message ?? e?.message ?? 'Sync failed');
+        .markFailed(id, err?.response?.data?.message ?? err?.message ?? 'Sync failed');
       return false;
     }
   }, []);

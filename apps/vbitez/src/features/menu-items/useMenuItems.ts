@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { posService } from '../../shared/services/posService';
 import type { MenuItem } from '../../shared/types/pos';
 import { menuItemSchema } from '../../shared/schemas/menuItems';
@@ -10,22 +10,17 @@ interface UseMenuItemsResult {
   categories: string[];
   loading: boolean;
   error: string | null;
-  reload: () => Promise<void>;
+  reload: () => void;
 }
 
 export function useMenuItems(): UseMenuItemsResult {
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const query = useQuery({
+    queryKey: ['pos-menu-items'],
+    queryFn: async (): Promise<MenuItem[]> => {
       const res = await unwrap(posService.getMenuItems());
       const raw = res?.items ?? res?.data ?? [];
       const parsed = z.array(menuItemSchema).parse(Array.isArray(raw) ? raw : []);
-      const mapped: MenuItem[] = parsed.map((it) => ({
+      return parsed.map((it) => ({
         id: it.id,
         name: it.name,
         price: it.price,
@@ -38,19 +33,22 @@ export function useMenuItems(): UseMenuItemsResult {
         taxRate: it.taxRate ?? undefined,
         barcode: it.barcode ?? undefined,
       }));
-      setItems(mapped);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load menu');
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    staleTime: 2 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    load();
-  }, []);
-
+  const items = query.data ?? [];
   const categories = Array.from(new Set(items.map((i) => i.category))).sort();
-  return { items, categories, loading, error, reload: load };
+
+  return {
+    items,
+    categories,
+    loading: query.isLoading,
+    error: query.error
+      ? query.error instanceof Error
+        ? query.error.message
+        : String(query.error)
+      : null,
+    reload: () => void query.refetch(),
+  };
 }

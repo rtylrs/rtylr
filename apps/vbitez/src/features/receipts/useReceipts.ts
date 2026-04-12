@@ -21,8 +21,9 @@ export function useReceipts() {
       const res = await unwrap(posService.getReceipts());
       const raw = res?.receipts ?? res?.data ?? [];
       setRemote(z.array(receiptSchema).parse(Array.isArray(raw) ? raw : []) as Receipt[]);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load receipts');
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load receipts');
     } finally {
       setLoading(false);
     }
