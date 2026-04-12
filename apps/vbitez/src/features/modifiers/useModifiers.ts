@@ -1,7 +1,9 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { ModifierGroup } from '../../shared/types/pos';
+import { modifierGroupSchema } from '../../shared/schemas/modifiers';
 
 export function useModifiers() {
   const [groups, setGroups] = useState<ModifierGroup[]>([]);
@@ -14,18 +16,19 @@ export function useModifiers() {
     try {
       const res = await unwrap(posService.getModifiers());
       const raw = res?.groups ?? res?.data ?? [];
-      const mapped: ModifierGroup[] = (Array.isArray(raw) ? raw : []).map((g: any) => ({
-        id: String(g.id ?? Math.random().toString(36).slice(2)),
-        name: g.name ?? 'Modifiers',
-        min: Number(g.min ?? 0),
-        max: Number(g.max ?? 1),
-        modifiers: (g.modifiers ?? []).map((m: any) => ({
-          id: String(m.id ?? Math.random().toString(36).slice(2)),
-          name: m.name ?? 'Option',
-          priceDelta: Number(m.priceDelta ?? 0),
-          group: g.name,
-          required: !!m.required,
-          defaultSelected: !!m.default,
+      const parsed = z.array(modifierGroupSchema).parse(Array.isArray(raw) ? raw : []);
+      const mapped: ModifierGroup[] = parsed.map((g) => ({
+        id: g.id,
+        name: g.name,
+        min: g.min,
+        max: g.max,
+        modifiers: g.modifiers.map((m) => ({
+          id: m.id,
+          name: m.name,
+          priceDelta: m.priceDelta,
+          group: m.group ?? g.name,
+          required: m.required,
+          defaultSelected: m.defaultSelected,
         })),
       }));
       setGroups(mapped);

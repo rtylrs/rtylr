@@ -43,7 +43,7 @@ const sampleReceipts = [
     customerName: 'Alice',
     printedAt: '2026-01-01T10:00:00Z',
     items: [{ name: 'Burger', qty: 1, price: 12.99 }],
-    payments: [{ method: 'cash', amount: 25.99 }],
+    payments: [{ id: 'p1', method: 'cash', amount: 25.99 }],
   },
   {
     id: 'r2',
@@ -51,7 +51,7 @@ const sampleReceipts = [
     total: 15.0,
     printedAt: '2026-01-01T11:00:00Z',
     items: [{ name: 'Fries', qty: 2, price: 7.5 }],
-    payments: [{ method: 'card', amount: 15.0 }],
+    payments: [{ id: 'p2', method: 'card', amount: 15.0 }],
   },
 ];
 

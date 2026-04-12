@@ -1,7 +1,9 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { Combo } from '../../shared/types/pos';
+import { comboSchema } from '../../shared/schemas/combos';
 
 export function useCombos() {
   const [combos, setCombos] = useState<Combo[]>([]);
@@ -14,18 +16,13 @@ export function useCombos() {
     try {
       const res = await unwrap(posService.getCombos());
       const raw = res?.combos ?? res?.data ?? [];
-      const mapped: Combo[] = (Array.isArray(raw) ? raw : []).map((c: any) => ({
-        id: String(c.id ?? Math.random().toString(36).slice(2)),
-        name: c.name ?? 'Combo',
-        price: Number(c.price ?? 0),
-        description: c.description,
-        items: Array.isArray(c.items)
-          ? c.items.map((it: any) => ({
-              itemId: String(it.itemId ?? it.id),
-              qty: Number(it.qty ?? 1),
-              name: it.name,
-            }))
-          : [],
+      const parsed = z.array(comboSchema).parse(Array.isArray(raw) ? raw : []);
+      const mapped: Combo[] = parsed.map((c) => ({
+        id: c.id,
+        name: c.name,
+        price: c.price,
+        description: c.description ?? undefined,
+        items: c.items,
       }));
       setCombos(mapped);
     } catch (e: any) {

@@ -1,8 +1,10 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import type { Receipt } from '../../shared/types/pos';
+import { receiptSchema } from '../../shared/schemas/receipts';
 
 export function useReceipts() {
   const local = useReceiptsStore((s) => s.receipts);
@@ -18,7 +20,7 @@ export function useReceipts() {
     try {
       const res = await unwrap(posService.getReceipts());
       const raw = res?.receipts ?? res?.data ?? [];
-      setRemote(Array.isArray(raw) ? raw : []);
+      setRemote(z.array(receiptSchema).parse(Array.isArray(raw) ? raw : []) as Receipt[]);
     } catch (e: any) {
       setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load receipts');
     } finally {

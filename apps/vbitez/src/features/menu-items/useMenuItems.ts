@@ -1,7 +1,9 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { MenuItem } from '../../shared/types/pos';
+import { menuItemSchema } from '../../shared/schemas/menuItems';
 
 interface UseMenuItemsResult {
   items: MenuItem[];
@@ -22,18 +24,19 @@ export function useMenuItems(): UseMenuItemsResult {
     try {
       const res = await unwrap(posService.getMenuItems());
       const raw = res?.items ?? res?.data ?? [];
-      const mapped: MenuItem[] = (Array.isArray(raw) ? raw : []).map((it: any) => ({
-        id: String(it.id ?? it.sku ?? Math.random().toString(36).slice(2)),
-        name: it.name ?? 'Item',
-        price: Number(it.price ?? 0),
-        category: it.category ?? 'Other',
-        image: it.image ?? it.imageUrl,
-        available: it.available !== false,
-        sku: it.sku,
-        stock: it.stock,
-        description: it.description,
-        taxRate: it.taxRate,
-        barcode: it.barcode,
+      const parsed = z.array(menuItemSchema).parse(Array.isArray(raw) ? raw : []);
+      const mapped: MenuItem[] = parsed.map((it) => ({
+        id: it.id,
+        name: it.name,
+        price: it.price,
+        category: it.category,
+        image: it.image ?? undefined,
+        available: it.available,
+        sku: it.sku ?? undefined,
+        stock: it.stock ?? undefined,
+        description: it.description ?? undefined,
+        taxRate: it.taxRate ?? undefined,
+        barcode: it.barcode ?? undefined,
       }));
       setItems(mapped);
     } catch (e: any) {

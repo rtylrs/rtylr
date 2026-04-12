@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import type { DaySummary } from '../../shared/types/pos';
+import { daySummarySchema } from '../../shared/schemas/daySummary';
 
 export function useDaySummary(date?: string) {
   const [summary, setSummary] = useState<DaySummary | null>(null);
@@ -17,20 +18,13 @@ export function useDaySummary(date?: string) {
     try {
       const res = await unwrap(posService.getDaySummary(date));
       const raw = res?.data ?? {};
-      const mapped: DaySummary = {
-        date: raw.date ?? date ?? new Date().toISOString().slice(0, 10),
-        grossSales: Number(raw.grossSales ?? 0),
-        netSales: Number(raw.netSales ?? 0),
-        taxCollected: Number(raw.taxCollected ?? 0),
-        tips: Number(raw.tips ?? 0),
-        refunds: Number(raw.refunds ?? 0),
-        voids: Number(raw.voids ?? 0),
-        orderCount: Number(raw.orderCount ?? 0),
-        averageTicket: Number(raw.averageTicket ?? 0),
-        cashDrops: Number(raw.cashDrops ?? 0),
-        openingFloat: Number(raw.openingFloat ?? openingFloat),
-        closingCash: Number(raw.closingCash ?? expectedCash),
-      };
+      const parsed = daySummarySchema.parse({
+        ...raw,
+        date: raw.date ?? date,
+        openingFloat: raw.openingFloat ?? openingFloat,
+        closingCash: raw.closingCash ?? expectedCash,
+      });
+      const mapped: DaySummary = parsed;
       setSummary(mapped);
     } catch (e: any) {
       setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load day summary');
