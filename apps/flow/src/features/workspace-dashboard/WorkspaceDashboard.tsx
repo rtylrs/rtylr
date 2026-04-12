@@ -15,7 +15,7 @@ import {
 import { useUserStore } from '../../shared/stores/userStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { cn, formatDate } from '../../shared/lib/utils';
-import { type DashboardStats } from '../../shared/services/flowApi';
+import { type DashboardStats, type ApiTask } from '../../shared/services/flowApi';
 import { useFlowDashboard } from './useDashboard';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { getCurrentUserId, isTaskMine } from '../../shared/lib/currentUser';
@@ -100,11 +100,11 @@ const WorkspaceDashboard: React.FC = () => {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-  const myTasks =
+  const myTasks: ApiTask[] =
     apiStats?.myTasks ??
     (workspaceTasks.filter(
       (t) => isTaskMine(t.assigneeId) && t.status !== 'done' && t.status !== 'cancelled'
-    ) as any);
+    ) as ApiTask[]);
 
   const openTasks = apiStats?.openTasks ?? workspaceTasks.filter((t) => t.status === 'todo').length;
   const inProgress =
@@ -320,7 +320,7 @@ const WorkspaceDashboard: React.FC = () => {
           </div>
 
           <div className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
-            {myTasks.slice(0, 4).map((task: any, i: any) => (
+            {myTasks.slice(0, 4).map((task, i) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, x: -8 }}
