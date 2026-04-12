@@ -3,8 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
+
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
@@ -14,100 +17,48 @@ import (
 
 // ─── Shared payloads ──────────────────────────────────────────────────────────
 
-type OrderItemPayload struct {
-	ID             int64     `json:"id"`
-	OrderID        int64     `json:"order_id"`
-	MenuItemID     int64     `json:"menu_item_id"`
-	Name           string    `json:"name"`
-	SKU            string    `json:"sku"`
-	Quantity       float64   `json:"quantity"`
-	UnitPrice      float64   `json:"unit_price"`
-	DiscountPct    float64   `json:"discount_pct"`
-	DiscountAmount float64   `json:"discount_amount"`
-	TaxRate        float64   `json:"tax_rate"`
-	Total          float64   `json:"total"`
-	Notes          string    `json:"notes"`
-	Status         string    `json:"status"`
-	CreatedAt      time.Time `json:"created_at"`
+type OrderPayload = posv1.Order
+
+func orderItemToProto(item domain.OrderItem) *posv1.OrderItem {
+	return &posv1.OrderItem{
+		Id:         item.ID,
+		OrderId:    item.OrderID,
+		MenuItemId: item.MenuItemID,
+		Name:       item.Name,
+		Quantity:   int32(item.Quantity),
+		UnitPrice:  item.UnitPrice,
+		TotalPrice: item.Total,
+		Notes:      item.Notes,
+		Status:     string(item.Status),
+		CreatedAt:  item.CreatedAt.Format(time.RFC3339),
+	}
 }
 
-type OrderPayload struct {
-	ID             int64              `json:"id"`
-	OwnerID        int64              `json:"owner_id"`
-	SessionID      int64              `json:"session_id"`
-	TableID        int64              `json:"table_id"`
-	LocationID     int64              `json:"location_id"`
-	OrderNumber    string             `json:"order_number"`
-	Type           string             `json:"type"`
-	Status         string             `json:"status"`
-	CustomerID     int64              `json:"customer_id"`
-	CustomerName   string             `json:"customer_name"`
-	StaffID        int64              `json:"staff_id"`
-	Subtotal       float64            `json:"subtotal"`
-	DiscountAmount float64            `json:"discount_amount"`
-	TaxAmount      float64            `json:"tax_amount"`
-	Total          float64            `json:"total"`
-	PaymentMethod  string             `json:"payment_method"`
-	PaymentStatus  string             `json:"payment_status"`
-	AmountPaid     float64            `json:"amount_paid"`
-	ChangeDue      float64            `json:"change_due"`
-	Notes          string             `json:"notes"`
-	KitchenNotes   string             `json:"kitchen_notes"`
-	CreatedAt      time.Time          `json:"created_at"`
-	UpdatedAt      time.Time          `json:"updated_at"`
-	PaidAt         *time.Time         `json:"paid_at"`
-	Items          []OrderItemPayload `json:"items,omitempty"`
-}
-
-func newOrderPayload(o domain.Order) OrderPayload {
-	p := OrderPayload{
-		ID:             o.ID,
-		OwnerID:        o.OwnerID,
-		SessionID:      o.SessionID,
-		TableID:        o.TableID,
-		LocationID:     o.LocationID,
+func newOrderPayload(o domain.Order) *posv1.Order {
+	p := &posv1.Order{
+		Id:             o.ID,
 		OrderNumber:    o.OrderNumber,
-		Type:           string(o.Type),
+		LocationId:     o.LocationID,
+		SessionId:      o.SessionID,
+		TableId:        o.TableID,
+		CustomerId:     o.CustomerID,
+		OrderType:      string(o.Type),
 		Status:         string(o.Status),
-		CustomerID:     o.CustomerID,
-		CustomerName:   o.CustomerName,
-		StaffID:        o.StaffID,
 		Subtotal:       o.Subtotal,
-		DiscountAmount: o.DiscountAmount,
 		TaxAmount:      o.TaxAmount,
+		DiscountAmount: o.DiscountAmount,
 		Total:          o.Total,
-		PaymentMethod:  string(o.PaymentMethod),
-		PaymentStatus:  string(o.PaymentStatus),
-		AmountPaid:     o.AmountPaid,
-		ChangeDue:      o.ChangeDue,
 		Notes:          o.Notes,
-		KitchenNotes:   o.KitchenNotes,
-		CreatedAt:      o.CreatedAt,
-		UpdatedAt:      o.UpdatedAt,
-		PaidAt:         o.PaidAt,
+		CreatedBy:      fmt.Sprintf("%d", o.StaffID),
+		CreatedAt:      o.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      o.UpdatedAt.Format(time.RFC3339),
 	}
 
 	if len(o.Items) > 0 {
-		items := make([]OrderItemPayload, 0, len(o.Items))
+		items := make([]*posv1.OrderItem, 0, len(o.Items))
 		for _, item := range o.Items {
-			items = append(items, OrderItemPayload{
-				ID:             item.ID,
-				OrderID:        item.OrderID,
-				MenuItemID:     item.MenuItemID,
-				Name:           item.Name,
-				SKU:            item.SKU,
-				Quantity:       item.Quantity,
-				UnitPrice:      item.UnitPrice,
-				DiscountPct:    item.DiscountPct,
-				DiscountAmount: item.DiscountAmount,
-				TaxRate:        item.TaxRate,
-				Total:          item.Total,
-				Notes:          item.Notes,
-				Status:         string(item.Status),
-				CreatedAt:      item.CreatedAt,
-			})
+			items = append(items, orderItemToProto(item))
 		}
-
 		p.Items = items
 	}
 
@@ -128,7 +79,7 @@ type ListOrdersRequest struct {
 }
 
 type ListOrdersResponse struct {
-	Orders []OrderPayload `json:"orders"`
+	Orders []*posv1.Order `json:"orders"`
 }
 
 func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, *errorModels.ServerError) {
@@ -148,7 +99,7 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 		}
 	}
 
-	payloads := make([]OrderPayload, 0, len(orders))
+	payloads := make([]*posv1.Order, 0, len(orders))
 	for _, o := range orders {
 		payloads = append(payloads, newOrderPayload(o))
 	}
@@ -290,7 +241,7 @@ type GetOrderDetailRequest struct {
 }
 
 type GetOrderDetailResponse struct {
-	Order *OrderPayload `json:"order"`
+	Order *posv1.Order `json:"order"`
 }
 
 func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, *errorModels.ServerError) {
@@ -320,7 +271,7 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 
 	payload := newOrderPayload(*order)
 
-	return GetOrderDetailResponse{Order: &payload}, nil
+	return GetOrderDetailResponse{Order: payload}, nil
 }
 
 // ─── Update Order Status ──────────────────────────────────────────────────────

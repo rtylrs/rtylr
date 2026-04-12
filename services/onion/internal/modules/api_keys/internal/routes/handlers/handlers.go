@@ -19,19 +19,8 @@ type ListHandler struct{ Service *application.Service }
 
 type ListRequest struct{}
 
-type APIKeyPayload struct {
-	ID         int64      `json:"id"`
-	Name       string     `json:"name"`
-	KeyPrefix  string     `json:"key_prefix"`
-	Scopes     []string   `json:"scopes"`
-	LastUsedAt *time.Time `json:"last_used_at"`
-	ExpiresAt  *time.Time `json:"expires_at"`
-	IsActive   bool       `json:"is_active"`
-	CreatedAt  time.Time  `json:"created_at"`
-}
-
 type ListResponse struct {
-	Keys []APIKeyPayload `json:"keys"`
+	Keys []*hubv1.ApiKey `json:"keys"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -49,22 +38,27 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]APIKeyPayload, 0, len(keys))
+	payloads := make([]*hubv1.ApiKey, 0, len(keys))
 	for _, k := range keys {
 		scopes := k.Scopes
 		if scopes == nil {
 			scopes = []string{}
 		}
-		payloads = append(payloads, APIKeyPayload{
-			ID:         k.ID,
-			Name:       k.Name,
-			KeyPrefix:  k.KeyPrefix,
-			Scopes:     scopes,
-			LastUsedAt: k.LastUsedAt,
-			ExpiresAt:  k.ExpiresAt,
-			IsActive:   k.IsActive,
-			CreatedAt:  k.CreatedAt,
-		})
+		ak := &hubv1.ApiKey{
+			Id:        k.ID,
+			Name:      k.Name,
+			KeyPrefix: k.KeyPrefix,
+			Scopes:    scopes,
+			IsActive:  k.IsActive,
+			CreatedAt: k.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		}
+		if k.LastUsedAt != nil {
+			ak.LastUsedAt = k.LastUsedAt.Format("2006-01-02T15:04:05Z07:00")
+		}
+		if k.ExpiresAt != nil {
+			ak.ExpiresAt = k.ExpiresAt.Format("2006-01-02T15:04:05Z07:00")
+		}
+		payloads = append(payloads, ak)
 	}
 
 	return ListResponse{Keys: payloads}, nil

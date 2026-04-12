@@ -19,18 +19,8 @@ func ReadAllRoutes() []string         { return []string{"/notifications/read-all
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 
-type NotificationPayload struct {
-	ID        int64     `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	Type      string    `json:"type"`
-	IsRead    bool      `json:"is_read"`
-	Link      string    `json:"link"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
 type ListResponse struct {
-	Notifications []NotificationPayload `json:"notifications"`
+	Notifications []*hubv1.Notification `json:"notifications"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -48,16 +38,16 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]NotificationPayload, 0, len(notifications))
+	payloads := make([]*hubv1.Notification, 0, len(notifications))
 	for _, n := range notifications {
-		payloads = append(payloads, NotificationPayload{
-			ID:        n.ID,
+		payloads = append(payloads, &hubv1.Notification{
+			Id:        n.ID,
 			Title:     n.Title,
 			Body:      n.Body,
 			Type:      n.Type,
-			IsRead:    n.IsRead,
+			Read:      n.IsRead,
 			Link:      n.Link,
-			CreatedAt: n.CreatedAt,
+			CreatedAt: n.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
 

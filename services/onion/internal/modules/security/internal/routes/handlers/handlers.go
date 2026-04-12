@@ -22,17 +22,8 @@ func InvalidateRoutes() []string     { return []string{"/security/invalidate-ses
 type GetSettingsHandler struct{ Service *application.Service }
 type GetSettingsRequest struct{}
 
-type SessionPayload struct {
-	ID        string `json:"id"`
-	IP        string `json:"ip"`
-	UserAgent string `json:"user_agent"`
-	CreatedAt string `json:"created_at"`
-	IsCurrent bool   `json:"is_current"`
-}
-
 type GetSettingsResponse struct {
-	TwoFactorEnabled bool             `json:"two_factor_enabled"`
-	ActiveSessions   []SessionPayload `json:"active_sessions"`
+	State *hubv1.SecurityState `json:"state"`
 }
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, *errorModels.ServerError) {
@@ -50,11 +41,11 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 		}
 	}
 
-	sessions := make([]SessionPayload, 0, len(settings.ActiveSessions))
+	sessions := make([]*hubv1.ActiveSession, 0, len(settings.ActiveSessions))
 	for _, s := range settings.ActiveSessions {
-		sessions = append(sessions, SessionPayload{
-			ID:        s.ID,
-			IP:        s.IP,
+		sessions = append(sessions, &hubv1.ActiveSession{
+			Id:        s.ID,
+			Ip:        s.IP,
 			UserAgent: s.UserAgent,
 			CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z"),
 			IsCurrent: s.IsCurrent,
@@ -62,8 +53,10 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	}
 
 	return GetSettingsResponse{
-		TwoFactorEnabled: settings.TwoFactorEnabled,
-		ActiveSessions:   sessions,
+		State: &hubv1.SecurityState{
+			TwoFactorEnabled: settings.TwoFactorEnabled,
+			ActiveSessions:   sessions,
+		},
 	}, nil
 }
 
@@ -108,17 +101,8 @@ func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (To
 type LoginHistoryHandler struct{ Service *application.Service }
 type LoginHistoryRequest struct{}
 
-type LoginEntryPayload struct {
-	Email     string `json:"email"`
-	Method    string `json:"method"`
-	IP        string `json:"ip"`
-	UserAgent string `json:"user_agent"`
-	Success   bool   `json:"success"`
-	CreatedAt string `json:"created_at"`
-}
-
 type LoginHistoryResponse struct {
-	History []LoginEntryPayload `json:"history"`
+	History []*hubv1.LoginEntry `json:"history"`
 }
 
 func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest) (LoginHistoryResponse, *errorModels.ServerError) {
@@ -136,12 +120,12 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest)
 		}
 	}
 
-	payloads := make([]LoginEntryPayload, 0, len(entries))
+	payloads := make([]*hubv1.LoginEntry, 0, len(entries))
 	for _, e := range entries {
-		payloads = append(payloads, LoginEntryPayload{
+		payloads = append(payloads, &hubv1.LoginEntry{
 			Email:     e.Email,
 			Method:    e.Method,
-			IP:        e.IP,
+			Ip:        e.IP,
 			UserAgent: e.UserAgent,
 			Success:   e.Success,
 			CreatedAt: e.CreatedAt.Format("2006-01-02T15:04:05Z"),

@@ -33,13 +33,7 @@ type RegisterRequest struct {
 	BusinessName string `json:"business_name"`
 }
 
-type RegisterResponse struct {
-	Token   string `json:"token"`
-	Message string `json:"message"`
-	UserID  int64  `json:"user_id"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-}
+type RegisterResponse = authv1.RegisterResponse
 
 func (h *RegisterHandler) Validate(_ context.Context, req *RegisterRequest) *errorModels.ServerError {
 	if req.Email == "" || req.Password == "" {
@@ -145,7 +139,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 	return RegisterResponse{
 		Token:   token,
 		Message: "Registration successful",
-		UserID:  userId,
+		UserId:  userId,
 		Email:   registerData.Email,
 		Name:    registerData.FullName,
 	}, nil

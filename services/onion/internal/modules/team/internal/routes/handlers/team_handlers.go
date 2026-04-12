@@ -25,31 +25,21 @@ type ListUsersHandler struct{ Service *application.Service }
 
 type ListUsersRequest struct{}
 
-type StaffUserPayload struct {
-	ID        int64     `json:"id"`
-	Email     string    `json:"email"`
-	FullName  string    `json:"full_name"`
-	CreatedAt time.Time `json:"created_at"`
-	Apps      []string  `json:"apps"`
-	Role      string    `json:"role"`
-	IsActive  bool      `json:"is_active"`
-}
-
 type ListUsersResponse struct {
-	Users []StaffUserPayload `json:"users"`
+	Users []*hubv1.StaffUserPayload `json:"users"`
 }
 
-func newStaffUserPayload(u domain.StaffUser) StaffUserPayload {
+func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
 	apps := u.Apps
 	if apps == nil {
 		apps = []string{}
 	}
 
-	return StaffUserPayload{
-		ID:        u.ID,
+	return &hubv1.StaffUserPayload{
+		Id:        u.ID,
 		Email:     u.Email,
 		FullName:  u.FullName,
-		CreatedAt: u.CreatedAt,
+		CreatedAt: u.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		Apps:      apps,
 		Role:      string(u.Role),
 		IsActive:  u.IsActive,
@@ -73,9 +63,9 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		}
 	}
 
-	payloads := make([]StaffUserPayload, 0, len(users))
+	payloads := make([]*hubv1.StaffUserPayload, 0, len(users))
 	for _, u := range users {
-		payloads = append(payloads, newStaffUserPayload(u))
+		payloads = append(payloads, newProtoStaffUser(u))
 	}
 
 	return ListUsersResponse{Users: payloads}, nil
@@ -88,7 +78,7 @@ type GetMemberByIDHandler struct{ Service *application.Service }
 type GetMemberByIDRequest struct{}
 
 type GetMemberByIDResponse struct {
-	User StaffUserPayload `json:"user"`
+	User *hubv1.StaffUserPayload `json:"user"`
 }
 
 func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDRequest) (GetMemberByIDResponse, *errorModels.ServerError) {
@@ -127,7 +117,7 @@ func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDReques
 		}
 	}
 
-	return GetMemberByIDResponse{User: newStaffUserPayload(*member)}, nil
+	return GetMemberByIDResponse{User: newProtoStaffUser(*member)}, nil
 }
 
 // ─── Invite User ──────────────────────────────────────────────────────────────
@@ -144,10 +134,7 @@ type InviteUserRequest struct {
 	Role     string   `json:"role"`
 }
 
-type InviteUserResponse struct {
-	UserID  int64  `json:"user_id"`
-	Message string `json:"message"`
-}
+type InviteUserResponse = hubv1.InviteUserResponse
 
 func (h *InviteUserHandler) Validate(_ context.Context, req *InviteUserRequest) *errorModels.ServerError {
 	if req.Email == "" {
@@ -200,10 +187,10 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 			inviteLink := "https://auth.rtylr.com/invite/" + token
 			emailPkg.SendInvitation(ctx, req.Email, "Your team", "rtylr", inviteLink)
 		}()
-		return InviteUserResponse{UserID: userID, Message: "Invitation sent"}, nil
+		return InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
 	}
 
-	return InviteUserResponse{UserID: userID, Message: "Member created"}, nil
+	return InviteUserResponse{UserId: userID, Message: "Member created"}, nil
 }
 
 // ─── Verify Invite Token ────────────────────────────────────────────────────

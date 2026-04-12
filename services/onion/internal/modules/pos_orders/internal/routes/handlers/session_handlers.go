@@ -3,8 +3,11 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
+
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
@@ -14,48 +17,27 @@ import (
 
 // ─── Session payload ──────────────────────────────────────────────────────────
 
-type SessionPayload struct {
-	ID               int64      `json:"id"`
-	OwnerID          int64      `json:"owner_id"`
-	LocationID       int64      `json:"location_id"`
-	StaffID          int64      `json:"staff_id"`
-	Status           string     `json:"status"`
-	OpeningCash      float64    `json:"opening_cash"`
-	ClosingCash      float64    `json:"closing_cash"`
-	ExpectedCash     float64    `json:"expected_cash"`
-	CashDifference   float64    `json:"cash_difference"`
-	TotalSales       float64    `json:"total_sales"`
-	TotalOrders      int        `json:"total_orders"`
-	TotalCashSales   float64    `json:"total_cash_sales"`
-	TotalCardSales   float64    `json:"total_card_sales"`
-	TotalOnlineSales float64    `json:"total_online_sales"`
-	TotalRefunds     float64    `json:"total_refunds"`
-	OpenedAt         time.Time  `json:"opened_at"`
-	ClosedAt         *time.Time `json:"closed_at"`
-	Notes            string     `json:"notes"`
-}
-
-func newSessionPayload(s domain.Session) SessionPayload {
-	return SessionPayload{
-		ID:               s.ID,
-		OwnerID:          s.OwnerID,
-		LocationID:       s.LocationID,
-		StaffID:          s.StaffID,
-		Status:           string(s.Status),
-		OpeningCash:      s.OpeningCash,
-		ClosingCash:      s.ClosingCash,
-		ExpectedCash:     s.ExpectedCash,
-		CashDifference:   s.CashDifference,
-		TotalSales:       s.TotalSales,
-		TotalOrders:      s.TotalOrders,
-		TotalCashSales:   s.TotalCashSales,
-		TotalCardSales:   s.TotalCardSales,
-		TotalOnlineSales: s.TotalOnlineSales,
-		TotalRefunds:     s.TotalRefunds,
-		OpenedAt:         s.OpenedAt,
-		ClosedAt:         s.ClosedAt,
-		Notes:            s.Notes,
+func sessionToProto(s domain.Session) *posv1.Session {
+	p := &posv1.Session{
+		Id:             s.ID,
+		LocationId:     s.LocationID,
+		OpenedBy:       s.StaffID,
+		Status:         string(s.Status),
+		OpeningCash:    s.OpeningCash,
+		ClosingCash:    s.ClosingCash,
+		ExpectedCash:   s.ExpectedCash,
+		CashDifference: s.CashDifference,
+		TotalOrders:    int32(s.TotalOrders),
+		TotalSales:     s.TotalSales,
+		TotalRefunds:   s.TotalRefunds,
+		OpenedAt:       s.OpenedAt.Format(time.RFC3339),
 	}
+	if s.ClosedAt != nil {
+		p.ClosedAt = s.ClosedAt.Format(time.RFC3339)
+	}
+	_ = fmt.Sprintf // ensure fmt is used
+	_ = errors.New  // ensure errors is used
+	return p
 }
 
 // ─── Get Current Session ──────────────────────────────────────────────────────
@@ -67,7 +49,7 @@ type GetCurrentSessionHandler struct{ Service *application.Service }
 type GetCurrentSessionRequest struct{}
 
 type GetCurrentSessionResponse struct {
-	Session *SessionPayload `json:"session"`
+	Session *posv1.Session `json:"session"`
 }
 
 func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessionRequest) (GetCurrentSessionResponse, *errorModels.ServerError) {
@@ -92,9 +74,9 @@ func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessi
 		return GetCurrentSessionResponse{Session: nil}, nil
 	}
 
-	payload := newSessionPayload(*sess)
+	payload := sessionToProto(*sess)
 
-	return GetCurrentSessionResponse{Session: &payload}, nil
+	return GetCurrentSessionResponse{Session: payload}, nil
 }
 
 // ─── Open Session ─────────────────────────────────────────────────────────────
@@ -237,7 +219,7 @@ type ListSessionsRequest struct {
 }
 
 type ListSessionsResponse struct {
-	Sessions []SessionPayload `json:"sessions"`
+	Sessions []*posv1.Session `json:"sessions"`
 }
 
 func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
@@ -257,9 +239,9 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsReques
 		}
 	}
 
-	payloads := make([]SessionPayload, 0, len(sessions))
+	payloads := make([]*posv1.Session, 0, len(sessions))
 	for _, s := range sessions {
-		payloads = append(payloads, newSessionPayload(s))
+		payloads = append(payloads, sessionToProto(s))
 	}
 
 	return ListSessionsResponse{Sessions: payloads}, nil

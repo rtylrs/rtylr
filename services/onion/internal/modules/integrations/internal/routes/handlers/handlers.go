@@ -19,17 +19,8 @@ func IntegrationRoutes() []string { return []string{"/integrations"} }
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 
-type IntegrationPayload struct {
-	ID          int64           `json:"id"`
-	Provider    string          `json:"provider"`
-	Status      string          `json:"status"`
-	Config      json.RawMessage `json:"config"`
-	ConnectedAt *time.Time      `json:"connected_at"`
-	CreatedAt   time.Time       `json:"created_at"`
-}
-
 type ListResponse struct {
-	Integrations []IntegrationPayload `json:"integrations"`
+	Integrations []*hubv1.Integration `json:"integrations"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -47,16 +38,19 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]IntegrationPayload, 0, len(integrations))
+	payloads := make([]*hubv1.Integration, 0, len(integrations))
 	for _, i := range integrations {
-		payloads = append(payloads, IntegrationPayload{
-			ID:          i.ID,
-			Provider:    i.Provider,
-			Status:      string(i.Status),
-			Config:      i.Config,
-			ConnectedAt: i.ConnectedAt,
-			CreatedAt:   i.CreatedAt,
-		})
+		ig := &hubv1.Integration{
+			Id:        i.ID,
+			Provider:  i.Provider,
+			Status:    string(i.Status),
+			Config:    json.RawMessage(i.Config),
+			CreatedAt: i.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		}
+		if i.ConnectedAt != nil {
+			ig.ConnectedAt = i.ConnectedAt.Format("2006-01-02T15:04:05Z07:00")
+		}
+		payloads = append(payloads, ig)
 	}
 
 	return ListResponse{Integrations: payloads}, nil

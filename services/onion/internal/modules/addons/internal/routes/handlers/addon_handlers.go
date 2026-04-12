@@ -46,7 +46,7 @@ func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (Li
 	return ListAddonsResponse{Addons: payloads}, nil
 }
 
-func toProtoAddon(a domain.Addon) *hubv1.Addon {
+func toProtoAddon(a domain.BusinessAddon) *hubv1.Addon {
 	p := &hubv1.Addon{
 		Id:          a.AddonID,
 		Name:        a.Name,

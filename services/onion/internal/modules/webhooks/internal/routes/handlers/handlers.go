@@ -18,17 +18,8 @@ func WebhookRoutes() []string { return []string{"/webhooks"} }
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 
-type WebhookPayload struct {
-	ID              int64      `json:"id"`
-	URL             string     `json:"url"`
-	Events          []string   `json:"events"`
-	IsActive        bool       `json:"is_active"`
-	LastTriggeredAt *time.Time `json:"last_triggered_at"`
-	CreatedAt       time.Time  `json:"created_at"`
-}
-
 type ListResponse struct {
-	Webhooks []WebhookPayload `json:"webhooks"`
+	Webhooks []*hubv1.Webhook `json:"webhooks"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -46,20 +37,23 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]WebhookPayload, 0, len(webhooks))
+	payloads := make([]*hubv1.Webhook, 0, len(webhooks))
 	for _, w := range webhooks {
 		events := w.Events
 		if events == nil {
 			events = []string{}
 		}
-		payloads = append(payloads, WebhookPayload{
-			ID:              w.ID,
-			URL:             w.URL,
-			Events:          events,
-			IsActive:        w.IsActive,
-			LastTriggeredAt: w.LastTriggeredAt,
-			CreatedAt:       w.CreatedAt,
-		})
+		wh := &hubv1.Webhook{
+			Id:        w.ID,
+			Url:       w.URL,
+			Events:    events,
+			IsActive:  w.IsActive,
+			CreatedAt: w.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		}
+		if w.LastTriggeredAt != nil {
+			wh.LastTriggeredAt = w.LastTriggeredAt.Format("2006-01-02T15:04:05Z07:00")
+		}
+		payloads = append(payloads, wh)
 	}
 
 	return ListResponse{Webhooks: payloads}, nil

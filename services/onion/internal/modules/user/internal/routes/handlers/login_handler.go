@@ -29,13 +29,7 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type LoginResponse struct {
-	Token   string `json:"token"`
-	Message string `json:"message"`
-	UserID  int64  `json:"user_id"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-}
+type LoginResponse = authv1.LoginResponse
 
 func (h *LoginHandler) Validate(_ context.Context, req *LoginRequest) *errorModels.ServerError {
 	if req.Email == "" || req.Password == "" {
@@ -109,7 +103,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 	return LoginResponse{
 		Token:   token,
 		Message: "Login successful",
-		UserID:  userId,
+		UserId:  userId,
 		Email:   user.Email,
 		Name:    user.FullName,
 	}, nil
