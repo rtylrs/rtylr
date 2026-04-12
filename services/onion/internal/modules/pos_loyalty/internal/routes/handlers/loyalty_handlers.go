@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	"context"
 	"errors"
 	"net/http"
@@ -19,18 +21,19 @@ func GetConfigRoutes() []string { return []string{"/pos/loyalty/config"} }
 type GetConfigHandler struct{ Service *application.Service }
 type GetConfigRequest struct{}
 type GetConfigResponse struct {
-	Config *LoyaltyConfigPayload `json:"config"`
+	Config *posv1.LoyaltyConfig `json:"config"`
 }
 
-type LoyaltyConfigPayload struct {
-	ID              int64   `json:"id"`
-	BusinessID      int64   `json:"business_id"`
-	IsEnabled       bool    `json:"is_enabled"`
-	PointsPerDollar float64 `json:"points_per_dollar"`
-	RedemptionRate  float64 `json:"redemption_rate"`
-	MinRedeemPoints int32   `json:"min_redeem_points"`
-	CreatedAt       string  `json:"created_at"`
-	UpdatedAt       string  `json:"updated_at"`
+func loyaltyConfigToProto(cfg domain.LoyaltyConfig) *posv1.LoyaltyConfig {
+	return &posv1.LoyaltyConfig{
+		Id:              cfg.ID,
+		IsEnabled:       cfg.IsEnabled,
+		PointsPerDollar: cfg.PointsPerDollar,
+		RedemptionRate:  cfg.RedemptionRate,
+		MinRedeemPoints: cfg.MinRedeemPoints,
+		CreatedAt:       cfg.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:       cfg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
 }
 
 func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetConfigResponse, *errorModels.ServerError) {
@@ -45,16 +48,7 @@ func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetC
 		}
 		return GetConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get loyalty config"}
 	}
-	payload := &LoyaltyConfigPayload{
-		ID:              cfg.ID,
-		BusinessID:      cfg.BusinessID,
-		IsEnabled:       cfg.IsEnabled,
-		PointsPerDollar: cfg.PointsPerDollar,
-		RedemptionRate:  cfg.RedemptionRate,
-		MinRedeemPoints: cfg.MinRedeemPoints,
-		CreatedAt:       cfg.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:       cfg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}
+	payload := loyaltyConfigToProto(*cfg)
 	return GetConfigResponse{Config: payload}, nil
 }
 

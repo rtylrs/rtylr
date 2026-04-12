@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	"context"
 	"net/http"
 
@@ -11,26 +13,13 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 )
 
-type MenuItemPayload struct {
-	ID         int64   `json:"id"`
-	OwnerID    int64   `json:"owner_id"`
-	CategoryID int64   `json:"category_id"`
-	Name       string  `json:"name"`
-	SKU        string  `json:"sku"`
-	SalePrice  float64 `json:"sale_price"`
-	IsActive   bool    `json:"is_active"`
-	CreatedAt  string  `json:"created_at"`
-	UpdatedAt  string  `json:"updated_at"`
-}
-
-func newMenuItemPayload(item domain.MenuItem) MenuItemPayload {
-	return MenuItemPayload{
-		ID:         item.ID,
-		OwnerID:    item.OwnerID,
-		CategoryID: item.CategoryID,
+func menuItemToProto(item domain.MenuItem) *posv1.MenuItem {
+	return &posv1.MenuItem{
+		Id:         item.ID,
+		CategoryId: item.CategoryID,
 		Name:       item.Name,
-		SKU:        item.SKU,
-		SalePrice:  item.SalePrice,
+		Sku:        item.SKU,
+		Price:      item.SalePrice,
 		IsActive:   item.IsActive,
 		CreatedAt:  item.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:  item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
@@ -44,7 +33,7 @@ func ListMenuItemsRoutes() []string { return []string{"/pos/menu/items"} }
 type ListMenuItemsHandler struct{ Service *application.Service }
 type ListMenuItemsRequest struct{}
 type ListMenuItemsResponse struct {
-	Items []MenuItemPayload `json:"items"`
+	Items []*posv1.MenuItem `json:"items"`
 }
 
 func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsRequest) (ListMenuItemsResponse, *errorModels.ServerError) {
@@ -56,9 +45,9 @@ func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsReques
 	if err != nil {
 		return ListMenuItemsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list menu items"}
 	}
-	payloads := make([]MenuItemPayload, len(items))
+	payloads := make([]*posv1.MenuItem, len(items))
 	for i, item := range items {
-		payloads[i] = newMenuItemPayload(item)
+		payloads[i] = menuItemToProto(item)
 	}
 	return ListMenuItemsResponse{Items: payloads}, nil
 }

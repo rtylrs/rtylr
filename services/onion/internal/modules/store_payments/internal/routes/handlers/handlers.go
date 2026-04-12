@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	storev1 "github.com/voxire/voxie/gen/go/store/v1"
+
 	"context"
 	"net/http"
 
@@ -10,13 +12,13 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type Payload struct {
-	ID       int64  `json:"id"`; OwnerID int64 `json:"owner_id"`; Provider string `json:"provider"`
-	Config   string `json:"config"`; IsActive bool `json:"is_active"`; CreatedAt string `json:"created_at"`
-}
-
-func toPayload(p domain.PaymentMethod) Payload {
-	return Payload{ID: p.ID, OwnerID: p.OwnerID, Provider: p.Provider, Config: p.Config, IsActive: p.IsActive, CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
+func toProto(p domain.PaymentMethod) *storev1.PaymentMethod {
+	return &storev1.PaymentMethod{
+		Id:        p.ID,
+		Provider:  p.Provider,
+		IsEnabled: p.IsActive,
+		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
 }
 
 func ListRoutes() []string   { return []string{"/store/payments"} }
@@ -25,14 +27,14 @@ func UpdateRoutes() []string { return []string{"/store/payments"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Methods []Payload `json:"methods"` }
+type ListResponse struct{ Methods []*storev1.PaymentMethod `json:"methods"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list payment methods"} }
-	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
+	out := make([]*storev1.PaymentMethod, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
 	return ListResponse{Methods: out}, nil
 }
 

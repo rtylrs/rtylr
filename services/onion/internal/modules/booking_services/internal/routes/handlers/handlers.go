@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
+
 	"context"
 	"net/http"
 
@@ -10,17 +12,18 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; Name string `json:"name"`
-	Description string `json:"description"`; DurationMinutes int `json:"duration_minutes"`
-	Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"is_active"`
-	CreatedAt string `json:"created_at"`; UpdatedAt string `json:"updated_at"`
-}
-
-func toPayload(s domain.BookingService) Payload {
-	return Payload{ID: s.ID, OwnerID: s.OwnerID, Name: s.Name, Description: s.Description,
-		DurationMinutes: s.DurationMinutes, Price: s.Price, Color: s.Color, IsActive: s.IsActive,
-		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"), UpdatedAt: s.UpdatedAt.Format("2006-01-02T15:04:05Z07:00")}
+func toProto(s domain.BookingService) *bookv1.BookService {
+	return &bookv1.BookService{
+		Id:              s.ID,
+		Name:            s.Name,
+		Description:     s.Description,
+		DurationMinutes: int32(s.DurationMinutes),
+		Price:           s.Price,
+		Color:           s.Color,
+		IsActive:        s.IsActive,
+		CreatedAt:       s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:       s.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
 }
 
 func ListRoutes() []string   { return []string{"/book/services"} }
@@ -30,14 +33,14 @@ func DeleteRoutes() []string { return []string{"/book/services"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Services []Payload `json:"services"` }
+type ListResponse struct{ Services []*bookv1.BookService `json:"services"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list booking services"} }
-	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
+	out := make([]*bookv1.BookService, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
 	return ListResponse{Services: out}, nil
 }
 

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	"context"
 	"net/http"
 	"strconv"
@@ -13,25 +15,12 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 )
 
-type FloorPayload struct {
-	ID         int64  `json:"id"`
-	BusinessID int64  `json:"business_id"`
-	BranchID   int64  `json:"branch_id"`
-	Name       string `json:"name"`
-	SortOrder  int    `json:"sort_order"`
-	IsActive   bool   `json:"is_active"`
-	CreatedAt  string `json:"created_at"`
-}
-
-func newFloorPayload(f domain.Floor) FloorPayload {
-	return FloorPayload{
-		ID:         f.ID,
-		BusinessID: f.BusinessID,
-		BranchID:   f.BranchID,
-		Name:       f.Name,
-		SortOrder:  f.SortOrder,
-		IsActive:   f.IsActive,
-		CreatedAt:  f.CreatedAt.Format("2006-01-02T15:04:05Z"),
+func floorToProto(f domain.Floor) *posv1.Floor {
+	return &posv1.Floor{
+		Id:        f.ID,
+		Name:      f.Name,
+		SortOrder: int32(f.SortOrder),
+		CreatedAt: f.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -44,7 +33,7 @@ type ListFloorsRequest struct {
 	BranchID int64 `json:"branch_id"`
 }
 type ListFloorsResponse struct {
-	Floors []FloorPayload `json:"floors"`
+	Floors []*posv1.Floor `json:"floors"`
 }
 
 func (h *ListFloorsHandler) Serve(ctx context.Context, req *ListFloorsRequest) (ListFloorsResponse, *errorModels.ServerError) {
@@ -59,9 +48,9 @@ func (h *ListFloorsHandler) Serve(ctx context.Context, req *ListFloorsRequest) (
 	if err != nil {
 		return ListFloorsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list floors"}
 	}
-	payloads := make([]FloorPayload, len(floors))
+	payloads := make([]*posv1.Floor, len(floors))
 	for i, f := range floors {
-		payloads[i] = newFloorPayload(f)
+		payloads[i] = floorToProto(f)
 	}
 	return ListFloorsResponse{Floors: payloads}, nil
 }

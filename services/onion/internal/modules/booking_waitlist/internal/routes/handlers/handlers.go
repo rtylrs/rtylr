@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
+
 	"context"
 	"net/http"
 
@@ -10,16 +12,17 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; ServiceID int64 `json:"service_id"`
-	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
-	PreferredDate string `json:"preferred_date"`; PreferredTime string `json:"preferred_time"`; Status string `json:"status"`; CreatedAt string `json:"created_at"`
-}
-
-func toPayload(w domain.WaitlistEntry) Payload {
-	return Payload{ID: w.ID, OwnerID: w.OwnerID, ServiceID: w.ServiceID, CustomerName: w.CustomerName,
-		CustomerEmail: w.CustomerEmail, CustomerPhone: w.CustomerPhone, PreferredDate: w.PreferredDate,
-		PreferredTime: w.PreferredTime, Status: w.Status, CreatedAt: w.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
+func toProto(w domain.WaitlistEntry) *bookv1.WaitlistEntry {
+	return &bookv1.WaitlistEntry{
+		Id:                w.ID,
+		ServiceId:         w.ServiceID,
+		CustomerName:      w.CustomerName,
+		CustomerEmail:     w.CustomerEmail,
+		CustomerPhone:     w.CustomerPhone,
+		PreferredDate:     w.PreferredDate,
+		PreferredTimeFrom: w.PreferredTime,
+		Status:            w.Status,
+	}
 }
 
 func ListRoutes() []string   { return []string{"/book/waitlist"} }
@@ -28,14 +31,14 @@ func UpdateRoutes() []string { return []string{"/book/waitlist"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Entries []Payload `json:"entries"` }
+type ListResponse struct{ Entries []*bookv1.WaitlistEntry `json:"entries"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list waitlist"} }
-	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
+	out := make([]*bookv1.WaitlistEntry, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
 	return ListResponse{Entries: out}, nil
 }
 

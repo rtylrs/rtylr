@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	"context"
 	"net/http"
 
@@ -22,6 +24,14 @@ type VerifyPINResponse struct {
 	Valid   bool   `json:"valid"`
 	StaffID int64  `json:"staff_id"`
 	Message string `json:"message"`
+}
+
+// verifyPINToProto converts to the proto response type for reference.
+func verifyPINToProto(valid bool, staffID int64) *posv1.VerifyManagerPinResponse {
+	return &posv1.VerifyManagerPinResponse{
+		Valid:     valid,
+		ManagerId: staffID,
+	}
 }
 
 func (h *VerifyPINHandler) Validate(_ context.Context, req *VerifyPINRequest) *errorModels.ServerError {

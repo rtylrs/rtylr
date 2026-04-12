@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	storev1 "github.com/voxire/voxie/gen/go/store/v1"
+
 	"context"
 	"net/http"
 
@@ -10,23 +12,15 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type Payload struct {
-	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"owner_id"`
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	Description string `json:"description"`
-	ImageURL    string `json:"image_url"`
-	ParentID    int64  `json:"parent_id"`
-	SortOrder   int    `json:"sort_order"`
-	CreatedAt   string `json:"created_at"`
-}
-
-func toPayload(c domain.StoreCategory) Payload {
-	return Payload{
-		ID: c.ID, OwnerID: c.OwnerID, Name: c.Name, Slug: c.Slug,
-		Description: c.Description, ImageURL: c.ImageURL, ParentID: c.ParentID,
-		SortOrder: c.SortOrder, CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+func toProto(c domain.StoreCategory) *storev1.Category {
+	return &storev1.Category{
+		Id:          c.ID,
+		Name:        c.Name,
+		Slug:        c.Slug,
+		Description: c.Description,
+		ImageUrl:    c.ImageURL,
+		ParentId:    c.ParentID,
+		SortOrder:   int32(c.SortOrder),
 	}
 }
 
@@ -37,7 +31,7 @@ func DeleteRoutes() []string { return []string{"/store/categories"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Categories []Payload `json:"categories"` }
+type ListResponse struct{ Categories []*storev1.Category `json:"categories"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -48,8 +42,8 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list store categories"}
 	}
-	out := make([]Payload, 0, len(items))
-	for _, i := range items { out = append(out, toPayload(i)) }
+	out := make([]*storev1.Category, 0, len(items))
+	for _, i := range items { out = append(out, toProto(i)) }
 	return ListResponse{Categories: out}, nil
 }
 
