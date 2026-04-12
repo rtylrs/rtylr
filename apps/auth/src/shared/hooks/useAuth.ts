@@ -45,7 +45,7 @@ export const useLogin = () => {
       });
       login(data.role);
     },
-    onError: (error: any) => {
+    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
       const errorMessage =
         error.response?.data?.message || error.response?.data?.error || 'Login failed';
       setError(errorMessage);
@@ -77,7 +77,7 @@ export const useRegisterRestaurant = () => {
       });
       login(data.role);
     },
-    onError: (error: any) => {
+    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
       const errorMessage =
         error.response?.data?.message || error.response?.data?.error || 'Registration failed';
       setError(errorMessage);
@@ -109,7 +109,7 @@ export const useGoogleAuth = () => {
       });
       login(data.role);
     },
-    onError: (error: any) => {
+    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
       const errorMessage =
         error.response?.data?.message || error.response?.data?.error || 'Google login failed';
       setError(errorMessage);
