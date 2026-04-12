@@ -97,13 +97,13 @@ describe('useApps', () => {
   });
 
   it('handles flat array response (no .apps wrapper)', async () => {
-    mockGet.mockResolvedValue([{ id: 'store', name: 'Store', isEnabled: true }]);
+    mockGet.mockResolvedValue([{ id: 'crm', name: 'CRM', isEnabled: true }]);
 
     const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data![0].key).toBe('store');
+    expect(result.current.data![0].key).toBe('crm');
   });
 
   it('calls safe.get with /apps', async () => {

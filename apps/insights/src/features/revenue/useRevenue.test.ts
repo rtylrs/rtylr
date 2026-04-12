@@ -65,7 +65,7 @@ describe('useRevenueByApp', () => {
   });
 
   it('fetches revenue by app', async () => {
-    const data = [{ app: 'book', revenue: 3000 }];
+    const data = [{ app: 'pos', revenue: 3000 }];
     (insightsService.getRevenueByApp as any).mockResolvedValue(data);
     const { result } = renderHook(() => useRevenueByApp('weekly'), {
       wrapper: createWrapper(),

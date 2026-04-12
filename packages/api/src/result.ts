@@ -124,10 +124,10 @@ export interface SafeApi {
  * import { createApiClient } from '@voxire/api';
  * import { safeFetch } from '@voxire/api/result';
  *
- * const api = createApiClient('store');
+ * const api = createApiClient('crm');
  * const safe = safeFetch(api);
  *
- * const result = await safe.get<Product[]>('/store/products');
+ * const result = await safe.get<Customer[]>('/crm/customers');
  * if (result.isOk()) {
  *   console.log(result.value); // Product[]
  * } else {

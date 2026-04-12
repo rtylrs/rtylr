@@ -815,7 +815,6 @@ const Design: React.FC = () => {
                 ['Gallery', 'gallery'],
                 ['Reviews', 'reviews'],
                 ['Offers', 'offers'],
-                ['Book', 'book'],
               ] as [string, keyof MenuLayoutConfig['pages']][]
             ).map(([label, key]) => (
               <ToggleRow
