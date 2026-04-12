@@ -1,12 +1,12 @@
 # rtylr
 
-All-in-one business operating system for SMBs. 14 apps, 10 shared packages.
+All-in-one business operating system for SMBs. 14 apps, 11 shared packages.
 
 ## Architecture
 
-Frontend monorepo with 14 apps and 10 shared packages. pnpm workspaces + Turborepo.
+Frontend monorepo with 14 apps and 11 shared packages. pnpm workspaces + Turborepo.
 
-**Stack:** React 19, Vite 7, TypeScript 5.9, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
+**Stack:** React 19, Vite 7, TypeScript 5.9 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
 ## Apps
 
@@ -15,7 +15,7 @@ Frontend monorepo with 14 apps and 10 shared packages. pnpm workspaces + Turbore
 | Hub      | 5175 | `hub`             | Owner command center, dashboard, team management, settings |
 | Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept             |
 | Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                 |
-| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri desktop)                     |
+| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri v2 desktop)                  |
 | ERP      | 5179 | `@rtylr/erp`      | Inventory, suppliers, purchasing, stock management         |
 | HR       | 5180 | `@rtylr/hr`       | Staff, shifts, payroll, time off, reviews                  |
 | CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                    |
@@ -32,12 +32,13 @@ Frontend monorepo with 14 apps and 10 shared packages. pnpm workspaces + Turbore
 | Package                   | Purpose                                                                          |
 | ------------------------- | -------------------------------------------------------------------------------- |
 | `@voxire/api`             | Axios client factory, neverthrow `safeFetch` wrapper, `unwrap()` for React Query |
+| `@voxire/permissions`     | Typed RBAC with platform roles, POS roles, and 100+ granular capabilities        |
 | `@voxire/config`          | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors                          |
 | `@voxire/types`           | `UserRole`, `AppId`, `User` interface                                            |
 | `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
 | `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
 | `@voxire/auth`            | Cookie helpers, auth guards, user store                                          |
-| `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useLocalStorage`, formatting, validation        |
+| `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useTheme`, formatting, validation               |
 | `@voxire/assets`          | Shared SCSS variables and static assets                                          |
 | `@voxire/menu`            | Customer-facing menu page components                                             |
 | `@voxire/tailwind-config` | Shared Tailwind CSS preset                                                       |
@@ -69,6 +70,43 @@ apps/{name}/src/
   App.tsx
   main.tsx
   globals.css
+```
+
+## API Contracts (voxie)
+
+API request/response types are defined as Protocol Buffers in the [voxie](https://github.com/voxire/voxie) submodule, shared between frontend and backend as the single source of truth.
+
+```
+voxie/proto/
+  common/v1/             # Pagination, errors, timestamps
+  auth/v1/               # Login, register, password reset
+  hub/v1/                # Team, business, apps, dashboard, billing, developer
+```
+
+### Setup
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules git@github.com:voxire/rtylr.git
+
+# Or if already cloned
+git submodule update --init --recursive
+
+# Generate TypeScript types from proto files
+cd voxie && make generate
+```
+
+### Updating contracts
+
+```bash
+cd voxie
+# Edit proto files in proto/{module}/v1/
+make generate    # Regenerate Go + TypeScript types
+git add -A && git commit -m "feat: add X contract"
+git push
+
+# Then update the submodule ref in frontend + backend
+cd .. && git add voxie && git commit -m "chore: update voxie submodule"
 ```
 
 ## API Layer
@@ -128,9 +166,22 @@ pnpm --filter @rtylr/store dev
 # Build all
 pnpm build
 
-# Typecheck all
+# Typecheck all (strict mode)
 pnpm turbo typecheck
 
-# Build + typecheck a single app
-pnpm --filter @rtylr/crm build
+# Run tests (1,250+ unit tests)
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Format
+pnpm format
 ```
+
+## Testing
+
+- **Unit tests:** Vitest + React Testing Library (1,250+ tests)
+- **E2E tests:** Playwright (auth, hub, landing flows)
+- **Coverage:** stores ~95%, services ~85%, hooks ~80%, utils ~90%
+- **CI pipeline:** format check -> typecheck (strict) -> unit tests -> lint -> build

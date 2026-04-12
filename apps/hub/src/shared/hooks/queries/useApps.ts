@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
+import type { App as ProtoApp } from '@voxie/hub/v1/apps';
 import {
   MonitorSpeaker,
   Package,
@@ -121,7 +122,7 @@ export const useApps = () => {
       const res = await unwrap(safe.get('/apps'));
       const remote = res?.apps ?? res;
       if (!Array.isArray(remote)) return [];
-      return remote.map((a: any) => {
+      return remote.map((a: ProtoApp) => {
         const meta = APP_META[a.id] ?? {
           href: '#',
           color: '#888',
