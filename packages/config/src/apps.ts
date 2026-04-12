@@ -14,9 +14,6 @@ export const APP_URLS: Record<AppId, string> & { api: string; status: string } =
   crm: IS_LOCAL ? 'http://localhost:5181' : 'https://crm.rtylr.com',
   finance: IS_LOCAL ? 'http://localhost:5182' : 'https://finance.rtylr.com',
   flow: IS_LOCAL ? 'http://localhost:5183' : 'https://flow.rtylr.com',
-  store: IS_LOCAL ? 'http://localhost:5184' : 'https://store.rtylr.com',
-  book: IS_LOCAL ? 'http://localhost:5185' : 'https://book.rtylr.com',
-  support: IS_LOCAL ? 'http://localhost:5186' : 'https://support.rtylr.com',
   insights: IS_LOCAL ? 'http://localhost:5187' : 'https://insights.rtylr.com',
   landing: IS_LOCAL ? 'http://localhost:4200' : 'https://rtylr.com',
   api: 'https://api.voxire.dev',
@@ -40,13 +37,6 @@ export const APP_CONFIG: Record<
   crm: { name: 'CRM', devPort: 5181, allowedRoles: ['owner', 'admin', 'operator'] },
   finance: { name: 'Finance', devPort: 5182, allowedRoles: ['owner', 'admin'] },
   flow: { name: 'Flow', devPort: 5183, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  store: { name: 'Store', devPort: 5184, allowedRoles: ['owner', 'admin', 'operator'] },
-  book: { name: 'Book', devPort: 5185, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  support: {
-    name: 'Support',
-    devPort: 5186,
-    allowedRoles: ['owner', 'admin', 'operator', 'staff'],
-  },
   insights: { name: 'Insights', devPort: 5187, allowedRoles: ['owner', 'admin'] },
   landing: { name: 'Landing', devPort: 4200, allowedRoles: [] },
 };

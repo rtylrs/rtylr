@@ -1,10 +1,10 @@
 # rtylr
 
-The all-in-one business operating system for SMBs. 14 apps, 11 shared packages, 1,250+ tests.
+The all-in-one business operating system for SMBs. 11 apps, 11 shared packages, 1,250+ tests.
 
 ## Architecture
 
-Frontend monorepo with 14 apps and 11 shared packages. pnpm workspaces + Turborepo.
+Frontend monorepo with 11 apps and 11 shared packages. pnpm workspaces + Turborepo.
 
 **Stack:** React 19, Vite 7, TypeScript 5.9 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
@@ -21,9 +21,6 @@ Frontend monorepo with 14 apps and 11 shared packages. pnpm workspaces + Turbore
 | CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                    |
 | Finance  | 5182 | `@rtylr/finance`  | Invoices, expenses, P&L, tax, reconciliation               |
 | Flow     | 5183 | `@rtylr/flow`     | Projects, tasks, roadmaps, cycles, team workload           |
-| Store    | 5184 | `@rtylr/store`    | Online storefront, products, orders, checkout              |
-| Book     | 5185 | `@rtylr/book`     | Appointments, scheduling, resources, waitlist              |
-| Support  | 5186 | `@rtylr/support`  | Help desk, tickets, shared inbox, knowledge base           |
 | Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports          |
 | Landing  | 4200 | `@rtylr/landing`  | Marketing site (Next.js 15)                                |
 
@@ -133,7 +130,7 @@ Each app's `lib/api.ts`:
 
 ```typescript
 import { createApiClient, safeFetch } from '@voxire/api';
-const api = createApiClient('store'); // raw axios (backwards compat)
+const api = createApiClient('crm'); // raw axios (backwards compat)
 export const safe = safeFetch(api); // neverthrow-wrapped
 export default api;
 ```
@@ -161,7 +158,7 @@ pnpm install
 pnpm dev
 
 # Run a single app
-pnpm --filter @rtylr/store dev
+pnpm --filter @rtylr/crm dev
 
 # Build all
 pnpm build

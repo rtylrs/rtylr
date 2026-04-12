@@ -10,9 +10,6 @@ export type AppId =
   | 'flow'
   | 'menu'
   | 'landing'
-  | 'store'
-  | 'book'
-  | 'support'
   | 'insights';
 
 export interface User {

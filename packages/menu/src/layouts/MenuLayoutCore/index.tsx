@@ -133,13 +133,6 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         )}
 
         {activePage === 'offers' && <OffersPage offers={business.offers ?? []} />}
-
-        {activePage === 'book' && (
-          <div className={styles.layout__bookPlaceholder}>
-            <span>📅</span>
-            <p>Online booking coming soon.</p>
-          </div>
-        )}
       </main>
 
       {/* Cart drawer */}

@@ -21,9 +21,6 @@ export type Resource =
   | 'app:crm'
   | 'app:finance'
   | 'app:flow'
-  | 'app:store'
-  | 'app:book'
-  | 'app:support'
   | 'app:insights'
   | 'app:menu'
   // POS operations
@@ -95,25 +92,6 @@ export type Resource =
   | 'flow:tasks:assign'
   | 'flow:views'
   | 'flow:roadmap'
-  // Store operations
-  | 'store:products'
-  | 'store:products:manage'
-  | 'store:orders'
-  | 'store:storefront'
-  | 'store:settings'
-  // Book operations
-  | 'book:appointments'
-  | 'book:appointments:manage'
-  | 'book:services'
-  | 'book:resources'
-  | 'book:settings'
-  // Support operations
-  | 'support:inbox'
-  | 'support:tickets'
-  | 'support:tickets:assign'
-  | 'support:knowledge'
-  | 'support:knowledge:manage'
-  | 'support:settings'
   // Insights operations
   | 'insights:dashboard'
   | 'insights:reports'

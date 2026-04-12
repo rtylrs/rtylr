@@ -68,7 +68,6 @@ export interface PageConfig {
   gallery?: boolean;
   reviews?: boolean;
   offers?: boolean;
-  book?: boolean;
 }
 
 export interface HeaderConfig {
@@ -108,7 +107,6 @@ export const DEFAULT_LAYOUT_CONFIG: MenuLayoutConfig = {
     gallery: false,
     reviews: false,
     offers: false,
-    book: false,
   },
   header: {
     coverHeight: 'md',

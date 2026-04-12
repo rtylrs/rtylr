@@ -6,19 +6,7 @@ import { hasPOSRoleLevel } from './roles';
 
 // ── App access guard ────────────────────────────────────────────────
 
-export type AppId =
-  | 'hub'
-  | 'pos'
-  | 'erp'
-  | 'hr'
-  | 'crm'
-  | 'finance'
-  | 'flow'
-  | 'store'
-  | 'book'
-  | 'support'
-  | 'insights'
-  | 'menu';
+export type AppId = 'hub' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow' | 'insights' | 'menu';
 
 const APP_RESOURCE_MAP: Record<AppId, Resource> = {
   hub: 'hub:dashboard',
@@ -28,9 +16,6 @@ const APP_RESOURCE_MAP: Record<AppId, Resource> = {
   crm: 'app:crm',
   finance: 'finance:invoices',
   flow: 'app:flow',
-  store: 'app:store',
-  book: 'app:book',
-  support: 'support:inbox',
   insights: 'app:insights',
   menu: 'app:menu',
 };

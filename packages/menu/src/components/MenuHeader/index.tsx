@@ -12,7 +12,6 @@ const PAGE_DEFS = [
   { id: 'gallery', label: 'Gallery' },
   { id: 'reviews', label: 'Reviews' },
   { id: 'offers', label: 'Offers' },
-  { id: 'book', label: 'Book' },
 ] as const;
 
 const COVER_HEIGHT: Record<string, string> = {
