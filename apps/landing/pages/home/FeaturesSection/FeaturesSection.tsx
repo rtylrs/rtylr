@@ -70,33 +70,6 @@ const features: Feature[] = [
     image: 'https://placehold.co/600x400',
   },
   {
-    id: 'store',
-    category: 'Store',
-    title: 'Online Storefront & E-Commerce',
-    description:
-      'Launch your online store in minutes. Manage products, process orders, configure shipping and payments, and customize your storefront, all connected to your inventory.',
-    ctaText: 'EXPLORE STORE',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    id: 'book',
-    category: 'Book',
-    title: 'Appointments & Scheduling',
-    description:
-      'Let customers book appointments online. Manage services, resources, and staff availability with a calendar built for service businesses, salons, clinics, and consultancies.',
-    ctaText: 'EXPLORE BOOK',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    id: 'support',
-    category: 'Support',
-    title: 'Help Desk & Customer Support',
-    description:
-      'Manage customer conversations from one shared inbox. Create tickets, build a knowledge base, set up canned responses, and resolve issues faster with built-in SLAs.',
-    ctaText: 'EXPLORE SUPPORT',
-    image: 'https://placehold.co/600x400',
-  },
-  {
     id: 'insights',
     category: 'Insights',
     title: 'Analytics & Business Intelligence',

@@ -9,9 +9,6 @@ import {
   CreditCard,
   Layers,
   Lock,
-  Store,
-  CalendarCheck,
-  Headphones,
   BarChart3,
 } from 'lucide-react';
 import { useUserStore, type StoredUser } from '../stores/userStore';
@@ -74,30 +71,6 @@ const ALL_APPS = [
     color: '#64C5B9',
     icon: Layers,
     href: APP_URLS.flow || 'https://flow.rtylr.com',
-  },
-  {
-    id: 'store',
-    name: 'Store',
-    desc: 'Online store and orders',
-    color: '#14b8a6',
-    icon: Store,
-    href: APP_URLS.store || 'https://store.rtylr.com',
-  },
-  {
-    id: 'book',
-    name: 'Book',
-    desc: 'Appointments and scheduling',
-    color: '#0ea5e9',
-    icon: CalendarCheck,
-    href: APP_URLS.book || 'https://book.rtylr.com',
-  },
-  {
-    id: 'support',
-    name: 'Support',
-    desc: 'Help desk and tickets',
-    color: '#4583C4',
-    icon: Headphones,
-    href: APP_URLS.support || 'https://support.rtylr.com',
   },
   {
     id: 'insights',
