@@ -21,16 +21,33 @@ interface ThemeConfig {
   menuAccent?: string;
 }
 
-function transformCategories(rawItems: any[]): MenuCategoryData[] {
+interface RawMenuItem {
+  _id?: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  image?: string;
+  badges?: string[];
+  available?: boolean;
+}
+interface RawCategory {
+  _id?: string;
+  type?: string;
+  name?: string;
+  description?: string;
+  menuItems?: RawMenuItem[];
+}
+
+function transformCategories(rawItems: RawCategory[]): MenuCategoryData[] {
   return rawItems
-    .filter((item: any) => item.type === 'category' && Array.isArray(item.menuItems))
-    .map((cat: any) => ({
-      id: cat._id,
-      name: cat.name,
+    .filter((item) => item.type === 'category' && Array.isArray(item.menuItems))
+    .map((cat) => ({
+      id: cat._id ?? '',
+      name: cat.name ?? '',
       description: cat.description,
-      items: cat.menuItems.map((item: any) => ({
-        id: item._id,
-        name: item.name,
+      items: (cat.menuItems ?? []).map((item) => ({
+        id: item._id ?? '',
+        name: item.name ?? '',
         description: item.description,
         price: item.price ?? 0,
         image: item.image,
