@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@voxire/api": "workspace:*",
+    "@voxire/contracts": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.4",
     "@aldabil/react-scheduler": "^2.9.3",
     "@tanstack/react-query": "^5.89.0",
