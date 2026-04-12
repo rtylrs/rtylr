@@ -26,10 +26,10 @@ type PLReportResponse struct {
 	Period            string  `json:"period"`
 	Revenue           float64 `json:"revenue"`
 	COGS              float64 `json:"cogs"`
-	GrossProfit       float64 `json:"grossProfit"`
-	OperatingExpenses float64 `json:"operatingExpenses"`
-	NetProfit         float64 `json:"netProfit"`
-	MarginPct         float64 `json:"marginPct"`
+	GrossProfit       float64 `json:"gross_profit"`
+	OperatingExpenses float64 `json:"operating_expenses"`
+	NetProfit         float64 `json:"net_profit"`
+	MarginPct         float64 `json:"margin_pct"`
 }
 
 func (h *PLReportHandler) Serve(ctx context.Context, req *PLReportRequest) (PLReportResponse, *errorModels.ServerError) {

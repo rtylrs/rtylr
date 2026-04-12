@@ -21,13 +21,13 @@ func FeedbackCreateRoutes() []string {
 
 type FeedbackPayload struct {
 	ID         int64  `json:"id"`
-	OwnerID    int64  `json:"ownerId"`
-	CustomerID int64  `json:"customerId"`
+	OwnerID    int64  `json:"owner_id"`
+	CustomerID int64  `json:"customer_id"`
 	Type       string `json:"type"`
 	Score      int    `json:"score"`
 	Comment    string `json:"comment"`
 	Source     string `json:"source"`
-	CreatedAt  string `json:"createdAt"`
+	CreatedAt  string `json:"created_at"`
 }
 
 // -- LIST --------------------------------------------------------------------
@@ -39,14 +39,14 @@ type ListFeedbackHandler struct {
 type ListFeedbackRequest struct {
 	Type     string `json:"type"`
 	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
+	PageSize int    `json:"page_size"`
 }
 
 type ListFeedbackResponse struct {
 	Feedback []FeedbackPayload `json:"feedback"`
 	Total    int               `json:"total"`
 	Page     int               `json:"page"`
-	PageSize int               `json:"pageSize"`
+	PageSize int               `json:"page_size"`
 }
 
 func (h *ListFeedbackHandler) Serve(ctx context.Context, req *ListFeedbackRequest) (ListFeedbackResponse, *errorModels.ServerError) {
@@ -100,7 +100,7 @@ type CreateFeedbackHandler struct {
 }
 
 type CreateFeedbackRequest struct {
-	CustomerID int64  `json:"customerId"`
+	CustomerID int64  `json:"customer_id"`
 	Type       string `json:"type"`
 	Score      int    `json:"score"`
 	Comment    string `json:"comment"`
@@ -108,7 +108,7 @@ type CreateFeedbackRequest struct {
 }
 
 type CreateFeedbackResponse struct {
-	FeedbackID int64  `json:"feedbackId"`
+	FeedbackID int64  `json:"feedback_id"`
 	Message    string `json:"message"`
 }
 

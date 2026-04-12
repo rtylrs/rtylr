@@ -25,23 +25,23 @@ type ListPayrollRequest struct {
 
 type PayrollPayload struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	StaffID       int64     `json:"staffId"`
-	PeriodStart   time.Time `json:"periodStart"`
-	PeriodEnd     time.Time `json:"periodEnd"`
-	PeriodLabel   string    `json:"periodLabel"`
-	RegularHours  float64   `json:"regularHours"`
-	OvertimeHours float64   `json:"overtimeHours"`
-	BasePay       float64   `json:"basePay"`
-	OvertimePay   float64   `json:"overtimePay"`
+	OwnerID       int64     `json:"owner_id"`
+	StaffID       int64     `json:"staff_id"`
+	PeriodStart   time.Time `json:"period_start"`
+	PeriodEnd     time.Time `json:"period_end"`
+	PeriodLabel   string    `json:"period_label"`
+	RegularHours  float64   `json:"regular_hours"`
+	OvertimeHours float64   `json:"overtime_hours"`
+	BasePay       float64   `json:"base_pay"`
+	OvertimePay   float64   `json:"overtime_pay"`
 	Bonuses       float64   `json:"bonuses"`
 	Deductions    float64   `json:"deductions"`
-	TaxWithheld   float64   `json:"taxWithheld"`
-	NetPay        float64   `json:"netPay"`
+	TaxWithheld   float64   `json:"tax_withheld"`
+	NetPay        float64   `json:"net_pay"`
 	Status        string    `json:"status"`
-	PaidAt        time.Time `json:"paidAt"`
+	PaidAt        time.Time `json:"paid_at"`
 	Notes         string    `json:"notes"`
-	CreatedAt     time.Time `json:"createdAt"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type ListPayrollResponse struct {
@@ -99,13 +99,13 @@ type RunPayrollHandler struct {
 }
 
 type RunPayrollRequest struct {
-	PeriodStart string `json:"periodStart"`
-	PeriodEnd   string `json:"periodEnd"`
-	PeriodLabel string `json:"periodLabel"`
+	PeriodStart string `json:"period_start"`
+	PeriodEnd   string `json:"period_end"`
+	PeriodLabel string `json:"period_label"`
 }
 
 type RunPayrollResponse struct {
-	RecordsCreated int `json:"recordsCreated"`
+	RecordsCreated int `json:"records_created"`
 }
 
 func (h *RunPayrollHandler) Validate(_ context.Context, req *RunPayrollRequest) *errorModels.ServerError {

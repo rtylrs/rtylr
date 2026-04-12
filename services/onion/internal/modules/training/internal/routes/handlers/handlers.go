@@ -13,12 +13,12 @@ import (
 
 type TrainingCoursePayload struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
+	OwnerID       int64     `json:"owner_id"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
-	DurationHours float64   `json:"durationHours"`
-	IsRequired    bool      `json:"isRequired"`
-	CreatedAt     time.Time `json:"createdAt"`
+	DurationHours float64   `json:"duration_hours"`
+	IsRequired    bool      `json:"is_required"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 func newPayload(t domain.TrainingCourse) TrainingCoursePayload {
@@ -58,8 +58,8 @@ type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
 	Name          string  `json:"name"`
 	Description   string  `json:"description"`
-	DurationHours float64 `json:"durationHours"`
-	IsRequired    bool    `json:"isRequired"`
+	DurationHours float64 `json:"duration_hours"`
+	IsRequired    bool    `json:"is_required"`
 }
 type CreateResponse struct {
 	ID      int64  `json:"id"`

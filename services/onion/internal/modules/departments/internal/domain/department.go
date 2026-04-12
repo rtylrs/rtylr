@@ -10,12 +10,12 @@ var ErrDepartmentNotFound = errors.New("department not found")
 
 type Department struct {
 	ID             int64     `json:"id"`
-	OwnerID        int64     `json:"ownerId"`
+	OwnerID        int64     `json:"owner_id"`
 	Name           string    `json:"name"`
 	Description    string    `json:"description"`
-	ManagerStaffID int64     `json:"managerStaffId"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	ManagerStaffID int64     `json:"manager_staff_id"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 func (d *Department) FromRow(row *sql.Rows) error {
@@ -50,8 +50,8 @@ func (d *Department) FromRow(row *sql.Rows) error {
 
 type DepartmentInput struct {
 	ID             int64  `json:"id"`
-	OwnerID        int64  `json:"ownerId"`
+	OwnerID        int64  `json:"owner_id"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
-	ManagerStaffID int64  `json:"managerStaffId"`
+	ManagerStaffID int64  `json:"manager_staff_id"`
 }

@@ -23,14 +23,14 @@ type GetSettingsRequest struct{}
 type SessionPayload struct {
 	ID        string `json:"id"`
 	IP        string `json:"ip"`
-	UserAgent string `json:"userAgent"`
-	CreatedAt string `json:"createdAt"`
-	IsCurrent bool   `json:"isCurrent"`
+	UserAgent string `json:"user_agent"`
+	CreatedAt string `json:"created_at"`
+	IsCurrent bool   `json:"is_current"`
 }
 
 type GetSettingsResponse struct {
-	TwoFactorEnabled bool             `json:"twoFactorEnabled"`
-	ActiveSessions   []SessionPayload `json:"activeSessions"`
+	TwoFactorEnabled bool             `json:"two_factor_enabled"`
+	ActiveSessions   []SessionPayload `json:"active_sessions"`
 }
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, *errorModels.ServerError) {
@@ -110,9 +110,9 @@ type LoginEntryPayload struct {
 	Email     string `json:"email"`
 	Method    string `json:"method"`
 	IP        string `json:"ip"`
-	UserAgent string `json:"userAgent"`
+	UserAgent string `json:"user_agent"`
 	Success   bool   `json:"success"`
-	CreatedAt string `json:"createdAt"`
+	CreatedAt string `json:"created_at"`
 }
 
 type LoginHistoryResponse struct {

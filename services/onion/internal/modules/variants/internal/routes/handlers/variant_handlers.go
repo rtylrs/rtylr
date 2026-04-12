@@ -21,23 +21,23 @@ type ListVariantsHandler struct {
 }
 
 type ListVariantsRequest struct {
-	ProductID int64 `json:"productId"`
+	ProductID int64 `json:"product_id"`
 }
 
 type VariantPayload struct {
 	ID            int64   `json:"id"`
-	OwnerID       int64   `json:"ownerId"`
-	ProductID     int64   `json:"productId"`
+	OwnerID       int64   `json:"owner_id"`
+	ProductID     int64   `json:"product_id"`
 	Name          string  `json:"name"`
 	SKU           string  `json:"sku"`
 	Barcode       string  `json:"barcode"`
-	CostPrice     float64 `json:"costPrice"`
-	SalePrice     float64 `json:"salePrice"`
-	StockQuantity float64 `json:"stockQuantity"`
+	CostPrice     float64 `json:"cost_price"`
+	SalePrice     float64 `json:"sale_price"`
+	StockQuantity float64 `json:"stock_quantity"`
 	Attributes    string  `json:"attributes"`
-	IsActive      bool    `json:"isActive"`
-	CreatedAt     string  `json:"createdAt"`
-	UpdatedAt     string  `json:"updatedAt"`
+	IsActive      bool    `json:"is_active"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     string  `json:"updated_at"`
 }
 
 type ListVariantsResponse struct {
@@ -100,19 +100,19 @@ type CreateVariantHandler struct {
 }
 
 type CreateVariantRequest struct {
-	ProductID     int64   `json:"productId"`
+	ProductID     int64   `json:"product_id"`
 	Name          string  `json:"name"`
 	SKU           string  `json:"sku"`
 	Barcode       string  `json:"barcode"`
-	CostPrice     float64 `json:"costPrice"`
-	SalePrice     float64 `json:"salePrice"`
-	StockQuantity float64 `json:"stockQuantity"`
+	CostPrice     float64 `json:"cost_price"`
+	SalePrice     float64 `json:"sale_price"`
+	StockQuantity float64 `json:"stock_quantity"`
 	Attributes    string  `json:"attributes"`
-	IsActive      bool    `json:"isActive"`
+	IsActive      bool    `json:"is_active"`
 }
 
 type CreateVariantResponse struct {
-	VariantID int64  `json:"variantId"`
+	VariantID int64  `json:"variant_id"`
 	Message   string `json:"message"`
 }
 
@@ -182,15 +182,15 @@ type UpdateVariantHandler struct {
 
 type UpdateVariantRequest struct {
 	ID            int64   `json:"id"`
-	ProductID     int64   `json:"productId"`
+	ProductID     int64   `json:"product_id"`
 	Name          string  `json:"name"`
 	SKU           string  `json:"sku"`
 	Barcode       string  `json:"barcode"`
-	CostPrice     float64 `json:"costPrice"`
-	SalePrice     float64 `json:"salePrice"`
-	StockQuantity float64 `json:"stockQuantity"`
+	CostPrice     float64 `json:"cost_price"`
+	SalePrice     float64 `json:"sale_price"`
+	StockQuantity float64 `json:"stock_quantity"`
 	Attributes    string  `json:"attributes"`
-	IsActive      bool    `json:"isActive"`
+	IsActive      bool    `json:"is_active"`
 }
 
 type UpdateVariantResponse struct {

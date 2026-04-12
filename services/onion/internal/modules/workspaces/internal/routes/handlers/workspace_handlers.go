@@ -28,15 +28,15 @@ func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/
 
 type WorkspacePayload struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
+	OwnerID     int64     `json:"owner_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Icon        string    `json:"icon"`
 	Color       string    `json:"color"`
-	IsDefault   bool      `json:"isDefault"`
-	CreatedBy   int64     `json:"createdBy"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	IsDefault   bool      `json:"is_default"`
+	CreatedBy   int64     `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func toWorkspacePayload(w domain.Workspace) WorkspacePayload {
@@ -252,8 +252,8 @@ type AddWorkspaceMemberHandler struct {
 }
 
 type AddWorkspaceMemberRequest struct {
-	WorkspaceID int64  `json:"workspaceId"`
-	UserID      int64  `json:"userId"`
+	WorkspaceID int64  `json:"workspace_id"`
+	UserID      int64  `json:"user_id"`
 	Role        string `json:"role"`
 }
 
@@ -304,8 +304,8 @@ type RemoveWorkspaceMemberHandler struct {
 }
 
 type RemoveWorkspaceMemberRequest struct {
-	WorkspaceID int64 `json:"workspaceId"`
-	UserID      int64 `json:"userId"`
+	WorkspaceID int64 `json:"workspace_id"`
+	UserID      int64 `json:"user_id"`
 }
 
 type RemoveWorkspaceMemberResponse struct {

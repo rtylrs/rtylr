@@ -16,26 +16,26 @@ var (
 
 type Customer struct {
 	ID            int64      `json:"id"`
-	OwnerID       int64      `json:"ownerId"`
-	FirstName     string     `json:"firstName"`
-	LastName      string     `json:"lastName"`
+	OwnerID       int64      `json:"owner_id"`
+	FirstName     string     `json:"first_name"`
+	LastName      string     `json:"last_name"`
 	Email         string     `json:"email"`
 	Phone         string     `json:"phone"`
-	DateOfBirth   *time.Time `json:"dateOfBirth"`
+	DateOfBirth   *time.Time `json:"date_of_birth"`
 	Gender        string     `json:"gender"`
 	Address       string     `json:"address"`
 	City          string     `json:"city"`
 	Country       string     `json:"country"`
-	LoyaltyPoints int        `json:"loyaltyPoints"`
-	TotalSpent    float64    `json:"totalSpent"`
-	VisitCount    int        `json:"visitCount"`
-	LastVisitAt   *time.Time `json:"lastVisitAt"`
-	LoyaltyTier   string     `json:"loyaltyTier"`
+	LoyaltyPoints int        `json:"loyalty_points"`
+	TotalSpent    float64    `json:"total_spent"`
+	VisitCount    int        `json:"visit_count"`
+	LastVisitAt   *time.Time `json:"last_visit_at"`
+	LoyaltyTier   string     `json:"loyalty_tier"`
 	Tags          []string   `json:"tags"`
 	Notes         string     `json:"notes"`
-	IsActive      bool       `json:"isActive"`
-	CreatedAt     time.Time  `json:"createdAt"`
-	UpdatedAt     time.Time  `json:"updatedAt"`
+	IsActive      bool       `json:"is_active"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
 type CustomerInput struct {
@@ -83,39 +83,39 @@ type CustomerListResult struct {
 	Customers []Customer `json:"customers"`
 	Total     int        `json:"total"`
 	Page      int        `json:"page"`
-	PageSize  int        `json:"pageSize"`
+	PageSize  int        `json:"page_size"`
 }
 
 type LoyaltyTransaction struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	CustomerID    int64     `json:"customerId"`
+	OwnerID       int64     `json:"owner_id"`
+	CustomerID    int64     `json:"customer_id"`
 	Type          string    `json:"type"`
 	Points        int       `json:"points"`
-	BalanceBefore int       `json:"balanceBefore"`
-	BalanceAfter  int       `json:"balanceAfter"`
+	BalanceBefore int       `json:"balance_before"`
+	BalanceAfter  int       `json:"balance_after"`
 	Description   string    `json:"description"`
-	ReferenceID   *int64    `json:"referenceId"`
-	ReferenceType string    `json:"referenceType"`
-	CreatedAt     time.Time `json:"createdAt"`
+	ReferenceID   *int64    `json:"reference_id"`
+	ReferenceType string    `json:"reference_type"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type LoyaltyConfig struct {
 	ID                    int64     `json:"id"`
-	OwnerID               int64     `json:"ownerId"`
-	IsEnabled             bool      `json:"isEnabled"`
-	PointsPerCurrencyUnit float64   `json:"pointsPerCurrencyUnit"`
-	CurrencyPerPoint      float64   `json:"currencyPerPoint"`
-	BronzeMin             int       `json:"bronzeMin"`
-	SilverMin             int       `json:"silverMin"`
-	GoldMin               int       `json:"goldMin"`
-	PlatinumMin           int       `json:"platinumMin"`
-	BronzeDiscountPct     float64   `json:"bronzeDiscountPct"`
-	SilverDiscountPct     float64   `json:"silverDiscountPct"`
-	GoldDiscountPct       float64   `json:"goldDiscountPct"`
-	PlatinumDiscountPct   float64   `json:"platinumDiscountPct"`
-	PointsExpiryDays      int       `json:"pointsExpiryDays"`
-	UpdatedAt             time.Time `json:"updatedAt"`
+	OwnerID               int64     `json:"owner_id"`
+	IsEnabled             bool      `json:"is_enabled"`
+	PointsPerCurrencyUnit float64   `json:"points_per_currency_unit"`
+	CurrencyPerPoint      float64   `json:"currency_per_point"`
+	BronzeMin             int       `json:"bronze_min"`
+	SilverMin             int       `json:"silver_min"`
+	GoldMin               int       `json:"gold_min"`
+	PlatinumMin           int       `json:"platinum_min"`
+	BronzeDiscountPct     float64   `json:"bronze_discount_pct"`
+	SilverDiscountPct     float64   `json:"silver_discount_pct"`
+	GoldDiscountPct       float64   `json:"gold_discount_pct"`
+	PlatinumDiscountPct   float64   `json:"platinum_discount_pct"`
+	PointsExpiryDays      int       `json:"points_expiry_days"`
+	UpdatedAt             time.Time `json:"updated_at"`
 }
 
 type LoyaltyConfigInput struct {
@@ -161,14 +161,14 @@ type RecordVisitInput struct {
 
 type Segment struct {
 	ID               int64      `json:"id"`
-	OwnerID          int64      `json:"ownerId"`
+	OwnerID          int64      `json:"owner_id"`
 	Name             string     `json:"name"`
 	Description      string     `json:"description"`
 	Rules            []byte     `json:"rules"`
-	CustomerCount    int        `json:"customerCount"`
-	LastCalculatedAt *time.Time `json:"lastCalculatedAt"`
-	CreatedAt        time.Time  `json:"createdAt"`
-	UpdatedAt        time.Time  `json:"updatedAt"`
+	CustomerCount    int        `json:"customer_count"`
+	LastCalculatedAt *time.Time `json:"last_calculated_at"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
 }
 
 type SegmentInput struct {
@@ -188,23 +188,23 @@ type SegmentUpdateInput struct {
 
 type Campaign struct {
 	ID             int64      `json:"id"`
-	OwnerID        int64      `json:"ownerId"`
+	OwnerID        int64      `json:"owner_id"`
 	Name           string     `json:"name"`
 	Description    string     `json:"description"`
 	Channel        string     `json:"channel"`
 	Status         string     `json:"status"`
-	SegmentID      *int64     `json:"segmentId"`
+	SegmentID      *int64     `json:"segment_id"`
 	Subject        string     `json:"subject"`
 	Content        string     `json:"content"`
-	ScheduledAt    *time.Time `json:"scheduledAt"`
-	SentAt         *time.Time `json:"sentAt"`
-	AudienceCount  int        `json:"audienceCount"`
-	SentCount      int        `json:"sentCount"`
-	DeliveredCount int        `json:"deliveredCount"`
-	OpenedCount    int        `json:"openedCount"`
-	ClickedCount   int        `json:"clickedCount"`
-	CreatedAt      time.Time  `json:"createdAt"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
+	ScheduledAt    *time.Time `json:"scheduled_at"`
+	SentAt         *time.Time `json:"sent_at"`
+	AudienceCount  int        `json:"audience_count"`
+	SentCount      int        `json:"sent_count"`
+	DeliveredCount int        `json:"delivered_count"`
+	OpenedCount    int        `json:"opened_count"`
+	ClickedCount   int        `json:"clicked_count"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type CampaignInput struct {
@@ -231,20 +231,20 @@ type CampaignUpdateInput struct {
 }
 
 type DashboardStats struct {
-	TotalCustomers       int              `json:"totalCustomers"`
-	NewThisMonth         int              `json:"newThisMonth"`
-	ActiveLoyaltyMembers int              `json:"activeLoyaltyMembers"`
-	TopCustomers         []TopCustomer    `json:"topCustomers"`
+	TotalCustomers       int              `json:"total_customers"`
+	NewThisMonth         int              `json:"new_this_month"`
+	ActiveLoyaltyMembers int              `json:"active_loyalty_members"`
+	TopCustomers         []TopCustomer    `json:"top_customers"`
 }
 
 type TopCustomer struct {
 	ID            int64   `json:"id"`
-	FirstName     string  `json:"firstName"`
-	LastName      string  `json:"lastName"`
+	FirstName     string  `json:"first_name"`
+	LastName      string  `json:"last_name"`
 	Email         string  `json:"email"`
-	TotalSpent    float64 `json:"totalSpent"`
-	LoyaltyPoints int     `json:"loyaltyPoints"`
-	LoyaltyTier   string  `json:"loyaltyTier"`
+	TotalSpent    float64 `json:"total_spent"`
+	LoyaltyPoints int     `json:"loyalty_points"`
+	LoyaltyTier   string  `json:"loyalty_tier"`
 }
 
 const (
@@ -258,30 +258,30 @@ const (
 
 type TimelineEntry struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	CustomerID  int64     `json:"customerId"`
+	OwnerID     int64     `json:"owner_id"`
+	CustomerID  int64     `json:"customer_id"`
 	Type        string    `json:"type"`
 	Description string    `json:"description"`
 	Metadata    []byte    `json:"metadata"`
-	CreatedAt   time.Time `json:"createdAt"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 // CustomerDetail includes loyalty transactions and visit info
 
 type CustomerDetail struct {
 	Customer            Customer             `json:"customer"`
-	LoyaltyTransactions []LoyaltyTransaction `json:"loyaltyTransactions"`
-	RecentVisits        []TimelineEntry      `json:"recentVisits"`
+	LoyaltyTransactions []LoyaltyTransaction `json:"loyalty_transactions"`
+	RecentVisits        []TimelineEntry      `json:"recent_visits"`
 }
 
 // Import
 
 type CustomerImportItem struct {
-	FirstName   string   `json:"firstName"`
-	LastName    string   `json:"lastName"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
 	Email       string   `json:"email"`
 	Phone       string   `json:"phone"`
-	DateOfBirth string   `json:"dateOfBirth"`
+	DateOfBirth string   `json:"date_of_birth"`
 	Gender      string   `json:"gender"`
 	Address     string   `json:"address"`
 	City        string   `json:"city"`
@@ -291,7 +291,7 @@ type CustomerImportItem struct {
 }
 
 type CustomerImportResult struct {
-	TotalProcessed int `json:"totalProcessed"`
+	TotalProcessed int `json:"total_processed"`
 	Imported       int `json:"imported"`
 	Failed         int `json:"failed"`
 }
@@ -316,14 +316,14 @@ type MergeCustomersInput struct {
 
 type LoyaltyTier struct {
 	ID             int64     `json:"id"`
-	OwnerID        int64     `json:"ownerId"`
+	OwnerID        int64     `json:"owner_id"`
 	Name           string    `json:"name"`
-	MinPoints      int       `json:"minPoints"`
-	DiscountPct    float64   `json:"discountPct"`
+	MinPoints      int       `json:"min_points"`
+	DiscountPct    float64   `json:"discount_pct"`
 	Perks          []byte    `json:"perks"`
-	SortOrder      int       `json:"sortOrder"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	SortOrder      int       `json:"sort_order"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type LoyaltyTierInput struct {
@@ -348,14 +348,14 @@ type LoyaltyTierUpdateInput struct {
 // Campaign Stats
 
 type CampaignStats struct {
-	CampaignID     int64 `json:"campaignId"`
-	AudienceCount  int   `json:"audienceCount"`
-	SentCount      int   `json:"sentCount"`
-	DeliveredCount int   `json:"deliveredCount"`
-	OpenedCount    int   `json:"openedCount"`
-	ClickedCount   int   `json:"clickedCount"`
-	BouncedCount   int   `json:"bouncedCount"`
-	FailedCount    int   `json:"failedCount"`
+	CampaignID     int64 `json:"campaign_id"`
+	AudienceCount  int   `json:"audience_count"`
+	SentCount      int   `json:"sent_count"`
+	DeliveredCount int   `json:"delivered_count"`
+	OpenedCount    int   `json:"opened_count"`
+	ClickedCount   int   `json:"clicked_count"`
+	BouncedCount   int   `json:"bounced_count"`
+	FailedCount    int   `json:"failed_count"`
 }
 
 // Campaign Detail

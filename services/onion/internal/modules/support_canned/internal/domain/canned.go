@@ -4,12 +4,12 @@ import "time"
 
 type CannedResponse struct {
 	ID         int64     `json:"id"`
-	BusinessID int64     `json:"businessId"`
+	BusinessID int64     `json:"business_id"`
 	Name       string    `json:"name"`
 	Body       string    `json:"body"`
 	Category   string    `json:"category"`
 	Shortcut   string    `json:"shortcut"`
-	CreatedAt  time.Time `json:"createdAt"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type CannedResponseInput struct {

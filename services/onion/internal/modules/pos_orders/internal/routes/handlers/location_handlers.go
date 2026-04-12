@@ -21,12 +21,12 @@ type ListLocationsRequest struct{}
 
 type LocationPayload struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Address   string    `json:"address"`
 	Phone     string    `json:"phone"`
-	IsActive  bool      `json:"isActive"`
-	CreatedAt time.Time `json:"createdAt"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ListLocationsResponse struct {
@@ -130,10 +130,10 @@ type DashboardHandler struct{ Service *application.Service }
 type DashboardRequest struct{}
 
 type DashboardResponse struct {
-	TotalSales    float64 `json:"totalSales"`
-	OrderCount    int     `json:"orderCount"`
-	AvgOrder      float64 `json:"avgOrder"`
-	TableTurnover float64 `json:"tableTurnover"`
+	TotalSales    float64 `json:"total_sales"`
+	OrderCount    int     `json:"order_count"`
+	AvgOrder      float64 `json:"avg_order"`
+	TableTurnover float64 `json:"table_turnover"`
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {

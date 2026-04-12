@@ -14,24 +14,24 @@ var (
 
 type GiftCard struct {
 	ID             int64      `json:"id"`
-	OwnerID        int64      `json:"ownerId"`
+	OwnerID        int64      `json:"owner_id"`
 	Code           string     `json:"code"`
-	InitialAmount  float64    `json:"initialAmount"`
-	CurrentBalance float64    `json:"currentBalance"`
-	CustomerName   string     `json:"customerName"`
-	CustomerEmail  string     `json:"customerEmail"`
-	IsActive       bool       `json:"isActive"`
-	ExpiresAt      *time.Time `json:"expiresAt"`
-	CreatedAt      time.Time  `json:"createdAt"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
+	InitialAmount  float64    `json:"initial_amount"`
+	CurrentBalance float64    `json:"current_balance"`
+	CustomerName   string     `json:"customer_name"`
+	CustomerEmail  string     `json:"customer_email"`
+	IsActive       bool       `json:"is_active"`
+	ExpiresAt      *time.Time `json:"expires_at"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type GiftCardInput struct {
 	Code           string  `json:"code"`
-	InitialAmount  float64 `json:"initialAmount"`
-	CustomerName   string  `json:"customerName"`
-	CustomerEmail  string  `json:"customerEmail"`
-	ExpiresAt      string  `json:"expiresAt"`
+	InitialAmount  float64 `json:"initial_amount"`
+	CustomerName   string  `json:"customer_name"`
+	CustomerEmail  string  `json:"customer_email"`
+	ExpiresAt      string  `json:"expires_at"`
 }
 
 type RedeemInput struct {

@@ -23,18 +23,18 @@ type UpdateCustomerHandler struct {
 
 type UpdateCustomerRequest struct {
 	ID          int64    `json:"id"`
-	FirstName   string   `json:"firstName"`
-	LastName    string   `json:"lastName"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
 	Email       string   `json:"email"`
 	Phone       string   `json:"phone"`
-	DateOfBirth string   `json:"dateOfBirth"`
+	DateOfBirth string   `json:"date_of_birth"`
 	Gender      string   `json:"gender"`
 	Address     string   `json:"address"`
 	City        string   `json:"city"`
 	Country     string   `json:"country"`
 	Tags        []string `json:"tags"`
 	Notes       string   `json:"notes"`
-	IsActive    *bool    `json:"isActive"`
+	IsActive    *bool    `json:"is_active"`
 }
 
 type UpdateCustomerResponse struct {

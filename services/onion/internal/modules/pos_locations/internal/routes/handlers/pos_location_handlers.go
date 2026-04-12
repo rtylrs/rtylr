@@ -16,13 +16,13 @@ import (
 
 type LocationPayload struct {
 	ID        int64  `json:"id"`
-	OwnerID   int64  `json:"ownerId"`
+	OwnerID   int64  `json:"owner_id"`
 	Name      string `json:"name"`
 	Address   string `json:"address"`
 	Phone     string `json:"phone"`
-	IsActive  bool   `json:"isActive"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	IsActive  bool   `json:"is_active"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func newLocationPayload(l domain.Location) LocationPayload {
@@ -74,11 +74,11 @@ type CreateLocationRequest struct {
 	Name     string `json:"name"`
 	Address  string `json:"address"`
 	Phone    string `json:"phone"`
-	IsActive bool   `json:"isActive"`
+	IsActive bool   `json:"is_active"`
 }
 
 type CreateLocationResponse struct {
-	LocationID int64  `json:"locationId"`
+	LocationID int64  `json:"location_id"`
 	Message    string `json:"message"`
 }
 
@@ -117,7 +117,7 @@ type UpdateLocationRequest struct {
 	Name     string `json:"name"`
 	Address  string `json:"address"`
 	Phone    string `json:"phone"`
-	IsActive bool   `json:"isActive"`
+	IsActive bool   `json:"is_active"`
 }
 
 type UpdateLocationResponse struct {

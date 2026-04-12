@@ -11,13 +11,13 @@ import (
 
 type CustomerPayload struct {
 	ID           int64  `json:"id"`
-	BusinessID   int64  `json:"businessId"`
+	BusinessID   int64  `json:"business_id"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	Phone        string `json:"phone"`
-	TotalTickets int    `json:"totalTickets"`
-	LastTicketAt string `json:"lastTicketAt"`
-	CreatedAt    string `json:"createdAt"`
+	TotalTickets int    `json:"total_tickets"`
+	LastTicketAt string `json:"last_ticket_at"`
+	CreatedAt    string `json:"created_at"`
 }
 
 // -- LIST --------------------------------------------------------------------
@@ -28,14 +28,14 @@ type ListCustomersHandler struct{ Service *application.Service }
 
 type ListCustomersRequest struct {
 	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	PageSize int `json:"page_size"`
 }
 
 type ListCustomersResponse struct {
 	Customers []CustomerPayload `json:"customers"`
 	Total     int               `json:"total"`
 	Page      int               `json:"page"`
-	PageSize  int               `json:"pageSize"`
+	PageSize  int               `json:"page_size"`
 }
 
 func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequest) (ListCustomersResponse, *errorModels.ServerError) {

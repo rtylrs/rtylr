@@ -10,11 +10,11 @@ var ErrCategoryNotFound = errors.New("category not found")
 
 type Category struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
+	OwnerID     int64     `json:"owner_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (c *Category) FromRow(row *sql.Rows) error {

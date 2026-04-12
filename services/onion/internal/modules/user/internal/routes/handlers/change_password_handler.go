@@ -21,8 +21,8 @@ type ChangePasswordHandler struct {
 }
 
 type ChangePasswordRequest struct {
-	CurrentPassword string `json:"currentPassword"`
-	NewPassword     string `json:"newPassword"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
 }
 
 type ChangePasswordResponse struct{}

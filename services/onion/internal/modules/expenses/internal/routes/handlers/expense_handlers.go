@@ -17,17 +17,17 @@ import (
 
 type ExpensePayload struct {
 	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"ownerId"`
-	CategoryID  *int64  `json:"categoryId"`
+	OwnerID     int64   `json:"owner_id"`
+	CategoryID  *int64  `json:"category_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
 	Description string  `json:"description"`
 	Vendor      string  `json:"vendor"`
-	ReceiptURL  string  `json:"receiptUrl"`
-	ExpenseDate string  `json:"expenseDate"`
+	ReceiptURL  string  `json:"receipt_url"`
+	ExpenseDate string  `json:"expense_date"`
 	Status      string  `json:"status"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 func newExpensePayload(e domain.Expense) ExpensePayload {
@@ -80,17 +80,17 @@ func ExpenseCreateRoutes() []string { return []string{"/finance/expenses"} }
 type CreateExpenseHandler struct{ Service *application.Service }
 
 type CreateExpenseRequest struct {
-	CategoryID  *int64  `json:"categoryId"`
+	CategoryID  *int64  `json:"category_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
 	Description string  `json:"description"`
 	Vendor      string  `json:"vendor"`
-	ReceiptURL  string  `json:"receiptUrl"`
-	ExpenseDate string  `json:"expenseDate"`
+	ReceiptURL  string  `json:"receipt_url"`
+	ExpenseDate string  `json:"expense_date"`
 }
 
 type CreateExpenseResponse struct {
-	ExpenseID int64  `json:"expenseId"`
+	ExpenseID int64  `json:"expense_id"`
 	Message   string `json:"message"`
 }
 
@@ -135,13 +135,13 @@ func ExpenseUpdateRoutes() []string { return []string{"/finance/expenses/{id}"} 
 type UpdateExpenseHandler struct{ Service *application.Service }
 
 type UpdateExpenseRequest struct {
-	CategoryID  *int64  `json:"categoryId"`
+	CategoryID  *int64  `json:"category_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
 	Description string  `json:"description"`
 	Vendor      string  `json:"vendor"`
-	ReceiptURL  string  `json:"receiptUrl"`
-	ExpenseDate string  `json:"expenseDate"`
+	ReceiptURL  string  `json:"receipt_url"`
+	ExpenseDate string  `json:"expense_date"`
 }
 
 type UpdateExpenseResponse struct {
@@ -231,10 +231,10 @@ type ListCategoriesResponse struct {
 
 type CategoryPayload struct {
 	ID        int64  `json:"id"`
-	OwnerID   int64  `json:"ownerId"`
+	OwnerID   int64  `json:"owner_id"`
 	Name      string `json:"name"`
 	Color     string `json:"color"`
-	CreatedAt string `json:"createdAt"`
+	CreatedAt string `json:"created_at"`
 }
 
 func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequest) (ListCategoriesResponse, *errorModels.ServerError) {

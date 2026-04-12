@@ -23,8 +23,8 @@ type IntegrationPayload struct {
 	Provider    string          `json:"provider"`
 	Status      string          `json:"status"`
 	Config      json.RawMessage `json:"config"`
-	ConnectedAt *time.Time      `json:"connectedAt"`
-	CreatedAt   time.Time       `json:"createdAt"`
+	ConnectedAt *time.Time      `json:"connected_at"`
+	CreatedAt   time.Time       `json:"created_at"`
 }
 
 type ListResponse struct {

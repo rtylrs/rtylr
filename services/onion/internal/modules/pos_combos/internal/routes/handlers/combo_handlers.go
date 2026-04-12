@@ -16,14 +16,14 @@ import (
 
 type ComboPayload struct {
 	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"ownerId"`
+	OwnerID     int64   `json:"owner_id"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Items       string  `json:"items"`
-	IsActive    bool    `json:"isActive"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
+	IsActive    bool    `json:"is_active"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 func newComboPayload(c domain.Combo) ComboPayload {
@@ -77,11 +77,11 @@ type CreateComboRequest struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Items       string  `json:"items"`
-	IsActive    bool    `json:"isActive"`
+	IsActive    bool    `json:"is_active"`
 }
 
 type CreateComboResponse struct {
-	ComboID int64  `json:"comboId"`
+	ComboID int64  `json:"combo_id"`
 	Message string `json:"message"`
 }
 
@@ -121,7 +121,7 @@ type UpdateComboRequest struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Items       string  `json:"items"`
-	IsActive    bool    `json:"isActive"`
+	IsActive    bool    `json:"is_active"`
 }
 
 type UpdateComboResponse struct {

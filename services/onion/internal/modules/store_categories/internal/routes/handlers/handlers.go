@@ -12,14 +12,14 @@ import (
 
 type Payload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
+	OwnerID     int64  `json:"owner_id"`
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	Description string `json:"description"`
-	ImageURL    string `json:"imageUrl"`
-	ParentID    int64  `json:"parentId"`
-	SortOrder   int    `json:"sortOrder"`
-	CreatedAt   string `json:"createdAt"`
+	ImageURL    string `json:"image_url"`
+	ParentID    int64  `json:"parent_id"`
+	SortOrder   int    `json:"sort_order"`
+	CreatedAt   string `json:"created_at"`
 }
 
 func toPayload(c domain.StoreCategory) Payload {
@@ -56,7 +56,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
 	Name string `json:"name"`; Slug string `json:"slug"`; Description string `json:"description"`
-	ImageURL string `json:"imageUrl"`; ParentID int64 `json:"parentId"`; SortOrder int `json:"sortOrder"`
+	ImageURL string `json:"image_url"`; ParentID int64 `json:"parent_id"`; SortOrder int `json:"sort_order"`
 }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
@@ -76,7 +76,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID int64 `json:"id"`; Name string `json:"name"`; Slug string `json:"slug"`; Description string `json:"description"`
-	ImageURL string `json:"imageUrl"`; ParentID int64 `json:"parentId"`; SortOrder int `json:"sortOrder"`
+	ImageURL string `json:"image_url"`; ParentID int64 `json:"parent_id"`; SortOrder int `json:"sort_order"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

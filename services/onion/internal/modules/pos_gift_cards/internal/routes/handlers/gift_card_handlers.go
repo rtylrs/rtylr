@@ -14,16 +14,16 @@ import (
 
 type GiftCardPayload struct {
 	ID             int64   `json:"id"`
-	OwnerID        int64   `json:"ownerId"`
+	OwnerID        int64   `json:"owner_id"`
 	Code           string  `json:"code"`
-	InitialAmount  float64 `json:"initialAmount"`
-	CurrentBalance float64 `json:"currentBalance"`
-	CustomerName   string  `json:"customerName"`
-	CustomerEmail  string  `json:"customerEmail"`
-	IsActive       bool    `json:"isActive"`
-	ExpiresAt      string  `json:"expiresAt"`
-	CreatedAt      string  `json:"createdAt"`
-	UpdatedAt      string  `json:"updatedAt"`
+	InitialAmount  float64 `json:"initial_amount"`
+	CurrentBalance float64 `json:"current_balance"`
+	CustomerName   string  `json:"customer_name"`
+	CustomerEmail  string  `json:"customer_email"`
+	IsActive       bool    `json:"is_active"`
+	ExpiresAt      string  `json:"expires_at"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
 }
 
 func newGiftCardPayload(gc domain.GiftCard) GiftCardPayload {
@@ -53,7 +53,7 @@ func ListGiftCardsRoutes() []string { return []string{"/pos/gift-cards"} }
 type ListGiftCardsHandler struct{ Service *application.Service }
 type ListGiftCardsRequest struct{}
 type ListGiftCardsResponse struct {
-	GiftCards []GiftCardPayload `json:"giftCards"`
+	GiftCards []GiftCardPayload `json:"gift_cards"`
 }
 
 func (h *ListGiftCardsHandler) Serve(ctx context.Context, _ *ListGiftCardsRequest) (ListGiftCardsResponse, *errorModels.ServerError) {
@@ -80,14 +80,14 @@ type CreateGiftCardHandler struct{ Service *application.Service }
 
 type CreateGiftCardRequest struct {
 	Code          string  `json:"code"`
-	InitialAmount float64 `json:"initialAmount"`
-	CustomerName  string  `json:"customerName"`
-	CustomerEmail string  `json:"customerEmail"`
-	ExpiresAt     string  `json:"expiresAt"`
+	InitialAmount float64 `json:"initial_amount"`
+	CustomerName  string  `json:"customer_name"`
+	CustomerEmail string  `json:"customer_email"`
+	ExpiresAt     string  `json:"expires_at"`
 }
 
 type CreateGiftCardResponse struct {
-	GiftCardID int64  `json:"giftCardId"`
+	GiftCardID int64  `json:"gift_card_id"`
 	Message    string `json:"message"`
 }
 
@@ -131,7 +131,7 @@ type RedeemGiftCardRequest struct {
 }
 
 type RedeemGiftCardResponse struct {
-	GiftCard GiftCardPayload `json:"giftCard"`
+	GiftCard GiftCardPayload `json:"gift_card"`
 	Message  string          `json:"message"`
 }
 

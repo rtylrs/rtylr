@@ -23,10 +23,10 @@ type AddonPayload struct {
 	Description string  `json:"description"`
 	Icon        string  `json:"icon"`
 	Price       float64 `json:"price"`
-	IsFree      bool    `json:"isFree"`
-	IsEnabled   bool    `json:"isEnabled"`
-	EnabledAt   *string `json:"enabledAt,omitempty"`
-	DisabledAt  *string `json:"disabledAt,omitempty"`
+	IsFree      bool    `json:"is_free"`
+	IsEnabled   bool    `json:"is_enabled"`
+	EnabledAt   *string `json:"enabled_at,omitempty"`
+	DisabledAt  *string `json:"disabled_at,omitempty"`
 }
 
 type ListAddonsResponse struct {
@@ -80,7 +80,7 @@ func EnableAddonRoutes() []string { return []string{"/addons/enable"} }
 type EnableAddonHandler struct{ Service *application.Service }
 
 type EnableAddonRequest struct {
-	AddonID string `json:"addonId"`
+	AddonID string `json:"addon_id"`
 }
 
 type EnableAddonResponse struct {
@@ -118,7 +118,7 @@ func DisableAddonRoutes() []string { return []string{"/addons/disable"} }
 type DisableAddonHandler struct{ Service *application.Service }
 
 type DisableAddonRequest struct {
-	AddonID string `json:"addonId"`
+	AddonID string `json:"addon_id"`
 }
 
 type DisableAddonResponse struct {
@@ -156,11 +156,11 @@ func AddonStatusRoutes() []string { return []string{"/addons/status"} }
 type AddonStatusHandler struct{ Service *application.Service }
 
 type AddonStatusRequest struct {
-	AddonID string `json:"addonId"`
+	AddonID string `json:"addon_id"`
 }
 
 type AddonStatusResponse struct {
-	IsEnabled bool `json:"isEnabled"`
+	IsEnabled bool `json:"is_enabled"`
 }
 
 func (h *AddonStatusHandler) Serve(ctx context.Context, req *AddonStatusRequest) (AddonStatusResponse, *errorModels.ServerError) {

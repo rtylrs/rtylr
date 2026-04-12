@@ -10,12 +10,12 @@ var ErrTrainingCourseNotFound = errors.New("training course not found")
 
 type TrainingCourse struct {
 	ID            int64              `json:"id"`
-	OwnerID       int64              `json:"ownerId"`
+	OwnerID       int64              `json:"owner_id"`
 	Name          string             `json:"name"`
 	Description   string             `json:"description"`
-	DurationHours float64            `json:"durationHours"`
-	IsRequired    bool               `json:"isRequired"`
-	CreatedAt     time.Time          `json:"createdAt"`
+	DurationHours float64            `json:"duration_hours"`
+	IsRequired    bool               `json:"is_required"`
+	CreatedAt     time.Time          `json:"created_at"`
 	Progress      []TrainingProgress `json:"progress,omitempty"`
 }
 
@@ -42,15 +42,15 @@ func (t *TrainingCourse) FromRow(row *sql.Rows) error {
 
 type TrainingProgress struct {
 	ID          int64     `json:"id"`
-	CourseID    int64     `json:"courseId"`
-	StaffID     int64     `json:"staffId"`
+	CourseID    int64     `json:"course_id"`
+	StaffID     int64     `json:"staff_id"`
 	Status      string    `json:"status"`
-	CompletedAt time.Time `json:"completedAt"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 type TrainingCourseInput struct {
 	Name          string  `json:"name"`
 	Description   string  `json:"description"`
-	DurationHours float64 `json:"durationHours"`
-	IsRequired    bool    `json:"isRequired"`
+	DurationHours float64 `json:"duration_hours"`
+	IsRequired    bool    `json:"is_required"`
 }

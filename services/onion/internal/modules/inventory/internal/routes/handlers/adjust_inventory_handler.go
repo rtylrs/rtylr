@@ -19,7 +19,7 @@ type AdjustInventoryHandler struct {
 }
 
 type AdjustInventoryRequest struct {
-	ProductID int64   `json:"productId"`
+	ProductID int64   `json:"product_id"`
 	Change    float64 `json:"change"`
 	Type      string  `json:"type"`
 	Notes     string  `json:"notes"`

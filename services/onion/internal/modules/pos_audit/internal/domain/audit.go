@@ -7,16 +7,16 @@ import (
 
 type AuditLog struct {
 	ID         int64            `json:"id"`
-	BusinessID int64            `json:"businessId"`
-	BranchID   int64            `json:"branchId"`
-	TerminalID *int64           `json:"terminalId"`
-	EmployeeID int64            `json:"employeeId"`
+	BusinessID int64            `json:"business_id"`
+	BranchID   int64            `json:"branch_id"`
+	TerminalID *int64           `json:"terminal_id"`
+	EmployeeID int64            `json:"employee_id"`
 	Action     string           `json:"action"`
-	EntityType string           `json:"entityType"`
-	EntityID   *int64           `json:"entityId"`
+	EntityType string           `json:"entity_type"`
+	EntityID   *int64           `json:"entity_id"`
 	Details    *json.RawMessage `json:"details"`
-	IPAddress  *string          `json:"ipAddress"`
-	CreatedAt  time.Time        `json:"createdAt"`
+	IPAddress  *string          `json:"ip_address"`
+	CreatedAt  time.Time        `json:"created_at"`
 }
 
 type AuditLogInput struct {

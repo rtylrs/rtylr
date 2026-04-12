@@ -10,17 +10,17 @@ var ErrWarehouseNotFound = errors.New("warehouse not found")
 
 type Warehouse struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
+	OwnerID     int64     `json:"owner_id"`
 	Name        string    `json:"name"`
 	Address     string    `json:"address"`
 	City        string    `json:"city"`
 	Country     string    `json:"country"`
-	ManagerName string    `json:"managerName"`
+	ManagerName string    `json:"manager_name"`
 	Capacity    int64     `json:"capacity"`
-	IsDefault   bool      `json:"isDefault"`
-	IsActive    bool      `json:"isActive"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	IsDefault   bool      `json:"is_default"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (w *Warehouse) FromRow(row *sql.Rows) error {
@@ -78,8 +78,8 @@ type WarehouseInput struct {
 	Address     string `json:"address"`
 	City        string `json:"city"`
 	Country     string `json:"country"`
-	ManagerName string `json:"managerName"`
+	ManagerName string `json:"manager_name"`
 	Capacity    int64  `json:"capacity"`
-	IsDefault   bool   `json:"isDefault"`
-	IsActive    bool   `json:"isActive"`
+	IsDefault   bool   `json:"is_default"`
+	IsActive    bool   `json:"is_active"`
 }

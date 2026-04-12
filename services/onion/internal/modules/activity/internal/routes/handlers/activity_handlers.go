@@ -25,15 +25,15 @@ type ListActivityRequest struct {
 
 type ActivityPayload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
+	OwnerID     int64  `json:"owner_id"`
 	App         string `json:"app"`
-	EntityType  string `json:"entityType"`
-	EntityID    int64  `json:"entityId"`
+	EntityType  string `json:"entity_type"`
+	EntityID    int64  `json:"entity_id"`
 	Action      string `json:"action"`
 	Description string `json:"description"`
-	UserID      int64  `json:"userId"`
-	UserName    string `json:"userName"`
-	CreatedAt   string `json:"createdAt"`
+	UserID      int64  `json:"user_id"`
+	UserName    string `json:"user_name"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type ListActivityResponse struct {

@@ -17,14 +17,14 @@ import (
 
 type MilestonePayload struct {
 	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"ownerId"`
-	ProjectID   int64   `json:"projectId"`
+	OwnerID     int64   `json:"owner_id"`
+	ProjectID   int64   `json:"project_id"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
-	TargetDate  *string `json:"targetDate"`
+	TargetDate  *string `json:"target_date"`
 	Status      string  `json:"status"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 func newMilestonePayload(m domain.Milestone) MilestonePayload {
@@ -90,14 +90,14 @@ func MilestoneCreateRoutes() []string { return []string{"/flow/milestones"} }
 type CreateMilestoneHandler struct{ Service *application.Service }
 
 type CreateMilestoneRequest struct {
-	ProjectID   int64  `json:"projectId"`
+	ProjectID   int64  `json:"project_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	TargetDate  string `json:"targetDate"`
+	TargetDate  string `json:"target_date"`
 }
 
 type CreateMilestoneResponse struct {
-	MilestoneID int64  `json:"milestoneId"`
+	MilestoneID int64  `json:"milestone_id"`
 	Message     string `json:"message"`
 }
 
@@ -143,7 +143,7 @@ type UpdateMilestoneHandler struct{ Service *application.Service }
 type UpdateMilestoneRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	TargetDate  string `json:"targetDate"`
+	TargetDate  string `json:"target_date"`
 	Status      string `json:"status"`
 }
 

@@ -275,8 +275,8 @@ type DiscountInput struct {
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 type DashboardStats struct {
-	TotalSales    float64 `json:"totalSales"`
-	OrderCount    int     `json:"orderCount"`
-	AvgOrder      float64 `json:"avgOrder"`
-	TableTurnover float64 `json:"tableTurnover"`
+	TotalSales    float64 `json:"total_sales"`
+	OrderCount    int     `json:"order_count"`
+	AvgOrder      float64 `json:"avg_order"`
+	TableTurnover float64 `json:"table_turnover"`
 }

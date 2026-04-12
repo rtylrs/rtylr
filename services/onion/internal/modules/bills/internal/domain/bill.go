@@ -10,15 +10,15 @@ var ErrBillNotFound = errors.New("bill not found")
 
 type Bill struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	SupplierID  int64     `json:"supplierId"`
+	OwnerID     int64     `json:"owner_id"`
+	SupplierID  int64     `json:"supplier_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
-	DueDate     time.Time `json:"dueDate"`
+	DueDate     time.Time `json:"due_date"`
 	Status      string    `json:"status"`
 	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (b *Bill) FromRow(row *sql.Rows) error {
@@ -50,10 +50,10 @@ func (b *Bill) FromRow(row *sql.Rows) error {
 }
 
 type BillInput struct {
-	SupplierID  int64   `json:"supplierId"`
+	SupplierID  int64   `json:"supplier_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	DueDate     string  `json:"dueDate"`
+	DueDate     string  `json:"due_date"`
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
 }

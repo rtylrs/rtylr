@@ -10,15 +10,15 @@ var ErrBankAccountNotFound = errors.New("bank account not found")
 
 type BankAccount struct {
 	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"ownerId"`
+	OwnerID      int64     `json:"owner_id"`
 	Name         string    `json:"name"`
 	Institution  string    `json:"institution"`
-	AccountType  string    `json:"accountType"`
+	AccountType  string    `json:"account_type"`
 	Balance      float64   `json:"balance"`
 	Currency     string    `json:"currency"`
-	IsConnected  bool      `json:"isConnected"`
-	LastSyncedAt time.Time `json:"lastSyncedAt"`
-	CreatedAt    time.Time `json:"createdAt"`
+	IsConnected  bool      `json:"is_connected"`
+	LastSyncedAt time.Time `json:"last_synced_at"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 func (b *BankAccount) FromRow(row *sql.Rows) error {
@@ -56,8 +56,8 @@ func (b *BankAccount) FromRow(row *sql.Rows) error {
 type BankAccountInput struct {
 	Name        string  `json:"name"`
 	Institution string  `json:"institution"`
-	AccountType string  `json:"accountType"`
+	AccountType string  `json:"account_type"`
 	Balance     float64 `json:"balance"`
 	Currency    string  `json:"currency"`
-	IsConnected bool    `json:"isConnected"`
+	IsConnected bool    `json:"is_connected"`
 }

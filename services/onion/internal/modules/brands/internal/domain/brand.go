@@ -10,13 +10,13 @@ var ErrBrandNotFound = errors.New("brand not found")
 
 type Brand struct {
 	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"ownerId"`
+	OwnerID      int64     `json:"owner_id"`
 	Name         string    `json:"name"`
-	LogoURL      string    `json:"logoUrl"`
+	LogoURL      string    `json:"logo_url"`
 	Description  string    `json:"description"`
-	ProductCount int64     `json:"productCount"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ProductCount int64     `json:"product_count"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 func (b *Brand) FromRow(row *sql.Rows) error {
@@ -57,6 +57,6 @@ func (b *Brand) FromRow(row *sql.Rows) error {
 
 type BrandInput struct {
 	Name        string `json:"name"`
-	LogoURL     string `json:"logoUrl"`
+	LogoURL     string `json:"logo_url"`
 	Description string `json:"description"`
 }

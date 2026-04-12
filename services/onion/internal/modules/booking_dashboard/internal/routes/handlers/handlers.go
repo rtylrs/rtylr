@@ -14,9 +14,9 @@ func DashboardRoutes() []string { return []string{"/book/dashboard"} }
 type DashboardHandler struct{ Service *application.Service }
 type DashboardRequest struct{}
 type DashboardResponse struct {
-	TodayCount       int     `json:"todayCount"`
-	UpcomingCount    int     `json:"upcomingCount"`
-	CancellationRate float64 `json:"cancellationRate"`
+	TodayCount       int     `json:"today_count"`
+	UpcomingCount    int     `json:"upcoming_count"`
+	CancellationRate float64 `json:"cancellation_rate"`
 	Revenue          float64 `json:"revenue"`
 }
 

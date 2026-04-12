@@ -21,9 +21,9 @@ type WebhookPayload struct {
 	ID              int64      `json:"id"`
 	URL             string     `json:"url"`
 	Events          []string   `json:"events"`
-	IsActive        bool       `json:"isActive"`
-	LastTriggeredAt *time.Time `json:"lastTriggeredAt"`
-	CreatedAt       time.Time  `json:"createdAt"`
+	IsActive        bool       `json:"is_active"`
+	LastTriggeredAt *time.Time `json:"last_triggered_at"`
+	CreatedAt       time.Time  `json:"created_at"`
 }
 
 type ListResponse struct {

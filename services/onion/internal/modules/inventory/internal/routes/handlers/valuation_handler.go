@@ -21,16 +21,16 @@ type ValuationHandler struct {
 type ValuationRequest struct{}
 
 type ValuationItemPayload struct {
-	CategoryName string  `json:"categoryName"`
-	WarehouseName string `json:"warehouseName"`
-	TotalItems   int64   `json:"totalItems"`
-	TotalValue   float64 `json:"totalValue"`
-	TotalCost    float64 `json:"totalCost"`
+	CategoryName string  `json:"category_name"`
+	WarehouseName string `json:"warehouse_name"`
+	TotalItems   int64   `json:"total_items"`
+	TotalValue   float64 `json:"total_value"`
+	TotalCost    float64 `json:"total_cost"`
 }
 
 type ValuationResponse struct {
 	Items      []ValuationItemPayload `json:"items"`
-	TotalValue float64                `json:"totalValue"`
+	TotalValue float64                `json:"total_value"`
 }
 
 func newValuationItemPayload(item domain.ValuationItem) ValuationItemPayload {

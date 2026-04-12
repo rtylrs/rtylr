@@ -31,14 +31,14 @@ func SegmentDeleteRoutes() []string {
 
 type SegmentPayload struct {
 	ID               int64           `json:"id"`
-	OwnerID          int64           `json:"ownerId"`
+	OwnerID          int64           `json:"owner_id"`
 	Name             string          `json:"name"`
 	Description      string          `json:"description"`
 	Rules            json.RawMessage `json:"rules"`
-	CustomerCount    int             `json:"customerCount"`
-	LastCalculatedAt *string         `json:"lastCalculatedAt"`
-	CreatedAt        string          `json:"createdAt"`
-	UpdatedAt        string          `json:"updatedAt"`
+	CustomerCount    int             `json:"customer_count"`
+	LastCalculatedAt *string         `json:"last_calculated_at"`
+	CreatedAt        string          `json:"created_at"`
+	UpdatedAt        string          `json:"updated_at"`
 }
 
 func newSegmentPayload(seg domain.Segment) SegmentPayload {
@@ -108,7 +108,7 @@ type CreateSegmentRequest struct {
 }
 
 type CreateSegmentResponse struct {
-	SegmentID int64  `json:"segmentId"`
+	SegmentID int64  `json:"segment_id"`
 	Message   string `json:"message"`
 }
 

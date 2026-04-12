@@ -28,13 +28,13 @@ type RegisterRequest struct {
 	Email        string `json:"email"`
 	Password     string `json:"password"`
 	Name         string `json:"name"`
-	BusinessName string `json:"businessName"`
+	BusinessName string `json:"business_name"`
 }
 
 type RegisterResponse struct {
 	Token   string `json:"token"`
 	Message string `json:"message"`
-	UserID  int64  `json:"userId"`
+	UserID  int64  `json:"user_id"`
 	Email   string `json:"email"`
 	Name    string `json:"name"`
 }

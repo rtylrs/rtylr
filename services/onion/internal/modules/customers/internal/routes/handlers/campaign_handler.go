@@ -31,23 +31,23 @@ func CampaignStatusRoutes() []string {
 
 type CampaignPayload struct {
 	ID             int64   `json:"id"`
-	OwnerID        int64   `json:"ownerId"`
+	OwnerID        int64   `json:"owner_id"`
 	Name           string  `json:"name"`
 	Description    string  `json:"description"`
 	Channel        string  `json:"channel"`
 	Status         string  `json:"status"`
-	SegmentID      *int64  `json:"segmentId"`
+	SegmentID      *int64  `json:"segment_id"`
 	Subject        string  `json:"subject"`
 	Content        string  `json:"content"`
-	ScheduledAt    *string `json:"scheduledAt"`
-	SentAt         *string `json:"sentAt"`
-	AudienceCount  int     `json:"audienceCount"`
-	SentCount      int     `json:"sentCount"`
-	DeliveredCount int     `json:"deliveredCount"`
-	OpenedCount    int     `json:"openedCount"`
-	ClickedCount   int     `json:"clickedCount"`
-	CreatedAt      string  `json:"createdAt"`
-	UpdatedAt      string  `json:"updatedAt"`
+	ScheduledAt    *string `json:"scheduled_at"`
+	SentAt         *string `json:"sent_at"`
+	AudienceCount  int     `json:"audience_count"`
+	SentCount      int     `json:"sent_count"`
+	DeliveredCount int     `json:"delivered_count"`
+	OpenedCount    int     `json:"opened_count"`
+	ClickedCount   int     `json:"clicked_count"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
 }
 
 func newCampaignPayload(c domain.Campaign) CampaignPayload {
@@ -129,14 +129,14 @@ type CreateCampaignRequest struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Channel     string  `json:"channel"`
-	SegmentID   *int64  `json:"segmentId"`
+	SegmentID   *int64  `json:"segment_id"`
 	Subject     string  `json:"subject"`
 	Content     string  `json:"content"`
-	ScheduledAt string  `json:"scheduledAt"`
+	ScheduledAt string  `json:"scheduled_at"`
 }
 
 type CreateCampaignResponse struct {
-	CampaignID int64  `json:"campaignId"`
+	CampaignID int64  `json:"campaign_id"`
 	Message    string `json:"message"`
 }
 
@@ -210,10 +210,10 @@ type UpdateCampaignRequest struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Channel     string  `json:"channel"`
-	SegmentID   *int64  `json:"segmentId"`
+	SegmentID   *int64  `json:"segment_id"`
 	Subject     string  `json:"subject"`
 	Content     string  `json:"content"`
-	ScheduledAt string  `json:"scheduledAt"`
+	ScheduledAt string  `json:"scheduled_at"`
 }
 
 type UpdateCampaignResponse struct {

@@ -26,7 +26,7 @@ type PaymentPayload struct {
 	ID          int64   `json:"id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	PaymentDate string  `json:"paymentDate"`
+	PaymentDate string  `json:"payment_date"`
 	Method      string  `json:"method"`
 	Reference   string  `json:"reference"`
 	Notes       string  `json:"notes"`

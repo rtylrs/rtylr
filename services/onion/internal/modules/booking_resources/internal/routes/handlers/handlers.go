@@ -11,8 +11,8 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; Name string `json:"name"`
-	Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"isActive"`; CreatedAt string `json:"createdAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; Name string `json:"name"`
+	Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"`; CreatedAt string `json:"created_at"`
 }
 
 func toPayload(r domain.Resource) Payload {
@@ -38,7 +38,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 }
 
 type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct { Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"isActive"` }
+type CreateRequest struct { Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"` }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
@@ -54,7 +54,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 }
 
 type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct { ID int64 `json:"id"`; Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"isActive"` }
+type UpdateRequest struct { ID int64 `json:"id"`; Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"` }
 type UpdateResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {

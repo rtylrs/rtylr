@@ -20,30 +20,30 @@ type ListLoyaltyTransactionsHandler struct {
 }
 
 type ListLoyaltyTransactionsRequest struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 	Page       int   `json:"page"`
-	PageSize   int   `json:"pageSize"`
+	PageSize   int   `json:"page_size"`
 }
 
 type LoyaltyTransactionPayload struct {
 	ID            int64   `json:"id"`
-	OwnerID       int64   `json:"ownerId"`
-	CustomerID    int64   `json:"customerId"`
+	OwnerID       int64   `json:"owner_id"`
+	CustomerID    int64   `json:"customer_id"`
 	Type          string  `json:"type"`
 	Points        int     `json:"points"`
-	BalanceBefore int     `json:"balanceBefore"`
-	BalanceAfter  int     `json:"balanceAfter"`
+	BalanceBefore int     `json:"balance_before"`
+	BalanceAfter  int     `json:"balance_after"`
 	Description   string  `json:"description"`
-	ReferenceID   *int64  `json:"referenceId"`
-	ReferenceType string  `json:"referenceType"`
-	CreatedAt     string  `json:"createdAt"`
+	ReferenceID   *int64  `json:"reference_id"`
+	ReferenceType string  `json:"reference_type"`
+	CreatedAt     string  `json:"created_at"`
 }
 
 type ListLoyaltyTransactionsResponse struct {
 	Transactions []LoyaltyTransactionPayload `json:"transactions"`
 	Total        int                         `json:"total"`
 	Page         int                         `json:"page"`
-	PageSize     int                         `json:"pageSize"`
+	PageSize     int                         `json:"page_size"`
 }
 
 func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) LoyaltyTransactionPayload {

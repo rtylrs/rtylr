@@ -10,19 +10,19 @@ var ErrQuoteNotFound = errors.New("quote not found")
 
 type Quote struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	CustomerName  string    `json:"customerName"`
-	CustomerEmail string    `json:"customerEmail"`
+	OwnerID       int64     `json:"owner_id"`
+	CustomerName  string    `json:"customer_name"`
+	CustomerEmail string    `json:"customer_email"`
 	Status        string    `json:"status"`
 	Items         string    `json:"items"`
 	Subtotal      float64   `json:"subtotal"`
 	Tax           float64   `json:"tax"`
 	Discount      float64   `json:"discount"`
 	Total         float64   `json:"total"`
-	ValidUntil    time.Time `json:"validUntil"`
+	ValidUntil    time.Time `json:"valid_until"`
 	Notes         string    `json:"notes"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 func (q *Quote) FromRow(row *sql.Rows) error {
@@ -59,14 +59,14 @@ func (q *Quote) FromRow(row *sql.Rows) error {
 }
 
 type QuoteInput struct {
-	CustomerName  string  `json:"customerName"`
-	CustomerEmail string  `json:"customerEmail"`
+	CustomerName  string  `json:"customer_name"`
+	CustomerEmail string  `json:"customer_email"`
 	Status        string  `json:"status"`
 	Items         string  `json:"items"`
 	Subtotal      float64 `json:"subtotal"`
 	Tax           float64 `json:"tax"`
 	Discount      float64 `json:"discount"`
 	Total         float64 `json:"total"`
-	ValidUntil    string  `json:"validUntil"`
+	ValidUntil    string  `json:"valid_until"`
 	Notes         string  `json:"notes"`
 }

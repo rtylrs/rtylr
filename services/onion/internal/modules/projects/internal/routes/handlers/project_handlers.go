@@ -16,14 +16,14 @@ import (
 
 type ProjectPayload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
-	WorkspaceID *int64 `json:"workspaceId"`
+	OwnerID     int64  `json:"owner_id"`
+	WorkspaceID *int64 `json:"workspace_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 	Color       string `json:"color"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 func newProjectPayload(p domain.Project) ProjectPayload {
@@ -73,14 +73,14 @@ func ProjectCreateRoutes() []string { return []string{"/flow/projects"} }
 type CreateProjectHandler struct{ Service *application.Service }
 
 type CreateProjectRequest struct {
-	WorkspaceID *int64 `json:"workspaceId"`
+	WorkspaceID *int64 `json:"workspace_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Color       string `json:"color"`
 }
 
 type CreateProjectResponse struct {
-	ProjectID int64  `json:"projectId"`
+	ProjectID int64  `json:"project_id"`
 	Message   string `json:"message"`
 }
 
@@ -116,7 +116,7 @@ func ProjectUpdateRoutes() []string { return []string{"/flow/projects/{id}"} }
 type UpdateProjectHandler struct{ Service *application.Service }
 
 type UpdateProjectRequest struct {
-	WorkspaceID *int64 `json:"workspaceId"`
+	WorkspaceID *int64 `json:"workspace_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Status      string `json:"status"`

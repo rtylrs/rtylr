@@ -15,10 +15,10 @@ const (
 
 type Integration struct {
 	ID          int64             `json:"id"`
-	OwnerID     int64             `json:"ownerId"`
+	OwnerID     int64             `json:"owner_id"`
 	Provider    string            `json:"provider"`
 	Status      IntegrationStatus `json:"status"`
 	Config      json.RawMessage   `json:"config"`
-	ConnectedAt *time.Time        `json:"connectedAt"`
-	CreatedAt   time.Time         `json:"createdAt"`
+	ConnectedAt *time.Time        `json:"connected_at"`
+	CreatedAt   time.Time         `json:"created_at"`
 }

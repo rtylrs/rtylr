@@ -12,12 +12,12 @@ import (
 
 type CannedPayload struct {
 	ID         int64  `json:"id"`
-	BusinessID int64  `json:"businessId"`
+	BusinessID int64  `json:"business_id"`
 	Name       string `json:"name"`
 	Body       string `json:"body"`
 	Category   string `json:"category"`
 	Shortcut   string `json:"shortcut"`
-	CreatedAt  string `json:"createdAt"`
+	CreatedAt  string `json:"created_at"`
 }
 
 func ListCannedRoutes() []string  { return []string{"/support/canned"} }
@@ -32,7 +32,7 @@ type ListCannedHandler struct{ Service *application.Service }
 type ListCannedRequest struct{}
 
 type ListCannedResponse struct {
-	CannedResponses []CannedPayload `json:"cannedResponses"`
+	CannedResponses []CannedPayload `json:"canned_responses"`
 }
 
 func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (ListCannedResponse, *errorModels.ServerError) {
@@ -67,7 +67,7 @@ type CreateCannedRequest struct {
 }
 
 type CreateCannedResponse struct {
-	CannedResponseID int64  `json:"cannedResponseId"`
+	CannedResponseID int64  `json:"canned_response_id"`
 	Message          string `json:"message"`
 }
 

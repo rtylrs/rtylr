@@ -10,16 +10,16 @@ import (
 )
 
 type InboxPayload struct {
-	TicketID      int64  `json:"ticketId"`
-	CustomerName  string `json:"customerName"`
-	CustomerEmail string `json:"customerEmail"`
+	TicketID      int64  `json:"ticket_id"`
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
 	Subject       string `json:"subject"`
 	Status        string `json:"status"`
 	Priority      string `json:"priority"`
 	Channel       string `json:"channel"`
-	LastMessage   string `json:"lastMessage"`
-	LastMessageAt string `json:"lastMessageAt"`
-	MessageCount  int    `json:"messageCount"`
+	LastMessage   string `json:"last_message"`
+	LastMessageAt string `json:"last_message_at"`
+	MessageCount  int    `json:"message_count"`
 }
 
 // -- LIST INBOX --------------------------------------------------------------
@@ -30,14 +30,14 @@ type ListInboxHandler struct{ Service *application.Service }
 
 type ListInboxRequest struct {
 	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	PageSize int `json:"page_size"`
 }
 
 type ListInboxResponse struct {
 	Inbox    []InboxPayload `json:"inbox"`
 	Total    int            `json:"total"`
 	Page     int            `json:"page"`
-	PageSize int            `json:"pageSize"`
+	PageSize int            `json:"page_size"`
 }
 
 func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (ListInboxResponse, *errorModels.ServerError) {

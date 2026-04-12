@@ -13,19 +13,19 @@ import (
 
 type JournalLinePayload struct {
 	ID        int64   `json:"id"`
-	EntryID   int64   `json:"entryId"`
-	AccountID int64   `json:"accountId"`
+	EntryID   int64   `json:"entry_id"`
+	AccountID int64   `json:"account_id"`
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }
 
 type JournalEntryPayload struct {
 	ID          int64                 `json:"id"`
-	OwnerID     int64                 `json:"ownerId"`
+	OwnerID     int64                 `json:"owner_id"`
 	Date        time.Time             `json:"date"`
 	Description string                `json:"description"`
 	Lines       []JournalLinePayload  `json:"lines"`
-	CreatedAt   time.Time             `json:"createdAt"`
+	CreatedAt   time.Time             `json:"created_at"`
 }
 
 func newPayload(e domain.JournalEntry) JournalEntryPayload {
@@ -71,7 +71,7 @@ func CreateRoutes() []string { return []string{"/finance/journal"} }
 type CreateHandler struct{ Service *application.Service }
 
 type JournalLineInput struct {
-	AccountID int64   `json:"accountId"`
+	AccountID int64   `json:"account_id"`
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }

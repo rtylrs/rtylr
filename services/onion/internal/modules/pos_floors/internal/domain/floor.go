@@ -9,12 +9,12 @@ var ErrFloorNotFound = errors.New("floor not found")
 
 type Floor struct {
 	ID         int64     `json:"id"`
-	BusinessID int64     `json:"businessId"`
-	BranchID   int64     `json:"branchId"`
+	BusinessID int64     `json:"business_id"`
+	BranchID   int64     `json:"branch_id"`
 	Name       string    `json:"name"`
-	SortOrder  int       `json:"sortOrder"`
-	IsActive   bool      `json:"isActive"`
-	CreatedAt  time.Time `json:"createdAt"`
+	SortOrder  int       `json:"sort_order"`
+	IsActive   bool      `json:"is_active"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type FloorInput struct {

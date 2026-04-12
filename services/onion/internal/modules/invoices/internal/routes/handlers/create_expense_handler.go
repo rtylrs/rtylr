@@ -19,16 +19,16 @@ type CreateExpenseHandler struct {
 }
 
 type CreateExpenseRequest struct {
-	CategoryID      int64   `json:"categoryId"`
+	CategoryID      int64   `json:"category_id"`
 	Description     string  `json:"description"`
 	Amount          float64 `json:"amount"`
 	Currency        string  `json:"currency"`
-	ExpenseDate     string  `json:"expenseDate"`
+	ExpenseDate     string  `json:"expense_date"`
 	Vendor          string  `json:"vendor"`
-	PaymentMethod   string  `json:"paymentMethod"`
-	ReceiptURL      string  `json:"receiptUrl"`
-	IsTaxDeductible bool    `json:"isTaxDeductible"`
-	TaxAmount       float64 `json:"taxAmount"`
+	PaymentMethod   string  `json:"payment_method"`
+	ReceiptURL      string  `json:"receipt_url"`
+	IsTaxDeductible bool    `json:"is_tax_deductible"`
+	TaxAmount       float64 `json:"tax_amount"`
 	Notes           string  `json:"notes"`
 }
 

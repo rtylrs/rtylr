@@ -13,15 +13,15 @@ import (
 
 type BillPayload struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	SupplierID  int64     `json:"supplierId"`
+	OwnerID     int64     `json:"owner_id"`
+	SupplierID  int64     `json:"supplier_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
-	DueDate     time.Time `json:"dueDate"`
+	DueDate     time.Time `json:"due_date"`
 	Status      string    `json:"status"`
 	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func newPayload(b domain.Bill) BillPayload {
@@ -61,10 +61,10 @@ func CreateRoutes() []string { return []string{"/finance/bills"} }
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	SupplierID  int64   `json:"supplierId"`
+	SupplierID  int64   `json:"supplier_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	DueDate     string  `json:"dueDate"`
+	DueDate     string  `json:"due_date"`
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
 }
@@ -104,10 +104,10 @@ func UpdateRoutes() []string { return []string{"/finance/bills"} }
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID          int64   `json:"id"`
-	SupplierID  int64   `json:"supplierId"`
+	SupplierID  int64   `json:"supplier_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	DueDate     string  `json:"dueDate"`
+	DueDate     string  `json:"due_date"`
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
 }

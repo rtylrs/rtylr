@@ -26,16 +26,16 @@ type ListMovementsResponse struct {
 
 type StockMovementPayload struct {
 	ID            int64   `json:"id"`
-	BusinessID    int64   `json:"businessId"`
-	BranchID      int64   `json:"branchId"`
-	ProductID     int64   `json:"productId"`
+	BusinessID    int64   `json:"business_id"`
+	BranchID      int64   `json:"branch_id"`
+	ProductID     int64   `json:"product_id"`
 	Type          string  `json:"type"`
 	Quantity      float64 `json:"quantity"`
-	ReferenceID   *int64  `json:"referenceId"`
-	ReferenceType *string `json:"referenceType"`
+	ReferenceID   *int64  `json:"reference_id"`
+	ReferenceType *string `json:"reference_type"`
 	Note          *string `json:"note"`
-	EmployeeID    *int64  `json:"employeeId"`
-	CreatedAt     string  `json:"createdAt"`
+	EmployeeID    *int64  `json:"employee_id"`
+	CreatedAt     string  `json:"created_at"`
 }
 
 func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequest) (ListMovementsResponse, *errorModels.ServerError) {
@@ -76,15 +76,15 @@ func ReceiveStockRoutes() []string { return []string{"/pos/stock/receive"} }
 type ReceiveStockHandler struct{ Service *application.Service }
 
 type ReceiveStockRequest struct {
-	BranchID   int64   `json:"branchId"`
-	ProductID  int64   `json:"productId"`
+	BranchID   int64   `json:"branch_id"`
+	ProductID  int64   `json:"product_id"`
 	Quantity   float64 `json:"quantity"`
 	Note       *string `json:"note"`
-	EmployeeID *int64  `json:"employeeId"`
+	EmployeeID *int64  `json:"employee_id"`
 }
 
 type ReceiveStockResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -117,15 +117,15 @@ func AdjustStockRoutes() []string { return []string{"/pos/stock/adjust"} }
 type AdjustStockHandler struct{ Service *application.Service }
 
 type AdjustStockRequest struct {
-	BranchID   int64   `json:"branchId"`
-	ProductID  int64   `json:"productId"`
+	BranchID   int64   `json:"branch_id"`
+	ProductID  int64   `json:"product_id"`
 	Quantity   float64 `json:"quantity"`
 	Note       *string `json:"note"`
-	EmployeeID *int64  `json:"employeeId"`
+	EmployeeID *int64  `json:"employee_id"`
 }
 
 type AdjustStockResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -158,15 +158,15 @@ func WasteStockRoutes() []string { return []string{"/pos/stock/waste"} }
 type WasteStockHandler struct{ Service *application.Service }
 
 type WasteStockRequest struct {
-	BranchID   int64   `json:"branchId"`
-	ProductID  int64   `json:"productId"`
+	BranchID   int64   `json:"branch_id"`
+	ProductID  int64   `json:"product_id"`
 	Quantity   float64 `json:"quantity"`
 	Note       *string `json:"note"`
-	EmployeeID *int64  `json:"employeeId"`
+	EmployeeID *int64  `json:"employee_id"`
 }
 
 type WasteStockResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -199,16 +199,16 @@ func TransferStockRoutes() []string { return []string{"/pos/stock/transfer"} }
 type TransferStockHandler struct{ Service *application.Service }
 
 type TransferStockRequest struct {
-	FromBranchID int64   `json:"fromBranchId"`
-	ToBranchID   int64   `json:"toBranchId"`
-	ProductID    int64   `json:"productId"`
+	FromBranchID int64   `json:"from_branch_id"`
+	ToBranchID   int64   `json:"to_branch_id"`
+	ProductID    int64   `json:"product_id"`
 	Quantity     float64 `json:"quantity"`
 	Note         *string `json:"note"`
-	EmployeeID   *int64  `json:"employeeId"`
+	EmployeeID   *int64  `json:"employee_id"`
 }
 
 type TransferStockResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -249,13 +249,13 @@ type ListInventoryResponse struct {
 
 type BranchInventoryPayload struct {
 	ID              int64    `json:"id"`
-	BusinessID      int64    `json:"businessId"`
-	BranchID        int64    `json:"branchId"`
-	ProductID       int64    `json:"productId"`
+	BusinessID      int64    `json:"business_id"`
+	BranchID        int64    `json:"branch_id"`
+	ProductID       int64    `json:"product_id"`
 	Quantity        float64  `json:"quantity"`
-	ReorderPoint    *float64 `json:"reorderPoint"`
-	ReorderQuantity *float64 `json:"reorderQuantity"`
-	UpdatedAt       string   `json:"updatedAt"`
+	ReorderPoint    *float64 `json:"reorder_point"`
+	ReorderQuantity *float64 `json:"reorder_quantity"`
+	UpdatedAt       string   `json:"updated_at"`
 }
 
 func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequest) (ListInventoryResponse, *errorModels.ServerError) {

@@ -15,13 +15,13 @@ import (
 
 type TerminalPayload struct {
 	ID         int64   `json:"id"`
-	BusinessID int64   `json:"businessId"`
-	BranchID   int64   `json:"branchId"`
+	BusinessID int64   `json:"business_id"`
+	BranchID   int64   `json:"branch_id"`
 	Name       string  `json:"name"`
-	DeviceID   *string `json:"deviceId"`
-	IsActive   bool    `json:"isActive"`
-	LastSeenAt *string `json:"lastSeenAt"`
-	CreatedAt  string  `json:"createdAt"`
+	DeviceID   *string `json:"device_id"`
+	IsActive   bool    `json:"is_active"`
+	LastSeenAt *string `json:"last_seen_at"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 func newTerminalPayload(t domain.Terminal) TerminalPayload {
@@ -74,13 +74,13 @@ func TerminalCreateRoutes() []string { return []string{"/pos/terminals"} }
 type CreateTerminalHandler struct{ Service *application.Service }
 
 type CreateTerminalRequest struct {
-	BranchID int64   `json:"branchId"`
+	BranchID int64   `json:"branch_id"`
 	Name     string  `json:"name"`
-	DeviceID *string `json:"deviceId"`
+	DeviceID *string `json:"device_id"`
 }
 
 type CreateTerminalResponse struct {
-	TerminalID int64  `json:"terminalId"`
+	TerminalID int64  `json:"terminal_id"`
 	Message    string `json:"message"`
 }
 
@@ -118,10 +118,10 @@ func TerminalUpdateRoutes() []string { return []string{"/pos/terminals/{id}"} }
 type UpdateTerminalHandler struct{ Service *application.Service }
 
 type UpdateTerminalRequest struct {
-	BranchID int64   `json:"branchId"`
+	BranchID int64   `json:"branch_id"`
 	Name     string  `json:"name"`
-	DeviceID *string `json:"deviceId"`
-	IsActive bool    `json:"isActive"`
+	DeviceID *string `json:"device_id"`
+	IsActive bool    `json:"is_active"`
 }
 
 type UpdateTerminalResponse struct {
@@ -165,7 +165,7 @@ func TerminalHeartbeatRoutes() []string { return []string{"/pos/terminals/heartb
 type HeartbeatTerminalHandler struct{ Service *application.Service }
 
 type HeartbeatTerminalRequest struct {
-	TerminalID int64 `json:"terminalId"`
+	TerminalID int64 `json:"terminal_id"`
 }
 
 type HeartbeatTerminalResponse struct {

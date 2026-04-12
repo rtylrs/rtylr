@@ -9,14 +9,14 @@ var ErrComboNotFound = errors.New("combo not found")
 
 type Combo struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
+	OwnerID     int64     `json:"owner_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Price       float64   `json:"price"`
 	Items       string    `json:"items"`
-	IsActive    bool      `json:"isActive"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ComboInput struct {
@@ -24,5 +24,5 @@ type ComboInput struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Items       string  `json:"items"`
-	IsActive    bool    `json:"isActive"`
+	IsActive    bool    `json:"is_active"`
 }

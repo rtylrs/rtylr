@@ -4,16 +4,16 @@ import "time"
 
 type Ticket struct {
 	ID            int64     `json:"id"`
-	BusinessID    int64     `json:"businessId"`
-	CustomerName  string    `json:"customerName"`
-	CustomerEmail string    `json:"customerEmail"`
+	BusinessID    int64     `json:"business_id"`
+	CustomerName  string    `json:"customer_name"`
+	CustomerEmail string    `json:"customer_email"`
 	Subject       string    `json:"subject"`
 	Status        string    `json:"status"`
 	Priority      string    `json:"priority"`
-	AssignedTo    *int64    `json:"assignedTo"`
+	AssignedTo    *int64    `json:"assigned_to"`
 	Channel       string    `json:"channel"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type TicketInput struct {
@@ -39,12 +39,12 @@ type TicketUpdateInput struct {
 
 type Message struct {
 	ID         int64     `json:"id"`
-	TicketID   int64     `json:"ticketId"`
-	SenderType string    `json:"senderType"`
-	SenderName string    `json:"senderName"`
+	TicketID   int64     `json:"ticket_id"`
+	SenderType string    `json:"sender_type"`
+	SenderName string    `json:"sender_name"`
 	Body       string    `json:"body"`
-	IsInternal bool      `json:"isInternal"`
-	CreatedAt  time.Time `json:"createdAt"`
+	IsInternal bool      `json:"is_internal"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type MessageInput struct {

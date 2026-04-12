@@ -9,15 +9,15 @@ var ErrTemplateNotFound = errors.New("template not found")
 
 type Template struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Type      string    `json:"type"`
 	Subject   string    `json:"subject"`
 	Body      string    `json:"body"`
 	Variables []byte    `json:"variables"`
-	IsActive  bool      `json:"isActive"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type TemplateInput struct {

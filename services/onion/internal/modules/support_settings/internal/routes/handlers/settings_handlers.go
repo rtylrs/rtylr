@@ -12,13 +12,13 @@ import (
 
 type SettingsPayload struct {
 	ID                int64  `json:"id"`
-	BusinessID        int64  `json:"businessId"`
-	AutoAssign        bool   `json:"autoAssign"`
-	SLAHours          int    `json:"slaHours"`
-	BusinessHours     string `json:"businessHours"`
-	NotificationEmail string `json:"notificationEmail"`
-	CreatedAt         string `json:"createdAt"`
-	UpdatedAt         string `json:"updatedAt"`
+	BusinessID        int64  `json:"business_id"`
+	AutoAssign        bool   `json:"auto_assign"`
+	SLAHours          int    `json:"sla_hours"`
+	BusinessHours     string `json:"business_hours"`
+	NotificationEmail string `json:"notification_email"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
 }
 
 func GetSettingsRoutes() []string    { return []string{"/support/settings"} }
@@ -57,10 +57,10 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 type UpdateSettingsHandler struct{ Service *application.Service }
 
 type UpdateSettingsRequest struct {
-	AutoAssign        bool   `json:"autoAssign"`
-	SLAHours          int    `json:"slaHours"`
-	BusinessHours     string `json:"businessHours"`
-	NotificationEmail string `json:"notificationEmail"`
+	AutoAssign        bool   `json:"auto_assign"`
+	SLAHours          int    `json:"sla_hours"`
+	BusinessHours     string `json:"business_hours"`
+	NotificationEmail string `json:"notification_email"`
 }
 
 type UpdateSettingsResponse struct {

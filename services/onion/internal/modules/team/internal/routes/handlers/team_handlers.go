@@ -27,11 +27,11 @@ type ListUsersRequest struct{}
 type StaffUserPayload struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
-	FullName  string    `json:"fullName"`
-	CreatedAt time.Time `json:"createdAt"`
+	FullName  string    `json:"full_name"`
+	CreatedAt time.Time `json:"created_at"`
 	Apps      []string  `json:"apps"`
 	Role      string    `json:"role"`
-	IsActive  bool      `json:"isActive"`
+	IsActive  bool      `json:"is_active"`
 }
 
 type ListUsersResponse struct {
@@ -137,14 +137,14 @@ type InviteUserHandler struct{ Service *application.Service }
 
 type InviteUserRequest struct {
 	Email    string   `json:"email"`
-	FullName string   `json:"fullName"`
+	FullName string   `json:"full_name"`
 	Password string   `json:"password"`
 	Apps     []string `json:"apps"`
 	Role     string   `json:"role"`
 }
 
 type InviteUserResponse struct {
-	UserID  int64  `json:"userId"`
+	UserID  int64  `json:"user_id"`
 	Message string `json:"message"`
 }
 
@@ -217,7 +217,7 @@ type VerifyInviteRequest struct {
 
 type VerifyInviteResponse struct {
 	Email    string `json:"email"`
-	FullName string `json:"fullName"`
+	FullName string `json:"full_name"`
 	Valid    bool   `json:"valid"`
 }
 
@@ -281,7 +281,7 @@ func UpdatePermissionsRoutes() []string { return []string{"/team/users/permissio
 type UpdatePermissionsHandler struct{ Service *application.Service }
 
 type UpdatePermissionsRequest struct {
-	UserID int64    `json:"userId"`
+	UserID int64    `json:"user_id"`
 	Apps   []string `json:"apps"`
 	Role   string   `json:"role"`
 }
@@ -335,7 +335,7 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 type DeactivateUserHandler struct{ Service *application.Service }
 
 type DeactivateUserRequest struct {
-	UserID int64 `json:"userId"`
+	UserID int64 `json:"user_id"`
 }
 
 type DeactivateUserResponse struct {
@@ -380,18 +380,18 @@ func MeRoutes() []string { return []string{"/user/me"} }
 type MeHandler struct{ Service *application.Service }
 
 type MeRequest struct {
-	OwnerID int64 `json:"ownerId"`
+	OwnerID int64 `json:"owner_id"`
 }
 
 type MeResponse struct {
 	ID           int64    `json:"id"`
 	Email        string   `json:"email"`
-	FullName     string   `json:"fullName"`
+	FullName     string   `json:"full_name"`
 	Apps         []string `json:"apps"`
 	Role         string   `json:"role"`
-	BusinessID   int64    `json:"businessId"`
-	BusinessName string   `json:"businessName"`
-	IsOwner      bool     `json:"isOwner"`
+	BusinessID   int64    `json:"business_id"`
+	BusinessName string   `json:"business_name"`
+	IsOwner      bool     `json:"is_owner"`
 	Onboarded    bool     `json:"onboarded"`
 }
 

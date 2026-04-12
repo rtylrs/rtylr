@@ -12,14 +12,14 @@ import (
 
 type Payload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
+	OwnerID     int64  `json:"owner_id"`
 	Name        string `json:"name"`
 	Domain      string `json:"domain"`
-	LogoURL     string `json:"logoUrl"`
-	ThemeID     int64  `json:"themeId"`
-	IsPublished bool   `json:"isPublished"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	LogoURL     string `json:"logo_url"`
+	ThemeID     int64  `json:"theme_id"`
+	IsPublished bool   `json:"is_published"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 func toPayload(s domain.Storefront) Payload {
@@ -63,9 +63,9 @@ type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
 	Name        string `json:"name"`
 	Domain      string `json:"domain"`
-	LogoURL     string `json:"logoUrl"`
-	ThemeID     int64  `json:"themeId"`
-	IsPublished bool   `json:"isPublished"`
+	LogoURL     string `json:"logo_url"`
+	ThemeID     int64  `json:"theme_id"`
+	IsPublished bool   `json:"is_published"`
 }
 type CreateResponse struct {
 	ID      int64  `json:"id"`
@@ -102,9 +102,9 @@ type UpdateRequest struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Domain      string `json:"domain"`
-	LogoURL     string `json:"logoUrl"`
-	ThemeID     int64  `json:"themeId"`
-	IsPublished bool   `json:"isPublished"`
+	LogoURL     string `json:"logo_url"`
+	ThemeID     int64  `json:"theme_id"`
+	IsPublished bool   `json:"is_published"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

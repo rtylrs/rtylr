@@ -16,13 +16,13 @@ import (
 
 type ModifierPayload struct {
 	ID         int64   `json:"id"`
-	OwnerID    int64   `json:"ownerId"`
+	OwnerID    int64   `json:"owner_id"`
 	Name       string  `json:"name"`
-	PriceDelta float64 `json:"priceDelta"`
-	GroupName  string  `json:"groupName"`
-	IsRequired bool    `json:"isRequired"`
-	CreatedAt  string  `json:"createdAt"`
-	UpdatedAt  string  `json:"updatedAt"`
+	PriceDelta float64 `json:"price_delta"`
+	GroupName  string  `json:"group_name"`
+	IsRequired bool    `json:"is_required"`
+	CreatedAt  string  `json:"created_at"`
+	UpdatedAt  string  `json:"updated_at"`
 }
 
 func newModifierPayload(m domain.Modifier) ModifierPayload {
@@ -72,13 +72,13 @@ type CreateModifierHandler struct{ Service *application.Service }
 
 type CreateModifierRequest struct {
 	Name       string  `json:"name"`
-	PriceDelta float64 `json:"priceDelta"`
-	GroupName  string  `json:"groupName"`
-	IsRequired bool    `json:"isRequired"`
+	PriceDelta float64 `json:"price_delta"`
+	GroupName  string  `json:"group_name"`
+	IsRequired bool    `json:"is_required"`
 }
 
 type CreateModifierResponse struct {
-	ModifierID int64  `json:"modifierId"`
+	ModifierID int64  `json:"modifier_id"`
 	Message    string `json:"message"`
 }
 
@@ -114,9 +114,9 @@ type UpdateModifierHandler struct{ Service *application.Service }
 
 type UpdateModifierRequest struct {
 	Name       string  `json:"name"`
-	PriceDelta float64 `json:"priceDelta"`
-	GroupName  string  `json:"groupName"`
-	IsRequired bool    `json:"isRequired"`
+	PriceDelta float64 `json:"price_delta"`
+	GroupName  string  `json:"group_name"`
+	IsRequired bool    `json:"is_required"`
 }
 
 type UpdateModifierResponse struct {

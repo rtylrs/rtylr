@@ -4,14 +4,14 @@ import "time"
 
 type Webhook struct {
 	ID              int64      `json:"id"`
-	OwnerID         int64      `json:"ownerId"`
+	OwnerID         int64      `json:"owner_id"`
 	URL             string     `json:"url"`
 	Events          []string   `json:"events"`
 	Secret          string     `json:"-"`
-	IsActive        bool       `json:"isActive"`
-	LastTriggeredAt *time.Time `json:"lastTriggeredAt"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
+	IsActive        bool       `json:"is_active"`
+	LastTriggeredAt *time.Time `json:"last_triggered_at"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 type CreateWebhookInput struct {

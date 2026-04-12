@@ -13,14 +13,14 @@ import (
 
 type MenuItemPayload struct {
 	ID         int64   `json:"id"`
-	OwnerID    int64   `json:"ownerId"`
-	CategoryID int64   `json:"categoryId"`
+	OwnerID    int64   `json:"owner_id"`
+	CategoryID int64   `json:"category_id"`
 	Name       string  `json:"name"`
 	SKU        string  `json:"sku"`
-	SalePrice  float64 `json:"salePrice"`
-	IsActive   bool    `json:"isActive"`
-	CreatedAt  string  `json:"createdAt"`
-	UpdatedAt  string  `json:"updatedAt"`
+	SalePrice  float64 `json:"sale_price"`
+	IsActive   bool    `json:"is_active"`
+	CreatedAt  string  `json:"created_at"`
+	UpdatedAt  string  `json:"updated_at"`
 }
 
 func newMenuItemPayload(item domain.MenuItem) MenuItemPayload {
@@ -72,11 +72,11 @@ type CreateMenuItemHandler struct{ Service *application.Service }
 type CreateMenuItemRequest struct {
 	Name      string  `json:"name"`
 	SKU       string  `json:"sku"`
-	SalePrice float64 `json:"salePrice"`
+	SalePrice float64 `json:"sale_price"`
 }
 
 type CreateMenuItemResponse struct {
-	ItemID  int64  `json:"itemId"`
+	ItemID  int64  `json:"item_id"`
 	Message string `json:"message"`
 }
 

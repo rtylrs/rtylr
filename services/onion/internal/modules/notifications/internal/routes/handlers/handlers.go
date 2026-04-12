@@ -23,9 +23,9 @@ type NotificationPayload struct {
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
 	Type      string    `json:"type"`
-	IsRead    bool      `json:"isRead"`
+	IsRead    bool      `json:"is_read"`
 	Link      string    `json:"link"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ListResponse struct {

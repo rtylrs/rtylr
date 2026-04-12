@@ -21,11 +21,11 @@ type AwardPointsHandler struct {
 }
 
 type AwardPointsRequest struct {
-	CustomerID    int64  `json:"customerId"`
+	CustomerID    int64  `json:"customer_id"`
 	Points        int    `json:"points"`
 	Description   string `json:"description"`
-	ReferenceID   *int64 `json:"referenceId"`
-	ReferenceType string `json:"referenceType"`
+	ReferenceID   *int64 `json:"reference_id"`
+	ReferenceType string `json:"reference_type"`
 }
 
 type AwardPointsResponse struct {

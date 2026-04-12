@@ -22,30 +22,30 @@ type ListProductsHandler struct {
 
 type ListProductsRequest struct {
 	Search     string `json:"search"`
-	CategoryID int    `json:"categoryId"`
+	CategoryID int    `json:"category_id"`
 	Limit      int    `json:"limit"`
 	Offset     int    `json:"offset"`
 }
 
 type ProductPayload struct {
 	ID                int64   `json:"id"`
-	OwnerID           int64   `json:"ownerId"`
-	CategoryID        int64   `json:"categoryId"`
-	SupplierID        int64   `json:"supplierId"`
+	OwnerID           int64   `json:"owner_id"`
+	CategoryID        int64   `json:"category_id"`
+	SupplierID        int64   `json:"supplier_id"`
 	Name              string  `json:"name"`
 	SKU               string  `json:"sku"`
 	Barcode           string  `json:"barcode"`
 	Description       string  `json:"description"`
 	Unit              string  `json:"unit"`
-	CostPrice         float64 `json:"costPrice"`
-	SalePrice         float64 `json:"salePrice"`
-	StockQuantity     float64 `json:"stockQuantity"`
-	LowStockThreshold float64 `json:"lowStockThreshold"`
-	ReorderQuantity   float64 `json:"reorderQuantity"`
-	IsActive          bool    `json:"isActive"`
-	TrackInventory    bool    `json:"trackInventory"`
-	CreatedAt         string  `json:"createdAt"`
-	UpdatedAt         string  `json:"updatedAt"`
+	CostPrice         float64 `json:"cost_price"`
+	SalePrice         float64 `json:"sale_price"`
+	StockQuantity     float64 `json:"stock_quantity"`
+	LowStockThreshold float64 `json:"low_stock_threshold"`
+	ReorderQuantity   float64 `json:"reorder_quantity"`
+	IsActive          bool    `json:"is_active"`
+	TrackInventory    bool    `json:"track_inventory"`
+	CreatedAt         string  `json:"created_at"`
+	UpdatedAt         string  `json:"updated_at"`
 }
 
 type ListProductsResponse struct {
@@ -113,23 +113,23 @@ type CreateProductHandler struct {
 }
 
 type CreateProductRequest struct {
-	CategoryID        int64   `json:"categoryId"`
-	SupplierID        int64   `json:"supplierId"`
+	CategoryID        int64   `json:"category_id"`
+	SupplierID        int64   `json:"supplier_id"`
 	Name              string  `json:"name"`
 	SKU               string  `json:"sku"`
 	Barcode           string  `json:"barcode"`
 	Description       string  `json:"description"`
 	Unit              string  `json:"unit"`
-	CostPrice         float64 `json:"costPrice"`
-	SalePrice         float64 `json:"salePrice"`
-	LowStockThreshold float64 `json:"lowStockThreshold"`
-	ReorderQuantity   float64 `json:"reorderQuantity"`
-	IsActive          bool    `json:"isActive"`
-	TrackInventory    bool    `json:"trackInventory"`
+	CostPrice         float64 `json:"cost_price"`
+	SalePrice         float64 `json:"sale_price"`
+	LowStockThreshold float64 `json:"low_stock_threshold"`
+	ReorderQuantity   float64 `json:"reorder_quantity"`
+	IsActive          bool    `json:"is_active"`
+	TrackInventory    bool    `json:"track_inventory"`
 }
 
 type CreateProductResponse struct {
-	ProductID int64  `json:"productId"`
+	ProductID int64  `json:"product_id"`
 	Message   string `json:"message"`
 }
 
@@ -198,19 +198,19 @@ type UpdateProductHandler struct {
 
 type UpdateProductRequest struct {
 	ID                int64   `json:"id"`
-	CategoryID        int64   `json:"categoryId"`
-	SupplierID        int64   `json:"supplierId"`
+	CategoryID        int64   `json:"category_id"`
+	SupplierID        int64   `json:"supplier_id"`
 	Name              string  `json:"name"`
 	SKU               string  `json:"sku"`
 	Barcode           string  `json:"barcode"`
 	Description       string  `json:"description"`
 	Unit              string  `json:"unit"`
-	CostPrice         float64 `json:"costPrice"`
-	SalePrice         float64 `json:"salePrice"`
-	LowStockThreshold float64 `json:"lowStockThreshold"`
-	ReorderQuantity   float64 `json:"reorderQuantity"`
-	IsActive          bool    `json:"isActive"`
-	TrackInventory    bool    `json:"trackInventory"`
+	CostPrice         float64 `json:"cost_price"`
+	SalePrice         float64 `json:"sale_price"`
+	LowStockThreshold float64 `json:"low_stock_threshold"`
+	ReorderQuantity   float64 `json:"reorder_quantity"`
+	IsActive          bool    `json:"is_active"`
+	TrackInventory    bool    `json:"track_inventory"`
 }
 
 type UpdateProductResponse struct {

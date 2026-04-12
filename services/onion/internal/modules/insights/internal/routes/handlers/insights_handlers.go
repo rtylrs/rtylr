@@ -20,13 +20,13 @@ func InsightsRoutes() []string { return []string{"/flow/insights"} }
 type GetInsightsHandler struct{ Service *application.Service }
 type GetInsightsRequest struct{}
 type GetInsightsResponse struct {
-	TotalTasks      int64   `json:"totalTasks"`
-	CompletedTasks  int64   `json:"completedTasks"`
-	InProgressTasks int64   `json:"inProgressTasks"`
-	OverdueTasks    int64   `json:"overdueTasks"`
-	AvgCycleTimeDays float64 `json:"avgCycleTimeDays"`
+	TotalTasks      int64   `json:"total_tasks"`
+	CompletedTasks  int64   `json:"completed_tasks"`
+	InProgressTasks int64   `json:"in_progress_tasks"`
+	OverdueTasks    int64   `json:"overdue_tasks"`
+	AvgCycleTimeDays float64 `json:"avg_cycle_time_days"`
 	Velocity        int64   `json:"velocity"`
-	VelocityChange  int64   `json:"velocityChange"`
+	VelocityChange  int64   `json:"velocity_change"`
 }
 
 func (h *GetInsightsHandler) Serve(ctx context.Context, _ *GetInsightsRequest) (GetInsightsResponse, *errorModels.ServerError) {
@@ -65,12 +65,12 @@ type GetWorkloadHandler struct{ Service *application.Service }
 type GetWorkloadRequest struct{}
 
 type WorkloadPayload struct {
-	UserID          int64 `json:"userId"`
-	OpenTasks       int64 `json:"openTasks"`
-	InProgressTasks int64 `json:"inProgressTasks"`
-	CompletedTasks  int64 `json:"completedTasks"`
-	OverdueTasks    int64 `json:"overdueTasks"`
-	TotalActive     int64 `json:"totalActive"`
+	UserID          int64 `json:"user_id"`
+	OpenTasks       int64 `json:"open_tasks"`
+	InProgressTasks int64 `json:"in_progress_tasks"`
+	CompletedTasks  int64 `json:"completed_tasks"`
+	OverdueTasks    int64 `json:"overdue_tasks"`
+	TotalActive     int64 `json:"total_active"`
 }
 
 type GetWorkloadResponse struct {
@@ -116,14 +116,14 @@ type GetRoadmapHandler struct{ Service *application.Service }
 type GetRoadmapRequest struct{}
 
 type RoadmapProjectPayload struct {
-	ProjectID       int64   `json:"projectId"`
-	ProjectName     string  `json:"projectName"`
+	ProjectID       int64   `json:"project_id"`
+	ProjectName     string  `json:"project_name"`
 	Status          string  `json:"status"`
-	TotalTasks      int64   `json:"totalTasks"`
-	CompletedTasks  int64   `json:"completedTasks"`
-	ProgressPercent float64 `json:"progressPercent"`
-	StartDate       *string `json:"startDate"`
-	DueDate         *string `json:"dueDate"`
+	TotalTasks      int64   `json:"total_tasks"`
+	CompletedTasks  int64   `json:"completed_tasks"`
+	ProgressPercent float64 `json:"progress_percent"`
+	StartDate       *string `json:"start_date"`
+	DueDate         *string `json:"due_date"`
 }
 
 type GetRoadmapResponse struct {

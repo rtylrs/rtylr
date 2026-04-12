@@ -16,13 +16,13 @@ import (
 
 type TablePayload struct {
 	ID         int64  `json:"id"`
-	OwnerID    int64  `json:"ownerId"`
-	LocationID *int64 `json:"locationId"`
+	OwnerID    int64  `json:"owner_id"`
+	LocationID *int64 `json:"location_id"`
 	Label      string `json:"label"`
 	Seats      int    `json:"seats"`
 	Status     string `json:"status"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 func newTablePayload(t domain.Table) TablePayload {
@@ -71,13 +71,13 @@ func TableCreateRoutes() []string { return []string{"/pos/tables"} }
 type CreateTableHandler struct{ Service *application.Service }
 
 type CreateTableRequest struct {
-	LocationID *int64 `json:"locationId"`
+	LocationID *int64 `json:"location_id"`
 	Label      string `json:"label"`
 	Seats      int    `json:"seats"`
 }
 
 type CreateTableResponse struct {
-	TableID int64  `json:"tableId"`
+	TableID int64  `json:"table_id"`
 	Message string `json:"message"`
 }
 
@@ -112,7 +112,7 @@ func TableUpdateRoutes() []string { return []string{"/pos/tables/{id}"} }
 type UpdateTableHandler struct{ Service *application.Service }
 
 type UpdateTableRequest struct {
-	LocationID *int64 `json:"locationId"`
+	LocationID *int64 `json:"location_id"`
 	Label      string `json:"label"`
 	Seats      int    `json:"seats"`
 	Status     string `json:"status"`

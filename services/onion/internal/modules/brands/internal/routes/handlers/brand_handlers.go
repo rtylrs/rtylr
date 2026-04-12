@@ -24,13 +24,13 @@ type ListBrandsRequest struct{}
 
 type BrandPayload struct {
 	ID           int64  `json:"id"`
-	OwnerID      int64  `json:"ownerId"`
+	OwnerID      int64  `json:"owner_id"`
 	Name         string `json:"name"`
-	LogoURL      string `json:"logoUrl"`
+	LogoURL      string `json:"logo_url"`
 	Description  string `json:"description"`
-	ProductCount int64  `json:"productCount"`
-	CreatedAt    string `json:"createdAt"`
-	UpdatedAt    string `json:"updatedAt"`
+	ProductCount int64  `json:"product_count"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
 }
 
 type ListBrandsResponse struct {
@@ -89,12 +89,12 @@ type CreateBrandHandler struct {
 
 type CreateBrandRequest struct {
 	Name        string `json:"name"`
-	LogoURL     string `json:"logoUrl"`
+	LogoURL     string `json:"logo_url"`
 	Description string `json:"description"`
 }
 
 type CreateBrandResponse struct {
-	BrandID int64  `json:"brandId"`
+	BrandID int64  `json:"brand_id"`
 	Message string `json:"message"`
 }
 
@@ -151,7 +151,7 @@ type UpdateBrandHandler struct {
 type UpdateBrandRequest struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
-	LogoURL     string `json:"logoUrl"`
+	LogoURL     string `json:"logo_url"`
 	Description string `json:"description"`
 }
 

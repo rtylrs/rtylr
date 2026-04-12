@@ -20,22 +20,22 @@ type ListShiftsHandler struct {
 }
 
 type ListShiftsRequest struct {
-	StaffID int64  `json:"staffId"`
+	StaffID int64  `json:"staff_id"`
 	Date    string `json:"date"`
 }
 
 type ShiftPayload struct {
 	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"ownerId"`
-	StaffID      int64     `json:"staffId"`
+	OwnerID      int64     `json:"owner_id"`
+	StaffID      int64     `json:"staff_id"`
 	Date         string    `json:"date"`
-	StartTime    string    `json:"startTime"`
-	EndTime      string    `json:"endTime"`
-	BreakMinutes int       `json:"breakMinutes"`
+	StartTime    string    `json:"start_time"`
+	EndTime      string    `json:"end_time"`
+	BreakMinutes int       `json:"break_minutes"`
 	Status       string    `json:"status"`
 	Notes        string    `json:"notes"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type ListShiftsResponse struct {
@@ -78,11 +78,11 @@ type CreateShiftHandler struct {
 }
 
 type CreateShiftRequest struct {
-	StaffID      int64  `json:"staffId"`
+	StaffID      int64  `json:"staff_id"`
 	Date         string `json:"date"`
-	StartTime    string `json:"startTime"`
-	EndTime      string `json:"endTime"`
-	BreakMinutes int    `json:"breakMinutes"`
+	StartTime    string `json:"start_time"`
+	EndTime      string `json:"end_time"`
+	BreakMinutes int    `json:"break_minutes"`
 	Status       string `json:"status"`
 	Notes        string `json:"notes"`
 }
@@ -142,9 +142,9 @@ type UpdateShiftHandler struct {
 type UpdateShiftRequest struct {
 	ID           int64  `json:"id"`
 	Date         string `json:"date"`
-	StartTime    string `json:"startTime"`
-	EndTime      string `json:"endTime"`
-	BreakMinutes int    `json:"breakMinutes"`
+	StartTime    string `json:"start_time"`
+	EndTime      string `json:"end_time"`
+	BreakMinutes int    `json:"break_minutes"`
 	Status       string `json:"status"`
 	Notes        string `json:"notes"`
 }

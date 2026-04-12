@@ -10,15 +10,15 @@ var ErrPaymentNotFound = errors.New("payment not found")
 
 type Payment struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	InvoiceID   int64     `json:"invoiceId"`
+	OwnerID     int64     `json:"owner_id"`
+	InvoiceID   int64     `json:"invoice_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
-	PaymentDate time.Time `json:"paymentDate"`
+	PaymentDate time.Time `json:"payment_date"`
 	Method      string    `json:"method"`
 	Reference   string    `json:"reference"`
 	Notes       string    `json:"notes"`
-	CreatedAt   time.Time `json:"createdAt"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (p *Payment) FromRow(row *sql.Rows) error {
@@ -62,10 +62,10 @@ func (p *Payment) FromRow(row *sql.Rows) error {
 }
 
 type PaymentInput struct {
-	InvoiceID   int64   `json:"invoiceId"`
+	InvoiceID   int64   `json:"invoice_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	PaymentDate string  `json:"paymentDate"`
+	PaymentDate string  `json:"payment_date"`
 	Method      string  `json:"method"`
 	Reference   string  `json:"reference"`
 	Notes       string  `json:"notes"`

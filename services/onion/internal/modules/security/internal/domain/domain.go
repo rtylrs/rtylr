@@ -3,16 +3,16 @@ package domain
 import "time"
 
 type SecuritySettings struct {
-	TwoFactorEnabled bool            `json:"twoFactorEnabled"`
-	ActiveSessions   []ActiveSession `json:"activeSessions"`
+	TwoFactorEnabled bool            `json:"two_factor_enabled"`
+	ActiveSessions   []ActiveSession `json:"active_sessions"`
 }
 
 type ActiveSession struct {
 	ID        string    `json:"id"`
 	IP        string    `json:"ip"`
-	UserAgent string    `json:"userAgent"`
-	CreatedAt time.Time `json:"createdAt"`
-	IsCurrent bool      `json:"isCurrent"`
+	UserAgent string    `json:"user_agent"`
+	CreatedAt time.Time `json:"created_at"`
+	IsCurrent bool      `json:"is_current"`
 }
 
 type TwoFactorInput struct {
@@ -23,7 +23,7 @@ type LoginEntry struct {
 	Email     string    `json:"email"`
 	Method    string    `json:"method"`
 	IP        string    `json:"ip"`
-	UserAgent string    `json:"userAgent"`
+	UserAgent string    `json:"user_agent"`
 	Success   bool      `json:"success"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 }

@@ -4,12 +4,12 @@ import "time"
 
 type Role struct {
 	ID          int64    `json:"id"`
-	OwnerID     int64    `json:"ownerId"`
+	OwnerID     int64    `json:"owner_id"`
 	Name        string   `json:"name"`
 	Permissions []string `json:"permissions"`
-	IsSystem    bool     `json:"isSystem"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	IsSystem    bool     `json:"is_system"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type CreateRoleInput struct {

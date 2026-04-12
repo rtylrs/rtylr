@@ -9,19 +9,19 @@ var ErrCampaignNotFound = errors.New("campaign not found")
 
 type Campaign struct {
 	ID                int64      `json:"id"`
-	OwnerID           int64      `json:"ownerId"`
+	OwnerID           int64      `json:"owner_id"`
 	Name              string     `json:"name"`
 	Type              string     `json:"type"`
 	Status            string     `json:"status"`
-	AudienceSegmentID *int64     `json:"audienceSegmentId"`
+	AudienceSegmentID *int64     `json:"audience_segment_id"`
 	Subject           string     `json:"subject"`
 	Body              string     `json:"body"`
-	SentCount         int        `json:"sentCount"`
-	OpenCount         int        `json:"openCount"`
-	ScheduledAt       *time.Time `json:"scheduledAt"`
-	SentAt            *time.Time `json:"sentAt"`
-	CreatedAt         time.Time  `json:"createdAt"`
-	UpdatedAt         time.Time  `json:"updatedAt"`
+	SentCount         int        `json:"sent_count"`
+	OpenCount         int        `json:"open_count"`
+	ScheduledAt       *time.Time `json:"scheduled_at"`
+	SentAt            *time.Time `json:"sent_at"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 }
 
 type CampaignInput struct {

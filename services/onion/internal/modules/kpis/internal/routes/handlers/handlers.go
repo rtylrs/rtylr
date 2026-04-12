@@ -16,11 +16,11 @@ type KPIRequest struct{}
 
 type KPIResponse struct {
 	Revenue       float64 `json:"revenue"`
-	OrderCount    int64   `json:"orderCount"`
-	StaffCount    int64   `json:"staffCount"`
-	CustomerCount int64   `json:"customerCount"`
-	LowStockCount int64   `json:"lowStockCount"`
-	ActiveApps    int64   `json:"activeApps"`
+	OrderCount    int64   `json:"order_count"`
+	StaffCount    int64   `json:"staff_count"`
+	CustomerCount int64   `json:"customer_count"`
+	LowStockCount int64   `json:"low_stock_count"`
+	ActiveApps    int64   `json:"active_apps"`
 }
 
 func (h *KPIHandler) Serve(ctx context.Context, _ *KPIRequest) (KPIResponse, *errorModels.ServerError) {

@@ -10,19 +10,19 @@ var ErrTimeOffNotFound = errors.New("time off request not found")
 
 type TimeOffRequest struct {
 	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"ownerId"`
-	StaffID    int64     `json:"staffId"`
+	OwnerID    int64     `json:"owner_id"`
+	StaffID    int64     `json:"staff_id"`
 	Type       string    `json:"type"`
-	StartDate  time.Time `json:"startDate"`
-	EndDate    time.Time `json:"endDate"`
-	DaysCount  float64   `json:"daysCount"`
+	StartDate  time.Time `json:"start_date"`
+	EndDate    time.Time `json:"end_date"`
+	DaysCount  float64   `json:"days_count"`
 	Status     string    `json:"status"`
 	Reason     string    `json:"reason"`
-	ApprovedBy int64     `json:"approvedBy"`
-	ApprovedAt time.Time `json:"approvedAt"`
+	ApprovedBy int64     `json:"approved_by"`
+	ApprovedAt time.Time `json:"approved_at"`
 	Notes      string    `json:"notes"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 func (t *TimeOffRequest) FromRow(row *sql.Rows) error {
@@ -78,12 +78,12 @@ func (t *TimeOffRequest) FromRow(row *sql.Rows) error {
 }
 
 type TimeOffInput struct {
-	OwnerID   int64   `json:"ownerId"`
-	StaffID   int64   `json:"staffId"`
+	OwnerID   int64   `json:"owner_id"`
+	StaffID   int64   `json:"staff_id"`
 	Type      string  `json:"type"`
-	StartDate string  `json:"startDate"`
-	EndDate   string  `json:"endDate"`
-	DaysCount float64 `json:"daysCount"`
+	StartDate string  `json:"start_date"`
+	EndDate   string  `json:"end_date"`
+	DaysCount float64 `json:"days_count"`
 	Reason    string  `json:"reason"`
 	Notes     string  `json:"notes"`
 }
@@ -91,6 +91,6 @@ type TimeOffInput struct {
 type TimeOffApprovalInput struct {
 	ID         int64  `json:"id"`
 	Status     string `json:"status"`
-	ApprovedBy int64  `json:"approvedBy"`
+	ApprovedBy int64  `json:"approved_by"`
 	Notes      string `json:"notes"`
 }

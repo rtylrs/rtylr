@@ -85,16 +85,16 @@ type GetSegmentCustomersHandler struct {
 }
 
 type GetSegmentCustomersRequest struct {
-	SegmentID int64 `json:"segmentId"`
+	SegmentID int64 `json:"segment_id"`
 	Page      int   `json:"page"`
-	PageSize  int   `json:"pageSize"`
+	PageSize  int   `json:"page_size"`
 }
 
 type GetSegmentCustomersResponse struct {
 	Customers []CustomerPayload `json:"customers"`
 	Total     int               `json:"total"`
 	Page      int               `json:"page"`
-	PageSize  int               `json:"pageSize"`
+	PageSize  int               `json:"page_size"`
 }
 
 func (h *GetSegmentCustomersHandler) Validate(_ context.Context, req *GetSegmentCustomersRequest) *errorModels.ServerError {

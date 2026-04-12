@@ -24,38 +24,38 @@ type ListCustomersRequest struct {
 	Tier     string `json:"tier"`
 	Tag      string `json:"tag"`
 	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
+	PageSize int    `json:"page_size"`
 }
 
 type CustomerPayload struct {
 	ID            int64    `json:"id"`
-	OwnerID       int64    `json:"ownerId"`
-	FirstName     string   `json:"firstName"`
-	LastName      string   `json:"lastName"`
+	OwnerID       int64    `json:"owner_id"`
+	FirstName     string   `json:"first_name"`
+	LastName      string   `json:"last_name"`
 	Email         string   `json:"email"`
 	Phone         string   `json:"phone"`
-	DateOfBirth   *string  `json:"dateOfBirth"`
+	DateOfBirth   *string  `json:"date_of_birth"`
 	Gender        string   `json:"gender"`
 	Address       string   `json:"address"`
 	City          string   `json:"city"`
 	Country       string   `json:"country"`
-	LoyaltyPoints int      `json:"loyaltyPoints"`
-	TotalSpent    float64  `json:"totalSpent"`
-	VisitCount    int      `json:"visitCount"`
-	LastVisitAt   *string  `json:"lastVisitAt"`
-	LoyaltyTier   string   `json:"loyaltyTier"`
+	LoyaltyPoints int      `json:"loyalty_points"`
+	TotalSpent    float64  `json:"total_spent"`
+	VisitCount    int      `json:"visit_count"`
+	LastVisitAt   *string  `json:"last_visit_at"`
+	LoyaltyTier   string   `json:"loyalty_tier"`
 	Tags          []string `json:"tags"`
 	Notes         string   `json:"notes"`
-	IsActive      bool     `json:"isActive"`
-	CreatedAt     string   `json:"createdAt"`
-	UpdatedAt     string   `json:"updatedAt"`
+	IsActive      bool     `json:"is_active"`
+	CreatedAt     string   `json:"created_at"`
+	UpdatedAt     string   `json:"updated_at"`
 }
 
 type ListCustomersResponse struct {
 	Customers []CustomerPayload `json:"customers"`
 	Total     int               `json:"total"`
 	Page      int               `json:"page"`
-	PageSize  int               `json:"pageSize"`
+	PageSize  int               `json:"page_size"`
 }
 
 func newCustomerPayload(c domain.Customer) CustomerPayload {

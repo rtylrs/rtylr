@@ -27,8 +27,8 @@ type GetCustomerDetailFullRequest struct {
 
 type GetCustomerDetailFullResponse struct {
 	Customer            CustomerPayload             `json:"customer"`
-	LoyaltyTransactions []LoyaltyTransactionPayload `json:"loyaltyTransactions"`
-	RecentVisits        []TimelineEntryPayload      `json:"recentVisits"`
+	LoyaltyTransactions []LoyaltyTransactionPayload `json:"loyalty_transactions"`
+	RecentVisits        []TimelineEntryPayload      `json:"recent_visits"`
 }
 
 func (h *GetCustomerDetailFullHandler) Validate(_ context.Context, req *GetCustomerDetailFullRequest) *errorModels.ServerError {

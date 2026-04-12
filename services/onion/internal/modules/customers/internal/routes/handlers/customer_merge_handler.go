@@ -20,8 +20,8 @@ type MergeCustomersHandler struct {
 }
 
 type MergeCustomersRequest struct {
-	PrimaryID   int64 `json:"primaryId"`
-	SecondaryID int64 `json:"secondaryId"`
+	PrimaryID   int64 `json:"primary_id"`
+	SecondaryID int64 `json:"secondary_id"`
 }
 
 type MergeCustomersResponse struct {

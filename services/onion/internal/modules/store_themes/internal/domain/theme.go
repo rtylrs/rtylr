@@ -4,22 +4,22 @@ import "time"
 
 type Theme struct {
 	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"ownerId"`
+	OwnerID      int64     `json:"owner_id"`
 	Name         string    `json:"name"`
-	PrimaryColor string    `json:"primaryColor"`
+	PrimaryColor string    `json:"primary_color"`
 	Font         string    `json:"font"`
-	HeaderStyle  string    `json:"headerStyle"`
-	FooterStyle  string    `json:"footerStyle"`
-	CustomCSS    string    `json:"customCss"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	HeaderStyle  string    `json:"header_style"`
+	FooterStyle  string    `json:"footer_style"`
+	CustomCSS    string    `json:"custom_css"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type ThemeInput struct {
 	Name         string `json:"name"`
-	PrimaryColor string `json:"primaryColor"`
+	PrimaryColor string `json:"primary_color"`
 	Font         string `json:"font"`
-	HeaderStyle  string `json:"headerStyle"`
-	FooterStyle  string `json:"footerStyle"`
-	CustomCSS    string `json:"customCss"`
+	HeaderStyle  string `json:"header_style"`
+	FooterStyle  string `json:"footer_style"`
+	CustomCSS    string `json:"custom_css"`
 }

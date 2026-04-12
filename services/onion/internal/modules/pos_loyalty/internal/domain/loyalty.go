@@ -14,13 +14,13 @@ var (
 
 type LoyaltyConfig struct {
 	ID              int64     `json:"id"`
-	BusinessID      int64     `json:"businessId"`
-	IsEnabled       bool      `json:"isEnabled"`
-	PointsPerDollar float64   `json:"pointsPerDollar"`
-	RedemptionRate  float64   `json:"redemptionRate"`
-	MinRedeemPoints int32     `json:"minRedeemPoints"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
+	BusinessID      int64     `json:"business_id"`
+	IsEnabled       bool      `json:"is_enabled"`
+	PointsPerDollar float64   `json:"points_per_dollar"`
+	RedemptionRate  float64   `json:"redemption_rate"`
+	MinRedeemPoints int32     `json:"min_redeem_points"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type UpdateLoyaltyConfigInput struct {
@@ -33,14 +33,14 @@ type UpdateLoyaltyConfigInput struct {
 
 type LoyaltyTransaction struct {
 	ID           int64     `json:"id"`
-	BusinessID   int64     `json:"businessId"`
-	CustomerID   int64     `json:"customerId"`
-	OrderID      *int64    `json:"orderId"`
+	BusinessID   int64     `json:"business_id"`
+	CustomerID   int64     `json:"customer_id"`
+	OrderID      *int64    `json:"order_id"`
 	Type         string    `json:"type"`
 	Points       int32     `json:"points"`
-	BalanceAfter int32     `json:"balanceAfter"`
+	BalanceAfter int32     `json:"balance_after"`
 	Note         *string   `json:"note"`
-	CreatedAt    time.Time `json:"createdAt"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type EarnPointsInput struct {

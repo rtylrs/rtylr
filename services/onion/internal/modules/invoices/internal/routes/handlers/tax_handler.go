@@ -27,13 +27,13 @@ type ListTaxConfigRequest struct{}
 
 type TaxConfigPayload struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Rate      float64   `json:"rate"`
 	Type      string    `json:"type"`
-	IsDefault bool      `json:"isDefault"`
-	IsActive  bool      `json:"isActive"`
-	CreatedAt time.Time `json:"createdAt"`
+	IsDefault bool      `json:"is_default"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ListTaxConfigResponse struct {
@@ -88,7 +88,7 @@ type CreateTaxConfigRequest struct {
 	Name      string  `json:"name"`
 	Rate      float64 `json:"rate"`
 	Type      string  `json:"type"`
-	IsDefault bool    `json:"isDefault"`
+	IsDefault bool    `json:"is_default"`
 }
 
 type CreateTaxConfigResponse struct {
@@ -153,8 +153,8 @@ type TaxReportRequest struct {
 
 type TaxReportResponse struct {
 	Period       string  `json:"period"`
-	TaxCollected float64 `json:"taxCollected"`
-	TaxOwed      float64 `json:"taxOwed"`
+	TaxCollected float64 `json:"tax_collected"`
+	TaxOwed      float64 `json:"tax_owed"`
 }
 
 func (h *TaxReportHandler) Serve(ctx context.Context, req *TaxReportRequest) (TaxReportResponse, *errorModels.ServerError) {

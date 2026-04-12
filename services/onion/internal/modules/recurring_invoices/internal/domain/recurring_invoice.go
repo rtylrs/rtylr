@@ -10,13 +10,13 @@ var ErrRecurringInvoiceNotFound = errors.New("recurring invoice not found")
 
 type RecurringInvoice struct {
 	ID                int64     `json:"id"`
-	OwnerID           int64     `json:"ownerId"`
-	TemplateInvoiceID int64     `json:"templateInvoiceId"`
+	OwnerID           int64     `json:"owner_id"`
+	TemplateInvoiceID int64     `json:"template_invoice_id"`
 	Frequency         string    `json:"frequency"`
-	NextInvoiceDate   time.Time `json:"nextInvoiceDate"`
-	EndDate           time.Time `json:"endDate"`
-	IsActive          bool      `json:"isActive"`
-	CreatedAt         time.Time `json:"createdAt"`
+	NextInvoiceDate   time.Time `json:"next_invoice_date"`
+	EndDate           time.Time `json:"end_date"`
+	IsActive          bool      `json:"is_active"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 func (r *RecurringInvoice) FromRow(row *sql.Rows) error {
@@ -38,9 +38,9 @@ func (r *RecurringInvoice) FromRow(row *sql.Rows) error {
 }
 
 type RecurringInvoiceInput struct {
-	TemplateInvoiceID int64  `json:"templateInvoiceId"`
+	TemplateInvoiceID int64  `json:"template_invoice_id"`
 	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"nextInvoiceDate"`
-	EndDate           string `json:"endDate"`
-	IsActive          bool   `json:"isActive"`
+	NextInvoiceDate   string `json:"next_invoice_date"`
+	EndDate           string `json:"end_date"`
+	IsActive          bool   `json:"is_active"`
 }

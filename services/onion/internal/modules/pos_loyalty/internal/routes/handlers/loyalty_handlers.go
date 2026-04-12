@@ -24,13 +24,13 @@ type GetConfigResponse struct {
 
 type LoyaltyConfigPayload struct {
 	ID              int64   `json:"id"`
-	BusinessID      int64   `json:"businessId"`
-	IsEnabled       bool    `json:"isEnabled"`
-	PointsPerDollar float64 `json:"pointsPerDollar"`
-	RedemptionRate  float64 `json:"redemptionRate"`
-	MinRedeemPoints int32   `json:"minRedeemPoints"`
-	CreatedAt       string  `json:"createdAt"`
-	UpdatedAt       string  `json:"updatedAt"`
+	BusinessID      int64   `json:"business_id"`
+	IsEnabled       bool    `json:"is_enabled"`
+	PointsPerDollar float64 `json:"points_per_dollar"`
+	RedemptionRate  float64 `json:"redemption_rate"`
+	MinRedeemPoints int32   `json:"min_redeem_points"`
+	CreatedAt       string  `json:"created_at"`
+	UpdatedAt       string  `json:"updated_at"`
 }
 
 func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetConfigResponse, *errorModels.ServerError) {
@@ -65,10 +65,10 @@ func UpdateConfigRoutes() []string { return []string{"/pos/loyalty/config"} }
 type UpdateConfigHandler struct{ Service *application.Service }
 
 type UpdateConfigRequest struct {
-	IsEnabled       bool    `json:"isEnabled"`
-	PointsPerDollar float64 `json:"pointsPerDollar"`
-	RedemptionRate  float64 `json:"redemptionRate"`
-	MinRedeemPoints int32   `json:"minRedeemPoints"`
+	IsEnabled       bool    `json:"is_enabled"`
+	PointsPerDollar float64 `json:"points_per_dollar"`
+	RedemptionRate  float64 `json:"redemption_rate"`
+	MinRedeemPoints int32   `json:"min_redeem_points"`
 }
 
 type UpdateConfigResponse struct {
@@ -106,14 +106,14 @@ type ListTransactionsResponse struct {
 
 type LoyaltyTransactionPayload struct {
 	ID           int64   `json:"id"`
-	BusinessID   int64   `json:"businessId"`
-	CustomerID   int64   `json:"customerId"`
-	OrderID      *int64  `json:"orderId"`
+	BusinessID   int64   `json:"business_id"`
+	CustomerID   int64   `json:"customer_id"`
+	OrderID      *int64  `json:"order_id"`
 	Type         string  `json:"type"`
 	Points       int32   `json:"points"`
-	BalanceAfter int32   `json:"balanceAfter"`
+	BalanceAfter int32   `json:"balance_after"`
 	Note         *string `json:"note"`
-	CreatedAt    string  `json:"createdAt"`
+	CreatedAt    string  `json:"created_at"`
 }
 
 func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, *errorModels.ServerError) {
@@ -152,13 +152,13 @@ func EarnPointsRoutes() []string { return []string{"/pos/loyalty/earn"} }
 type EarnPointsHandler struct{ Service *application.Service }
 
 type EarnPointsRequest struct {
-	CustomerID int64  `json:"customerId"`
-	OrderID    *int64 `json:"orderId"`
+	CustomerID int64  `json:"customer_id"`
+	OrderID    *int64 `json:"order_id"`
 	Points     int32  `json:"points"`
 }
 
 type EarnPointsResponse struct {
-	TransactionID int64  `json:"transactionId"`
+	TransactionID int64  `json:"transaction_id"`
 	Message       string `json:"message"`
 }
 
@@ -189,12 +189,12 @@ func RedeemPointsRoutes() []string { return []string{"/pos/loyalty/redeem"} }
 type RedeemPointsHandler struct{ Service *application.Service }
 
 type RedeemPointsRequest struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 	Points     int32 `json:"points"`
 }
 
 type RedeemPointsResponse struct {
-	TransactionID int64  `json:"transactionId"`
+	TransactionID int64  `json:"transaction_id"`
 	Message       string `json:"message"`
 }
 
@@ -229,7 +229,7 @@ type GetBalanceRequest struct {
 	CustomerID int64 `json:"customer_id"`
 }
 type GetBalanceResponse struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 	Balance    int32 `json:"balance"`
 }
 

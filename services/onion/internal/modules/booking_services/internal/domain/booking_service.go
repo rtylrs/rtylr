@@ -4,22 +4,22 @@ import "time"
 
 type BookingService struct {
 	ID              int64     `json:"id"`
-	OwnerID         int64     `json:"ownerId"`
+	OwnerID         int64     `json:"owner_id"`
 	Name            string    `json:"name"`
 	Description     string    `json:"description"`
-	DurationMinutes int       `json:"durationMinutes"`
+	DurationMinutes int       `json:"duration_minutes"`
 	Price           float64   `json:"price"`
 	Color           string    `json:"color"`
-	IsActive        bool      `json:"isActive"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
+	IsActive        bool      `json:"is_active"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type BookingServiceInput struct {
 	Name            string  `json:"name"`
 	Description     string  `json:"description"`
-	DurationMinutes int     `json:"durationMinutes"`
+	DurationMinutes int     `json:"duration_minutes"`
 	Price           float64 `json:"price"`
 	Color           string  `json:"color"`
-	IsActive        bool    `json:"isActive"`
+	IsActive        bool    `json:"is_active"`
 }

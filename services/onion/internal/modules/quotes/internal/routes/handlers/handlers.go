@@ -13,19 +13,19 @@ import (
 
 type QuotePayload struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	CustomerName  string    `json:"customerName"`
-	CustomerEmail string    `json:"customerEmail"`
+	OwnerID       int64     `json:"owner_id"`
+	CustomerName  string    `json:"customer_name"`
+	CustomerEmail string    `json:"customer_email"`
 	Status        string    `json:"status"`
 	Items         string    `json:"items"`
 	Subtotal      float64   `json:"subtotal"`
 	Tax           float64   `json:"tax"`
 	Discount      float64   `json:"discount"`
 	Total         float64   `json:"total"`
-	ValidUntil    time.Time `json:"validUntil"`
+	ValidUntil    time.Time `json:"valid_until"`
 	Notes         string    `json:"notes"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 func newPayload(q domain.Quote) QuotePayload {
@@ -72,15 +72,15 @@ func CreateRoutes() []string { return []string{"/finance/quotes"} }
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	CustomerName  string  `json:"customerName"`
-	CustomerEmail string  `json:"customerEmail"`
+	CustomerName  string  `json:"customer_name"`
+	CustomerEmail string  `json:"customer_email"`
 	Status        string  `json:"status"`
 	Items         string  `json:"items"`
 	Subtotal      float64 `json:"subtotal"`
 	Tax           float64 `json:"tax"`
 	Discount      float64 `json:"discount"`
 	Total         float64 `json:"total"`
-	ValidUntil    string  `json:"validUntil"`
+	ValidUntil    string  `json:"valid_until"`
 	Notes         string  `json:"notes"`
 }
 type CreateResponse struct {
@@ -123,15 +123,15 @@ func UpdateRoutes() []string { return []string{"/finance/quotes"} }
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID            int64   `json:"id"`
-	CustomerName  string  `json:"customerName"`
-	CustomerEmail string  `json:"customerEmail"`
+	CustomerName  string  `json:"customer_name"`
+	CustomerEmail string  `json:"customer_email"`
 	Status        string  `json:"status"`
 	Items         string  `json:"items"`
 	Subtotal      float64 `json:"subtotal"`
 	Tax           float64 `json:"tax"`
 	Discount      float64 `json:"discount"`
 	Total         float64 `json:"total"`
-	ValidUntil    string  `json:"validUntil"`
+	ValidUntil    string  `json:"valid_until"`
 	Notes         string  `json:"notes"`
 }
 type UpdateResponse struct {

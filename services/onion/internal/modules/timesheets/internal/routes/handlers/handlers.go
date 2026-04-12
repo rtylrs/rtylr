@@ -10,19 +10,19 @@ import (
 )
 
 type TimesheetEntryPayload struct {
-	StaffID       int64   `json:"staffId"`
-	StaffName     string  `json:"staffName"`
-	WeekStart     string  `json:"weekStart"`
-	TotalHours    float64 `json:"totalHours"`
-	RegularHours  float64 `json:"regularHours"`
-	OvertimeHours float64 `json:"overtimeHours"`
+	StaffID       int64   `json:"staff_id"`
+	StaffName     string  `json:"staff_name"`
+	WeekStart     string  `json:"week_start"`
+	TotalHours    float64 `json:"total_hours"`
+	RegularHours  float64 `json:"regular_hours"`
+	OvertimeHours float64 `json:"overtime_hours"`
 }
 
 func ListRoutes() []string { return []string{"/hr/timesheets"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct {
-	WeekStart string `json:"weekStart"`
+	WeekStart string `json:"week_start"`
 }
 type ListResponse struct {
 	Timesheets []TimesheetEntryPayload `json:"timesheets"`

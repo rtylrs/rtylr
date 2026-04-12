@@ -14,16 +14,16 @@ import (
 
 type AuditLogPayload struct {
 	ID         int64            `json:"id"`
-	BusinessID int64            `json:"businessId"`
-	BranchID   int64            `json:"branchId"`
-	TerminalID *int64           `json:"terminalId"`
-	EmployeeID int64            `json:"employeeId"`
+	BusinessID int64            `json:"business_id"`
+	BranchID   int64            `json:"branch_id"`
+	TerminalID *int64           `json:"terminal_id"`
+	EmployeeID int64            `json:"employee_id"`
 	Action     string           `json:"action"`
-	EntityType string           `json:"entityType"`
-	EntityID   *int64           `json:"entityId"`
+	EntityType string           `json:"entity_type"`
+	EntityID   *int64           `json:"entity_id"`
 	Details    *json.RawMessage `json:"details"`
-	IPAddress  *string          `json:"ipAddress"`
-	CreatedAt  string           `json:"createdAt"`
+	IPAddress  *string          `json:"ip_address"`
+	CreatedAt  string           `json:"created_at"`
 }
 
 func newAuditLogPayload(l domain.AuditLog) AuditLogPayload {
@@ -88,18 +88,18 @@ func AuditCreateRoutes() []string { return []string{"/pos/audit"} }
 type CreateAuditHandler struct{ Service *application.Service }
 
 type CreateAuditRequest struct {
-	BranchID   int64            `json:"branchId"`
-	TerminalID *int64           `json:"terminalId"`
-	EmployeeID int64            `json:"employeeId"`
+	BranchID   int64            `json:"branch_id"`
+	TerminalID *int64           `json:"terminal_id"`
+	EmployeeID int64            `json:"employee_id"`
 	Action     string           `json:"action"`
-	EntityType string           `json:"entityType"`
-	EntityID   *int64           `json:"entityId"`
+	EntityType string           `json:"entity_type"`
+	EntityID   *int64           `json:"entity_id"`
 	Details    *json.RawMessage `json:"details"`
-	IPAddress  *string          `json:"ipAddress"`
+	IPAddress  *string          `json:"ip_address"`
 }
 
 type CreateAuditResponse struct {
-	AuditLogID int64  `json:"auditLogId"`
+	AuditLogID int64  `json:"audit_log_id"`
 	Message    string `json:"message"`
 }
 

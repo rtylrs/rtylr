@@ -18,12 +18,12 @@ func SplitOrderRoutes() []string { return []string{"/pos/orders/split"} }
 type SplitOrderHandler struct{ Service *application.Service }
 
 type SplitOrderRequest struct {
-	OrderID int64     `json:"orderId"`
+	OrderID int64     `json:"order_id"`
 	Splits  [][]int64 `json:"splits"`
 }
 
 type SplitOrderResponse struct {
-	OrderIDs []int64 `json:"orderIds"`
+	OrderIDs []int64 `json:"order_ids"`
 	Message  string  `json:"message"`
 }
 
@@ -60,9 +60,9 @@ func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount"} }
 type DiscountOrderHandler struct{ Service *application.Service }
 
 type DiscountOrderRequest struct {
-	OrderID        int64   `json:"orderId"`
-	DiscountType   string  `json:"discountType"`
-	DiscountValue  float64 `json:"discountValue"`
+	OrderID        int64   `json:"order_id"`
+	DiscountType   string  `json:"discount_type"`
+	DiscountValue  float64 `json:"discount_value"`
 	Reason         string  `json:"reason"`
 }
 
@@ -107,7 +107,7 @@ func VoidOrderRoutes() []string { return []string{"/pos/orders/void"} }
 type VoidOrderHandler struct{ Service *application.Service }
 
 type VoidOrderRequest struct {
-	OrderID int64  `json:"orderId"`
+	OrderID int64  `json:"order_id"`
 	Reason  string `json:"reason"`
 }
 
@@ -147,7 +147,7 @@ func HoldOrderRoutes() []string { return []string{"/pos/orders/hold"} }
 type HoldOrderHandler struct{ Service *application.Service }
 
 type HoldOrderRequest struct {
-	OrderID int64  `json:"orderId"`
+	OrderID int64  `json:"order_id"`
 	Reason  string `json:"reason"`
 }
 

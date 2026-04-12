@@ -9,13 +9,13 @@ var ErrLocationNotFound = errors.New("location not found")
 
 type Location struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Address   string    `json:"address"`
 	Phone     string    `json:"phone"`
-	IsActive  bool      `json:"isActive"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type LocationInput struct {

@@ -20,10 +20,10 @@ type DashboardHandler struct {
 type DashboardRequest struct{}
 
 type DashboardResponse struct {
-	TotalReceivable  float64 `json:"totalReceivable"`
-	OverdueAmount    float64 `json:"overdueAmount"`
-	TotalExpensesMTD float64 `json:"totalExpensesMtd"`
-	NetProfitMTD     float64 `json:"netProfitMtd"`
+	TotalReceivable  float64 `json:"total_receivable"`
+	OverdueAmount    float64 `json:"overdue_amount"`
+	TotalExpensesMTD float64 `json:"total_expenses_mtd"`
+	NetProfitMTD     float64 `json:"net_profit_mtd"`
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {

@@ -16,10 +16,10 @@ type GetProfileRequest struct{}
 
 type GetProfileResponse struct {
 	ID           int64  `json:"id"`
-	SiteName     string `json:"siteName"`
-	LogoURL      string `json:"logoUrl"`
-	ContactEmail string `json:"contactEmail"`
-	ContactPhone string `json:"contactPhone"`
+	SiteName     string `json:"site_name"`
+	LogoURL      string `json:"logo_url"`
+	ContactEmail string `json:"contact_email"`
+	ContactPhone string `json:"contact_phone"`
 	Address      string `json:"address"`
 	Currency     string `json:"currency"`
 	Timezone     string `json:"timezone"`

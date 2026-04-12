@@ -24,17 +24,17 @@ type ListWarehousesRequest struct{}
 
 type WarehousePayload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
+	OwnerID     int64  `json:"owner_id"`
 	Name        string `json:"name"`
 	Address     string `json:"address"`
 	City        string `json:"city"`
 	Country     string `json:"country"`
-	ManagerName string `json:"managerName"`
+	ManagerName string `json:"manager_name"`
 	Capacity    int64  `json:"capacity"`
-	IsDefault   bool   `json:"isDefault"`
-	IsActive    bool   `json:"isActive"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	IsDefault   bool   `json:"is_default"`
+	IsActive    bool   `json:"is_active"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 type ListWarehousesResponse struct {
@@ -100,14 +100,14 @@ type CreateWarehouseRequest struct {
 	Address     string `json:"address"`
 	City        string `json:"city"`
 	Country     string `json:"country"`
-	ManagerName string `json:"managerName"`
+	ManagerName string `json:"manager_name"`
 	Capacity    int64  `json:"capacity"`
-	IsDefault   bool   `json:"isDefault"`
-	IsActive    bool   `json:"isActive"`
+	IsDefault   bool   `json:"is_default"`
+	IsActive    bool   `json:"is_active"`
 }
 
 type CreateWarehouseResponse struct {
-	WarehouseID int64  `json:"warehouseId"`
+	WarehouseID int64  `json:"warehouse_id"`
 	Message     string `json:"message"`
 }
 
@@ -172,10 +172,10 @@ type UpdateWarehouseRequest struct {
 	Address     string `json:"address"`
 	City        string `json:"city"`
 	Country     string `json:"country"`
-	ManagerName string `json:"managerName"`
+	ManagerName string `json:"manager_name"`
 	Capacity    int64  `json:"capacity"`
-	IsDefault   bool   `json:"isDefault"`
-	IsActive    bool   `json:"isActive"`
+	IsDefault   bool   `json:"is_default"`
+	IsActive    bool   `json:"is_active"`
 }
 
 type UpdateWarehouseResponse struct {

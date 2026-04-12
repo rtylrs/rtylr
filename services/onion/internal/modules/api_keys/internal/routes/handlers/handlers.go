@@ -21,12 +21,12 @@ type ListRequest struct{}
 type APIKeyPayload struct {
 	ID         int64      `json:"id"`
 	Name       string     `json:"name"`
-	KeyPrefix  string     `json:"keyPrefix"`
+	KeyPrefix  string     `json:"key_prefix"`
 	Scopes     []string   `json:"scopes"`
-	LastUsedAt *time.Time `json:"lastUsedAt"`
-	ExpiresAt  *time.Time `json:"expiresAt"`
-	IsActive   bool       `json:"isActive"`
-	CreatedAt  time.Time  `json:"createdAt"`
+	LastUsedAt *time.Time `json:"last_used_at"`
+	ExpiresAt  *time.Time `json:"expires_at"`
+	IsActive   bool       `json:"is_active"`
+	CreatedAt  time.Time  `json:"created_at"`
 }
 
 type ListResponse struct {

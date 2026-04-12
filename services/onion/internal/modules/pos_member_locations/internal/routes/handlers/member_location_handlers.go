@@ -29,11 +29,11 @@ func AssignRoutes() []string { return []string{"/pos/access/assign"} }
 
 type AssignLocationHandler struct{ Service *application.Service }
 type AssignLocationRequest struct {
-	UserID             int64 `json:"userId"`
-	LocationID         int64 `json:"locationId"`
-	CanManagePOSUsers  bool  `json:"canManagePosUsers"`
-	CanManageTerminals bool  `json:"canManageTerminals"`
-	CanViewReports     bool  `json:"canViewReports"`
+	UserID             int64 `json:"user_id"`
+	LocationID         int64 `json:"location_id"`
+	CanManagePOSUsers  bool  `json:"can_manage_pos_users"`
+	CanManageTerminals bool  `json:"can_manage_terminals"`
+	CanViewReports     bool  `json:"can_view_reports"`
 }
 type AssignLocationResponse struct{ ID int64 `json:"id"` }
 

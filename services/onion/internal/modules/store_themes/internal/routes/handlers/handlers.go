@@ -11,10 +11,10 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; Name string `json:"name"`
-	PrimaryColor string `json:"primaryColor"`; Font string `json:"font"`
-	HeaderStyle string `json:"headerStyle"`; FooterStyle string `json:"footerStyle"`
-	CustomCSS string `json:"customCss"`; CreatedAt string `json:"createdAt"`; UpdatedAt string `json:"updatedAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; Name string `json:"name"`
+	PrimaryColor string `json:"primary_color"`; Font string `json:"font"`
+	HeaderStyle string `json:"header_style"`; FooterStyle string `json:"footer_style"`
+	CustomCSS string `json:"custom_css"`; CreatedAt string `json:"created_at"`; UpdatedAt string `json:"updated_at"`
 }
 
 func toPayload(t domain.Theme) Payload {
@@ -42,8 +42,8 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	Name string `json:"name"`; PrimaryColor string `json:"primaryColor"`; Font string `json:"font"`
-	HeaderStyle string `json:"headerStyle"`; FooterStyle string `json:"footerStyle"`; CustomCSS string `json:"customCss"`
+	Name string `json:"name"`; PrimaryColor string `json:"primary_color"`; Font string `json:"font"`
+	HeaderStyle string `json:"header_style"`; FooterStyle string `json:"footer_style"`; CustomCSS string `json:"custom_css"`
 }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
@@ -61,8 +61,8 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
-	ID int64 `json:"id"`; Name string `json:"name"`; PrimaryColor string `json:"primaryColor"`; Font string `json:"font"`
-	HeaderStyle string `json:"headerStyle"`; FooterStyle string `json:"footerStyle"`; CustomCSS string `json:"customCss"`
+	ID int64 `json:"id"`; Name string `json:"name"`; PrimaryColor string `json:"primary_color"`; Font string `json:"font"`
+	HeaderStyle string `json:"header_style"`; FooterStyle string `json:"footer_style"`; CustomCSS string `json:"custom_css"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

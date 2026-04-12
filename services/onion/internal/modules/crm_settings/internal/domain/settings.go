@@ -4,14 +4,14 @@ import "time"
 
 type Settings struct {
 	ID             int64     `json:"id"`
-	OwnerID        int64     `json:"ownerId"`
-	DefaultConsent bool      `json:"defaultConsent"`
-	FromEmail      string    `json:"fromEmail"`
-	FromName       string    `json:"fromName"`
-	SmsSenderID    string    `json:"smsSenderId"`
+	OwnerID        int64     `json:"owner_id"`
+	DefaultConsent bool      `json:"default_consent"`
+	FromEmail      string    `json:"from_email"`
+	FromName       string    `json:"from_name"`
+	SmsSenderID    string    `json:"sms_sender_id"`
 	Timezone       string    `json:"timezone"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type SettingsInput struct {

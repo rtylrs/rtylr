@@ -24,28 +24,28 @@ type ListStockTakesRequest struct{}
 
 type StockTakeItemPayload struct {
 	ID          int64   `json:"id"`
-	StockTakeID int64   `json:"stockTakeId"`
-	ProductID   int64   `json:"productId"`
-	ExpectedQty float64 `json:"expectedQty"`
-	CountedQty  float64 `json:"countedQty"`
+	StockTakeID int64   `json:"stock_take_id"`
+	ProductID   int64   `json:"product_id"`
+	ExpectedQty float64 `json:"expected_qty"`
+	CountedQty  float64 `json:"counted_qty"`
 	Variance    float64 `json:"variance"`
-	CreatedAt   string  `json:"createdAt"`
+	CreatedAt   string  `json:"created_at"`
 }
 
 type StockTakePayload struct {
 	ID          int64                  `json:"id"`
-	OwnerID     int64                  `json:"ownerId"`
-	WarehouseID int64                  `json:"warehouseId"`
+	OwnerID     int64                  `json:"owner_id"`
+	WarehouseID int64                  `json:"warehouse_id"`
 	Status      string                 `json:"status"`
 	Notes       string                 `json:"notes"`
 	Items       []StockTakeItemPayload `json:"items"`
-	StartedAt   string                 `json:"startedAt"`
-	CompletedAt string                 `json:"completedAt"`
-	CreatedAt   string                 `json:"createdAt"`
+	StartedAt   string                 `json:"started_at"`
+	CompletedAt string                 `json:"completed_at"`
+	CreatedAt   string                 `json:"created_at"`
 }
 
 type ListStockTakesResponse struct {
-	StockTakes []StockTakePayload `json:"stockTakes"`
+	StockTakes []StockTakePayload `json:"stock_takes"`
 }
 
 func newStockTakePayload(s domain.StockTake) StockTakePayload {
@@ -113,19 +113,19 @@ type CreateStockTakeHandler struct {
 }
 
 type CreateStockTakeItemInput struct {
-	ProductID   int64   `json:"productId"`
-	ExpectedQty float64 `json:"expectedQty"`
-	CountedQty  float64 `json:"countedQty"`
+	ProductID   int64   `json:"product_id"`
+	ExpectedQty float64 `json:"expected_qty"`
+	CountedQty  float64 `json:"counted_qty"`
 }
 
 type CreateStockTakeRequest struct {
-	WarehouseID int64                      `json:"warehouseId"`
+	WarehouseID int64                      `json:"warehouse_id"`
 	Notes       string                     `json:"notes"`
 	Items       []CreateStockTakeItemInput `json:"items"`
 }
 
 type CreateStockTakeResponse struct {
-	StockTakeID int64  `json:"stockTakeId"`
+	StockTakeID int64  `json:"stock_take_id"`
 	Message     string `json:"message"`
 }
 
@@ -181,9 +181,9 @@ type UpdateStockTakeHandler struct {
 }
 
 type UpdateStockTakeItemInput struct {
-	ProductID   int64   `json:"productId"`
-	ExpectedQty float64 `json:"expectedQty"`
-	CountedQty  float64 `json:"countedQty"`
+	ProductID   int64   `json:"product_id"`
+	ExpectedQty float64 `json:"expected_qty"`
+	CountedQty  float64 `json:"counted_qty"`
 }
 
 type UpdateStockTakeRequest struct {

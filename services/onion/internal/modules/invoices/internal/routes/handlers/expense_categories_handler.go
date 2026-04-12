@@ -27,11 +27,11 @@ type ListExpenseCategoriesRequest struct{}
 
 type ExpenseCategoryPayload struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Color     string    `json:"color"`
 	Icon      string    `json:"icon"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ListExpenseCategoriesResponse struct {

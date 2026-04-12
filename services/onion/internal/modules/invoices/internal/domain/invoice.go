@@ -14,30 +14,30 @@ var (
 
 type Invoice struct {
 	ID             int64          `json:"id"`
-	OwnerID        int64          `json:"ownerId"`
-	InvoiceNumber  string         `json:"invoiceNumber"`
-	ClientName     string         `json:"clientName"`
-	ClientEmail    string         `json:"clientEmail"`
-	ClientAddress  string         `json:"clientAddress"`
-	ClientTaxID    string         `json:"clientTaxId"`
+	OwnerID        int64          `json:"owner_id"`
+	InvoiceNumber  string         `json:"invoice_number"`
+	ClientName     string         `json:"client_name"`
+	ClientEmail    string         `json:"client_email"`
+	ClientAddress  string         `json:"client_address"`
+	ClientTaxID    string         `json:"client_tax_id"`
 	Status         string         `json:"status"`
-	IssueDate      time.Time      `json:"issueDate"`
-	DueDate        time.Time      `json:"dueDate"`
-	PaidDate       *time.Time     `json:"paidDate"`
+	IssueDate      time.Time      `json:"issue_date"`
+	DueDate        time.Time      `json:"due_date"`
+	PaidDate       *time.Time     `json:"paid_date"`
 	Currency       string         `json:"currency"`
 	Subtotal       float64        `json:"subtotal"`
-	DiscountType   string         `json:"discountType"`
-	DiscountValue  float64        `json:"discountValue"`
-	DiscountAmount float64        `json:"discountAmount"`
-	TaxRate        float64        `json:"taxRate"`
-	TaxAmount      float64        `json:"taxAmount"`
+	DiscountType   string         `json:"discount_type"`
+	DiscountValue  float64        `json:"discount_value"`
+	DiscountAmount float64        `json:"discount_amount"`
+	TaxRate        float64        `json:"tax_rate"`
+	TaxAmount      float64        `json:"tax_amount"`
 	Total          float64        `json:"total"`
-	AmountPaid     float64        `json:"amountPaid"`
-	AmountDue      float64        `json:"amountDue"`
+	AmountPaid     float64        `json:"amount_paid"`
+	AmountDue      float64        `json:"amount_due"`
 	Notes          string         `json:"notes"`
 	Terms          string         `json:"terms"`
-	CreatedAt      time.Time      `json:"createdAt"`
-	UpdatedAt      time.Time      `json:"updatedAt"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
 	Items          []InvoiceItem  `json:"items"`
 	Payments       []Payment      `json:"payments"`
 }
@@ -125,32 +125,32 @@ func (inv *Invoice) FromRow(row *sql.Rows) error {
 }
 
 type InvoiceInput struct {
-	ClientName    string             `json:"clientName"`
-	ClientEmail   string             `json:"clientEmail"`
-	ClientAddress string             `json:"clientAddress"`
-	ClientTaxID   string             `json:"clientTaxId"`
-	IssueDate     string             `json:"issueDate"`
-	DueDate       string             `json:"dueDate"`
+	ClientName    string             `json:"client_name"`
+	ClientEmail   string             `json:"client_email"`
+	ClientAddress string             `json:"client_address"`
+	ClientTaxID   string             `json:"client_tax_id"`
+	IssueDate     string             `json:"issue_date"`
+	DueDate       string             `json:"due_date"`
 	Currency      string             `json:"currency"`
-	DiscountType  string             `json:"discountType"`
-	DiscountValue float64            `json:"discountValue"`
-	TaxRate       float64            `json:"taxRate"`
+	DiscountType  string             `json:"discount_type"`
+	DiscountValue float64            `json:"discount_value"`
+	TaxRate       float64            `json:"tax_rate"`
 	Notes         string             `json:"notes"`
 	Terms         string             `json:"terms"`
 	Items         []InvoiceItemInput `json:"items"`
 }
 
 type InvoiceUpdateInput struct {
-	ClientName    string             `json:"clientName"`
-	ClientEmail   string             `json:"clientEmail"`
-	ClientAddress string             `json:"clientAddress"`
-	ClientTaxID   string             `json:"clientTaxId"`
-	IssueDate     string             `json:"issueDate"`
-	DueDate       string             `json:"dueDate"`
+	ClientName    string             `json:"client_name"`
+	ClientEmail   string             `json:"client_email"`
+	ClientAddress string             `json:"client_address"`
+	ClientTaxID   string             `json:"client_tax_id"`
+	IssueDate     string             `json:"issue_date"`
+	DueDate       string             `json:"due_date"`
 	Currency      string             `json:"currency"`
-	DiscountType  string             `json:"discountType"`
-	DiscountValue float64            `json:"discountValue"`
-	TaxRate       float64            `json:"taxRate"`
+	DiscountType  string             `json:"discount_type"`
+	DiscountValue float64            `json:"discount_value"`
+	TaxRate       float64            `json:"tax_rate"`
 	Notes         string             `json:"notes"`
 	Terms         string             `json:"terms"`
 	Items         []InvoiceItemInput `json:"items"`

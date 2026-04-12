@@ -10,11 +10,11 @@ var ErrJournalEntryNotFound = errors.New("journal entry not found")
 
 type JournalEntry struct {
 	ID          int64         `json:"id"`
-	OwnerID     int64         `json:"ownerId"`
+	OwnerID     int64         `json:"owner_id"`
 	Date        time.Time     `json:"date"`
 	Description string        `json:"description"`
 	Lines       []JournalLine `json:"lines"`
-	CreatedAt   time.Time     `json:"createdAt"`
+	CreatedAt   time.Time     `json:"created_at"`
 }
 
 func (j *JournalEntry) FromRow(row *sql.Rows) error {
@@ -34,8 +34,8 @@ func (j *JournalEntry) FromRow(row *sql.Rows) error {
 
 type JournalLine struct {
 	ID        int64   `json:"id"`
-	EntryID   int64   `json:"entryId"`
-	AccountID int64   `json:"accountId"`
+	EntryID   int64   `json:"entry_id"`
+	AccountID int64   `json:"account_id"`
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }
@@ -51,7 +51,7 @@ type JournalEntryInput struct {
 }
 
 type JournalLineInput struct {
-	AccountID int64   `json:"accountId"`
+	AccountID int64   `json:"account_id"`
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }

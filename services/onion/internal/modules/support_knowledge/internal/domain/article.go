@@ -4,15 +4,15 @@ import "time"
 
 type Article struct {
 	ID          int64     `json:"id"`
-	BusinessID  int64     `json:"businessId"`
+	BusinessID  int64     `json:"business_id"`
 	Title       string    `json:"title"`
 	Slug        string    `json:"slug"`
 	Body        string    `json:"body"`
 	Category    string    `json:"category"`
-	IsPublished bool      `json:"isPublished"`
+	IsPublished bool      `json:"is_published"`
 	Views       int       `json:"views"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ArticleInput struct {

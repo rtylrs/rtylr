@@ -10,20 +10,20 @@ var ErrExpenseNotFound = errors.New("expense not found")
 
 type Expense struct {
 	ID              int64     `json:"id"`
-	OwnerID         int64     `json:"ownerId"`
-	CategoryID      int64     `json:"categoryId"`
+	OwnerID         int64     `json:"owner_id"`
+	CategoryID      int64     `json:"category_id"`
 	Description     string    `json:"description"`
 	Amount          float64   `json:"amount"`
 	Currency        string    `json:"currency"`
-	ExpenseDate     time.Time `json:"expenseDate"`
+	ExpenseDate     time.Time `json:"expense_date"`
 	Vendor          string    `json:"vendor"`
-	PaymentMethod   string    `json:"paymentMethod"`
-	ReceiptURL      string    `json:"receiptUrl"`
-	IsTaxDeductible bool      `json:"isTaxDeductible"`
-	TaxAmount       float64   `json:"taxAmount"`
+	PaymentMethod   string    `json:"payment_method"`
+	ReceiptURL      string    `json:"receipt_url"`
+	IsTaxDeductible bool      `json:"is_tax_deductible"`
+	TaxAmount       float64   `json:"tax_amount"`
 	Notes           string    `json:"notes"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 func (e *Expense) FromRow(row *sql.Rows) error {
@@ -89,15 +89,15 @@ func (e *Expense) FromRow(row *sql.Rows) error {
 }
 
 type ExpenseInput struct {
-	CategoryID      int64   `json:"categoryId"`
+	CategoryID      int64   `json:"category_id"`
 	Description     string  `json:"description"`
 	Amount          float64 `json:"amount"`
 	Currency        string  `json:"currency"`
-	ExpenseDate     string  `json:"expenseDate"`
+	ExpenseDate     string  `json:"expense_date"`
 	Vendor          string  `json:"vendor"`
-	PaymentMethod   string  `json:"paymentMethod"`
-	ReceiptURL      string  `json:"receiptUrl"`
-	IsTaxDeductible bool    `json:"isTaxDeductible"`
-	TaxAmount       float64 `json:"taxAmount"`
+	PaymentMethod   string  `json:"payment_method"`
+	ReceiptURL      string  `json:"receipt_url"`
+	IsTaxDeductible bool    `json:"is_tax_deductible"`
+	TaxAmount       float64 `json:"tax_amount"`
 	Notes           string  `json:"notes"`
 }

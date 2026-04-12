@@ -26,12 +26,12 @@ const (
 
 type PurchaseOrderItem struct {
 	ID               int64   `json:"id"`
-	PurchaseOrderID  int64   `json:"purchaseOrderId"`
-	ProductID        int64   `json:"productId"`
-	QuantityOrdered  float64 `json:"quantityOrdered"`
-	QuantityReceived float64 `json:"quantityReceived"`
-	UnitCost         float64 `json:"unitCost"`
-	TotalCost        float64 `json:"totalCost"`
+	PurchaseOrderID  int64   `json:"purchase_order_id"`
+	ProductID        int64   `json:"product_id"`
+	QuantityOrdered  float64 `json:"quantity_ordered"`
+	QuantityReceived float64 `json:"quantity_received"`
+	UnitCost         float64 `json:"unit_cost"`
+	TotalCost        float64 `json:"total_cost"`
 }
 
 func (i *PurchaseOrderItem) FromRow(row *sql.Rows) error {
@@ -47,26 +47,26 @@ func (i *PurchaseOrderItem) FromRow(row *sql.Rows) error {
 }
 
 type PurchaseOrderItemInput struct {
-	ProductID       int64   `json:"productId"`
-	QuantityOrdered float64 `json:"quantityOrdered"`
-	UnitCost        float64 `json:"unitCost"`
+	ProductID       int64   `json:"product_id"`
+	QuantityOrdered float64 `json:"quantity_ordered"`
+	UnitCost        float64 `json:"unit_cost"`
 }
 
 type PurchaseOrder struct {
 	ID               int64               `json:"id"`
-	OwnerID          int64               `json:"ownerId"`
-	SupplierID       int64               `json:"supplierId"`
-	PONumber         string              `json:"poNumber"`
+	OwnerID          int64               `json:"owner_id"`
+	SupplierID       int64               `json:"supplier_id"`
+	PONumber         string              `json:"po_number"`
 	Status           PurchaseOrderStatus `json:"status"`
 	Subtotal         float64             `json:"subtotal"`
-	TaxAmount        float64             `json:"taxAmount"`
+	TaxAmount        float64             `json:"tax_amount"`
 	Total            float64             `json:"total"`
-	ExpectedDelivery *time.Time          `json:"expectedDelivery"`
-	ReceivedAt       *time.Time          `json:"receivedAt"`
+	ExpectedDelivery *time.Time          `json:"expected_delivery"`
+	ReceivedAt       *time.Time          `json:"received_at"`
 	Notes            string              `json:"notes"`
-	CreatedBy        int64               `json:"createdBy"`
-	CreatedAt        time.Time           `json:"createdAt"`
-	UpdatedAt        time.Time           `json:"updatedAt"`
+	CreatedBy        int64               `json:"created_by"`
+	CreatedAt        time.Time           `json:"created_at"`
+	UpdatedAt        time.Time           `json:"updated_at"`
 	Items            []PurchaseOrderItem `json:"items"`
 }
 
@@ -115,10 +115,10 @@ func (po *PurchaseOrder) FromRow(row *sql.Rows) error {
 }
 
 type PurchaseOrderInput struct {
-	SupplierID       int64                    `json:"supplierId"`
-	PONumber         string                   `json:"poNumber"`
-	TaxAmount        float64                  `json:"taxAmount"`
-	ExpectedDelivery string                   `json:"expectedDelivery"`
+	SupplierID       int64                    `json:"supplier_id"`
+	PONumber         string                   `json:"po_number"`
+	TaxAmount        float64                  `json:"tax_amount"`
+	ExpectedDelivery string                   `json:"expected_delivery"`
 	Notes            string                   `json:"notes"`
 	Items            []PurchaseOrderItemInput `json:"items"`
 }

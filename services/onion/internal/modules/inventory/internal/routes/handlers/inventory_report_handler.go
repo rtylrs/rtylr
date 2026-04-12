@@ -21,22 +21,22 @@ type InventoryReportHandler struct {
 type InventoryReportRequest struct{}
 
 type InventoryReportItemPayload struct {
-	ProductID         int64   `json:"productId"`
-	ProductName       string  `json:"productName"`
+	ProductID         int64   `json:"product_id"`
+	ProductName       string  `json:"product_name"`
 	SKU               string  `json:"sku"`
 	Unit              string  `json:"unit"`
-	StockQuantity     float64 `json:"stockQuantity"`
-	LowStockThreshold float64 `json:"lowStockThreshold"`
-	ReorderQuantity   float64 `json:"reorderQuantity"`
-	CostPrice         float64 `json:"costPrice"`
-	SalePrice         float64 `json:"salePrice"`
-	StockValue        float64 `json:"stockValue"`
-	IsLowStock        bool    `json:"isLowStock"`
+	StockQuantity     float64 `json:"stock_quantity"`
+	LowStockThreshold float64 `json:"low_stock_threshold"`
+	ReorderQuantity   float64 `json:"reorder_quantity"`
+	CostPrice         float64 `json:"cost_price"`
+	SalePrice         float64 `json:"sale_price"`
+	StockValue        float64 `json:"stock_value"`
+	IsLowStock        bool    `json:"is_low_stock"`
 }
 
 type InventoryReportResponse struct {
 	Items      []InventoryReportItemPayload `json:"items"`
-	TotalValue float64                      `json:"totalValue"`
+	TotalValue float64                      `json:"total_value"`
 }
 
 func newInventoryReportItemPayload(item domain.InventoryReportItem) InventoryReportItemPayload {

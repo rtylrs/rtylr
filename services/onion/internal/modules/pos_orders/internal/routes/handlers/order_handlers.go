@@ -16,46 +16,46 @@ import (
 
 type OrderItemPayload struct {
 	ID             int64     `json:"id"`
-	OrderID        int64     `json:"orderId"`
-	MenuItemID     int64     `json:"menuItemId"`
+	OrderID        int64     `json:"order_id"`
+	MenuItemID     int64     `json:"menu_item_id"`
 	Name           string    `json:"name"`
 	SKU            string    `json:"sku"`
 	Quantity       float64   `json:"quantity"`
-	UnitPrice      float64   `json:"unitPrice"`
-	DiscountPct    float64   `json:"discountPct"`
-	DiscountAmount float64   `json:"discountAmount"`
-	TaxRate        float64   `json:"taxRate"`
+	UnitPrice      float64   `json:"unit_price"`
+	DiscountPct    float64   `json:"discount_pct"`
+	DiscountAmount float64   `json:"discount_amount"`
+	TaxRate        float64   `json:"tax_rate"`
 	Total          float64   `json:"total"`
 	Notes          string    `json:"notes"`
 	Status         string    `json:"status"`
-	CreatedAt      time.Time `json:"createdAt"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type OrderPayload struct {
 	ID             int64              `json:"id"`
-	OwnerID        int64              `json:"ownerId"`
-	SessionID      int64              `json:"sessionId"`
-	TableID        int64              `json:"tableId"`
-	LocationID     int64              `json:"locationId"`
-	OrderNumber    string             `json:"orderNumber"`
+	OwnerID        int64              `json:"owner_id"`
+	SessionID      int64              `json:"session_id"`
+	TableID        int64              `json:"table_id"`
+	LocationID     int64              `json:"location_id"`
+	OrderNumber    string             `json:"order_number"`
 	Type           string             `json:"type"`
 	Status         string             `json:"status"`
-	CustomerID     int64              `json:"customerId"`
-	CustomerName   string             `json:"customerName"`
-	StaffID        int64              `json:"staffId"`
+	CustomerID     int64              `json:"customer_id"`
+	CustomerName   string             `json:"customer_name"`
+	StaffID        int64              `json:"staff_id"`
 	Subtotal       float64            `json:"subtotal"`
-	DiscountAmount float64            `json:"discountAmount"`
-	TaxAmount      float64            `json:"taxAmount"`
+	DiscountAmount float64            `json:"discount_amount"`
+	TaxAmount      float64            `json:"tax_amount"`
 	Total          float64            `json:"total"`
-	PaymentMethod  string             `json:"paymentMethod"`
-	PaymentStatus  string             `json:"paymentStatus"`
-	AmountPaid     float64            `json:"amountPaid"`
-	ChangeDue      float64            `json:"changeDue"`
+	PaymentMethod  string             `json:"payment_method"`
+	PaymentStatus  string             `json:"payment_status"`
+	AmountPaid     float64            `json:"amount_paid"`
+	ChangeDue      float64            `json:"change_due"`
 	Notes          string             `json:"notes"`
-	KitchenNotes   string             `json:"kitchenNotes"`
-	CreatedAt      time.Time          `json:"createdAt"`
-	UpdatedAt      time.Time          `json:"updatedAt"`
-	PaidAt         *time.Time         `json:"paidAt"`
+	KitchenNotes   string             `json:"kitchen_notes"`
+	CreatedAt      time.Time          `json:"created_at"`
+	UpdatedAt      time.Time          `json:"updated_at"`
+	PaidAt         *time.Time         `json:"paid_at"`
 	Items          []OrderItemPayload `json:"items,omitempty"`
 }
 
@@ -121,10 +121,10 @@ func ListOrdersRoutes() []string { return []string{"/pos/orders"} }
 type ListOrdersHandler struct{ Service *application.Service }
 
 type ListOrdersRequest struct {
-	SessionID int64  `json:"sessionId"`
+	SessionID int64  `json:"session_id"`
 	Status    string `json:"status"`
-	DateFrom  string `json:"dateFrom"`
-	DateTo    string `json:"dateTo"`
+	DateFrom  string `json:"date_from"`
+	DateTo    string `json:"date_to"`
 }
 
 type ListOrdersResponse struct {
@@ -161,32 +161,32 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 type CreateOrderHandler struct{ Service *application.Service }
 
 type CreateOrderItemInput struct {
-	MenuItemID  int64   `json:"menuItemId"`
+	MenuItemID  int64   `json:"menu_item_id"`
 	Name        string  `json:"name"`
 	SKU         string  `json:"sku"`
 	Quantity    float64 `json:"quantity"`
-	UnitPrice   float64 `json:"unitPrice"`
-	DiscountPct float64 `json:"discountPct"`
-	TaxRate     float64 `json:"taxRate"`
+	UnitPrice   float64 `json:"unit_price"`
+	DiscountPct float64 `json:"discount_pct"`
+	TaxRate     float64 `json:"tax_rate"`
 	Notes       string  `json:"notes"`
 }
 
 type CreateOrderRequest struct {
-	SessionID     int64                  `json:"sessionId"`
-	TableID       int64                  `json:"tableId"`
-	LocationID    int64                  `json:"locationId"`
+	SessionID     int64                  `json:"session_id"`
+	TableID       int64                  `json:"table_id"`
+	LocationID    int64                  `json:"location_id"`
 	Type          string                 `json:"type"`
-	CustomerID    int64                  `json:"customerId"`
-	CustomerName  string                 `json:"customerName"`
-	PaymentMethod string                 `json:"paymentMethod"`
+	CustomerID    int64                  `json:"customer_id"`
+	CustomerName  string                 `json:"customer_name"`
+	PaymentMethod string                 `json:"payment_method"`
 	Notes         string                 `json:"notes"`
-	KitchenNotes  string                 `json:"kitchenNotes"`
+	KitchenNotes  string                 `json:"kitchen_notes"`
 	Items         []CreateOrderItemInput `json:"items"`
 }
 
 type CreateOrderResponse struct {
-	OrderID     int64  `json:"orderId"`
-	OrderNumber string `json:"orderNumber"`
+	OrderID     int64  `json:"order_id"`
+	OrderNumber string `json:"order_number"`
 	Message     string `json:"message"`
 }
 
@@ -286,7 +286,7 @@ func GetOrderDetailRoutes() []string { return []string{"/pos/orders/detail"} }
 type GetOrderDetailHandler struct{ Service *application.Service }
 
 type GetOrderDetailRequest struct {
-	OrderID int64 `json:"orderId"`
+	OrderID int64 `json:"order_id"`
 }
 
 type GetOrderDetailResponse struct {
@@ -330,7 +330,7 @@ func UpdateOrderStatusRoutes() []string { return []string{"/pos/orders/status"} 
 type UpdateOrderStatusHandler struct{ Service *application.Service }
 
 type UpdateOrderStatusRequest struct {
-	OrderID int64  `json:"orderId"`
+	OrderID int64  `json:"order_id"`
 	Status  string `json:"status"`
 }
 
@@ -384,8 +384,8 @@ func UpdateOrderItemStatusRoutes() []string { return []string{"/pos/orders/item-
 type UpdateOrderItemStatusHandler struct{ Service *application.Service }
 
 type UpdateOrderItemStatusRequest struct {
-	OrderID int64  `json:"orderId"`
-	ItemID  int64  `json:"itemId"`
+	OrderID int64  `json:"order_id"`
+	ItemID  int64  `json:"item_id"`
 	Status  string `json:"status"`
 }
 
@@ -437,9 +437,9 @@ func ProcessPaymentRoutes() []string { return []string{"/pos/orders/payment"} }
 type ProcessPaymentHandler struct{ Service *application.Service }
 
 type ProcessPaymentRequest struct {
-	OrderID       int64   `json:"orderId"`
-	PaymentMethod string  `json:"paymentMethod"`
-	AmountPaid    float64 `json:"amountPaid"`
+	OrderID       int64   `json:"order_id"`
+	PaymentMethod string  `json:"payment_method"`
+	AmountPaid    float64 `json:"amount_paid"`
 }
 
 type ProcessPaymentResponse struct {
@@ -504,13 +504,13 @@ func ProcessRefundRoutes() []string { return []string{"/pos/orders/refund"} }
 type ProcessRefundHandler struct{ Service *application.Service }
 
 type ProcessRefundRequest struct {
-	OrderID int64   `json:"orderId"`
+	OrderID int64   `json:"order_id"`
 	Amount  float64 `json:"amount"`
 	Reason  string  `json:"reason"`
 }
 
 type ProcessRefundResponse struct {
-	RefundID int64  `json:"refundId"`
+	RefundID int64  `json:"refund_id"`
 	Message  string `json:"message"`
 }
 

@@ -11,8 +11,8 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; AppointmentID int64 `json:"appointmentId"`
-	Type string `json:"type"`; ScheduledAt string `json:"scheduledAt"`; SentAt string `json:"sentAt"`; CreatedAt string `json:"createdAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; AppointmentID int64 `json:"appointment_id"`
+	Type string `json:"type"`; ScheduledAt string `json:"scheduled_at"`; SentAt string `json:"sent_at"`; CreatedAt string `json:"created_at"`
 }
 
 func toPayload(r domain.Reminder) Payload {
@@ -39,7 +39,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 }
 
 type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct { AppointmentID int64 `json:"appointmentId"`; Type string `json:"type"`; ScheduledAt string `json:"scheduledAt"` }
+type CreateRequest struct { AppointmentID int64 `json:"appointment_id"`; Type string `json:"type"`; ScheduledAt string `json:"scheduled_at"` }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {

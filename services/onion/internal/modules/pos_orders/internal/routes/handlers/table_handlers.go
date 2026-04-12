@@ -17,20 +17,20 @@ func ListTablesRoutes() []string { return []string{"/pos/tables"} }
 type ListTablesHandler struct{ Service *application.Service }
 
 type ListTablesRequest struct {
-	OwnerID    int64  `json:"ownerId"`
-	LocationID int64  `json:"locationId"`
+	OwnerID    int64  `json:"owner_id"`
+	LocationID int64  `json:"location_id"`
 	Status     string `json:"status"`
 }
 
 type TablePayload struct {
 	ID                    int64  `json:"id"`
-	OwnerID               int64  `json:"ownerId"`
-	LocationID            int64  `json:"locationId"`
+	OwnerID               int64  `json:"owner_id"`
+	LocationID            int64  `json:"location_id"`
 	Name                  string `json:"name"`
 	Capacity              int    `json:"capacity"`
 	Status                string `json:"status"`
-	CurrentSessionOrderID int64  `json:"currentSessionOrderId"`
-	QRCodeURL             string `json:"qrCodeUrl"`
+	CurrentSessionOrderID int64  `json:"current_session_order_id"`
+	QRCodeURL             string `json:"qr_code_url"`
 }
 
 type ListTablesResponse struct {
@@ -82,10 +82,10 @@ func CreateTableRoutes() []string { return []string{"/pos/tables"} }
 type CreateTableHandler struct{ Service *application.Service }
 
 type CreateTableRequest struct {
-	LocationID int64  `json:"locationId"`
+	LocationID int64  `json:"location_id"`
 	Name       string `json:"name"`
 	Capacity   int    `json:"capacity"`
-	QRCodeURL  string `json:"qrCodeUrl"`
+	QRCodeURL  string `json:"qr_code_url"`
 }
 
 type CreateTableResponse struct {
@@ -138,10 +138,10 @@ type UpdateTableHandler struct{ Service *application.Service }
 
 type UpdateTableRequest struct {
 	ID         int64  `json:"id"`
-	LocationID int64  `json:"locationId"`
+	LocationID int64  `json:"location_id"`
 	Name       string `json:"name"`
 	Capacity   int    `json:"capacity"`
-	QRCodeURL  string `json:"qrCodeUrl"`
+	QRCodeURL  string `json:"qr_code_url"`
 }
 
 type UpdateTableResponse struct {
@@ -200,7 +200,7 @@ func UpdateTableStatusRoutes() []string { return []string{"/pos/tables/status"} 
 type UpdateTableStatusHandler struct{ Service *application.Service }
 
 type UpdateTableStatusRequest struct {
-	TableID int64  `json:"tableId"`
+	TableID int64  `json:"table_id"`
 	Status  string `json:"status"`
 }
 
@@ -254,7 +254,7 @@ func DeleteTableRoutes() []string { return []string{"/pos/tables"} }
 type DeleteTableHandler struct{ Service *application.Service }
 
 type DeleteTableRequest struct {
-	TableID int64 `json:"tableId"`
+	TableID int64 `json:"table_id"`
 }
 
 type DeleteTableResponse struct {

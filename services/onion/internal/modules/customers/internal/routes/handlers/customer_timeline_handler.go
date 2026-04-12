@@ -20,16 +20,16 @@ type GetTimelineHandler struct {
 }
 
 type GetTimelineRequest struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 }
 
 type TimelineEntryPayload struct {
 	ID          int64           `json:"id"`
-	CustomerID  int64           `json:"customerId"`
+	CustomerID  int64           `json:"customer_id"`
 	Type        string          `json:"type"`
 	Description string          `json:"description"`
 	Metadata    json.RawMessage `json:"metadata"`
-	CreatedAt   string          `json:"createdAt"`
+	CreatedAt   string          `json:"created_at"`
 }
 
 type GetTimelineResponse struct {

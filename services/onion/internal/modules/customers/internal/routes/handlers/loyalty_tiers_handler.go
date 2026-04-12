@@ -27,14 +27,14 @@ func LoyaltyTiersUpdateRoutes() []string {
 
 type LoyaltyTierPayload struct {
 	ID          int64           `json:"id"`
-	OwnerID     int64           `json:"ownerId"`
+	OwnerID     int64           `json:"owner_id"`
 	Name        string          `json:"name"`
-	MinPoints   int             `json:"minPoints"`
-	DiscountPct float64         `json:"discountPct"`
+	MinPoints   int             `json:"min_points"`
+	DiscountPct float64         `json:"discount_pct"`
 	Perks       json.RawMessage `json:"perks"`
-	SortOrder   int             `json:"sortOrder"`
-	CreatedAt   string          `json:"createdAt"`
-	UpdatedAt   string          `json:"updatedAt"`
+	SortOrder   int             `json:"sort_order"`
+	CreatedAt   string          `json:"created_at"`
+	UpdatedAt   string          `json:"updated_at"`
 }
 
 func newLoyaltyTierPayload(t domain.LoyaltyTier) LoyaltyTierPayload {
@@ -93,14 +93,14 @@ type CreateLoyaltyTierHandler struct {
 
 type CreateLoyaltyTierRequest struct {
 	Name        string          `json:"name"`
-	MinPoints   int             `json:"minPoints"`
-	DiscountPct float64         `json:"discountPct"`
+	MinPoints   int             `json:"min_points"`
+	DiscountPct float64         `json:"discount_pct"`
 	Perks       json.RawMessage `json:"perks"`
-	SortOrder   int             `json:"sortOrder"`
+	SortOrder   int             `json:"sort_order"`
 }
 
 type CreateLoyaltyTierResponse struct {
-	TierID  int64  `json:"tierId"`
+	TierID  int64  `json:"tier_id"`
 	Message string `json:"message"`
 }
 
@@ -153,10 +153,10 @@ type UpdateLoyaltyTierHandler struct {
 type UpdateLoyaltyTierRequest struct {
 	ID          int64           `json:"id"`
 	Name        string          `json:"name"`
-	MinPoints   int             `json:"minPoints"`
-	DiscountPct float64         `json:"discountPct"`
+	MinPoints   int             `json:"min_points"`
+	DiscountPct float64         `json:"discount_pct"`
 	Perks       json.RawMessage `json:"perks"`
-	SortOrder   int             `json:"sortOrder"`
+	SortOrder   int             `json:"sort_order"`
 }
 
 type UpdateLoyaltyTierResponse struct {

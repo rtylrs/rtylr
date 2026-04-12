@@ -15,12 +15,12 @@ import (
 
 type FloorPayload struct {
 	ID         int64  `json:"id"`
-	BusinessID int64  `json:"businessId"`
-	BranchID   int64  `json:"branchId"`
+	BusinessID int64  `json:"business_id"`
+	BranchID   int64  `json:"branch_id"`
 	Name       string `json:"name"`
-	SortOrder  int    `json:"sortOrder"`
-	IsActive   bool   `json:"isActive"`
-	CreatedAt  string `json:"createdAt"`
+	SortOrder  int    `json:"sort_order"`
+	IsActive   bool   `json:"is_active"`
+	CreatedAt  string `json:"created_at"`
 }
 
 func newFloorPayload(f domain.Floor) FloorPayload {
@@ -73,13 +73,13 @@ func FloorCreateRoutes() []string { return []string{"/pos/floors"} }
 type CreateFloorHandler struct{ Service *application.Service }
 
 type CreateFloorRequest struct {
-	BranchID  int64  `json:"branchId"`
+	BranchID  int64  `json:"branch_id"`
 	Name      string `json:"name"`
-	SortOrder int    `json:"sortOrder"`
+	SortOrder int    `json:"sort_order"`
 }
 
 type CreateFloorResponse struct {
-	FloorID int64  `json:"floorId"`
+	FloorID int64  `json:"floor_id"`
 	Message string `json:"message"`
 }
 
@@ -118,7 +118,7 @@ type UpdateFloorHandler struct{ Service *application.Service }
 
 type UpdateFloorRequest struct {
 	Name      string `json:"name"`
-	SortOrder int    `json:"sortOrder"`
+	SortOrder int    `json:"sort_order"`
 }
 
 type UpdateFloorResponse struct {

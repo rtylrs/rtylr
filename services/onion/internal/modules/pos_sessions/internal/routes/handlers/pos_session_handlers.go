@@ -16,16 +16,16 @@ import (
 
 type SessionPayload struct {
 	ID           int64   `json:"id"`
-	OwnerID      int64   `json:"ownerId"`
-	LocationID   *int64  `json:"locationId"`
-	StaffID      *int64  `json:"staffId"`
-	OpeningFloat float64 `json:"openingFloat"`
-	ClosingFloat float64 `json:"closingFloat"`
-	TotalSales   float64 `json:"totalSales"`
+	OwnerID      int64   `json:"owner_id"`
+	LocationID   *int64  `json:"location_id"`
+	StaffID      *int64  `json:"staff_id"`
+	OpeningFloat float64 `json:"opening_float"`
+	ClosingFloat float64 `json:"closing_float"`
+	TotalSales   float64 `json:"total_sales"`
 	Status       string  `json:"status"`
-	OpenedAt     string  `json:"openedAt"`
-	ClosedAt     *string `json:"closedAt"`
-	CreatedAt    string  `json:"createdAt"`
+	OpenedAt     string  `json:"opened_at"`
+	ClosedAt     *string `json:"closed_at"`
+	CreatedAt    string  `json:"created_at"`
 }
 
 func newSessionPayload(s domain.Session) SessionPayload {
@@ -81,13 +81,13 @@ func SessionOpenRoutes() []string { return []string{"/pos/sessions/open"} }
 type OpenSessionHandler struct{ Service *application.Service }
 
 type OpenSessionRequest struct {
-	LocationID   *int64  `json:"locationId"`
-	StaffID      *int64  `json:"staffId"`
-	OpeningFloat float64 `json:"openingFloat"`
+	LocationID   *int64  `json:"location_id"`
+	StaffID      *int64  `json:"staff_id"`
+	OpeningFloat float64 `json:"opening_float"`
 }
 
 type OpenSessionResponse struct {
-	SessionID int64  `json:"sessionId"`
+	SessionID int64  `json:"session_id"`
 	Message   string `json:"message"`
 }
 
@@ -115,7 +115,7 @@ func SessionCloseRoutes() []string { return []string{"/pos/sessions/{id}/close"}
 type CloseSessionHandler struct{ Service *application.Service }
 
 type CloseSessionRequest struct {
-	ClosingFloat float64 `json:"closingFloat"`
+	ClosingFloat float64 `json:"closing_float"`
 }
 
 type CloseSessionResponse struct {

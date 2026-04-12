@@ -22,23 +22,23 @@ type ListInvoicesHandler struct {
 type ListInvoicesRequest struct {
 	Status   string `json:"status"`
 	Search   string `json:"search"`
-	DateFrom string `json:"dateFrom"`
-	DateTo   string `json:"dateTo"`
+	DateFrom string `json:"date_from"`
+	DateTo   string `json:"date_to"`
 }
 
 type InvoiceSummary struct {
 	ID            int64      `json:"id"`
-	InvoiceNumber string     `json:"invoiceNumber"`
-	ClientName    string     `json:"clientName"`
+	InvoiceNumber string     `json:"invoice_number"`
+	ClientName    string     `json:"client_name"`
 	Status        string     `json:"status"`
-	IssueDate     time.Time  `json:"issueDate"`
-	DueDate       time.Time  `json:"dueDate"`
-	PaidDate      *time.Time `json:"paidDate"`
+	IssueDate     time.Time  `json:"issue_date"`
+	DueDate       time.Time  `json:"due_date"`
+	PaidDate      *time.Time `json:"paid_date"`
 	Currency      string     `json:"currency"`
 	Total         float64    `json:"total"`
-	AmountPaid    float64    `json:"amountPaid"`
-	AmountDue     float64    `json:"amountDue"`
-	CreatedAt     time.Time  `json:"createdAt"`
+	AmountPaid    float64    `json:"amount_paid"`
+	AmountDue     float64    `json:"amount_due"`
+	CreatedAt     time.Time  `json:"created_at"`
 }
 
 type ListInvoicesResponse struct {

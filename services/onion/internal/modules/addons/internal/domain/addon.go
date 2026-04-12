@@ -8,19 +8,19 @@ type Addon struct {
 	Description      string  `json:"description"`
 	Icon             string  `json:"icon"`
 	Price            float64 `json:"price"`
-	IsFree           bool    `json:"isFree"`
-	IsDefaultEnabled bool    `json:"isDefaultEnabled"`
-	SortOrder        int     `json:"sortOrder"`
+	IsFree           bool    `json:"is_free"`
+	IsDefaultEnabled bool    `json:"is_default_enabled"`
+	SortOrder        int     `json:"sort_order"`
 }
 
 type BusinessAddon struct {
-	AddonID     string     `json:"addonId"`
+	AddonID     string     `json:"addon_id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Icon        string     `json:"icon"`
 	Price       float64    `json:"price"`
-	IsFree      bool       `json:"isFree"`
-	IsEnabled   bool       `json:"isEnabled"`
-	EnabledAt   *time.Time `json:"enabledAt,omitempty"`
-	DisabledAt  *time.Time `json:"disabledAt,omitempty"`
+	IsFree      bool       `json:"is_free"`
+	IsEnabled   bool       `json:"is_enabled"`
+	EnabledAt   *time.Time `json:"enabled_at,omitempty"`
+	DisabledAt  *time.Time `json:"disabled_at,omitempty"`
 }

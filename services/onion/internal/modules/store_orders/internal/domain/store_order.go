@@ -4,48 +4,48 @@ import "time"
 
 type StoreOrder struct {
 	ID              int64     `json:"id"`
-	OwnerID         int64     `json:"ownerId"`
-	CustomerEmail   string    `json:"customerEmail"`
-	CustomerName    string    `json:"customerName"`
-	CustomerPhone   string    `json:"customerPhone"`
+	OwnerID         int64     `json:"owner_id"`
+	CustomerEmail   string    `json:"customer_email"`
+	CustomerName    string    `json:"customer_name"`
+	CustomerPhone   string    `json:"customer_phone"`
 	Status          string    `json:"status"`
 	Subtotal        float64   `json:"subtotal"`
 	Tax             float64   `json:"tax"`
-	ShippingCost    float64   `json:"shippingCost"`
+	ShippingCost    float64   `json:"shipping_cost"`
 	Total           float64   `json:"total"`
-	ShippingAddress string    `json:"shippingAddress"`
+	ShippingAddress string    `json:"shipping_address"`
 	Notes           string    `json:"notes"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type StoreOrderItem struct {
 	ID        int64     `json:"id"`
-	OrderID   int64     `json:"orderId"`
-	ProductID int64     `json:"productId"`
+	OrderID   int64     `json:"order_id"`
+	ProductID int64     `json:"product_id"`
 	Name      string    `json:"name"`
 	Quantity  int       `json:"quantity"`
 	Price     float64   `json:"price"`
 	Total     float64   `json:"total"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type StoreOrderInput struct {
-	CustomerEmail   string           `json:"customerEmail"`
-	CustomerName    string           `json:"customerName"`
-	CustomerPhone   string           `json:"customerPhone"`
+	CustomerEmail   string           `json:"customer_email"`
+	CustomerName    string           `json:"customer_name"`
+	CustomerPhone   string           `json:"customer_phone"`
 	Status          string           `json:"status"`
 	Subtotal        float64          `json:"subtotal"`
 	Tax             float64          `json:"tax"`
-	ShippingCost    float64          `json:"shippingCost"`
+	ShippingCost    float64          `json:"shipping_cost"`
 	Total           float64          `json:"total"`
-	ShippingAddress string           `json:"shippingAddress"`
+	ShippingAddress string           `json:"shipping_address"`
 	Notes           string           `json:"notes"`
 	Items           []OrderItemInput `json:"items"`
 }
 
 type OrderItemInput struct {
-	ProductID int64   `json:"productId"`
+	ProductID int64   `json:"product_id"`
 	Name      string  `json:"name"`
 	Quantity  int     `json:"quantity"`
 	Price     float64 `json:"price"`

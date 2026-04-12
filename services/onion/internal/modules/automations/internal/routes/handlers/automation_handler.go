@@ -31,16 +31,16 @@ func AutomationDeleteRoutes() []string {
 
 type AutomationPayload struct {
 	ID            int64           `json:"id"`
-	OwnerID       int64           `json:"ownerId"`
+	OwnerID       int64           `json:"owner_id"`
 	Name          string          `json:"name"`
-	TriggerType   string          `json:"triggerType"`
-	TriggerConfig json.RawMessage `json:"triggerConfig"`
+	TriggerType   string          `json:"trigger_type"`
+	TriggerConfig json.RawMessage `json:"trigger_config"`
 	Actions       json.RawMessage `json:"actions"`
-	IsActive      bool            `json:"isActive"`
-	LastRunAt     *string         `json:"lastRunAt"`
-	RunCount      int             `json:"runCount"`
-	CreatedAt     string          `json:"createdAt"`
-	UpdatedAt     string          `json:"updatedAt"`
+	IsActive      bool            `json:"is_active"`
+	LastRunAt     *string         `json:"last_run_at"`
+	RunCount      int             `json:"run_count"`
+	CreatedAt     string          `json:"created_at"`
+	UpdatedAt     string          `json:"updated_at"`
 }
 
 func newAutomationPayload(a domain.Automation) AutomationPayload {
@@ -107,14 +107,14 @@ type CreateAutomationHandler struct {
 
 type CreateAutomationRequest struct {
 	Name          string          `json:"name"`
-	TriggerType   string          `json:"triggerType"`
-	TriggerConfig json.RawMessage `json:"triggerConfig"`
+	TriggerType   string          `json:"trigger_type"`
+	TriggerConfig json.RawMessage `json:"trigger_config"`
 	Actions       json.RawMessage `json:"actions"`
-	IsActive      bool            `json:"isActive"`
+	IsActive      bool            `json:"is_active"`
 }
 
 type CreateAutomationResponse struct {
-	AutomationID int64  `json:"automationId"`
+	AutomationID int64  `json:"automation_id"`
 	Message      string `json:"message"`
 }
 
@@ -179,10 +179,10 @@ type UpdateAutomationHandler struct {
 type UpdateAutomationRequest struct {
 	ID            int64           `json:"id"`
 	Name          string          `json:"name"`
-	TriggerType   string          `json:"triggerType"`
-	TriggerConfig json.RawMessage `json:"triggerConfig"`
+	TriggerType   string          `json:"trigger_type"`
+	TriggerConfig json.RawMessage `json:"trigger_config"`
 	Actions       json.RawMessage `json:"actions"`
-	IsActive      bool            `json:"isActive"`
+	IsActive      bool            `json:"is_active"`
 }
 
 type UpdateAutomationResponse struct {

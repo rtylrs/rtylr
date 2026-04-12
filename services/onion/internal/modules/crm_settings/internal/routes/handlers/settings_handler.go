@@ -21,14 +21,14 @@ func SettingsUpdateRoutes() []string {
 
 type SettingsPayload struct {
 	ID             int64  `json:"id"`
-	OwnerID        int64  `json:"ownerId"`
-	DefaultConsent bool   `json:"defaultConsent"`
-	FromEmail      string `json:"fromEmail"`
-	FromName       string `json:"fromName"`
-	SmsSenderID    string `json:"smsSenderId"`
+	OwnerID        int64  `json:"owner_id"`
+	DefaultConsent bool   `json:"default_consent"`
+	FromEmail      string `json:"from_email"`
+	FromName       string `json:"from_name"`
+	SmsSenderID    string `json:"sms_sender_id"`
 	Timezone       string `json:"timezone"`
-	CreatedAt      string `json:"createdAt"`
-	UpdatedAt      string `json:"updatedAt"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
 }
 
 // -- GET ---------------------------------------------------------------------
@@ -89,10 +89,10 @@ type UpdateSettingsHandler struct {
 }
 
 type UpdateSettingsRequest struct {
-	DefaultConsent bool   `json:"defaultConsent"`
-	FromEmail      string `json:"fromEmail"`
-	FromName       string `json:"fromName"`
-	SmsSenderID    string `json:"smsSenderId"`
+	DefaultConsent bool   `json:"default_consent"`
+	FromEmail      string `json:"from_email"`
+	FromName       string `json:"from_name"`
+	SmsSenderID    string `json:"sms_sender_id"`
 	Timezone       string `json:"timezone"`
 }
 

@@ -24,10 +24,10 @@ func CreateLabelRoutes() []string { return []string{"/flow/labels"} }
 
 type LabelPayload struct {
 	ID          int64     `json:"id"`
-	WorkspaceID int64     `json:"workspaceId"`
+	WorkspaceID int64     `json:"workspace_id"`
 	Name        string    `json:"name"`
 	Color       string    `json:"color"`
-	CreatedAt   time.Time `json:"createdAt"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func toLabelPayload(l domain.Label) LabelPayload {
@@ -95,7 +95,7 @@ type CreateLabelHandler struct {
 }
 
 type CreateLabelRequest struct {
-	WorkspaceID int64  `json:"workspaceId"`
+	WorkspaceID int64  `json:"workspace_id"`
 	Name        string `json:"name"`
 	Color       string `json:"color"`
 }

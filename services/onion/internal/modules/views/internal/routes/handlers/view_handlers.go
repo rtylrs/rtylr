@@ -17,15 +17,15 @@ import (
 
 type ViewPayload struct {
 	ID          int64           `json:"id"`
-	OwnerID     int64           `json:"ownerId"`
-	WorkspaceID int64           `json:"workspaceId"`
+	OwnerID     int64           `json:"owner_id"`
+	WorkspaceID int64           `json:"workspace_id"`
 	Name        string          `json:"name"`
 	Filters     json.RawMessage `json:"filters"`
-	SortBy      string          `json:"sortBy"`
-	GroupBy     string          `json:"groupBy"`
-	IsDefault   bool            `json:"isDefault"`
-	CreatedAt   string          `json:"createdAt"`
-	UpdatedAt   string          `json:"updatedAt"`
+	SortBy      string          `json:"sort_by"`
+	GroupBy     string          `json:"group_by"`
+	IsDefault   bool            `json:"is_default"`
+	CreatedAt   string          `json:"created_at"`
+	UpdatedAt   string          `json:"updated_at"`
 }
 
 func newViewPayload(v domain.View) ViewPayload {
@@ -53,7 +53,7 @@ func ViewListRoutes() []string { return []string{"/flow/views"} }
 
 type ListViewsHandler struct{ Service *application.Service }
 type ListViewsRequest struct {
-	WorkspaceID int64 `json:"workspaceId"`
+	WorkspaceID int64 `json:"workspace_id"`
 }
 type ListViewsResponse struct {
 	Views []ViewPayload `json:"views"`
@@ -89,16 +89,16 @@ func ViewCreateRoutes() []string { return []string{"/flow/views"} }
 type CreateViewHandler struct{ Service *application.Service }
 
 type CreateViewRequest struct {
-	WorkspaceID int64           `json:"workspaceId"`
+	WorkspaceID int64           `json:"workspace_id"`
 	Name        string          `json:"name"`
 	Filters     json.RawMessage `json:"filters"`
-	SortBy      string          `json:"sortBy"`
-	GroupBy     string          `json:"groupBy"`
-	IsDefault   bool            `json:"isDefault"`
+	SortBy      string          `json:"sort_by"`
+	GroupBy     string          `json:"group_by"`
+	IsDefault   bool            `json:"is_default"`
 }
 
 type CreateViewResponse struct {
-	ViewID  int64  `json:"viewId"`
+	ViewID  int64  `json:"view_id"`
 	Message string `json:"message"`
 }
 
@@ -146,9 +146,9 @@ type UpdateViewHandler struct{ Service *application.Service }
 type UpdateViewRequest struct {
 	Name      string          `json:"name"`
 	Filters   json.RawMessage `json:"filters"`
-	SortBy    string          `json:"sortBy"`
-	GroupBy   string          `json:"groupBy"`
-	IsDefault bool            `json:"isDefault"`
+	SortBy    string          `json:"sort_by"`
+	GroupBy   string          `json:"group_by"`
+	IsDefault bool            `json:"is_default"`
 }
 
 type UpdateViewResponse struct {

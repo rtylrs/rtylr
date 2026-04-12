@@ -26,11 +26,11 @@ type Career struct {
 	Title          string `json:"title"`
 	Department     string `json:"department"`
 	Location       string `json:"location"`
-	EmploymentType string `json:"employmentType"`
-	WorkMode       string `json:"workMode"`
+	EmploymentType string `json:"employment_type"`
+	WorkMode       string `json:"work_mode"`
 	Seniority      string `json:"seniority"`
 	Details        string `json:"details"`
-	IsActive       bool   `json:"isActive"`
+	IsActive       bool   `json:"is_active"`
 }
 
 type GetActiveCareersResponse struct {

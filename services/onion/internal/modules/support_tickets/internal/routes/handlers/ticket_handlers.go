@@ -12,26 +12,26 @@ import (
 
 type TicketPayload struct {
 	ID            int64  `json:"id"`
-	BusinessID    int64  `json:"businessId"`
-	CustomerName  string `json:"customerName"`
-	CustomerEmail string `json:"customerEmail"`
+	BusinessID    int64  `json:"business_id"`
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
 	Subject       string `json:"subject"`
 	Status        string `json:"status"`
 	Priority      string `json:"priority"`
-	AssignedTo    *int64 `json:"assignedTo"`
+	AssignedTo    *int64 `json:"assigned_to"`
 	Channel       string `json:"channel"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 type MessagePayload struct {
 	ID         int64  `json:"id"`
-	TicketID   int64  `json:"ticketId"`
-	SenderType string `json:"senderType"`
-	SenderName string `json:"senderName"`
+	TicketID   int64  `json:"ticket_id"`
+	SenderType string `json:"sender_type"`
+	SenderName string `json:"sender_name"`
 	Body       string `json:"body"`
-	IsInternal bool   `json:"isInternal"`
-	CreatedAt  string `json:"createdAt"`
+	IsInternal bool   `json:"is_internal"`
+	CreatedAt  string `json:"created_at"`
 }
 
 func toTicketPayload(t domain.Ticket) TicketPayload {
@@ -53,14 +53,14 @@ type ListTicketsHandler struct{ Service *application.Service }
 type ListTicketsRequest struct {
 	Status   string `json:"status"`
 	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
+	PageSize int    `json:"page_size"`
 }
 
 type ListTicketsResponse struct {
 	Tickets  []TicketPayload `json:"tickets"`
 	Total    int             `json:"total"`
 	Page     int             `json:"page"`
-	PageSize int             `json:"pageSize"`
+	PageSize int             `json:"page_size"`
 }
 
 func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest) (ListTicketsResponse, *errorModels.ServerError) {
@@ -138,18 +138,18 @@ func CreateTicketRoutes() []string { return []string{"/support/tickets"} }
 type CreateTicketHandler struct{ Service *application.Service }
 
 type CreateTicketRequest struct {
-	CustomerName  string `json:"customerName"`
-	CustomerEmail string `json:"customerEmail"`
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
 	Subject       string `json:"subject"`
 	Priority      string `json:"priority"`
 	Channel       string `json:"channel"`
-	AssignedTo    *int64 `json:"assignedTo"`
+	AssignedTo    *int64 `json:"assigned_to"`
 	Body          string `json:"body"`
-	SenderName    string `json:"senderName"`
+	SenderName    string `json:"sender_name"`
 }
 
 type CreateTicketResponse struct {
-	TicketID int64  `json:"ticketId"`
+	TicketID int64  `json:"ticket_id"`
 	Message  string `json:"message"`
 }
 
@@ -206,7 +206,7 @@ type UpdateTicketRequest struct {
 	Subject    string `json:"subject"`
 	Status     string `json:"status"`
 	Priority   string `json:"priority"`
-	AssignedTo *int64 `json:"assignedTo"`
+	AssignedTo *int64 `json:"assigned_to"`
 	Channel    string `json:"channel"`
 }
 

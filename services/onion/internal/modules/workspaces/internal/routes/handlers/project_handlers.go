@@ -26,18 +26,18 @@ func DeleteProjectRoutes() []string { return []string{"/flow/projects"} }
 
 type ProjectPayload struct {
 	ID          int64      `json:"id"`
-	WorkspaceID int64      `json:"workspaceId"`
-	OwnerID     int64      `json:"ownerId"`
+	WorkspaceID int64      `json:"workspace_id"`
+	OwnerID     int64      `json:"owner_id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Icon        string     `json:"icon"`
 	Color       string     `json:"color"`
 	Status      string     `json:"status"`
-	StartDate   *time.Time `json:"startDate,omitempty"`
-	DueDate     *time.Time `json:"dueDate,omitempty"`
-	CreatedBy   int64      `json:"createdBy"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
+	StartDate   *time.Time `json:"start_date,omitempty"`
+	DueDate     *time.Time `json:"due_date,omitempty"`
+	CreatedBy   int64      `json:"created_by"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
 func toProjectPayload(p domain.Project) ProjectPayload {
@@ -113,13 +113,13 @@ type CreateProjectHandler struct {
 }
 
 type CreateProjectRequest struct {
-	WorkspaceID int64      `json:"workspaceId"`
+	WorkspaceID int64      `json:"workspace_id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Icon        string     `json:"icon"`
 	Color       string     `json:"color"`
-	StartDate   *time.Time `json:"startDate"`
-	DueDate     *time.Time `json:"dueDate"`
+	StartDate   *time.Time `json:"start_date"`
+	DueDate     *time.Time `json:"due_date"`
 }
 
 type CreateProjectResponse struct {
@@ -182,8 +182,8 @@ type UpdateProjectRequest struct {
 	Icon        string     `json:"icon"`
 	Color       string     `json:"color"`
 	Status      string     `json:"status"`
-	StartDate   *time.Time `json:"startDate"`
-	DueDate     *time.Time `json:"dueDate"`
+	StartDate   *time.Time `json:"start_date"`
+	DueDate     *time.Time `json:"due_date"`
 }
 
 type UpdateProjectResponse struct {

@@ -21,9 +21,9 @@ type SummaryRequest struct{}
 type SummaryResponse struct {
 	Plan            string     `json:"plan"`
 	Status          string     `json:"status"`
-	CurrentUsage    float64    `json:"currentUsage"`
-	UsageLimit      float64    `json:"usageLimit"`
-	NextBillingDate *time.Time `json:"nextBillingDate"`
+	CurrentUsage    float64    `json:"current_usage"`
+	UsageLimit      float64    `json:"usage_limit"`
+	NextBillingDate *time.Time `json:"next_billing_date"`
 }
 
 func (h *SummaryHandler) Serve(ctx context.Context, _ *SummaryRequest) (SummaryResponse, *errorModels.ServerError) {
@@ -60,8 +60,8 @@ type InvoicePayload struct {
 	Amount   float64    `json:"amount"`
 	Currency string     `json:"currency"`
 	Status   string     `json:"status"`
-	IssuedAt time.Time  `json:"issuedAt"`
-	PaidAt   *time.Time `json:"paidAt"`
+	IssuedAt time.Time  `json:"issued_at"`
+	PaidAt   *time.Time `json:"paid_at"`
 }
 
 type InvoicesResponse struct {

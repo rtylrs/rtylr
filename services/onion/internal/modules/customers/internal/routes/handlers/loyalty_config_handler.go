@@ -29,20 +29,20 @@ type GetLoyaltyConfigRequest struct{}
 
 type LoyaltyConfigPayload struct {
 	ID                    int64   `json:"id"`
-	OwnerID               int64   `json:"ownerId"`
-	IsEnabled             bool    `json:"isEnabled"`
-	PointsPerCurrencyUnit float64 `json:"pointsPerCurrencyUnit"`
-	CurrencyPerPoint      float64 `json:"currencyPerPoint"`
-	BronzeMin             int     `json:"bronzeMin"`
-	SilverMin             int     `json:"silverMin"`
-	GoldMin               int     `json:"goldMin"`
-	PlatinumMin           int     `json:"platinumMin"`
-	BronzeDiscountPct     float64 `json:"bronzeDiscountPct"`
-	SilverDiscountPct     float64 `json:"silverDiscountPct"`
-	GoldDiscountPct       float64 `json:"goldDiscountPct"`
-	PlatinumDiscountPct   float64 `json:"platinumDiscountPct"`
-	PointsExpiryDays      int     `json:"pointsExpiryDays"`
-	UpdatedAt             string  `json:"updatedAt"`
+	OwnerID               int64   `json:"owner_id"`
+	IsEnabled             bool    `json:"is_enabled"`
+	PointsPerCurrencyUnit float64 `json:"points_per_currency_unit"`
+	CurrencyPerPoint      float64 `json:"currency_per_point"`
+	BronzeMin             int     `json:"bronze_min"`
+	SilverMin             int     `json:"silver_min"`
+	GoldMin               int     `json:"gold_min"`
+	PlatinumMin           int     `json:"platinum_min"`
+	BronzeDiscountPct     float64 `json:"bronze_discount_pct"`
+	SilverDiscountPct     float64 `json:"silver_discount_pct"`
+	GoldDiscountPct       float64 `json:"gold_discount_pct"`
+	PlatinumDiscountPct   float64 `json:"platinum_discount_pct"`
+	PointsExpiryDays      int     `json:"points_expiry_days"`
+	UpdatedAt             string  `json:"updated_at"`
 }
 
 type GetLoyaltyConfigResponse struct {
@@ -93,18 +93,18 @@ type UpdateLoyaltyConfigHandler struct {
 }
 
 type UpdateLoyaltyConfigRequest struct {
-	IsEnabled             bool    `json:"isEnabled"`
-	PointsPerCurrencyUnit float64 `json:"pointsPerCurrencyUnit"`
-	CurrencyPerPoint      float64 `json:"currencyPerPoint"`
-	BronzeMin             int     `json:"bronzeMin"`
-	SilverMin             int     `json:"silverMin"`
-	GoldMin               int     `json:"goldMin"`
-	PlatinumMin           int     `json:"platinumMin"`
-	BronzeDiscountPct     float64 `json:"bronzeDiscountPct"`
-	SilverDiscountPct     float64 `json:"silverDiscountPct"`
-	GoldDiscountPct       float64 `json:"goldDiscountPct"`
-	PlatinumDiscountPct   float64 `json:"platinumDiscountPct"`
-	PointsExpiryDays      int     `json:"pointsExpiryDays"`
+	IsEnabled             bool    `json:"is_enabled"`
+	PointsPerCurrencyUnit float64 `json:"points_per_currency_unit"`
+	CurrencyPerPoint      float64 `json:"currency_per_point"`
+	BronzeMin             int     `json:"bronze_min"`
+	SilverMin             int     `json:"silver_min"`
+	GoldMin               int     `json:"gold_min"`
+	PlatinumMin           int     `json:"platinum_min"`
+	BronzeDiscountPct     float64 `json:"bronze_discount_pct"`
+	SilverDiscountPct     float64 `json:"silver_discount_pct"`
+	GoldDiscountPct       float64 `json:"gold_discount_pct"`
+	PlatinumDiscountPct   float64 `json:"platinum_discount_pct"`
+	PointsExpiryDays      int     `json:"points_expiry_days"`
 }
 
 type UpdateLoyaltyConfigResponse struct {

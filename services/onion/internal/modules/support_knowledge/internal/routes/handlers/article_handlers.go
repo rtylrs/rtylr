@@ -12,15 +12,15 @@ import (
 
 type ArticlePayload struct {
 	ID          int64  `json:"id"`
-	BusinessID  int64  `json:"businessId"`
+	BusinessID  int64  `json:"business_id"`
 	Title       string `json:"title"`
 	Slug        string `json:"slug"`
 	Body        string `json:"body"`
 	Category    string `json:"category"`
-	IsPublished bool   `json:"isPublished"`
+	IsPublished bool   `json:"is_published"`
 	Views       int    `json:"views"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 func toArticlePayload(a domain.Article) ArticlePayload {
@@ -43,14 +43,14 @@ type ListArticlesHandler struct{ Service *application.Service }
 
 type ListArticlesRequest struct {
 	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	PageSize int `json:"page_size"`
 }
 
 type ListArticlesResponse struct {
 	Articles []ArticlePayload `json:"articles"`
 	Total    int              `json:"total"`
 	Page     int              `json:"page"`
-	PageSize int              `json:"pageSize"`
+	PageSize int              `json:"page_size"`
 }
 
 func (h *ListArticlesHandler) Serve(ctx context.Context, req *ListArticlesRequest) (ListArticlesResponse, *errorModels.ServerError) {
@@ -84,11 +84,11 @@ type CreateArticleRequest struct {
 	Slug        string `json:"slug"`
 	Body        string `json:"body"`
 	Category    string `json:"category"`
-	IsPublished bool   `json:"isPublished"`
+	IsPublished bool   `json:"is_published"`
 }
 
 type CreateArticleResponse struct {
-	ArticleID int64  `json:"articleId"`
+	ArticleID int64  `json:"article_id"`
 	Message   string `json:"message"`
 }
 
@@ -131,7 +131,7 @@ type UpdateArticleRequest struct {
 	Slug        string `json:"slug"`
 	Body        string `json:"body"`
 	Category    string `json:"category"`
-	IsPublished bool   `json:"isPublished"`
+	IsPublished bool   `json:"is_published"`
 }
 
 type UpdateArticleResponse struct {

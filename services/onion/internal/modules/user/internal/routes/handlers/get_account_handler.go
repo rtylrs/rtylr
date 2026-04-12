@@ -23,15 +23,15 @@ type AccountHandler struct {
 }
 
 type GetProfileRequest struct {
-	UserID int64 `json:"userId"`
+	UserID int64 `json:"user_id"`
 }
 
 type ProfileUser struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type GetProfileResponse struct {

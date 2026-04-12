@@ -18,14 +18,14 @@ const (
 
 type StockTake struct {
 	ID          int64           `json:"id"`
-	OwnerID     int64           `json:"ownerId"`
-	WarehouseID int64           `json:"warehouseId"`
+	OwnerID     int64           `json:"owner_id"`
+	WarehouseID int64           `json:"warehouse_id"`
 	Status      StockTakeStatus `json:"status"`
 	Notes       string          `json:"notes"`
 	Items       []StockTakeItem `json:"items"`
-	StartedAt   string          `json:"startedAt"`
-	CompletedAt string          `json:"completedAt"`
-	CreatedAt   time.Time       `json:"createdAt"`
+	StartedAt   string          `json:"started_at"`
+	CompletedAt string          `json:"completed_at"`
+	CreatedAt   time.Time       `json:"created_at"`
 }
 
 func (s *StockTake) FromRow(row *sql.Rows) error {
@@ -71,12 +71,12 @@ func (s *StockTake) FromRow(row *sql.Rows) error {
 
 type StockTakeItem struct {
 	ID          int64   `json:"id"`
-	StockTakeID int64   `json:"stockTakeId"`
-	ProductID   int64   `json:"productId"`
-	ExpectedQty float64 `json:"expectedQty"`
-	CountedQty  float64 `json:"countedQty"`
+	StockTakeID int64   `json:"stock_take_id"`
+	ProductID   int64   `json:"product_id"`
+	ExpectedQty float64 `json:"expected_qty"`
+	CountedQty  float64 `json:"counted_qty"`
 	Variance    float64 `json:"variance"`
-	CreatedAt   string  `json:"createdAt"`
+	CreatedAt   string  `json:"created_at"`
 }
 
 func (i *StockTakeItem) FromRow(row *sql.Rows) error {
@@ -101,15 +101,15 @@ func (i *StockTakeItem) FromRow(row *sql.Rows) error {
 }
 
 type StockTakeInput struct {
-	WarehouseID int64               `json:"warehouseId"`
+	WarehouseID int64               `json:"warehouse_id"`
 	Notes       string              `json:"notes"`
 	Items       []StockTakeItemInput `json:"items"`
 }
 
 type StockTakeItemInput struct {
-	ProductID   int64   `json:"productId"`
-	ExpectedQty float64 `json:"expectedQty"`
-	CountedQty  float64 `json:"countedQty"`
+	ProductID   int64   `json:"product_id"`
+	ExpectedQty float64 `json:"expected_qty"`
+	CountedQty  float64 `json:"counted_qty"`
 }
 
 type StockTakeUpdateInput struct {

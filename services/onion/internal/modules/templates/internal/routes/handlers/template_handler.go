@@ -31,15 +31,15 @@ func TemplateDeleteRoutes() []string {
 
 type TemplatePayload struct {
 	ID        int64           `json:"id"`
-	OwnerID   int64           `json:"ownerId"`
+	OwnerID   int64           `json:"owner_id"`
 	Name      string          `json:"name"`
 	Type      string          `json:"type"`
 	Subject   string          `json:"subject"`
 	Body      string          `json:"body"`
 	Variables json.RawMessage `json:"variables"`
-	IsActive  bool            `json:"isActive"`
-	CreatedAt string          `json:"createdAt"`
-	UpdatedAt string          `json:"updatedAt"`
+	IsActive  bool            `json:"is_active"`
+	CreatedAt string          `json:"created_at"`
+	UpdatedAt string          `json:"updated_at"`
 }
 
 func newTemplatePayload(t domain.Template) TemplatePayload {
@@ -103,11 +103,11 @@ type CreateTemplateRequest struct {
 	Subject   string          `json:"subject"`
 	Body      string          `json:"body"`
 	Variables json.RawMessage `json:"variables"`
-	IsActive  bool            `json:"isActive"`
+	IsActive  bool            `json:"is_active"`
 }
 
 type CreateTemplateResponse struct {
-	TemplateID int64  `json:"templateId"`
+	TemplateID int64  `json:"template_id"`
 	Message    string `json:"message"`
 }
 
@@ -179,7 +179,7 @@ type UpdateTemplateRequest struct {
 	Subject   string          `json:"subject"`
 	Body      string          `json:"body"`
 	Variables json.RawMessage `json:"variables"`
-	IsActive  bool            `json:"isActive"`
+	IsActive  bool            `json:"is_active"`
 }
 
 type UpdateTemplateResponse struct {

@@ -9,14 +9,14 @@ var ErrProjectNotFound = errors.New("project not found")
 
 type Project struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	WorkspaceID *int64    `json:"workspaceId"`
+	OwnerID     int64     `json:"owner_id"`
+	WorkspaceID *int64    `json:"workspace_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Status      string    `json:"status"`
 	Color       string    `json:"color"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ProjectInput struct {

@@ -27,28 +27,28 @@ type ListStaffRequest struct {
 
 type StaffPayload struct {
 	ID                    int64     `json:"id"`
-	OwnerID               int64     `json:"ownerId"`
-	UserID                int64     `json:"userId"`
-	DepartmentID          int64     `json:"departmentId"`
-	FirstName             string    `json:"firstName"`
-	LastName              string    `json:"lastName"`
+	OwnerID               int64     `json:"owner_id"`
+	UserID                int64     `json:"user_id"`
+	DepartmentID          int64     `json:"department_id"`
+	FirstName             string    `json:"first_name"`
+	LastName              string    `json:"last_name"`
 	Email                 string    `json:"email"`
 	Phone                 string    `json:"phone"`
 	Role                  string    `json:"role"`
-	EmploymentType        string    `json:"employmentType"`
+	EmploymentType        string    `json:"employment_type"`
 	Status                string    `json:"status"`
 	Salary                float64   `json:"salary"`
-	HourlyRate            float64   `json:"hourlyRate"`
-	OvertimeRate          float64   `json:"overtimeRate"`
-	StartDate             time.Time `json:"startDate"`
-	EndDate               time.Time `json:"endDate"`
+	HourlyRate            float64   `json:"hourly_rate"`
+	OvertimeRate          float64   `json:"overtime_rate"`
+	StartDate             time.Time `json:"start_date"`
+	EndDate               time.Time `json:"end_date"`
 	Address               string    `json:"address"`
-	EmergencyContactName  string    `json:"emergencyContactName"`
-	EmergencyContactPhone string    `json:"emergencyContactPhone"`
+	EmergencyContactName  string    `json:"emergency_contact_name"`
+	EmergencyContactPhone string    `json:"emergency_contact_phone"`
 	Apps                  string    `json:"apps"`
 	Notes                 string    `json:"notes"`
-	CreatedAt             time.Time `json:"createdAt"`
-	UpdatedAt             time.Time `json:"updatedAt"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
 }
 
 type ListStaffResponse struct {
@@ -95,23 +95,23 @@ type CreateStaffHandler struct {
 }
 
 type CreateStaffRequest struct {
-	UserID                int64   `json:"userId"`
-	DepartmentID          int64   `json:"departmentId"`
-	FirstName             string  `json:"firstName"`
-	LastName              string  `json:"lastName"`
+	UserID                int64   `json:"user_id"`
+	DepartmentID          int64   `json:"department_id"`
+	FirstName             string  `json:"first_name"`
+	LastName              string  `json:"last_name"`
 	Email                 string  `json:"email"`
 	Phone                 string  `json:"phone"`
 	Role                  string  `json:"role"`
-	EmploymentType        string  `json:"employmentType"`
+	EmploymentType        string  `json:"employment_type"`
 	Status                string  `json:"status"`
 	Salary                float64 `json:"salary"`
-	HourlyRate            float64 `json:"hourlyRate"`
-	OvertimeRate          float64 `json:"overtimeRate"`
-	StartDate             string  `json:"startDate"`
-	EndDate               string  `json:"endDate"`
+	HourlyRate            float64 `json:"hourly_rate"`
+	OvertimeRate          float64 `json:"overtime_rate"`
+	StartDate             string  `json:"start_date"`
+	EndDate               string  `json:"end_date"`
 	Address               string  `json:"address"`
-	EmergencyContactName  string  `json:"emergencyContactName"`
-	EmergencyContactPhone string  `json:"emergencyContactPhone"`
+	EmergencyContactName  string  `json:"emergency_contact_name"`
+	EmergencyContactPhone string  `json:"emergency_contact_phone"`
 	Apps                  string  `json:"apps"`
 	Notes                 string  `json:"notes"`
 }
@@ -173,21 +173,21 @@ type UpdateStaffHandler struct {
 
 type UpdateStaffRequest struct {
 	ID                    int64   `json:"id"`
-	DepartmentID          int64   `json:"departmentId"`
-	FirstName             string  `json:"firstName"`
-	LastName              string  `json:"lastName"`
+	DepartmentID          int64   `json:"department_id"`
+	FirstName             string  `json:"first_name"`
+	LastName              string  `json:"last_name"`
 	Email                 string  `json:"email"`
 	Phone                 string  `json:"phone"`
 	Role                  string  `json:"role"`
-	EmploymentType        string  `json:"employmentType"`
+	EmploymentType        string  `json:"employment_type"`
 	Status                string  `json:"status"`
 	Salary                float64 `json:"salary"`
-	HourlyRate            float64 `json:"hourlyRate"`
-	OvertimeRate          float64 `json:"overtimeRate"`
-	EndDate               string  `json:"endDate"`
+	HourlyRate            float64 `json:"hourly_rate"`
+	OvertimeRate          float64 `json:"overtime_rate"`
+	EndDate               string  `json:"end_date"`
 	Address               string  `json:"address"`
-	EmergencyContactName  string  `json:"emergencyContactName"`
-	EmergencyContactPhone string  `json:"emergencyContactPhone"`
+	EmergencyContactName  string  `json:"emergency_contact_name"`
+	EmergencyContactPhone string  `json:"emergency_contact_phone"`
 	Apps                  string  `json:"apps"`
 	Notes                 string  `json:"notes"`
 }
@@ -310,7 +310,7 @@ type ClockInHandler struct {
 }
 
 type ClockInRequest struct {
-	StaffID int64 `json:"staffId"`
+	StaffID int64 `json:"staff_id"`
 }
 
 type ClockInResponse struct {
@@ -346,7 +346,7 @@ type ClockOutHandler struct {
 }
 
 type ClockOutRequest struct {
-	StaffID int64 `json:"staffId"`
+	StaffID int64 `json:"staff_id"`
 }
 
 type ClockOutResponse struct {
@@ -384,10 +384,10 @@ type DashboardHandler struct {
 type DashboardRequest struct{}
 
 type DashboardStatsPayload struct {
-	TotalStaff     int `json:"totalStaff"`
-	OnShiftToday   int `json:"onShiftToday"`
-	PendingTimeOff int `json:"pendingTimeOff"`
-	PayrollDraft   int `json:"payrollDraft"`
+	TotalStaff     int `json:"total_staff"`
+	OnShiftToday   int `json:"on_shift_today"`
+	PendingTimeOff int `json:"pending_time_off"`
+	PayrollDraft   int `json:"payroll_draft"`
 }
 
 type DashboardResponse struct {

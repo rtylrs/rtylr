@@ -22,7 +22,7 @@ type ExportCustomerHandler struct {
 }
 
 type ExportCustomerRequest struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 }
 
 type ExportCustomerResponse struct {

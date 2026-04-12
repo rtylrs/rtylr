@@ -6,15 +6,15 @@ import (
 
 type InvoiceItem struct {
 	ID          int64   `json:"id"`
-	InvoiceID   int64   `json:"invoiceId"`
+	InvoiceID   int64   `json:"invoice_id"`
 	Description string  `json:"description"`
 	Quantity    float64 `json:"quantity"`
 	Unit        string  `json:"unit"`
-	UnitPrice   float64 `json:"unitPrice"`
-	TaxRate     float64 `json:"taxRate"`
-	DiscountPct float64 `json:"discountPct"`
+	UnitPrice   float64 `json:"unit_price"`
+	TaxRate     float64 `json:"tax_rate"`
+	DiscountPct float64 `json:"discount_pct"`
 	Total       float64 `json:"total"`
-	SortOrder   int     `json:"sortOrder"`
+	SortOrder   int     `json:"sort_order"`
 }
 
 func (item *InvoiceItem) FromRow(row *sql.Rows) error {
@@ -51,10 +51,10 @@ type InvoiceItemInput struct {
 	Description string  `json:"description"`
 	Quantity    float64 `json:"quantity"`
 	Unit        string  `json:"unit"`
-	UnitPrice   float64 `json:"unitPrice"`
-	TaxRate     float64 `json:"taxRate"`
-	DiscountPct float64 `json:"discountPct"`
-	SortOrder   int     `json:"sortOrder"`
+	UnitPrice   float64 `json:"unit_price"`
+	TaxRate     float64 `json:"tax_rate"`
+	DiscountPct float64 `json:"discount_pct"`
+	SortOrder   int     `json:"sort_order"`
 }
 
 // CalculateTotal computes the line total after per-item discount and tax.

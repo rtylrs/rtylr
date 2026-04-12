@@ -27,7 +27,7 @@ type CreateConfigRequest struct {
 }
 
 type CreateConfigResponse struct {
-	ConfigID int64  `json:"configId"`
+	ConfigID int64  `json:"config_id"`
 	Message  string `json:"message"`
 }
 

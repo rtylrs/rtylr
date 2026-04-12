@@ -12,30 +12,30 @@ import (
 
 type OrderPayload struct {
 	ID              int64   `json:"id"`
-	OwnerID         int64   `json:"ownerId"`
-	CustomerEmail   string  `json:"customerEmail"`
-	CustomerName    string  `json:"customerName"`
-	CustomerPhone   string  `json:"customerPhone"`
+	OwnerID         int64   `json:"owner_id"`
+	CustomerEmail   string  `json:"customer_email"`
+	CustomerName    string  `json:"customer_name"`
+	CustomerPhone   string  `json:"customer_phone"`
 	Status          string  `json:"status"`
 	Subtotal        float64 `json:"subtotal"`
 	Tax             float64 `json:"tax"`
-	ShippingCost    float64 `json:"shippingCost"`
+	ShippingCost    float64 `json:"shipping_cost"`
 	Total           float64 `json:"total"`
-	ShippingAddress string  `json:"shippingAddress"`
+	ShippingAddress string  `json:"shipping_address"`
 	Notes           string  `json:"notes"`
-	CreatedAt       string  `json:"createdAt"`
-	UpdatedAt       string  `json:"updatedAt"`
+	CreatedAt       string  `json:"created_at"`
+	UpdatedAt       string  `json:"updated_at"`
 }
 
 type ItemPayload struct {
 	ID        int64   `json:"id"`
-	OrderID   int64   `json:"orderId"`
-	ProductID int64   `json:"productId"`
+	OrderID   int64   `json:"order_id"`
+	ProductID int64   `json:"product_id"`
 	Name      string  `json:"name"`
 	Quantity  int     `json:"quantity"`
 	Price     float64 `json:"price"`
 	Total     float64 `json:"total"`
-	CreatedAt string  `json:"createdAt"`
+	CreatedAt string  `json:"created_at"`
 }
 
 func toOrderPayload(o domain.StoreOrder) OrderPayload {
@@ -96,15 +96,15 @@ func (h *DetailHandler) Serve(ctx context.Context, req *DetailRequest) (DetailRe
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	CustomerEmail   string                 `json:"customerEmail"`
-	CustomerName    string                 `json:"customerName"`
-	CustomerPhone   string                 `json:"customerPhone"`
+	CustomerEmail   string                 `json:"customer_email"`
+	CustomerName    string                 `json:"customer_name"`
+	CustomerPhone   string                 `json:"customer_phone"`
 	Status          string                 `json:"status"`
 	Subtotal        float64                `json:"subtotal"`
 	Tax             float64                `json:"tax"`
-	ShippingCost    float64                `json:"shippingCost"`
+	ShippingCost    float64                `json:"shipping_cost"`
 	Total           float64                `json:"total"`
-	ShippingAddress string                 `json:"shippingAddress"`
+	ShippingAddress string                 `json:"shipping_address"`
 	Notes           string                 `json:"notes"`
 	Items           []domain.OrderItemInput `json:"items"`
 }
@@ -132,15 +132,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID              int64   `json:"id"`
-	CustomerEmail   string  `json:"customerEmail"`
-	CustomerName    string  `json:"customerName"`
-	CustomerPhone   string  `json:"customerPhone"`
+	CustomerEmail   string  `json:"customer_email"`
+	CustomerName    string  `json:"customer_name"`
+	CustomerPhone   string  `json:"customer_phone"`
 	Status          string  `json:"status"`
 	Subtotal        float64 `json:"subtotal"`
 	Tax             float64 `json:"tax"`
-	ShippingCost    float64 `json:"shippingCost"`
+	ShippingCost    float64 `json:"shipping_cost"`
 	Total           float64 `json:"total"`
-	ShippingAddress string  `json:"shippingAddress"`
+	ShippingAddress string  `json:"shipping_address"`
 	Notes           string  `json:"notes"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }

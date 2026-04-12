@@ -20,13 +20,13 @@ type GetTaxConfigRequest struct{}
 
 type TaxConfigPayload struct {
 	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"ownerId"`
-	TaxName     string  `json:"taxName"`
-	TaxRate     float64 `json:"taxRate"`
-	IsInclusive bool    `json:"isInclusive"`
-	IsActive    bool    `json:"isActive"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
+	OwnerID     int64   `json:"owner_id"`
+	TaxName     string  `json:"tax_name"`
+	TaxRate     float64 `json:"tax_rate"`
+	IsInclusive bool    `json:"is_inclusive"`
+	IsActive    bool    `json:"is_active"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 type GetTaxConfigResponse struct {
@@ -61,10 +61,10 @@ func TaxConfigUpdateRoutes() []string { return []string{"/finance/tax"} }
 type UpdateTaxConfigHandler struct{ Service *application.Service }
 
 type UpdateTaxConfigRequest struct {
-	TaxName     string  `json:"taxName"`
-	TaxRate     float64 `json:"taxRate"`
-	IsInclusive bool    `json:"isInclusive"`
-	IsActive    bool    `json:"isActive"`
+	TaxName     string  `json:"tax_name"`
+	TaxRate     float64 `json:"tax_rate"`
+	IsInclusive bool    `json:"is_inclusive"`
+	IsActive    bool    `json:"is_active"`
 }
 
 type UpdateTaxConfigResponse struct {
@@ -97,10 +97,10 @@ type GetPLReportHandler struct{ Service *application.Service }
 type GetPLReportRequest struct{}
 
 type PLReportResponse struct {
-	TotalRevenue  float64 `json:"totalRevenue"`
-	TotalExpenses float64 `json:"totalExpenses"`
-	GrossProfit   float64 `json:"grossProfit"`
-	NetProfit     float64 `json:"netProfit"`
+	TotalRevenue  float64 `json:"total_revenue"`
+	TotalExpenses float64 `json:"total_expenses"`
+	GrossProfit   float64 `json:"gross_profit"`
+	NetProfit     float64 `json:"net_profit"`
 }
 
 func (h *GetPLReportHandler) Serve(ctx context.Context, _ *GetPLReportRequest) (PLReportResponse, *errorModels.ServerError) {

@@ -9,13 +9,13 @@ var ErrTaxConfigNotFound = errors.New("tax config not found")
 
 type TaxConfig struct {
 	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"ownerId"`
-	TaxName     string    `json:"taxName"`
-	TaxRate     float64   `json:"taxRate"`
-	IsInclusive bool      `json:"isInclusive"`
-	IsActive    bool      `json:"isActive"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	OwnerID     int64     `json:"owner_id"`
+	TaxName     string    `json:"tax_name"`
+	TaxRate     float64   `json:"tax_rate"`
+	IsInclusive bool      `json:"is_inclusive"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type TaxConfigInput struct {
@@ -27,8 +27,8 @@ type TaxConfigInput struct {
 }
 
 type PLReport struct {
-	TotalRevenue  float64 `json:"totalRevenue"`
-	TotalExpenses float64 `json:"totalExpenses"`
-	GrossProfit   float64 `json:"grossProfit"`
-	NetProfit     float64 `json:"netProfit"`
+	TotalRevenue  float64 `json:"total_revenue"`
+	TotalExpenses float64 `json:"total_expenses"`
+	GrossProfit   float64 `json:"gross_profit"`
+	NetProfit     float64 `json:"net_profit"`
 }

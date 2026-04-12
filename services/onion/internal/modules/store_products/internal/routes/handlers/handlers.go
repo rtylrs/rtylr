@@ -12,18 +12,18 @@ import (
 
 type Payload struct {
 	ID             int64   `json:"id"`
-	OwnerID        int64   `json:"ownerId"`
-	ProductID      int64   `json:"productId"`
+	OwnerID        int64   `json:"owner_id"`
+	ProductID      int64   `json:"product_id"`
 	Title          string  `json:"title"`
 	Slug           string  `json:"slug"`
 	Description    string  `json:"description"`
 	Images         string  `json:"images"`
 	Price          float64 `json:"price"`
-	CompareAtPrice float64 `json:"compareAtPrice"`
-	IsPublished    bool    `json:"isPublished"`
-	SortOrder      int     `json:"sortOrder"`
-	CreatedAt      string  `json:"createdAt"`
-	UpdatedAt      string  `json:"updatedAt"`
+	CompareAtPrice float64 `json:"compare_at_price"`
+	IsPublished    bool    `json:"is_published"`
+	SortOrder      int     `json:"sort_order"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
 }
 
 func toPayload(p domain.StoreProduct) Payload {
@@ -64,15 +64,15 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	ProductID      int64   `json:"productId"`
+	ProductID      int64   `json:"product_id"`
 	Title          string  `json:"title"`
 	Slug           string  `json:"slug"`
 	Description    string  `json:"description"`
 	Images         string  `json:"images"`
 	Price          float64 `json:"price"`
-	CompareAtPrice float64 `json:"compareAtPrice"`
-	IsPublished    bool    `json:"isPublished"`
-	SortOrder      int     `json:"sortOrder"`
+	CompareAtPrice float64 `json:"compare_at_price"`
+	IsPublished    bool    `json:"is_published"`
+	SortOrder      int     `json:"sort_order"`
 }
 type CreateResponse struct {
 	ID      int64  `json:"id"`
@@ -105,15 +105,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID             int64   `json:"id"`
-	ProductID      int64   `json:"productId"`
+	ProductID      int64   `json:"product_id"`
 	Title          string  `json:"title"`
 	Slug           string  `json:"slug"`
 	Description    string  `json:"description"`
 	Images         string  `json:"images"`
 	Price          float64 `json:"price"`
-	CompareAtPrice float64 `json:"compareAtPrice"`
-	IsPublished    bool    `json:"isPublished"`
-	SortOrder      int     `json:"sortOrder"`
+	CompareAtPrice float64 `json:"compare_at_price"`
+	IsPublished    bool    `json:"is_published"`
+	SortOrder      int     `json:"sort_order"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

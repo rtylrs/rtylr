@@ -12,26 +12,26 @@ var (
 
 type Task struct {
 	ID          int64      `json:"id"`
-	OwnerID     int64      `json:"ownerId"`
-	ProjectID   *int64     `json:"projectId"`
-	WorkspaceID *int64     `json:"workspaceId"`
+	OwnerID     int64      `json:"owner_id"`
+	ProjectID   *int64     `json:"project_id"`
+	WorkspaceID *int64     `json:"workspace_id"`
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
 	Status      string     `json:"status"`
 	Priority    string     `json:"priority"`
-	AssigneeID  *int64     `json:"assigneeId"`
-	LabelIDs    []byte     `json:"labelIds"`
-	DueDate     *time.Time `json:"dueDate"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
+	AssigneeID  *int64     `json:"assignee_id"`
+	LabelIDs    []byte     `json:"label_ids"`
+	DueDate     *time.Time `json:"due_date"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
 type Label struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Color     string    `json:"color"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type TaskInput struct {

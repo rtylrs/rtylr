@@ -20,7 +20,7 @@ type VerifyPINRequest struct {
 
 type VerifyPINResponse struct {
 	Valid   bool   `json:"valid"`
-	StaffID int64  `json:"staffId"`
+	StaffID int64  `json:"staff_id"`
 	Message string `json:"message"`
 }
 

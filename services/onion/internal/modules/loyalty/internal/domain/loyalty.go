@@ -13,25 +13,25 @@ var (
 
 type LoyaltyTransaction struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	CustomerID    int64     `json:"customerId"`
+	OwnerID       int64     `json:"owner_id"`
+	CustomerID    int64     `json:"customer_id"`
 	Points        int       `json:"points"`
 	Type          string    `json:"type"`
 	Description   string    `json:"description"`
-	ReferenceID   *int64    `json:"referenceId"`
-	ReferenceType string    `json:"referenceType"`
-	CreatedAt     time.Time `json:"createdAt"`
+	ReferenceID   *int64    `json:"reference_id"`
+	ReferenceType string    `json:"reference_type"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type LoyaltyConfig struct {
 	ID                   int64     `json:"id"`
-	OwnerID              int64     `json:"ownerId"`
-	PointsPerDollar      float64   `json:"pointsPerDollar"`
-	MinRedemptionPoints  int       `json:"minRedemptionPoints"`
-	PointsValue          float64   `json:"pointsValue"`
-	IsActive             bool      `json:"isActive"`
-	CreatedAt            time.Time `json:"createdAt"`
-	UpdatedAt            time.Time `json:"updatedAt"`
+	OwnerID              int64     `json:"owner_id"`
+	PointsPerDollar      float64   `json:"points_per_dollar"`
+	MinRedemptionPoints  int       `json:"min_redemption_points"`
+	PointsValue          float64   `json:"points_value"`
+	IsActive             bool      `json:"is_active"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 type AwardInput struct {

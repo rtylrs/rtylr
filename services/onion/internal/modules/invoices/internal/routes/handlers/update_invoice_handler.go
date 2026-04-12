@@ -20,16 +20,16 @@ type UpdateInvoiceHandler struct {
 
 type UpdateInvoiceRequest struct {
 	ID            int64                `json:"id"`
-	ClientName    string               `json:"clientName"`
-	ClientEmail   string               `json:"clientEmail"`
-	ClientAddress string               `json:"clientAddress"`
-	ClientTaxID   string               `json:"clientTaxId"`
-	IssueDate     string               `json:"issueDate"`
-	DueDate       string               `json:"dueDate"`
+	ClientName    string               `json:"client_name"`
+	ClientEmail   string               `json:"client_email"`
+	ClientAddress string               `json:"client_address"`
+	ClientTaxID   string               `json:"client_tax_id"`
+	IssueDate     string               `json:"issue_date"`
+	DueDate       string               `json:"due_date"`
 	Currency      string               `json:"currency"`
-	DiscountType  string               `json:"discountType"`
-	DiscountValue float64              `json:"discountValue"`
-	TaxRate       float64              `json:"taxRate"`
+	DiscountType  string               `json:"discount_type"`
+	DiscountValue float64              `json:"discount_value"`
+	TaxRate       float64              `json:"tax_rate"`
 	Notes         string               `json:"notes"`
 	Terms         string               `json:"terms"`
 	Items         []InvoiceItemPayload `json:"items"`

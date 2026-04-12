@@ -9,16 +9,16 @@ var ErrCashMovementNotFound = errors.New("cash movement not found")
 
 type CashMovement struct {
 	ID         int64     `json:"id"`
-	BusinessID int64     `json:"businessId"`
-	BranchID   int64     `json:"branchId"`
-	TerminalID *int64    `json:"terminalId"`
-	SessionID  int64     `json:"sessionId"`
-	EmployeeID int64     `json:"employeeId"`
+	BusinessID int64     `json:"business_id"`
+	BranchID   int64     `json:"branch_id"`
+	TerminalID *int64    `json:"terminal_id"`
+	SessionID  int64     `json:"session_id"`
+	EmployeeID int64     `json:"employee_id"`
 	Type       string    `json:"type"`
 	Amount     float64   `json:"amount"`
 	Reason     *string   `json:"reason"`
-	ApprovedBy *int64    `json:"approvedBy"`
-	CreatedAt  time.Time `json:"createdAt"`
+	ApprovedBy *int64    `json:"approved_by"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type CreateCashMovementInput struct {

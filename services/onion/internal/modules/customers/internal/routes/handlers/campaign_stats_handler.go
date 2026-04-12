@@ -27,18 +27,18 @@ type GetCampaignStatsHandler struct {
 }
 
 type GetCampaignStatsRequest struct {
-	CampaignID int64 `json:"campaignId"`
+	CampaignID int64 `json:"campaign_id"`
 }
 
 type CampaignStatsPayload struct {
-	CampaignID     int64 `json:"campaignId"`
-	AudienceCount  int   `json:"audienceCount"`
-	SentCount      int   `json:"sentCount"`
-	DeliveredCount int   `json:"deliveredCount"`
-	OpenedCount    int   `json:"openedCount"`
-	ClickedCount   int   `json:"clickedCount"`
-	BouncedCount   int   `json:"bouncedCount"`
-	FailedCount    int   `json:"failedCount"`
+	CampaignID     int64 `json:"campaign_id"`
+	AudienceCount  int   `json:"audience_count"`
+	SentCount      int   `json:"sent_count"`
+	DeliveredCount int   `json:"delivered_count"`
+	OpenedCount    int   `json:"opened_count"`
+	ClickedCount   int   `json:"clicked_count"`
+	BouncedCount   int   `json:"bounced_count"`
+	FailedCount    int   `json:"failed_count"`
 }
 
 type GetCampaignStatsResponse struct {

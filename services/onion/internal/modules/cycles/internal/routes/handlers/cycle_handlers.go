@@ -17,14 +17,14 @@ import (
 
 type CyclePayload struct {
 	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"ownerId"`
-	WorkspaceID int64   `json:"workspaceId"`
+	OwnerID     int64   `json:"owner_id"`
+	WorkspaceID int64   `json:"workspace_id"`
 	Name        string  `json:"name"`
-	StartDate   *string `json:"startDate"`
-	EndDate     *string `json:"endDate"`
+	StartDate   *string `json:"start_date"`
+	EndDate     *string `json:"end_date"`
 	Status      string  `json:"status"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 func newCyclePayload(c domain.Cycle) CyclePayload {
@@ -93,14 +93,14 @@ func CycleCreateRoutes() []string { return []string{"/flow/cycles"} }
 type CreateCycleHandler struct{ Service *application.Service }
 
 type CreateCycleRequest struct {
-	WorkspaceID int64  `json:"workspaceId"`
+	WorkspaceID int64  `json:"workspace_id"`
 	Name        string `json:"name"`
-	StartDate   string `json:"startDate"`
-	EndDate     string `json:"endDate"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
 }
 
 type CreateCycleResponse struct {
-	CycleID int64  `json:"cycleId"`
+	CycleID int64  `json:"cycle_id"`
 	Message string `json:"message"`
 }
 
@@ -149,8 +149,8 @@ type UpdateCycleHandler struct{ Service *application.Service }
 
 type UpdateCycleRequest struct {
 	Name      string `json:"name"`
-	StartDate string `json:"startDate"`
-	EndDate   string `json:"endDate"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 	Status    string `json:"status"`
 }
 

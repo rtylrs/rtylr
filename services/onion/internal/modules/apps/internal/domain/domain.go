@@ -5,7 +5,7 @@ type App struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
-	IsEnabled   bool   `json:"isEnabled"`
+	IsEnabled   bool   `json:"is_enabled"`
 	// AddonGated indicates this app's visibility is controlled by an addon.
 	// If empty, the app is always visible (core app).
 	AddonGated string `json:"-"`

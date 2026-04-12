@@ -24,26 +24,26 @@ type ListStockTransfersRequest struct{}
 
 type StockTransferItemPayload struct {
 	ID         int64   `json:"id"`
-	TransferID int64   `json:"transferId"`
-	ProductID  int64   `json:"productId"`
+	TransferID int64   `json:"transfer_id"`
+	ProductID  int64   `json:"product_id"`
 	Quantity   float64 `json:"quantity"`
-	CreatedAt  string  `json:"createdAt"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 type StockTransferPayload struct {
 	ID              int64                      `json:"id"`
-	OwnerID         int64                      `json:"ownerId"`
-	FromWarehouseID int64                      `json:"fromWarehouseId"`
-	ToWarehouseID   int64                      `json:"toWarehouseId"`
+	OwnerID         int64                      `json:"owner_id"`
+	FromWarehouseID int64                      `json:"from_warehouse_id"`
+	ToWarehouseID   int64                      `json:"to_warehouse_id"`
 	Status          string                     `json:"status"`
 	Notes           string                     `json:"notes"`
 	Items           []StockTransferItemPayload `json:"items"`
-	CreatedAt       string                     `json:"createdAt"`
-	UpdatedAt       string                     `json:"updatedAt"`
+	CreatedAt       string                     `json:"created_at"`
+	UpdatedAt       string                     `json:"updated_at"`
 }
 
 type ListStockTransfersResponse struct {
-	StockTransfers []StockTransferPayload `json:"stockTransfers"`
+	StockTransfers []StockTransferPayload `json:"stock_transfers"`
 }
 
 func newStockTransferPayload(t domain.StockTransfer) StockTransferPayload {
@@ -109,19 +109,19 @@ type CreateStockTransferHandler struct {
 }
 
 type CreateStockTransferItemInput struct {
-	ProductID int64   `json:"productId"`
+	ProductID int64   `json:"product_id"`
 	Quantity  float64 `json:"quantity"`
 }
 
 type CreateStockTransferRequest struct {
-	FromWarehouseID int64                          `json:"fromWarehouseId"`
-	ToWarehouseID   int64                          `json:"toWarehouseId"`
+	FromWarehouseID int64                          `json:"from_warehouse_id"`
+	ToWarehouseID   int64                          `json:"to_warehouse_id"`
 	Notes           string                         `json:"notes"`
 	Items           []CreateStockTransferItemInput `json:"items"`
 }
 
 type CreateStockTransferResponse struct {
-	TransferID int64  `json:"transferId"`
+	TransferID int64  `json:"transfer_id"`
 	Message    string `json:"message"`
 }
 

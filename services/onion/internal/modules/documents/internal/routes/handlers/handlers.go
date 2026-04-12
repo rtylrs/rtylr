@@ -13,13 +13,13 @@ import (
 
 type DocumentPayload struct {
 	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"ownerId"`
-	StaffID    int64     `json:"staffId"`
+	OwnerID    int64     `json:"owner_id"`
+	StaffID    int64     `json:"staff_id"`
 	Name       string    `json:"name"`
 	Type       string    `json:"type"`
-	FileURL    string    `json:"fileUrl"`
-	ExpiryDate time.Time `json:"expiryDate"`
-	CreatedAt  time.Time `json:"createdAt"`
+	FileURL    string    `json:"file_url"`
+	ExpiryDate time.Time `json:"expiry_date"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func newPayload(d domain.Document) DocumentPayload {
@@ -57,11 +57,11 @@ func CreateRoutes() []string { return []string{"/hr/documents"} }
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	StaffID    int64  `json:"staffId"`
+	StaffID    int64  `json:"staff_id"`
 	Name       string `json:"name"`
 	Type       string `json:"type"`
-	FileURL    string `json:"fileUrl"`
-	ExpiryDate string `json:"expiryDate"`
+	FileURL    string `json:"file_url"`
+	ExpiryDate string `json:"expiry_date"`
 }
 type CreateResponse struct {
 	ID      int64  `json:"id"`

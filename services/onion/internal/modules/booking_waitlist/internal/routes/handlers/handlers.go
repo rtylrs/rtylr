@@ -11,9 +11,9 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; ServiceID int64 `json:"serviceId"`
-	CustomerName string `json:"customerName"`; CustomerEmail string `json:"customerEmail"`; CustomerPhone string `json:"customerPhone"`
-	PreferredDate string `json:"preferredDate"`; PreferredTime string `json:"preferredTime"`; Status string `json:"status"`; CreatedAt string `json:"createdAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; ServiceID int64 `json:"service_id"`
+	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	PreferredDate string `json:"preferred_date"`; PreferredTime string `json:"preferred_time"`; Status string `json:"status"`; CreatedAt string `json:"created_at"`
 }
 
 func toPayload(w domain.WaitlistEntry) Payload {
@@ -41,8 +41,8 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	ServiceID int64 `json:"serviceId"`; CustomerName string `json:"customerName"`; CustomerEmail string `json:"customerEmail"`
-	CustomerPhone string `json:"customerPhone"`; PreferredDate string `json:"preferredDate"`; PreferredTime string `json:"preferredTime"`
+	ServiceID int64 `json:"service_id"`; CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`
+	CustomerPhone string `json:"customer_phone"`; PreferredDate string `json:"preferred_date"`; PreferredTime string `json:"preferred_time"`
 }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
@@ -61,9 +61,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
-	ID int64 `json:"id"`; ServiceID int64 `json:"serviceId"`; CustomerName string `json:"customerName"`
-	CustomerEmail string `json:"customerEmail"`; CustomerPhone string `json:"customerPhone"`
-	PreferredDate string `json:"preferredDate"`; PreferredTime string `json:"preferredTime"`; Status string `json:"status"`
+	ID int64 `json:"id"`; ServiceID int64 `json:"service_id"`; CustomerName string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	PreferredDate string `json:"preferred_date"`; PreferredTime string `json:"preferred_time"`; Status string `json:"status"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

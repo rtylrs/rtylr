@@ -20,10 +20,10 @@ type RecordPaymentHandler struct {
 }
 
 type RecordPaymentRequest struct {
-	InvoiceID   int64   `json:"invoiceId"`
+	InvoiceID   int64   `json:"invoice_id"`
 	Amount      float64 `json:"amount"`
 	Currency    string  `json:"currency"`
-	PaymentDate string  `json:"paymentDate"`
+	PaymentDate string  `json:"payment_date"`
 	Method      string  `json:"method"`
 	Reference   string  `json:"reference"`
 	Notes       string  `json:"notes"`
@@ -31,10 +31,10 @@ type RecordPaymentRequest struct {
 
 type RecordPaymentResponsePayload struct {
 	ID          int64     `json:"id"`
-	InvoiceID   int64     `json:"invoiceId"`
+	InvoiceID   int64     `json:"invoice_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
-	PaymentDate time.Time `json:"paymentDate"`
+	PaymentDate time.Time `json:"payment_date"`
 	Method      string    `json:"method"`
 	Reference   string    `json:"reference"`
 	Notes       string    `json:"notes"`

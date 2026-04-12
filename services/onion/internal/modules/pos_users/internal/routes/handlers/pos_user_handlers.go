@@ -13,16 +13,16 @@ import (
 
 type POSUserPayload struct {
 	ID               int64   `json:"id"`
-	BusinessID       int64   `json:"businessId"`
-	LocationID       int64   `json:"locationId"`
+	BusinessID       int64   `json:"business_id"`
+	LocationID       int64   `json:"location_id"`
 	Name             string  `json:"name"`
 	Role             string  `json:"role"`
-	IsActive         bool    `json:"isActive"`
-	MaxDiscountPct   float64 `json:"maxDiscountPct"`
-	CanVoid          bool    `json:"canVoid"`
-	CanRefund        bool    `json:"canRefund"`
-	CanOpenDrawer    bool    `json:"canOpenDrawer"`
-	CanApplyDiscount bool    `json:"canApplyDiscount"`
+	IsActive         bool    `json:"is_active"`
+	MaxDiscountPct   float64 `json:"max_discount_pct"`
+	CanVoid          bool    `json:"can_void"`
+	CanRefund        bool    `json:"can_refund"`
+	CanOpenDrawer    bool    `json:"can_open_drawer"`
+	CanApplyDiscount bool    `json:"can_apply_discount"`
 }
 
 func toPayload(u domain.POSUser) POSUserPayload {
@@ -66,16 +66,16 @@ func POSUserCreateRoutes() []string { return []string{"/pos/users"} }
 
 type CreatePOSUserHandler struct{ Service *application.Service }
 type CreatePOSUserRequest struct {
-	LocationID       int64   `json:"locationId"`
+	LocationID       int64   `json:"location_id"`
 	Name             string  `json:"name"`
 	PIN              string  `json:"pin"`
 	Role             string  `json:"role"`
-	HourlyRate       float64 `json:"hourlyRate"`
-	MaxDiscountPct   float64 `json:"maxDiscountPct"`
-	CanVoid          bool    `json:"canVoid"`
-	CanRefund        bool    `json:"canRefund"`
-	CanOpenDrawer    bool    `json:"canOpenDrawer"`
-	CanApplyDiscount bool    `json:"canApplyDiscount"`
+	HourlyRate       float64 `json:"hourly_rate"`
+	MaxDiscountPct   float64 `json:"max_discount_pct"`
+	CanVoid          bool    `json:"can_void"`
+	CanRefund        bool    `json:"can_refund"`
+	CanOpenDrawer    bool    `json:"can_open_drawer"`
+	CanApplyDiscount bool    `json:"can_apply_discount"`
 }
 type CreatePOSUserResponse struct{ ID int64 `json:"id"` }
 
@@ -110,13 +110,13 @@ type UpdatePOSUserRequest struct {
 	Name             string  `json:"name"`
 	PIN              string  `json:"pin"`
 	Role             string  `json:"role"`
-	IsActive         bool    `json:"isActive"`
-	HourlyRate       float64 `json:"hourlyRate"`
-	MaxDiscountPct   float64 `json:"maxDiscountPct"`
-	CanVoid          bool    `json:"canVoid"`
-	CanRefund        bool    `json:"canRefund"`
-	CanOpenDrawer    bool    `json:"canOpenDrawer"`
-	CanApplyDiscount bool    `json:"canApplyDiscount"`
+	IsActive         bool    `json:"is_active"`
+	HourlyRate       float64 `json:"hourly_rate"`
+	MaxDiscountPct   float64 `json:"max_discount_pct"`
+	CanVoid          bool    `json:"can_void"`
+	CanRefund        bool    `json:"can_refund"`
+	CanOpenDrawer    bool    `json:"can_open_drawer"`
+	CanApplyDiscount bool    `json:"can_apply_discount"`
 }
 type UpdatePOSUserResponse struct{ Success bool `json:"success"` }
 

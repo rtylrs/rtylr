@@ -19,7 +19,7 @@ type AppPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
-	IsEnabled   bool   `json:"isEnabled"`
+	IsEnabled   bool   `json:"is_enabled"`
 }
 
 type ListAppsResponse struct {

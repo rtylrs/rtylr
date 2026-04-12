@@ -61,8 +61,8 @@ type TaskPayloadCompact struct {
 	Title     string  `json:"title"`
 	Status    string  `json:"status"`
 	Priority  string  `json:"priority"`
-	DueDate   *string `json:"dueDate"`
-	CreatedAt string  `json:"createdAt"`
+	DueDate   *string `json:"due_date"`
+	CreatedAt string  `json:"created_at"`
 }
 
 func (h *GetSubtasksHandler) Serve(ctx context.Context, _ *GetSubtasksRequest) (GetSubtasksResponse, *errorModels.ServerError) {
@@ -101,19 +101,19 @@ func CreateSubtaskRoutes() []string { return []string{"/flow/tasks/{id}/subtasks
 type CreateSubtaskHandler struct{ FlowService *application.Service }
 
 type CreateSubtaskRequest struct {
-	ProjectID      int64   `json:"projectId"`
-	WorkspaceID    int64   `json:"workspaceId"`
+	ProjectID      int64   `json:"project_id"`
+	WorkspaceID    int64   `json:"workspace_id"`
 	Title          string  `json:"title"`
 	Description    string  `json:"description"`
 	Priority       string  `json:"priority"`
-	AssigneeID     *int64  `json:"assigneeId"`
-	DueDate        *string `json:"dueDate"`
-	StartDate      *string `json:"startDate"`
-	EstimatedHours *float64 `json:"estimatedHours"`
+	AssigneeID     *int64  `json:"assignee_id"`
+	DueDate        *string `json:"due_date"`
+	StartDate      *string `json:"start_date"`
+	EstimatedHours *float64 `json:"estimated_hours"`
 }
 
 type CreateSubtaskResponse struct {
-	TaskID  int64  `json:"taskId"`
+	TaskID  int64  `json:"task_id"`
 	Message string `json:"message"`
 }
 
@@ -172,12 +172,12 @@ type GetAttachmentsRequest struct{}
 
 type AttachmentPayload struct {
 	ID         int64  `json:"id"`
-	TaskID     int64  `json:"taskId"`
+	TaskID     int64  `json:"task_id"`
 	Name       string `json:"name"`
 	URL        string `json:"url"`
 	Size       int64  `json:"size"`
-	UploadedBy int64  `json:"uploadedBy"`
-	CreatedAt  string `json:"createdAt"`
+	UploadedBy int64  `json:"uploaded_by"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type GetAttachmentsResponse struct {
@@ -224,7 +224,7 @@ type CreateAttachmentRequest struct {
 }
 
 type CreateAttachmentResponse struct {
-	AttachmentID int64  `json:"attachmentId"`
+	AttachmentID int64  `json:"attachment_id"`
 	Message      string `json:"message"`
 }
 
@@ -296,16 +296,16 @@ type GetTimeLogsRequest struct{}
 
 type TimeLogPayload struct {
 	ID              int64  `json:"id"`
-	TaskID          int64  `json:"taskId"`
-	UserID          int64  `json:"userId"`
-	DurationMinutes int    `json:"durationMinutes"`
+	TaskID          int64  `json:"task_id"`
+	UserID          int64  `json:"user_id"`
+	DurationMinutes int    `json:"duration_minutes"`
 	Description     string `json:"description"`
-	LoggedAt        string `json:"loggedAt"`
-	CreatedAt       string `json:"createdAt"`
+	LoggedAt        string `json:"logged_at"`
+	CreatedAt       string `json:"created_at"`
 }
 
 type GetTimeLogsResponse struct {
-	TimeLogs []TimeLogPayload `json:"timeLogs"`
+	TimeLogs []TimeLogPayload `json:"time_logs"`
 }
 
 func (h *GetTimeLogsHandler) Serve(ctx context.Context, _ *GetTimeLogsRequest) (GetTimeLogsResponse, *errorModels.ServerError) {
@@ -342,12 +342,12 @@ func CreateTimeLogRoutes() []string { return []string{"/flow/tasks/{id}/time"} }
 type CreateTimeLogHandler struct{ FlowService *application.Service }
 
 type CreateTimeLogRequest struct {
-	DurationMinutes int    `json:"durationMinutes"`
+	DurationMinutes int    `json:"duration_minutes"`
 	Description     string `json:"description"`
 }
 
 type CreateTimeLogResponse struct {
-	TimeLogID int64  `json:"timeLogId"`
+	TimeLogID int64  `json:"time_log_id"`
 	Message   string `json:"message"`
 }
 

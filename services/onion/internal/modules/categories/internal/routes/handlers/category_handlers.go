@@ -24,11 +24,11 @@ type ListCategoriesRequest struct{}
 
 type CategoryPayload struct {
 	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"ownerId"`
+	OwnerID     int64  `json:"owner_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 type ListCategoriesResponse struct {
@@ -89,7 +89,7 @@ type CreateCategoryRequest struct {
 }
 
 type CreateCategoryResponse struct {
-	CategoryID int64  `json:"categoryId"`
+	CategoryID int64  `json:"category_id"`
 	Message    string `json:"message"`
 }
 

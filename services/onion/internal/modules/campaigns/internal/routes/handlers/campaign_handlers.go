@@ -16,19 +16,19 @@ import (
 
 type CampaignPayload struct {
 	ID                int64   `json:"id"`
-	OwnerID           int64   `json:"ownerId"`
+	OwnerID           int64   `json:"owner_id"`
 	Name              string  `json:"name"`
 	Type              string  `json:"type"`
 	Status            string  `json:"status"`
-	AudienceSegmentID *int64  `json:"audienceSegmentId"`
+	AudienceSegmentID *int64  `json:"audience_segment_id"`
 	Subject           string  `json:"subject"`
 	Body              string  `json:"body"`
-	SentCount         int     `json:"sentCount"`
-	OpenCount         int     `json:"openCount"`
-	ScheduledAt       *string `json:"scheduledAt"`
-	SentAt            *string `json:"sentAt"`
-	CreatedAt         string  `json:"createdAt"`
-	UpdatedAt         string  `json:"updatedAt"`
+	SentCount         int     `json:"sent_count"`
+	OpenCount         int     `json:"open_count"`
+	ScheduledAt       *string `json:"scheduled_at"`
+	SentAt            *string `json:"sent_at"`
+	CreatedAt         string  `json:"created_at"`
+	UpdatedAt         string  `json:"updated_at"`
 }
 
 func newCampaignPayload(c domain.Campaign) CampaignPayload {
@@ -92,14 +92,14 @@ type CreateCampaignHandler struct{ Service *application.Service }
 type CreateCampaignRequest struct {
 	Name              string  `json:"name"`
 	Type              string  `json:"type"`
-	AudienceSegmentID *int64  `json:"audienceSegmentId"`
+	AudienceSegmentID *int64  `json:"audience_segment_id"`
 	Subject           string  `json:"subject"`
 	Body              string  `json:"body"`
-	ScheduledAt       *string `json:"scheduledAt"`
+	ScheduledAt       *string `json:"scheduled_at"`
 }
 
 type CreateCampaignResponse struct {
-	CampaignID int64  `json:"campaignId"`
+	CampaignID int64  `json:"campaign_id"`
 	Message    string `json:"message"`
 }
 
@@ -145,10 +145,10 @@ type UpdateCampaignHandler struct{ Service *application.Service }
 type UpdateCampaignRequest struct {
 	Name              string  `json:"name"`
 	Type              string  `json:"type"`
-	AudienceSegmentID *int64  `json:"audienceSegmentId"`
+	AudienceSegmentID *int64  `json:"audience_segment_id"`
 	Subject           string  `json:"subject"`
 	Body              string  `json:"body"`
-	ScheduledAt       *string `json:"scheduledAt"`
+	ScheduledAt       *string `json:"scheduled_at"`
 }
 
 type UpdateCampaignResponse struct {

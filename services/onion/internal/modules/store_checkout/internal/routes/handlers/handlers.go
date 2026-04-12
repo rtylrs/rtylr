@@ -15,8 +15,8 @@ func CompleteRoutes() []string { return []string{"/store/checkout/complete"} }
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	SessionID     string  `json:"sessionId"`
-	CustomerEmail string  `json:"customerEmail"`
+	SessionID     string  `json:"session_id"`
+	CustomerEmail string  `json:"customer_email"`
 	Items         string  `json:"items"`
 	Subtotal      float64 `json:"subtotal"`
 	Tax           float64 `json:"tax"`

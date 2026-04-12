@@ -15,13 +15,13 @@ import (
 
 type RecurringInvoicePayload struct {
 	ID                int64     `json:"id"`
-	OwnerID           int64     `json:"ownerId"`
-	TemplateInvoiceID int64     `json:"templateInvoiceId"`
+	OwnerID           int64     `json:"owner_id"`
+	TemplateInvoiceID int64     `json:"template_invoice_id"`
 	Frequency         string    `json:"frequency"`
-	NextInvoiceDate   time.Time `json:"nextInvoiceDate"`
-	EndDate           time.Time `json:"endDate"`
-	IsActive          bool      `json:"isActive"`
-	CreatedAt         time.Time `json:"createdAt"`
+	NextInvoiceDate   time.Time `json:"next_invoice_date"`
+	EndDate           time.Time `json:"end_date"`
+	IsActive          bool      `json:"is_active"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 func newPayload(r domain.RecurringInvoice) RecurringInvoicePayload {
@@ -39,7 +39,7 @@ func ListRoutes() []string { return []string{"/finance/recurring-invoices"} }
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 type ListResponse struct {
-	RecurringInvoices []RecurringInvoicePayload `json:"recurringInvoices"`
+	RecurringInvoices []RecurringInvoicePayload `json:"recurring_invoices"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -67,11 +67,11 @@ func CreateRoutes() []string { return []string{"/finance/recurring-invoices"} }
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	TemplateInvoiceID int64  `json:"templateInvoiceId"`
+	TemplateInvoiceID int64  `json:"template_invoice_id"`
 	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"nextInvoiceDate"`
-	EndDate           string `json:"endDate"`
-	IsActive          bool   `json:"isActive"`
+	NextInvoiceDate   string `json:"next_invoice_date"`
+	EndDate           string `json:"end_date"`
+	IsActive          bool   `json:"is_active"`
 }
 type CreateResponse struct {
 	ID      int64  `json:"id"`
@@ -120,11 +120,11 @@ func UpdateRoutes() []string { return []string{"/finance/recurring-invoices"} }
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID                int64  `json:"id"`
-	TemplateInvoiceID int64  `json:"templateInvoiceId"`
+	TemplateInvoiceID int64  `json:"template_invoice_id"`
 	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"nextInvoiceDate"`
-	EndDate           string `json:"endDate"`
-	IsActive          bool   `json:"isActive"`
+	NextInvoiceDate   string `json:"next_invoice_date"`
+	EndDate           string `json:"end_date"`
+	IsActive          bool   `json:"is_active"`
 }
 type UpdateResponse struct {
 	Message string `json:"message"`

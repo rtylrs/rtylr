@@ -26,34 +26,34 @@ type ListPurchaseOrdersRequest struct {
 
 type PurchaseOrderItemPayload struct {
 	ID               int64   `json:"id"`
-	PurchaseOrderID  int64   `json:"purchaseOrderId"`
-	ProductID        int64   `json:"productId"`
-	QuantityOrdered  float64 `json:"quantityOrdered"`
-	QuantityReceived float64 `json:"quantityReceived"`
-	UnitCost         float64 `json:"unitCost"`
-	TotalCost        float64 `json:"totalCost"`
+	PurchaseOrderID  int64   `json:"purchase_order_id"`
+	ProductID        int64   `json:"product_id"`
+	QuantityOrdered  float64 `json:"quantity_ordered"`
+	QuantityReceived float64 `json:"quantity_received"`
+	UnitCost         float64 `json:"unit_cost"`
+	TotalCost        float64 `json:"total_cost"`
 }
 
 type PurchaseOrderPayload struct {
 	ID               int64                      `json:"id"`
-	OwnerID          int64                      `json:"ownerId"`
-	SupplierID       int64                      `json:"supplierId"`
-	PONumber         string                     `json:"poNumber"`
+	OwnerID          int64                      `json:"owner_id"`
+	SupplierID       int64                      `json:"supplier_id"`
+	PONumber         string                     `json:"po_number"`
 	Status           domain.PurchaseOrderStatus `json:"status"`
 	Subtotal         float64                    `json:"subtotal"`
-	TaxAmount        float64                    `json:"taxAmount"`
+	TaxAmount        float64                    `json:"tax_amount"`
 	Total            float64                    `json:"total"`
-	ExpectedDelivery *string                    `json:"expectedDelivery"`
-	ReceivedAt       *string                    `json:"receivedAt"`
+	ExpectedDelivery *string                    `json:"expected_delivery"`
+	ReceivedAt       *string                    `json:"received_at"`
 	Notes            string                     `json:"notes"`
-	CreatedBy        int64                      `json:"createdBy"`
-	CreatedAt        string                     `json:"createdAt"`
-	UpdatedAt        string                     `json:"updatedAt"`
+	CreatedBy        int64                      `json:"created_by"`
+	CreatedAt        string                     `json:"created_at"`
+	UpdatedAt        string                     `json:"updated_at"`
 	Items            []PurchaseOrderItemPayload `json:"items"`
 }
 
 type ListPurchaseOrdersResponse struct {
-	PurchaseOrders []PurchaseOrderPayload `json:"purchaseOrders"`
+	PurchaseOrders []PurchaseOrderPayload `json:"purchase_orders"`
 }
 
 func newPurchaseOrderPayload(po domain.PurchaseOrder) PurchaseOrderPayload {
@@ -136,22 +136,22 @@ type CreatePurchaseOrderHandler struct {
 }
 
 type CreatePurchaseOrderItemRequest struct {
-	ProductID       int64   `json:"productId"`
-	QuantityOrdered float64 `json:"quantityOrdered"`
-	UnitCost        float64 `json:"unitCost"`
+	ProductID       int64   `json:"product_id"`
+	QuantityOrdered float64 `json:"quantity_ordered"`
+	UnitCost        float64 `json:"unit_cost"`
 }
 
 type CreatePurchaseOrderRequest struct {
-	SupplierID       int64                            `json:"supplierId"`
-	PONumber         string                           `json:"poNumber"`
-	TaxAmount        float64                          `json:"taxAmount"`
-	ExpectedDelivery string                           `json:"expectedDelivery"`
+	SupplierID       int64                            `json:"supplier_id"`
+	PONumber         string                           `json:"po_number"`
+	TaxAmount        float64                          `json:"tax_amount"`
+	ExpectedDelivery string                           `json:"expected_delivery"`
 	Notes            string                           `json:"notes"`
 	Items            []CreatePurchaseOrderItemRequest `json:"items"`
 }
 
 type CreatePurchaseOrderResponse struct {
-	PurchaseOrderID int64  `json:"purchaseOrderId"`
+	PurchaseOrderID int64  `json:"purchase_order_id"`
 	Message         string `json:"message"`
 }
 

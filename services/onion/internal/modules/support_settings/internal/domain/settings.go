@@ -4,13 +4,13 @@ import "time"
 
 type Settings struct {
 	ID                int64     `json:"id"`
-	BusinessID        int64     `json:"businessId"`
-	AutoAssign        bool      `json:"autoAssign"`
-	SLAHours          int       `json:"slaHours"`
-	BusinessHours     string    `json:"businessHours"`
-	NotificationEmail string    `json:"notificationEmail"`
-	CreatedAt         time.Time `json:"createdAt"`
-	UpdatedAt         time.Time `json:"updatedAt"`
+	BusinessID        int64     `json:"business_id"`
+	AutoAssign        bool      `json:"auto_assign"`
+	SLAHours          int       `json:"sla_hours"`
+	BusinessHours     string    `json:"business_hours"`
+	NotificationEmail string    `json:"notification_email"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 type SettingsInput struct {

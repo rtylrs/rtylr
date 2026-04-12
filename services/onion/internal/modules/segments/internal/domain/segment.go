@@ -9,13 +9,13 @@ var ErrSegmentNotFound = errors.New("segment not found")
 
 type Segment struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
+	OwnerID       int64     `json:"owner_id"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
 	Filters       []byte    `json:"filters"`
-	CustomerCount int       `json:"customerCount"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	CustomerCount int       `json:"customer_count"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type SegmentInput struct {

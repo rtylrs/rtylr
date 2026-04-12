@@ -4,16 +4,16 @@ import "time"
 
 type Reminder struct {
 	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"ownerId"`
-	AppointmentID int64     `json:"appointmentId"`
+	OwnerID       int64     `json:"owner_id"`
+	AppointmentID int64     `json:"appointment_id"`
 	Type          string    `json:"type"`
-	ScheduledAt   time.Time `json:"scheduledAt"`
-	SentAt        time.Time `json:"sentAt"`
-	CreatedAt     time.Time `json:"createdAt"`
+	ScheduledAt   time.Time `json:"scheduled_at"`
+	SentAt        time.Time `json:"sent_at"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type ReminderInput struct {
-	AppointmentID int64  `json:"appointmentId"`
+	AppointmentID int64  `json:"appointment_id"`
 	Type          string `json:"type"`
-	ScheduledAt   string `json:"scheduledAt"`
+	ScheduledAt   string `json:"scheduled_at"`
 }

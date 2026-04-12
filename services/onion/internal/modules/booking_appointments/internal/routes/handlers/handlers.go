@@ -11,11 +11,11 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; ServiceID int64 `json:"serviceId"`
-	ResourceID int64 `json:"resourceId"`; StaffID int64 `json:"staffId"`
-	CustomerName string `json:"customerName"`; CustomerEmail string `json:"customerEmail"`; CustomerPhone string `json:"customerPhone"`
-	StartTime string `json:"startTime"`; EndTime string `json:"endTime"`; Status string `json:"status"`
-	Notes string `json:"notes"`; CreatedAt string `json:"createdAt"`; UpdatedAt string `json:"updatedAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; ServiceID int64 `json:"service_id"`
+	ResourceID int64 `json:"resource_id"`; StaffID int64 `json:"staff_id"`
+	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	StartTime string `json:"start_time"`; EndTime string `json:"end_time"`; Status string `json:"status"`
+	Notes string `json:"notes"`; CreatedAt string `json:"created_at"`; UpdatedAt string `json:"updated_at"`
 }
 
 func toPayload(a domain.Appointment) Payload {
@@ -60,9 +60,9 @@ func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayRespons
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	ServiceID int64 `json:"serviceId"`; ResourceID int64 `json:"resourceId"`; StaffID int64 `json:"staffId"`
-	CustomerName string `json:"customerName"`; CustomerEmail string `json:"customerEmail"`; CustomerPhone string `json:"customerPhone"`
-	StartTime string `json:"startTime"`; EndTime string `json:"endTime"`; Status string `json:"status"`; Notes string `json:"notes"`
+	ServiceID int64 `json:"service_id"`; ResourceID int64 `json:"resource_id"`; StaffID int64 `json:"staff_id"`
+	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	StartTime string `json:"start_time"`; EndTime string `json:"end_time"`; Status string `json:"status"`; Notes string `json:"notes"`
 }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
@@ -84,9 +84,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
-	ID int64 `json:"id"`; ServiceID int64 `json:"serviceId"`; ResourceID int64 `json:"resourceId"`; StaffID int64 `json:"staffId"`
-	CustomerName string `json:"customerName"`; CustomerEmail string `json:"customerEmail"`; CustomerPhone string `json:"customerPhone"`
-	StartTime string `json:"startTime"`; EndTime string `json:"endTime"`; Status string `json:"status"`; Notes string `json:"notes"`
+	ID int64 `json:"id"`; ServiceID int64 `json:"service_id"`; ResourceID int64 `json:"resource_id"`; StaffID int64 `json:"staff_id"`
+	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	StartTime string `json:"start_time"`; EndTime string `json:"end_time"`; Status string `json:"status"`; Notes string `json:"notes"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

@@ -31,45 +31,45 @@ func DeleteCommentRoutes() []string   { return []string{"/flow/tasks/comment"} }
 
 type TaskPayload struct {
 	ID             int64      `json:"id"`
-	ProjectID      int64      `json:"projectId"`
-	WorkspaceID    int64      `json:"workspaceId"`
-	OwnerID        int64      `json:"ownerId"`
-	ParentTaskID   *int64     `json:"parentTaskId,omitempty"`
+	ProjectID      int64      `json:"project_id"`
+	WorkspaceID    int64      `json:"workspace_id"`
+	OwnerID        int64      `json:"owner_id"`
+	ParentTaskID   *int64     `json:"parent_task_id,omitempty"`
 	Title          string     `json:"title"`
 	Description    string     `json:"description"`
 	Status         string     `json:"status"`
 	Priority       string     `json:"priority"`
-	AssigneeID     *int64     `json:"assigneeId,omitempty"`
-	ReporterID     int64      `json:"reporterId"`
-	DueDate        *time.Time `json:"dueDate,omitempty"`
-	StartDate      *time.Time `json:"startDate,omitempty"`
-	CompletedAt    *time.Time `json:"completedAt,omitempty"`
-	EstimatedHours *float64   `json:"estimatedHours,omitempty"`
-	ActualHours    *float64   `json:"actualHours,omitempty"`
-	SortOrder      int        `json:"sortOrder"`
+	AssigneeID     *int64     `json:"assignee_id,omitempty"`
+	ReporterID     int64      `json:"reporter_id"`
+	DueDate        *time.Time `json:"due_date,omitempty"`
+	StartDate      *time.Time `json:"start_date,omitempty"`
+	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	EstimatedHours *float64   `json:"estimated_hours,omitempty"`
+	ActualHours    *float64   `json:"actual_hours,omitempty"`
+	SortOrder      int        `json:"sort_order"`
 	Labels         []int64    `json:"labels"`
-	CreatedAt      time.Time  `json:"createdAt"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type TaskCommentPayload struct {
 	ID        int64     `json:"id"`
-	TaskID    int64     `json:"taskId"`
-	UserID    int64     `json:"userId"`
+	TaskID    int64     `json:"task_id"`
+	UserID    int64     `json:"user_id"`
 	Content   string    `json:"content"`
-	IsEdited  bool      `json:"isEdited"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	IsEdited  bool      `json:"is_edited"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type TaskActivityPayload struct {
 	ID        int64     `json:"id"`
-	TaskID    int64     `json:"taskId"`
-	UserID    int64     `json:"userId"`
+	TaskID    int64     `json:"task_id"`
+	UserID    int64     `json:"user_id"`
 	Action    string    `json:"action"`
-	OldValue  string    `json:"oldValue"`
-	NewValue  string    `json:"newValue"`
-	CreatedAt time.Time `json:"createdAt"`
+	OldValue  string    `json:"old_value"`
+	NewValue  string    `json:"new_value"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func toTaskPayload(t domain.Task) TaskPayload {
@@ -191,16 +191,16 @@ type CreateTaskHandler struct {
 }
 
 type CreateTaskRequest struct {
-	ProjectID      int64      `json:"projectId"`
-	WorkspaceID    int64      `json:"workspaceId"`
-	ParentTaskID   *int64     `json:"parentTaskId"`
+	ProjectID      int64      `json:"project_id"`
+	WorkspaceID    int64      `json:"workspace_id"`
+	ParentTaskID   *int64     `json:"parent_task_id"`
 	Title          string     `json:"title"`
 	Description    string     `json:"description"`
 	Priority       string     `json:"priority"`
-	AssigneeID     *int64     `json:"assigneeId"`
-	DueDate        *time.Time `json:"dueDate"`
-	StartDate      *time.Time `json:"startDate"`
-	EstimatedHours *float64   `json:"estimatedHours"`
+	AssigneeID     *int64     `json:"assignee_id"`
+	DueDate        *time.Time `json:"due_date"`
+	StartDate      *time.Time `json:"start_date"`
+	EstimatedHours *float64   `json:"estimated_hours"`
 	Labels         []int64    `json:"labels"`
 }
 
@@ -335,9 +335,9 @@ type UpdateTaskRequest struct {
 	Description string     `json:"description"`
 	Status      string     `json:"status"`
 	Priority    string     `json:"priority"`
-	AssigneeID  *int64     `json:"assigneeId"`
-	DueDate     *time.Time `json:"dueDate"`
-	StartDate   *time.Time `json:"startDate"`
+	AssigneeID  *int64     `json:"assignee_id"`
+	DueDate     *time.Time `json:"due_date"`
+	StartDate   *time.Time `json:"start_date"`
 	Labels      []int64    `json:"labels"`
 }
 
@@ -522,7 +522,7 @@ type AddCommentHandler struct {
 }
 
 type AddCommentRequest struct {
-	TaskID  int64  `json:"taskId"`
+	TaskID  int64  `json:"task_id"`
 	Content string `json:"content"`
 }
 

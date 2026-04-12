@@ -23,19 +23,19 @@ type DashboardRequest struct{}
 
 type TopCustomerPayload struct {
 	ID            int64   `json:"id"`
-	FirstName     string  `json:"firstName"`
-	LastName      string  `json:"lastName"`
+	FirstName     string  `json:"first_name"`
+	LastName      string  `json:"last_name"`
 	Email         string  `json:"email"`
-	TotalSpent    float64 `json:"totalSpent"`
-	LoyaltyPoints int     `json:"loyaltyPoints"`
-	LoyaltyTier   string  `json:"loyaltyTier"`
+	TotalSpent    float64 `json:"total_spent"`
+	LoyaltyPoints int     `json:"loyalty_points"`
+	LoyaltyTier   string  `json:"loyalty_tier"`
 }
 
 type DashboardResponse struct {
-	TotalCustomers       int                  `json:"totalCustomers"`
-	NewThisMonth         int                  `json:"newThisMonth"`
-	ActiveLoyaltyMembers int                  `json:"activeLoyaltyMembers"`
-	TopCustomers         []TopCustomerPayload `json:"topCustomers"`
+	TotalCustomers       int                  `json:"total_customers"`
+	NewThisMonth         int                  `json:"new_this_month"`
+	ActiveLoyaltyMembers int                  `json:"active_loyalty_members"`
+	TopCustomers         []TopCustomerPayload `json:"top_customers"`
 }
 
 func newTopCustomerPayload(tc domain.TopCustomer) TopCustomerPayload {

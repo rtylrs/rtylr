@@ -18,28 +18,28 @@ func LoyaltyTransactionsRoutes() []string { return []string{"/crm/loyalty/transa
 type ListTransactionsHandler struct{ Service *application.Service }
 
 type ListTransactionsRequest struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID int64 `json:"customer_id"`
 	Page       int   `json:"page"`
-	PageSize   int   `json:"pageSize"`
+	PageSize   int   `json:"page_size"`
 }
 
 type TransactionPayload struct {
 	ID            int64  `json:"id"`
-	OwnerID       int64  `json:"ownerId"`
-	CustomerID    int64  `json:"customerId"`
+	OwnerID       int64  `json:"owner_id"`
+	CustomerID    int64  `json:"customer_id"`
 	Points        int    `json:"points"`
 	Type          string `json:"type"`
 	Description   string `json:"description"`
-	ReferenceID   *int64 `json:"referenceId"`
-	ReferenceType string `json:"referenceType"`
-	CreatedAt     string `json:"createdAt"`
+	ReferenceID   *int64 `json:"reference_id"`
+	ReferenceType string `json:"reference_type"`
+	CreatedAt     string `json:"created_at"`
 }
 
 type ListTransactionsResponse struct {
 	Transactions []TransactionPayload `json:"transactions"`
 	Total        int                  `json:"total"`
 	Page         int                  `json:"page"`
-	PageSize     int                  `json:"pageSize"`
+	PageSize     int                  `json:"page_size"`
 }
 
 func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, *errorModels.ServerError) {
@@ -81,11 +81,11 @@ func LoyaltyAwardRoutes() []string { return []string{"/crm/loyalty/award"} }
 type AwardPointsHandler struct{ Service *application.Service }
 
 type AwardPointsRequest struct {
-	CustomerID    int64  `json:"customerId"`
+	CustomerID    int64  `json:"customer_id"`
 	Points        int    `json:"points"`
 	Description   string `json:"description"`
-	ReferenceID   *int64 `json:"referenceId"`
-	ReferenceType string `json:"referenceType"`
+	ReferenceID   *int64 `json:"reference_id"`
+	ReferenceType string `json:"reference_type"`
 }
 
 type AwardPointsResponse struct {
@@ -128,11 +128,11 @@ func LoyaltyRedeemRoutes() []string { return []string{"/crm/loyalty/redeem"} }
 type RedeemPointsHandler struct{ Service *application.Service }
 
 type RedeemPointsRequest struct {
-	CustomerID    int64  `json:"customerId"`
+	CustomerID    int64  `json:"customer_id"`
 	Points        int    `json:"points"`
 	Description   string `json:"description"`
-	ReferenceID   *int64 `json:"referenceId"`
-	ReferenceType string `json:"referenceType"`
+	ReferenceID   *int64 `json:"reference_id"`
+	ReferenceType string `json:"reference_type"`
 }
 
 type RedeemPointsResponse struct {
@@ -178,13 +178,13 @@ type GetLoyaltyConfigRequest struct{}
 
 type LoyaltyConfigPayload struct {
 	ID                  int64   `json:"id"`
-	OwnerID             int64   `json:"ownerId"`
-	PointsPerDollar     float64 `json:"pointsPerDollar"`
-	MinRedemptionPoints int     `json:"minRedemptionPoints"`
-	PointsValue         float64 `json:"pointsValue"`
-	IsActive            bool    `json:"isActive"`
-	CreatedAt           string  `json:"createdAt"`
-	UpdatedAt           string  `json:"updatedAt"`
+	OwnerID             int64   `json:"owner_id"`
+	PointsPerDollar     float64 `json:"points_per_dollar"`
+	MinRedemptionPoints int     `json:"min_redemption_points"`
+	PointsValue         float64 `json:"points_value"`
+	IsActive            bool    `json:"is_active"`
+	CreatedAt           string  `json:"created_at"`
+	UpdatedAt           string  `json:"updated_at"`
 }
 
 type GetLoyaltyConfigResponse struct {
@@ -219,10 +219,10 @@ func LoyaltyConfigUpdateRoutes() []string { return []string{"/crm/loyalty/config
 type UpdateLoyaltyConfigHandler struct{ Service *application.Service }
 
 type UpdateLoyaltyConfigRequest struct {
-	PointsPerDollar     float64 `json:"pointsPerDollar"`
-	MinRedemptionPoints int     `json:"minRedemptionPoints"`
-	PointsValue         float64 `json:"pointsValue"`
-	IsActive            bool    `json:"isActive"`
+	PointsPerDollar     float64 `json:"points_per_dollar"`
+	MinRedemptionPoints int     `json:"min_redemption_points"`
+	PointsValue         float64 `json:"points_value"`
+	IsActive            bool    `json:"is_active"`
 }
 
 type UpdateLoyaltyConfigResponse struct {

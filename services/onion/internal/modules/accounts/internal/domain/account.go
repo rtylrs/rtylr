@@ -10,13 +10,13 @@ var ErrAccountNotFound = errors.New("account not found")
 
 type Account struct {
 	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"ownerId"`
+	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
 	Type      string    `json:"type"`
 	Currency  string    `json:"currency"`
 	Balance   float64   `json:"balance"`
-	IsActive  bool      `json:"isActive"`
-	CreatedAt time.Time `json:"createdAt"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (a *Account) FromRow(row *sql.Rows) error {
@@ -44,5 +44,5 @@ type AccountInput struct {
 	Type     string  `json:"type"`
 	Currency string  `json:"currency"`
 	Balance  float64 `json:"balance"`
-	IsActive bool    `json:"isActive"`
+	IsActive bool    `json:"is_active"`
 }

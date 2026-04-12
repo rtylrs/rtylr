@@ -9,13 +9,13 @@ var ErrTerminalNotFound = errors.New("terminal not found")
 
 type Terminal struct {
 	ID         int64      `json:"id"`
-	BusinessID int64      `json:"businessId"`
-	BranchID   int64      `json:"branchId"`
+	BusinessID int64      `json:"business_id"`
+	BranchID   int64      `json:"branch_id"`
 	Name       string     `json:"name"`
-	DeviceID   *string    `json:"deviceId"`
-	IsActive   bool       `json:"isActive"`
-	LastSeenAt *time.Time `json:"lastSeenAt"`
-	CreatedAt  time.Time  `json:"createdAt"`
+	DeviceID   *string    `json:"device_id"`
+	IsActive   bool       `json:"is_active"`
+	LastSeenAt *time.Time `json:"last_seen_at"`
+	CreatedAt  time.Time  `json:"created_at"`
 }
 
 type TerminalInput struct {

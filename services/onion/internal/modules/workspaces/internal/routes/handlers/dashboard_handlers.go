@@ -28,11 +28,11 @@ type GetDashboardRequest struct {
 }
 
 type GetDashboardResponse struct {
-	OpenTasks         int64         `json:"openTasks"`
-	InProgressTasks   int64         `json:"inProgressTasks"`
-	CompletedThisWeek int64         `json:"completedThisWeek"`
-	OverdueTasks      int64         `json:"overdueTasks"`
-	MyTasks           []TaskPayload `json:"myTasks"`
+	OpenTasks         int64         `json:"open_tasks"`
+	InProgressTasks   int64         `json:"in_progress_tasks"`
+	CompletedThisWeek int64         `json:"completed_this_week"`
+	OverdueTasks      int64         `json:"overdue_tasks"`
+	MyTasks           []TaskPayload `json:"my_tasks"`
 }
 
 func (h *GetDashboardHandler) Validate(_ context.Context, req *GetDashboardRequest) *errorModels.ServerError {

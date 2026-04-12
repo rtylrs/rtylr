@@ -4,9 +4,9 @@ import "time"
 
 type Receipt struct {
 	ID            int64     `json:"id"`
-	OrderNumber   string    `json:"orderNumber"`
-	CustomerName  string    `json:"customerName"`
+	OrderNumber   string    `json:"order_number"`
+	CustomerName  string    `json:"customer_name"`
 	Total         float64   `json:"total"`
-	PaymentMethod string    `json:"paymentMethod"`
-	PaidAt        time.Time `json:"paidAt"`
+	PaymentMethod string    `json:"payment_method"`
+	PaidAt        time.Time `json:"paid_at"`
 }

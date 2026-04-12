@@ -10,18 +10,18 @@ var ErrReviewNotFound = errors.New("review not found")
 
 type Review struct {
 	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"ownerId"`
-	StaffID      int64     `json:"staffId"`
-	ReviewerID   int64     `json:"reviewerId"`
+	OwnerID      int64     `json:"owner_id"`
+	StaffID      int64     `json:"staff_id"`
+	ReviewerID   int64     `json:"reviewer_id"`
 	Period       string    `json:"period"`
 	Rating       float64   `json:"rating"`
-	GoalsRating  float64   `json:"goalsRating"`
-	ValuesRating float64   `json:"valuesRating"`
-	SkillsRating float64   `json:"skillsRating"`
+	GoalsRating  float64   `json:"goals_rating"`
+	ValuesRating float64   `json:"values_rating"`
+	SkillsRating float64   `json:"skills_rating"`
 	Notes        string    `json:"notes"`
 	Status       string    `json:"status"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 func (r *Review) FromRow(row *sql.Rows) error {
@@ -74,13 +74,13 @@ func (r *Review) FromRow(row *sql.Rows) error {
 }
 
 type ReviewInput struct {
-	StaffID      int64   `json:"staffId"`
-	ReviewerID   int64   `json:"reviewerId"`
+	StaffID      int64   `json:"staff_id"`
+	ReviewerID   int64   `json:"reviewer_id"`
 	Period       string  `json:"period"`
 	Rating       float64 `json:"rating"`
-	GoalsRating  float64 `json:"goalsRating"`
-	ValuesRating float64 `json:"valuesRating"`
-	SkillsRating float64 `json:"skillsRating"`
+	GoalsRating  float64 `json:"goals_rating"`
+	ValuesRating float64 `json:"values_rating"`
+	SkillsRating float64 `json:"skills_rating"`
 	Notes        string  `json:"notes"`
 	Status       string  `json:"status"`
 }

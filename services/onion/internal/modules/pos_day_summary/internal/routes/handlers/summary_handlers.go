@@ -19,12 +19,12 @@ type DaySummaryRequest struct {
 }
 
 type DaySummaryResponse struct {
-	TotalSales       float64            `json:"totalSales"`
-	TotalTax         float64            `json:"totalTax"`
-	TotalTips        float64            `json:"totalTips"`
-	TotalRefunds     float64            `json:"totalRefunds"`
-	TotalOrders      int                `json:"totalOrders"`
-	PaymentBreakdown map[string]float64 `json:"paymentBreakdown"`
+	TotalSales       float64            `json:"total_sales"`
+	TotalTax         float64            `json:"total_tax"`
+	TotalTips        float64            `json:"total_tips"`
+	TotalRefunds     float64            `json:"total_refunds"`
+	TotalOrders      int                `json:"total_orders"`
+	PaymentBreakdown map[string]float64 `json:"payment_breakdown"`
 }
 
 func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (DaySummaryResponse, *errorModels.ServerError) {

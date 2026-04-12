@@ -25,16 +25,16 @@ type ListCashMovementsResponse struct {
 
 type CashMovementPayload struct {
 	ID         int64   `json:"id"`
-	BusinessID int64   `json:"businessId"`
-	BranchID   int64   `json:"branchId"`
-	TerminalID *int64  `json:"terminalId"`
-	SessionID  int64   `json:"sessionId"`
-	EmployeeID int64   `json:"employeeId"`
+	BusinessID int64   `json:"business_id"`
+	BranchID   int64   `json:"branch_id"`
+	TerminalID *int64  `json:"terminal_id"`
+	SessionID  int64   `json:"session_id"`
+	EmployeeID int64   `json:"employee_id"`
 	Type       string  `json:"type"`
 	Amount     float64 `json:"amount"`
 	Reason     *string `json:"reason"`
-	ApprovedBy *int64  `json:"approvedBy"`
-	CreatedAt  string  `json:"createdAt"`
+	ApprovedBy *int64  `json:"approved_by"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovementsRequest) (ListCashMovementsResponse, *errorModels.ServerError) {
@@ -75,16 +75,16 @@ func CashDropRoutes() []string { return []string{"/pos/cash/drop"} }
 type CashDropHandler struct{ Service *application.Service }
 
 type CashDropRequest struct {
-	BranchID   int64   `json:"branchId"`
-	TerminalID *int64  `json:"terminalId"`
-	SessionID  int64   `json:"sessionId"`
-	EmployeeID int64   `json:"employeeId"`
+	BranchID   int64   `json:"branch_id"`
+	TerminalID *int64  `json:"terminal_id"`
+	SessionID  int64   `json:"session_id"`
+	EmployeeID int64   `json:"employee_id"`
 	Amount     float64 `json:"amount"`
 	Reason     *string `json:"reason"`
 }
 
 type CashDropResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -118,16 +118,16 @@ func CashPickupRoutes() []string { return []string{"/pos/cash/pickup"} }
 type CashPickupHandler struct{ Service *application.Service }
 
 type CashPickupRequest struct {
-	BranchID   int64   `json:"branchId"`
-	TerminalID *int64  `json:"terminalId"`
-	SessionID  int64   `json:"sessionId"`
-	EmployeeID int64   `json:"employeeId"`
+	BranchID   int64   `json:"branch_id"`
+	TerminalID *int64  `json:"terminal_id"`
+	SessionID  int64   `json:"session_id"`
+	EmployeeID int64   `json:"employee_id"`
 	Amount     float64 `json:"amount"`
 	Reason     *string `json:"reason"`
 }
 
 type CashPickupResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 
@@ -161,16 +161,16 @@ func CashAdjustRoutes() []string { return []string{"/pos/cash/adjust"} }
 type CashAdjustHandler struct{ Service *application.Service }
 
 type CashAdjustRequest struct {
-	BranchID   int64   `json:"branchId"`
-	TerminalID *int64  `json:"terminalId"`
-	SessionID  int64   `json:"sessionId"`
-	EmployeeID int64   `json:"employeeId"`
+	BranchID   int64   `json:"branch_id"`
+	TerminalID *int64  `json:"terminal_id"`
+	SessionID  int64   `json:"session_id"`
+	EmployeeID int64   `json:"employee_id"`
 	Amount     float64 `json:"amount"`
 	Reason     *string `json:"reason"`
 }
 
 type CashAdjustResponse struct {
-	MovementID int64  `json:"movementId"`
+	MovementID int64  `json:"movement_id"`
 	Message    string `json:"message"`
 }
 

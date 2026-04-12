@@ -20,9 +20,9 @@ type RecordVisitHandler struct {
 }
 
 type RecordVisitRequest struct {
-	CustomerID  int64   `json:"customerId"`
+	CustomerID  int64   `json:"customer_id"`
 	Amount      float64 `json:"amount"`
-	AwardPoints bool    `json:"awardPoints"`
+	AwardPoints bool    `json:"award_points"`
 }
 
 type RecordVisitResponse struct {

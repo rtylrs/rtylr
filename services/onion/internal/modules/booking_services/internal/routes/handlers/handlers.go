@@ -11,10 +11,10 @@ import (
 )
 
 type Payload struct {
-	ID int64 `json:"id"`; OwnerID int64 `json:"ownerId"`; Name string `json:"name"`
-	Description string `json:"description"`; DurationMinutes int `json:"durationMinutes"`
-	Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"isActive"`
-	CreatedAt string `json:"createdAt"`; UpdatedAt string `json:"updatedAt"`
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; Name string `json:"name"`
+	Description string `json:"description"`; DurationMinutes int `json:"duration_minutes"`
+	Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"is_active"`
+	CreatedAt string `json:"created_at"`; UpdatedAt string `json:"updated_at"`
 }
 
 func toPayload(s domain.BookingService) Payload {
@@ -43,8 +43,8 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 type CreateHandler struct{ Service *application.Service }
 type CreateRequest struct {
-	Name string `json:"name"`; Description string `json:"description"`; DurationMinutes int `json:"durationMinutes"`
-	Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"isActive"`
+	Name string `json:"name"`; Description string `json:"description"`; DurationMinutes int `json:"duration_minutes"`
+	Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"is_active"`
 }
 type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
 
@@ -63,7 +63,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 type UpdateHandler struct{ Service *application.Service }
 type UpdateRequest struct {
 	ID int64 `json:"id"`; Name string `json:"name"`; Description string `json:"description"`
-	DurationMinutes int `json:"durationMinutes"`; Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"isActive"`
+	DurationMinutes int `json:"duration_minutes"`; Price float64 `json:"price"`; Color string `json:"color"`; IsActive bool `json:"is_active"`
 }
 type UpdateResponse struct{ Message string `json:"message"` }
 

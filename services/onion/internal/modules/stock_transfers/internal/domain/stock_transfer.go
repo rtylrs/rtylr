@@ -19,14 +19,14 @@ const (
 
 type StockTransfer struct {
 	ID              int64               `json:"id"`
-	OwnerID         int64               `json:"ownerId"`
-	FromWarehouseID int64               `json:"fromWarehouseId"`
-	ToWarehouseID   int64               `json:"toWarehouseId"`
+	OwnerID         int64               `json:"owner_id"`
+	FromWarehouseID int64               `json:"from_warehouse_id"`
+	ToWarehouseID   int64               `json:"to_warehouse_id"`
 	Status          StockTransferStatus `json:"status"`
 	Notes           string              `json:"notes"`
 	Items           []StockTransferItem `json:"items"`
-	CreatedAt       time.Time           `json:"createdAt"`
-	UpdatedAt       time.Time           `json:"updatedAt"`
+	CreatedAt       time.Time           `json:"created_at"`
+	UpdatedAt       time.Time           `json:"updated_at"`
 }
 
 func (s *StockTransfer) FromRow(row *sql.Rows) error {
@@ -55,10 +55,10 @@ func (s *StockTransfer) FromRow(row *sql.Rows) error {
 
 type StockTransferItem struct {
 	ID         int64     `json:"id"`
-	TransferID int64     `json:"transferId"`
-	ProductID  int64     `json:"productId"`
+	TransferID int64     `json:"transfer_id"`
+	ProductID  int64     `json:"product_id"`
 	Quantity   float64   `json:"quantity"`
-	CreatedAt  time.Time `json:"createdAt"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func (i *StockTransferItem) FromRow(row *sql.Rows) error {
@@ -72,14 +72,14 @@ func (i *StockTransferItem) FromRow(row *sql.Rows) error {
 }
 
 type StockTransferInput struct {
-	FromWarehouseID int64                    `json:"fromWarehouseId"`
-	ToWarehouseID   int64                    `json:"toWarehouseId"`
+	FromWarehouseID int64                    `json:"from_warehouse_id"`
+	ToWarehouseID   int64                    `json:"to_warehouse_id"`
 	Notes           string                   `json:"notes"`
 	Items           []StockTransferItemInput `json:"items"`
 }
 
 type StockTransferItemInput struct {
-	ProductID int64   `json:"productId"`
+	ProductID int64   `json:"product_id"`
 	Quantity  float64 `json:"quantity"`
 }
 

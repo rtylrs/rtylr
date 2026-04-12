@@ -24,19 +24,19 @@ type ListSuppliersRequest struct{}
 
 type SupplierPayload struct {
 	ID           int64  `json:"id"`
-	OwnerID      int64  `json:"ownerId"`
+	OwnerID      int64  `json:"owner_id"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	Phone        string `json:"phone"`
 	Address      string `json:"address"`
 	City         string `json:"city"`
 	Country      string `json:"country"`
-	TaxID        string `json:"taxId"`
-	PaymentTerms string `json:"paymentTerms"`
+	TaxID        string `json:"tax_id"`
+	PaymentTerms string `json:"payment_terms"`
 	Notes        string `json:"notes"`
-	IsActive     bool   `json:"isActive"`
-	CreatedAt    string `json:"createdAt"`
-	UpdatedAt    string `json:"updatedAt"`
+	IsActive     bool   `json:"is_active"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
 }
 
 type ListSuppliersResponse struct {
@@ -106,14 +106,14 @@ type CreateSupplierRequest struct {
 	Address      string `json:"address"`
 	City         string `json:"city"`
 	Country      string `json:"country"`
-	TaxID        string `json:"taxId"`
-	PaymentTerms string `json:"paymentTerms"`
+	TaxID        string `json:"tax_id"`
+	PaymentTerms string `json:"payment_terms"`
 	Notes        string `json:"notes"`
-	IsActive     bool   `json:"isActive"`
+	IsActive     bool   `json:"is_active"`
 }
 
 type CreateSupplierResponse struct {
-	SupplierID int64  `json:"supplierId"`
+	SupplierID int64  `json:"supplier_id"`
 	Message    string `json:"message"`
 }
 
@@ -181,10 +181,10 @@ type UpdateSupplierRequest struct {
 	Address      string `json:"address"`
 	City         string `json:"city"`
 	Country      string `json:"country"`
-	TaxID        string `json:"taxId"`
-	PaymentTerms string `json:"paymentTerms"`
+	TaxID        string `json:"tax_id"`
+	PaymentTerms string `json:"payment_terms"`
 	Notes        string `json:"notes"`
-	IsActive     bool   `json:"isActive"`
+	IsActive     bool   `json:"is_active"`
 }
 
 type UpdateSupplierResponse struct {

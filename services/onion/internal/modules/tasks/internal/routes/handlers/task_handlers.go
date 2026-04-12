@@ -18,18 +18,18 @@ import (
 
 type TaskPayload struct {
 	ID          int64           `json:"id"`
-	OwnerID     int64           `json:"ownerId"`
-	ProjectID   *int64          `json:"projectId"`
-	WorkspaceID *int64          `json:"workspaceId"`
+	OwnerID     int64           `json:"owner_id"`
+	ProjectID   *int64          `json:"project_id"`
+	WorkspaceID *int64          `json:"workspace_id"`
 	Title       string          `json:"title"`
 	Description string          `json:"description"`
 	Status      string          `json:"status"`
 	Priority    string          `json:"priority"`
-	AssigneeID  *int64          `json:"assigneeId"`
-	LabelIDs    json.RawMessage `json:"labelIds"`
-	DueDate     *string         `json:"dueDate"`
-	CreatedAt   string          `json:"createdAt"`
-	UpdatedAt   string          `json:"updatedAt"`
+	AssigneeID  *int64          `json:"assignee_id"`
+	LabelIDs    json.RawMessage `json:"label_ids"`
+	DueDate     *string         `json:"due_date"`
+	CreatedAt   string          `json:"created_at"`
+	UpdatedAt   string          `json:"updated_at"`
 }
 
 func newTaskPayload(t domain.Task) TaskPayload {
@@ -91,18 +91,18 @@ func TaskCreateRoutes() []string { return []string{"/flow/tasks"} }
 type CreateTaskHandler struct{ Service *application.Service }
 
 type CreateTaskRequest struct {
-	ProjectID   *int64          `json:"projectId"`
-	WorkspaceID *int64          `json:"workspaceId"`
+	ProjectID   *int64          `json:"project_id"`
+	WorkspaceID *int64          `json:"workspace_id"`
 	Title       string          `json:"title"`
 	Description string          `json:"description"`
 	Priority    string          `json:"priority"`
-	AssigneeID  *int64          `json:"assigneeId"`
-	LabelIDs    json.RawMessage `json:"labelIds"`
-	DueDate     *string         `json:"dueDate"`
+	AssigneeID  *int64          `json:"assignee_id"`
+	LabelIDs    json.RawMessage `json:"label_ids"`
+	DueDate     *string         `json:"due_date"`
 }
 
 type CreateTaskResponse struct {
-	TaskID  int64  `json:"taskId"`
+	TaskID  int64  `json:"task_id"`
 	Message string `json:"message"`
 }
 
@@ -151,15 +151,15 @@ func TaskUpdateRoutes() []string { return []string{"/flow/tasks/{id}"} }
 type UpdateTaskHandler struct{ Service *application.Service }
 
 type UpdateTaskRequest struct {
-	ProjectID   *int64          `json:"projectId"`
-	WorkspaceID *int64          `json:"workspaceId"`
+	ProjectID   *int64          `json:"project_id"`
+	WorkspaceID *int64          `json:"workspace_id"`
 	Title       string          `json:"title"`
 	Description string          `json:"description"`
 	Status      string          `json:"status"`
 	Priority    string          `json:"priority"`
-	AssigneeID  *int64          `json:"assigneeId"`
-	LabelIDs    json.RawMessage `json:"labelIds"`
-	DueDate     *string         `json:"dueDate"`
+	AssigneeID  *int64          `json:"assignee_id"`
+	LabelIDs    json.RawMessage `json:"label_ids"`
+	DueDate     *string         `json:"due_date"`
 }
 
 type UpdateTaskResponse struct {
@@ -251,10 +251,10 @@ type ListLabelsRequest struct{}
 
 type LabelPayload struct {
 	ID        int64  `json:"id"`
-	OwnerID   int64  `json:"ownerId"`
+	OwnerID   int64  `json:"owner_id"`
 	Name      string `json:"name"`
 	Color     string `json:"color"`
-	CreatedAt string `json:"createdAt"`
+	CreatedAt string `json:"created_at"`
 }
 
 type ListLabelsResponse struct {
@@ -289,7 +289,7 @@ type CreateLabelRequest struct {
 }
 
 type CreateLabelResponse struct {
-	LabelID int64  `json:"labelId"`
+	LabelID int64  `json:"label_id"`
 	Message string `json:"message"`
 }
 

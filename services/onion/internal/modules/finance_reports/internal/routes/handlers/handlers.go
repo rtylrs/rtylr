@@ -16,12 +16,12 @@ func BalanceSheetRoutes() []string { return []string{"/finance/balance-sheet"} }
 type BalanceSheetHandler struct{ Service *application.Service }
 type BalanceSheetRequest struct{}
 type BalanceSheetResponse struct {
-	TotalAssets         float64 `json:"totalAssets"`
-	TotalLiabilities    float64 `json:"totalLiabilities"`
-	TotalEquity         float64 `json:"totalEquity"`
-	CashBalance         float64 `json:"cashBalance"`
-	AccountsReceivable  float64 `json:"accountsReceivable"`
-	AccountsPayable     float64 `json:"accountsPayable"`
+	TotalAssets         float64 `json:"total_assets"`
+	TotalLiabilities    float64 `json:"total_liabilities"`
+	TotalEquity         float64 `json:"total_equity"`
+	CashBalance         float64 `json:"cash_balance"`
+	AccountsReceivable  float64 `json:"accounts_receivable"`
+	AccountsPayable     float64 `json:"accounts_payable"`
 }
 
 func (h *BalanceSheetHandler) Serve(ctx context.Context, _ *BalanceSheetRequest) (BalanceSheetResponse, *errorModels.ServerError) {
@@ -52,10 +52,10 @@ type CashFlowRequest struct {
 }
 type CashFlowResponse struct {
 	Period           string  `json:"period"`
-	OperatingInflow  float64 `json:"operatingInflow"`
-	OperatingOutflow float64 `json:"operatingOutflow"`
-	NetOperating     float64 `json:"netOperating"`
-	NetCashFlow      float64 `json:"netCashFlow"`
+	OperatingInflow  float64 `json:"operating_inflow"`
+	OperatingOutflow float64 `json:"operating_outflow"`
+	NetOperating     float64 `json:"net_operating"`
+	NetCashFlow      float64 `json:"net_cash_flow"`
 }
 
 func (h *CashFlowHandler) Serve(ctx context.Context, req *CashFlowRequest) (CashFlowResponse, *errorModels.ServerError) {

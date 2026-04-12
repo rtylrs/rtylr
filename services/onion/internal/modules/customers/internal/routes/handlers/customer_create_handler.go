@@ -21,11 +21,11 @@ type CreateCustomerHandler struct {
 }
 
 type CreateCustomerRequest struct {
-	FirstName   string   `json:"firstName"`
-	LastName    string   `json:"lastName"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
 	Email       string   `json:"email"`
 	Phone       string   `json:"phone"`
-	DateOfBirth string   `json:"dateOfBirth"`
+	DateOfBirth string   `json:"date_of_birth"`
 	Gender      string   `json:"gender"`
 	Address     string   `json:"address"`
 	City        string   `json:"city"`
@@ -35,7 +35,7 @@ type CreateCustomerRequest struct {
 }
 
 type CreateCustomerResponse struct {
-	CustomerID int64  `json:"customerId"`
+	CustomerID int64  `json:"customer_id"`
 	Message    string `json:"message"`
 }
 

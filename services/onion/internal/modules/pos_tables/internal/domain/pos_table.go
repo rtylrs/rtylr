@@ -9,13 +9,13 @@ var ErrTableNotFound = errors.New("table not found")
 
 type Table struct {
 	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"ownerId"`
-	LocationID *int64    `json:"locationId"`
+	OwnerID    int64     `json:"owner_id"`
+	LocationID *int64    `json:"location_id"`
 	Label      string    `json:"label"`
 	Seats      int       `json:"seats"`
 	Status     string    `json:"status"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type TableInput struct {
