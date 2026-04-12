@@ -1,18 +1,27 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { crmApi, Campaign } from '../../shared/services/crmApi';
+import { campaignSchema, campaignStatsSchema } from '../../shared/schemas/campaigns';
 
 export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
-    queryFn: () => unwrap(crmApi.getCampaigns()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCampaigns());
+      const raw = res ?? [];
+      return z.array(campaignSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useCampaignById(id: number | undefined) {
   return useQuery({
     queryKey: ['campaign', id],
-    queryFn: () => unwrap(crmApi.getCampaignById(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCampaignById(id!));
+      return campaignSchema.parse(res);
+    },
     enabled: !!id,
   });
 }
@@ -20,7 +29,10 @@ export function useCampaignById(id: number | undefined) {
 export function useCampaignStats(id: number | undefined) {
   return useQuery({
     queryKey: ['campaign-stats', id],
-    queryFn: () => unwrap(crmApi.getCampaignStats(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCampaignStats(id!));
+      return campaignStatsSchema.parse(res);
+    },
     enabled: !!id,
   });
 }

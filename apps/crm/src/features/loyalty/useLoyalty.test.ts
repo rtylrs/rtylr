@@ -56,7 +56,9 @@ describe('useLoyaltyTransactions', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches loyalty transactions', async () => {
-    const txns = [{ id: 1, customerId: 1, points: 100, type: 'earn' }];
+    const txns = [
+      { customer: 'Alice', action: 'Earned 100 points', time: '2026-04-01', type: 'earn' },
+    ];
     mockCrmApi.getLoyaltyTransactions.mockResolvedValue(txns);
 
     const { result } = renderHook(() => useLoyaltyTransactions(), { wrapper: createWrapper() });
@@ -77,7 +79,12 @@ describe('useLoyaltyConfig', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches loyalty config', async () => {
-    const config = { pointsPerDollar: 10, enabled: true };
+    const config = {
+      programEnabled: true,
+      pointsPerDollar: 10,
+      pointsExpiry: 365,
+      redemptionRate: 0.01,
+    };
     mockCrmApi.getLoyaltyConfig.mockResolvedValue(config);
 
     const { result } = renderHook(() => useLoyaltyConfig(), { wrapper: createWrapper() });
@@ -91,7 +98,18 @@ describe('useLoyaltyMembers', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches loyalty members', async () => {
-    mockCrmApi.getLoyaltyMembers.mockResolvedValue([{ id: 1, name: 'Alice', points: 500 }]);
+    mockCrmApi.getLoyaltyMembers.mockResolvedValue([
+      {
+        id: 1,
+        name: 'Alice',
+        initials: 'AL',
+        points: 500,
+        tier: 'Gold',
+        visits: 20,
+        joinedAt: '2025-01-01',
+        lastActive: '2026-04-01',
+      },
+    ]);
 
     const { result } = renderHook(() => useLoyaltyMembers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -105,7 +123,15 @@ describe('useLoyaltyRewards', () => {
 
   it('fetches loyalty rewards', async () => {
     mockCrmApi.getLoyaltyRewards.mockResolvedValue([
-      { id: 1, name: 'Free Coffee', pointsCost: 200 },
+      {
+        id: 1,
+        name: 'Free Coffee',
+        description: 'A free coffee drink',
+        pointsCost: 200,
+        category: 'Beverages',
+        stock: 50,
+        active: true,
+      },
     ]);
 
     const { result } = renderHook(() => useLoyaltyRewards(), { wrapper: createWrapper() });
@@ -120,8 +146,8 @@ describe('useLoyaltyTiers', () => {
 
   it('fetches loyalty tiers', async () => {
     mockCrmApi.getLoyaltyTiers.mockResolvedValue([
-      { id: 1, name: 'Bronze', minPoints: 0 },
-      { id: 2, name: 'Silver', minPoints: 500 },
+      { id: 1, name: 'Bronze', threshold: 0, multiplier: 1, color: '#CD7F32' },
+      { id: 2, name: 'Silver', threshold: 500, multiplier: 1.5, color: '#C0C0C0' },
     ]);
 
     const { result } = renderHook(() => useLoyaltyTiers(), { wrapper: createWrapper() });

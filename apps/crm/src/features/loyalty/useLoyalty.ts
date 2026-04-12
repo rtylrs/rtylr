@@ -1,39 +1,66 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { crmApi, LoyaltyConfig, LoyaltyTier } from '../../shared/services/crmApi';
+import {
+  loyaltyConfigSchema,
+  loyaltyTransactionSchema,
+  loyaltyMemberSchema,
+  loyaltyRewardSchema,
+  loyaltyTierSchema,
+} from '../../shared/schemas/loyalty';
 
 export function useLoyaltyTransactions() {
   return useQuery({
     queryKey: ['loyalty-transactions'],
-    queryFn: () => unwrap(crmApi.getLoyaltyTransactions()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getLoyaltyTransactions());
+      const raw = res ?? [];
+      return z.array(loyaltyTransactionSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useLoyaltyConfig() {
   return useQuery({
     queryKey: ['loyalty-config'],
-    queryFn: () => unwrap(crmApi.getLoyaltyConfig()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getLoyaltyConfig());
+      return loyaltyConfigSchema.parse(res);
+    },
   });
 }
 
 export function useLoyaltyMembers() {
   return useQuery({
     queryKey: ['loyalty-members'],
-    queryFn: () => unwrap(crmApi.getLoyaltyMembers()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getLoyaltyMembers());
+      const raw = res ?? [];
+      return z.array(loyaltyMemberSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useLoyaltyRewards() {
   return useQuery({
     queryKey: ['loyalty-rewards'],
-    queryFn: () => unwrap(crmApi.getLoyaltyRewards()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getLoyaltyRewards());
+      const raw = res ?? [];
+      return z.array(loyaltyRewardSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useLoyaltyTiers() {
   return useQuery({
     queryKey: ['loyalty-tiers'],
-    queryFn: () => unwrap(crmApi.getLoyaltyTiers()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getLoyaltyTiers());
+      const raw = res ?? [];
+      return z.array(loyaltyTierSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

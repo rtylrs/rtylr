@@ -1,18 +1,27 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { crmApi, Customer, CustomersParams } from '../../shared/services/crmApi';
+import { customerSchema, timelineEntrySchema } from '../../shared/schemas/customers';
 
 export function useCustomers(params?: CustomersParams) {
   return useQuery({
     queryKey: ['customers', params],
-    queryFn: () => unwrap(crmApi.getCustomers(params)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCustomers(params));
+      const raw = res ?? [];
+      return z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useCustomer(id: number | undefined) {
   return useQuery({
     queryKey: ['customer', id],
-    queryFn: () => unwrap(crmApi.getCustomerDetail(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCustomerDetail(id!));
+      return customerSchema.parse(res);
+    },
     enabled: !!id,
   });
 }
@@ -24,7 +33,11 @@ export function useCustomerDetail(id: number | undefined) {
 export function useCustomerTimeline(id: number | undefined) {
   return useQuery({
     queryKey: ['customer-timeline', id],
-    queryFn: () => unwrap(crmApi.getCustomerTimeline(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getCustomerTimeline(id!));
+      const raw = res ?? [];
+      return z.array(timelineEntrySchema).parse(Array.isArray(raw) ? raw : []);
+    },
     enabled: !!id,
   });
 }

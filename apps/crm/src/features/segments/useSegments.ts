@@ -1,18 +1,28 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { crmApi, Segment } from '../../shared/services/crmApi';
+import { segmentSchema } from '../../shared/schemas/segments';
+import { customerSchema } from '../../shared/schemas/customers';
 
 export function useSegments() {
   return useQuery({
     queryKey: ['segments'],
-    queryFn: () => unwrap(crmApi.getSegments()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getSegments());
+      const raw = res ?? [];
+      return z.array(segmentSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useSegmentById(id: number | undefined) {
   return useQuery({
     queryKey: ['segment', id],
-    queryFn: () => unwrap(crmApi.getSegmentById(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getSegmentById(id!));
+      return segmentSchema.parse(res);
+    },
     enabled: !!id,
   });
 }
@@ -20,7 +30,11 @@ export function useSegmentById(id: number | undefined) {
 export function useSegmentCustomers(id: number | undefined) {
   return useQuery({
     queryKey: ['segment-customers', id],
-    queryFn: () => unwrap(crmApi.getSegmentCustomers(id!)),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getSegmentCustomers(id!));
+      const raw = res ?? [];
+      return z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
+    },
     enabled: !!id,
   });
 }

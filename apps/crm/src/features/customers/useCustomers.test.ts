@@ -56,8 +56,28 @@ function createWrapper() {
 }
 
 const sampleCustomers = [
-  { id: 1, name: 'Alice', email: 'alice@test.com', phone: '555-0001', totalSpent: 500, visits: 10 },
-  { id: 2, name: 'Bob', email: 'bob@test.com', phone: '555-0002', totalSpent: 200, visits: 3 },
+  {
+    id: 1,
+    name: 'Alice',
+    email: 'alice@test.com',
+    phone: '555-0001',
+    totalSpent: 500,
+    visits: 10,
+    loyaltyPoints: 100,
+    lastVisit: '2026-04-01',
+    initials: 'AL',
+  },
+  {
+    id: 2,
+    name: 'Bob',
+    email: 'bob@test.com',
+    phone: '555-0002',
+    totalSpent: 200,
+    visits: 3,
+    loyaltyPoints: 50,
+    lastVisit: '2026-03-15',
+    initials: 'BO',
+  },
 ];
 
 describe('useCustomers', () => {
