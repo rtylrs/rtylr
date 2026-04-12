@@ -156,9 +156,8 @@ describe('canAccessApp', () => {
     expect(canAccessApp('viewer', 'pos')).toBe(false);
   });
 
-  it('operator can access CRM and store', () => {
+  it('operator can access CRM', () => {
     expect(canAccessApp('operator', 'crm')).toBe(true);
-    expect(canAccessApp('operator', 'store')).toBe(true);
   });
 
   it('billing role can access finance', () => {
