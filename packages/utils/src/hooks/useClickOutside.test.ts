@@ -69,7 +69,7 @@ describe('useClickOutside', () => {
   });
 
   it('does not call handler when ref.current is null', () => {
-    const ref = { current: null } as React.RefObject<HTMLDivElement>;
+    const ref = { current: null } as unknown as React.RefObject<HTMLDivElement>;
 
     renderHook(() => useClickOutside(ref, handler));
 
