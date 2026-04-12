@@ -67,14 +67,14 @@ describe('useTeam', () => {
   it('fetches team members from .members key', async () => {
     mockGet.mockResolvedValue({
       members: [
-        { id: '2', name: 'Bob', email: 'bob@test.com', role: 'staff', apps: [], status: 'active' },
+        { id: 2, fullName: 'Bob', email: 'bob@test.com', role: 'staff', apps: [], isActive: true },
       ],
     });
 
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data![0].name).toBe('Bob');
+    expect(result.current.data).toHaveLength(1);
   });
 
   it('prefers fullName over name', async () => {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@voxire/api": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/contracts": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "@voxire/tailwind-config": "workspace:*",
     "axios": "^1.15.0",

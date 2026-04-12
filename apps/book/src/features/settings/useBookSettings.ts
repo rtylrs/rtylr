@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type { UpdateBookSettingsRequest } from '@voxire/contracts/book/v1/settings';
 import { bookService } from '../../shared/services/bookService';
 
 export function useBookSettings() {
@@ -12,7 +13,7 @@ export function useBookSettings() {
 export function useUpdateBookSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(bookService.updateSettings(data)),
+    mutationFn: (data: UpdateBookSettingsRequest) => unwrap(bookService.updateSettings(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['book-settings'] }),
   });
 }

@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type {
+  CreateBookServiceRequest,
+  UpdateBookServiceRequest,
+} from '@voxire/contracts/book/v1/services';
 import { bookService } from '../../shared/services/bookService';
 
 export interface ServiceFilters {
@@ -26,7 +30,7 @@ export function useService(id: number | undefined) {
 export function useCreateService() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(bookService.createService(data)),
+    mutationFn: (data: CreateBookServiceRequest) => unwrap(bookService.createService(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
   });
 }
@@ -34,7 +38,7 @@ export function useCreateService() {
 export function useUpdateService() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: number; data: UpdateBookServiceRequest }) =>
       unwrap(bookService.updateService(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
   });

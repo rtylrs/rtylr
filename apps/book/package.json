@@ -16,6 +16,7 @@
     "@voxire/auth": "workspace:*",
     "@voxire/api": "workspace:*",
     "@voxire/types": "workspace:*",
+    "@voxire/contracts": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "axios": "^1.15.0",
     "motion": "^12.0.0",

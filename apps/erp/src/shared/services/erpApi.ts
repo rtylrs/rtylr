@@ -1,4 +1,5 @@
 import { safe } from '../lib/api';
+import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -248,7 +249,8 @@ export const erpApi = {
 
   // Purchase Orders
   listPurchaseOrders: () => safe.get<PurchaseOrder[]>('/erp/purchase-orders'),
-  createPurchaseOrder: (data: any) => safe.post<PurchaseOrder>('/erp/purchase-orders', data),
+  createPurchaseOrder: (data: CreatePurchaseOrderRequest) =>
+    safe.post<PurchaseOrder>('/erp/purchase-orders', data),
   updatePurchaseOrderStatus: (id: number, status: string) =>
     safe.post<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
   approvePurchaseOrder: (id: number) =>
@@ -257,7 +259,8 @@ export const erpApi = {
   // Inventory
   getInventoryReport: () => safe.get<InventoryReportItem[]>('/erp/inventory/report'),
   getLowStock: () => safe.get<LowStockItem[]>('/erp/inventory/low-stock'),
-  adjustInventory: (data: any) => safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
+  adjustInventory: (data: { productId: number; delta: number }) =>
+    safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
   getValuation: (method: 'FIFO' | 'LIFO' | 'WAC' = 'WAC') =>
     safe.get<any>('/erp/inventory/valuation', { params: { method } }),
 

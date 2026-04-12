@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import type { App as AppContract } from '@voxire/contracts/hub/apps';
+import type { App as AppContract } from '@voxire/contracts/hub/v1/apps';
 import {
   MonitorSpeaker,
   Package,

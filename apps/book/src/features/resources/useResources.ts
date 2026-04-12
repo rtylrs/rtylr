@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type {
+  CreateResourceRequest,
+  UpdateResourceRequest,
+} from '@voxire/contracts/book/v1/resources';
 import { bookService } from '../../shared/services/bookService';
 
 export interface ResourceFilters {
@@ -19,7 +23,7 @@ export function useResources(filters?: ResourceFilters) {
 export function useCreateResource() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(bookService.createResource(data)),
+    mutationFn: (data: CreateResourceRequest) => unwrap(bookService.createResource(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
 }
@@ -27,7 +31,7 @@ export function useCreateResource() {
 export function useUpdateResource() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: number; data: UpdateResourceRequest }) =>
       unwrap(bookService.updateResource(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
