@@ -11,7 +11,10 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@voxie/*": ["./voxie/gen/ts/*"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
