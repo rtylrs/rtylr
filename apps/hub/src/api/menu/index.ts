@@ -1,7 +1,7 @@
 import api from '../../shared/lib/api';
 import { API_ROUTES } from './routes';
 
-const getMenu = async ({ id }: any) => {
+const getMenu = async ({ id }: { id: string | number }) => {
   const res = await api.get(API_ROUTES.GET.GET_MENU_WITH_ID(id), {
     params: {
       detailed: true,
@@ -10,7 +10,7 @@ const getMenu = async ({ id }: any) => {
   return res.data;
 };
 
-const getMenuWithMenuId = async ({ id }: any) => {
+const getMenuWithMenuId = async ({ id }: { id: string | number }) => {
   const res = await api.get(API_ROUTES.GET.GET_MENU_WITH_MENU_ID(id), {
     params: {
       detailed: true,

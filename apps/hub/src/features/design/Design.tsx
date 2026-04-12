@@ -521,14 +521,30 @@ const Design: React.FC = () => {
       }
     : DEFAULT_BUSINESS;
 
+  interface RawMenuItem {
+    _id?: string;
+    name?: string;
+    description?: string;
+    price?: number;
+    currency?: string;
+    available?: boolean;
+    image?: string;
+    badges?: string[];
+  }
+  interface RawCategory {
+    _id?: string;
+    name?: string;
+    type?: string;
+    menuItems?: RawMenuItem[];
+  }
   const menuCategories: MenuCategoryData[] =
     menuItems && menuItems.length > 0
-      ? (menuItems
-          .filter((item: any) => item.type === 'category')
-          .map((cat: any) => ({
+      ? ((menuItems as RawCategory[])
+          .filter((item) => item.type === 'category')
+          .map((cat) => ({
             id: cat._id,
             name: cat.name,
-            items: (cat.menuItems || []).map((mi: any) => ({
+            items: (cat.menuItems || []).map((mi) => ({
               id: mi._id,
               name: mi.name,
               description: mi.description || '',

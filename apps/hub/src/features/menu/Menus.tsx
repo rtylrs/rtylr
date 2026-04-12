@@ -31,6 +31,16 @@ import {
   DropdownMenuItem,
 } from '../../shared/components/ui';
 
+interface MenuEntry {
+  _id: string;
+  menuName?: string;
+  name?: string;
+  items?: unknown[];
+  itemCount?: number;
+  isActive?: boolean;
+  active?: boolean;
+}
+
 const Menus: React.FC = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
@@ -41,7 +51,7 @@ const Menus: React.FC = () => {
   const createMenu = useCreateMenu();
   const setActiveMenu = useSetActiveMenu();
 
-  const filteredMenus = (allMenus as any[]).filter((menu: any) =>
+  const filteredMenus = (allMenus as MenuEntry[]).filter((menu) =>
     (menu.menuName || menu.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -138,7 +148,7 @@ const Menus: React.FC = () => {
       {/* Menus Grid */}
       {!isLoading && filteredMenus.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
-          {filteredMenus.map((menu: any) => {
+          {filteredMenus.map((menu) => {
             const name = menu.menuName || menu.name || 'Untitled';
             const itemCount = menu.items?.length ?? menu.itemCount ?? 0;
             const isActive = menu.isActive || menu.active;

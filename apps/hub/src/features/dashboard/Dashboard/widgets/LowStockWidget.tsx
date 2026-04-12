@@ -3,6 +3,12 @@ import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../../../shared/lib/api';
 
+interface StockItem {
+  name?: string;
+  stockQuantity?: number;
+  stock?: number;
+}
+
 const LowStockWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['low-stock-widget'],
@@ -12,7 +18,7 @@ const LowStockWidget: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const items = Array.isArray(raw) ? raw.slice(0, 6) : [];
+  const items: StockItem[] = Array.isArray(raw) ? (raw as StockItem[]).slice(0, 6) : [];
 
   return (
     <div className="flex flex-col h-full">
@@ -33,7 +39,7 @@ const LowStockWidget: React.FC = () => {
             </p>
           </div>
         ) : (
-          items.map((p: any, i: number) => (
+          items.map((p, i) => (
             <div
               key={i}
               className="flex items-center gap-3 px-2 py-1.5 rounded-lg"

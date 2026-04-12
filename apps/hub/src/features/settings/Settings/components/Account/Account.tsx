@@ -49,17 +49,23 @@ const Account: React.FC = () => {
     import('../../../../../shared/lib/api').then(({ default: api }) => {
       api
         .get('/security/login-history')
-        .then((res: any) => {
-          const history = res.data?.history ?? [];
-          setLoginHistory(
-            history.map((h: any) => ({
-              email: h.email,
-              method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
-              ip: h.ip ? `from ${h.ip}` : '',
-              timeAgo: formatTimeAgo(h.createdAt),
-            }))
-          );
-        })
+        .then(
+          (res: {
+            data?: {
+              history?: Array<{ email: string; method: string; ip?: string; createdAt: string }>;
+            };
+          }) => {
+            const history = res.data?.history ?? [];
+            setLoginHistory(
+              history.map((h) => ({
+                email: h.email,
+                method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
+                ip: h.ip ? `from ${h.ip}` : '',
+                timeAgo: formatTimeAgo(h.createdAt),
+              }))
+            );
+          }
+        )
         .catch(() => {});
     });
   }, []);

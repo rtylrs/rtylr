@@ -3,6 +3,11 @@ import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../../../shared/lib/api';
 
+interface PendingRequest {
+  staffName?: string;
+  type?: string;
+}
+
 const PendingWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['pending-widget'],
@@ -12,7 +17,9 @@ const PendingWidget: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const requests = Array.isArray(raw) ? raw.slice(0, 5) : [];
+  const requests: PendingRequest[] = Array.isArray(raw)
+    ? (raw as PendingRequest[]).slice(0, 5)
+    : [];
 
   return (
     <div className="flex flex-col h-full">
@@ -33,7 +40,7 @@ const PendingWidget: React.FC = () => {
             </p>
           </div>
         ) : (
-          requests.map((r: any, i: number) => (
+          requests.map((r, i) => (
             <div
               key={i}
               className="flex items-center gap-3 px-2 py-1.5 rounded-lg"

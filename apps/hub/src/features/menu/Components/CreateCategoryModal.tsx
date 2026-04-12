@@ -1,8 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useMenuStore } from '../../../shared/stores/menuStore';
 import { useUserStore } from '../../../shared/stores/userStore';
+
+interface StoreItemDetails {
+  isParentCategory?: boolean;
+  name?: string;
+}
+
+interface StoreItem {
+  itemId?: string;
+  type?: string;
+  details?: StoreItemDetails;
+}
 
 interface CreateCategoryModalProps {
   isOpen: boolean;
@@ -36,8 +47,8 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
 
   const { userId: restaurantId } = useUserStore();
   const { items, addCategory, editCategory } = useMenuStore();
-  const parentCategories = items.filter(
-    (item: any) => item.type === 'category' && item.details.isParentCategory
+  const parentCategories = (items as StoreItem[]).filter(
+    (item) => item.type === 'category' && item.details?.isParentCategory
   );
 
   useEffect(() => {
@@ -51,7 +62,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
     }
   }, [isOpen, categoryData]);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (category.trim() && parentCategory) {
       const categoryPayload = {
@@ -140,9 +151,9 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                 required
               >
                 <option value="">Select Parent Category</option>
-                {parentCategories.map((parent: any) => (
+                {parentCategories.map((parent) => (
                   <option key={parent.itemId} value={parent.itemId}>
-                    {parent.details.name}
+                    {parent.details?.name}
                   </option>
                 ))}
               </select>

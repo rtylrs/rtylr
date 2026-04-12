@@ -31,17 +31,18 @@ const DropdownMenu: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   );
 };
 
-const DropdownMenuTrigger: React.FC<{ children: React.ReactElement; asChild?: boolean }> = ({
-  children,
-}) => {
+const DropdownMenuTrigger: React.FC<{
+  children: React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>;
+  asChild?: boolean;
+}> = ({ children }) => {
   const { open, setOpen } = useContext(DropdownContext);
   return React.cloneElement(children, {
     onClick: (e: React.MouseEvent) => {
       e.stopPropagation();
-      (children.props as any).onClick?.(e);
+      children.props.onClick?.(e);
       setOpen(!open);
     },
-  } as any);
+  });
 };
 
 interface DropdownMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {

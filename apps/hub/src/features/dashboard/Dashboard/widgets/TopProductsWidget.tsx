@@ -3,6 +3,14 @@ import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../../../shared/lib/api';
 
+interface WidgetProduct {
+  name?: string;
+  sku?: string;
+  category?: string;
+  salePrice?: number;
+  price?: number;
+}
+
 const TopProductsWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['top-products-widget'],
@@ -12,7 +20,7 @@ const TopProductsWidget: React.FC = () => {
     },
     staleTime: 60_000,
   });
-  const products = Array.isArray(raw) ? raw.slice(0, 5) : [];
+  const products: WidgetProduct[] = Array.isArray(raw) ? (raw as WidgetProduct[]).slice(0, 5) : [];
 
   return (
     <div className="flex flex-col h-full">
@@ -33,7 +41,7 @@ const TopProductsWidget: React.FC = () => {
             </p>
           </div>
         ) : (
-          products.map((p: any, i: number) => (
+          products.map((p, i) => (
             <div key={i} className="flex items-center gap-3 px-2 py-1.5">
               <span
                 className="text-[10px] font-bold w-4 text-center"

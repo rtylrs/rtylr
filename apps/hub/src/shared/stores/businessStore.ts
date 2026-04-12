@@ -13,13 +13,13 @@ export type BusinessType =
 
 interface BusinessState {
   businessType: BusinessType | null;
-  businessPreferences: Record<string, any>;
+  businessPreferences: Record<string, unknown>;
 }
 
 interface BusinessActions {
   setBusinessType: (type: BusinessType) => void;
-  setBusinessPreferences: (preferences: Record<string, any>) => void;
-  updateBusinessPreference: (key: string, value: any) => void;
+  setBusinessPreferences: (preferences: Record<string, unknown>) => void;
+  updateBusinessPreference: (key: string, value: unknown) => void;
 }
 
 const initialState: BusinessState = {

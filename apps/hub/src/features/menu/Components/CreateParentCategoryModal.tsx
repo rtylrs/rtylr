@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useMenuStore } from '../../../shared/stores/menuStore';
@@ -36,7 +36,7 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
     }
   }, [isOpen, categoryData]);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (category.trim()) {
       const categoryPayload = {

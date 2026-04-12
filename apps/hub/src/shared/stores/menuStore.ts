@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 interface MenuItem {
   _id: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Category {
@@ -12,7 +12,7 @@ interface Category {
   name: string;
   type: 'category';
   menuItems: MenuItem[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Banner {
