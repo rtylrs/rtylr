@@ -78,7 +78,6 @@ import (
 	posusers "github.com/voxire/onion/internal/modules/pos_users"
 	posmemberlocations "github.com/voxire/onion/internal/modules/pos_member_locations"
 	"github.com/voxire/onion/internal/modules/products"
-	"github.com/voxire/onion/internal/modules/projects"
 	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
 	"github.com/voxire/onion/internal/modules/quotes"
 	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
@@ -105,7 +104,6 @@ import (
 	storeshipping "github.com/voxire/onion/internal/modules/store_shipping"
 	storethemes "github.com/voxire/onion/internal/modules/store_themes"
 	"github.com/voxire/onion/internal/modules/suppliers"
-	"github.com/voxire/onion/internal/modules/tasks"
 	"github.com/voxire/onion/internal/modules/tax"
 	"github.com/voxire/onion/internal/modules/team"
 	"github.com/voxire/onion/internal/modules/templates"
@@ -295,7 +293,6 @@ type apiModules struct {
 	PosUsers             *posusers.Module
 	PosMemberLocations   *posmemberlocations.Module
 	Products             *products.Module
-	Projects             *projects.Module
 	PurchaseOrders       *purchaseorders.Module
 	Quotes               *quotes.Module
 	RecurringInvoices    *recurringinvoices.Module
@@ -322,7 +319,6 @@ type apiModules struct {
 	SupportSettings      *supportsettings.Module
 	SupportTickets       *supporttickets.Module
 	Suppliers            *suppliers.Module
-	Tasks                *tasks.Module
 	Tax                  *tax.Module
 	Team                 *team.Module
 	Templates            *templates.Module
@@ -408,7 +404,6 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosUsers:             posusers.NewModule(ctx),
 		PosMemberLocations:   posmemberlocations.NewModule(ctx),
 		Products:             products.NewModule(ctx),
-		Projects:             projects.NewModule(ctx),
 		PurchaseOrders:       purchaseorders.NewModule(ctx),
 		Quotes:               quotes.NewModule(ctx),
 		RecurringInvoices:    recurringinvoices.NewModule(ctx),
@@ -435,7 +430,6 @@ func initializeModules(ctx context.Context) *apiModules {
 		SupportSettings:      supportsettings.NewModule(ctx),
 		SupportTickets:       supporttickets.NewModule(ctx),
 		Suppliers:            suppliers.NewModule(ctx),
-		Tasks:                tasks.NewModule(ctx),
 		Tax:                  tax.NewModule(ctx),
 		Team:                 team.NewModule(ctx),
 		Templates:            templates.NewModule(ctx),
