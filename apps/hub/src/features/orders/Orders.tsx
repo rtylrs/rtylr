@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ShoppingBag, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { useOrders, type HubOrder } from '../../shared/hooks/queries/useOrders';
 import {
   Card,
   CardContent,
@@ -54,13 +55,22 @@ const EmptyState: React.FC<{ label: string }> = ({ label }) => (
   </TableRow>
 );
 
-const OrdersTable: React.FC<{ orders: any[]; emptyLabel: string }> = ({ orders, emptyLabel }) => (
+function formatTime(iso: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
+  orders,
+  emptyLabel,
+}) => (
   <Table>
     <TableHeader>
       <TableRow>
         <TableHead>Order #</TableHead>
-        <TableHead>Table</TableHead>
-        <TableHead>Items</TableHead>
+        <TableHead>Customer</TableHead>
+        <TableHead>Subtotal</TableHead>
         <TableHead>Total</TableHead>
         <TableHead>Status</TableHead>
         <TableHead>Time</TableHead>
@@ -74,13 +84,13 @@ const OrdersTable: React.FC<{ orders: any[]; emptyLabel: string }> = ({ orders, 
         orders.map((order) => (
           <TableRow key={order.id}>
             <TableCell className="font-mono text-xs">#{order.id}</TableCell>
-            <TableCell>{order.table}</TableCell>
-            <TableCell>{order.itemCount}</TableCell>
+            <TableCell>{order.customerName || order.customerEmail || '—'}</TableCell>
+            <TableCell>${order.subtotal.toFixed(2)}</TableCell>
             <TableCell>${order.total.toFixed(2)}</TableCell>
             <TableCell>
               <Badge variant={statusBadgeVariant[order.status]}>{statusLabel[order.status]}</Badge>
             </TableCell>
-            <TableCell className="text-gray-400 text-xs">{order.time}</TableCell>
+            <TableCell className="text-gray-400 text-xs">{formatTime(order.createdAt)}</TableCell>
             <TableCell className="text-right">
               <Button variant="ghost" size="sm">
                 View
@@ -95,14 +105,19 @@ const OrdersTable: React.FC<{ orders: any[]; emptyLabel: string }> = ({ orders, 
 
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
+  const { data: allOrders = [] } = useOrders();
 
-  // TODO: fetch from /orders API
-  const allOrders: any[] = [];
-  const pendingOrders = allOrders.filter((o) => o.status === 'pending');
-  const inProgressOrders = allOrders.filter((o) => o.status === 'in_progress');
-  const completedOrders = allOrders.filter((o) => o.status === 'completed');
+  const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
+  const inProgressOrders = useMemo(
+    () => allOrders.filter((o) => o.status === 'in_progress'),
+    [allOrders]
+  );
+  const completedOrders = useMemo(
+    () => allOrders.filter((o) => o.status === 'completed'),
+    [allOrders]
+  );
 
-  const ordersForTab: Record<OrderStatus, any[]> = {
+  const ordersForTab: Record<OrderStatus, HubOrder[]> = {
     all: allOrders,
     pending: pendingOrders,
     in_progress: inProgressOrders,
