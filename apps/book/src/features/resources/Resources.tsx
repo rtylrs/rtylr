@@ -131,8 +131,8 @@ const Resources: React.FC = () => {
 
         {!isLoading && !isError && resources && resources.length > 0 && (
           <div>
-            {resources.map((res: any) => {
-              const typeColor = getTypeColor(res.type);
+            {resources.map((res) => {
+              const typeColor = getTypeColor(res.type ?? '');
               return (
                 <div
                   key={res.id}
@@ -165,11 +165,11 @@ const Resources: React.FC = () => {
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
                         background:
-                          res.available !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                        color: res.available !== false ? '#10b981' : '#ef4444',
+                          res.isActive !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                        color: res.isActive !== false ? '#10b981' : '#ef4444',
                       }}
                     >
-                      {res.available !== false ? 'Available' : 'Unavailable'}
+                      {res.isActive !== false ? 'Available' : 'Unavailable'}
                     </span>
                   </div>
                 </div>

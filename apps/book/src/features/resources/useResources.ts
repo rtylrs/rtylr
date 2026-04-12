@@ -20,7 +20,7 @@ export function useResources(filters?: ResourceFilters) {
     queryKey: ['resources', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getResources(filters));
-      const raw = (res as any)?.resources ?? res;
+      const raw = (res as Record<string, unknown>)?.resources ?? res;
       return z.array(resourceSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

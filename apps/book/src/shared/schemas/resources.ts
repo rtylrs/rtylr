@@ -7,6 +7,7 @@ export const resourceSchema = z.object({
   description: z.string().optional().nullable(),
   capacity: z.number().optional().nullable(),
   isActive: z.boolean().optional(),
+  location: z.string().optional().nullable(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

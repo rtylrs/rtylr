@@ -21,7 +21,7 @@ export function useAppointments(filters?: AppointmentFilters) {
     queryKey: ['appointments', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getAppointments(filters));
-      const raw = (res as any)?.appointments ?? res;
+      const raw = (res as Record<string, unknown>)?.appointments ?? res;
       return z.array(appointmentSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

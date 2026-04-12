@@ -8,7 +8,7 @@ const INDIGO = '#6366f1';
 
 const Section: React.FC<{
   title: string;
-  icon: React.ComponentType<{ size?: number; style?: any }>;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   children: React.ReactNode;
 }> = ({ title, icon: Icon, children }) => (
   <div

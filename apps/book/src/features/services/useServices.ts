@@ -19,7 +19,7 @@ export function useServices(filters?: ServiceFilters) {
     queryKey: ['services', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getServices(filters));
-      const raw = (res as any)?.services ?? res;
+      const raw = (res as Record<string, unknown>)?.services ?? res;
       return z.array(bookServiceSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

@@ -15,7 +15,7 @@ export function useCalendarEvents(filters?: CalendarFilters) {
     queryKey: ['calendar', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getCalendarEvents(filters));
-      const raw = (res as any)?.events ?? res;
+      const raw = (res as Record<string, unknown>)?.events ?? res;
       return z.array(calendarEventSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
