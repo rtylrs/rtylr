@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useFlowStore, type Project, type Milestone } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
 import { useMilestones } from '../milestones/useMilestones';
-import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 
 function parseDate(d: string): number {
@@ -17,10 +16,8 @@ const Timeline: React.FC = () => {
   const storeMilestones = useFlowStore((s) => s.milestones);
   const { data: apiProjects } = useProjects(activeWorkspaceId || undefined);
   const { data: apiMilestones } = useMilestones();
-  const projects = (isFlowLocal() ? storeProjects : (apiProjects ?? storeProjects)) as Project[];
-  const milestones = (
-    isFlowLocal() ? storeMilestones : (apiMilestones ?? storeMilestones)
-  ) as Milestone[];
+  const projects = (apiProjects ?? storeProjects) as Project[];
+  const milestones = (apiMilestones ?? storeMilestones) as Milestone[];
 
   const { start, end, days } = useMemo(() => {
     const now = new Date();

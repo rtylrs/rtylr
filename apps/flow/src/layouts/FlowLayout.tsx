@@ -41,7 +41,6 @@ import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects } from '../features/projects/useProjects';
 import { isTaskMine } from '../shared/lib/currentUser';
-import { isFlowLocal } from '../shared/lib/flowLocalMode';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
 import {
@@ -215,17 +214,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const currentWorkspaceId = workspaceId || activeWorkspaceId || workspaces[0]?.id || '';
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
-  // Remote API: hydrate the store from React Query. Local mode uses the store as SSOT — syncing
-  // back would loop (setProjects → new filtered array from useProjects → effect runs again).
+  // Hydrate the store from React Query so sidebar and other consumers see fresh data.
   useEffect(() => {
-    if (isFlowLocal()) return;
     if (apiWorkspaces && apiWorkspaces.length > 0) {
       setWorkspaces(apiWorkspaces as any);
     }
   }, [apiWorkspaces, setWorkspaces]);
 
   useEffect(() => {
-    if (isFlowLocal()) return;
     if (apiProjects && apiProjects.length > 0) {
       setProjects(apiProjects as any);
     }

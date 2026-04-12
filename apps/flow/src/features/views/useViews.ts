@@ -2,46 +2,19 @@ import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
-import { isFlowLocal } from '../../shared/lib/flowLocalMode';
-import {
-  useFlowStore,
-  PRIORITY_ORDER,
-  type SavedView,
-  type Task,
-} from '../../shared/stores/flowStore';
+import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
 
 export function useViews() {
-  const views = useFlowStore((s) => s.views);
-  const q = useQuery<SavedView[]>({
+  return useQuery<SavedView[]>({
     queryKey: ['views'],
     queryFn: () => unwrap(flowApi.getViews()) as Promise<SavedView[]>,
-    enabled: !isFlowLocal(),
   });
-  return {
-    ...q,
-    data: isFlowLocal() ? views : q.data,
-    isLoading: isFlowLocal() ? false : q.isLoading,
-  };
 }
 
 export function useCreateView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<SavedView>) => {
-      if (isFlowLocal()) {
-        const id = `view-${Date.now()}`;
-        const row: SavedView = {
-          id,
-          name: data.name ?? 'New view',
-          icon: data.icon ?? 'eye',
-          filters: data.filters ?? {},
-          groupBy: data.groupBy,
-          sortBy: data.sortBy,
-          sortDir: data.sortDir,
-        };
-        useFlowStore.setState({ views: [...useFlowStore.getState().views, row] });
-        return Promise.resolve(row as any);
-      }
       return unwrap(flowApi.createView(data as any));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
@@ -52,13 +25,6 @@ export function useUpdateView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }) => {
-      if (isFlowLocal()) {
-        const views = useFlowStore
-          .getState()
-          .views.map((v) => (v.id === id ? { ...v, ...data } : v));
-        useFlowStore.setState({ views });
-        return Promise.resolve();
-      }
       return unwrap(flowApi.updateView(id, data as any)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
@@ -69,12 +35,6 @@ export function useDeleteView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => {
-      if (isFlowLocal()) {
-        useFlowStore.setState({
-          views: useFlowStore.getState().views.filter((v) => v.id !== id),
-        });
-        return Promise.resolve();
-      }
       return unwrap(flowApi.deleteView(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
