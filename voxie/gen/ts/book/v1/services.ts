@@ -6,88 +6,58 @@
 
 /* eslint-disable */
 
-export interface BookService {
+export interface BookingService {
   id: number;
-  businessId: number;
-  categoryId: number;
+  ownerId: number;
   name: string;
   description: string;
   durationMinutes: number;
-  /** time between appointments */
-  bufferMinutes: number;
   price: number;
   color: string;
   isActive: boolean;
-  sortOrder: number;
-  /** for group bookings */
-  maxCapacity: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ServiceCategory {
-  id: number;
-  name: string;
-  sortOrder: number;
-  serviceCount: number;
+export interface ListBookingServicesRequest {
 }
 
-export interface ListBookServicesRequest {
-  activeOnly: boolean;
-  categoryId: number;
+export interface ListBookingServicesResponse {
+  services: BookingService[];
 }
 
-export interface ListBookServicesResponse {
-  services: BookService[];
-  categories: ServiceCategory[];
-}
-
-export interface GetBookServiceRequest {
-  id: number;
-}
-
-export interface GetBookServiceResponse {
-  service: BookService | undefined;
-}
-
-export interface CreateBookServiceRequest {
+export interface CreateBookingServiceRequest {
   name: string;
   description: string;
   durationMinutes: number;
-  bufferMinutes: number;
   price: number;
   color: string;
-  categoryId: number;
-  sortOrder: number;
-  maxCapacity: number;
-}
-
-export interface CreateBookServiceResponse {
-  service: BookService | undefined;
-}
-
-export interface UpdateBookServiceRequest {
-  id: number;
-  name: string;
-  description: string;
-  durationMinutes: number;
-  bufferMinutes: number;
-  price: number;
-  color: string;
-  categoryId: number;
-  sortOrder: number;
-  maxCapacity: number;
   isActive: boolean;
 }
 
-export interface UpdateBookServiceResponse {
-  service: BookService | undefined;
+export interface CreateBookingServiceResponse {
+  id: number;
+  message: string;
 }
 
-export interface DeleteBookServiceRequest {
+export interface UpdateBookingServiceRequest {
+  id: number;
+  name: string;
+  description: string;
+  durationMinutes: number;
+  price: number;
+  color: string;
+  isActive: boolean;
+}
+
+export interface UpdateBookingServiceResponse {
+  message: string;
+}
+
+export interface DeleteBookingServiceRequest {
   id: number;
 }
 
-export interface DeleteBookServiceResponse {
-  success: boolean;
+export interface DeleteBookingServiceResponse {
+  message: string;
 }

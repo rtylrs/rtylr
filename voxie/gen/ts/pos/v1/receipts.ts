@@ -5,44 +5,21 @@
 // source: pos/v1/receipts.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Receipt {
   id: number;
-  orderId: number;
   orderNumber: string;
-  receiptNumber: string;
-  /** sale, refund, void */
-  type: string;
-  subtotal: number;
-  taxAmount: number;
-  discountAmount: number;
-  tipAmount: number;
+  customerName: string;
   total: number;
   paymentMethod: string;
-  customerName: string;
-  customerEmail: string;
-  cashierName: string;
-  locationName: string;
-  createdAt: string;
+  paidAt: string;
 }
 
 export interface ListReceiptsRequest {
-  pagination: PaginationRequest | undefined;
-  dateFrom: string;
-  dateTo: string;
+  from: string;
+  to: string;
 }
 
 export interface ListReceiptsResponse {
   receipts: Receipt[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface EmailReceiptRequest {
-  receiptId: number;
-  email: string;
-}
-
-export interface EmailReceiptResponse {
-  success: boolean;
 }

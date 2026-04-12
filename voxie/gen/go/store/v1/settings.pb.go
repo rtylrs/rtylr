@@ -21,42 +21,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type StoreSettings struct {
-	state                    protoimpl.MessageState `protogen:"open.v1"`
-	Id                       int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StoreId                  int64                  `protobuf:"varint,2,opt,name=store_id,json=storeId,proto3" json:"store_id,omitempty"`
-	Currency                 string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
-	Timezone                 string                 `protobuf:"bytes,4,opt,name=timezone,proto3" json:"timezone,omitempty"`
-	WeightUnit               string                 `protobuf:"bytes,5,opt,name=weight_unit,json=weightUnit,proto3" json:"weight_unit,omitempty"` // kg, lb
-	TaxIncludedInPrice       bool                   `protobuf:"varint,6,opt,name=tax_included_in_price,json=taxIncludedInPrice,proto3" json:"tax_included_in_price,omitempty"`
-	TaxRate                  float64                `protobuf:"fixed64,7,opt,name=tax_rate,json=taxRate,proto3" json:"tax_rate,omitempty"`
-	AutoFulfill              bool                   `protobuf:"varint,8,opt,name=auto_fulfill,json=autoFulfill,proto3" json:"auto_fulfill,omitempty"`
-	InventoryTracking        bool                   `protobuf:"varint,9,opt,name=inventory_tracking,json=inventoryTracking,proto3" json:"inventory_tracking,omitempty"`
-	OrderPrefix              string                 `protobuf:"bytes,10,opt,name=order_prefix,json=orderPrefix,proto3" json:"order_prefix,omitempty"`
-	NextOrderNumber          int32                  `protobuf:"varint,11,opt,name=next_order_number,json=nextOrderNumber,proto3" json:"next_order_number,omitempty"`
-	NotificationEmail        string                 `protobuf:"bytes,12,opt,name=notification_email,json=notificationEmail,proto3" json:"notification_email,omitempty"`
-	SendOrderConfirmation    bool                   `protobuf:"varint,13,opt,name=send_order_confirmation,json=sendOrderConfirmation,proto3" json:"send_order_confirmation,omitempty"`
-	SendShippingConfirmation bool                   `protobuf:"varint,14,opt,name=send_shipping_confirmation,json=sendShippingConfirmation,proto3" json:"send_shipping_confirmation,omitempty"`
-	CreatedAt                string                 `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt                string                 `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+type CreateCheckoutRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,2,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	Items         string                 `protobuf:"bytes,3,opt,name=items,proto3" json:"items,omitempty"`
+	Subtotal      float64                `protobuf:"fixed64,4,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
+	Tax           float64                `protobuf:"fixed64,5,opt,name=tax,proto3" json:"tax,omitempty"`
+	Total         float64                `protobuf:"fixed64,6,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *StoreSettings) Reset() {
-	*x = StoreSettings{}
+func (x *CreateCheckoutRequest) Reset() {
+	*x = CreateCheckoutRequest{}
 	mi := &file_store_v1_settings_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StoreSettings) String() string {
+func (x *CreateCheckoutRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StoreSettings) ProtoMessage() {}
+func (*CreateCheckoutRequest) ProtoMessage() {}
 
-func (x *StoreSettings) ProtoReflect() protoreflect.Message {
+func (x *CreateCheckoutRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_settings_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -68,180 +58,126 @@ func (x *StoreSettings) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StoreSettings.ProtoReflect.Descriptor instead.
-func (*StoreSettings) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateCheckoutRequest.ProtoReflect.Descriptor instead.
+func (*CreateCheckoutRequest) Descriptor() ([]byte, []int) {
 	return file_store_v1_settings_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *StoreSettings) GetId() int64 {
+func (x *CreateCheckoutRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *CreateCheckoutRequest) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
+}
+
+func (x *CreateCheckoutRequest) GetItems() string {
+	if x != nil {
+		return x.Items
+	}
+	return ""
+}
+
+func (x *CreateCheckoutRequest) GetSubtotal() float64 {
+	if x != nil {
+		return x.Subtotal
+	}
+	return 0
+}
+
+func (x *CreateCheckoutRequest) GetTax() float64 {
+	if x != nil {
+		return x.Tax
+	}
+	return 0
+}
+
+func (x *CreateCheckoutRequest) GetTotal() float64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type CreateCheckoutResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateCheckoutResponse) Reset() {
+	*x = CreateCheckoutResponse{}
+	mi := &file_store_v1_settings_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateCheckoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateCheckoutResponse) ProtoMessage() {}
+
+func (x *CreateCheckoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_settings_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateCheckoutResponse.ProtoReflect.Descriptor instead.
+func (*CreateCheckoutResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_settings_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateCheckoutResponse) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *StoreSettings) GetStoreId() int64 {
+func (x *CreateCheckoutResponse) GetMessage() string {
 	if x != nil {
-		return x.StoreId
-	}
-	return 0
-}
-
-func (x *StoreSettings) GetCurrency() string {
-	if x != nil {
-		return x.Currency
+		return x.Message
 	}
 	return ""
 }
 
-func (x *StoreSettings) GetTimezone() string {
-	if x != nil {
-		return x.Timezone
-	}
-	return ""
-}
-
-func (x *StoreSettings) GetWeightUnit() string {
-	if x != nil {
-		return x.WeightUnit
-	}
-	return ""
-}
-
-func (x *StoreSettings) GetTaxIncludedInPrice() bool {
-	if x != nil {
-		return x.TaxIncludedInPrice
-	}
-	return false
-}
-
-func (x *StoreSettings) GetTaxRate() float64 {
-	if x != nil {
-		return x.TaxRate
-	}
-	return 0
-}
-
-func (x *StoreSettings) GetAutoFulfill() bool {
-	if x != nil {
-		return x.AutoFulfill
-	}
-	return false
-}
-
-func (x *StoreSettings) GetInventoryTracking() bool {
-	if x != nil {
-		return x.InventoryTracking
-	}
-	return false
-}
-
-func (x *StoreSettings) GetOrderPrefix() string {
-	if x != nil {
-		return x.OrderPrefix
-	}
-	return ""
-}
-
-func (x *StoreSettings) GetNextOrderNumber() int32 {
-	if x != nil {
-		return x.NextOrderNumber
-	}
-	return 0
-}
-
-func (x *StoreSettings) GetNotificationEmail() string {
-	if x != nil {
-		return x.NotificationEmail
-	}
-	return ""
-}
-
-func (x *StoreSettings) GetSendOrderConfirmation() bool {
-	if x != nil {
-		return x.SendOrderConfirmation
-	}
-	return false
-}
-
-func (x *StoreSettings) GetSendShippingConfirmation() bool {
-	if x != nil {
-		return x.SendShippingConfirmation
-	}
-	return false
-}
-
-func (x *StoreSettings) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *StoreSettings) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
-type GetStoreSettingsRequest struct {
+type CompleteCheckoutRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetStoreSettingsRequest) Reset() {
-	*x = GetStoreSettingsRequest{}
-	mi := &file_store_v1_settings_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetStoreSettingsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetStoreSettingsRequest) ProtoMessage() {}
-
-func (x *GetStoreSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_settings_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetStoreSettingsRequest.ProtoReflect.Descriptor instead.
-func (*GetStoreSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_settings_proto_rawDescGZIP(), []int{1}
-}
-
-type GetStoreSettingsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Settings      *StoreSettings         `protobuf:"bytes,1,opt,name=settings,proto3" json:"settings,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetStoreSettingsResponse) Reset() {
-	*x = GetStoreSettingsResponse{}
+func (x *CompleteCheckoutRequest) Reset() {
+	*x = CompleteCheckoutRequest{}
 	mi := &file_store_v1_settings_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetStoreSettingsResponse) String() string {
+func (x *CompleteCheckoutRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetStoreSettingsResponse) ProtoMessage() {}
+func (*CompleteCheckoutRequest) ProtoMessage() {}
 
-func (x *GetStoreSettingsResponse) ProtoReflect() protoreflect.Message {
+func (x *CompleteCheckoutRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_settings_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -253,164 +189,40 @@ func (x *GetStoreSettingsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetStoreSettingsResponse.ProtoReflect.Descriptor instead.
-func (*GetStoreSettingsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CompleteCheckoutRequest.ProtoReflect.Descriptor instead.
+func (*CompleteCheckoutRequest) Descriptor() ([]byte, []int) {
 	return file_store_v1_settings_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetStoreSettingsResponse) GetSettings() *StoreSettings {
+func (x *CompleteCheckoutRequest) GetId() int64 {
 	if x != nil {
-		return x.Settings
-	}
-	return nil
-}
-
-type UpdateStoreSettingsRequest struct {
-	state                    protoimpl.MessageState `protogen:"open.v1"`
-	Currency                 string                 `protobuf:"bytes,1,opt,name=currency,proto3" json:"currency,omitempty"`
-	Timezone                 string                 `protobuf:"bytes,2,opt,name=timezone,proto3" json:"timezone,omitempty"`
-	WeightUnit               string                 `protobuf:"bytes,3,opt,name=weight_unit,json=weightUnit,proto3" json:"weight_unit,omitempty"`
-	TaxIncludedInPrice       bool                   `protobuf:"varint,4,opt,name=tax_included_in_price,json=taxIncludedInPrice,proto3" json:"tax_included_in_price,omitempty"`
-	TaxRate                  float64                `protobuf:"fixed64,5,opt,name=tax_rate,json=taxRate,proto3" json:"tax_rate,omitempty"`
-	AutoFulfill              bool                   `protobuf:"varint,6,opt,name=auto_fulfill,json=autoFulfill,proto3" json:"auto_fulfill,omitempty"`
-	InventoryTracking        bool                   `protobuf:"varint,7,opt,name=inventory_tracking,json=inventoryTracking,proto3" json:"inventory_tracking,omitempty"`
-	OrderPrefix              string                 `protobuf:"bytes,8,opt,name=order_prefix,json=orderPrefix,proto3" json:"order_prefix,omitempty"`
-	NotificationEmail        string                 `protobuf:"bytes,9,opt,name=notification_email,json=notificationEmail,proto3" json:"notification_email,omitempty"`
-	SendOrderConfirmation    bool                   `protobuf:"varint,10,opt,name=send_order_confirmation,json=sendOrderConfirmation,proto3" json:"send_order_confirmation,omitempty"`
-	SendShippingConfirmation bool                   `protobuf:"varint,11,opt,name=send_shipping_confirmation,json=sendShippingConfirmation,proto3" json:"send_shipping_confirmation,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *UpdateStoreSettingsRequest) Reset() {
-	*x = UpdateStoreSettingsRequest{}
-	mi := &file_store_v1_settings_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateStoreSettingsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateStoreSettingsRequest) ProtoMessage() {}
-
-func (x *UpdateStoreSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_settings_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateStoreSettingsRequest.ProtoReflect.Descriptor instead.
-func (*UpdateStoreSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_settings_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *UpdateStoreSettingsRequest) GetCurrency() string {
-	if x != nil {
-		return x.Currency
-	}
-	return ""
-}
-
-func (x *UpdateStoreSettingsRequest) GetTimezone() string {
-	if x != nil {
-		return x.Timezone
-	}
-	return ""
-}
-
-func (x *UpdateStoreSettingsRequest) GetWeightUnit() string {
-	if x != nil {
-		return x.WeightUnit
-	}
-	return ""
-}
-
-func (x *UpdateStoreSettingsRequest) GetTaxIncludedInPrice() bool {
-	if x != nil {
-		return x.TaxIncludedInPrice
-	}
-	return false
-}
-
-func (x *UpdateStoreSettingsRequest) GetTaxRate() float64 {
-	if x != nil {
-		return x.TaxRate
+		return x.Id
 	}
 	return 0
 }
 
-func (x *UpdateStoreSettingsRequest) GetAutoFulfill() bool {
-	if x != nil {
-		return x.AutoFulfill
-	}
-	return false
-}
-
-func (x *UpdateStoreSettingsRequest) GetInventoryTracking() bool {
-	if x != nil {
-		return x.InventoryTracking
-	}
-	return false
-}
-
-func (x *UpdateStoreSettingsRequest) GetOrderPrefix() string {
-	if x != nil {
-		return x.OrderPrefix
-	}
-	return ""
-}
-
-func (x *UpdateStoreSettingsRequest) GetNotificationEmail() string {
-	if x != nil {
-		return x.NotificationEmail
-	}
-	return ""
-}
-
-func (x *UpdateStoreSettingsRequest) GetSendOrderConfirmation() bool {
-	if x != nil {
-		return x.SendOrderConfirmation
-	}
-	return false
-}
-
-func (x *UpdateStoreSettingsRequest) GetSendShippingConfirmation() bool {
-	if x != nil {
-		return x.SendShippingConfirmation
-	}
-	return false
-}
-
-type UpdateStoreSettingsResponse struct {
+type CompleteCheckoutResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Settings      *StoreSettings         `protobuf:"bytes,1,opt,name=settings,proto3" json:"settings,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateStoreSettingsResponse) Reset() {
-	*x = UpdateStoreSettingsResponse{}
-	mi := &file_store_v1_settings_proto_msgTypes[4]
+func (x *CompleteCheckoutResponse) Reset() {
+	*x = CompleteCheckoutResponse{}
+	mi := &file_store_v1_settings_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateStoreSettingsResponse) String() string {
+func (x *CompleteCheckoutResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateStoreSettingsResponse) ProtoMessage() {}
+func (*CompleteCheckoutResponse) ProtoMessage() {}
 
-func (x *UpdateStoreSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_settings_proto_msgTypes[4]
+func (x *CompleteCheckoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_settings_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,63 +233,38 @@ func (x *UpdateStoreSettingsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateStoreSettingsResponse.ProtoReflect.Descriptor instead.
-func (*UpdateStoreSettingsResponse) Descriptor() ([]byte, []int) {
-	return file_store_v1_settings_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use CompleteCheckoutResponse.ProtoReflect.Descriptor instead.
+func (*CompleteCheckoutResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_settings_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpdateStoreSettingsResponse) GetSettings() *StoreSettings {
+func (x *CompleteCheckoutResponse) GetMessage() string {
 	if x != nil {
-		return x.Settings
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_store_v1_settings_proto protoreflect.FileDescriptor
 
 const file_store_v1_settings_proto_rawDesc = "" +
 	"\n" +
-	"\x17store/v1/settings.proto\x12\x05store\"\xe5\x04\n" +
-	"\rStoreSettings\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstore_id\x18\x02 \x01(\x03R\astoreId\x12\x1a\n" +
-	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x1a\n" +
-	"\btimezone\x18\x04 \x01(\tR\btimezone\x12\x1f\n" +
-	"\vweight_unit\x18\x05 \x01(\tR\n" +
-	"weightUnit\x121\n" +
-	"\x15tax_included_in_price\x18\x06 \x01(\bR\x12taxIncludedInPrice\x12\x19\n" +
-	"\btax_rate\x18\a \x01(\x01R\ataxRate\x12!\n" +
-	"\fauto_fulfill\x18\b \x01(\bR\vautoFulfill\x12-\n" +
-	"\x12inventory_tracking\x18\t \x01(\bR\x11inventoryTracking\x12!\n" +
-	"\forder_prefix\x18\n" +
-	" \x01(\tR\vorderPrefix\x12*\n" +
-	"\x11next_order_number\x18\v \x01(\x05R\x0fnextOrderNumber\x12-\n" +
-	"\x12notification_email\x18\f \x01(\tR\x11notificationEmail\x126\n" +
-	"\x17send_order_confirmation\x18\r \x01(\bR\x15sendOrderConfirmation\x12<\n" +
-	"\x1asend_shipping_confirmation\x18\x0e \x01(\bR\x18sendShippingConfirmation\x12\x1d\n" +
+	"\x17store/v1/settings.proto\x12\x05store\"\xb7\x01\n" +
+	"\x15CreateCheckoutRequest\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x0f \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x10 \x01(\tR\tupdatedAt\"\x19\n" +
-	"\x17GetStoreSettingsRequest\"L\n" +
-	"\x18GetStoreSettingsResponse\x120\n" +
-	"\bsettings\x18\x01 \x01(\v2\x14.store.StoreSettingsR\bsettings\"\xdd\x03\n" +
-	"\x1aUpdateStoreSettingsRequest\x12\x1a\n" +
-	"\bcurrency\x18\x01 \x01(\tR\bcurrency\x12\x1a\n" +
-	"\btimezone\x18\x02 \x01(\tR\btimezone\x12\x1f\n" +
-	"\vweight_unit\x18\x03 \x01(\tR\n" +
-	"weightUnit\x121\n" +
-	"\x15tax_included_in_price\x18\x04 \x01(\bR\x12taxIncludedInPrice\x12\x19\n" +
-	"\btax_rate\x18\x05 \x01(\x01R\ataxRate\x12!\n" +
-	"\fauto_fulfill\x18\x06 \x01(\bR\vautoFulfill\x12-\n" +
-	"\x12inventory_tracking\x18\a \x01(\bR\x11inventoryTracking\x12!\n" +
-	"\forder_prefix\x18\b \x01(\tR\vorderPrefix\x12-\n" +
-	"\x12notification_email\x18\t \x01(\tR\x11notificationEmail\x126\n" +
-	"\x17send_order_confirmation\x18\n" +
-	" \x01(\bR\x15sendOrderConfirmation\x12<\n" +
-	"\x1asend_shipping_confirmation\x18\v \x01(\bR\x18sendShippingConfirmation\"O\n" +
-	"\x1bUpdateStoreSettingsResponse\x120\n" +
-	"\bsettings\x18\x01 \x01(\v2\x14.store.StoreSettingsR\bsettingsB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12%\n" +
+	"\x0ecustomer_email\x18\x02 \x01(\tR\rcustomerEmail\x12\x14\n" +
+	"\x05items\x18\x03 \x01(\tR\x05items\x12\x1a\n" +
+	"\bsubtotal\x18\x04 \x01(\x01R\bsubtotal\x12\x10\n" +
+	"\x03tax\x18\x05 \x01(\x01R\x03tax\x12\x14\n" +
+	"\x05total\x18\x06 \x01(\x01R\x05total\"B\n" +
+	"\x16CreateCheckoutResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\")\n" +
+	"\x17CompleteCheckoutRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"4\n" +
+	"\x18CompleteCheckoutResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
 
 var (
 	file_store_v1_settings_proto_rawDescOnce sync.Once
@@ -491,22 +278,19 @@ func file_store_v1_settings_proto_rawDescGZIP() []byte {
 	return file_store_v1_settings_proto_rawDescData
 }
 
-var file_store_v1_settings_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_store_v1_settings_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_store_v1_settings_proto_goTypes = []any{
-	(*StoreSettings)(nil),               // 0: store.StoreSettings
-	(*GetStoreSettingsRequest)(nil),     // 1: store.GetStoreSettingsRequest
-	(*GetStoreSettingsResponse)(nil),    // 2: store.GetStoreSettingsResponse
-	(*UpdateStoreSettingsRequest)(nil),  // 3: store.UpdateStoreSettingsRequest
-	(*UpdateStoreSettingsResponse)(nil), // 4: store.UpdateStoreSettingsResponse
+	(*CreateCheckoutRequest)(nil),    // 0: store.CreateCheckoutRequest
+	(*CreateCheckoutResponse)(nil),   // 1: store.CreateCheckoutResponse
+	(*CompleteCheckoutRequest)(nil),  // 2: store.CompleteCheckoutRequest
+	(*CompleteCheckoutResponse)(nil), // 3: store.CompleteCheckoutResponse
 }
 var file_store_v1_settings_proto_depIdxs = []int32{
-	0, // 0: store.GetStoreSettingsResponse.settings:type_name -> store.StoreSettings
-	0, // 1: store.UpdateStoreSettingsResponse.settings:type_name -> store.StoreSettings
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_store_v1_settings_proto_init() }
@@ -520,7 +304,7 @@ func file_store_v1_settings_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_store_v1_settings_proto_rawDesc), len(file_store_v1_settings_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

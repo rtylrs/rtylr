@@ -5,57 +5,44 @@
 // source: hr/v1/payroll.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface PayrollRun {
+export interface PayrollRecord {
   id: number;
-  /** 2024-01, 2024-02, etc. */
-  period: string;
-  /** draft, processing, completed, paid */
+  ownerId: number;
+  staffId: number;
+  periodStart: string;
+  periodEnd: string;
+  periodLabel: string;
+  regularHours: number;
+  overtimeHours: number;
+  basePay: number;
+  overtimePay: number;
+  bonuses: number;
+  deductions: number;
+  taxWithheld: number;
+  netPay: number;
   status: string;
-  staffCount: number;
-  totalGross: number;
-  totalDeductions: number;
-  totalNet: number;
-  items: PayrollItem[];
-  runAt: string;
   paidAt: string;
+  notes: string;
   createdAt: string;
 }
 
-export interface PayrollItem {
-  staffId: number;
-  staffName: string;
-  hoursWorked: number;
-  grossPay: number;
-  deductions: number;
-  netPay: number;
+export interface ListPayrollRequest {
+  periodLabel: string;
 }
 
-export interface ListPayrollRunsRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-}
-
-export interface ListPayrollRunsResponse {
-  runs: PayrollRun[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetPayrollRunRequest {
-  id: number;
-}
-
-export interface GetPayrollRunResponse {
-  run: PayrollRun | undefined;
+export interface ListPayrollResponse {
+  records: PayrollRecord[];
 }
 
 export interface RunPayrollRequest {
-  period: string;
+  periodStart: string;
+  periodEnd: string;
+  periodLabel: string;
 }
 
 export interface RunPayrollResponse {
-  run: PayrollRun | undefined;
+  recordsCreated: number;
 }
 
 export interface MarkPayrollPaidRequest {
@@ -63,5 +50,5 @@ export interface MarkPayrollPaidRequest {
 }
 
 export interface MarkPayrollPaidResponse {
-  run: PayrollRun | undefined;
+  success: boolean;
 }

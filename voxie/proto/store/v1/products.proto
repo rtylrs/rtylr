@@ -4,136 +4,76 @@ package store;
 
 option go_package = "github.com/voxire/voxie/gen/go/store/v1";
 
-import "common/v1/pagination.proto";
+// ── StoreProduct ──────────────────────────────────────────────────
 
-// ── Product ────────────────────────────────────────────────────────
-
-message ProductVariant {
+message StoreProduct {
   int64 id = 1;
-  string name = 2;
-  string sku = 3;
-  double price = 4;
-  double compare_at_price = 5;
-  int32 stock_quantity = 6;
-  bool track_inventory = 7;
-  double weight = 8;
-  string weight_unit = 9;
-}
-
-message ProductImage {
-  int64 id = 1;
-  string url = 2;
-  string alt_text = 3;
-  int32 sort_order = 4;
-  bool is_primary = 5;
-}
-
-message Product {
-  int64 id = 1;
-  int64 store_id = 2;
-  string title = 3;
-  string description = 4;
+  int64 owner_id = 2;
+  int64 product_id = 3;
+  string title = 4;
   string slug = 5;
-  string status = 6; // draft, active, archived
+  string description = 6;
+  string images = 7;
+  double price = 8;
+  double compare_at_price = 9;
+  bool is_published = 10;
+  int32 sort_order = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListStoreProductsRequest {}
+
+message ListStoreProductsResponse {
+  repeated StoreProduct products = 1;
+}
+
+// ── Create ────────────────────────────────────────────────────────
+
+message CreateStoreProductRequest {
+  int64 product_id = 1;
+  string title = 2;
+  string slug = 3;
+  string description = 4;
+  string images = 5;
+  double price = 6;
+  double compare_at_price = 7;
+  bool is_published = 8;
+  int32 sort_order = 9;
+}
+
+message CreateStoreProductResponse {
+  int64 id = 1;
+  string message = 2;
+}
+
+// ── Update ────────────────────────────────────────────────────────
+
+message UpdateStoreProductRequest {
+  int64 id = 1;
+  int64 product_id = 2;
+  string title = 3;
+  string slug = 4;
+  string description = 5;
+  string images = 6;
   double price = 7;
   double compare_at_price = 8;
-  string sku = 9;
-  int32 stock_quantity = 10;
-  bool track_inventory = 11;
-  double weight = 12;
-  string weight_unit = 13;
-  int64 category_id = 14;
-  string category_name = 15;
-  repeated string tags = 16;
-  repeated ProductVariant variants = 17;
-  repeated ProductImage images = 18;
-  bool is_featured = 19;
-  string seo_title = 20;
-  string seo_description = 21;
-  string created_at = 22;
-  string updated_at = 23;
+  bool is_published = 9;
+  int32 sort_order = 10;
 }
 
-// ── List ───────────────────────────────────────────────────────────
-
-message ListProductsRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  int64 category_id = 3;
-  string search = 4;
-  bool featured_only = 5;
+message UpdateStoreProductResponse {
+  string message = 1;
 }
 
-message ListProductsResponse {
-  repeated Product products = 1;
-  common.PaginationResponse pagination = 2;
-}
+// ── Delete ────────────────────────────────────────────────────────
 
-// ── Get ────────────────────────────────────────────────────────────
-
-message GetProductRequest {
+message DeleteStoreProductRequest {
   int64 id = 1;
 }
 
-message GetProductResponse {
-  Product product = 1;
-}
-
-// ── Create ─────────────────────────────────────────────────────────
-
-message CreateProductRequest {
-  string title = 1;
-  string description = 2;
-  double price = 3;
-  double compare_at_price = 4;
-  string sku = 5;
-  int32 stock_quantity = 6;
-  bool track_inventory = 7;
-  double weight = 8;
-  string weight_unit = 9;
-  int64 category_id = 10;
-  repeated string tags = 11;
-  string status = 12;
-  bool is_featured = 13;
-  string seo_title = 14;
-  string seo_description = 15;
-}
-
-message CreateProductResponse {
-  Product product = 1;
-}
-
-// ── Update ─────────────────────────────────────────────────────────
-
-message UpdateProductRequest {
-  int64 id = 1;
-  string title = 2;
-  string description = 3;
-  double price = 4;
-  double compare_at_price = 5;
-  string sku = 6;
-  int32 stock_quantity = 7;
-  bool track_inventory = 8;
-  double weight = 9;
-  string weight_unit = 10;
-  int64 category_id = 11;
-  repeated string tags = 12;
-  string status = 13;
-  bool is_featured = 14;
-  string seo_title = 15;
-  string seo_description = 16;
-}
-
-message UpdateProductResponse {
-  Product product = 1;
-}
-
-// ── Delete ─────────────────────────────────────────────────────────
-
-message DeleteProductRequest {
-  int64 id = 1;
-}
-
-message DeleteProductResponse {
-  bool success = 1;
+message DeleteStoreProductResponse {
+  string message = 1;
 }

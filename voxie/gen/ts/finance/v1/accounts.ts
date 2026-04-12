@@ -5,48 +5,34 @@
 // source: finance/v1/accounts.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Account {
   id: number;
-  code: string;
+  ownerId: number;
   name: string;
-  /** asset, liability, equity, revenue, expense */
   type: string;
-  subType: string;
+  currency: string;
   balance: number;
-  description: string;
   isActive: boolean;
   createdAt: string;
 }
 
 export interface ListAccountsRequest {
-  pagination: PaginationRequest | undefined;
-  type: string;
-  search: string;
 }
 
 export interface ListAccountsResponse {
   accounts: Account[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetAccountRequest {
-  id: number;
-}
-
-export interface GetAccountResponse {
-  account: Account | undefined;
 }
 
 export interface CreateAccountRequest {
-  code: string;
   name: string;
   type: string;
-  subType: string;
-  description: string;
+  currency: string;
+  balance: number;
+  isActive: boolean;
 }
 
 export interface CreateAccountResponse {
-  account: Account | undefined;
+  id: number;
+  message: string;
 }

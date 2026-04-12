@@ -8,21 +8,11 @@
 
 export interface PaymentMethod {
   id: number;
-  storeId: number;
-  /** stripe, paypal, square, cash_on_delivery */
+  ownerId: number;
   provider: string;
-  displayName: string;
-  isEnabled: boolean;
-  isDefault: boolean;
-  testMode: boolean;
-  config: { [key: string]: string };
+  config: string;
+  isActive: boolean;
   createdAt: string;
-  updatedAt: string;
-}
-
-export interface PaymentMethod_ConfigEntry {
-  key: string;
-  value: string;
 }
 
 export interface ListPaymentMethodsRequest {
@@ -32,20 +22,24 @@ export interface ListPaymentMethodsResponse {
   methods: PaymentMethod[];
 }
 
-export interface UpdatePaymentMethodRequest {
-  id: number;
-  displayName: string;
-  isEnabled: boolean;
-  isDefault: boolean;
-  testMode: boolean;
-  config: { [key: string]: string };
+export interface CreatePaymentMethodRequest {
+  provider: string;
+  config: string;
+  isActive: boolean;
 }
 
-export interface UpdatePaymentMethodRequest_ConfigEntry {
-  key: string;
-  value: string;
+export interface CreatePaymentMethodResponse {
+  id: number;
+  message: string;
+}
+
+export interface UpdatePaymentMethodRequest {
+  id: number;
+  provider: string;
+  config: string;
+  isActive: boolean;
 }
 
 export interface UpdatePaymentMethodResponse {
-  method: PaymentMethod | undefined;
+  message: string;
 }

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package insights;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Reports ─────────────────────────────────────────────────────────
+
+message ReportTemplate {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string type = 4; // revenue, customers, products, operations, financial
+  repeated string metrics = 5;
+  string format = 6; // pdf, csv, xlsx
+  string created_at = 7;
+}
+
+message ScheduledReport {
+  int64 id = 1;
+  int64 template_id = 2;
+  string template_name = 3;
+  string frequency = 4; // daily, weekly, monthly
+  string recipient_email = 5;
+  bool is_active = 6;
+  string last_sent_at = 7;
+  string next_send_at = 8;
+  string created_at = 9;
+}
+
+message ListReportTemplatesRequest {
+  common.PaginationRequest pagination = 1;
+  string type = 2;
+}
+
+message ListReportTemplatesResponse {
+  repeated ReportTemplate templates = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetReportTemplateRequest {
+  int64 id = 1;
+}
+
+message GetReportTemplateResponse {
+  ReportTemplate template = 1;
+}
+
+message CreateReportTemplateRequest {
+  string name = 1;
+  string description = 2;
+  string type = 3;
+  repeated string metrics = 4;
+  string format = 5;
+}
+
+message CreateReportTemplateResponse {
+  ReportTemplate template = 1;
+}
+
+message ListScheduledReportsRequest {
+  common.PaginationRequest pagination = 1;
+}
+
+message ListScheduledReportsResponse {
+  repeated ScheduledReport reports = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message CreateScheduledReportRequest {
+  int64 template_id = 1;
+  string frequency = 2;
+  string recipient_email = 3;
+}
+
+message CreateScheduledReportResponse {
+  ScheduledReport report = 1;
+}

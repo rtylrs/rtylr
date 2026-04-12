@@ -4,50 +4,40 @@ package flow;
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Projects ────────────────────────────────────────────────────────
 
 message Project {
   int64 id = 1;
-  string name = 2;
-  string description = 3;
-  string status = 4; // active, archived, completed
-  string color = 5;
-  int64 workspace_id = 6;
-  string workspace_name = 7;
-  int32 task_count = 8;
-  int32 completed_tasks = 9;
-  double progress = 10;
-  string created_at = 11;
-  string updated_at = 12;
+  int64 workspace_id = 2;
+  int64 owner_id = 3;
+  string name = 4;
+  string description = 5;
+  string icon = 6;
+  string color = 7;
+  string status = 8;
+  string start_date = 9;
+  string due_date = 10;
+  int64 created_by = 11;
+  string created_at = 12;
+  string updated_at = 13;
 }
 
 message ListProjectsRequest {
-  common.PaginationRequest pagination = 1;
-  int64 workspace_id = 2;
-  string status = 3;
-  string search = 4;
+  int64 workspace_id = 1;
 }
 
 message ListProjectsResponse {
   repeated Project projects = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message GetProjectRequest {
-  int64 id = 1;
-}
-
-message GetProjectResponse {
-  Project project = 1;
 }
 
 message CreateProjectRequest {
-  string name = 1;
-  string description = 2;
-  int64 workspace_id = 3;
-  string color = 4;
+  int64 workspace_id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  string color = 5;
+  string start_date = 6;
+  string due_date = 7;
 }
 
 message CreateProjectResponse {
@@ -58,12 +48,15 @@ message UpdateProjectRequest {
   int64 id = 1;
   string name = 2;
   string description = 3;
-  string status = 4;
+  string icon = 4;
   string color = 5;
+  string status = 6;
+  string start_date = 7;
+  string due_date = 8;
 }
 
 message UpdateProjectResponse {
-  Project project = 1;
+  string message = 1;
 }
 
 message DeleteProjectRequest {
@@ -71,5 +64,5 @@ message DeleteProjectRequest {
 }
 
 message DeleteProjectResponse {
-  bool success = 1;
+  string message = 1;
 }

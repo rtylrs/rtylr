@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,13 +24,13 @@ const (
 type GiftCard struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId     int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	OwnerId        int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Code           string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
-	InitialBalance float64                `protobuf:"fixed64,4,opt,name=initial_balance,json=initialBalance,proto3" json:"initial_balance,omitempty"`
+	InitialAmount  float64                `protobuf:"fixed64,4,opt,name=initial_amount,json=initialAmount,proto3" json:"initial_amount,omitempty"`
 	CurrentBalance float64                `protobuf:"fixed64,5,opt,name=current_balance,json=currentBalance,proto3" json:"current_balance,omitempty"`
-	IsActive       bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	CustomerId     int64                  `protobuf:"varint,7,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CustomerName   string                 `protobuf:"bytes,8,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerName   string                 `protobuf:"bytes,6,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail  string                 `protobuf:"bytes,7,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	IsActive       bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	ExpiresAt      string                 `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	CreatedAt      string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -76,9 +75,9 @@ func (x *GiftCard) GetId() int64 {
 	return 0
 }
 
-func (x *GiftCard) GetLocationId() int64 {
+func (x *GiftCard) GetOwnerId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -90,9 +89,9 @@ func (x *GiftCard) GetCode() string {
 	return ""
 }
 
-func (x *GiftCard) GetInitialBalance() float64 {
+func (x *GiftCard) GetInitialAmount() float64 {
 	if x != nil {
-		return x.InitialBalance
+		return x.InitialAmount
 	}
 	return 0
 }
@@ -104,25 +103,25 @@ func (x *GiftCard) GetCurrentBalance() float64 {
 	return 0
 }
 
-func (x *GiftCard) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *GiftCard) GetCustomerId() int64 {
-	if x != nil {
-		return x.CustomerId
-	}
-	return 0
-}
-
 func (x *GiftCard) GetCustomerName() string {
 	if x != nil {
 		return x.CustomerName
 	}
 	return ""
+}
+
+func (x *GiftCard) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
+}
+
+func (x *GiftCard) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 func (x *GiftCard) GetExpiresAt() string {
@@ -146,110 +145,15 @@ func (x *GiftCard) GetUpdatedAt() string {
 	return ""
 }
 
-type GiftCardTransaction struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	GiftCardId    int64                  `protobuf:"varint,2,opt,name=gift_card_id,json=giftCardId,proto3" json:"gift_card_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // purchase, redeem, refund, adjustment
-	Amount        float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
-	BalanceAfter  float64                `protobuf:"fixed64,5,opt,name=balance_after,json=balanceAfter,proto3" json:"balance_after,omitempty"`
-	OrderId       int64                  `protobuf:"varint,6,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GiftCardTransaction) Reset() {
-	*x = GiftCardTransaction{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GiftCardTransaction) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GiftCardTransaction) ProtoMessage() {}
-
-func (x *GiftCardTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GiftCardTransaction.ProtoReflect.Descriptor instead.
-func (*GiftCardTransaction) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *GiftCardTransaction) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *GiftCardTransaction) GetGiftCardId() int64 {
-	if x != nil {
-		return x.GiftCardId
-	}
-	return 0
-}
-
-func (x *GiftCardTransaction) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-func (x *GiftCardTransaction) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-func (x *GiftCardTransaction) GetBalanceAfter() float64 {
-	if x != nil {
-		return x.BalanceAfter
-	}
-	return 0
-}
-
-func (x *GiftCardTransaction) GetOrderId() int64 {
-	if x != nil {
-		return x.OrderId
-	}
-	return 0
-}
-
-func (x *GiftCardTransaction) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
 type ListGiftCardsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	ActiveOnly    bool                   `protobuf:"varint,2,opt,name=active_only,json=activeOnly,proto3" json:"active_only,omitempty"`
-	Search        string                 `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListGiftCardsRequest) Reset() {
 	*x = ListGiftCardsRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[2]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -261,7 +165,7 @@ func (x *ListGiftCardsRequest) String() string {
 func (*ListGiftCardsRequest) ProtoMessage() {}
 
 func (x *ListGiftCardsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[2]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -274,41 +178,19 @@ func (x *ListGiftCardsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListGiftCardsRequest.ProtoReflect.Descriptor instead.
 func (*ListGiftCardsRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListGiftCardsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListGiftCardsRequest) GetActiveOnly() bool {
-	if x != nil {
-		return x.ActiveOnly
-	}
-	return false
-}
-
-func (x *ListGiftCardsRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{1}
 }
 
 type ListGiftCardsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	GiftCards     []*GiftCard            `protobuf:"bytes,1,rep,name=gift_cards,json=giftCards,proto3" json:"gift_cards,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListGiftCardsResponse) Reset() {
 	*x = ListGiftCardsResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[3]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -320,7 +202,7 @@ func (x *ListGiftCardsResponse) String() string {
 func (*ListGiftCardsResponse) ProtoMessage() {}
 
 func (x *ListGiftCardsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[3]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -333,7 +215,7 @@ func (x *ListGiftCardsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListGiftCardsResponse.ProtoReflect.Descriptor instead.
 func (*ListGiftCardsResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{3}
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListGiftCardsResponse) GetGiftCards() []*GiftCard {
@@ -343,25 +225,20 @@ func (x *ListGiftCardsResponse) GetGiftCards() []*GiftCard {
 	return nil
 }
 
-func (x *ListGiftCardsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 type CreateGiftCardRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	InitialBalance float64                `protobuf:"fixed64,1,opt,name=initial_balance,json=initialBalance,proto3" json:"initial_balance,omitempty"`
-	CustomerId     int64                  `protobuf:"varint,2,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	ExpiresAt      string                 `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	InitialAmount float64                `protobuf:"fixed64,2,opt,name=initial_amount,json=initialAmount,proto3" json:"initial_amount,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,3,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,4,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	ExpiresAt     string                 `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateGiftCardRequest) Reset() {
 	*x = CreateGiftCardRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[4]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -373,7 +250,7 @@ func (x *CreateGiftCardRequest) String() string {
 func (*CreateGiftCardRequest) ProtoMessage() {}
 
 func (x *CreateGiftCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[4]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -386,21 +263,35 @@ func (x *CreateGiftCardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGiftCardRequest.ProtoReflect.Descriptor instead.
 func (*CreateGiftCardRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{4}
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateGiftCardRequest) GetInitialBalance() float64 {
+func (x *CreateGiftCardRequest) GetCode() string {
 	if x != nil {
-		return x.InitialBalance
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CreateGiftCardRequest) GetInitialAmount() float64 {
+	if x != nil {
+		return x.InitialAmount
 	}
 	return 0
 }
 
-func (x *CreateGiftCardRequest) GetCustomerId() int64 {
+func (x *CreateGiftCardRequest) GetCustomerName() string {
 	if x != nil {
-		return x.CustomerId
+		return x.CustomerName
 	}
-	return 0
+	return ""
+}
+
+func (x *CreateGiftCardRequest) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
 }
 
 func (x *CreateGiftCardRequest) GetExpiresAt() string {
@@ -412,14 +303,15 @@ func (x *CreateGiftCardRequest) GetExpiresAt() string {
 
 type CreateGiftCardResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GiftCard      *GiftCard              `protobuf:"bytes,1,opt,name=gift_card,json=giftCard,proto3" json:"gift_card,omitempty"`
+	GiftCardId    int64                  `protobuf:"varint,1,opt,name=gift_card_id,json=giftCardId,proto3" json:"gift_card_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateGiftCardResponse) Reset() {
 	*x = CreateGiftCardResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[5]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -431,7 +323,7 @@ func (x *CreateGiftCardResponse) String() string {
 func (*CreateGiftCardResponse) ProtoMessage() {}
 
 func (x *CreateGiftCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[5]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -444,124 +336,34 @@ func (x *CreateGiftCardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateGiftCardResponse.ProtoReflect.Descriptor instead.
 func (*CreateGiftCardResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{5}
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateGiftCardResponse) GetGiftCard() *GiftCard {
+func (x *CreateGiftCardResponse) GetGiftCardId() int64 {
 	if x != nil {
-		return x.GiftCard
-	}
-	return nil
-}
-
-type GetGiftCardRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetGiftCardRequest) Reset() {
-	*x = GetGiftCardRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetGiftCardRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetGiftCardRequest) ProtoMessage() {}
-
-func (x *GetGiftCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetGiftCardRequest.ProtoReflect.Descriptor instead.
-func (*GetGiftCardRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetGiftCardRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
+		return x.GiftCardId
 	}
 	return 0
 }
 
-type GetGiftCardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	GiftCard      *GiftCard              `protobuf:"bytes,1,opt,name=gift_card,json=giftCard,proto3" json:"gift_card,omitempty"`
-	Transactions  []*GiftCardTransaction `protobuf:"bytes,2,rep,name=transactions,proto3" json:"transactions,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetGiftCardResponse) Reset() {
-	*x = GetGiftCardResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetGiftCardResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetGiftCardResponse) ProtoMessage() {}
-
-func (x *GetGiftCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[7]
+func (x *CreateGiftCardResponse) GetMessage() string {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.Message
 	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetGiftCardResponse.ProtoReflect.Descriptor instead.
-func (*GetGiftCardResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetGiftCardResponse) GetGiftCard() *GiftCard {
-	if x != nil {
-		return x.GiftCard
-	}
-	return nil
-}
-
-func (x *GetGiftCardResponse) GetTransactions() []*GiftCardTransaction {
-	if x != nil {
-		return x.Transactions
-	}
-	return nil
+	return ""
 }
 
 type RedeemGiftCardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	OrderId       int64                  `protobuf:"varint,3,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RedeemGiftCardRequest) Reset() {
 	*x = RedeemGiftCardRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[8]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -573,7 +375,7 @@ func (x *RedeemGiftCardRequest) String() string {
 func (*RedeemGiftCardRequest) ProtoMessage() {}
 
 func (x *RedeemGiftCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[8]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -586,7 +388,7 @@ func (x *RedeemGiftCardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RedeemGiftCardRequest.ProtoReflect.Descriptor instead.
 func (*RedeemGiftCardRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{8}
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RedeemGiftCardRequest) GetCode() string {
@@ -603,24 +405,17 @@ func (x *RedeemGiftCardRequest) GetAmount() float64 {
 	return 0
 }
 
-func (x *RedeemGiftCardRequest) GetOrderId() int64 {
-	if x != nil {
-		return x.OrderId
-	}
-	return 0
-}
-
 type RedeemGiftCardResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	GiftCard       *GiftCard              `protobuf:"bytes,1,opt,name=gift_card,json=giftCard,proto3" json:"gift_card,omitempty"`
-	RedeemedAmount float64                `protobuf:"fixed64,2,opt,name=redeemed_amount,json=redeemedAmount,proto3" json:"redeemed_amount,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GiftCard      *GiftCard              `protobuf:"bytes,1,opt,name=gift_card,json=giftCard,proto3" json:"gift_card,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RedeemGiftCardResponse) Reset() {
 	*x = RedeemGiftCardResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[9]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -632,7 +427,7 @@ func (x *RedeemGiftCardResponse) String() string {
 func (*RedeemGiftCardResponse) ProtoMessage() {}
 
 func (x *RedeemGiftCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[9]
+	mi := &file_pos_v1_gift_cards_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -645,7 +440,7 @@ func (x *RedeemGiftCardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RedeemGiftCardResponse.ProtoReflect.Descriptor instead.
 func (*RedeemGiftCardResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{9}
+	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RedeemGiftCardResponse) GetGiftCard() *GiftCard {
@@ -655,393 +450,55 @@ func (x *RedeemGiftCardResponse) GetGiftCard() *GiftCard {
 	return nil
 }
 
-func (x *RedeemGiftCardResponse) GetRedeemedAmount() float64 {
+func (x *RedeemGiftCardResponse) GetMessage() string {
 	if x != nil {
-		return x.RedeemedAmount
-	}
-	return 0
-}
-
-type GetGiftCardBalanceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetGiftCardBalanceRequest) Reset() {
-	*x = GetGiftCardBalanceRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetGiftCardBalanceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetGiftCardBalanceRequest) ProtoMessage() {}
-
-func (x *GetGiftCardBalanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetGiftCardBalanceRequest.ProtoReflect.Descriptor instead.
-func (*GetGiftCardBalanceRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *GetGiftCardBalanceRequest) GetCode() string {
-	if x != nil {
-		return x.Code
+		return x.Message
 	}
 	return ""
-}
-
-type GetGiftCardBalanceResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Balance       float64                `protobuf:"fixed64,1,opt,name=balance,proto3" json:"balance,omitempty"`
-	IsActive      bool                   `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	ExpiresAt     string                 `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetGiftCardBalanceResponse) Reset() {
-	*x = GetGiftCardBalanceResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetGiftCardBalanceResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetGiftCardBalanceResponse) ProtoMessage() {}
-
-func (x *GetGiftCardBalanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetGiftCardBalanceResponse.ProtoReflect.Descriptor instead.
-func (*GetGiftCardBalanceResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *GetGiftCardBalanceResponse) GetBalance() float64 {
-	if x != nil {
-		return x.Balance
-	}
-	return 0
-}
-
-func (x *GetGiftCardBalanceResponse) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *GetGiftCardBalanceResponse) GetExpiresAt() string {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return ""
-}
-
-type UpdateGiftCardRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	IsActive      bool                   `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	ExpiresAt     string                 `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateGiftCardRequest) Reset() {
-	*x = UpdateGiftCardRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateGiftCardRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateGiftCardRequest) ProtoMessage() {}
-
-func (x *UpdateGiftCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateGiftCardRequest.ProtoReflect.Descriptor instead.
-func (*UpdateGiftCardRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *UpdateGiftCardRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateGiftCardRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *UpdateGiftCardRequest) GetExpiresAt() string {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return ""
-}
-
-type UpdateGiftCardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	GiftCard      *GiftCard              `protobuf:"bytes,1,opt,name=gift_card,json=giftCard,proto3" json:"gift_card,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateGiftCardResponse) Reset() {
-	*x = UpdateGiftCardResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateGiftCardResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateGiftCardResponse) ProtoMessage() {}
-
-func (x *UpdateGiftCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateGiftCardResponse.ProtoReflect.Descriptor instead.
-func (*UpdateGiftCardResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *UpdateGiftCardResponse) GetGiftCard() *GiftCard {
-	if x != nil {
-		return x.GiftCard
-	}
-	return nil
-}
-
-type DeleteGiftCardRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteGiftCardRequest) Reset() {
-	*x = DeleteGiftCardRequest{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteGiftCardRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteGiftCardRequest) ProtoMessage() {}
-
-func (x *DeleteGiftCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteGiftCardRequest.ProtoReflect.Descriptor instead.
-func (*DeleteGiftCardRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *DeleteGiftCardRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type DeleteGiftCardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteGiftCardResponse) Reset() {
-	*x = DeleteGiftCardResponse{}
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteGiftCardResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteGiftCardResponse) ProtoMessage() {}
-
-func (x *DeleteGiftCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_gift_cards_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteGiftCardResponse.ProtoReflect.Descriptor instead.
-func (*DeleteGiftCardResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_gift_cards_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *DeleteGiftCardResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
 }
 
 var File_pos_v1_gift_cards_proto protoreflect.FileDescriptor
 
 const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/v1/gift_cards.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\xe1\x02\n" +
+	"\x17pos/v1/gift_cards.proto\x12\x03pos\"\xdf\x02\n" +
 	"\bGiftCard\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04code\x18\x03 \x01(\tR\x04code\x12'\n" +
-	"\x0finitial_balance\x18\x04 \x01(\x01R\x0einitialBalance\x12'\n" +
-	"\x0fcurrent_balance\x18\x05 \x01(\x01R\x0ecurrentBalance\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12\x1f\n" +
-	"\vcustomer_id\x18\a \x01(\x03R\n" +
-	"customerId\x12#\n" +
-	"\rcustomer_name\x18\b \x01(\tR\fcustomerName\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\x12%\n" +
+	"\x0einitial_amount\x18\x04 \x01(\x01R\rinitialAmount\x12'\n" +
+	"\x0fcurrent_balance\x18\x05 \x01(\x01R\x0ecurrentBalance\x12#\n" +
+	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\a \x01(\tR\rcustomerEmail\x12\x1b\n" +
+	"\tis_active\x18\b \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
 	"expires_at\x18\t \x01(\tR\texpiresAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\xd2\x01\n" +
-	"\x13GiftCardTransaction\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12 \n" +
-	"\fgift_card_id\x18\x02 \x01(\x03R\n" +
-	"giftCardId\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
-	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12#\n" +
-	"\rbalance_after\x18\x05 \x01(\x01R\fbalanceAfter\x12\x19\n" +
-	"\border_id\x18\x06 \x01(\x03R\aorderId\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"\x8a\x01\n" +
-	"\x14ListGiftCardsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x1f\n" +
-	"\vactive_only\x18\x02 \x01(\bR\n" +
-	"activeOnly\x12\x16\n" +
-	"\x06search\x18\x03 \x01(\tR\x06search\"\x81\x01\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x16\n" +
+	"\x14ListGiftCardsRequest\"E\n" +
 	"\x15ListGiftCardsResponse\x12,\n" +
 	"\n" +
-	"gift_cards\x18\x01 \x03(\v2\r.pos.GiftCardR\tgiftCards\x12:\n" +
+	"gift_cards\x18\x01 \x03(\v2\r.pos.GiftCardR\tgiftCards\"\xbd\x01\n" +
+	"\x15CreateGiftCardRequest\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12%\n" +
+	"\x0einitial_amount\x18\x02 \x01(\x01R\rinitialAmount\x12#\n" +
+	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x04 \x01(\tR\rcustomerEmail\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"\x80\x01\n" +
-	"\x15CreateGiftCardRequest\x12'\n" +
-	"\x0finitial_balance\x18\x01 \x01(\x01R\x0einitialBalance\x12\x1f\n" +
-	"\vcustomer_id\x18\x02 \x01(\x03R\n" +
-	"customerId\x12\x1d\n" +
-	"\n" +
-	"expires_at\x18\x03 \x01(\tR\texpiresAt\"D\n" +
-	"\x16CreateGiftCardResponse\x12*\n" +
-	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\"$\n" +
-	"\x12GetGiftCardRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x7f\n" +
-	"\x13GetGiftCardResponse\x12*\n" +
-	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\x12<\n" +
-	"\ftransactions\x18\x02 \x03(\v2\x18.pos.GiftCardTransactionR\ftransactions\"^\n" +
+	"expires_at\x18\x05 \x01(\tR\texpiresAt\"T\n" +
+	"\x16CreateGiftCardResponse\x12 \n" +
+	"\fgift_card_id\x18\x01 \x01(\x03R\n" +
+	"giftCardId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"C\n" +
 	"\x15RedeemGiftCardRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x19\n" +
-	"\border_id\x18\x03 \x01(\x03R\aorderId\"m\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\"^\n" +
 	"\x16RedeemGiftCardResponse\x12*\n" +
-	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\x12'\n" +
-	"\x0fredeemed_amount\x18\x02 \x01(\x01R\x0eredeemedAmount\"/\n" +
-	"\x19GetGiftCardBalanceRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"r\n" +
-	"\x1aGetGiftCardBalanceResponse\x12\x18\n" +
-	"\abalance\x18\x01 \x01(\x01R\abalance\x12\x1b\n" +
-	"\tis_active\x18\x02 \x01(\bR\bisActive\x12\x1d\n" +
-	"\n" +
-	"expires_at\x18\x03 \x01(\tR\texpiresAt\"c\n" +
-	"\x15UpdateGiftCardRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
-	"\tis_active\x18\x02 \x01(\bR\bisActive\x12\x1d\n" +
-	"\n" +
-	"expires_at\x18\x03 \x01(\tR\texpiresAt\"D\n" +
-	"\x16UpdateGiftCardResponse\x12*\n" +
-	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\"'\n" +
-	"\x15DeleteGiftCardRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
-	"\x16DeleteGiftCardResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_gift_cards_proto_rawDescOnce sync.Once
@@ -1055,41 +512,24 @@ func file_pos_v1_gift_cards_proto_rawDescGZIP() []byte {
 	return file_pos_v1_gift_cards_proto_rawDescData
 }
 
-var file_pos_v1_gift_cards_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_pos_v1_gift_cards_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_gift_cards_proto_goTypes = []any{
-	(*GiftCard)(nil),                   // 0: pos.GiftCard
-	(*GiftCardTransaction)(nil),        // 1: pos.GiftCardTransaction
-	(*ListGiftCardsRequest)(nil),       // 2: pos.ListGiftCardsRequest
-	(*ListGiftCardsResponse)(nil),      // 3: pos.ListGiftCardsResponse
-	(*CreateGiftCardRequest)(nil),      // 4: pos.CreateGiftCardRequest
-	(*CreateGiftCardResponse)(nil),     // 5: pos.CreateGiftCardResponse
-	(*GetGiftCardRequest)(nil),         // 6: pos.GetGiftCardRequest
-	(*GetGiftCardResponse)(nil),        // 7: pos.GetGiftCardResponse
-	(*RedeemGiftCardRequest)(nil),      // 8: pos.RedeemGiftCardRequest
-	(*RedeemGiftCardResponse)(nil),     // 9: pos.RedeemGiftCardResponse
-	(*GetGiftCardBalanceRequest)(nil),  // 10: pos.GetGiftCardBalanceRequest
-	(*GetGiftCardBalanceResponse)(nil), // 11: pos.GetGiftCardBalanceResponse
-	(*UpdateGiftCardRequest)(nil),      // 12: pos.UpdateGiftCardRequest
-	(*UpdateGiftCardResponse)(nil),     // 13: pos.UpdateGiftCardResponse
-	(*DeleteGiftCardRequest)(nil),      // 14: pos.DeleteGiftCardRequest
-	(*DeleteGiftCardResponse)(nil),     // 15: pos.DeleteGiftCardResponse
-	(*v1.PaginationRequest)(nil),       // 16: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),      // 17: common.PaginationResponse
+	(*GiftCard)(nil),               // 0: pos.GiftCard
+	(*ListGiftCardsRequest)(nil),   // 1: pos.ListGiftCardsRequest
+	(*ListGiftCardsResponse)(nil),  // 2: pos.ListGiftCardsResponse
+	(*CreateGiftCardRequest)(nil),  // 3: pos.CreateGiftCardRequest
+	(*CreateGiftCardResponse)(nil), // 4: pos.CreateGiftCardResponse
+	(*RedeemGiftCardRequest)(nil),  // 5: pos.RedeemGiftCardRequest
+	(*RedeemGiftCardResponse)(nil), // 6: pos.RedeemGiftCardResponse
 }
 var file_pos_v1_gift_cards_proto_depIdxs = []int32{
-	16, // 0: pos.ListGiftCardsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: pos.ListGiftCardsResponse.gift_cards:type_name -> pos.GiftCard
-	17, // 2: pos.ListGiftCardsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: pos.CreateGiftCardResponse.gift_card:type_name -> pos.GiftCard
-	0,  // 4: pos.GetGiftCardResponse.gift_card:type_name -> pos.GiftCard
-	1,  // 5: pos.GetGiftCardResponse.transactions:type_name -> pos.GiftCardTransaction
-	0,  // 6: pos.RedeemGiftCardResponse.gift_card:type_name -> pos.GiftCard
-	0,  // 7: pos.UpdateGiftCardResponse.gift_card:type_name -> pos.GiftCard
-	8,  // [8:8] is the sub-list for method output_type
-	8,  // [8:8] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	0, // 0: pos.ListGiftCardsResponse.gift_cards:type_name -> pos.GiftCard
+	0, // 1: pos.RedeemGiftCardResponse.gift_card:type_name -> pos.GiftCard
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_gift_cards_proto_init() }
@@ -1103,7 +543,7 @@ func file_pos_v1_gift_cards_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_gift_cards_proto_rawDesc), len(file_pos_v1_gift_cards_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

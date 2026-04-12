@@ -6,47 +6,24 @@
 
 /* eslint-disable */
 
-export interface StoreSettings {
+export interface CreateCheckoutRequest {
+  sessionId: string;
+  customerEmail: string;
+  items: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+}
+
+export interface CreateCheckoutResponse {
   id: number;
-  storeId: number;
-  currency: string;
-  timezone: string;
-  /** kg, lb */
-  weightUnit: string;
-  taxIncludedInPrice: boolean;
-  taxRate: number;
-  autoFulfill: boolean;
-  inventoryTracking: boolean;
-  orderPrefix: string;
-  nextOrderNumber: number;
-  notificationEmail: string;
-  sendOrderConfirmation: boolean;
-  sendShippingConfirmation: boolean;
-  createdAt: string;
-  updatedAt: string;
+  message: string;
 }
 
-export interface GetStoreSettingsRequest {
+export interface CompleteCheckoutRequest {
+  id: number;
 }
 
-export interface GetStoreSettingsResponse {
-  settings: StoreSettings | undefined;
-}
-
-export interface UpdateStoreSettingsRequest {
-  currency: string;
-  timezone: string;
-  weightUnit: string;
-  taxIncludedInPrice: boolean;
-  taxRate: number;
-  autoFulfill: boolean;
-  inventoryTracking: boolean;
-  orderPrefix: string;
-  notificationEmail: string;
-  sendOrderConfirmation: boolean;
-  sendShippingConfirmation: boolean;
-}
-
-export interface UpdateStoreSettingsResponse {
-  settings: StoreSettings | undefined;
+export interface CompleteCheckoutResponse {
+  message: string;
 }

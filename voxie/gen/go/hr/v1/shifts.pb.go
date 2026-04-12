@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,15 +24,16 @@ const (
 type Shift struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
-	StaffName     string                 `protobuf:"bytes,3,opt,name=staff_name,json=staffName,proto3" json:"staff_name,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,3,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
 	Date          string                 `protobuf:"bytes,4,opt,name=date,proto3" json:"date,omitempty"`
 	StartTime     string                 `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Hours         float64                `protobuf:"fixed64,7,opt,name=hours,proto3" json:"hours,omitempty"`
-	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"` // scheduled, in_progress, completed, missed
+	BreakMinutes  int32                  `protobuf:"varint,7,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	Notes         string                 `protobuf:"bytes,9,opt,name=notes,proto3" json:"notes,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -75,18 +75,18 @@ func (x *Shift) GetId() int64 {
 	return 0
 }
 
+func (x *Shift) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Shift) GetStaffId() int64 {
 	if x != nil {
 		return x.StaffId
 	}
 	return 0
-}
-
-func (x *Shift) GetStaffName() string {
-	if x != nil {
-		return x.StaffName
-	}
-	return ""
 }
 
 func (x *Shift) GetDate() string {
@@ -110,9 +110,9 @@ func (x *Shift) GetEndTime() string {
 	return ""
 }
 
-func (x *Shift) GetHours() float64 {
+func (x *Shift) GetBreakMinutes() int32 {
 	if x != nil {
-		return x.Hours
+		return x.BreakMinutes
 	}
 	return 0
 }
@@ -138,13 +138,17 @@ func (x *Shift) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Shift) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 type ListShiftsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
-	FromDate      string                 `protobuf:"bytes,3,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,4,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	StaffId       int64                  `protobuf:"varint,1,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,13 +183,6 @@ func (*ListShiftsRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListShiftsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListShiftsRequest) GetStaffId() int64 {
 	if x != nil {
 		return x.StaffId
@@ -193,23 +190,9 @@ func (x *ListShiftsRequest) GetStaffId() int64 {
 	return 0
 }
 
-func (x *ListShiftsRequest) GetFromDate() string {
+func (x *ListShiftsRequest) GetDate() string {
 	if x != nil {
-		return x.FromDate
-	}
-	return ""
-}
-
-func (x *ListShiftsRequest) GetToDate() string {
-	if x != nil {
-		return x.ToDate
-	}
-	return ""
-}
-
-func (x *ListShiftsRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
+		return x.Date
 	}
 	return ""
 }
@@ -217,7 +200,6 @@ func (x *ListShiftsRequest) GetStatus() string {
 type ListShiftsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Shifts        []*Shift               `protobuf:"bytes,1,rep,name=shifts,proto3" json:"shifts,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,115 +241,22 @@ func (x *ListShiftsResponse) GetShifts() []*Shift {
 	return nil
 }
 
-func (x *ListShiftsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetShiftRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetShiftRequest) Reset() {
-	*x = GetShiftRequest{}
-	mi := &file_hr_v1_shifts_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetShiftRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetShiftRequest) ProtoMessage() {}
-
-func (x *GetShiftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_shifts_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetShiftRequest.ProtoReflect.Descriptor instead.
-func (*GetShiftRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetShiftRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetShiftResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Shift         *Shift                 `protobuf:"bytes,1,opt,name=shift,proto3" json:"shift,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetShiftResponse) Reset() {
-	*x = GetShiftResponse{}
-	mi := &file_hr_v1_shifts_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetShiftResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetShiftResponse) ProtoMessage() {}
-
-func (x *GetShiftResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_shifts_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetShiftResponse.ProtoReflect.Descriptor instead.
-func (*GetShiftResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetShiftResponse) GetShift() *Shift {
-	if x != nil {
-		return x.Shift
-	}
-	return nil
-}
-
 type CreateShiftRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StaffId       int64                  `protobuf:"varint,1,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
 	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	StartTime     string                 `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Notes         string                 `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
+	BreakMinutes  int32                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateShiftRequest) Reset() {
 	*x = CreateShiftRequest{}
-	mi := &file_hr_v1_shifts_proto_msgTypes[5]
+	mi := &file_hr_v1_shifts_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -379,7 +268,7 @@ func (x *CreateShiftRequest) String() string {
 func (*CreateShiftRequest) ProtoMessage() {}
 
 func (x *CreateShiftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_shifts_proto_msgTypes[5]
+	mi := &file_hr_v1_shifts_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -392,7 +281,7 @@ func (x *CreateShiftRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateShiftRequest.ProtoReflect.Descriptor instead.
 func (*CreateShiftRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{5}
+	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateShiftRequest) GetStaffId() int64 {
@@ -423,6 +312,20 @@ func (x *CreateShiftRequest) GetEndTime() string {
 	return ""
 }
 
+func (x *CreateShiftRequest) GetBreakMinutes() int32 {
+	if x != nil {
+		return x.BreakMinutes
+	}
+	return 0
+}
+
+func (x *CreateShiftRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 func (x *CreateShiftRequest) GetNotes() string {
 	if x != nil {
 		return x.Notes
@@ -432,14 +335,14 @@ func (x *CreateShiftRequest) GetNotes() string {
 
 type CreateShiftResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Shift         *Shift                 `protobuf:"bytes,1,opt,name=shift,proto3" json:"shift,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateShiftResponse) Reset() {
 	*x = CreateShiftResponse{}
-	mi := &file_hr_v1_shifts_proto_msgTypes[6]
+	mi := &file_hr_v1_shifts_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +354,7 @@ func (x *CreateShiftResponse) String() string {
 func (*CreateShiftResponse) ProtoMessage() {}
 
 func (x *CreateShiftResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_shifts_proto_msgTypes[6]
+	mi := &file_hr_v1_shifts_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,62 +367,292 @@ func (x *CreateShiftResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateShiftResponse.ProtoReflect.Descriptor instead.
 func (*CreateShiftResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateShiftResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type UpdateShiftRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
+	StartTime     string                 `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       string                 `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	BreakMinutes  int32                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateShiftRequest) Reset() {
+	*x = UpdateShiftRequest{}
+	mi := &file_hr_v1_shifts_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateShiftRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateShiftRequest) ProtoMessage() {}
+
+func (x *UpdateShiftRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_shifts_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateShiftRequest.ProtoReflect.Descriptor instead.
+func (*UpdateShiftRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateShiftRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateShiftRequest) GetDate() string {
+	if x != nil {
+		return x.Date
+	}
+	return ""
+}
+
+func (x *UpdateShiftRequest) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *UpdateShiftRequest) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *UpdateShiftRequest) GetBreakMinutes() int32 {
+	if x != nil {
+		return x.BreakMinutes
+	}
+	return 0
+}
+
+func (x *UpdateShiftRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateShiftRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
+	}
+	return ""
+}
+
+type UpdateShiftResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateShiftResponse) Reset() {
+	*x = UpdateShiftResponse{}
+	mi := &file_hr_v1_shifts_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateShiftResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateShiftResponse) ProtoMessage() {}
+
+func (x *UpdateShiftResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_shifts_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateShiftResponse.ProtoReflect.Descriptor instead.
+func (*UpdateShiftResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateShiftResponse) GetShift() *Shift {
+func (x *UpdateShiftResponse) GetSuccess() bool {
 	if x != nil {
-		return x.Shift
+		return x.Success
 	}
-	return nil
+	return false
+}
+
+type DeleteShiftRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteShiftRequest) Reset() {
+	*x = DeleteShiftRequest{}
+	mi := &file_hr_v1_shifts_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteShiftRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteShiftRequest) ProtoMessage() {}
+
+func (x *DeleteShiftRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_shifts_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteShiftRequest.ProtoReflect.Descriptor instead.
+func (*DeleteShiftRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteShiftRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteShiftResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteShiftResponse) Reset() {
+	*x = DeleteShiftResponse{}
+	mi := &file_hr_v1_shifts_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteShiftResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteShiftResponse) ProtoMessage() {}
+
+func (x *DeleteShiftResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_shifts_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteShiftResponse.ProtoReflect.Descriptor instead.
+func (*DeleteShiftResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_shifts_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DeleteShiftResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
 }
 
 var File_hr_v1_shifts_proto protoreflect.FileDescriptor
 
 const file_hr_v1_shifts_proto_rawDesc = "" +
 	"\n" +
-	"\x12hr/v1/shifts.proto\x12\x02hr\x1a\x1acommon/v1/pagination.proto\"\x82\x02\n" +
+	"\x12hr/v1/shifts.proto\x12\x02hr\"\xac\x02\n" +
 	"\x05Shift\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x1d\n" +
-	"\n" +
-	"staff_name\x18\x03 \x01(\tR\tstaffName\x12\x12\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x19\n" +
+	"\bstaff_id\x18\x03 \x01(\x03R\astaffId\x12\x12\n" +
 	"\x04date\x18\x04 \x01(\tR\x04date\x12\x1d\n" +
 	"\n" +
 	"start_time\x18\x05 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x06 \x01(\tR\aendTime\x12\x14\n" +
-	"\x05hours\x18\a \x01(\x01R\x05hours\x12\x16\n" +
+	"\bend_time\x18\x06 \x01(\tR\aendTime\x12#\n" +
+	"\rbreak_minutes\x18\a \x01(\x05R\fbreakMinutes\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x14\n" +
 	"\x05notes\x18\t \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\"\xb7\x01\n" +
-	"\x11ListShiftsRequest\x129\n" +
+	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x1b\n" +
-	"\tfrom_date\x18\x03 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x04 \x01(\tR\x06toDate\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\"s\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"B\n" +
+	"\x11ListShiftsRequest\x12\x19\n" +
+	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\x12\x12\n" +
+	"\x04date\x18\x02 \x01(\tR\x04date\"7\n" +
 	"\x12ListShiftsResponse\x12!\n" +
-	"\x06shifts\x18\x01 \x03(\v2\t.hr.ShiftR\x06shifts\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"!\n" +
-	"\x0fGetShiftRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
-	"\x10GetShiftResponse\x12\x1f\n" +
-	"\x05shift\x18\x01 \x01(\v2\t.hr.ShiftR\x05shift\"\x93\x01\n" +
+	"\x06shifts\x18\x01 \x03(\v2\t.hr.ShiftR\x06shifts\"\xd0\x01\n" +
 	"\x12CreateShiftRequest\x12\x19\n" +
 	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\x12\x12\n" +
 	"\x04date\x18\x02 \x01(\tR\x04date\x12\x1d\n" +
 	"\n" +
 	"start_time\x18\x03 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x04 \x01(\tR\aendTime\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\"6\n" +
-	"\x13CreateShiftResponse\x12\x1f\n" +
-	"\x05shift\x18\x01 \x01(\v2\t.hr.ShiftR\x05shiftB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
+	"\bend_time\x18\x04 \x01(\tR\aendTime\x12#\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\"%\n" +
+	"\x13CreateShiftResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xc5\x01\n" +
+	"\x12UpdateShiftRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04date\x18\x02 \x01(\tR\x04date\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\x03 \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\x04 \x01(\tR\aendTime\x12#\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\"/\n" +
+	"\x13UpdateShiftResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"$\n" +
+	"\x12DeleteShiftRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"/\n" +
+	"\x13DeleteShiftResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
 
 var (
 	file_hr_v1_shifts_proto_rawDescOnce sync.Once
@@ -533,29 +666,25 @@ func file_hr_v1_shifts_proto_rawDescGZIP() []byte {
 	return file_hr_v1_shifts_proto_rawDescData
 }
 
-var file_hr_v1_shifts_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_hr_v1_shifts_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_hr_v1_shifts_proto_goTypes = []any{
-	(*Shift)(nil),                 // 0: hr.Shift
-	(*ListShiftsRequest)(nil),     // 1: hr.ListShiftsRequest
-	(*ListShiftsResponse)(nil),    // 2: hr.ListShiftsResponse
-	(*GetShiftRequest)(nil),       // 3: hr.GetShiftRequest
-	(*GetShiftResponse)(nil),      // 4: hr.GetShiftResponse
-	(*CreateShiftRequest)(nil),    // 5: hr.CreateShiftRequest
-	(*CreateShiftResponse)(nil),   // 6: hr.CreateShiftResponse
-	(*v1.PaginationRequest)(nil),  // 7: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 8: common.PaginationResponse
+	(*Shift)(nil),               // 0: hr.Shift
+	(*ListShiftsRequest)(nil),   // 1: hr.ListShiftsRequest
+	(*ListShiftsResponse)(nil),  // 2: hr.ListShiftsResponse
+	(*CreateShiftRequest)(nil),  // 3: hr.CreateShiftRequest
+	(*CreateShiftResponse)(nil), // 4: hr.CreateShiftResponse
+	(*UpdateShiftRequest)(nil),  // 5: hr.UpdateShiftRequest
+	(*UpdateShiftResponse)(nil), // 6: hr.UpdateShiftResponse
+	(*DeleteShiftRequest)(nil),  // 7: hr.DeleteShiftRequest
+	(*DeleteShiftResponse)(nil), // 8: hr.DeleteShiftResponse
 }
 var file_hr_v1_shifts_proto_depIdxs = []int32{
-	7, // 0: hr.ListShiftsRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: hr.ListShiftsResponse.shifts:type_name -> hr.Shift
-	8, // 2: hr.ListShiftsResponse.pagination:type_name -> common.PaginationResponse
-	0, // 3: hr.GetShiftResponse.shift:type_name -> hr.Shift
-	0, // 4: hr.CreateShiftResponse.shift:type_name -> hr.Shift
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0, // 0: hr.ListShiftsResponse.shifts:type_name -> hr.Shift
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_shifts_proto_init() }
@@ -569,7 +698,7 @@ func file_hr_v1_shifts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_v1_shifts_proto_rawDesc), len(file_hr_v1_shifts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

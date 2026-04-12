@@ -4,43 +4,46 @@ package hr;
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Departments ─────────────────────────────────────────────────────
 
 message Department {
   int64 id = 1;
-  string name = 2;
-  string description = 3;
-  int64 manager_id = 4;
-  string manager_name = 5;
-  int32 member_count = 6;
-  string created_at = 7;
+  int64 owner_id = 2;
+  string name = 3;
+  string description = 4;
+  string created_at = 5;
+  string updated_at = 6;
 }
 
-message ListDepartmentsRequest {
-  common.PaginationRequest pagination = 1;
-}
+message ListDepartmentsRequest {}
 
 message ListDepartmentsResponse {
   repeated Department departments = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message GetDepartmentRequest {
-  int64 id = 1;
-}
-
-message GetDepartmentResponse {
-  Department department = 1;
 }
 
 message CreateDepartmentRequest {
   string name = 1;
   string description = 2;
-  int64 manager_id = 3;
 }
 
 message CreateDepartmentResponse {
-  Department department = 1;
+  int64 id = 1;
+}
+
+message UpdateDepartmentRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message UpdateDepartmentResponse {
+  bool success = 1;
+}
+
+message DeleteDepartmentRequest {
+  int64 id = 1;
+}
+
+message DeleteDepartmentResponse {
+  bool success = 1;
 }

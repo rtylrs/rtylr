@@ -5,90 +5,72 @@
 // source: book/v1/appointments.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Appointment {
   id: number;
-  businessId: number;
-  locationId: number;
-  customerId: number;
+  ownerId: number;
+  serviceId: number;
+  resourceId: number;
+  staffId: number;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  serviceId: number;
-  serviceName: string;
-  resourceId: number;
-  resourceName: string;
-  /** scheduled, confirmed, in_progress, completed, cancelled, no_show */
-  status: string;
   startTime: string;
   endTime: string;
-  durationMinutes: number;
-  price: number;
+  status: string;
   notes: string;
-  cancellationReason: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ListAppointmentsRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-  resourceId: number;
-  serviceId: number;
-  dateFrom: string;
-  dateTo: string;
-  search: string;
 }
 
 export interface ListAppointmentsResponse {
   appointments: Appointment[];
-  pagination: PaginationResponse | undefined;
 }
 
-export interface GetAppointmentRequest {
-  id: number;
+export interface TodayAppointmentsRequest {
 }
 
-export interface GetAppointmentResponse {
-  appointment: Appointment | undefined;
+export interface TodayAppointmentsResponse {
+  appointments: Appointment[];
 }
 
 export interface CreateAppointmentRequest {
-  customerId: number;
   serviceId: number;
   resourceId: number;
-  startTime: string;
-  notes: string;
+  staffId: number;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  notes: string;
 }
 
 export interface CreateAppointmentResponse {
-  appointment: Appointment | undefined;
+  id: number;
+  message: string;
 }
 
 export interface UpdateAppointmentRequest {
   id: number;
   serviceId: number;
   resourceId: number;
+  staffId: number;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
   startTime: string;
+  endTime: string;
   status: string;
   notes: string;
 }
 
 export interface UpdateAppointmentResponse {
-  appointment: Appointment | undefined;
-}
-
-export interface CancelAppointmentRequest {
-  id: number;
-  reason: string;
-}
-
-export interface CancelAppointmentResponse {
-  appointment: Appointment | undefined;
+  message: string;
 }
 
 export interface DeleteAppointmentRequest {
@@ -96,5 +78,5 @@ export interface DeleteAppointmentRequest {
 }
 
 export interface DeleteAppointmentResponse {
-  success: boolean;
+  message: string;
 }

@@ -21,34 +21,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type HRDashboard struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	TotalStaff       int32                  `protobuf:"varint,1,opt,name=total_staff,json=totalStaff,proto3" json:"total_staff,omitempty"`
-	ActiveStaff      int32                  `protobuf:"varint,2,opt,name=active_staff,json=activeStaff,proto3" json:"active_staff,omitempty"`
-	OnLeave          int32                  `protobuf:"varint,3,opt,name=on_leave,json=onLeave,proto3" json:"on_leave,omitempty"`
-	ClockedIn        int32                  `protobuf:"varint,4,opt,name=clocked_in,json=clockedIn,proto3" json:"clocked_in,omitempty"`
-	OpenShifts       int32                  `protobuf:"varint,5,opt,name=open_shifts,json=openShifts,proto3" json:"open_shifts,omitempty"`
-	PendingTimeOff   int32                  `protobuf:"varint,6,opt,name=pending_time_off,json=pendingTimeOff,proto3" json:"pending_time_off,omitempty"`
-	PayrollThisMonth float64                `protobuf:"fixed64,7,opt,name=payroll_this_month,json=payrollThisMonth,proto3" json:"payroll_this_month,omitempty"`
-	Departments      []*DepartmentSummary   `protobuf:"bytes,8,rep,name=departments,proto3" json:"departments,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+type DashboardStats struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TotalStaff     int32                  `protobuf:"varint,1,opt,name=total_staff,json=totalStaff,proto3" json:"total_staff,omitempty"`
+	OnShiftToday   int32                  `protobuf:"varint,2,opt,name=on_shift_today,json=onShiftToday,proto3" json:"on_shift_today,omitempty"`
+	PendingTimeOff int32                  `protobuf:"varint,3,opt,name=pending_time_off,json=pendingTimeOff,proto3" json:"pending_time_off,omitempty"`
+	PayrollDraft   int32                  `protobuf:"varint,4,opt,name=payroll_draft,json=payrollDraft,proto3" json:"payroll_draft,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *HRDashboard) Reset() {
-	*x = HRDashboard{}
+func (x *DashboardStats) Reset() {
+	*x = DashboardStats{}
 	mi := &file_hr_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *HRDashboard) String() string {
+func (x *DashboardStats) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HRDashboard) ProtoMessage() {}
+func (*DashboardStats) ProtoMessage() {}
 
-func (x *HRDashboard) ProtoReflect() protoreflect.Message {
+func (x *DashboardStats) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -60,123 +56,35 @@ func (x *HRDashboard) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HRDashboard.ProtoReflect.Descriptor instead.
-func (*HRDashboard) Descriptor() ([]byte, []int) {
+// Deprecated: Use DashboardStats.ProtoReflect.Descriptor instead.
+func (*DashboardStats) Descriptor() ([]byte, []int) {
 	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *HRDashboard) GetTotalStaff() int32 {
+func (x *DashboardStats) GetTotalStaff() int32 {
 	if x != nil {
 		return x.TotalStaff
 	}
 	return 0
 }
 
-func (x *HRDashboard) GetActiveStaff() int32 {
+func (x *DashboardStats) GetOnShiftToday() int32 {
 	if x != nil {
-		return x.ActiveStaff
+		return x.OnShiftToday
 	}
 	return 0
 }
 
-func (x *HRDashboard) GetOnLeave() int32 {
-	if x != nil {
-		return x.OnLeave
-	}
-	return 0
-}
-
-func (x *HRDashboard) GetClockedIn() int32 {
-	if x != nil {
-		return x.ClockedIn
-	}
-	return 0
-}
-
-func (x *HRDashboard) GetOpenShifts() int32 {
-	if x != nil {
-		return x.OpenShifts
-	}
-	return 0
-}
-
-func (x *HRDashboard) GetPendingTimeOff() int32 {
+func (x *DashboardStats) GetPendingTimeOff() int32 {
 	if x != nil {
 		return x.PendingTimeOff
 	}
 	return 0
 }
 
-func (x *HRDashboard) GetPayrollThisMonth() float64 {
+func (x *DashboardStats) GetPayrollDraft() int32 {
 	if x != nil {
-		return x.PayrollThisMonth
-	}
-	return 0
-}
-
-func (x *HRDashboard) GetDepartments() []*DepartmentSummary {
-	if x != nil {
-		return x.Departments
-	}
-	return nil
-}
-
-type DepartmentSummary struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	MemberCount   int32                  `protobuf:"varint,2,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
-	Active        int32                  `protobuf:"varint,3,opt,name=active,proto3" json:"active,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DepartmentSummary) Reset() {
-	*x = DepartmentSummary{}
-	mi := &file_hr_v1_dashboard_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DepartmentSummary) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DepartmentSummary) ProtoMessage() {}
-
-func (x *DepartmentSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_dashboard_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DepartmentSummary.ProtoReflect.Descriptor instead.
-func (*DepartmentSummary) Descriptor() ([]byte, []int) {
-	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *DepartmentSummary) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *DepartmentSummary) GetMemberCount() int32 {
-	if x != nil {
-		return x.MemberCount
-	}
-	return 0
-}
-
-func (x *DepartmentSummary) GetActive() int32 {
-	if x != nil {
-		return x.Active
+		return x.PayrollDraft
 	}
 	return 0
 }
@@ -189,7 +97,7 @@ type GetHRDashboardRequest struct {
 
 func (x *GetHRDashboardRequest) Reset() {
 	*x = GetHRDashboardRequest{}
-	mi := &file_hr_v1_dashboard_proto_msgTypes[2]
+	mi := &file_hr_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -201,7 +109,7 @@ func (x *GetHRDashboardRequest) String() string {
 func (*GetHRDashboardRequest) ProtoMessage() {}
 
 func (x *GetHRDashboardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_dashboard_proto_msgTypes[2]
+	mi := &file_hr_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -214,19 +122,19 @@ func (x *GetHRDashboardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHRDashboardRequest.ProtoReflect.Descriptor instead.
 func (*GetHRDashboardRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{2}
+	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
 type GetHRDashboardResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Dashboard     *HRDashboard           `protobuf:"bytes,1,opt,name=dashboard,proto3" json:"dashboard,omitempty"`
+	Stats         *DashboardStats        `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetHRDashboardResponse) Reset() {
 	*x = GetHRDashboardResponse{}
-	mi := &file_hr_v1_dashboard_proto_msgTypes[3]
+	mi := &file_hr_v1_dashboard_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -238,7 +146,7 @@ func (x *GetHRDashboardResponse) String() string {
 func (*GetHRDashboardResponse) ProtoMessage() {}
 
 func (x *GetHRDashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_dashboard_proto_msgTypes[3]
+	mi := &file_hr_v1_dashboard_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -251,12 +159,12 @@ func (x *GetHRDashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHRDashboardResponse.ProtoReflect.Descriptor instead.
 func (*GetHRDashboardResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{3}
+	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetHRDashboardResponse) GetDashboard() *HRDashboard {
+func (x *GetHRDashboardResponse) GetStats() *DashboardStats {
 	if x != nil {
-		return x.Dashboard
+		return x.Stats
 	}
 	return nil
 }
@@ -265,26 +173,16 @@ var File_hr_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_hr_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x15hr/v1/dashboard.proto\x12\x02hr\"\xbd\x02\n" +
-	"\vHRDashboard\x12\x1f\n" +
+	"\x15hr/v1/dashboard.proto\x12\x02hr\"\xa6\x01\n" +
+	"\x0eDashboardStats\x12\x1f\n" +
 	"\vtotal_staff\x18\x01 \x01(\x05R\n" +
-	"totalStaff\x12!\n" +
-	"\factive_staff\x18\x02 \x01(\x05R\vactiveStaff\x12\x19\n" +
-	"\bon_leave\x18\x03 \x01(\x05R\aonLeave\x12\x1d\n" +
-	"\n" +
-	"clocked_in\x18\x04 \x01(\x05R\tclockedIn\x12\x1f\n" +
-	"\vopen_shifts\x18\x05 \x01(\x05R\n" +
-	"openShifts\x12(\n" +
-	"\x10pending_time_off\x18\x06 \x01(\x05R\x0ependingTimeOff\x12,\n" +
-	"\x12payroll_this_month\x18\a \x01(\x01R\x10payrollThisMonth\x127\n" +
-	"\vdepartments\x18\b \x03(\v2\x15.hr.DepartmentSummaryR\vdepartments\"b\n" +
-	"\x11DepartmentSummary\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\fmember_count\x18\x02 \x01(\x05R\vmemberCount\x12\x16\n" +
-	"\x06active\x18\x03 \x01(\x05R\x06active\"\x17\n" +
-	"\x15GetHRDashboardRequest\"G\n" +
-	"\x16GetHRDashboardResponse\x12-\n" +
-	"\tdashboard\x18\x01 \x01(\v2\x0f.hr.HRDashboardR\tdashboardB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
+	"totalStaff\x12$\n" +
+	"\x0eon_shift_today\x18\x02 \x01(\x05R\fonShiftToday\x12(\n" +
+	"\x10pending_time_off\x18\x03 \x01(\x05R\x0ependingTimeOff\x12#\n" +
+	"\rpayroll_draft\x18\x04 \x01(\x05R\fpayrollDraft\"\x17\n" +
+	"\x15GetHRDashboardRequest\"B\n" +
+	"\x16GetHRDashboardResponse\x12(\n" +
+	"\x05stats\x18\x01 \x01(\v2\x12.hr.DashboardStatsR\x05statsB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
 
 var (
 	file_hr_v1_dashboard_proto_rawDescOnce sync.Once
@@ -298,21 +196,19 @@ func file_hr_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_hr_v1_dashboard_proto_rawDescData
 }
 
-var file_hr_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_hr_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_v1_dashboard_proto_goTypes = []any{
-	(*HRDashboard)(nil),            // 0: hr.HRDashboard
-	(*DepartmentSummary)(nil),      // 1: hr.DepartmentSummary
-	(*GetHRDashboardRequest)(nil),  // 2: hr.GetHRDashboardRequest
-	(*GetHRDashboardResponse)(nil), // 3: hr.GetHRDashboardResponse
+	(*DashboardStats)(nil),         // 0: hr.DashboardStats
+	(*GetHRDashboardRequest)(nil),  // 1: hr.GetHRDashboardRequest
+	(*GetHRDashboardResponse)(nil), // 2: hr.GetHRDashboardResponse
 }
 var file_hr_v1_dashboard_proto_depIdxs = []int32{
-	1, // 0: hr.HRDashboard.departments:type_name -> hr.DepartmentSummary
-	0, // 1: hr.GetHRDashboardResponse.dashboard:type_name -> hr.HRDashboard
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: hr.GetHRDashboardResponse.stats:type_name -> hr.DashboardStats
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_dashboard_proto_init() }
@@ -326,7 +222,7 @@ func file_hr_v1_dashboard_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_v1_dashboard_proto_rawDesc), len(file_hr_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

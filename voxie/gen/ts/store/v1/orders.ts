@@ -5,90 +5,92 @@
 // source: store/v1/orders.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface OrderLineItem {
+export interface StoreOrder {
   id: number;
-  productId: number;
-  variantId: number;
-  title: string;
-  variantName: string;
-  sku: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  imageUrl: string;
-}
-
-export interface OrderAddress {
-  name: string;
-  line1: string;
-  line2: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  phone: string;
-}
-
-export interface Order {
-  id: number;
-  storeId: number;
-  orderNumber: string;
-  /** pending, confirmed, processing, shipped, delivered, cancelled, refunded */
-  status: string;
-  /** pending, paid, refunded, failed */
-  paymentStatus: string;
-  /** unfulfilled, partial, fulfilled */
-  fulfillmentStatus: string;
-  items: OrderLineItem[];
-  shippingAddress: OrderAddress | undefined;
-  billingAddress: OrderAddress | undefined;
-  subtotal: number;
-  shippingCost: number;
-  taxAmount: number;
-  discountAmount: number;
-  total: number;
-  currency: string;
-  customerName: string;
+  ownerId: number;
   customerEmail: string;
-  shippingMethod: string;
-  trackingNumber: string;
+  customerName: string;
+  customerPhone: string;
+  status: string;
+  subtotal: number;
+  tax: number;
+  shippingCost: number;
+  total: number;
+  shippingAddress: string;
   notes: string;
   createdAt: string;
   updatedAt: string;
 }
 
+export interface StoreOrderItem {
+  id: number;
+  orderId: number;
+  productId: number;
+  name: string;
+  quantity: number;
+  price: number;
+  total: number;
+  createdAt: string;
+}
+
 export interface ListStoreOrdersRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-  paymentStatus: string;
-  fulfillmentStatus: string;
-  dateFrom: string;
-  dateTo: string;
-  search: string;
 }
 
 export interface ListStoreOrdersResponse {
-  orders: Order[];
-  pagination: PaginationResponse | undefined;
+  orders: StoreOrder[];
 }
 
-export interface GetStoreOrderRequest {
+export interface GetStoreOrderDetailRequest {
   id: number;
 }
 
-export interface GetStoreOrderResponse {
-  order: Order | undefined;
+export interface GetStoreOrderDetailResponse {
+  order: StoreOrder | undefined;
+  items: StoreOrderItem[];
 }
 
-export interface UpdateStoreOrderStatusRequest {
-  id: number;
+export interface OrderItemInput {
+  productId: number;
+  name: string;
+  quantity: number;
+  price: number;
+  total: number;
+}
+
+export interface CreateStoreOrderRequest {
+  customerEmail: string;
+  customerName: string;
+  customerPhone: string;
   status: string;
-  trackingNumber: string;
+  subtotal: number;
+  tax: number;
+  shippingCost: number;
+  total: number;
+  shippingAddress: string;
+  notes: string;
+  items: OrderItemInput[];
+}
+
+export interface CreateStoreOrderResponse {
+  id: number;
+  message: string;
+}
+
+export interface UpdateStoreOrderRequest {
+  id: number;
+  customerEmail: string;
+  customerName: string;
+  customerPhone: string;
+  status: string;
+  subtotal: number;
+  tax: number;
+  shippingCost: number;
+  total: number;
+  shippingAddress: string;
   notes: string;
 }
 
-export interface UpdateStoreOrderStatusResponse {
-  order: Order | undefined;
+export interface UpdateStoreOrderResponse {
+  message: string;
 }

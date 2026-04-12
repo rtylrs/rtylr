@@ -5,46 +5,45 @@
 // source: pos/v1/audit.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface AuditEntry {
+export interface AuditLog {
   id: number;
-  locationId: number;
+  businessId: number;
+  branchId: number;
+  terminalId: number;
+  employeeId: number;
   action: string;
-  /** order, session, user, menu_item */
   entityType: string;
   entityId: number;
-  actorName: string;
-  actorId: number;
-  description: string;
+  details: string;
   ipAddress: string;
-  /** JSON string of extra details */
-  metadata: string;
   createdAt: string;
 }
 
-export interface ListAuditEntriesRequest {
-  pagination: PaginationRequest | undefined;
+export interface ListAuditRequest {
   action: string;
   entityType: string;
-  actorId: number;
-  dateFrom: string;
-  dateTo: string;
+  employeeId: number;
+  startDate: string;
+  endDate: string;
 }
 
-export interface ListAuditEntriesResponse {
-  entries: AuditEntry[];
-  pagination: PaginationResponse | undefined;
+export interface ListAuditResponse {
+  logs: AuditLog[];
 }
 
-export interface CreateAuditEntryRequest {
+export interface CreateAuditRequest {
+  branchId: number;
+  terminalId: number;
+  employeeId: number;
   action: string;
   entityType: string;
   entityId: number;
-  description: string;
-  metadata: string;
+  details: string;
+  ipAddress: string;
 }
 
-export interface CreateAuditEntryResponse {
-  entry: AuditEntry | undefined;
+export interface CreateAuditResponse {
+  auditLogId: number;
+  message: string;
 }

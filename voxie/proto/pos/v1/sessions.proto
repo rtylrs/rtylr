@@ -4,54 +4,49 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── Session ────────────────────────────────────────────────────────
+// ── Session ───────────────────────────────────────────────────────
 
 message Session {
   int64 id = 1;
-  int64 location_id = 2;
-  int64 terminal_id = 3;
-  int64 opened_by = 4;
-  int64 closed_by = 5;
-  string status = 6; // open, closed
-  double opening_cash = 7;
-  double closing_cash = 8;
-  double expected_cash = 9;
-  double cash_difference = 10;
-  int32 total_orders = 11;
-  double total_sales = 12;
-  double total_refunds = 13;
-  double total_voids = 14;
-  string opened_at = 15;
-  string closed_at = 16;
+  int64 owner_id = 2;
+  int64 location_id = 3;
+  int64 staff_id = 4;
+  double opening_float = 5;
+  double closing_float = 6;
+  double total_sales = 7;
+  string status = 8;
+  string opened_at = 9;
+  string closed_at = 10;
+  string created_at = 11;
 }
 
-// ── Open ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+// ── Open ──────────────────────────────────────────────────────────
 
 message OpenSessionRequest {
-  int64 terminal_id = 1;
-  double opening_cash = 2;
+  int64 location_id = 1;
+  int64 staff_id = 2;
+  double opening_float = 3;
 }
 
 message OpenSessionResponse {
-  Session session = 1;
+  int64 session_id = 1;
+  string message = 2;
 }
 
-// ── Close ──────────────────────────────────────────────────────────
+// ── Close ─────────────────────────────────────────────────────────
 
 message CloseSessionRequest {
-  int64 id = 1;
-  double closing_cash = 2;
-  string notes = 3;
+  double closing_float = 1;
 }
 
 message CloseSessionResponse {
-  Session session = 1;
-}
-
-// ── Get Current ────────────────────────────────────────────────────
-
-message GetCurrentSessionRequest {}
-
-message GetCurrentSessionResponse {
-  Session session = 1;
+  string message = 1;
 }

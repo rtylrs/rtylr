@@ -21,169 +21,24 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ComboGroup struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	MinSelect     int32                  `protobuf:"varint,3,opt,name=min_select,json=minSelect,proto3" json:"min_select,omitempty"`
-	MaxSelect     int32                  `protobuf:"varint,4,opt,name=max_select,json=maxSelect,proto3" json:"max_select,omitempty"`
-	Items         []*ComboGroupItem      `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ComboGroup) Reset() {
-	*x = ComboGroup{}
-	mi := &file_pos_v1_combos_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ComboGroup) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ComboGroup) ProtoMessage() {}
-
-func (x *ComboGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ComboGroup.ProtoReflect.Descriptor instead.
-func (*ComboGroup) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *ComboGroup) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ComboGroup) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ComboGroup) GetMinSelect() int32 {
-	if x != nil {
-		return x.MinSelect
-	}
-	return 0
-}
-
-func (x *ComboGroup) GetMaxSelect() int32 {
-	if x != nil {
-		return x.MaxSelect
-	}
-	return 0
-}
-
-func (x *ComboGroup) GetItems() []*ComboGroupItem {
-	if x != nil {
-		return x.Items
-	}
-	return nil
-}
-
-type ComboGroupItem struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	MenuItemId      int64                  `protobuf:"varint,2,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Name            string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	PriceAdjustment float64                `protobuf:"fixed64,4,opt,name=price_adjustment,json=priceAdjustment,proto3" json:"price_adjustment,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *ComboGroupItem) Reset() {
-	*x = ComboGroupItem{}
-	mi := &file_pos_v1_combos_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ComboGroupItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ComboGroupItem) ProtoMessage() {}
-
-func (x *ComboGroupItem) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ComboGroupItem.ProtoReflect.Descriptor instead.
-func (*ComboGroupItem) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ComboGroupItem) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ComboGroupItem) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
-	}
-	return 0
-}
-
-func (x *ComboGroupItem) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ComboGroupItem) GetPriceAdjustment() float64 {
-	if x != nil {
-		return x.PriceAdjustment
-	}
-	return 0
-}
-
 type Combo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	Price         float64                `protobuf:"fixed64,5,opt,name=price,proto3" json:"price,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,6,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	Items         string                 `protobuf:"bytes,6,opt,name=items,proto3" json:"items,omitempty"`
 	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	Groups        []*ComboGroup          `protobuf:"bytes,8,rep,name=groups,proto3" json:"groups,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Combo) Reset() {
 	*x = Combo{}
-	mi := &file_pos_v1_combos_proto_msgTypes[2]
+	mi := &file_pos_v1_combos_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -195,7 +50,7 @@ func (x *Combo) String() string {
 func (*Combo) ProtoMessage() {}
 
 func (x *Combo) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[2]
+	mi := &file_pos_v1_combos_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -208,7 +63,7 @@ func (x *Combo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Combo.ProtoReflect.Descriptor instead.
 func (*Combo) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{2}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Combo) GetId() int64 {
@@ -218,9 +73,9 @@ func (x *Combo) GetId() int64 {
 	return 0
 }
 
-func (x *Combo) GetLocationId() int64 {
+func (x *Combo) GetOwnerId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -246,9 +101,9 @@ func (x *Combo) GetPrice() float64 {
 	return 0
 }
 
-func (x *Combo) GetImageUrl() string {
+func (x *Combo) GetItems() string {
 	if x != nil {
-		return x.ImageUrl
+		return x.Items
 	}
 	return ""
 }
@@ -258,13 +113,6 @@ func (x *Combo) GetIsActive() bool {
 		return x.IsActive
 	}
 	return false
-}
-
-func (x *Combo) GetGroups() []*ComboGroup {
-	if x != nil {
-		return x.Groups
-	}
-	return nil
 }
 
 func (x *Combo) GetCreatedAt() string {
@@ -289,7 +137,7 @@ type ListCombosRequest struct {
 
 func (x *ListCombosRequest) Reset() {
 	*x = ListCombosRequest{}
-	mi := &file_pos_v1_combos_proto_msgTypes[3]
+	mi := &file_pos_v1_combos_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -301,7 +149,7 @@ func (x *ListCombosRequest) String() string {
 func (*ListCombosRequest) ProtoMessage() {}
 
 func (x *ListCombosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[3]
+	mi := &file_pos_v1_combos_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -314,7 +162,7 @@ func (x *ListCombosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCombosRequest.ProtoReflect.Descriptor instead.
 func (*ListCombosRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{3}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{1}
 }
 
 type ListCombosResponse struct {
@@ -326,7 +174,7 @@ type ListCombosResponse struct {
 
 func (x *ListCombosResponse) Reset() {
 	*x = ListCombosResponse{}
-	mi := &file_pos_v1_combos_proto_msgTypes[4]
+	mi := &file_pos_v1_combos_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -338,7 +186,7 @@ func (x *ListCombosResponse) String() string {
 func (*ListCombosResponse) ProtoMessage() {}
 
 func (x *ListCombosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[4]
+	mi := &file_pos_v1_combos_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -351,7 +199,7 @@ func (x *ListCombosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCombosResponse.ProtoReflect.Descriptor instead.
 func (*ListCombosResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{4}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListCombosResponse) GetCombos() []*Combo {
@@ -366,16 +214,15 @@ type CreateComboRequest struct {
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Price         float64                `protobuf:"fixed64,3,opt,name=price,proto3" json:"price,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,4,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	Items         string                 `protobuf:"bytes,4,opt,name=items,proto3" json:"items,omitempty"`
 	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	Groups        []*ComboGroupInput     `protobuf:"bytes,6,rep,name=groups,proto3" json:"groups,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateComboRequest) Reset() {
 	*x = CreateComboRequest{}
-	mi := &file_pos_v1_combos_proto_msgTypes[5]
+	mi := &file_pos_v1_combos_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -387,7 +234,7 @@ func (x *CreateComboRequest) String() string {
 func (*CreateComboRequest) ProtoMessage() {}
 
 func (x *CreateComboRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[5]
+	mi := &file_pos_v1_combos_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -400,7 +247,7 @@ func (x *CreateComboRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateComboRequest.ProtoReflect.Descriptor instead.
 func (*CreateComboRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{5}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateComboRequest) GetName() string {
@@ -424,9 +271,9 @@ func (x *CreateComboRequest) GetPrice() float64 {
 	return 0
 }
 
-func (x *CreateComboRequest) GetImageUrl() string {
+func (x *CreateComboRequest) GetItems() string {
 	if x != nil {
-		return x.ImageUrl
+		return x.Items
 	}
 	return ""
 }
@@ -438,91 +285,17 @@ func (x *CreateComboRequest) GetIsActive() bool {
 	return false
 }
 
-func (x *CreateComboRequest) GetGroups() []*ComboGroupInput {
-	if x != nil {
-		return x.Groups
-	}
-	return nil
-}
-
-type ComboGroupInput struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	MinSelect     int32                  `protobuf:"varint,2,opt,name=min_select,json=minSelect,proto3" json:"min_select,omitempty"`
-	MaxSelect     int32                  `protobuf:"varint,3,opt,name=max_select,json=maxSelect,proto3" json:"max_select,omitempty"`
-	MenuItemIds   []int64                `protobuf:"varint,4,rep,packed,name=menu_item_ids,json=menuItemIds,proto3" json:"menu_item_ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ComboGroupInput) Reset() {
-	*x = ComboGroupInput{}
-	mi := &file_pos_v1_combos_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ComboGroupInput) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ComboGroupInput) ProtoMessage() {}
-
-func (x *ComboGroupInput) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ComboGroupInput.ProtoReflect.Descriptor instead.
-func (*ComboGroupInput) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *ComboGroupInput) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ComboGroupInput) GetMinSelect() int32 {
-	if x != nil {
-		return x.MinSelect
-	}
-	return 0
-}
-
-func (x *ComboGroupInput) GetMaxSelect() int32 {
-	if x != nil {
-		return x.MaxSelect
-	}
-	return 0
-}
-
-func (x *ComboGroupInput) GetMenuItemIds() []int64 {
-	if x != nil {
-		return x.MenuItemIds
-	}
-	return nil
-}
-
 type CreateComboResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Combo         *Combo                 `protobuf:"bytes,1,opt,name=combo,proto3" json:"combo,omitempty"`
+	ComboId       int64                  `protobuf:"varint,1,opt,name=combo_id,json=comboId,proto3" json:"combo_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateComboResponse) Reset() {
 	*x = CreateComboResponse{}
-	mi := &file_pos_v1_combos_proto_msgTypes[7]
+	mi := &file_pos_v1_combos_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -534,7 +307,7 @@ func (x *CreateComboResponse) String() string {
 func (*CreateComboResponse) ProtoMessage() {}
 
 func (x *CreateComboResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[7]
+	mi := &file_pos_v1_combos_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -547,32 +320,37 @@ func (x *CreateComboResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateComboResponse.ProtoReflect.Descriptor instead.
 func (*CreateComboResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{7}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateComboResponse) GetCombo() *Combo {
+func (x *CreateComboResponse) GetComboId() int64 {
 	if x != nil {
-		return x.Combo
+		return x.ComboId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateComboResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateComboRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Price         float64                `protobuf:"fixed64,4,opt,name=price,proto3" json:"price,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,5,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	Groups        []*ComboGroupInput     `protobuf:"bytes,7,rep,name=groups,proto3" json:"groups,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Price         float64                `protobuf:"fixed64,3,opt,name=price,proto3" json:"price,omitempty"`
+	Items         string                 `protobuf:"bytes,4,opt,name=items,proto3" json:"items,omitempty"`
+	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateComboRequest) Reset() {
 	*x = UpdateComboRequest{}
-	mi := &file_pos_v1_combos_proto_msgTypes[8]
+	mi := &file_pos_v1_combos_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -584,7 +362,7 @@ func (x *UpdateComboRequest) String() string {
 func (*UpdateComboRequest) ProtoMessage() {}
 
 func (x *UpdateComboRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[8]
+	mi := &file_pos_v1_combos_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,14 +375,7 @@ func (x *UpdateComboRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateComboRequest.ProtoReflect.Descriptor instead.
 func (*UpdateComboRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *UpdateComboRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateComboRequest) GetName() string {
@@ -628,9 +399,9 @@ func (x *UpdateComboRequest) GetPrice() float64 {
 	return 0
 }
 
-func (x *UpdateComboRequest) GetImageUrl() string {
+func (x *UpdateComboRequest) GetItems() string {
 	if x != nil {
-		return x.ImageUrl
+		return x.Items
 	}
 	return ""
 }
@@ -642,23 +413,16 @@ func (x *UpdateComboRequest) GetIsActive() bool {
 	return false
 }
 
-func (x *UpdateComboRequest) GetGroups() []*ComboGroupInput {
-	if x != nil {
-		return x.Groups
-	}
-	return nil
-}
-
 type UpdateComboResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Combo         *Combo                 `protobuf:"bytes,1,opt,name=combo,proto3" json:"combo,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateComboResponse) Reset() {
 	*x = UpdateComboResponse{}
-	mi := &file_pos_v1_combos_proto_msgTypes[9]
+	mi := &file_pos_v1_combos_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -670,7 +434,7 @@ func (x *UpdateComboResponse) String() string {
 func (*UpdateComboResponse) ProtoMessage() {}
 
 func (x *UpdateComboResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[9]
+	mi := &file_pos_v1_combos_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -683,26 +447,25 @@ func (x *UpdateComboResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateComboResponse.ProtoReflect.Descriptor instead.
 func (*UpdateComboResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{9}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateComboResponse) GetCombo() *Combo {
+func (x *UpdateComboResponse) GetMessage() string {
 	if x != nil {
-		return x.Combo
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type DeleteComboRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteComboRequest) Reset() {
 	*x = DeleteComboRequest{}
-	mi := &file_pos_v1_combos_proto_msgTypes[10]
+	mi := &file_pos_v1_combos_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -714,7 +477,7 @@ func (x *DeleteComboRequest) String() string {
 func (*DeleteComboRequest) ProtoMessage() {}
 
 func (x *DeleteComboRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[10]
+	mi := &file_pos_v1_combos_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -727,26 +490,19 @@ func (x *DeleteComboRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteComboRequest.ProtoReflect.Descriptor instead.
 func (*DeleteComboRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *DeleteComboRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{7}
 }
 
 type DeleteComboResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteComboResponse) Reset() {
 	*x = DeleteComboResponse{}
-	mi := &file_pos_v1_combos_proto_msgTypes[11]
+	mi := &file_pos_v1_combos_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -758,7 +514,7 @@ func (x *DeleteComboResponse) String() string {
 func (*DeleteComboResponse) ProtoMessage() {}
 
 func (x *DeleteComboResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_combos_proto_msgTypes[11]
+	mi := &file_pos_v1_combos_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -771,87 +527,57 @@ func (x *DeleteComboResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteComboResponse.ProtoReflect.Descriptor instead.
 func (*DeleteComboResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_combos_proto_rawDescGZIP(), []int{11}
+	return file_pos_v1_combos_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteComboResponse) GetSuccess() bool {
+func (x *DeleteComboResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_pos_v1_combos_proto protoreflect.FileDescriptor
 
 const file_pos_v1_combos_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/combos.proto\x12\x03pos\"\x99\x01\n" +
-	"\n" +
-	"ComboGroup\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
-	"\n" +
-	"min_select\x18\x03 \x01(\x05R\tminSelect\x12\x1d\n" +
-	"\n" +
-	"max_select\x18\x04 \x01(\x05R\tmaxSelect\x12)\n" +
-	"\x05items\x18\x05 \x03(\v2\x13.pos.ComboGroupItemR\x05items\"\x81\x01\n" +
-	"\x0eComboGroupItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12 \n" +
-	"\fmenu_item_id\x18\x02 \x01(\x03R\n" +
-	"menuItemId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12)\n" +
-	"\x10price_adjustment\x18\x04 \x01(\x01R\x0fpriceAdjustment\"\xa5\x02\n" +
+	"\x13pos/v1/combos.proto\x12\x03pos\"\xef\x01\n" +
 	"\x05Combo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05price\x18\x05 \x01(\x01R\x05price\x12\x1b\n" +
-	"\timage_url\x18\x06 \x01(\tR\bimageUrl\x12\x1b\n" +
-	"\tis_active\x18\a \x01(\bR\bisActive\x12'\n" +
-	"\x06groups\x18\b \x03(\v2\x0f.pos.ComboGroupR\x06groups\x12\x1d\n" +
+	"\x05price\x18\x05 \x01(\x01R\x05price\x12\x14\n" +
+	"\x05items\x18\x06 \x01(\tR\x05items\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\"\x13\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x13\n" +
 	"\x11ListCombosRequest\"8\n" +
 	"\x12ListCombosResponse\x12\"\n" +
 	"\x06combos\x18\x01 \x03(\v2\n" +
-	".pos.ComboR\x06combos\"\xc8\x01\n" +
+	".pos.ComboR\x06combos\"\x93\x01\n" +
 	"\x12CreateComboRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05price\x18\x03 \x01(\x01R\x05price\x12\x1b\n" +
-	"\timage_url\x18\x04 \x01(\tR\bimageUrl\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\x12,\n" +
-	"\x06groups\x18\x06 \x03(\v2\x14.pos.ComboGroupInputR\x06groups\"\x87\x01\n" +
-	"\x0fComboGroupInput\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
-	"\n" +
-	"min_select\x18\x02 \x01(\x05R\tminSelect\x12\x1d\n" +
-	"\n" +
-	"max_select\x18\x03 \x01(\x05R\tmaxSelect\x12\"\n" +
-	"\rmenu_item_ids\x18\x04 \x03(\x03R\vmenuItemIds\"7\n" +
-	"\x13CreateComboResponse\x12 \n" +
-	"\x05combo\x18\x01 \x01(\v2\n" +
-	".pos.ComboR\x05combo\"\xd8\x01\n" +
-	"\x12UpdateComboRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05price\x18\x04 \x01(\x01R\x05price\x12\x1b\n" +
-	"\timage_url\x18\x05 \x01(\tR\bimageUrl\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12,\n" +
-	"\x06groups\x18\a \x03(\v2\x14.pos.ComboGroupInputR\x06groups\"7\n" +
-	"\x13UpdateComboResponse\x12 \n" +
-	"\x05combo\x18\x01 \x01(\v2\n" +
-	".pos.ComboR\x05combo\"$\n" +
-	"\x12DeleteComboRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"/\n" +
+	"\x05price\x18\x03 \x01(\x01R\x05price\x12\x14\n" +
+	"\x05items\x18\x04 \x01(\tR\x05items\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"J\n" +
+	"\x13CreateComboResponse\x12\x19\n" +
+	"\bcombo_id\x18\x01 \x01(\x03R\acomboId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x93\x01\n" +
+	"\x12UpdateComboRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05price\x18\x03 \x01(\x01R\x05price\x12\x14\n" +
+	"\x05items\x18\x04 \x01(\tR\x05items\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"/\n" +
+	"\x13UpdateComboResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
+	"\x12DeleteComboRequest\"/\n" +
 	"\x13DeleteComboResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_combos_proto_rawDescOnce sync.Once
@@ -865,34 +591,25 @@ func file_pos_v1_combos_proto_rawDescGZIP() []byte {
 	return file_pos_v1_combos_proto_rawDescData
 }
 
-var file_pos_v1_combos_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_pos_v1_combos_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_combos_proto_goTypes = []any{
-	(*ComboGroup)(nil),          // 0: pos.ComboGroup
-	(*ComboGroupItem)(nil),      // 1: pos.ComboGroupItem
-	(*Combo)(nil),               // 2: pos.Combo
-	(*ListCombosRequest)(nil),   // 3: pos.ListCombosRequest
-	(*ListCombosResponse)(nil),  // 4: pos.ListCombosResponse
-	(*CreateComboRequest)(nil),  // 5: pos.CreateComboRequest
-	(*ComboGroupInput)(nil),     // 6: pos.ComboGroupInput
-	(*CreateComboResponse)(nil), // 7: pos.CreateComboResponse
-	(*UpdateComboRequest)(nil),  // 8: pos.UpdateComboRequest
-	(*UpdateComboResponse)(nil), // 9: pos.UpdateComboResponse
-	(*DeleteComboRequest)(nil),  // 10: pos.DeleteComboRequest
-	(*DeleteComboResponse)(nil), // 11: pos.DeleteComboResponse
+	(*Combo)(nil),               // 0: pos.Combo
+	(*ListCombosRequest)(nil),   // 1: pos.ListCombosRequest
+	(*ListCombosResponse)(nil),  // 2: pos.ListCombosResponse
+	(*CreateComboRequest)(nil),  // 3: pos.CreateComboRequest
+	(*CreateComboResponse)(nil), // 4: pos.CreateComboResponse
+	(*UpdateComboRequest)(nil),  // 5: pos.UpdateComboRequest
+	(*UpdateComboResponse)(nil), // 6: pos.UpdateComboResponse
+	(*DeleteComboRequest)(nil),  // 7: pos.DeleteComboRequest
+	(*DeleteComboResponse)(nil), // 8: pos.DeleteComboResponse
 }
 var file_pos_v1_combos_proto_depIdxs = []int32{
-	1, // 0: pos.ComboGroup.items:type_name -> pos.ComboGroupItem
-	0, // 1: pos.Combo.groups:type_name -> pos.ComboGroup
-	2, // 2: pos.ListCombosResponse.combos:type_name -> pos.Combo
-	6, // 3: pos.CreateComboRequest.groups:type_name -> pos.ComboGroupInput
-	2, // 4: pos.CreateComboResponse.combo:type_name -> pos.Combo
-	6, // 5: pos.UpdateComboRequest.groups:type_name -> pos.ComboGroupInput
-	2, // 6: pos.UpdateComboResponse.combo:type_name -> pos.Combo
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	0, // 0: pos.ListCombosResponse.combos:type_name -> pos.Combo
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_combos_proto_init() }
@@ -906,7 +623,7 @@ func file_pos_v1_combos_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_combos_proto_rawDesc), len(file_pos_v1_combos_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

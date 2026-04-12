@@ -8,17 +8,13 @@
 
 export interface Terminal {
   id: number;
-  locationId: number;
+  businessId: number;
+  branchId: number;
   name: string;
   deviceId: string;
-  /** online, offline */
-  status: string;
   isActive: boolean;
-  lastHeartbeatAt: string;
-  ipAddress: string;
-  appVersion: string;
+  lastSeenAt: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ListTerminalsRequest {
@@ -29,38 +25,31 @@ export interface ListTerminalsResponse {
 }
 
 export interface CreateTerminalRequest {
+  branchId: number;
   name: string;
   deviceId: string;
 }
 
 export interface CreateTerminalResponse {
-  terminal: Terminal | undefined;
+  terminalId: number;
+  message: string;
 }
 
 export interface UpdateTerminalRequest {
-  id: number;
+  branchId: number;
   name: string;
+  deviceId: string;
   isActive: boolean;
 }
 
 export interface UpdateTerminalResponse {
-  terminal: Terminal | undefined;
+  message: string;
 }
 
-export interface DeleteTerminalRequest {
-  id: number;
+export interface HeartbeatTerminalRequest {
+  terminalId: number;
 }
 
-export interface DeleteTerminalResponse {
-  success: boolean;
-}
-
-export interface TerminalHeartbeatRequest {
-  id: number;
-  appVersion: string;
-  ipAddress: string;
-}
-
-export interface TerminalHeartbeatResponse {
-  success: boolean;
+export interface HeartbeatTerminalResponse {
+  message: string;
 }

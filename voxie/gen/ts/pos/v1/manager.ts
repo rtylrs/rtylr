@@ -6,14 +6,12 @@
 
 /* eslint-disable */
 
-export interface VerifyManagerPinRequest {
+export interface VerifyPINRequest {
   pin: string;
-  /** void, refund, discount, override */
-  action: string;
 }
 
-export interface VerifyManagerPinResponse {
+export interface VerifyPINResponse {
   valid: boolean;
-  managerId: number;
-  managerName: string;
+  staffId: number;
+  message: string;
 }

@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,12 +24,11 @@ const (
 type Department struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	ManagerId     int64                  `protobuf:"varint,4,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
-	ManagerName   string                 `protobuf:"bytes,5,opt,name=manager_name,json=managerName,proto3" json:"manager_name,omitempty"`
-	MemberCount   int32                  `protobuf:"varint,6,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,6 +70,13 @@ func (x *Department) GetId() int64 {
 	return 0
 }
 
+func (x *Department) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Department) GetName() string {
 	if x != nil {
 		return x.Name
@@ -86,27 +91,6 @@ func (x *Department) GetDescription() string {
 	return ""
 }
 
-func (x *Department) GetManagerId() int64 {
-	if x != nil {
-		return x.ManagerId
-	}
-	return 0
-}
-
-func (x *Department) GetManagerName() string {
-	if x != nil {
-		return x.ManagerName
-	}
-	return ""
-}
-
-func (x *Department) GetMemberCount() int32 {
-	if x != nil {
-		return x.MemberCount
-	}
-	return 0
-}
-
 func (x *Department) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
@@ -114,9 +98,15 @@ func (x *Department) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Department) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 type ListDepartmentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -151,17 +141,9 @@ func (*ListDepartmentsRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_departments_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListDepartmentsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 type ListDepartmentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Departments   []*Department          `protobuf:"bytes,1,rep,name=departments,proto3" json:"departments,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -203,113 +185,17 @@ func (x *ListDepartmentsResponse) GetDepartments() []*Department {
 	return nil
 }
 
-func (x *ListDepartmentsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetDepartmentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDepartmentRequest) Reset() {
-	*x = GetDepartmentRequest{}
-	mi := &file_hr_v1_departments_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDepartmentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDepartmentRequest) ProtoMessage() {}
-
-func (x *GetDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_departments_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDepartmentRequest.ProtoReflect.Descriptor instead.
-func (*GetDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_departments_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetDepartmentRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetDepartmentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Department    *Department            `protobuf:"bytes,1,opt,name=department,proto3" json:"department,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDepartmentResponse) Reset() {
-	*x = GetDepartmentResponse{}
-	mi := &file_hr_v1_departments_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDepartmentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDepartmentResponse) ProtoMessage() {}
-
-func (x *GetDepartmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_departments_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDepartmentResponse.ProtoReflect.Descriptor instead.
-func (*GetDepartmentResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_departments_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetDepartmentResponse) GetDepartment() *Department {
-	if x != nil {
-		return x.Department
-	}
-	return nil
-}
-
 type CreateDepartmentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	ManagerId     int64                  `protobuf:"varint,3,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateDepartmentRequest) Reset() {
 	*x = CreateDepartmentRequest{}
-	mi := &file_hr_v1_departments_proto_msgTypes[5]
+	mi := &file_hr_v1_departments_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -321,7 +207,7 @@ func (x *CreateDepartmentRequest) String() string {
 func (*CreateDepartmentRequest) ProtoMessage() {}
 
 func (x *CreateDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_departments_proto_msgTypes[5]
+	mi := &file_hr_v1_departments_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -334,7 +220,7 @@ func (x *CreateDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*CreateDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_departments_proto_rawDescGZIP(), []int{5}
+	return file_hr_v1_departments_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateDepartmentRequest) GetName() string {
@@ -351,23 +237,16 @@ func (x *CreateDepartmentRequest) GetDescription() string {
 	return ""
 }
 
-func (x *CreateDepartmentRequest) GetManagerId() int64 {
-	if x != nil {
-		return x.ManagerId
-	}
-	return 0
-}
-
 type CreateDepartmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Department    *Department            `protobuf:"bytes,1,opt,name=department,proto3" json:"department,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateDepartmentResponse) Reset() {
 	*x = CreateDepartmentResponse{}
-	mi := &file_hr_v1_departments_proto_msgTypes[6]
+	mi := &file_hr_v1_departments_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -379,7 +258,7 @@ func (x *CreateDepartmentResponse) String() string {
 func (*CreateDepartmentResponse) ProtoMessage() {}
 
 func (x *CreateDepartmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_departments_proto_msgTypes[6]
+	mi := &file_hr_v1_departments_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -392,56 +271,241 @@ func (x *CreateDepartmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDepartmentResponse.ProtoReflect.Descriptor instead.
 func (*CreateDepartmentResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_departments_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateDepartmentResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type UpdateDepartmentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDepartmentRequest) Reset() {
+	*x = UpdateDepartmentRequest{}
+	mi := &file_hr_v1_departments_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDepartmentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDepartmentRequest) ProtoMessage() {}
+
+func (x *UpdateDepartmentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_departments_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDepartmentRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDepartmentRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_departments_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateDepartmentRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateDepartmentRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateDepartmentRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type UpdateDepartmentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDepartmentResponse) Reset() {
+	*x = UpdateDepartmentResponse{}
+	mi := &file_hr_v1_departments_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDepartmentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDepartmentResponse) ProtoMessage() {}
+
+func (x *UpdateDepartmentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_departments_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDepartmentResponse.ProtoReflect.Descriptor instead.
+func (*UpdateDepartmentResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_departments_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateDepartmentResponse) GetDepartment() *Department {
+func (x *UpdateDepartmentResponse) GetSuccess() bool {
 	if x != nil {
-		return x.Department
+		return x.Success
 	}
-	return nil
+	return false
+}
+
+type DeleteDepartmentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDepartmentRequest) Reset() {
+	*x = DeleteDepartmentRequest{}
+	mi := &file_hr_v1_departments_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDepartmentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDepartmentRequest) ProtoMessage() {}
+
+func (x *DeleteDepartmentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_departments_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDepartmentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDepartmentRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_departments_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteDepartmentRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteDepartmentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDepartmentResponse) Reset() {
+	*x = DeleteDepartmentResponse{}
+	mi := &file_hr_v1_departments_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDepartmentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDepartmentResponse) ProtoMessage() {}
+
+func (x *DeleteDepartmentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_departments_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDepartmentResponse.ProtoReflect.Descriptor instead.
+func (*DeleteDepartmentResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_departments_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DeleteDepartmentResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
 }
 
 var File_hr_v1_departments_proto protoreflect.FileDescriptor
 
 const file_hr_v1_departments_proto_rawDesc = "" +
 	"\n" +
-	"\x17hr/v1/departments.proto\x12\x02hr\x1a\x1acommon/v1/pagination.proto\"\xd6\x01\n" +
+	"\x17hr/v1/departments.proto\x12\x02hr\"\xab\x01\n" +
 	"\n" +
 	"Department\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1d\n" +
 	"\n" +
-	"manager_id\x18\x04 \x01(\x03R\tmanagerId\x12!\n" +
-	"\fmanager_name\x18\x05 \x01(\tR\vmanagerName\x12!\n" +
-	"\fmember_count\x18\x06 \x01(\x05R\vmemberCount\x12\x1d\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"S\n" +
-	"\x16ListDepartmentsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x87\x01\n" +
+	"updated_at\x18\x06 \x01(\tR\tupdatedAt\"\x18\n" +
+	"\x16ListDepartmentsRequest\"K\n" +
 	"\x17ListDepartmentsResponse\x120\n" +
-	"\vdepartments\x18\x01 \x03(\v2\x0e.hr.DepartmentR\vdepartments\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"&\n" +
-	"\x14GetDepartmentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"G\n" +
-	"\x15GetDepartmentResponse\x12.\n" +
-	"\n" +
-	"department\x18\x01 \x01(\v2\x0e.hr.DepartmentR\n" +
-	"department\"n\n" +
+	"\vdepartments\x18\x01 \x03(\v2\x0e.hr.DepartmentR\vdepartments\"O\n" +
 	"\x17CreateDepartmentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1d\n" +
-	"\n" +
-	"manager_id\x18\x03 \x01(\x03R\tmanagerId\"J\n" +
-	"\x18CreateDepartmentResponse\x12.\n" +
-	"\n" +
-	"department\x18\x01 \x01(\v2\x0e.hr.DepartmentR\n" +
-	"departmentB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
+	"\vdescription\x18\x02 \x01(\tR\vdescription\"*\n" +
+	"\x18CreateDepartmentResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"_\n" +
+	"\x17UpdateDepartmentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"4\n" +
+	"\x18UpdateDepartmentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\")\n" +
+	"\x17DeleteDepartmentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"4\n" +
+	"\x18DeleteDepartmentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
 
 var (
 	file_hr_v1_departments_proto_rawDescOnce sync.Once
@@ -455,29 +519,25 @@ func file_hr_v1_departments_proto_rawDescGZIP() []byte {
 	return file_hr_v1_departments_proto_rawDescData
 }
 
-var file_hr_v1_departments_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_hr_v1_departments_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_hr_v1_departments_proto_goTypes = []any{
 	(*Department)(nil),               // 0: hr.Department
 	(*ListDepartmentsRequest)(nil),   // 1: hr.ListDepartmentsRequest
 	(*ListDepartmentsResponse)(nil),  // 2: hr.ListDepartmentsResponse
-	(*GetDepartmentRequest)(nil),     // 3: hr.GetDepartmentRequest
-	(*GetDepartmentResponse)(nil),    // 4: hr.GetDepartmentResponse
-	(*CreateDepartmentRequest)(nil),  // 5: hr.CreateDepartmentRequest
-	(*CreateDepartmentResponse)(nil), // 6: hr.CreateDepartmentResponse
-	(*v1.PaginationRequest)(nil),     // 7: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),    // 8: common.PaginationResponse
+	(*CreateDepartmentRequest)(nil),  // 3: hr.CreateDepartmentRequest
+	(*CreateDepartmentResponse)(nil), // 4: hr.CreateDepartmentResponse
+	(*UpdateDepartmentRequest)(nil),  // 5: hr.UpdateDepartmentRequest
+	(*UpdateDepartmentResponse)(nil), // 6: hr.UpdateDepartmentResponse
+	(*DeleteDepartmentRequest)(nil),  // 7: hr.DeleteDepartmentRequest
+	(*DeleteDepartmentResponse)(nil), // 8: hr.DeleteDepartmentResponse
 }
 var file_hr_v1_departments_proto_depIdxs = []int32{
-	7, // 0: hr.ListDepartmentsRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: hr.ListDepartmentsResponse.departments:type_name -> hr.Department
-	8, // 2: hr.ListDepartmentsResponse.pagination:type_name -> common.PaginationResponse
-	0, // 3: hr.GetDepartmentResponse.department:type_name -> hr.Department
-	0, // 4: hr.CreateDepartmentResponse.department:type_name -> hr.Department
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0, // 0: hr.ListDepartmentsResponse.departments:type_name -> hr.Department
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_departments_proto_init() }
@@ -491,7 +551,7 @@ func file_hr_v1_departments_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_v1_departments_proto_rawDesc), len(file_hr_v1_departments_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

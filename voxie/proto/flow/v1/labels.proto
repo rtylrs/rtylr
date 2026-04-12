@@ -8,20 +8,24 @@ option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
 
 message Label {
   int64 id = 1;
-  string name = 2;
-  string color = 3;
-  int32 task_count = 4;
+  int64 workspace_id = 2;
+  string name = 3;
+  string color = 4;
+  string created_at = 5;
 }
 
-message ListLabelsRequest {}
+message ListLabelsRequest {
+  int64 workspace_id = 1;
+}
 
 message ListLabelsResponse {
   repeated Label labels = 1;
 }
 
 message CreateLabelRequest {
-  string name = 1;
-  string color = 2;
+  int64 workspace_id = 1;
+  string name = 2;
+  string color = 3;
 }
 
 message CreateLabelResponse {

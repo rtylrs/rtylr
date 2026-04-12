@@ -6,35 +6,34 @@
 
 /* eslint-disable */
 
-export interface MemberLocation {
-  id: number;
-  memberId: number;
+export interface MyLocation {
   locationId: number;
-  locationName: string;
-  role: string;
-  assignedAt: string;
+  name: string;
+  address: string;
+  phone: string;
 }
 
 export interface GetMyLocationsRequest {
 }
 
 export interface GetMyLocationsResponse {
-  locations: MemberLocation[];
+  locations: MyLocation[];
 }
 
 export interface AssignLocationRequest {
-  memberId: number;
+  userId: number;
   locationId: number;
-  role: string;
+  canManagePosUsers: boolean;
+  canManageTerminals: boolean;
+  canViewReports: boolean;
 }
 
 export interface AssignLocationResponse {
-  assignment: MemberLocation | undefined;
+  id: number;
 }
 
 export interface RemoveLocationRequest {
-  memberId: number;
-  locationId: number;
+  id: number;
 }
 
 export interface RemoveLocationResponse {

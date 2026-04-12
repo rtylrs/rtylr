@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,13 +24,16 @@ const (
 type CashMovement struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	SessionId     int64                  `protobuf:"varint,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"` // drop, pickup, adjustment
-	Amount        float64                `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty"`
-	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
-	PerformedBy   string                 `protobuf:"bytes,7,opt,name=performed_by,json=performedBy,proto3" json:"performed_by,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,5,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,6,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Type          string                 `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
+	Amount        float64                `protobuf:"fixed64,8,opt,name=amount,proto3" json:"amount,omitempty"`
+	Reason        string                 `protobuf:"bytes,9,opt,name=reason,proto3" json:"reason,omitempty"`
+	ApprovedBy    int64                  `protobuf:"varint,10,opt,name=approved_by,json=approvedBy,proto3" json:"approved_by,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,6 +75,27 @@ func (x *CashMovement) GetId() int64 {
 	return 0
 }
 
+func (x *CashMovement) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *CashMovement) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *CashMovement) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
 func (x *CashMovement) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
@@ -80,9 +103,9 @@ func (x *CashMovement) GetSessionId() int64 {
 	return 0
 }
 
-func (x *CashMovement) GetLocationId() int64 {
+func (x *CashMovement) GetEmployeeId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.EmployeeId
 	}
 	return 0
 }
@@ -108,11 +131,11 @@ func (x *CashMovement) GetReason() string {
 	return ""
 }
 
-func (x *CashMovement) GetPerformedBy() string {
+func (x *CashMovement) GetApprovedBy() int64 {
 	if x != nil {
-		return x.PerformedBy
+		return x.ApprovedBy
 	}
-	return ""
+	return 0
 }
 
 func (x *CashMovement) GetCreatedAt() string {
@@ -124,9 +147,7 @@ func (x *CashMovement) GetCreatedAt() string {
 
 type ListCashMovementsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	SessionId     int64                  `protobuf:"varint,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -161,13 +182,6 @@ func (*ListCashMovementsRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListCashMovementsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListCashMovementsRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
@@ -175,17 +189,9 @@ func (x *ListCashMovementsRequest) GetSessionId() int64 {
 	return 0
 }
 
-func (x *ListCashMovementsRequest) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
 type ListCashMovementsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Movements     []*CashMovement        `protobuf:"bytes,1,rep,name=movements,proto3" json:"movements,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -227,17 +233,14 @@ func (x *ListCashMovementsResponse) GetMovements() []*CashMovement {
 	return nil
 }
 
-func (x *ListCashMovementsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 type CashDropRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Amount        float64                `protobuf:"fixed64,1,opt,name=amount,proto3" json:"amount,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,2,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,4,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty"`
+	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -272,6 +275,34 @@ func (*CashDropRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *CashDropRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *CashDropRequest) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
+func (x *CashDropRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *CashDropRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
 func (x *CashDropRequest) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
@@ -288,7 +319,8 @@ func (x *CashDropRequest) GetReason() string {
 
 type CashDropResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *CashMovement          `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -323,17 +355,28 @@ func (*CashDropResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CashDropResponse) GetMovement() *CashMovement {
+func (x *CashDropResponse) GetMovementId() int64 {
 	if x != nil {
-		return x.Movement
+		return x.MovementId
 	}
-	return nil
+	return 0
+}
+
+func (x *CashDropResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type CashPickupRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Amount        float64                `protobuf:"fixed64,1,opt,name=amount,proto3" json:"amount,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,2,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,4,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty"`
+	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -368,6 +411,34 @@ func (*CashPickupRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{5}
 }
 
+func (x *CashPickupRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *CashPickupRequest) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
+func (x *CashPickupRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *CashPickupRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
 func (x *CashPickupRequest) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
@@ -384,7 +455,8 @@ func (x *CashPickupRequest) GetReason() string {
 
 type CashPickupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *CashMovement          `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -419,17 +491,28 @@ func (*CashPickupResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CashPickupResponse) GetMovement() *CashMovement {
+func (x *CashPickupResponse) GetMovementId() int64 {
 	if x != nil {
-		return x.Movement
+		return x.MovementId
 	}
-	return nil
+	return 0
+}
+
+func (x *CashPickupResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type CashAdjustRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Amount        float64                `protobuf:"fixed64,1,opt,name=amount,proto3" json:"amount,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,2,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,4,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty"`
+	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -464,6 +547,34 @@ func (*CashAdjustRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{7}
 }
 
+func (x *CashAdjustRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *CashAdjustRequest) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
+func (x *CashAdjustRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *CashAdjustRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
 func (x *CashAdjustRequest) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
@@ -480,7 +591,8 @@ func (x *CashAdjustRequest) GetReason() string {
 
 type CashAdjustResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *CashMovement          `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -515,57 +627,91 @@ func (*CashAdjustResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_cash_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *CashAdjustResponse) GetMovement() *CashMovement {
+func (x *CashAdjustResponse) GetMovementId() int64 {
 	if x != nil {
-		return x.Movement
+		return x.MovementId
 	}
-	return nil
+	return 0
+}
+
+func (x *CashAdjustResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_pos_v1_cash_proto protoreflect.FileDescriptor
 
 const file_pos_v1_cash_proto_rawDesc = "" +
 	"\n" +
-	"\x11pos/v1/cash.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\xe4\x01\n" +
+	"\x11pos/v1/cash.proto\x12\x03pos\"\xc1\x02\n" +
 	"\fCashMovement\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x04 \x01(\x03R\n" +
+	"terminalId\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\x03R\tsessionId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12\x16\n" +
-	"\x06amount\x18\x05 \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06reason\x18\x06 \x01(\tR\x06reason\x12!\n" +
-	"\fperformed_by\x18\a \x01(\tR\vperformedBy\x12\x1d\n" +
+	"session_id\x18\x05 \x01(\x03R\tsessionId\x12\x1f\n" +
+	"\vemployee_id\x18\x06 \x01(\x03R\n" +
+	"employeeId\x12\x12\n" +
+	"\x04type\x18\a \x01(\tR\x04type\x12\x16\n" +
+	"\x06amount\x18\b \x01(\x01R\x06amount\x12\x16\n" +
+	"\x06reason\x18\t \x01(\tR\x06reason\x12\x1f\n" +
+	"\vapproved_by\x18\n" +
+	" \x01(\x03R\n" +
+	"approvedBy\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\"\x88\x01\n" +
-	"\x18ListCashMovementsRequest\x129\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\"9\n" +
+	"\x18ListCashMovementsRequest\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x02 \x01(\x03R\tsessionId\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"\x88\x01\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"L\n" +
 	"\x19ListCashMovementsResponse\x12/\n" +
-	"\tmovements\x18\x01 \x03(\v2\x11.pos.CashMovementR\tmovements\x12:\n" +
+	"\tmovements\x18\x01 \x03(\v2\x11.pos.CashMovementR\tmovements\"\xbf\x01\n" +
+	"\x0fCashDropRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x02 \x01(\x03R\n" +
+	"terminalId\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"A\n" +
-	"\x0fCashDropRequest\x12\x16\n" +
-	"\x06amount\x18\x01 \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"A\n" +
-	"\x10CashDropResponse\x12-\n" +
-	"\bmovement\x18\x01 \x01(\v2\x11.pos.CashMovementR\bmovement\"C\n" +
-	"\x11CashPickupRequest\x12\x16\n" +
-	"\x06amount\x18\x01 \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"C\n" +
-	"\x12CashPickupResponse\x12-\n" +
-	"\bmovement\x18\x01 \x01(\v2\x11.pos.CashMovementR\bmovement\"C\n" +
-	"\x11CashAdjustRequest\x12\x16\n" +
-	"\x06amount\x18\x01 \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"C\n" +
-	"\x12CashAdjustResponse\x12-\n" +
-	"\bmovement\x18\x01 \x01(\v2\x11.pos.CashMovementR\bmovementB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"session_id\x18\x03 \x01(\x03R\tsessionId\x12\x1f\n" +
+	"\vemployee_id\x18\x04 \x01(\x03R\n" +
+	"employeeId\x12\x16\n" +
+	"\x06amount\x18\x05 \x01(\x01R\x06amount\x12\x16\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\"M\n" +
+	"\x10CashDropResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xc1\x01\n" +
+	"\x11CashPickupRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x02 \x01(\x03R\n" +
+	"terminalId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\x03R\tsessionId\x12\x1f\n" +
+	"\vemployee_id\x18\x04 \x01(\x03R\n" +
+	"employeeId\x12\x16\n" +
+	"\x06amount\x18\x05 \x01(\x01R\x06amount\x12\x16\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\"O\n" +
+	"\x12CashPickupResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xc1\x01\n" +
+	"\x11CashAdjustRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x02 \x01(\x03R\n" +
+	"terminalId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\x03R\tsessionId\x12\x1f\n" +
+	"\vemployee_id\x18\x04 \x01(\x03R\n" +
+	"employeeId\x12\x16\n" +
+	"\x06amount\x18\x05 \x01(\x01R\x06amount\x12\x16\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\"O\n" +
+	"\x12CashAdjustResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_cash_proto_rawDescOnce sync.Once
@@ -590,21 +736,14 @@ var file_pos_v1_cash_proto_goTypes = []any{
 	(*CashPickupResponse)(nil),        // 6: pos.CashPickupResponse
 	(*CashAdjustRequest)(nil),         // 7: pos.CashAdjustRequest
 	(*CashAdjustResponse)(nil),        // 8: pos.CashAdjustResponse
-	(*v1.PaginationRequest)(nil),      // 9: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),     // 10: common.PaginationResponse
 }
 var file_pos_v1_cash_proto_depIdxs = []int32{
-	9,  // 0: pos.ListCashMovementsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: pos.ListCashMovementsResponse.movements:type_name -> pos.CashMovement
-	10, // 2: pos.ListCashMovementsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: pos.CashDropResponse.movement:type_name -> pos.CashMovement
-	0,  // 4: pos.CashPickupResponse.movement:type_name -> pos.CashMovement
-	0,  // 5: pos.CashAdjustResponse.movement:type_name -> pos.CashMovement
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: pos.ListCashMovementsResponse.movements:type_name -> pos.CashMovement
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_cash_proto_init() }

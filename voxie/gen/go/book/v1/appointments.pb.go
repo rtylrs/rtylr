@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,29 +22,23 @@ const (
 )
 
 type Appointment struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	BusinessId         int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
-	LocationId         int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	CustomerId         int64                  `protobuf:"varint,4,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CustomerName       string                 `protobuf:"bytes,5,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	CustomerEmail      string                 `protobuf:"bytes,6,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
-	CustomerPhone      string                 `protobuf:"bytes,7,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
-	ServiceId          int64                  `protobuf:"varint,8,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ServiceName        string                 `protobuf:"bytes,9,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	ResourceId         int64                  `protobuf:"varint,10,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	ResourceName       string                 `protobuf:"bytes,11,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	Status             string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"` // scheduled, confirmed, in_progress, completed, cancelled, no_show
-	StartTime          string                 `protobuf:"bytes,13,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime            string                 `protobuf:"bytes,14,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	DurationMinutes    int32                  `protobuf:"varint,15,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
-	Price              float64                `protobuf:"fixed64,16,opt,name=price,proto3" json:"price,omitempty"`
-	Notes              string                 `protobuf:"bytes,17,opt,name=notes,proto3" json:"notes,omitempty"`
-	CancellationReason string                 `protobuf:"bytes,18,opt,name=cancellation_reason,json=cancellationReason,proto3" json:"cancellation_reason,omitempty"`
-	CreatedAt          string                 `protobuf:"bytes,19,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt          string                 `protobuf:"bytes,20,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	ServiceId     int64                  `protobuf:"varint,3,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	ResourceId    int64                  `protobuf:"varint,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,5,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,6,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,7,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,8,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	StartTime     string                 `protobuf:"bytes,9,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       string                 `protobuf:"bytes,10,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Status        string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,12,opt,name=notes,proto3" json:"notes,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Appointment) Reset() {
@@ -85,23 +78,30 @@ func (x *Appointment) GetId() int64 {
 	return 0
 }
 
-func (x *Appointment) GetBusinessId() int64 {
+func (x *Appointment) GetOwnerId() int64 {
 	if x != nil {
-		return x.BusinessId
+		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *Appointment) GetLocationId() int64 {
+func (x *Appointment) GetServiceId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.ServiceId
 	}
 	return 0
 }
 
-func (x *Appointment) GetCustomerId() int64 {
+func (x *Appointment) GetResourceId() int64 {
 	if x != nil {
-		return x.CustomerId
+		return x.ResourceId
+	}
+	return 0
+}
+
+func (x *Appointment) GetStaffId() int64 {
+	if x != nil {
+		return x.StaffId
 	}
 	return 0
 }
@@ -127,41 +127,6 @@ func (x *Appointment) GetCustomerPhone() string {
 	return ""
 }
 
-func (x *Appointment) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *Appointment) GetServiceName() string {
-	if x != nil {
-		return x.ServiceName
-	}
-	return ""
-}
-
-func (x *Appointment) GetResourceId() int64 {
-	if x != nil {
-		return x.ResourceId
-	}
-	return 0
-}
-
-func (x *Appointment) GetResourceName() string {
-	if x != nil {
-		return x.ResourceName
-	}
-	return ""
-}
-
-func (x *Appointment) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
 func (x *Appointment) GetStartTime() string {
 	if x != nil {
 		return x.StartTime
@@ -176,30 +141,16 @@ func (x *Appointment) GetEndTime() string {
 	return ""
 }
 
-func (x *Appointment) GetDurationMinutes() int32 {
+func (x *Appointment) GetStatus() string {
 	if x != nil {
-		return x.DurationMinutes
+		return x.Status
 	}
-	return 0
-}
-
-func (x *Appointment) GetPrice() float64 {
-	if x != nil {
-		return x.Price
-	}
-	return 0
+	return ""
 }
 
 func (x *Appointment) GetNotes() string {
 	if x != nil {
 		return x.Notes
-	}
-	return ""
-}
-
-func (x *Appointment) GetCancellationReason() string {
-	if x != nil {
-		return x.CancellationReason
 	}
 	return ""
 }
@@ -220,13 +171,6 @@ func (x *Appointment) GetUpdatedAt() string {
 
 type ListAppointmentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	ResourceId    int64                  `protobuf:"varint,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	ServiceId     int64                  `protobuf:"varint,4,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	DateFrom      string                 `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
-	DateTo        string                 `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
-	Search        string                 `protobuf:"bytes,7,opt,name=search,proto3" json:"search,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -261,59 +205,9 @@ func (*ListAppointmentsRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListAppointmentsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListAppointmentsRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListAppointmentsRequest) GetResourceId() int64 {
-	if x != nil {
-		return x.ResourceId
-	}
-	return 0
-}
-
-func (x *ListAppointmentsRequest) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *ListAppointmentsRequest) GetDateFrom() string {
-	if x != nil {
-		return x.DateFrom
-	}
-	return ""
-}
-
-func (x *ListAppointmentsRequest) GetDateTo() string {
-	if x != nil {
-		return x.DateTo
-	}
-	return ""
-}
-
-func (x *ListAppointmentsRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
 type ListAppointmentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Appointments  []*Appointment         `protobuf:"bytes,1,rep,name=appointments,proto3" json:"appointments,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -355,34 +249,26 @@ func (x *ListAppointmentsResponse) GetAppointments() []*Appointment {
 	return nil
 }
 
-func (x *ListAppointmentsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetAppointmentRequest struct {
+type TodayAppointmentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetAppointmentRequest) Reset() {
-	*x = GetAppointmentRequest{}
+func (x *TodayAppointmentsRequest) Reset() {
+	*x = TodayAppointmentsRequest{}
 	mi := &file_book_v1_appointments_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetAppointmentRequest) String() string {
+func (x *TodayAppointmentsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAppointmentRequest) ProtoMessage() {}
+func (*TodayAppointmentsRequest) ProtoMessage() {}
 
-func (x *GetAppointmentRequest) ProtoReflect() protoreflect.Message {
+func (x *TodayAppointmentsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_appointments_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -394,39 +280,32 @@ func (x *GetAppointmentRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAppointmentRequest.ProtoReflect.Descriptor instead.
-func (*GetAppointmentRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use TodayAppointmentsRequest.ProtoReflect.Descriptor instead.
+func (*TodayAppointmentsRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetAppointmentRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetAppointmentResponse struct {
+type TodayAppointmentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Appointment   *Appointment           `protobuf:"bytes,1,opt,name=appointment,proto3" json:"appointment,omitempty"`
+	Appointments  []*Appointment         `protobuf:"bytes,1,rep,name=appointments,proto3" json:"appointments,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetAppointmentResponse) Reset() {
-	*x = GetAppointmentResponse{}
+func (x *TodayAppointmentsResponse) Reset() {
+	*x = TodayAppointmentsResponse{}
 	mi := &file_book_v1_appointments_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetAppointmentResponse) String() string {
+func (x *TodayAppointmentsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAppointmentResponse) ProtoMessage() {}
+func (*TodayAppointmentsResponse) ProtoMessage() {}
 
-func (x *GetAppointmentResponse) ProtoReflect() protoreflect.Message {
+func (x *TodayAppointmentsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_appointments_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -438,28 +317,30 @@ func (x *GetAppointmentResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAppointmentResponse.ProtoReflect.Descriptor instead.
-func (*GetAppointmentResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use TodayAppointmentsResponse.ProtoReflect.Descriptor instead.
+func (*TodayAppointmentsResponse) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetAppointmentResponse) GetAppointment() *Appointment {
+func (x *TodayAppointmentsResponse) GetAppointments() []*Appointment {
 	if x != nil {
-		return x.Appointment
+		return x.Appointments
 	}
 	return nil
 }
 
 type CreateAppointmentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ResourceId    int64                  `protobuf:"varint,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	StartTime     string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	Notes         string                 `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
-	CustomerName  string                 `protobuf:"bytes,6,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	CustomerEmail string                 `protobuf:"bytes,7,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
-	CustomerPhone string                 `protobuf:"bytes,8,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	ServiceId     int64                  `protobuf:"varint,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	ResourceId    int64                  `protobuf:"varint,2,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,3,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,4,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,5,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,6,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	StartTime     string                 `protobuf:"bytes,7,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       string                 `protobuf:"bytes,8,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Status        string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -494,13 +375,6 @@ func (*CreateAppointmentRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *CreateAppointmentRequest) GetCustomerId() int64 {
-	if x != nil {
-		return x.CustomerId
-	}
-	return 0
-}
-
 func (x *CreateAppointmentRequest) GetServiceId() int64 {
 	if x != nil {
 		return x.ServiceId
@@ -515,18 +389,11 @@ func (x *CreateAppointmentRequest) GetResourceId() int64 {
 	return 0
 }
 
-func (x *CreateAppointmentRequest) GetStartTime() string {
+func (x *CreateAppointmentRequest) GetStaffId() int64 {
 	if x != nil {
-		return x.StartTime
+		return x.StaffId
 	}
-	return ""
-}
-
-func (x *CreateAppointmentRequest) GetNotes() string {
-	if x != nil {
-		return x.Notes
-	}
-	return ""
+	return 0
 }
 
 func (x *CreateAppointmentRequest) GetCustomerName() string {
@@ -550,9 +417,38 @@ func (x *CreateAppointmentRequest) GetCustomerPhone() string {
 	return ""
 }
 
+func (x *CreateAppointmentRequest) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *CreateAppointmentRequest) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *CreateAppointmentRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *CreateAppointmentRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
+	}
+	return ""
+}
+
 type CreateAppointmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Appointment   *Appointment           `protobuf:"bytes,1,opt,name=appointment,proto3" json:"appointment,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -587,11 +483,18 @@ func (*CreateAppointmentResponse) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateAppointmentResponse) GetAppointment() *Appointment {
+func (x *CreateAppointmentResponse) GetId() int64 {
 	if x != nil {
-		return x.Appointment
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateAppointmentResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateAppointmentRequest struct {
@@ -599,9 +502,14 @@ type UpdateAppointmentRequest struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	ResourceId    int64                  `protobuf:"varint,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	StartTime     string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	Notes         string                 `protobuf:"bytes,6,opt,name=notes,proto3" json:"notes,omitempty"`
+	StaffId       int64                  `protobuf:"varint,4,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,5,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,6,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,7,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	StartTime     string                 `protobuf:"bytes,8,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       string                 `protobuf:"bytes,9,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Status        string                 `protobuf:"bytes,10,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,11,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -657,9 +565,44 @@ func (x *UpdateAppointmentRequest) GetResourceId() int64 {
 	return 0
 }
 
+func (x *UpdateAppointmentRequest) GetStaffId() int64 {
+	if x != nil {
+		return x.StaffId
+	}
+	return 0
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerName() string {
+	if x != nil {
+		return x.CustomerName
+	}
+	return ""
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerPhone() string {
+	if x != nil {
+		return x.CustomerPhone
+	}
+	return ""
+}
+
 func (x *UpdateAppointmentRequest) GetStartTime() string {
 	if x != nil {
 		return x.StartTime
+	}
+	return ""
+}
+
+func (x *UpdateAppointmentRequest) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
 	}
 	return ""
 }
@@ -680,7 +623,7 @@ func (x *UpdateAppointmentRequest) GetNotes() string {
 
 type UpdateAppointmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Appointment   *Appointment           `protobuf:"bytes,1,opt,name=appointment,proto3" json:"appointment,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -715,107 +658,11 @@ func (*UpdateAppointmentResponse) Descriptor() ([]byte, []int) {
 	return file_book_v1_appointments_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *UpdateAppointmentResponse) GetAppointment() *Appointment {
+func (x *UpdateAppointmentResponse) GetMessage() string {
 	if x != nil {
-		return x.Appointment
-	}
-	return nil
-}
-
-type CancelAppointmentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CancelAppointmentRequest) Reset() {
-	*x = CancelAppointmentRequest{}
-	mi := &file_book_v1_appointments_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CancelAppointmentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CancelAppointmentRequest) ProtoMessage() {}
-
-func (x *CancelAppointmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_appointments_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CancelAppointmentRequest.ProtoReflect.Descriptor instead.
-func (*CancelAppointmentRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_appointments_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *CancelAppointmentRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *CancelAppointmentRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
+		return x.Message
 	}
 	return ""
-}
-
-type CancelAppointmentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Appointment   *Appointment           `protobuf:"bytes,1,opt,name=appointment,proto3" json:"appointment,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CancelAppointmentResponse) Reset() {
-	*x = CancelAppointmentResponse{}
-	mi := &file_book_v1_appointments_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CancelAppointmentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CancelAppointmentResponse) ProtoMessage() {}
-
-func (x *CancelAppointmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_appointments_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CancelAppointmentResponse.ProtoReflect.Descriptor instead.
-func (*CancelAppointmentResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_appointments_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *CancelAppointmentResponse) GetAppointment() *Appointment {
-	if x != nil {
-		return x.Appointment
-	}
-	return nil
 }
 
 type DeleteAppointmentRequest struct {
@@ -827,7 +674,7 @@ type DeleteAppointmentRequest struct {
 
 func (x *DeleteAppointmentRequest) Reset() {
 	*x = DeleteAppointmentRequest{}
-	mi := &file_book_v1_appointments_proto_msgTypes[11]
+	mi := &file_book_v1_appointments_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -839,7 +686,7 @@ func (x *DeleteAppointmentRequest) String() string {
 func (*DeleteAppointmentRequest) ProtoMessage() {}
 
 func (x *DeleteAppointmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_appointments_proto_msgTypes[11]
+	mi := &file_book_v1_appointments_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -852,7 +699,7 @@ func (x *DeleteAppointmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAppointmentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteAppointmentRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_appointments_proto_rawDescGZIP(), []int{11}
+	return file_book_v1_appointments_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteAppointmentRequest) GetId() int64 {
@@ -864,14 +711,14 @@ func (x *DeleteAppointmentRequest) GetId() int64 {
 
 type DeleteAppointmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteAppointmentResponse) Reset() {
 	*x = DeleteAppointmentResponse{}
-	mi := &file_book_v1_appointments_proto_msgTypes[12]
+	mi := &file_book_v1_appointments_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -883,7 +730,7 @@ func (x *DeleteAppointmentResponse) String() string {
 func (*DeleteAppointmentResponse) ProtoMessage() {}
 
 func (x *DeleteAppointmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_appointments_proto_msgTypes[12]
+	mi := &file_book_v1_appointments_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -896,108 +743,88 @@ func (x *DeleteAppointmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAppointmentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteAppointmentResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_appointments_proto_rawDescGZIP(), []int{12}
+	return file_book_v1_appointments_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *DeleteAppointmentResponse) GetSuccess() bool {
+func (x *DeleteAppointmentResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_book_v1_appointments_proto protoreflect.FileDescriptor
 
 const file_book_v1_appointments_proto_rawDesc = "" +
 	"\n" +
-	"\x1abook/v1/appointments.proto\x12\x04book\x1a\x1acommon/v1/pagination.proto\"\x93\x05\n" +
+	"\x1abook/v1/appointments.proto\x12\x04book\"\xac\x03\n" +
 	"\vAppointment\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12\x1f\n" +
-	"\vcustomer_id\x18\x04 \x01(\x03R\n" +
-	"customerId\x12#\n" +
-	"\rcustomer_name\x18\x05 \x01(\tR\fcustomerName\x12%\n" +
-	"\x0ecustomer_email\x18\x06 \x01(\tR\rcustomerEmail\x12%\n" +
-	"\x0ecustomer_phone\x18\a \x01(\tR\rcustomerPhone\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
 	"\n" +
-	"service_id\x18\b \x01(\x03R\tserviceId\x12!\n" +
-	"\fservice_name\x18\t \x01(\tR\vserviceName\x12\x1f\n" +
-	"\vresource_id\x18\n" +
-	" \x01(\x03R\n" +
-	"resourceId\x12#\n" +
-	"\rresource_name\x18\v \x01(\tR\fresourceName\x12\x16\n" +
-	"\x06status\x18\f \x01(\tR\x06status\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\r \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x0e \x01(\tR\aendTime\x12)\n" +
-	"\x10duration_minutes\x18\x0f \x01(\x05R\x0fdurationMinutes\x12\x14\n" +
-	"\x05price\x18\x10 \x01(\x01R\x05price\x12\x14\n" +
-	"\x05notes\x18\x11 \x01(\tR\x05notes\x12/\n" +
-	"\x13cancellation_reason\x18\x12 \x01(\tR\x12cancellationReason\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x13 \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x14 \x01(\tR\tupdatedAt\"\xfa\x01\n" +
-	"\x17ListAppointmentsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1f\n" +
-	"\vresource_id\x18\x03 \x01(\x03R\n" +
-	"resourceId\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x04 \x01(\x03R\tserviceId\x12\x1b\n" +
-	"\tdate_from\x18\x05 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x06 \x01(\tR\x06dateTo\x12\x16\n" +
-	"\x06search\x18\a \x01(\tR\x06search\"\x8d\x01\n" +
-	"\x18ListAppointmentsResponse\x125\n" +
-	"\fappointments\x18\x01 \x03(\v2\x11.book.AppointmentR\fappointments\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"'\n" +
-	"\x15GetAppointmentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"M\n" +
-	"\x16GetAppointmentResponse\x123\n" +
-	"\vappointment\x18\x01 \x01(\v2\x11.book.AppointmentR\vappointment\"\xa3\x02\n" +
-	"\x18CreateAppointmentRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x02 \x01(\x03R\tserviceId\x12\x1f\n" +
-	"\vresource_id\x18\x03 \x01(\x03R\n" +
-	"resourceId\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\x12#\n" +
+	"service_id\x18\x03 \x01(\x03R\tserviceId\x12\x1f\n" +
+	"\vresource_id\x18\x04 \x01(\x03R\n" +
+	"resourceId\x12\x19\n" +
+	"\bstaff_id\x18\x05 \x01(\x03R\astaffId\x12#\n" +
 	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12%\n" +
 	"\x0ecustomer_email\x18\a \x01(\tR\rcustomerEmail\x12%\n" +
-	"\x0ecustomer_phone\x18\b \x01(\tR\rcustomerPhone\"P\n" +
-	"\x19CreateAppointmentResponse\x123\n" +
-	"\vappointment\x18\x01 \x01(\v2\x11.book.AppointmentR\vappointment\"\xb7\x01\n" +
+	"\x0ecustomer_phone\x18\b \x01(\tR\rcustomerPhone\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\t \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\n" +
+	" \x01(\tR\aendTime\x12\x16\n" +
+	"\x06status\x18\v \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\f \x01(\tR\x05notes\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"\x19\n" +
+	"\x17ListAppointmentsRequest\"Q\n" +
+	"\x18ListAppointmentsResponse\x125\n" +
+	"\fappointments\x18\x01 \x03(\v2\x11.book.AppointmentR\fappointments\"\x1a\n" +
+	"\x18TodayAppointmentsRequest\"R\n" +
+	"\x19TodayAppointmentsResponse\x125\n" +
+	"\fappointments\x18\x01 \x03(\v2\x11.book.AppointmentR\fappointments\"\xd0\x02\n" +
+	"\x18CreateAppointmentRequest\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x01 \x01(\x03R\tserviceId\x12\x1f\n" +
+	"\vresource_id\x18\x02 \x01(\x03R\n" +
+	"resourceId\x12\x19\n" +
+	"\bstaff_id\x18\x03 \x01(\x03R\astaffId\x12#\n" +
+	"\rcustomer_name\x18\x04 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x05 \x01(\tR\rcustomerEmail\x12%\n" +
+	"\x0ecustomer_phone\x18\x06 \x01(\tR\rcustomerPhone\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\a \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\b \x01(\tR\aendTime\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\n" +
+	" \x01(\tR\x05notes\"E\n" +
+	"\x19CreateAppointmentResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xe0\x02\n" +
 	"\x18UpdateAppointmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x02 \x01(\x03R\tserviceId\x12\x1f\n" +
 	"\vresource_id\x18\x03 \x01(\x03R\n" +
-	"resourceId\x12\x1d\n" +
+	"resourceId\x12\x19\n" +
+	"\bstaff_id\x18\x04 \x01(\x03R\astaffId\x12#\n" +
+	"\rcustomer_name\x18\x05 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x06 \x01(\tR\rcustomerEmail\x12%\n" +
+	"\x0ecustomer_phone\x18\a \x01(\tR\rcustomerPhone\x12\x1d\n" +
 	"\n" +
-	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12\x14\n" +
-	"\x05notes\x18\x06 \x01(\tR\x05notes\"P\n" +
-	"\x19UpdateAppointmentResponse\x123\n" +
-	"\vappointment\x18\x01 \x01(\v2\x11.book.AppointmentR\vappointment\"B\n" +
-	"\x18CancelAppointmentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"P\n" +
-	"\x19CancelAppointmentResponse\x123\n" +
-	"\vappointment\x18\x01 \x01(\v2\x11.book.AppointmentR\vappointment\"*\n" +
+	"start_time\x18\b \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\t \x01(\tR\aendTime\x12\x16\n" +
+	"\x06status\x18\n" +
+	" \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\v \x01(\tR\x05notes\"5\n" +
+	"\x19UpdateAppointmentResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"*\n" +
 	"\x18DeleteAppointmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"5\n" +
 	"\x19DeleteAppointmentResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
 
 var (
 	file_book_v1_appointments_proto_rawDescOnce sync.Once
@@ -1011,37 +838,28 @@ func file_book_v1_appointments_proto_rawDescGZIP() []byte {
 	return file_book_v1_appointments_proto_rawDescData
 }
 
-var file_book_v1_appointments_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_book_v1_appointments_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_book_v1_appointments_proto_goTypes = []any{
 	(*Appointment)(nil),               // 0: book.Appointment
 	(*ListAppointmentsRequest)(nil),   // 1: book.ListAppointmentsRequest
 	(*ListAppointmentsResponse)(nil),  // 2: book.ListAppointmentsResponse
-	(*GetAppointmentRequest)(nil),     // 3: book.GetAppointmentRequest
-	(*GetAppointmentResponse)(nil),    // 4: book.GetAppointmentResponse
+	(*TodayAppointmentsRequest)(nil),  // 3: book.TodayAppointmentsRequest
+	(*TodayAppointmentsResponse)(nil), // 4: book.TodayAppointmentsResponse
 	(*CreateAppointmentRequest)(nil),  // 5: book.CreateAppointmentRequest
 	(*CreateAppointmentResponse)(nil), // 6: book.CreateAppointmentResponse
 	(*UpdateAppointmentRequest)(nil),  // 7: book.UpdateAppointmentRequest
 	(*UpdateAppointmentResponse)(nil), // 8: book.UpdateAppointmentResponse
-	(*CancelAppointmentRequest)(nil),  // 9: book.CancelAppointmentRequest
-	(*CancelAppointmentResponse)(nil), // 10: book.CancelAppointmentResponse
-	(*DeleteAppointmentRequest)(nil),  // 11: book.DeleteAppointmentRequest
-	(*DeleteAppointmentResponse)(nil), // 12: book.DeleteAppointmentResponse
-	(*v1.PaginationRequest)(nil),      // 13: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),     // 14: common.PaginationResponse
+	(*DeleteAppointmentRequest)(nil),  // 9: book.DeleteAppointmentRequest
+	(*DeleteAppointmentResponse)(nil), // 10: book.DeleteAppointmentResponse
 }
 var file_book_v1_appointments_proto_depIdxs = []int32{
-	13, // 0: book.ListAppointmentsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: book.ListAppointmentsResponse.appointments:type_name -> book.Appointment
-	14, // 2: book.ListAppointmentsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: book.GetAppointmentResponse.appointment:type_name -> book.Appointment
-	0,  // 4: book.CreateAppointmentResponse.appointment:type_name -> book.Appointment
-	0,  // 5: book.UpdateAppointmentResponse.appointment:type_name -> book.Appointment
-	0,  // 6: book.CancelAppointmentResponse.appointment:type_name -> book.Appointment
-	7,  // [7:7] is the sub-list for method output_type
-	7,  // [7:7] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0, // 0: book.ListAppointmentsResponse.appointments:type_name -> book.Appointment
+	0, // 1: book.TodayAppointmentsResponse.appointments:type_name -> book.Appointment
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_book_v1_appointments_proto_init() }
@@ -1055,7 +873,7 @@ func file_book_v1_appointments_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_book_v1_appointments_proto_rawDesc), len(file_book_v1_appointments_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

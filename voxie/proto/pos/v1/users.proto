@@ -4,80 +4,87 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-import "common/v1/pagination.proto";
-
-// ── POSUser ────────────────────────────────────────────────────────
+// ── POSUser ───────────────────────────────────────────────────────
 
 message POSUser {
   int64 id = 1;
-  int64 location_id = 2;
-  string name = 3;
-  string email = 4;
-  string role = 5; // cashier, server, manager, admin
-  string pin = 6;
-  bool is_active = 7;
-  string last_login_at = 8;
-  string created_at = 9;
-  string updated_at = 10;
+  int64 business_id = 2;
+  int64 location_id = 3;
+  string name = 4;
+  string role = 5;
+  bool is_active = 6;
+  double max_discount_pct = 7;
+  bool can_void = 8;
+  bool can_refund = 9;
+  bool can_open_drawer = 10;
+  bool can_apply_discount = 11;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
 message ListPOSUsersRequest {
-  common.PaginationRequest pagination = 1;
-  string role = 2;
-  bool active_only = 3;
+  int64 location_id = 1;
 }
 
 message ListPOSUsersResponse {
   repeated POSUser users = 1;
-  common.PaginationResponse pagination = 2;
 }
 
-// ── Create ─────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
 message CreatePOSUserRequest {
-  string name = 1;
-  string email = 2;
-  string role = 3;
-  string pin = 4;
+  int64 location_id = 1;
+  string name = 2;
+  string pin = 3;
+  string role = 4;
+  double hourly_rate = 5;
+  double max_discount_pct = 6;
+  bool can_void = 7;
+  bool can_refund = 8;
+  bool can_open_drawer = 9;
+  bool can_apply_discount = 10;
 }
 
 message CreatePOSUserResponse {
-  POSUser user = 1;
+  int64 id = 1;
 }
 
-// ── Update ─────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────
 
 message UpdatePOSUserRequest {
   int64 id = 1;
   string name = 2;
-  string email = 3;
+  string pin = 3;
   string role = 4;
   bool is_active = 5;
+  double hourly_rate = 6;
+  double max_discount_pct = 7;
+  bool can_void = 8;
+  bool can_refund = 9;
+  bool can_open_drawer = 10;
+  bool can_apply_discount = 11;
 }
 
 message UpdatePOSUserResponse {
-  POSUser user = 1;
-}
-
-// ── Delete ─────────────────────────────────────────────────────────
-
-message DeletePOSUserRequest {
-  int64 id = 1;
-}
-
-message DeletePOSUserResponse {
   bool success = 1;
 }
 
-// ── Verify Pin ─────────────────────────────────────────────────────
+// ── Deactivate ────────────────────────────────────────────────────
 
-message VerifyPOSUserPinRequest {
+message DeactivatePOSUserRequest {
+  int64 id = 1;
+}
+
+message DeactivatePOSUserResponse {
+  bool success = 1;
+}
+
+// ── Verify PIN ────────────────────────────────────────────────────
+
+message VerifyPOSUserPINRequest {
   string pin = 1;
 }
 
-message VerifyPOSUserPinResponse {
-  bool valid = 1;
-  POSUser user = 2;
+message VerifyPOSUserPINResponse {
+  POSUser user = 1;
 }

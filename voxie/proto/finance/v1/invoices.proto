@@ -4,114 +4,132 @@ package finance;
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Invoices ────────────────────────────────────────────────────────
 
-message Invoice {
-  int64 id = 1;
-  string number = 2;
-  int64 customer_id = 3;
-  string customer_name = 4;
-  string status = 5; // draft, sent, paid, overdue, cancelled
-  repeated InvoiceLine lines = 6;
-  double subtotal = 7;
-  double tax = 8;
-  double discount = 9;
-  double total = 10;
-  double amount_paid = 11;
-  double balance_due = 12;
-  string currency = 13;
-  string issue_date = 14;
-  string due_date = 15;
-  string paid_at = 16;
-  string notes = 17;
-  string created_at = 18;
-  string updated_at = 19;
+message InvoiceItem {
+  string description = 1;
+  double quantity = 2;
+  string unit = 3;
+  double unit_price = 4;
+  double tax_rate = 5;
+  double discount_pct = 6;
+  int32 sort_order = 7;
+  double total = 8;
 }
 
-message InvoiceLine {
-  string description = 1;
-  int32 quantity = 2;
-  double unit_price = 3;
-  double tax_rate = 4;
-  double total = 5;
+message InvoiceSummary {
+  int64 id = 1;
+  string invoice_number = 2;
+  string client_name = 3;
+  string status = 4;
+  string issue_date = 5;
+  string due_date = 6;
+  string paid_date = 7;
+  string currency = 8;
+  double total = 9;
+  double amount_paid = 10;
+  double amount_due = 11;
+  string created_at = 12;
+}
+
+message InvoiceDetail {
+  int64 id = 1;
+  int64 owner_id = 2;
+  string invoice_number = 3;
+  string client_name = 4;
+  string client_email = 5;
+  string client_address = 6;
+  string client_tax_id = 7;
+  string status = 8;
+  string issue_date = 9;
+  string due_date = 10;
+  string paid_date = 11;
+  string currency = 12;
+  double subtotal = 13;
+  string discount_type = 14;
+  double discount_value = 15;
+  double discount_amount = 16;
+  double tax_rate = 17;
+  double tax_amount = 18;
+  double total = 19;
+  double amount_paid = 20;
+  double amount_due = 21;
+  string notes = 22;
+  string terms = 23;
+  string created_at = 24;
+  string updated_at = 25;
+  repeated InvoiceItem items = 26;
 }
 
 message ListInvoicesRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  int64 customer_id = 3;
-  string from_date = 4;
-  string to_date = 5;
+  string status = 1;
+  string search = 2;
+  string date_from = 3;
+  string date_to = 4;
 }
 
 message ListInvoicesResponse {
-  repeated Invoice invoices = 1;
-  common.PaginationResponse pagination = 2;
+  repeated InvoiceSummary invoices = 1;
 }
 
 message GetInvoiceRequest {
   int64 id = 1;
 }
 
+message Payment {
+  int64 id = 1;
+  double amount = 2;
+  string currency = 3;
+  string payment_date = 4;
+  string method = 5;
+  string reference = 6;
+  string notes = 7;
+}
+
 message GetInvoiceResponse {
-  Invoice invoice = 1;
+  InvoiceDetail invoice = 1;
+  repeated Payment payments = 2;
 }
 
 message CreateInvoiceRequest {
-  int64 customer_id = 1;
-  repeated InvoiceLine lines = 2;
-  string due_date = 3;
-  double discount = 4;
-  string notes = 5;
-  string currency = 6;
+  string client_name = 1;
+  string client_email = 2;
+  string client_address = 3;
+  string client_tax_id = 4;
+  string issue_date = 5;
+  string due_date = 6;
+  string currency = 7;
+  string discount_type = 8;
+  double discount_value = 9;
+  double tax_rate = 10;
+  string notes = 11;
+  string terms = 12;
+  repeated InvoiceItem items = 13;
 }
 
 message CreateInvoiceResponse {
-  Invoice invoice = 1;
+  InvoiceDetail invoice = 1;
 }
 
 message UpdateInvoiceRequest {
   int64 id = 1;
-  int64 customer_id = 2;
-  repeated InvoiceLine lines = 3;
-  string due_date = 4;
-  double discount = 5;
-  string notes = 6;
+  string client_name = 2;
+  string client_email = 3;
+  string client_address = 4;
+  string client_tax_id = 5;
+  string issue_date = 6;
+  string due_date = 7;
+  string currency = 8;
+  string discount_type = 9;
+  double discount_value = 10;
+  double tax_rate = 11;
+  string notes = 12;
+  string terms = 13;
+  repeated InvoiceItem items = 14;
 }
 
 message UpdateInvoiceResponse {
-  Invoice invoice = 1;
-}
-
-message DeleteInvoiceRequest {
-  int64 id = 1;
-}
-
-message DeleteInvoiceResponse {
-  bool success = 1;
-}
-
-message SendInvoiceRequest {
-  int64 id = 1;
-  string recipient_email = 2;
-}
-
-message SendInvoiceResponse {
-  bool success = 1;
-}
-
-message RecordPaymentRequest {
-  int64 invoice_id = 1;
-  double amount = 2;
-  string method = 3; // cash, card, bank_transfer, check
-  string reference = 4;
-  string paid_at = 5;
-}
-
-message RecordPaymentResponse {
-  Invoice invoice = 1;
+  InvoiceDetail invoice = 1;
 }
 
 message UpdateInvoiceStatusRequest {
@@ -120,5 +138,39 @@ message UpdateInvoiceStatusRequest {
 }
 
 message UpdateInvoiceStatusResponse {
-  Invoice invoice = 1;
+  string message = 1;
+}
+
+message DeleteInvoiceRequest {
+  int64 id = 1;
+}
+
+message DeleteInvoiceResponse {
+  string message = 1;
+}
+
+message RecordPaymentRequest {
+  int64 invoice_id = 1;
+  double amount = 2;
+  string currency = 3;
+  string payment_date = 4;
+  string method = 5;
+  string reference = 6;
+  string notes = 7;
+}
+
+message RecordPaymentResponsePayload {
+  int64 id = 1;
+  int64 invoice_id = 2;
+  double amount = 3;
+  string currency = 4;
+  string payment_date = 5;
+  string method = 6;
+  string reference = 7;
+  string notes = 8;
+}
+
+message RecordPaymentResponse {
+  RecordPaymentResponsePayload payment = 1;
+  string message = 2;
 }

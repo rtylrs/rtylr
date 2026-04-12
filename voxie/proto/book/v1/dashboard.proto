@@ -4,58 +4,13 @@ package book;
 
 option go_package = "github.com/voxire/voxie/gen/go/book/v1";
 
-// ── DashboardStats ─────────────────────────────────────────────────
+// ── Dashboard ─────────────────────────────────────────────────────
 
-message TodayAppointment {
-  int64 id = 1;
-  string customer_name = 2;
-  string service_name = 3;
-  string resource_name = 4;
-  string start_time = 5;
-  string end_time = 6;
-  string status = 7;
-}
-
-message AppointmentsByDay {
-  string date = 1;
-  int32 count = 2;
-  double revenue = 3;
-}
-
-message TopService {
-  int64 service_id = 1;
-  string name = 2;
-  int32 booking_count = 3;
-  double revenue = 4;
-}
-
-message DashboardStats {
-  int32 today_appointments = 1;
-  int32 upcoming_appointments = 2;
-  int32 total_customers = 3;
-  double total_revenue = 4;
-  double revenue_change = 5;
-  int32 no_show_count = 6;
-  int32 cancellation_count = 7;
-  double utilization_rate = 8;
-  repeated AppointmentsByDay appointments_by_day = 9;
-  repeated TopService top_services = 10;
-}
-
-// ── Get Dashboard ──────────────────────────────────────────────────
-
-message GetBookDashboardRequest {
-  string period = 1; // today, week, month
-}
+message GetBookDashboardRequest {}
 
 message GetBookDashboardResponse {
-  DashboardStats stats = 1;
-}
-
-// ── Today's Appointments ───────────────────────────────────────────
-
-message GetTodayAppointmentsRequest {}
-
-message GetTodayAppointmentsResponse {
-  repeated TodayAppointment appointments = 1;
+  int32 today_count = 1;
+  int32 upcoming_count = 2;
+  double cancellation_rate = 3;
+  double revenue = 4;
 }

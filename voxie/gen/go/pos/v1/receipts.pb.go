@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,25 +22,15 @@ const (
 )
 
 type Receipt struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId        int64                  `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	OrderNumber    string                 `protobuf:"bytes,3,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
-	ReceiptNumber  string                 `protobuf:"bytes,4,opt,name=receipt_number,json=receiptNumber,proto3" json:"receipt_number,omitempty"`
-	Type           string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"` // sale, refund, void
-	Subtotal       float64                `protobuf:"fixed64,6,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
-	TaxAmount      float64                `protobuf:"fixed64,7,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
-	DiscountAmount float64                `protobuf:"fixed64,8,opt,name=discount_amount,json=discountAmount,proto3" json:"discount_amount,omitempty"`
-	TipAmount      float64                `protobuf:"fixed64,9,opt,name=tip_amount,json=tipAmount,proto3" json:"tip_amount,omitempty"`
-	Total          float64                `protobuf:"fixed64,10,opt,name=total,proto3" json:"total,omitempty"`
-	PaymentMethod  string                 `protobuf:"bytes,11,opt,name=payment_method,json=paymentMethod,proto3" json:"payment_method,omitempty"`
-	CustomerName   string                 `protobuf:"bytes,12,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	CustomerEmail  string                 `protobuf:"bytes,13,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
-	CashierName    string                 `protobuf:"bytes,14,opt,name=cashier_name,json=cashierName,proto3" json:"cashier_name,omitempty"`
-	LocationName   string                 `protobuf:"bytes,15,opt,name=location_name,json=locationName,proto3" json:"location_name,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrderNumber   string                 `protobuf:"bytes,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,3,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	Total         float64                `protobuf:"fixed64,4,opt,name=total,proto3" json:"total,omitempty"`
+	PaymentMethod string                 `protobuf:"bytes,5,opt,name=payment_method,json=paymentMethod,proto3" json:"payment_method,omitempty"`
+	PaidAt        string                 `protobuf:"bytes,6,opt,name=paid_at,json=paidAt,proto3" json:"paid_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Receipt) Reset() {
@@ -81,13 +70,6 @@ func (x *Receipt) GetId() int64 {
 	return 0
 }
 
-func (x *Receipt) GetOrderId() int64 {
-	if x != nil {
-		return x.OrderId
-	}
-	return 0
-}
-
 func (x *Receipt) GetOrderNumber() string {
 	if x != nil {
 		return x.OrderNumber
@@ -95,46 +77,11 @@ func (x *Receipt) GetOrderNumber() string {
 	return ""
 }
 
-func (x *Receipt) GetReceiptNumber() string {
+func (x *Receipt) GetCustomerName() string {
 	if x != nil {
-		return x.ReceiptNumber
+		return x.CustomerName
 	}
 	return ""
-}
-
-func (x *Receipt) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-func (x *Receipt) GetSubtotal() float64 {
-	if x != nil {
-		return x.Subtotal
-	}
-	return 0
-}
-
-func (x *Receipt) GetTaxAmount() float64 {
-	if x != nil {
-		return x.TaxAmount
-	}
-	return 0
-}
-
-func (x *Receipt) GetDiscountAmount() float64 {
-	if x != nil {
-		return x.DiscountAmount
-	}
-	return 0
-}
-
-func (x *Receipt) GetTipAmount() float64 {
-	if x != nil {
-		return x.TipAmount
-	}
-	return 0
 }
 
 func (x *Receipt) GetTotal() float64 {
@@ -151,46 +98,17 @@ func (x *Receipt) GetPaymentMethod() string {
 	return ""
 }
 
-func (x *Receipt) GetCustomerName() string {
+func (x *Receipt) GetPaidAt() string {
 	if x != nil {
-		return x.CustomerName
-	}
-	return ""
-}
-
-func (x *Receipt) GetCustomerEmail() string {
-	if x != nil {
-		return x.CustomerEmail
-	}
-	return ""
-}
-
-func (x *Receipt) GetCashierName() string {
-	if x != nil {
-		return x.CashierName
-	}
-	return ""
-}
-
-func (x *Receipt) GetLocationName() string {
-	if x != nil {
-		return x.LocationName
-	}
-	return ""
-}
-
-func (x *Receipt) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
+		return x.PaidAt
 	}
 	return ""
 }
 
 type ListReceiptsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	DateFrom      string                 `protobuf:"bytes,2,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
-	DateTo        string                 `protobuf:"bytes,3,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	From          string                 `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`
+	To            string                 `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -225,23 +143,16 @@ func (*ListReceiptsRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_receipts_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListReceiptsRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListReceiptsRequest) GetFrom() string {
 	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListReceiptsRequest) GetDateFrom() string {
-	if x != nil {
-		return x.DateFrom
+		return x.From
 	}
 	return ""
 }
 
-func (x *ListReceiptsRequest) GetDateTo() string {
+func (x *ListReceiptsRequest) GetTo() string {
 	if x != nil {
-		return x.DateTo
+		return x.To
 	}
 	return ""
 }
@@ -249,7 +160,6 @@ func (x *ListReceiptsRequest) GetDateTo() string {
 type ListReceiptsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Receipts      []*Receipt             `protobuf:"bytes,1,rep,name=receipts,proto3" json:"receipts,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -291,152 +201,23 @@ func (x *ListReceiptsResponse) GetReceipts() []*Receipt {
 	return nil
 }
 
-func (x *ListReceiptsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type EmailReceiptRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReceiptId     int64                  `protobuf:"varint,1,opt,name=receipt_id,json=receiptId,proto3" json:"receipt_id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EmailReceiptRequest) Reset() {
-	*x = EmailReceiptRequest{}
-	mi := &file_pos_v1_receipts_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EmailReceiptRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EmailReceiptRequest) ProtoMessage() {}
-
-func (x *EmailReceiptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_receipts_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EmailReceiptRequest.ProtoReflect.Descriptor instead.
-func (*EmailReceiptRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_receipts_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *EmailReceiptRequest) GetReceiptId() int64 {
-	if x != nil {
-		return x.ReceiptId
-	}
-	return 0
-}
-
-func (x *EmailReceiptRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-type EmailReceiptResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EmailReceiptResponse) Reset() {
-	*x = EmailReceiptResponse{}
-	mi := &file_pos_v1_receipts_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EmailReceiptResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EmailReceiptResponse) ProtoMessage() {}
-
-func (x *EmailReceiptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_receipts_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EmailReceiptResponse.ProtoReflect.Descriptor instead.
-func (*EmailReceiptResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_receipts_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *EmailReceiptResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
 var File_pos_v1_receipts_proto protoreflect.FileDescriptor
 
 const file_pos_v1_receipts_proto_rawDesc = "" +
 	"\n" +
-	"\x15pos/v1/receipts.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\x85\x04\n" +
+	"\x15pos/v1/receipts.proto\x12\x03pos\"\xb7\x01\n" +
 	"\aReceipt\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\x03R\aorderId\x12!\n" +
-	"\forder_number\x18\x03 \x01(\tR\vorderNumber\x12%\n" +
-	"\x0ereceipt_number\x18\x04 \x01(\tR\rreceiptNumber\x12\x12\n" +
-	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1a\n" +
-	"\bsubtotal\x18\x06 \x01(\x01R\bsubtotal\x12\x1d\n" +
-	"\n" +
-	"tax_amount\x18\a \x01(\x01R\ttaxAmount\x12'\n" +
-	"\x0fdiscount_amount\x18\b \x01(\x01R\x0ediscountAmount\x12\x1d\n" +
-	"\n" +
-	"tip_amount\x18\t \x01(\x01R\ttipAmount\x12\x14\n" +
-	"\x05total\x18\n" +
-	" \x01(\x01R\x05total\x12%\n" +
-	"\x0epayment_method\x18\v \x01(\tR\rpaymentMethod\x12#\n" +
-	"\rcustomer_name\x18\f \x01(\tR\fcustomerName\x12%\n" +
-	"\x0ecustomer_email\x18\r \x01(\tR\rcustomerEmail\x12!\n" +
-	"\fcashier_name\x18\x0e \x01(\tR\vcashierName\x12#\n" +
-	"\rlocation_name\x18\x0f \x01(\tR\flocationName\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x10 \x01(\tR\tcreatedAt\"\x86\x01\n" +
-	"\x13ListReceiptsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x1b\n" +
-	"\tdate_from\x18\x02 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x03 \x01(\tR\x06dateTo\"|\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12#\n" +
+	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12\x14\n" +
+	"\x05total\x18\x04 \x01(\x01R\x05total\x12%\n" +
+	"\x0epayment_method\x18\x05 \x01(\tR\rpaymentMethod\x12\x17\n" +
+	"\apaid_at\x18\x06 \x01(\tR\x06paidAt\"9\n" +
+	"\x13ListReceiptsRequest\x12\x12\n" +
+	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
+	"\x02to\x18\x02 \x01(\tR\x02to\"@\n" +
 	"\x14ListReceiptsResponse\x12(\n" +
-	"\breceipts\x18\x01 \x03(\v2\f.pos.ReceiptR\breceipts\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"J\n" +
-	"\x13EmailReceiptRequest\x12\x1d\n" +
-	"\n" +
-	"receipt_id\x18\x01 \x01(\x03R\treceiptId\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"0\n" +
-	"\x14EmailReceiptResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\breceipts\x18\x01 \x03(\v2\f.pos.ReceiptR\breceiptsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_receipts_proto_rawDescOnce sync.Once
@@ -450,25 +231,19 @@ func file_pos_v1_receipts_proto_rawDescGZIP() []byte {
 	return file_pos_v1_receipts_proto_rawDescData
 }
 
-var file_pos_v1_receipts_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_pos_v1_receipts_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_v1_receipts_proto_goTypes = []any{
-	(*Receipt)(nil),               // 0: pos.Receipt
-	(*ListReceiptsRequest)(nil),   // 1: pos.ListReceiptsRequest
-	(*ListReceiptsResponse)(nil),  // 2: pos.ListReceiptsResponse
-	(*EmailReceiptRequest)(nil),   // 3: pos.EmailReceiptRequest
-	(*EmailReceiptResponse)(nil),  // 4: pos.EmailReceiptResponse
-	(*v1.PaginationRequest)(nil),  // 5: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 6: common.PaginationResponse
+	(*Receipt)(nil),              // 0: pos.Receipt
+	(*ListReceiptsRequest)(nil),  // 1: pos.ListReceiptsRequest
+	(*ListReceiptsResponse)(nil), // 2: pos.ListReceiptsResponse
 }
 var file_pos_v1_receipts_proto_depIdxs = []int32{
-	5, // 0: pos.ListReceiptsRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: pos.ListReceiptsResponse.receipts:type_name -> pos.Receipt
-	6, // 2: pos.ListReceiptsResponse.pagination:type_name -> common.PaginationResponse
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: pos.ListReceiptsResponse.receipts:type_name -> pos.Receipt
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_receipts_proto_init() }
@@ -482,7 +257,7 @@ func file_pos_v1_receipts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_receipts_proto_rawDesc), len(file_pos_v1_receipts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

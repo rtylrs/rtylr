@@ -21,32 +21,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type MemberLocation struct {
+type MyLocation struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	MemberId      int64                  `protobuf:"varint,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	LocationName  string                 `protobuf:"bytes,4,opt,name=location_name,json=locationName,proto3" json:"location_name,omitempty"`
-	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	AssignedAt    string                 `protobuf:"bytes,6,opt,name=assigned_at,json=assignedAt,proto3" json:"assigned_at,omitempty"`
+	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Address       string                 `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MemberLocation) Reset() {
-	*x = MemberLocation{}
+func (x *MyLocation) Reset() {
+	*x = MyLocation{}
 	mi := &file_pos_v1_access_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MemberLocation) String() string {
+func (x *MyLocation) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MemberLocation) ProtoMessage() {}
+func (*MyLocation) ProtoMessage() {}
 
-func (x *MemberLocation) ProtoReflect() protoreflect.Message {
+func (x *MyLocation) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_access_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,49 +56,35 @@ func (x *MemberLocation) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MemberLocation.ProtoReflect.Descriptor instead.
-func (*MemberLocation) Descriptor() ([]byte, []int) {
+// Deprecated: Use MyLocation.ProtoReflect.Descriptor instead.
+func (*MyLocation) Descriptor() ([]byte, []int) {
 	return file_pos_v1_access_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MemberLocation) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *MemberLocation) GetMemberId() int64 {
-	if x != nil {
-		return x.MemberId
-	}
-	return 0
-}
-
-func (x *MemberLocation) GetLocationId() int64 {
+func (x *MyLocation) GetLocationId() int64 {
 	if x != nil {
 		return x.LocationId
 	}
 	return 0
 }
 
-func (x *MemberLocation) GetLocationName() string {
+func (x *MyLocation) GetName() string {
 	if x != nil {
-		return x.LocationName
+		return x.Name
 	}
 	return ""
 }
 
-func (x *MemberLocation) GetRole() string {
+func (x *MyLocation) GetAddress() string {
 	if x != nil {
-		return x.Role
+		return x.Address
 	}
 	return ""
 }
 
-func (x *MemberLocation) GetAssignedAt() string {
+func (x *MyLocation) GetPhone() string {
 	if x != nil {
-		return x.AssignedAt
+		return x.Phone
 	}
 	return ""
 }
@@ -143,7 +127,7 @@ func (*GetMyLocationsRequest) Descriptor() ([]byte, []int) {
 
 type GetMyLocationsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Locations     []*MemberLocation      `protobuf:"bytes,1,rep,name=locations,proto3" json:"locations,omitempty"`
+	Locations     []*MyLocation          `protobuf:"bytes,1,rep,name=locations,proto3" json:"locations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -178,7 +162,7 @@ func (*GetMyLocationsResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_access_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetMyLocationsResponse) GetLocations() []*MemberLocation {
+func (x *GetMyLocationsResponse) GetLocations() []*MyLocation {
 	if x != nil {
 		return x.Locations
 	}
@@ -186,12 +170,14 @@ func (x *GetMyLocationsResponse) GetLocations() []*MemberLocation {
 }
 
 type AssignLocationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MemberId      int64                  `protobuf:"varint,1,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	UserId             int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	LocationId         int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	CanManagePosUsers  bool                   `protobuf:"varint,3,opt,name=can_manage_pos_users,json=canManagePosUsers,proto3" json:"can_manage_pos_users,omitempty"`
+	CanManageTerminals bool                   `protobuf:"varint,4,opt,name=can_manage_terminals,json=canManageTerminals,proto3" json:"can_manage_terminals,omitempty"`
+	CanViewReports     bool                   `protobuf:"varint,5,opt,name=can_view_reports,json=canViewReports,proto3" json:"can_view_reports,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *AssignLocationRequest) Reset() {
@@ -224,9 +210,9 @@ func (*AssignLocationRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_access_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *AssignLocationRequest) GetMemberId() int64 {
+func (x *AssignLocationRequest) GetUserId() int64 {
 	if x != nil {
-		return x.MemberId
+		return x.UserId
 	}
 	return 0
 }
@@ -238,16 +224,30 @@ func (x *AssignLocationRequest) GetLocationId() int64 {
 	return 0
 }
 
-func (x *AssignLocationRequest) GetRole() string {
+func (x *AssignLocationRequest) GetCanManagePosUsers() bool {
 	if x != nil {
-		return x.Role
+		return x.CanManagePosUsers
 	}
-	return ""
+	return false
+}
+
+func (x *AssignLocationRequest) GetCanManageTerminals() bool {
+	if x != nil {
+		return x.CanManageTerminals
+	}
+	return false
+}
+
+func (x *AssignLocationRequest) GetCanViewReports() bool {
+	if x != nil {
+		return x.CanViewReports
+	}
+	return false
 }
 
 type AssignLocationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Assignment    *MemberLocation        `protobuf:"bytes,1,opt,name=assignment,proto3" json:"assignment,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -282,17 +282,16 @@ func (*AssignLocationResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_access_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *AssignLocationResponse) GetAssignment() *MemberLocation {
+func (x *AssignLocationResponse) GetId() int64 {
 	if x != nil {
-		return x.Assignment
+		return x.Id
 	}
-	return nil
+	return 0
 }
 
 type RemoveLocationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MemberId      int64                  `protobuf:"varint,1,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -327,16 +326,9 @@ func (*RemoveLocationRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_access_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *RemoveLocationRequest) GetMemberId() int64 {
+func (x *RemoveLocationRequest) GetId() int64 {
 	if x != nil {
-		return x.MemberId
-	}
-	return 0
-}
-
-func (x *RemoveLocationRequest) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+		return x.Id
 	}
 	return 0
 }
@@ -389,32 +381,28 @@ var File_pos_v1_access_proto protoreflect.FileDescriptor
 
 const file_pos_v1_access_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/access.proto\x12\x03pos\"\xb8\x01\n" +
-	"\x0eMemberLocation\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
-	"\tmember_id\x18\x02 \x01(\x03R\bmemberId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12#\n" +
-	"\rlocation_name\x18\x04 \x01(\tR\flocationName\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1f\n" +
-	"\vassigned_at\x18\x06 \x01(\tR\n" +
-	"assignedAt\"\x17\n" +
-	"\x15GetMyLocationsRequest\"K\n" +
-	"\x16GetMyLocationsResponse\x121\n" +
-	"\tlocations\x18\x01 \x03(\v2\x13.pos.MemberLocationR\tlocations\"i\n" +
-	"\x15AssignLocationRequest\x12\x1b\n" +
-	"\tmember_id\x18\x01 \x01(\x03R\bmemberId\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\"M\n" +
-	"\x16AssignLocationResponse\x123\n" +
+	"\x13pos/v1/access.proto\x12\x03pos\"q\n" +
 	"\n" +
-	"assignment\x18\x01 \x01(\v2\x13.pos.MemberLocationR\n" +
-	"assignment\"U\n" +
-	"\x15RemoveLocationRequest\x12\x1b\n" +
-	"\tmember_id\x18\x01 \x01(\x03R\bmemberId\x12\x1f\n" +
+	"MyLocation\x12\x1f\n" +
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x14\n" +
+	"\x05phone\x18\x04 \x01(\tR\x05phone\"\x17\n" +
+	"\x15GetMyLocationsRequest\"G\n" +
+	"\x16GetMyLocationsResponse\x12-\n" +
+	"\tlocations\x18\x01 \x03(\v2\x0f.pos.MyLocationR\tlocations\"\xde\x01\n" +
+	"\x15AssignLocationRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1f\n" +
 	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\"2\n" +
+	"locationId\x12/\n" +
+	"\x14can_manage_pos_users\x18\x03 \x01(\bR\x11canManagePosUsers\x120\n" +
+	"\x14can_manage_terminals\x18\x04 \x01(\bR\x12canManageTerminals\x12(\n" +
+	"\x10can_view_reports\x18\x05 \x01(\bR\x0ecanViewReports\"(\n" +
+	"\x16AssignLocationResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"'\n" +
+	"\x15RemoveLocationRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
 	"\x16RemoveLocationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
@@ -432,7 +420,7 @@ func file_pos_v1_access_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_access_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_access_proto_goTypes = []any{
-	(*MemberLocation)(nil),         // 0: pos.MemberLocation
+	(*MyLocation)(nil),             // 0: pos.MyLocation
 	(*GetMyLocationsRequest)(nil),  // 1: pos.GetMyLocationsRequest
 	(*GetMyLocationsResponse)(nil), // 2: pos.GetMyLocationsResponse
 	(*AssignLocationRequest)(nil),  // 3: pos.AssignLocationRequest
@@ -441,13 +429,12 @@ var file_pos_v1_access_proto_goTypes = []any{
 	(*RemoveLocationResponse)(nil), // 6: pos.RemoveLocationResponse
 }
 var file_pos_v1_access_proto_depIdxs = []int32{
-	0, // 0: pos.GetMyLocationsResponse.locations:type_name -> pos.MemberLocation
-	0, // 1: pos.AssignLocationResponse.assignment:type_name -> pos.MemberLocation
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: pos.GetMyLocationsResponse.locations:type_name -> pos.MyLocation
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_access_proto_init() }

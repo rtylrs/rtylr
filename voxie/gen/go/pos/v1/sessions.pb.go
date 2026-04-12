@@ -22,25 +22,20 @@ const (
 )
 
 type Session struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId     int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	TerminalId     int64                  `protobuf:"varint,3,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
-	OpenedBy       int64                  `protobuf:"varint,4,opt,name=opened_by,json=openedBy,proto3" json:"opened_by,omitempty"`
-	ClosedBy       int64                  `protobuf:"varint,5,opt,name=closed_by,json=closedBy,proto3" json:"closed_by,omitempty"`
-	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"` // open, closed
-	OpeningCash    float64                `protobuf:"fixed64,7,opt,name=opening_cash,json=openingCash,proto3" json:"opening_cash,omitempty"`
-	ClosingCash    float64                `protobuf:"fixed64,8,opt,name=closing_cash,json=closingCash,proto3" json:"closing_cash,omitempty"`
-	ExpectedCash   float64                `protobuf:"fixed64,9,opt,name=expected_cash,json=expectedCash,proto3" json:"expected_cash,omitempty"`
-	CashDifference float64                `protobuf:"fixed64,10,opt,name=cash_difference,json=cashDifference,proto3" json:"cash_difference,omitempty"`
-	TotalOrders    int32                  `protobuf:"varint,11,opt,name=total_orders,json=totalOrders,proto3" json:"total_orders,omitempty"`
-	TotalSales     float64                `protobuf:"fixed64,12,opt,name=total_sales,json=totalSales,proto3" json:"total_sales,omitempty"`
-	TotalRefunds   float64                `protobuf:"fixed64,13,opt,name=total_refunds,json=totalRefunds,proto3" json:"total_refunds,omitempty"`
-	TotalVoids     float64                `protobuf:"fixed64,14,opt,name=total_voids,json=totalVoids,proto3" json:"total_voids,omitempty"`
-	OpenedAt       string                 `protobuf:"bytes,15,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`
-	ClosedAt       string                 `protobuf:"bytes,16,opt,name=closed_at,json=closedAt,proto3" json:"closed_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,4,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	OpeningFloat  float64                `protobuf:"fixed64,5,opt,name=opening_float,json=openingFloat,proto3" json:"opening_float,omitempty"`
+	ClosingFloat  float64                `protobuf:"fixed64,6,opt,name=closing_float,json=closingFloat,proto3" json:"closing_float,omitempty"`
+	TotalSales    float64                `protobuf:"fixed64,7,opt,name=total_sales,json=totalSales,proto3" json:"total_sales,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
+	OpenedAt      string                 `protobuf:"bytes,9,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`
+	ClosedAt      string                 `protobuf:"bytes,10,opt,name=closed_at,json=closedAt,proto3" json:"closed_at,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Session) Reset() {
@@ -80,6 +75,13 @@ func (x *Session) GetId() int64 {
 	return 0
 }
 
+func (x *Session) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Session) GetLocationId() int64 {
 	if x != nil {
 		return x.LocationId
@@ -87,65 +89,23 @@ func (x *Session) GetLocationId() int64 {
 	return 0
 }
 
-func (x *Session) GetTerminalId() int64 {
+func (x *Session) GetStaffId() int64 {
 	if x != nil {
-		return x.TerminalId
+		return x.StaffId
 	}
 	return 0
 }
 
-func (x *Session) GetOpenedBy() int64 {
+func (x *Session) GetOpeningFloat() float64 {
 	if x != nil {
-		return x.OpenedBy
+		return x.OpeningFloat
 	}
 	return 0
 }
 
-func (x *Session) GetClosedBy() int64 {
+func (x *Session) GetClosingFloat() float64 {
 	if x != nil {
-		return x.ClosedBy
-	}
-	return 0
-}
-
-func (x *Session) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *Session) GetOpeningCash() float64 {
-	if x != nil {
-		return x.OpeningCash
-	}
-	return 0
-}
-
-func (x *Session) GetClosingCash() float64 {
-	if x != nil {
-		return x.ClosingCash
-	}
-	return 0
-}
-
-func (x *Session) GetExpectedCash() float64 {
-	if x != nil {
-		return x.ExpectedCash
-	}
-	return 0
-}
-
-func (x *Session) GetCashDifference() float64 {
-	if x != nil {
-		return x.CashDifference
-	}
-	return 0
-}
-
-func (x *Session) GetTotalOrders() int32 {
-	if x != nil {
-		return x.TotalOrders
+		return x.ClosingFloat
 	}
 	return 0
 }
@@ -157,18 +117,11 @@ func (x *Session) GetTotalSales() float64 {
 	return 0
 }
 
-func (x *Session) GetTotalRefunds() float64 {
+func (x *Session) GetStatus() string {
 	if x != nil {
-		return x.TotalRefunds
+		return x.Status
 	}
-	return 0
-}
-
-func (x *Session) GetTotalVoids() float64 {
-	if x != nil {
-		return x.TotalVoids
-	}
-	return 0
+	return ""
 }
 
 func (x *Session) GetOpenedAt() string {
@@ -185,17 +138,105 @@ func (x *Session) GetClosedAt() string {
 	return ""
 }
 
+func (x *Session) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsRequest) Reset() {
+	*x = ListSessionsRequest{}
+	mi := &file_pos_v1_sessions_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsRequest) ProtoMessage() {}
+
+func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_sessions_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
+func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{1}
+}
+
+type ListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*Session             `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsResponse) Reset() {
+	*x = ListSessionsResponse{}
+	mi := &file_pos_v1_sessions_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsResponse) ProtoMessage() {}
+
+func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_sessions_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListSessionsResponse) GetSessions() []*Session {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
 type OpenSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TerminalId    int64                  `protobuf:"varint,1,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
-	OpeningCash   float64                `protobuf:"fixed64,2,opt,name=opening_cash,json=openingCash,proto3" json:"opening_cash,omitempty"`
+	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	OpeningFloat  float64                `protobuf:"fixed64,3,opt,name=opening_float,json=openingFloat,proto3" json:"opening_float,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *OpenSessionRequest) Reset() {
 	*x = OpenSessionRequest{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[1]
+	mi := &file_pos_v1_sessions_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -207,7 +248,7 @@ func (x *OpenSessionRequest) String() string {
 func (*OpenSessionRequest) ProtoMessage() {}
 
 func (x *OpenSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[1]
+	mi := &file_pos_v1_sessions_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -220,33 +261,41 @@ func (x *OpenSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenSessionRequest.ProtoReflect.Descriptor instead.
 func (*OpenSessionRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{1}
+	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *OpenSessionRequest) GetTerminalId() int64 {
+func (x *OpenSessionRequest) GetLocationId() int64 {
 	if x != nil {
-		return x.TerminalId
+		return x.LocationId
 	}
 	return 0
 }
 
-func (x *OpenSessionRequest) GetOpeningCash() float64 {
+func (x *OpenSessionRequest) GetStaffId() int64 {
 	if x != nil {
-		return x.OpeningCash
+		return x.StaffId
+	}
+	return 0
+}
+
+func (x *OpenSessionRequest) GetOpeningFloat() float64 {
+	if x != nil {
+		return x.OpeningFloat
 	}
 	return 0
 }
 
 type OpenSessionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Session       *Session               `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *OpenSessionResponse) Reset() {
 	*x = OpenSessionResponse{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[2]
+	mi := &file_pos_v1_sessions_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -258,7 +307,7 @@ func (x *OpenSessionResponse) String() string {
 func (*OpenSessionResponse) ProtoMessage() {}
 
 func (x *OpenSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[2]
+	mi := &file_pos_v1_sessions_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -271,28 +320,33 @@ func (x *OpenSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenSessionResponse.ProtoReflect.Descriptor instead.
 func (*OpenSessionResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{2}
+	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *OpenSessionResponse) GetSession() *Session {
+func (x *OpenSessionResponse) GetSessionId() int64 {
 	if x != nil {
-		return x.Session
+		return x.SessionId
 	}
-	return nil
+	return 0
+}
+
+func (x *OpenSessionResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type CloseSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ClosingCash   float64                `protobuf:"fixed64,2,opt,name=closing_cash,json=closingCash,proto3" json:"closing_cash,omitempty"`
-	Notes         string                 `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	ClosingFloat  float64                `protobuf:"fixed64,1,opt,name=closing_float,json=closingFloat,proto3" json:"closing_float,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CloseSessionRequest) Reset() {
 	*x = CloseSessionRequest{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[3]
+	mi := &file_pos_v1_sessions_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +358,7 @@ func (x *CloseSessionRequest) String() string {
 func (*CloseSessionRequest) ProtoMessage() {}
 
 func (x *CloseSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[3]
+	mi := &file_pos_v1_sessions_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,40 +371,26 @@ func (x *CloseSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseSessionRequest.ProtoReflect.Descriptor instead.
 func (*CloseSessionRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{3}
+	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *CloseSessionRequest) GetId() int64 {
+func (x *CloseSessionRequest) GetClosingFloat() float64 {
 	if x != nil {
-		return x.Id
+		return x.ClosingFloat
 	}
 	return 0
-}
-
-func (x *CloseSessionRequest) GetClosingCash() float64 {
-	if x != nil {
-		return x.ClosingCash
-	}
-	return 0
-}
-
-func (x *CloseSessionRequest) GetNotes() string {
-	if x != nil {
-		return x.Notes
-	}
-	return ""
 }
 
 type CloseSessionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Session       *Session               `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CloseSessionResponse) Reset() {
 	*x = CloseSessionResponse{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[4]
+	mi := &file_pos_v1_sessions_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -362,7 +402,7 @@ func (x *CloseSessionResponse) String() string {
 func (*CloseSessionResponse) ProtoMessage() {}
 
 func (x *CloseSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[4]
+	mi := &file_pos_v1_sessions_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,138 +415,53 @@ func (x *CloseSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseSessionResponse.ProtoReflect.Descriptor instead.
 func (*CloseSessionResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *CloseSessionResponse) GetSession() *Session {
-	if x != nil {
-		return x.Session
-	}
-	return nil
-}
-
-type GetCurrentSessionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCurrentSessionRequest) Reset() {
-	*x = GetCurrentSessionRequest{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCurrentSessionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCurrentSessionRequest) ProtoMessage() {}
-
-func (x *GetCurrentSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCurrentSessionRequest.ProtoReflect.Descriptor instead.
-func (*GetCurrentSessionRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{5}
-}
-
-type GetCurrentSessionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Session       *Session               `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCurrentSessionResponse) Reset() {
-	*x = GetCurrentSessionResponse{}
-	mi := &file_pos_v1_sessions_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCurrentSessionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCurrentSessionResponse) ProtoMessage() {}
-
-func (x *GetCurrentSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_sessions_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCurrentSessionResponse.ProtoReflect.Descriptor instead.
-func (*GetCurrentSessionResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_sessions_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetCurrentSessionResponse) GetSession() *Session {
+func (x *CloseSessionResponse) GetMessage() string {
 	if x != nil {
-		return x.Session
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_pos_v1_sessions_proto protoreflect.FileDescriptor
 
 const file_pos_v1_sessions_proto_rawDesc = "" +
 	"\n" +
-	"\x15pos/v1/sessions.proto\x12\x03pos\"\x85\x04\n" +
+	"\x15pos/v1/sessions.proto\x12\x03pos\"\xcc\x02\n" +
 	"\aSession\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x1f\n" +
-	"\vterminal_id\x18\x03 \x01(\x03R\n" +
-	"terminalId\x12\x1b\n" +
-	"\topened_by\x18\x04 \x01(\x03R\bopenedBy\x12\x1b\n" +
-	"\tclosed_by\x18\x05 \x01(\x03R\bclosedBy\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12!\n" +
-	"\fopening_cash\x18\a \x01(\x01R\vopeningCash\x12!\n" +
-	"\fclosing_cash\x18\b \x01(\x01R\vclosingCash\x12#\n" +
-	"\rexpected_cash\x18\t \x01(\x01R\fexpectedCash\x12'\n" +
-	"\x0fcash_difference\x18\n" +
-	" \x01(\x01R\x0ecashDifference\x12!\n" +
-	"\ftotal_orders\x18\v \x01(\x05R\vtotalOrders\x12\x1f\n" +
-	"\vtotal_sales\x18\f \x01(\x01R\n" +
-	"totalSales\x12#\n" +
-	"\rtotal_refunds\x18\r \x01(\x01R\ftotalRefunds\x12\x1f\n" +
-	"\vtotal_voids\x18\x0e \x01(\x01R\n" +
-	"totalVoids\x12\x1b\n" +
-	"\topened_at\x18\x0f \x01(\tR\bopenedAt\x12\x1b\n" +
-	"\tclosed_at\x18\x10 \x01(\tR\bclosedAt\"X\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
+	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"locationId\x12\x19\n" +
+	"\bstaff_id\x18\x04 \x01(\x03R\astaffId\x12#\n" +
+	"\ropening_float\x18\x05 \x01(\x01R\fopeningFloat\x12#\n" +
+	"\rclosing_float\x18\x06 \x01(\x01R\fclosingFloat\x12\x1f\n" +
+	"\vtotal_sales\x18\a \x01(\x01R\n" +
+	"totalSales\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12\x1b\n" +
+	"\topened_at\x18\t \x01(\tR\bopenedAt\x12\x1b\n" +
+	"\tclosed_at\x18\n" +
+	" \x01(\tR\bclosedAt\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\"\x15\n" +
+	"\x13ListSessionsRequest\"@\n" +
+	"\x14ListSessionsResponse\x12(\n" +
+	"\bsessions\x18\x01 \x03(\v2\f.pos.SessionR\bsessions\"u\n" +
 	"\x12OpenSessionRequest\x12\x1f\n" +
-	"\vterminal_id\x18\x01 \x01(\x03R\n" +
-	"terminalId\x12!\n" +
-	"\fopening_cash\x18\x02 \x01(\x01R\vopeningCash\"=\n" +
-	"\x13OpenSessionResponse\x12&\n" +
-	"\asession\x18\x01 \x01(\v2\f.pos.SessionR\asession\"^\n" +
-	"\x13CloseSessionRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
-	"\fclosing_cash\x18\x02 \x01(\x01R\vclosingCash\x12\x14\n" +
-	"\x05notes\x18\x03 \x01(\tR\x05notes\">\n" +
-	"\x14CloseSessionResponse\x12&\n" +
-	"\asession\x18\x01 \x01(\v2\f.pos.SessionR\asession\"\x1a\n" +
-	"\x18GetCurrentSessionRequest\"C\n" +
-	"\x19GetCurrentSessionResponse\x12&\n" +
-	"\asession\x18\x01 \x01(\v2\f.pos.SessionR\asessionB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\x12\x19\n" +
+	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12#\n" +
+	"\ropening_float\x18\x03 \x01(\x01R\fopeningFloat\"N\n" +
+	"\x13OpenSessionResponse\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\":\n" +
+	"\x13CloseSessionRequest\x12#\n" +
+	"\rclosing_float\x18\x01 \x01(\x01R\fclosingFloat\"0\n" +
+	"\x14CloseSessionResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_sessions_proto_rawDescOnce sync.Once
@@ -522,23 +477,21 @@ func file_pos_v1_sessions_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_sessions_proto_goTypes = []any{
-	(*Session)(nil),                   // 0: pos.Session
-	(*OpenSessionRequest)(nil),        // 1: pos.OpenSessionRequest
-	(*OpenSessionResponse)(nil),       // 2: pos.OpenSessionResponse
-	(*CloseSessionRequest)(nil),       // 3: pos.CloseSessionRequest
-	(*CloseSessionResponse)(nil),      // 4: pos.CloseSessionResponse
-	(*GetCurrentSessionRequest)(nil),  // 5: pos.GetCurrentSessionRequest
-	(*GetCurrentSessionResponse)(nil), // 6: pos.GetCurrentSessionResponse
+	(*Session)(nil),              // 0: pos.Session
+	(*ListSessionsRequest)(nil),  // 1: pos.ListSessionsRequest
+	(*ListSessionsResponse)(nil), // 2: pos.ListSessionsResponse
+	(*OpenSessionRequest)(nil),   // 3: pos.OpenSessionRequest
+	(*OpenSessionResponse)(nil),  // 4: pos.OpenSessionResponse
+	(*CloseSessionRequest)(nil),  // 5: pos.CloseSessionRequest
+	(*CloseSessionResponse)(nil), // 6: pos.CloseSessionResponse
 }
 var file_pos_v1_sessions_proto_depIdxs = []int32{
-	0, // 0: pos.OpenSessionResponse.session:type_name -> pos.Session
-	0, // 1: pos.CloseSessionResponse.session:type_name -> pos.Session
-	0, // 2: pos.GetCurrentSessionResponse.session:type_name -> pos.Session
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: pos.ListSessionsResponse.sessions:type_name -> pos.Session
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_sessions_proto_init() }

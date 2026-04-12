@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,19 +22,20 @@ const (
 )
 
 type POSUser struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"` // cashier, server, manager, admin
-	Pin           string                 `protobuf:"bytes,6,opt,name=pin,proto3" json:"pin,omitempty"`
-	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	LastLoginAt   string                 `protobuf:"bytes,8,opt,name=last_login_at,json=lastLoginAt,proto3" json:"last_login_at,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessId       int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	LocationId       int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Name             string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Role             string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	IsActive         bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	MaxDiscountPct   float64                `protobuf:"fixed64,7,opt,name=max_discount_pct,json=maxDiscountPct,proto3" json:"max_discount_pct,omitempty"`
+	CanVoid          bool                   `protobuf:"varint,8,opt,name=can_void,json=canVoid,proto3" json:"can_void,omitempty"`
+	CanRefund        bool                   `protobuf:"varint,9,opt,name=can_refund,json=canRefund,proto3" json:"can_refund,omitempty"`
+	CanOpenDrawer    bool                   `protobuf:"varint,10,opt,name=can_open_drawer,json=canOpenDrawer,proto3" json:"can_open_drawer,omitempty"`
+	CanApplyDiscount bool                   `protobuf:"varint,11,opt,name=can_apply_discount,json=canApplyDiscount,proto3" json:"can_apply_discount,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *POSUser) Reset() {
@@ -75,6 +75,13 @@ func (x *POSUser) GetId() int64 {
 	return 0
 }
 
+func (x *POSUser) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
+}
+
 func (x *POSUser) GetLocationId() int64 {
 	if x != nil {
 		return x.LocationId
@@ -89,23 +96,9 @@ func (x *POSUser) GetName() string {
 	return ""
 }
 
-func (x *POSUser) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
 func (x *POSUser) GetRole() string {
 	if x != nil {
 		return x.Role
-	}
-	return ""
-}
-
-func (x *POSUser) GetPin() string {
-	if x != nil {
-		return x.Pin
 	}
 	return ""
 }
@@ -117,32 +110,44 @@ func (x *POSUser) GetIsActive() bool {
 	return false
 }
 
-func (x *POSUser) GetLastLoginAt() string {
+func (x *POSUser) GetMaxDiscountPct() float64 {
 	if x != nil {
-		return x.LastLoginAt
+		return x.MaxDiscountPct
 	}
-	return ""
+	return 0
 }
 
-func (x *POSUser) GetCreatedAt() string {
+func (x *POSUser) GetCanVoid() bool {
 	if x != nil {
-		return x.CreatedAt
+		return x.CanVoid
 	}
-	return ""
+	return false
 }
 
-func (x *POSUser) GetUpdatedAt() string {
+func (x *POSUser) GetCanRefund() bool {
 	if x != nil {
-		return x.UpdatedAt
+		return x.CanRefund
 	}
-	return ""
+	return false
+}
+
+func (x *POSUser) GetCanOpenDrawer() bool {
+	if x != nil {
+		return x.CanOpenDrawer
+	}
+	return false
+}
+
+func (x *POSUser) GetCanApplyDiscount() bool {
+	if x != nil {
+		return x.CanApplyDiscount
+	}
+	return false
 }
 
 type ListPOSUsersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
-	ActiveOnly    bool                   `protobuf:"varint,3,opt,name=active_only,json=activeOnly,proto3" json:"active_only,omitempty"`
+	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -177,31 +182,16 @@ func (*ListPOSUsersRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListPOSUsersRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListPOSUsersRequest) GetLocationId() int64 {
 	if x != nil {
-		return x.Pagination
+		return x.LocationId
 	}
-	return nil
-}
-
-func (x *ListPOSUsersRequest) GetRole() string {
-	if x != nil {
-		return x.Role
-	}
-	return ""
-}
-
-func (x *ListPOSUsersRequest) GetActiveOnly() bool {
-	if x != nil {
-		return x.ActiveOnly
-	}
-	return false
+	return 0
 }
 
 type ListPOSUsersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Users         []*POSUser             `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -243,21 +233,20 @@ func (x *ListPOSUsersResponse) GetUsers() []*POSUser {
 	return nil
 }
 
-func (x *ListPOSUsersResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 type CreatePOSUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	Pin           string                 `protobuf:"bytes,4,opt,name=pin,proto3" json:"pin,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	LocationId       int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Name             string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Pin              string                 `protobuf:"bytes,3,opt,name=pin,proto3" json:"pin,omitempty"`
+	Role             string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	HourlyRate       float64                `protobuf:"fixed64,5,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	MaxDiscountPct   float64                `protobuf:"fixed64,6,opt,name=max_discount_pct,json=maxDiscountPct,proto3" json:"max_discount_pct,omitempty"`
+	CanVoid          bool                   `protobuf:"varint,7,opt,name=can_void,json=canVoid,proto3" json:"can_void,omitempty"`
+	CanRefund        bool                   `protobuf:"varint,8,opt,name=can_refund,json=canRefund,proto3" json:"can_refund,omitempty"`
+	CanOpenDrawer    bool                   `protobuf:"varint,9,opt,name=can_open_drawer,json=canOpenDrawer,proto3" json:"can_open_drawer,omitempty"`
+	CanApplyDiscount bool                   `protobuf:"varint,10,opt,name=can_apply_discount,json=canApplyDiscount,proto3" json:"can_apply_discount,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CreatePOSUserRequest) Reset() {
@@ -290,23 +279,16 @@ func (*CreatePOSUserRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *CreatePOSUserRequest) GetLocationId() int64 {
+	if x != nil {
+		return x.LocationId
+	}
+	return 0
+}
+
 func (x *CreatePOSUserRequest) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *CreatePOSUserRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *CreatePOSUserRequest) GetRole() string {
-	if x != nil {
-		return x.Role
 	}
 	return ""
 }
@@ -318,9 +300,58 @@ func (x *CreatePOSUserRequest) GetPin() string {
 	return ""
 }
 
+func (x *CreatePOSUserRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *CreatePOSUserRequest) GetHourlyRate() float64 {
+	if x != nil {
+		return x.HourlyRate
+	}
+	return 0
+}
+
+func (x *CreatePOSUserRequest) GetMaxDiscountPct() float64 {
+	if x != nil {
+		return x.MaxDiscountPct
+	}
+	return 0
+}
+
+func (x *CreatePOSUserRequest) GetCanVoid() bool {
+	if x != nil {
+		return x.CanVoid
+	}
+	return false
+}
+
+func (x *CreatePOSUserRequest) GetCanRefund() bool {
+	if x != nil {
+		return x.CanRefund
+	}
+	return false
+}
+
+func (x *CreatePOSUserRequest) GetCanOpenDrawer() bool {
+	if x != nil {
+		return x.CanOpenDrawer
+	}
+	return false
+}
+
+func (x *CreatePOSUserRequest) GetCanApplyDiscount() bool {
+	if x != nil {
+		return x.CanApplyDiscount
+	}
+	return false
+}
+
 type CreatePOSUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *POSUser               `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -355,22 +386,28 @@ func (*CreatePOSUserResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreatePOSUserResponse) GetUser() *POSUser {
+func (x *CreatePOSUserResponse) GetId() int64 {
 	if x != nil {
-		return x.User
+		return x.Id
 	}
-	return nil
+	return 0
 }
 
 type UpdatePOSUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
-	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name             string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Pin              string                 `protobuf:"bytes,3,opt,name=pin,proto3" json:"pin,omitempty"`
+	Role             string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	IsActive         bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	HourlyRate       float64                `protobuf:"fixed64,6,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	MaxDiscountPct   float64                `protobuf:"fixed64,7,opt,name=max_discount_pct,json=maxDiscountPct,proto3" json:"max_discount_pct,omitempty"`
+	CanVoid          bool                   `protobuf:"varint,8,opt,name=can_void,json=canVoid,proto3" json:"can_void,omitempty"`
+	CanRefund        bool                   `protobuf:"varint,9,opt,name=can_refund,json=canRefund,proto3" json:"can_refund,omitempty"`
+	CanOpenDrawer    bool                   `protobuf:"varint,10,opt,name=can_open_drawer,json=canOpenDrawer,proto3" json:"can_open_drawer,omitempty"`
+	CanApplyDiscount bool                   `protobuf:"varint,11,opt,name=can_apply_discount,json=canApplyDiscount,proto3" json:"can_apply_discount,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *UpdatePOSUserRequest) Reset() {
@@ -417,9 +454,9 @@ func (x *UpdatePOSUserRequest) GetName() string {
 	return ""
 }
 
-func (x *UpdatePOSUserRequest) GetEmail() string {
+func (x *UpdatePOSUserRequest) GetPin() string {
 	if x != nil {
-		return x.Email
+		return x.Pin
 	}
 	return ""
 }
@@ -438,9 +475,51 @@ func (x *UpdatePOSUserRequest) GetIsActive() bool {
 	return false
 }
 
+func (x *UpdatePOSUserRequest) GetHourlyRate() float64 {
+	if x != nil {
+		return x.HourlyRate
+	}
+	return 0
+}
+
+func (x *UpdatePOSUserRequest) GetMaxDiscountPct() float64 {
+	if x != nil {
+		return x.MaxDiscountPct
+	}
+	return 0
+}
+
+func (x *UpdatePOSUserRequest) GetCanVoid() bool {
+	if x != nil {
+		return x.CanVoid
+	}
+	return false
+}
+
+func (x *UpdatePOSUserRequest) GetCanRefund() bool {
+	if x != nil {
+		return x.CanRefund
+	}
+	return false
+}
+
+func (x *UpdatePOSUserRequest) GetCanOpenDrawer() bool {
+	if x != nil {
+		return x.CanOpenDrawer
+	}
+	return false
+}
+
+func (x *UpdatePOSUserRequest) GetCanApplyDiscount() bool {
+	if x != nil {
+		return x.CanApplyDiscount
+	}
+	return false
+}
+
 type UpdatePOSUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *POSUser               `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -475,122 +554,122 @@ func (*UpdatePOSUserResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdatePOSUserResponse) GetUser() *POSUser {
-	if x != nil {
-		return x.User
-	}
-	return nil
-}
-
-type DeletePOSUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeletePOSUserRequest) Reset() {
-	*x = DeletePOSUserRequest{}
-	mi := &file_pos_v1_users_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeletePOSUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeletePOSUserRequest) ProtoMessage() {}
-
-func (x *DeletePOSUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_users_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeletePOSUserRequest.ProtoReflect.Descriptor instead.
-func (*DeletePOSUserRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_users_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *DeletePOSUserRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type DeletePOSUserResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeletePOSUserResponse) Reset() {
-	*x = DeletePOSUserResponse{}
-	mi := &file_pos_v1_users_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeletePOSUserResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeletePOSUserResponse) ProtoMessage() {}
-
-func (x *DeletePOSUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_users_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeletePOSUserResponse.ProtoReflect.Descriptor instead.
-func (*DeletePOSUserResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_users_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *DeletePOSUserResponse) GetSuccess() bool {
+func (x *UpdatePOSUserResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-type VerifyPOSUserPinRequest struct {
+type DeactivatePOSUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeactivatePOSUserRequest) Reset() {
+	*x = DeactivatePOSUserRequest{}
+	mi := &file_pos_v1_users_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeactivatePOSUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeactivatePOSUserRequest) ProtoMessage() {}
+
+func (x *DeactivatePOSUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_users_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeactivatePOSUserRequest.ProtoReflect.Descriptor instead.
+func (*DeactivatePOSUserRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_users_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeactivatePOSUserRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeactivatePOSUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeactivatePOSUserResponse) Reset() {
+	*x = DeactivatePOSUserResponse{}
+	mi := &file_pos_v1_users_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeactivatePOSUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeactivatePOSUserResponse) ProtoMessage() {}
+
+func (x *DeactivatePOSUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_users_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeactivatePOSUserResponse.ProtoReflect.Descriptor instead.
+func (*DeactivatePOSUserResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_users_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DeactivatePOSUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type VerifyPOSUserPINRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pin           string                 `protobuf:"bytes,1,opt,name=pin,proto3" json:"pin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyPOSUserPinRequest) Reset() {
-	*x = VerifyPOSUserPinRequest{}
+func (x *VerifyPOSUserPINRequest) Reset() {
+	*x = VerifyPOSUserPINRequest{}
 	mi := &file_pos_v1_users_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyPOSUserPinRequest) String() string {
+func (x *VerifyPOSUserPINRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyPOSUserPinRequest) ProtoMessage() {}
+func (*VerifyPOSUserPINRequest) ProtoMessage() {}
 
-func (x *VerifyPOSUserPinRequest) ProtoReflect() protoreflect.Message {
+func (x *VerifyPOSUserPINRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_users_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -602,40 +681,39 @@ func (x *VerifyPOSUserPinRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyPOSUserPinRequest.ProtoReflect.Descriptor instead.
-func (*VerifyPOSUserPinRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyPOSUserPINRequest.ProtoReflect.Descriptor instead.
+func (*VerifyPOSUserPINRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *VerifyPOSUserPinRequest) GetPin() string {
+func (x *VerifyPOSUserPINRequest) GetPin() string {
 	if x != nil {
 		return x.Pin
 	}
 	return ""
 }
 
-type VerifyPOSUserPinResponse struct {
+type VerifyPOSUserPINResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	User          *POSUser               `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	User          *POSUser               `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyPOSUserPinResponse) Reset() {
-	*x = VerifyPOSUserPinResponse{}
+func (x *VerifyPOSUserPINResponse) Reset() {
+	*x = VerifyPOSUserPINResponse{}
 	mi := &file_pos_v1_users_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyPOSUserPinResponse) String() string {
+func (x *VerifyPOSUserPINResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyPOSUserPinResponse) ProtoMessage() {}
+func (*VerifyPOSUserPINResponse) ProtoMessage() {}
 
-func (x *VerifyPOSUserPinResponse) ProtoReflect() protoreflect.Message {
+func (x *VerifyPOSUserPINResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_users_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -647,19 +725,12 @@ func (x *VerifyPOSUserPinResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyPOSUserPinResponse.ProtoReflect.Descriptor instead.
-func (*VerifyPOSUserPinResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyPOSUserPINResponse.ProtoReflect.Descriptor instead.
+func (*VerifyPOSUserPINResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_users_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *VerifyPOSUserPinResponse) GetValid() bool {
-	if x != nil {
-		return x.Valid
-	}
-	return false
-}
-
-func (x *VerifyPOSUserPinResponse) GetUser() *POSUser {
+func (x *VerifyPOSUserPINResponse) GetUser() *POSUser {
 	if x != nil {
 		return x.User
 	}
@@ -670,58 +741,70 @@ var File_pos_v1_users_proto protoreflect.FileDescriptor
 
 const file_pos_v1_users_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/users.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\x89\x02\n" +
+	"\x12pos/v1/users.proto\x12\x03pos\"\xda\x02\n" +
 	"\aPOSUser\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1f\n" +
+	"\vlocation_id\x18\x03 \x01(\x03R\n" +
 	"locationId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12\x10\n" +
-	"\x03pin\x18\x06 \x01(\tR\x03pin\x12\x1b\n" +
-	"\tis_active\x18\a \x01(\bR\bisActive\x12\"\n" +
-	"\rlast_login_at\x18\b \x01(\tR\vlastLoginAt\x12\x1d\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12(\n" +
+	"\x10max_discount_pct\x18\a \x01(\x01R\x0emaxDiscountPct\x12\x19\n" +
+	"\bcan_void\x18\b \x01(\bR\acanVoid\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\"\x85\x01\n" +
-	"\x13ListPOSUsersRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x12\n" +
-	"\x04role\x18\x02 \x01(\tR\x04role\x12\x1f\n" +
-	"\vactive_only\x18\x03 \x01(\bR\n" +
-	"activeOnly\"v\n" +
+	"can_refund\x18\t \x01(\bR\tcanRefund\x12&\n" +
+	"\x0fcan_open_drawer\x18\n" +
+	" \x01(\bR\rcanOpenDrawer\x12,\n" +
+	"\x12can_apply_discount\x18\v \x01(\bR\x10canApplyDiscount\"6\n" +
+	"\x13ListPOSUsersRequest\x12\x1f\n" +
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\":\n" +
 	"\x14ListPOSUsersResponse\x12\"\n" +
-	"\x05users\x18\x01 \x03(\v2\f.pos.POSUserR\x05users\x12:\n" +
+	"\x05users\x18\x01 \x03(\v2\f.pos.POSUserR\x05users\"\xcc\x02\n" +
+	"\x14CreatePOSUserRequest\x12\x1f\n" +
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03pin\x18\x03 \x01(\tR\x03pin\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12\x1f\n" +
+	"\vhourly_rate\x18\x05 \x01(\x01R\n" +
+	"hourlyRate\x12(\n" +
+	"\x10max_discount_pct\x18\x06 \x01(\x01R\x0emaxDiscountPct\x12\x19\n" +
+	"\bcan_void\x18\a \x01(\bR\acanVoid\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"f\n" +
-	"\x14CreatePOSUserRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\x12\x10\n" +
-	"\x03pin\x18\x04 \x01(\tR\x03pin\"9\n" +
-	"\x15CreatePOSUserResponse\x12 \n" +
-	"\x04user\x18\x01 \x01(\v2\f.pos.POSUserR\x04user\"\x81\x01\n" +
+	"can_refund\x18\b \x01(\bR\tcanRefund\x12&\n" +
+	"\x0fcan_open_drawer\x18\t \x01(\bR\rcanOpenDrawer\x12,\n" +
+	"\x12can_apply_discount\x18\n" +
+	" \x01(\bR\x10canApplyDiscount\"'\n" +
+	"\x15CreatePOSUserResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xd8\x02\n" +
 	"\x14UpdatePOSUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03pin\x18\x03 \x01(\tR\x03pin\x12\x12\n" +
 	"\x04role\x18\x04 \x01(\tR\x04role\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\"9\n" +
-	"\x15UpdatePOSUserResponse\x12 \n" +
-	"\x04user\x18\x01 \x01(\v2\f.pos.POSUserR\x04user\"&\n" +
-	"\x14DeletePOSUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
-	"\x15DeletePOSUserResponse\x12\x18\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x1f\n" +
+	"\vhourly_rate\x18\x06 \x01(\x01R\n" +
+	"hourlyRate\x12(\n" +
+	"\x10max_discount_pct\x18\a \x01(\x01R\x0emaxDiscountPct\x12\x19\n" +
+	"\bcan_void\x18\b \x01(\bR\acanVoid\x12\x1d\n" +
+	"\n" +
+	"can_refund\x18\t \x01(\bR\tcanRefund\x12&\n" +
+	"\x0fcan_open_drawer\x18\n" +
+	" \x01(\bR\rcanOpenDrawer\x12,\n" +
+	"\x12can_apply_discount\x18\v \x01(\bR\x10canApplyDiscount\"1\n" +
+	"\x15UpdatePOSUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"*\n" +
+	"\x18DeactivatePOSUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"5\n" +
+	"\x19DeactivatePOSUserResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
-	"\x17VerifyPOSUserPinRequest\x12\x10\n" +
-	"\x03pin\x18\x01 \x01(\tR\x03pin\"R\n" +
-	"\x18VerifyPOSUserPinResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12 \n" +
-	"\x04user\x18\x02 \x01(\v2\f.pos.POSUserR\x04userB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x17VerifyPOSUserPINRequest\x12\x10\n" +
+	"\x03pin\x18\x01 \x01(\tR\x03pin\"<\n" +
+	"\x18VerifyPOSUserPINResponse\x12 \n" +
+	"\x04user\x18\x01 \x01(\v2\f.pos.POSUserR\x04userB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_users_proto_rawDescOnce sync.Once
@@ -737,32 +820,26 @@ func file_pos_v1_users_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_pos_v1_users_proto_goTypes = []any{
-	(*POSUser)(nil),                  // 0: pos.POSUser
-	(*ListPOSUsersRequest)(nil),      // 1: pos.ListPOSUsersRequest
-	(*ListPOSUsersResponse)(nil),     // 2: pos.ListPOSUsersResponse
-	(*CreatePOSUserRequest)(nil),     // 3: pos.CreatePOSUserRequest
-	(*CreatePOSUserResponse)(nil),    // 4: pos.CreatePOSUserResponse
-	(*UpdatePOSUserRequest)(nil),     // 5: pos.UpdatePOSUserRequest
-	(*UpdatePOSUserResponse)(nil),    // 6: pos.UpdatePOSUserResponse
-	(*DeletePOSUserRequest)(nil),     // 7: pos.DeletePOSUserRequest
-	(*DeletePOSUserResponse)(nil),    // 8: pos.DeletePOSUserResponse
-	(*VerifyPOSUserPinRequest)(nil),  // 9: pos.VerifyPOSUserPinRequest
-	(*VerifyPOSUserPinResponse)(nil), // 10: pos.VerifyPOSUserPinResponse
-	(*v1.PaginationRequest)(nil),     // 11: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),    // 12: common.PaginationResponse
+	(*POSUser)(nil),                   // 0: pos.POSUser
+	(*ListPOSUsersRequest)(nil),       // 1: pos.ListPOSUsersRequest
+	(*ListPOSUsersResponse)(nil),      // 2: pos.ListPOSUsersResponse
+	(*CreatePOSUserRequest)(nil),      // 3: pos.CreatePOSUserRequest
+	(*CreatePOSUserResponse)(nil),     // 4: pos.CreatePOSUserResponse
+	(*UpdatePOSUserRequest)(nil),      // 5: pos.UpdatePOSUserRequest
+	(*UpdatePOSUserResponse)(nil),     // 6: pos.UpdatePOSUserResponse
+	(*DeactivatePOSUserRequest)(nil),  // 7: pos.DeactivatePOSUserRequest
+	(*DeactivatePOSUserResponse)(nil), // 8: pos.DeactivatePOSUserResponse
+	(*VerifyPOSUserPINRequest)(nil),   // 9: pos.VerifyPOSUserPINRequest
+	(*VerifyPOSUserPINResponse)(nil),  // 10: pos.VerifyPOSUserPINResponse
 }
 var file_pos_v1_users_proto_depIdxs = []int32{
-	11, // 0: pos.ListPOSUsersRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: pos.ListPOSUsersResponse.users:type_name -> pos.POSUser
-	12, // 2: pos.ListPOSUsersResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: pos.CreatePOSUserResponse.user:type_name -> pos.POSUser
-	0,  // 4: pos.UpdatePOSUserResponse.user:type_name -> pos.POSUser
-	0,  // 5: pos.VerifyPOSUserPinResponse.user:type_name -> pos.POSUser
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: pos.ListPOSUsersResponse.users:type_name -> pos.POSUser
+	0, // 1: pos.VerifyPOSUserPINResponse.user:type_name -> pos.POSUser
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_users_proto_init() }

@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,14 +24,13 @@ const (
 type Account struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"` // asset, liability, equity, revenue, expense
-	SubType       string                 `protobuf:"bytes,5,opt,name=sub_type,json=subType,proto3" json:"sub_type,omitempty"`
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
 	Balance       float64                `protobuf:"fixed64,6,opt,name=balance,proto3" json:"balance,omitempty"`
-	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
-	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,11 +72,11 @@ func (x *Account) GetId() int64 {
 	return 0
 }
 
-func (x *Account) GetCode() string {
+func (x *Account) GetOwnerId() int64 {
 	if x != nil {
-		return x.Code
+		return x.OwnerId
 	}
-	return ""
+	return 0
 }
 
 func (x *Account) GetName() string {
@@ -95,9 +93,9 @@ func (x *Account) GetType() string {
 	return ""
 }
 
-func (x *Account) GetSubType() string {
+func (x *Account) GetCurrency() string {
 	if x != nil {
-		return x.SubType
+		return x.Currency
 	}
 	return ""
 }
@@ -107,13 +105,6 @@ func (x *Account) GetBalance() float64 {
 		return x.Balance
 	}
 	return 0
-}
-
-func (x *Account) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
 }
 
 func (x *Account) GetIsActive() bool {
@@ -132,9 +123,6 @@ func (x *Account) GetCreatedAt() string {
 
 type ListAccountsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Search        string                 `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -169,31 +157,9 @@ func (*ListAccountsRequest) Descriptor() ([]byte, []int) {
 	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListAccountsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListAccountsRequest) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-func (x *ListAccountsRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
 type ListAccountsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Accounts      []*Account             `protobuf:"bytes,1,rep,name=accounts,proto3" json:"accounts,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -235,115 +201,20 @@ func (x *ListAccountsResponse) GetAccounts() []*Account {
 	return nil
 }
 
-func (x *ListAccountsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetAccountRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAccountRequest) Reset() {
-	*x = GetAccountRequest{}
-	mi := &file_finance_v1_accounts_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAccountRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAccountRequest) ProtoMessage() {}
-
-func (x *GetAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_accounts_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAccountRequest.ProtoReflect.Descriptor instead.
-func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetAccountRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetAccountResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Account       *Account               `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAccountResponse) Reset() {
-	*x = GetAccountResponse{}
-	mi := &file_finance_v1_accounts_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAccountResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAccountResponse) ProtoMessage() {}
-
-func (x *GetAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_accounts_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAccountResponse.ProtoReflect.Descriptor instead.
-func (*GetAccountResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetAccountResponse) GetAccount() *Account {
-	if x != nil {
-		return x.Account
-	}
-	return nil
-}
-
 type CreateAccountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	SubType       string                 `protobuf:"bytes,4,opt,name=sub_type,json=subType,proto3" json:"sub_type,omitempty"`
-	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Currency      string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Balance       float64                `protobuf:"fixed64,4,opt,name=balance,proto3" json:"balance,omitempty"`
+	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateAccountRequest) Reset() {
 	*x = CreateAccountRequest{}
-	mi := &file_finance_v1_accounts_proto_msgTypes[5]
+	mi := &file_finance_v1_accounts_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -355,7 +226,7 @@ func (x *CreateAccountRequest) String() string {
 func (*CreateAccountRequest) ProtoMessage() {}
 
 func (x *CreateAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_accounts_proto_msgTypes[5]
+	mi := &file_finance_v1_accounts_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,14 +239,7 @@ func (x *CreateAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAccountRequest.ProtoReflect.Descriptor instead.
 func (*CreateAccountRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *CreateAccountRequest) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
+	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateAccountRequest) GetName() string {
@@ -392,30 +256,38 @@ func (x *CreateAccountRequest) GetType() string {
 	return ""
 }
 
-func (x *CreateAccountRequest) GetSubType() string {
+func (x *CreateAccountRequest) GetCurrency() string {
 	if x != nil {
-		return x.SubType
+		return x.Currency
 	}
 	return ""
 }
 
-func (x *CreateAccountRequest) GetDescription() string {
+func (x *CreateAccountRequest) GetBalance() float64 {
 	if x != nil {
-		return x.Description
+		return x.Balance
 	}
-	return ""
+	return 0
+}
+
+func (x *CreateAccountRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 type CreateAccountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Account       *Account               `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateAccountResponse) Reset() {
 	*x = CreateAccountResponse{}
-	mi := &file_finance_v1_accounts_proto_msgTypes[6]
+	mi := &file_finance_v1_accounts_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -427,7 +299,7 @@ func (x *CreateAccountResponse) String() string {
 func (*CreateAccountResponse) ProtoMessage() {}
 
 func (x *CreateAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_accounts_proto_msgTypes[6]
+	mi := &file_finance_v1_accounts_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -440,55 +312,50 @@ func (x *CreateAccountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAccountResponse.ProtoReflect.Descriptor instead.
 func (*CreateAccountResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{6}
+	return file_finance_v1_accounts_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateAccountResponse) GetAccount() *Account {
+func (x *CreateAccountResponse) GetId() int64 {
 	if x != nil {
-		return x.Account
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateAccountResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_finance_v1_accounts_proto protoreflect.FileDescriptor
 
 const file_finance_v1_accounts_proto_rawDesc = "" +
 	"\n" +
-	"\x19finance/v1/accounts.proto\x12\afinance\x1a\x1acommon/v1/pagination.proto\"\xe8\x01\n" +
+	"\x19finance/v1/accounts.proto\x12\afinance\"\xce\x01\n" +
 	"\aAccount\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12\x19\n" +
-	"\bsub_type\x18\x05 \x01(\tR\asubType\x12\x18\n" +
-	"\abalance\x18\x06 \x01(\x01R\abalance\x12 \n" +
-	"\vdescription\x18\a \x01(\tR\vdescription\x12\x1b\n" +
-	"\tis_active\x18\b \x01(\bR\bisActive\x12\x1d\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1a\n" +
+	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x18\n" +
+	"\abalance\x18\x06 \x01(\x01R\abalance\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\"|\n" +
-	"\x13ListAccountsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x16\n" +
-	"\x06search\x18\x03 \x01(\tR\x06search\"\x80\x01\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"\x15\n" +
+	"\x13ListAccountsRequest\"D\n" +
 	"\x14ListAccountsResponse\x12,\n" +
-	"\baccounts\x18\x01 \x03(\v2\x10.finance.AccountR\baccounts\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"#\n" +
-	"\x11GetAccountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"@\n" +
-	"\x12GetAccountResponse\x12*\n" +
-	"\aaccount\x18\x01 \x01(\v2\x10.finance.AccountR\aaccount\"\x8f\x01\n" +
+	"\baccounts\x18\x01 \x03(\v2\x10.finance.AccountR\baccounts\"\x91\x01\n" +
 	"\x14CreateAccountRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x19\n" +
-	"\bsub_type\x18\x04 \x01(\tR\asubType\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\"C\n" +
-	"\x15CreateAccountResponse\x12*\n" +
-	"\aaccount\x18\x01 \x01(\v2\x10.finance.AccountR\aaccountB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1a\n" +
+	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x18\n" +
+	"\abalance\x18\x04 \x01(\x01R\abalance\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"A\n" +
+	"\x15CreateAccountResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_accounts_proto_rawDescOnce sync.Once
@@ -502,29 +369,21 @@ func file_finance_v1_accounts_proto_rawDescGZIP() []byte {
 	return file_finance_v1_accounts_proto_rawDescData
 }
 
-var file_finance_v1_accounts_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_finance_v1_accounts_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_finance_v1_accounts_proto_goTypes = []any{
 	(*Account)(nil),               // 0: finance.Account
 	(*ListAccountsRequest)(nil),   // 1: finance.ListAccountsRequest
 	(*ListAccountsResponse)(nil),  // 2: finance.ListAccountsResponse
-	(*GetAccountRequest)(nil),     // 3: finance.GetAccountRequest
-	(*GetAccountResponse)(nil),    // 4: finance.GetAccountResponse
-	(*CreateAccountRequest)(nil),  // 5: finance.CreateAccountRequest
-	(*CreateAccountResponse)(nil), // 6: finance.CreateAccountResponse
-	(*v1.PaginationRequest)(nil),  // 7: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 8: common.PaginationResponse
+	(*CreateAccountRequest)(nil),  // 3: finance.CreateAccountRequest
+	(*CreateAccountResponse)(nil), // 4: finance.CreateAccountResponse
 }
 var file_finance_v1_accounts_proto_depIdxs = []int32{
-	7, // 0: finance.ListAccountsRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: finance.ListAccountsResponse.accounts:type_name -> finance.Account
-	8, // 2: finance.ListAccountsResponse.pagination:type_name -> common.PaginationResponse
-	0, // 3: finance.GetAccountResponse.account:type_name -> finance.Account
-	0, // 4: finance.CreateAccountResponse.account:type_name -> finance.Account
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0, // 0: finance.ListAccountsResponse.accounts:type_name -> finance.Account
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_finance_v1_accounts_proto_init() }
@@ -538,7 +397,7 @@ func file_finance_v1_accounts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_finance_v1_accounts_proto_rawDesc), len(file_finance_v1_accounts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

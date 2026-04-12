@@ -6,48 +6,4 @@
 
 /* eslint-disable */
 
-export interface BookSettings {
-  id: number;
-  businessId: number;
-  timezone: string;
-  slotDurationMinutes: number;
-  minBookingNoticeHours: number;
-  maxBookingAdvanceDays: number;
-  allowOnlineBooking: boolean;
-  requireConfirmation: boolean;
-  sendReminders: boolean;
-  reminderHoursBefore: number;
-  allowCancellation: boolean;
-  cancellationNoticeHours: number;
-  bookingPageUrl: string;
-  cancellationPolicy: string;
-  confirmationMessage: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface GetBookSettingsRequest {
-}
-
-export interface GetBookSettingsResponse {
-  settings: BookSettings | undefined;
-}
-
-export interface UpdateBookSettingsRequest {
-  timezone: string;
-  slotDurationMinutes: number;
-  minBookingNoticeHours: number;
-  maxBookingAdvanceDays: number;
-  allowOnlineBooking: boolean;
-  requireConfirmation: boolean;
-  sendReminders: boolean;
-  reminderHoursBefore: number;
-  allowCancellation: boolean;
-  cancellationNoticeHours: number;
-  cancellationPolicy: string;
-  confirmationMessage: string;
-}
-
-export interface UpdateBookSettingsResponse {
-  settings: BookSettings | undefined;
-}
+export {};

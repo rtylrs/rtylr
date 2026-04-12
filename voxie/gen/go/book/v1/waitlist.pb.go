@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,26 +22,19 @@ const (
 )
 
 type WaitlistEntry struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	BusinessId            int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
-	CustomerId            int64                  `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CustomerName          string                 `protobuf:"bytes,4,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	CustomerEmail         string                 `protobuf:"bytes,5,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
-	CustomerPhone         string                 `protobuf:"bytes,6,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
-	ServiceId             int64                  `protobuf:"varint,7,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ServiceName           string                 `protobuf:"bytes,8,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	PreferredResourceId   int64                  `protobuf:"varint,9,opt,name=preferred_resource_id,json=preferredResourceId,proto3" json:"preferred_resource_id,omitempty"`
-	PreferredResourceName string                 `protobuf:"bytes,10,opt,name=preferred_resource_name,json=preferredResourceName,proto3" json:"preferred_resource_name,omitempty"`
-	PreferredDate         string                 `protobuf:"bytes,11,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
-	PreferredTimeFrom     string                 `protobuf:"bytes,12,opt,name=preferred_time_from,json=preferredTimeFrom,proto3" json:"preferred_time_from,omitempty"`
-	PreferredTimeTo       string                 `protobuf:"bytes,13,opt,name=preferred_time_to,json=preferredTimeTo,proto3" json:"preferred_time_to,omitempty"`
-	Status                string                 `protobuf:"bytes,14,opt,name=status,proto3" json:"status,omitempty"` // waiting, notified, booked, expired, cancelled
-	Notes                 string                 `protobuf:"bytes,15,opt,name=notes,proto3" json:"notes,omitempty"`
-	CreatedAt             string                 `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt             string                 `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	ServiceId     int64                  `protobuf:"varint,3,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,4,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,5,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,6,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	PreferredDate string                 `protobuf:"bytes,7,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
+	PreferredTime string                 `protobuf:"bytes,8,opt,name=preferred_time,json=preferredTime,proto3" json:"preferred_time,omitempty"`
+	Status        string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *WaitlistEntry) Reset() {
@@ -82,16 +74,16 @@ func (x *WaitlistEntry) GetId() int64 {
 	return 0
 }
 
-func (x *WaitlistEntry) GetBusinessId() int64 {
+func (x *WaitlistEntry) GetOwnerId() int64 {
 	if x != nil {
-		return x.BusinessId
+		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *WaitlistEntry) GetCustomerId() int64 {
+func (x *WaitlistEntry) GetServiceId() int64 {
 	if x != nil {
-		return x.CustomerId
+		return x.ServiceId
 	}
 	return 0
 }
@@ -117,34 +109,6 @@ func (x *WaitlistEntry) GetCustomerPhone() string {
 	return ""
 }
 
-func (x *WaitlistEntry) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *WaitlistEntry) GetServiceName() string {
-	if x != nil {
-		return x.ServiceName
-	}
-	return ""
-}
-
-func (x *WaitlistEntry) GetPreferredResourceId() int64 {
-	if x != nil {
-		return x.PreferredResourceId
-	}
-	return 0
-}
-
-func (x *WaitlistEntry) GetPreferredResourceName() string {
-	if x != nil {
-		return x.PreferredResourceName
-	}
-	return ""
-}
-
 func (x *WaitlistEntry) GetPreferredDate() string {
 	if x != nil {
 		return x.PreferredDate
@@ -152,16 +116,9 @@ func (x *WaitlistEntry) GetPreferredDate() string {
 	return ""
 }
 
-func (x *WaitlistEntry) GetPreferredTimeFrom() string {
+func (x *WaitlistEntry) GetPreferredTime() string {
 	if x != nil {
-		return x.PreferredTimeFrom
-	}
-	return ""
-}
-
-func (x *WaitlistEntry) GetPreferredTimeTo() string {
-	if x != nil {
-		return x.PreferredTimeTo
+		return x.PreferredTime
 	}
 	return ""
 }
@@ -173,13 +130,6 @@ func (x *WaitlistEntry) GetStatus() string {
 	return ""
 }
 
-func (x *WaitlistEntry) GetNotes() string {
-	if x != nil {
-		return x.Notes
-	}
-	return ""
-}
-
 func (x *WaitlistEntry) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
@@ -187,18 +137,8 @@ func (x *WaitlistEntry) GetCreatedAt() string {
 	return ""
 }
 
-func (x *WaitlistEntry) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
 type ListWaitlistRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	ServiceId     int64                  `protobuf:"varint,3,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -233,31 +173,9 @@ func (*ListWaitlistRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListWaitlistRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListWaitlistRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListWaitlistRequest) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
 type ListWaitlistResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Entries       []*WaitlistEntry       `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -299,120 +217,21 @@ func (x *ListWaitlistResponse) GetEntries() []*WaitlistEntry {
 	return nil
 }
 
-func (x *ListWaitlistResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetWaitlistEntryRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetWaitlistEntryRequest) Reset() {
-	*x = GetWaitlistEntryRequest{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetWaitlistEntryRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetWaitlistEntryRequest) ProtoMessage() {}
-
-func (x *GetWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetWaitlistEntryRequest.ProtoReflect.Descriptor instead.
-func (*GetWaitlistEntryRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetWaitlistEntryRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetWaitlistEntryResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entry         *WaitlistEntry         `protobuf:"bytes,1,opt,name=entry,proto3" json:"entry,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetWaitlistEntryResponse) Reset() {
-	*x = GetWaitlistEntryResponse{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetWaitlistEntryResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetWaitlistEntryResponse) ProtoMessage() {}
-
-func (x *GetWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetWaitlistEntryResponse.ProtoReflect.Descriptor instead.
-func (*GetWaitlistEntryResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetWaitlistEntryResponse) GetEntry() *WaitlistEntry {
-	if x != nil {
-		return x.Entry
-	}
-	return nil
-}
-
 type CreateWaitlistEntryRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	CustomerId          int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CustomerName        string                 `protobuf:"bytes,2,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	CustomerEmail       string                 `protobuf:"bytes,3,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
-	CustomerPhone       string                 `protobuf:"bytes,4,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
-	ServiceId           int64                  `protobuf:"varint,5,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	PreferredResourceId int64                  `protobuf:"varint,6,opt,name=preferred_resource_id,json=preferredResourceId,proto3" json:"preferred_resource_id,omitempty"`
-	PreferredDate       string                 `protobuf:"bytes,7,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
-	PreferredTimeFrom   string                 `protobuf:"bytes,8,opt,name=preferred_time_from,json=preferredTimeFrom,proto3" json:"preferred_time_from,omitempty"`
-	PreferredTimeTo     string                 `protobuf:"bytes,9,opt,name=preferred_time_to,json=preferredTimeTo,proto3" json:"preferred_time_to,omitempty"`
-	Notes               string                 `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceId     int64                  `protobuf:"varint,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,2,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,3,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,4,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	PreferredDate string                 `protobuf:"bytes,5,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
+	PreferredTime string                 `protobuf:"bytes,6,opt,name=preferred_time,json=preferredTime,proto3" json:"preferred_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateWaitlistEntryRequest) Reset() {
 	*x = CreateWaitlistEntryRequest{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[5]
+	mi := &file_book_v1_waitlist_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +243,7 @@ func (x *CreateWaitlistEntryRequest) String() string {
 func (*CreateWaitlistEntryRequest) ProtoMessage() {}
 
 func (x *CreateWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[5]
+	mi := &file_book_v1_waitlist_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,12 +256,12 @@ func (x *CreateWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWaitlistEntryRequest.ProtoReflect.Descriptor instead.
 func (*CreateWaitlistEntryRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{5}
+	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateWaitlistEntryRequest) GetCustomerId() int64 {
+func (x *CreateWaitlistEntryRequest) GetServiceId() int64 {
 	if x != nil {
-		return x.CustomerId
+		return x.ServiceId
 	}
 	return 0
 }
@@ -468,20 +287,6 @@ func (x *CreateWaitlistEntryRequest) GetCustomerPhone() string {
 	return ""
 }
 
-func (x *CreateWaitlistEntryRequest) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *CreateWaitlistEntryRequest) GetPreferredResourceId() int64 {
-	if x != nil {
-		return x.PreferredResourceId
-	}
-	return 0
-}
-
 func (x *CreateWaitlistEntryRequest) GetPreferredDate() string {
 	if x != nil {
 		return x.PreferredDate
@@ -489,37 +294,24 @@ func (x *CreateWaitlistEntryRequest) GetPreferredDate() string {
 	return ""
 }
 
-func (x *CreateWaitlistEntryRequest) GetPreferredTimeFrom() string {
+func (x *CreateWaitlistEntryRequest) GetPreferredTime() string {
 	if x != nil {
-		return x.PreferredTimeFrom
-	}
-	return ""
-}
-
-func (x *CreateWaitlistEntryRequest) GetPreferredTimeTo() string {
-	if x != nil {
-		return x.PreferredTimeTo
-	}
-	return ""
-}
-
-func (x *CreateWaitlistEntryRequest) GetNotes() string {
-	if x != nil {
-		return x.Notes
+		return x.PreferredTime
 	}
 	return ""
 }
 
 type CreateWaitlistEntryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entry         *WaitlistEntry         `protobuf:"bytes,1,opt,name=entry,proto3" json:"entry,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateWaitlistEntryResponse) Reset() {
 	*x = CreateWaitlistEntryResponse{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[6]
+	mi := &file_book_v1_waitlist_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -531,7 +323,7 @@ func (x *CreateWaitlistEntryResponse) String() string {
 func (*CreateWaitlistEntryResponse) ProtoMessage() {}
 
 func (x *CreateWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[6]
+	mi := &file_book_v1_waitlist_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -544,28 +336,40 @@ func (x *CreateWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWaitlistEntryResponse.ProtoReflect.Descriptor instead.
 func (*CreateWaitlistEntryResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{6}
+	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateWaitlistEntryResponse) GetEntry() *WaitlistEntry {
+func (x *CreateWaitlistEntryResponse) GetId() int64 {
 	if x != nil {
-		return x.Entry
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateWaitlistEntryResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateWaitlistEntryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	Notes         string                 `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,3,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerEmail string                 `protobuf:"bytes,4,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerPhone string                 `protobuf:"bytes,5,opt,name=customer_phone,json=customerPhone,proto3" json:"customer_phone,omitempty"`
+	PreferredDate string                 `protobuf:"bytes,6,opt,name=preferred_date,json=preferredDate,proto3" json:"preferred_date,omitempty"`
+	PreferredTime string                 `protobuf:"bytes,7,opt,name=preferred_time,json=preferredTime,proto3" json:"preferred_time,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateWaitlistEntryRequest) Reset() {
 	*x = UpdateWaitlistEntryRequest{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[7]
+	mi := &file_book_v1_waitlist_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -577,7 +381,7 @@ func (x *UpdateWaitlistEntryRequest) String() string {
 func (*UpdateWaitlistEntryRequest) ProtoMessage() {}
 
 func (x *UpdateWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[7]
+	mi := &file_book_v1_waitlist_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -590,7 +394,7 @@ func (x *UpdateWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWaitlistEntryRequest.ProtoReflect.Descriptor instead.
 func (*UpdateWaitlistEntryRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{7}
+	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateWaitlistEntryRequest) GetId() int64 {
@@ -600,6 +404,48 @@ func (x *UpdateWaitlistEntryRequest) GetId() int64 {
 	return 0
 }
 
+func (x *UpdateWaitlistEntryRequest) GetServiceId() int64 {
+	if x != nil {
+		return x.ServiceId
+	}
+	return 0
+}
+
+func (x *UpdateWaitlistEntryRequest) GetCustomerName() string {
+	if x != nil {
+		return x.CustomerName
+	}
+	return ""
+}
+
+func (x *UpdateWaitlistEntryRequest) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
+}
+
+func (x *UpdateWaitlistEntryRequest) GetCustomerPhone() string {
+	if x != nil {
+		return x.CustomerPhone
+	}
+	return ""
+}
+
+func (x *UpdateWaitlistEntryRequest) GetPreferredDate() string {
+	if x != nil {
+		return x.PreferredDate
+	}
+	return ""
+}
+
+func (x *UpdateWaitlistEntryRequest) GetPreferredTime() string {
+	if x != nil {
+		return x.PreferredTime
+	}
+	return ""
+}
+
 func (x *UpdateWaitlistEntryRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
@@ -607,23 +453,16 @@ func (x *UpdateWaitlistEntryRequest) GetStatus() string {
 	return ""
 }
 
-func (x *UpdateWaitlistEntryRequest) GetNotes() string {
-	if x != nil {
-		return x.Notes
-	}
-	return ""
-}
-
 type UpdateWaitlistEntryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entry         *WaitlistEntry         `protobuf:"bytes,1,opt,name=entry,proto3" json:"entry,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateWaitlistEntryResponse) Reset() {
 	*x = UpdateWaitlistEntryResponse{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[8]
+	mi := &file_book_v1_waitlist_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -635,7 +474,7 @@ func (x *UpdateWaitlistEntryResponse) String() string {
 func (*UpdateWaitlistEntryResponse) ProtoMessage() {}
 
 func (x *UpdateWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[8]
+	mi := &file_book_v1_waitlist_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -648,175 +487,61 @@ func (x *UpdateWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWaitlistEntryResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWaitlistEntryResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{8}
+	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateWaitlistEntryResponse) GetEntry() *WaitlistEntry {
+func (x *UpdateWaitlistEntryResponse) GetMessage() string {
 	if x != nil {
-		return x.Entry
+		return x.Message
 	}
-	return nil
-}
-
-type DeleteWaitlistEntryRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteWaitlistEntryRequest) Reset() {
-	*x = DeleteWaitlistEntryRequest{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteWaitlistEntryRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteWaitlistEntryRequest) ProtoMessage() {}
-
-func (x *DeleteWaitlistEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteWaitlistEntryRequest.ProtoReflect.Descriptor instead.
-func (*DeleteWaitlistEntryRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *DeleteWaitlistEntryRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type DeleteWaitlistEntryResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteWaitlistEntryResponse) Reset() {
-	*x = DeleteWaitlistEntryResponse{}
-	mi := &file_book_v1_waitlist_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteWaitlistEntryResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteWaitlistEntryResponse) ProtoMessage() {}
-
-func (x *DeleteWaitlistEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_waitlist_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteWaitlistEntryResponse.ProtoReflect.Descriptor instead.
-func (*DeleteWaitlistEntryResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_waitlist_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *DeleteWaitlistEntryResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
+	return ""
 }
 
 var File_book_v1_waitlist_proto protoreflect.FileDescriptor
 
 const file_book_v1_waitlist_proto_rawDesc = "" +
 	"\n" +
-	"\x16book/v1/waitlist.proto\x12\x04book\x1a\x1acommon/v1/pagination.proto\"\xf1\x04\n" +
+	"\x16book/v1/waitlist.proto\x12\x04book\"\xd1\x02\n" +
 	"\rWaitlistEntry\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1f\n" +
-	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
-	"customerId\x12#\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x03 \x01(\x03R\tserviceId\x12#\n" +
 	"\rcustomer_name\x18\x04 \x01(\tR\fcustomerName\x12%\n" +
 	"\x0ecustomer_email\x18\x05 \x01(\tR\rcustomerEmail\x12%\n" +
-	"\x0ecustomer_phone\x18\x06 \x01(\tR\rcustomerPhone\x12\x1d\n" +
+	"\x0ecustomer_phone\x18\x06 \x01(\tR\rcustomerPhone\x12%\n" +
+	"\x0epreferred_date\x18\a \x01(\tR\rpreferredDate\x12%\n" +
+	"\x0epreferred_time\x18\b \x01(\tR\rpreferredTime\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"service_id\x18\a \x01(\x03R\tserviceId\x12!\n" +
-	"\fservice_name\x18\b \x01(\tR\vserviceName\x122\n" +
-	"\x15preferred_resource_id\x18\t \x01(\x03R\x13preferredResourceId\x126\n" +
-	"\x17preferred_resource_name\x18\n" +
-	" \x01(\tR\x15preferredResourceName\x12%\n" +
-	"\x0epreferred_date\x18\v \x01(\tR\rpreferredDate\x12.\n" +
-	"\x13preferred_time_from\x18\f \x01(\tR\x11preferredTimeFrom\x12*\n" +
-	"\x11preferred_time_to\x18\r \x01(\tR\x0fpreferredTimeTo\x12\x16\n" +
-	"\x06status\x18\x0e \x01(\tR\x06status\x12\x14\n" +
-	"\x05notes\x18\x0f \x01(\tR\x05notes\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x10 \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x11 \x01(\tR\tupdatedAt\"\x87\x01\n" +
-	"\x13ListWaitlistRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x03 \x01(\x03R\tserviceId\"\x81\x01\n" +
+	"created_at\x18\n" +
+	" \x01(\tR\tcreatedAt\"\x15\n" +
+	"\x13ListWaitlistRequest\"E\n" +
 	"\x14ListWaitlistResponse\x12-\n" +
-	"\aentries\x18\x01 \x03(\v2\x13.book.WaitlistEntryR\aentries\x12:\n" +
+	"\aentries\x18\x01 \x03(\v2\x13.book.WaitlistEntryR\aentries\"\xfc\x01\n" +
+	"\x1aCreateWaitlistEntryRequest\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\")\n" +
-	"\x17GetWaitlistEntryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"E\n" +
-	"\x18GetWaitlistEntryResponse\x12)\n" +
-	"\x05entry\x18\x01 \x01(\v2\x13.book.WaitlistEntryR\x05entry\"\x9c\x03\n" +
-	"\x1aCreateWaitlistEntryRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12#\n" +
+	"service_id\x18\x01 \x01(\x03R\tserviceId\x12#\n" +
 	"\rcustomer_name\x18\x02 \x01(\tR\fcustomerName\x12%\n" +
 	"\x0ecustomer_email\x18\x03 \x01(\tR\rcustomerEmail\x12%\n" +
-	"\x0ecustomer_phone\x18\x04 \x01(\tR\rcustomerPhone\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x05 \x01(\x03R\tserviceId\x122\n" +
-	"\x15preferred_resource_id\x18\x06 \x01(\x03R\x13preferredResourceId\x12%\n" +
-	"\x0epreferred_date\x18\a \x01(\tR\rpreferredDate\x12.\n" +
-	"\x13preferred_time_from\x18\b \x01(\tR\x11preferredTimeFrom\x12*\n" +
-	"\x11preferred_time_to\x18\t \x01(\tR\x0fpreferredTimeTo\x12\x14\n" +
-	"\x05notes\x18\n" +
-	" \x01(\tR\x05notes\"H\n" +
-	"\x1bCreateWaitlistEntryResponse\x12)\n" +
-	"\x05entry\x18\x01 \x01(\v2\x13.book.WaitlistEntryR\x05entry\"Z\n" +
+	"\x0ecustomer_phone\x18\x04 \x01(\tR\rcustomerPhone\x12%\n" +
+	"\x0epreferred_date\x18\x05 \x01(\tR\rpreferredDate\x12%\n" +
+	"\x0epreferred_time\x18\x06 \x01(\tR\rpreferredTime\"G\n" +
+	"\x1bCreateWaitlistEntryResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xa4\x02\n" +
 	"\x1aUpdateWaitlistEntryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12\x14\n" +
-	"\x05notes\x18\x03 \x01(\tR\x05notes\"H\n" +
-	"\x1bUpdateWaitlistEntryResponse\x12)\n" +
-	"\x05entry\x18\x01 \x01(\v2\x13.book.WaitlistEntryR\x05entry\",\n" +
-	"\x1aDeleteWaitlistEntryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
-	"\x1bDeleteWaitlistEntryResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x02 \x01(\x03R\tserviceId\x12#\n" +
+	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x04 \x01(\tR\rcustomerEmail\x12%\n" +
+	"\x0ecustomer_phone\x18\x05 \x01(\tR\rcustomerPhone\x12%\n" +
+	"\x0epreferred_date\x18\x06 \x01(\tR\rpreferredDate\x12%\n" +
+	"\x0epreferred_time\x18\a \x01(\tR\rpreferredTime\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\"7\n" +
+	"\x1bUpdateWaitlistEntryResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
 
 var (
 	file_book_v1_waitlist_proto_rawDescOnce sync.Once
@@ -830,34 +555,23 @@ func file_book_v1_waitlist_proto_rawDescGZIP() []byte {
 	return file_book_v1_waitlist_proto_rawDescData
 }
 
-var file_book_v1_waitlist_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_book_v1_waitlist_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_book_v1_waitlist_proto_goTypes = []any{
 	(*WaitlistEntry)(nil),               // 0: book.WaitlistEntry
 	(*ListWaitlistRequest)(nil),         // 1: book.ListWaitlistRequest
 	(*ListWaitlistResponse)(nil),        // 2: book.ListWaitlistResponse
-	(*GetWaitlistEntryRequest)(nil),     // 3: book.GetWaitlistEntryRequest
-	(*GetWaitlistEntryResponse)(nil),    // 4: book.GetWaitlistEntryResponse
-	(*CreateWaitlistEntryRequest)(nil),  // 5: book.CreateWaitlistEntryRequest
-	(*CreateWaitlistEntryResponse)(nil), // 6: book.CreateWaitlistEntryResponse
-	(*UpdateWaitlistEntryRequest)(nil),  // 7: book.UpdateWaitlistEntryRequest
-	(*UpdateWaitlistEntryResponse)(nil), // 8: book.UpdateWaitlistEntryResponse
-	(*DeleteWaitlistEntryRequest)(nil),  // 9: book.DeleteWaitlistEntryRequest
-	(*DeleteWaitlistEntryResponse)(nil), // 10: book.DeleteWaitlistEntryResponse
-	(*v1.PaginationRequest)(nil),        // 11: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),       // 12: common.PaginationResponse
+	(*CreateWaitlistEntryRequest)(nil),  // 3: book.CreateWaitlistEntryRequest
+	(*CreateWaitlistEntryResponse)(nil), // 4: book.CreateWaitlistEntryResponse
+	(*UpdateWaitlistEntryRequest)(nil),  // 5: book.UpdateWaitlistEntryRequest
+	(*UpdateWaitlistEntryResponse)(nil), // 6: book.UpdateWaitlistEntryResponse
 }
 var file_book_v1_waitlist_proto_depIdxs = []int32{
-	11, // 0: book.ListWaitlistRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: book.ListWaitlistResponse.entries:type_name -> book.WaitlistEntry
-	12, // 2: book.ListWaitlistResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: book.GetWaitlistEntryResponse.entry:type_name -> book.WaitlistEntry
-	0,  // 4: book.CreateWaitlistEntryResponse.entry:type_name -> book.WaitlistEntry
-	0,  // 5: book.UpdateWaitlistEntryResponse.entry:type_name -> book.WaitlistEntry
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: book.ListWaitlistResponse.entries:type_name -> book.WaitlistEntry
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_book_v1_waitlist_proto_init() }
@@ -871,7 +585,7 @@ func file_book_v1_waitlist_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_book_v1_waitlist_proto_rawDesc), len(file_book_v1_waitlist_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

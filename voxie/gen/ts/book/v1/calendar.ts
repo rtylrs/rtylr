@@ -6,44 +6,25 @@
 
 /* eslint-disable */
 
-export interface CalendarEntry {
+export interface CalendarAppointment {
   id: number;
-  appointmentId: number;
-  title: string;
+  serviceId: number;
+  customerName: string;
   startTime: string;
   endTime: string;
   status: string;
-  customerName: string;
-  serviceName: string;
-  resourceName: string;
-  color: string;
-  isBlocked: boolean;
 }
 
-export interface TimeSlot {
-  startTime: string;
-  endTime: string;
-  isAvailable: boolean;
+export interface CalendarDay {
+  date: string;
+  appointments: CalendarAppointment[];
 }
 
 export interface GetCalendarRequest {
-  dateFrom: string;
-  dateTo: string;
-  resourceId: number;
-  /** day, week, month */
-  view: string;
+  from: string;
+  to: string;
 }
 
 export interface GetCalendarResponse {
-  entries: CalendarEntry[];
-}
-
-export interface GetAvailableSlotsRequest {
-  date: string;
-  serviceId: number;
-  resourceId: number;
-}
-
-export interface GetAvailableSlotsResponse {
-  slots: TimeSlot[];
+  days: CalendarDay[];
 }

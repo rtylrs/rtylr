@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,37 +21,37 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type AuditEntry struct {
+type AuditLog struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
-	EntityType    string                 `protobuf:"bytes,4,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"` // order, session, user, menu_item
-	EntityId      int64                  `protobuf:"varint,5,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
-	ActorName     string                 `protobuf:"bytes,6,opt,name=actor_name,json=actorName,proto3" json:"actor_name,omitempty"`
-	ActorId       int64                  `protobuf:"varint,7,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
-	Description   string                 `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
-	IpAddress     string                 `protobuf:"bytes,9,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	Metadata      string                 `protobuf:"bytes,10,opt,name=metadata,proto3" json:"metadata,omitempty"` // JSON string of extra details
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,5,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Action        string                 `protobuf:"bytes,6,opt,name=action,proto3" json:"action,omitempty"`
+	EntityType    string                 `protobuf:"bytes,7,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EntityId      int64                  `protobuf:"varint,8,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Details       string                 `protobuf:"bytes,9,opt,name=details,proto3" json:"details,omitempty"`
+	IpAddress     string                 `protobuf:"bytes,10,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AuditEntry) Reset() {
-	*x = AuditEntry{}
+func (x *AuditLog) Reset() {
+	*x = AuditLog{}
 	mi := &file_pos_v1_audit_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AuditEntry) String() string {
+func (x *AuditLog) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AuditEntry) ProtoMessage() {}
+func (*AuditLog) ProtoMessage() {}
 
-func (x *AuditEntry) ProtoReflect() protoreflect.Message {
+func (x *AuditLog) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_audit_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -64,114 +63,113 @@ func (x *AuditEntry) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AuditEntry.ProtoReflect.Descriptor instead.
-func (*AuditEntry) Descriptor() ([]byte, []int) {
+// Deprecated: Use AuditLog.ProtoReflect.Descriptor instead.
+func (*AuditLog) Descriptor() ([]byte, []int) {
 	return file_pos_v1_audit_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AuditEntry) GetId() int64 {
+func (x *AuditLog) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *AuditEntry) GetLocationId() int64 {
+func (x *AuditLog) GetBusinessId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.BusinessId
 	}
 	return 0
 }
 
-func (x *AuditEntry) GetAction() string {
+func (x *AuditLog) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *AuditLog) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
+func (x *AuditLog) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+func (x *AuditLog) GetAction() string {
 	if x != nil {
 		return x.Action
 	}
 	return ""
 }
 
-func (x *AuditEntry) GetEntityType() string {
+func (x *AuditLog) GetEntityType() string {
 	if x != nil {
 		return x.EntityType
 	}
 	return ""
 }
 
-func (x *AuditEntry) GetEntityId() int64 {
+func (x *AuditLog) GetEntityId() int64 {
 	if x != nil {
 		return x.EntityId
 	}
 	return 0
 }
 
-func (x *AuditEntry) GetActorName() string {
+func (x *AuditLog) GetDetails() string {
 	if x != nil {
-		return x.ActorName
+		return x.Details
 	}
 	return ""
 }
 
-func (x *AuditEntry) GetActorId() int64 {
-	if x != nil {
-		return x.ActorId
-	}
-	return 0
-}
-
-func (x *AuditEntry) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *AuditEntry) GetIpAddress() string {
+func (x *AuditLog) GetIpAddress() string {
 	if x != nil {
 		return x.IpAddress
 	}
 	return ""
 }
 
-func (x *AuditEntry) GetMetadata() string {
-	if x != nil {
-		return x.Metadata
-	}
-	return ""
-}
-
-func (x *AuditEntry) GetCreatedAt() string {
+func (x *AuditLog) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-type ListAuditEntriesRequest struct {
+type ListAuditRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
-	EntityType    string                 `protobuf:"bytes,3,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	ActorId       int64                  `protobuf:"varint,4,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
-	DateFrom      string                 `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
-	DateTo        string                 `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	Action        string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	EntityType    string                 `protobuf:"bytes,2,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,3,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	StartDate     string                 `protobuf:"bytes,4,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate       string                 `protobuf:"bytes,5,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListAuditEntriesRequest) Reset() {
-	*x = ListAuditEntriesRequest{}
+func (x *ListAuditRequest) Reset() {
+	*x = ListAuditRequest{}
 	mi := &file_pos_v1_audit_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListAuditEntriesRequest) String() string {
+func (x *ListAuditRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListAuditEntriesRequest) ProtoMessage() {}
+func (*ListAuditRequest) ProtoMessage() {}
 
-func (x *ListAuditEntriesRequest) ProtoReflect() protoreflect.Message {
+func (x *ListAuditRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_audit_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -183,75 +181,67 @@ func (x *ListAuditEntriesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListAuditEntriesRequest.ProtoReflect.Descriptor instead.
-func (*ListAuditEntriesRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAuditRequest.ProtoReflect.Descriptor instead.
+func (*ListAuditRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_audit_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListAuditEntriesRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListAuditEntriesRequest) GetAction() string {
+func (x *ListAuditRequest) GetAction() string {
 	if x != nil {
 		return x.Action
 	}
 	return ""
 }
 
-func (x *ListAuditEntriesRequest) GetEntityType() string {
+func (x *ListAuditRequest) GetEntityType() string {
 	if x != nil {
 		return x.EntityType
 	}
 	return ""
 }
 
-func (x *ListAuditEntriesRequest) GetActorId() int64 {
+func (x *ListAuditRequest) GetEmployeeId() int64 {
 	if x != nil {
-		return x.ActorId
+		return x.EmployeeId
 	}
 	return 0
 }
 
-func (x *ListAuditEntriesRequest) GetDateFrom() string {
+func (x *ListAuditRequest) GetStartDate() string {
 	if x != nil {
-		return x.DateFrom
+		return x.StartDate
 	}
 	return ""
 }
 
-func (x *ListAuditEntriesRequest) GetDateTo() string {
+func (x *ListAuditRequest) GetEndDate() string {
 	if x != nil {
-		return x.DateTo
+		return x.EndDate
 	}
 	return ""
 }
 
-type ListAuditEntriesResponse struct {
+type ListAuditResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entries       []*AuditEntry          `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Logs          []*AuditLog            `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListAuditEntriesResponse) Reset() {
-	*x = ListAuditEntriesResponse{}
+func (x *ListAuditResponse) Reset() {
+	*x = ListAuditResponse{}
 	mi := &file_pos_v1_audit_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListAuditEntriesResponse) String() string {
+func (x *ListAuditResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListAuditEntriesResponse) ProtoMessage() {}
+func (*ListAuditResponse) ProtoMessage() {}
 
-func (x *ListAuditEntriesResponse) ProtoReflect() protoreflect.Message {
+func (x *ListAuditResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_audit_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -263,50 +253,46 @@ func (x *ListAuditEntriesResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListAuditEntriesResponse.ProtoReflect.Descriptor instead.
-func (*ListAuditEntriesResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAuditResponse.ProtoReflect.Descriptor instead.
+func (*ListAuditResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_audit_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListAuditEntriesResponse) GetEntries() []*AuditEntry {
+func (x *ListAuditResponse) GetLogs() []*AuditLog {
 	if x != nil {
-		return x.Entries
+		return x.Logs
 	}
 	return nil
 }
 
-func (x *ListAuditEntriesResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type CreateAuditEntryRequest struct {
+type CreateAuditRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Action        string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
-	EntityType    string                 `protobuf:"bytes,2,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	EntityId      int64                  `protobuf:"varint,3,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Metadata      string                 `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,2,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,3,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	Action        string                 `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
+	EntityType    string                 `protobuf:"bytes,5,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EntityId      int64                  `protobuf:"varint,6,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Details       string                 `protobuf:"bytes,7,opt,name=details,proto3" json:"details,omitempty"`
+	IpAddress     string                 `protobuf:"bytes,8,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateAuditEntryRequest) Reset() {
-	*x = CreateAuditEntryRequest{}
+func (x *CreateAuditRequest) Reset() {
+	*x = CreateAuditRequest{}
 	mi := &file_pos_v1_audit_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateAuditEntryRequest) String() string {
+func (x *CreateAuditRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateAuditEntryRequest) ProtoMessage() {}
+func (*CreateAuditRequest) ProtoMessage() {}
 
-func (x *CreateAuditEntryRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateAuditRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_audit_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -318,67 +304,89 @@ func (x *CreateAuditEntryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateAuditEntryRequest.ProtoReflect.Descriptor instead.
-func (*CreateAuditEntryRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateAuditRequest.ProtoReflect.Descriptor instead.
+func (*CreateAuditRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_audit_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateAuditEntryRequest) GetAction() string {
+func (x *CreateAuditRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *CreateAuditRequest) GetTerminalId() int64 {
+	if x != nil {
+		return x.TerminalId
+	}
+	return 0
+}
+
+func (x *CreateAuditRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+func (x *CreateAuditRequest) GetAction() string {
 	if x != nil {
 		return x.Action
 	}
 	return ""
 }
 
-func (x *CreateAuditEntryRequest) GetEntityType() string {
+func (x *CreateAuditRequest) GetEntityType() string {
 	if x != nil {
 		return x.EntityType
 	}
 	return ""
 }
 
-func (x *CreateAuditEntryRequest) GetEntityId() int64 {
+func (x *CreateAuditRequest) GetEntityId() int64 {
 	if x != nil {
 		return x.EntityId
 	}
 	return 0
 }
 
-func (x *CreateAuditEntryRequest) GetDescription() string {
+func (x *CreateAuditRequest) GetDetails() string {
 	if x != nil {
-		return x.Description
+		return x.Details
 	}
 	return ""
 }
 
-func (x *CreateAuditEntryRequest) GetMetadata() string {
+func (x *CreateAuditRequest) GetIpAddress() string {
 	if x != nil {
-		return x.Metadata
+		return x.IpAddress
 	}
 	return ""
 }
 
-type CreateAuditEntryResponse struct {
+type CreateAuditResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entry         *AuditEntry            `protobuf:"bytes,1,opt,name=entry,proto3" json:"entry,omitempty"`
+	AuditLogId    int64                  `protobuf:"varint,1,opt,name=audit_log_id,json=auditLogId,proto3" json:"audit_log_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateAuditEntryResponse) Reset() {
-	*x = CreateAuditEntryResponse{}
+func (x *CreateAuditResponse) Reset() {
+	*x = CreateAuditResponse{}
 	mi := &file_pos_v1_audit_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateAuditEntryResponse) String() string {
+func (x *CreateAuditResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateAuditEntryResponse) ProtoMessage() {}
+func (*CreateAuditResponse) ProtoMessage() {}
 
-func (x *CreateAuditEntryResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateAuditResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_audit_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -390,66 +398,77 @@ func (x *CreateAuditEntryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateAuditEntryResponse.ProtoReflect.Descriptor instead.
-func (*CreateAuditEntryResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateAuditResponse.ProtoReflect.Descriptor instead.
+func (*CreateAuditResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_audit_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateAuditEntryResponse) GetEntry() *AuditEntry {
+func (x *CreateAuditResponse) GetAuditLogId() int64 {
 	if x != nil {
-		return x.Entry
+		return x.AuditLogId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateAuditResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_pos_v1_audit_proto protoreflect.FileDescriptor
 
 const file_pos_v1_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/audit.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\xc9\x02\n" +
-	"\n" +
-	"AuditEntry\x12\x0e\n" +
+	"\x12pos/v1/audit.proto\x12\x03pos\"\xc8\x02\n" +
+	"\bAuditLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x16\n" +
-	"\x06action\x18\x03 \x01(\tR\x06action\x12\x1f\n" +
-	"\ventity_type\x18\x04 \x01(\tR\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x04 \x01(\x03R\n" +
+	"terminalId\x12\x1f\n" +
+	"\vemployee_id\x18\x05 \x01(\x03R\n" +
+	"employeeId\x12\x16\n" +
+	"\x06action\x18\x06 \x01(\tR\x06action\x12\x1f\n" +
+	"\ventity_type\x18\a \x01(\tR\n" +
 	"entityType\x12\x1b\n" +
-	"\tentity_id\x18\x05 \x01(\x03R\bentityId\x12\x1d\n" +
+	"\tentity_id\x18\b \x01(\x03R\bentityId\x12\x18\n" +
+	"\adetails\x18\t \x01(\tR\adetails\x12\x1d\n" +
 	"\n" +
-	"actor_name\x18\x06 \x01(\tR\tactorName\x12\x19\n" +
-	"\bactor_id\x18\a \x01(\x03R\aactorId\x12 \n" +
-	"\vdescription\x18\b \x01(\tR\vdescription\x12\x1d\n" +
+	"ip_address\x18\n" +
+	" \x01(\tR\tipAddress\x12\x1d\n" +
 	"\n" +
-	"ip_address\x18\t \x01(\tR\tipAddress\x12\x1a\n" +
-	"\bmetadata\x18\n" +
-	" \x01(\tR\bmetadata\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"\xde\x01\n" +
-	"\x17ListAuditEntriesRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06action\x18\x02 \x01(\tR\x06action\x12\x1f\n" +
-	"\ventity_type\x18\x03 \x01(\tR\n" +
-	"entityType\x12\x19\n" +
-	"\bactor_id\x18\x04 \x01(\x03R\aactorId\x12\x1b\n" +
-	"\tdate_from\x18\x05 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x06 \x01(\tR\x06dateTo\"\x81\x01\n" +
-	"\x18ListAuditEntriesResponse\x12)\n" +
-	"\aentries\x18\x01 \x03(\v2\x0f.pos.AuditEntryR\aentries\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"\xad\x01\n" +
-	"\x17CreateAuditEntryRequest\x12\x16\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\"\xa6\x01\n" +
+	"\x10ListAuditRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x1f\n" +
 	"\ventity_type\x18\x02 \x01(\tR\n" +
+	"entityType\x12\x1f\n" +
+	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"employeeId\x12\x1d\n" +
+	"\n" +
+	"start_date\x18\x04 \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x05 \x01(\tR\aendDate\"6\n" +
+	"\x11ListAuditResponse\x12!\n" +
+	"\x04logs\x18\x01 \x03(\v2\r.pos.AuditLogR\x04logs\"\x82\x02\n" +
+	"\x12CreateAuditRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
+	"\vterminal_id\x18\x02 \x01(\x03R\n" +
+	"terminalId\x12\x1f\n" +
+	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"employeeId\x12\x16\n" +
+	"\x06action\x18\x04 \x01(\tR\x06action\x12\x1f\n" +
+	"\ventity_type\x18\x05 \x01(\tR\n" +
 	"entityType\x12\x1b\n" +
-	"\tentity_id\x18\x03 \x01(\x03R\bentityId\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1a\n" +
-	"\bmetadata\x18\x05 \x01(\tR\bmetadata\"A\n" +
-	"\x18CreateAuditEntryResponse\x12%\n" +
-	"\x05entry\x18\x01 \x01(\v2\x0f.pos.AuditEntryR\x05entryB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\tentity_id\x18\x06 \x01(\x03R\bentityId\x12\x18\n" +
+	"\adetails\x18\a \x01(\tR\adetails\x12\x1d\n" +
+	"\n" +
+	"ip_address\x18\b \x01(\tR\tipAddress\"Q\n" +
+	"\x13CreateAuditResponse\x12 \n" +
+	"\faudit_log_id\x18\x01 \x01(\x03R\n" +
+	"auditLogId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_audit_proto_rawDescOnce sync.Once
@@ -465,24 +484,19 @@ func file_pos_v1_audit_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pos_v1_audit_proto_goTypes = []any{
-	(*AuditEntry)(nil),               // 0: pos.AuditEntry
-	(*ListAuditEntriesRequest)(nil),  // 1: pos.ListAuditEntriesRequest
-	(*ListAuditEntriesResponse)(nil), // 2: pos.ListAuditEntriesResponse
-	(*CreateAuditEntryRequest)(nil),  // 3: pos.CreateAuditEntryRequest
-	(*CreateAuditEntryResponse)(nil), // 4: pos.CreateAuditEntryResponse
-	(*v1.PaginationRequest)(nil),     // 5: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),    // 6: common.PaginationResponse
+	(*AuditLog)(nil),            // 0: pos.AuditLog
+	(*ListAuditRequest)(nil),    // 1: pos.ListAuditRequest
+	(*ListAuditResponse)(nil),   // 2: pos.ListAuditResponse
+	(*CreateAuditRequest)(nil),  // 3: pos.CreateAuditRequest
+	(*CreateAuditResponse)(nil), // 4: pos.CreateAuditResponse
 }
 var file_pos_v1_audit_proto_depIdxs = []int32{
-	5, // 0: pos.ListAuditEntriesRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: pos.ListAuditEntriesResponse.entries:type_name -> pos.AuditEntry
-	6, // 2: pos.ListAuditEntriesResponse.pagination:type_name -> common.PaginationResponse
-	0, // 3: pos.CreateAuditEntryResponse.entry:type_name -> pos.AuditEntry
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 0: pos.ListAuditResponse.logs:type_name -> pos.AuditLog
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_audit_proto_init() }

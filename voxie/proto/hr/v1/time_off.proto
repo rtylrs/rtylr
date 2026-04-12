@@ -4,63 +4,51 @@ package hr;
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Time Off ────────────────────────────────────────────────────────
 
 message TimeOffRequest {
   int64 id = 1;
-  int64 staff_id = 2;
-  string staff_name = 3;
-  string type = 4; // vacation, sick, personal, other
-  string status = 5; // pending, approved, rejected
-  string start_date = 6;
-  string end_date = 7;
-  int32 days = 8;
-  string reason = 9;
-  string reviewer_name = 10;
-  string reviewed_at = 11;
-  string created_at = 12;
-}
-
-message ListTimeOffRequestsRequest {
-  common.PaginationRequest pagination = 1;
-  int64 staff_id = 2;
-  string status = 3;
+  int64 owner_id = 2;
+  int64 staff_id = 3;
   string type = 4;
+  string start_date = 5;
+  string end_date = 6;
+  double days_count = 7;
+  string status = 8;
+  string reason = 9;
+  int64 approved_by = 10;
+  string approved_at = 11;
+  string notes = 12;
+  string created_at = 13;
+  string updated_at = 14;
 }
 
-message ListTimeOffRequestsResponse {
+message ListTimeOffRequest {}
+
+message ListTimeOffResponse {
   repeated TimeOffRequest requests = 1;
-  common.PaginationResponse pagination = 2;
 }
 
-message GetTimeOffRequestRequest {
-  int64 id = 1;
-}
-
-message GetTimeOffRequestResponse {
-  TimeOffRequest request = 1;
-}
-
-message CreateTimeOffRequestRequest {
+message SubmitTimeOffRequest {
   int64 staff_id = 1;
   string type = 2;
   string start_date = 3;
   string end_date = 4;
-  string reason = 5;
+  double days_count = 5;
+  string reason = 6;
+  string notes = 7;
 }
 
-message CreateTimeOffRequestResponse {
-  TimeOffRequest request = 1;
-}
-
-message ApproveTimeOffRequest {
+message SubmitTimeOffResponse {
   int64 id = 1;
-  bool approved = 2;
-  string reason = 3;
+}
+
+message ApproveTimeOffRequestMsg {
+  int64 id = 1;
+  string status = 2;
+  string notes = 3;
 }
 
 message ApproveTimeOffResponse {
-  TimeOffRequest request = 1;
+  bool success = 1;
 }

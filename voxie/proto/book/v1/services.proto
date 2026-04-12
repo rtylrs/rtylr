@@ -4,98 +4,67 @@ package book;
 
 option go_package = "github.com/voxire/voxie/gen/go/book/v1";
 
-// ── BookService ────────────────────────────────────────────────────
+// ── BookingService ────────────────────────────────────────────────
 
-message BookService {
+message BookingService {
   int64 id = 1;
-  int64 business_id = 2;
-  int64 category_id = 3;
-  string name = 4;
-  string description = 5;
-  int32 duration_minutes = 6;
-  int32 buffer_minutes = 7; // time between appointments
-  double price = 8;
-  string color = 9;
-  bool is_active = 10;
-  int32 sort_order = 11;
-  int32 max_capacity = 12; // for group bookings
-  string created_at = 13;
-  string updated_at = 14;
+  int64 owner_id = 2;
+  string name = 3;
+  string description = 4;
+  int32 duration_minutes = 5;
+  double price = 6;
+  string color = 7;
+  bool is_active = 8;
+  string created_at = 9;
+  string updated_at = 10;
 }
 
-message ServiceCategory {
-  int64 id = 1;
-  string name = 2;
-  int32 sort_order = 3;
-  int32 service_count = 4;
+// ── List ──────────────────────────────────────────────────────────
+
+message ListBookingServicesRequest {}
+
+message ListBookingServicesResponse {
+  repeated BookingService services = 1;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
-message ListBookServicesRequest {
-  bool active_only = 1;
-  int64 category_id = 2;
-}
-
-message ListBookServicesResponse {
-  repeated BookService services = 1;
-  repeated ServiceCategory categories = 2;
-}
-
-// ── Get ────────────────────────────────────────────────────────────
-
-message GetBookServiceRequest {
-  int64 id = 1;
-}
-
-message GetBookServiceResponse {
-  BookService service = 1;
-}
-
-// ── Create ─────────────────────────────────────────────────────────
-
-message CreateBookServiceRequest {
+message CreateBookingServiceRequest {
   string name = 1;
   string description = 2;
   int32 duration_minutes = 3;
-  int32 buffer_minutes = 4;
-  double price = 5;
-  string color = 6;
-  int64 category_id = 7;
-  int32 sort_order = 8;
-  int32 max_capacity = 9;
+  double price = 4;
+  string color = 5;
+  bool is_active = 6;
 }
 
-message CreateBookServiceResponse {
-  BookService service = 1;
+message CreateBookingServiceResponse {
+  int64 id = 1;
+  string message = 2;
 }
 
-// ── Update ─────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────
 
-message UpdateBookServiceRequest {
+message UpdateBookingServiceRequest {
   int64 id = 1;
   string name = 2;
   string description = 3;
   int32 duration_minutes = 4;
-  int32 buffer_minutes = 5;
-  double price = 6;
-  string color = 7;
-  int64 category_id = 8;
-  int32 sort_order = 9;
-  int32 max_capacity = 10;
-  bool is_active = 11;
+  double price = 5;
+  string color = 6;
+  bool is_active = 7;
 }
 
-message UpdateBookServiceResponse {
-  BookService service = 1;
+message UpdateBookingServiceResponse {
+  string message = 1;
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────
 
-message DeleteBookServiceRequest {
+message DeleteBookingServiceRequest {
   int64 id = 1;
 }
 
-message DeleteBookServiceResponse {
-  bool success = 1;
+message DeleteBookingServiceResponse {
+  string message = 1;
 }

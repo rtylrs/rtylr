@@ -4,84 +4,80 @@ package erp;
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Products ────────────────────────────────────────────────────────
 
 message Product {
   int64 id = 1;
-  string name = 2;
-  string sku = 3;
-  string description = 4;
-  string category = 5;
-  double price = 6;
-  double cost = 7;
-  int32 quantity = 8;
-  int32 low_stock_threshold = 9;
-  string unit = 10; // pcs, kg, ltr, etc.
-  string status = 11; // active, inactive, discontinued
-  string image_url = 12;
-  string barcode = 13;
-  map<string, string> attributes = 14;
-  string created_at = 15;
-  string updated_at = 16;
+  int64 owner_id = 2;
+  int64 category_id = 3;
+  int64 supplier_id = 4;
+  string name = 5;
+  string sku = 6;
+  string barcode = 7;
+  string description = 8;
+  string unit = 9;
+  double cost_price = 10;
+  double sale_price = 11;
+  double stock_quantity = 12;
+  double low_stock_threshold = 13;
+  double reorder_quantity = 14;
+  bool is_active = 15;
+  bool track_inventory = 16;
+  string created_at = 17;
+  string updated_at = 18;
 }
 
 message ListProductsRequest {
-  common.PaginationRequest pagination = 1;
-  string search = 2;
-  string category = 3;
-  string status = 4;
+  string search = 1;
+  int32 category_id = 2;
+  int32 limit = 3;
+  int32 offset = 4;
 }
 
 message ListProductsResponse {
   repeated Product products = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message GetProductRequest {
-  int64 id = 1;
-}
-
-message GetProductResponse {
-  Product product = 1;
 }
 
 message CreateProductRequest {
-  string name = 1;
-  string sku = 2;
-  string description = 3;
-  string category = 4;
-  double price = 5;
-  double cost = 6;
-  int32 quantity = 7;
-  int32 low_stock_threshold = 8;
-  string unit = 9;
-  string barcode = 10;
-  map<string, string> attributes = 11;
+  int64 category_id = 1;
+  int64 supplier_id = 2;
+  string name = 3;
+  string sku = 4;
+  string barcode = 5;
+  string description = 6;
+  string unit = 7;
+  double cost_price = 8;
+  double sale_price = 9;
+  double low_stock_threshold = 10;
+  double reorder_quantity = 11;
+  bool is_active = 12;
+  bool track_inventory = 13;
 }
 
 message CreateProductResponse {
-  Product product = 1;
+  int64 product_id = 1;
+  string message = 2;
 }
 
 message UpdateProductRequest {
   int64 id = 1;
-  string name = 2;
-  string sku = 3;
-  string description = 4;
-  string category = 5;
-  double price = 6;
-  double cost = 7;
-  int32 low_stock_threshold = 8;
-  string unit = 9;
-  string status = 10;
-  string barcode = 11;
-  map<string, string> attributes = 12;
+  int64 category_id = 2;
+  int64 supplier_id = 3;
+  string name = 4;
+  string sku = 5;
+  string barcode = 6;
+  string description = 7;
+  string unit = 8;
+  double cost_price = 9;
+  double sale_price = 10;
+  double low_stock_threshold = 11;
+  double reorder_quantity = 12;
+  bool is_active = 13;
+  bool track_inventory = 14;
 }
 
 message UpdateProductResponse {
-  Product product = 1;
+  string message = 1;
 }
 
 message DeleteProductRequest {
@@ -89,5 +85,5 @@ message DeleteProductRequest {
 }
 
 message DeleteProductResponse {
-  bool success = 1;
+  string message = 1;
 }

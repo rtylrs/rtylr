@@ -4,182 +4,161 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-import "common/v1/pagination.proto";
-
-// ── Order ──────────────────────────────────────────────────────────
+// ── Shared Payloads ───────────────────────────────────────────────
 
 message OrderItem {
   int64 id = 1;
   int64 order_id = 2;
   int64 menu_item_id = 3;
   string name = 4;
-  int32 quantity = 5;
-  double unit_price = 6;
-  double total_price = 7;
-  string notes = 8;
-  repeated OrderItemModifier modifiers = 9;
-  string status = 10; // pending, preparing, ready, served
-  string sent_at = 11;
-  string created_at = 12;
-}
-
-message OrderItemModifier {
-  int64 id = 1;
-  int64 modifier_id = 2;
-  string name = 3;
-  double price = 4;
-  int32 quantity = 5;
-}
-
-message OrderDiscount {
-  int64 id = 1;
-  string type = 2; // percentage, fixed
-  double value = 3;
-  string reason = 4;
-  string applied_by = 5;
-}
-
-message OrderPayment {
-  int64 id = 1;
-  string method = 2; // cash, card, gift_card
-  double amount = 3;
-  string reference = 4;
-  string status = 5;
-  string created_at = 6;
+  string sku = 5;
+  double quantity = 6;
+  double unit_price = 7;
+  double discount_pct = 8;
+  double discount_amount = 9;
+  double tax_rate = 10;
+  double total = 11;
+  string notes = 12;
+  string status = 13;
+  string created_at = 14;
 }
 
 message Order {
   int64 id = 1;
-  string order_number = 2;
-  int64 location_id = 3;
-  int64 session_id = 4;
-  int64 table_id = 5;
-  int64 customer_id = 6;
-  string order_type = 7; // dine_in, takeout, delivery
-  string status = 8; // open, held, closed, voided, refunded
-  repeated OrderItem items = 9;
-  repeated OrderDiscount discounts = 10;
-  repeated OrderPayment payments = 11;
+  int64 owner_id = 2;
+  int64 session_id = 3;
+  int64 table_id = 4;
+  int64 location_id = 5;
+  string order_number = 6;
+  string type = 7;
+  string status = 8;
+  int64 customer_id = 9;
+  string customer_name = 10;
+  int64 staff_id = 11;
   double subtotal = 12;
-  double tax_amount = 13;
-  double discount_amount = 14;
-  double tip_amount = 15;
-  double total = 16;
-  string notes = 17;
-  string created_by = 18;
-  string created_at = 19;
-  string updated_at = 20;
+  double discount_amount = 13;
+  double tax_amount = 14;
+  double total = 15;
+  string payment_method = 16;
+  string payment_status = 17;
+  double amount_paid = 18;
+  double change_due = 19;
+  string notes = 20;
+  string kitchen_notes = 21;
+  string created_at = 22;
+  string updated_at = 23;
+  string paid_at = 24;
+  repeated OrderItem items = 25;
 }
 
-// ── Create ─────────────────────────────────────────────────────────
-
-message CreateOrderRequest {
-  int64 location_id = 1;
-  int64 table_id = 2;
-  int64 customer_id = 3;
-  string order_type = 4;
-  repeated CreateOrderItemInput items = 5;
-  string notes = 6;
-}
-
-message CreateOrderItemInput {
-  int64 menu_item_id = 1;
-  int32 quantity = 2;
-  string notes = 3;
-  repeated int64 modifier_ids = 4;
-}
-
-message CreateOrderResponse {
-  Order order = 1;
-}
-
-// ── List ───────────────────────────────────────────────────────────
+// ── List Orders ───────────────────────────────────────────────────
 
 message ListOrdersRequest {
-  common.PaginationRequest pagination = 1;
+  int64 session_id = 1;
   string status = 2;
-  string order_type = 3;
-  int64 table_id = 4;
-  string date_from = 5;
-  string date_to = 6;
+  string date_from = 3;
+  string date_to = 4;
 }
 
 message ListOrdersResponse {
   repeated Order orders = 1;
-  common.PaginationResponse pagination = 2;
 }
 
-// ── Update Status ──────────────────────────────────────────────────
+// ── Create Order ──────────────────────────────────────────────────
+
+message CreateOrderItemInput {
+  int64 menu_item_id = 1;
+  string name = 2;
+  string sku = 3;
+  double quantity = 4;
+  double unit_price = 5;
+  double discount_pct = 6;
+  double tax_rate = 7;
+  string notes = 8;
+}
+
+message CreateOrderRequest {
+  int64 session_id = 1;
+  int64 table_id = 2;
+  int64 location_id = 3;
+  string type = 4;
+  int64 customer_id = 5;
+  string customer_name = 6;
+  string payment_method = 7;
+  string notes = 8;
+  string kitchen_notes = 9;
+  repeated CreateOrderItemInput items = 10;
+}
+
+message CreateOrderResponse {
+  int64 order_id = 1;
+  string order_number = 2;
+  string message = 3;
+}
+
+// ── Get Order Detail ──────────────────────────────────────────────
+
+message GetOrderDetailRequest {
+  int64 order_id = 1;
+}
+
+message GetOrderDetailResponse {
+  Order order = 1;
+}
+
+// ── Update Order Status ───────────────────────────────────────────
 
 message UpdateOrderStatusRequest {
-  int64 id = 1;
+  int64 order_id = 1;
   string status = 2;
 }
 
 message UpdateOrderStatusResponse {
-  Order order = 1;
+  string message = 1;
 }
 
-// ── Charge ─────────────────────────────────────────────────────────
+// ── Update Order Item Status ──────────────────────────────────────
 
-message ChargeOrderRequest {
-  int64 id = 1;
+message UpdateOrderItemStatusRequest {
+  int64 order_id = 1;
+  int64 item_id = 2;
+  string status = 3;
+}
+
+message UpdateOrderItemStatusResponse {
+  string message = 1;
+}
+
+// ── Process Payment ───────────────────────────────────────────────
+
+message ProcessPaymentRequest {
+  int64 order_id = 1;
   string payment_method = 2;
-  double amount = 3;
-  double tip_amount = 4;
-  string reference = 5;
+  double amount_paid = 3;
 }
 
-message ChargeOrderResponse {
-  Order order = 1;
-  OrderPayment payment = 2;
+message ProcessPaymentResponse {
+  string message = 1;
 }
 
-// ── Void ───────────────────────────────────────────────────────────
+// ── Process Refund ────────────────────────────────────────────────
 
-message VoidOrderRequest {
-  int64 id = 1;
-  string reason = 2;
-  string manager_pin = 3;
-}
-
-message VoidOrderResponse {
-  Order order = 1;
-}
-
-// ── Refund ─────────────────────────────────────────────────────────
-
-message RefundOrderRequest {
-  int64 id = 1;
+message ProcessRefundRequest {
+  int64 order_id = 1;
   double amount = 2;
   string reason = 3;
-  string manager_pin = 4;
 }
 
-message RefundOrderResponse {
-  Order order = 1;
-  double refunded_amount = 2;
+message ProcessRefundResponse {
+  int64 refund_id = 1;
+  string message = 2;
 }
 
-// ── Discount ───────────────────────────────────────────────────────
-
-message ApplyDiscountRequest {
-  int64 order_id = 1;
-  string type = 2; // percentage, fixed
-  double value = 3;
-  string reason = 4;
-}
-
-message ApplyDiscountResponse {
-  Order order = 1;
-}
-
-// ── Split ──────────────────────────────────────────────────────────
+// ── Split Order ───────────────────────────────────────────────────
 
 message SplitOrderRequest {
   int64 order_id = 1;
-  int32 ways = 2; // number of ways to split
-  repeated SplitGroup groups = 3; // or explicit item groups
+  repeated SplitGroup splits = 2;
 }
 
 message SplitGroup {
@@ -187,16 +166,60 @@ message SplitGroup {
 }
 
 message SplitOrderResponse {
-  repeated Order orders = 1;
+  repeated int64 order_ids = 1;
+  string message = 2;
 }
 
-// ── Hold ───────────────────────────────────────────────────────────
+// ── Apply Discount ────────────────────────────────────────────────
+
+message DiscountOrderRequest {
+  int64 order_id = 1;
+  string discount_type = 2;
+  double discount_value = 3;
+  string reason = 4;
+}
+
+message DiscountOrderResponse {
+  string message = 1;
+}
+
+// ── Void Order ────────────────────────────────────────────────────
+
+message VoidOrderRequest {
+  int64 order_id = 1;
+  string reason = 2;
+}
+
+message VoidOrderResponse {
+  string message = 1;
+}
+
+// ── Hold Order ────────────────────────────────────────────────────
 
 message HoldOrderRequest {
-  int64 id = 1;
+  int64 order_id = 1;
   string reason = 2;
 }
 
 message HoldOrderResponse {
-  Order order = 1;
+  string message = 1;
+}
+
+// ── List Held Orders ──────────────────────────────────────────────
+
+message ListHeldOrdersRequest {}
+
+message ListHeldOrdersResponse {
+  repeated Order orders = 1;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────
+
+message DashboardRequest {}
+
+message DashboardResponse {
+  double total_sales = 1;
+  int32 order_count = 2;
+  double avg_order = 3;
+  double table_turnover = 4;
 }

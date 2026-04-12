@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,21 +22,20 @@ const (
 )
 
 type StockMovement struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId            int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	MenuItemId            int64                  `protobuf:"varint,3,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	ItemName              string                 `protobuf:"bytes,4,opt,name=item_name,json=itemName,proto3" json:"item_name,omitempty"`
-	Type                  string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"` // receive, adjust, waste, transfer
-	Quantity              int32                  `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	QuantityBefore        int32                  `protobuf:"varint,7,opt,name=quantity_before,json=quantityBefore,proto3" json:"quantity_before,omitempty"`
-	QuantityAfter         int32                  `protobuf:"varint,8,opt,name=quantity_after,json=quantityAfter,proto3" json:"quantity_after,omitempty"`
-	Reason                string                 `protobuf:"bytes,9,opt,name=reason,proto3" json:"reason,omitempty"`
-	DestinationLocationId int64                  `protobuf:"varint,10,opt,name=destination_location_id,json=destinationLocationId,proto3" json:"destination_location_id,omitempty"`
-	PerformedBy           string                 `protobuf:"bytes,11,opt,name=performed_by,json=performedBy,proto3" json:"performed_by,omitempty"`
-	CreatedAt             string                 `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,4,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	ReferenceId   int64                  `protobuf:"varint,7,opt,name=reference_id,json=referenceId,proto3" json:"reference_id,omitempty"`
+	ReferenceType string                 `protobuf:"bytes,8,opt,name=reference_type,json=referenceType,proto3" json:"reference_type,omitempty"`
+	Note          string                 `protobuf:"bytes,9,opt,name=note,proto3" json:"note,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,10,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StockMovement) Reset() {
@@ -77,25 +75,25 @@ func (x *StockMovement) GetId() int64 {
 	return 0
 }
 
-func (x *StockMovement) GetLocationId() int64 {
+func (x *StockMovement) GetBusinessId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.BusinessId
 	}
 	return 0
 }
 
-func (x *StockMovement) GetMenuItemId() int64 {
+func (x *StockMovement) GetBranchId() int64 {
 	if x != nil {
-		return x.MenuItemId
+		return x.BranchId
 	}
 	return 0
 }
 
-func (x *StockMovement) GetItemName() string {
+func (x *StockMovement) GetProductId() int64 {
 	if x != nil {
-		return x.ItemName
+		return x.ProductId
 	}
-	return ""
+	return 0
 }
 
 func (x *StockMovement) GetType() string {
@@ -105,46 +103,39 @@ func (x *StockMovement) GetType() string {
 	return ""
 }
 
-func (x *StockMovement) GetQuantity() int32 {
+func (x *StockMovement) GetQuantity() float64 {
 	if x != nil {
 		return x.Quantity
 	}
 	return 0
 }
 
-func (x *StockMovement) GetQuantityBefore() int32 {
+func (x *StockMovement) GetReferenceId() int64 {
 	if x != nil {
-		return x.QuantityBefore
+		return x.ReferenceId
 	}
 	return 0
 }
 
-func (x *StockMovement) GetQuantityAfter() int32 {
+func (x *StockMovement) GetReferenceType() string {
 	if x != nil {
-		return x.QuantityAfter
-	}
-	return 0
-}
-
-func (x *StockMovement) GetReason() string {
-	if x != nil {
-		return x.Reason
+		return x.ReferenceType
 	}
 	return ""
 }
 
-func (x *StockMovement) GetDestinationLocationId() int64 {
+func (x *StockMovement) GetNote() string {
 	if x != nil {
-		return x.DestinationLocationId
-	}
-	return 0
-}
-
-func (x *StockMovement) GetPerformedBy() string {
-	if x != nil {
-		return x.PerformedBy
+		return x.Note
 	}
 	return ""
+}
+
+func (x *StockMovement) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
 }
 
 func (x *StockMovement) GetCreatedAt() string {
@@ -155,16 +146,17 @@ func (x *StockMovement) GetCreatedAt() string {
 }
 
 type BranchInventory struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	MenuItemId        int64                  `protobuf:"varint,1,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	ItemName          string                 `protobuf:"bytes,2,opt,name=item_name,json=itemName,proto3" json:"item_name,omitempty"`
-	Sku               string                 `protobuf:"bytes,3,opt,name=sku,proto3" json:"sku,omitempty"`
-	Quantity          int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	LowStockThreshold int32                  `protobuf:"varint,5,opt,name=low_stock_threshold,json=lowStockThreshold,proto3" json:"low_stock_threshold,omitempty"`
-	IsLowStock        bool                   `protobuf:"varint,6,opt,name=is_low_stock,json=isLowStock,proto3" json:"is_low_stock,omitempty"`
-	LastUpdatedAt     string                 `protobuf:"bytes,7,opt,name=last_updated_at,json=lastUpdatedAt,proto3" json:"last_updated_at,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessId      int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId        int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId       int64                  `protobuf:"varint,4,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity        float64                `protobuf:"fixed64,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	ReorderPoint    float64                `protobuf:"fixed64,6,opt,name=reorder_point,json=reorderPoint,proto3" json:"reorder_point,omitempty"`
+	ReorderQuantity float64                `protobuf:"fixed64,7,opt,name=reorder_quantity,json=reorderQuantity,proto3" json:"reorder_quantity,omitempty"`
+	UpdatedAt       string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *BranchInventory) Reset() {
@@ -197,587 +189,73 @@ func (*BranchInventory) Descriptor() ([]byte, []int) {
 	return file_pos_v1_stock_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *BranchInventory) GetMenuItemId() int64 {
+func (x *BranchInventory) GetId() int64 {
 	if x != nil {
-		return x.MenuItemId
+		return x.Id
 	}
 	return 0
 }
 
-func (x *BranchInventory) GetItemName() string {
+func (x *BranchInventory) GetBusinessId() int64 {
 	if x != nil {
-		return x.ItemName
+		return x.BusinessId
 	}
-	return ""
+	return 0
 }
 
-func (x *BranchInventory) GetSku() string {
+func (x *BranchInventory) GetBranchId() int64 {
 	if x != nil {
-		return x.Sku
+		return x.BranchId
 	}
-	return ""
+	return 0
 }
 
-func (x *BranchInventory) GetQuantity() int32 {
+func (x *BranchInventory) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *BranchInventory) GetQuantity() float64 {
 	if x != nil {
 		return x.Quantity
 	}
 	return 0
 }
 
-func (x *BranchInventory) GetLowStockThreshold() int32 {
+func (x *BranchInventory) GetReorderPoint() float64 {
 	if x != nil {
-		return x.LowStockThreshold
+		return x.ReorderPoint
 	}
 	return 0
 }
 
-func (x *BranchInventory) GetIsLowStock() bool {
+func (x *BranchInventory) GetReorderQuantity() float64 {
 	if x != nil {
-		return x.IsLowStock
+		return x.ReorderQuantity
 	}
-	return false
+	return 0
 }
 
-func (x *BranchInventory) GetLastUpdatedAt() string {
+func (x *BranchInventory) GetUpdatedAt() string {
 	if x != nil {
-		return x.LastUpdatedAt
+		return x.UpdatedAt
 	}
 	return ""
-}
-
-type ReceiveStockRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MenuItemId    int64                  `protobuf:"varint,1,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReceiveStockRequest) Reset() {
-	*x = ReceiveStockRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReceiveStockRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReceiveStockRequest) ProtoMessage() {}
-
-func (x *ReceiveStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReceiveStockRequest.ProtoReflect.Descriptor instead.
-func (*ReceiveStockRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ReceiveStockRequest) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
-	}
-	return 0
-}
-
-func (x *ReceiveStockRequest) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
-}
-
-func (x *ReceiveStockRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-type ReceiveStockResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *StockMovement         `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReceiveStockResponse) Reset() {
-	*x = ReceiveStockResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReceiveStockResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReceiveStockResponse) ProtoMessage() {}
-
-func (x *ReceiveStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReceiveStockResponse.ProtoReflect.Descriptor instead.
-func (*ReceiveStockResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ReceiveStockResponse) GetMovement() *StockMovement {
-	if x != nil {
-		return x.Movement
-	}
-	return nil
-}
-
-type AdjustStockRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MenuItemId    int64                  `protobuf:"varint,1,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdjustStockRequest) Reset() {
-	*x = AdjustStockRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdjustStockRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdjustStockRequest) ProtoMessage() {}
-
-func (x *AdjustStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdjustStockRequest.ProtoReflect.Descriptor instead.
-func (*AdjustStockRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *AdjustStockRequest) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
-	}
-	return 0
-}
-
-func (x *AdjustStockRequest) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
-}
-
-func (x *AdjustStockRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-type AdjustStockResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *StockMovement         `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AdjustStockResponse) Reset() {
-	*x = AdjustStockResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AdjustStockResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AdjustStockResponse) ProtoMessage() {}
-
-func (x *AdjustStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AdjustStockResponse.ProtoReflect.Descriptor instead.
-func (*AdjustStockResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *AdjustStockResponse) GetMovement() *StockMovement {
-	if x != nil {
-		return x.Movement
-	}
-	return nil
-}
-
-type WasteStockRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MenuItemId    int64                  `protobuf:"varint,1,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *WasteStockRequest) Reset() {
-	*x = WasteStockRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *WasteStockRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WasteStockRequest) ProtoMessage() {}
-
-func (x *WasteStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WasteStockRequest.ProtoReflect.Descriptor instead.
-func (*WasteStockRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *WasteStockRequest) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
-	}
-	return 0
-}
-
-func (x *WasteStockRequest) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
-}
-
-func (x *WasteStockRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-type WasteStockResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *StockMovement         `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *WasteStockResponse) Reset() {
-	*x = WasteStockResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *WasteStockResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WasteStockResponse) ProtoMessage() {}
-
-func (x *WasteStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WasteStockResponse.ProtoReflect.Descriptor instead.
-func (*WasteStockResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *WasteStockResponse) GetMovement() *StockMovement {
-	if x != nil {
-		return x.Movement
-	}
-	return nil
-}
-
-type TransferStockRequest struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	MenuItemId            int64                  `protobuf:"varint,1,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Quantity              int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	DestinationLocationId int64                  `protobuf:"varint,3,opt,name=destination_location_id,json=destinationLocationId,proto3" json:"destination_location_id,omitempty"`
-	Reason                string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
-}
-
-func (x *TransferStockRequest) Reset() {
-	*x = TransferStockRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TransferStockRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransferStockRequest) ProtoMessage() {}
-
-func (x *TransferStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransferStockRequest.ProtoReflect.Descriptor instead.
-func (*TransferStockRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *TransferStockRequest) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
-	}
-	return 0
-}
-
-func (x *TransferStockRequest) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
-}
-
-func (x *TransferStockRequest) GetDestinationLocationId() int64 {
-	if x != nil {
-		return x.DestinationLocationId
-	}
-	return 0
-}
-
-func (x *TransferStockRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-type TransferStockResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Movement      *StockMovement         `protobuf:"bytes,1,opt,name=movement,proto3" json:"movement,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TransferStockResponse) Reset() {
-	*x = TransferStockResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TransferStockResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TransferStockResponse) ProtoMessage() {}
-
-func (x *TransferStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TransferStockResponse.ProtoReflect.Descriptor instead.
-func (*TransferStockResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *TransferStockResponse) GetMovement() *StockMovement {
-	if x != nil {
-		return x.Movement
-	}
-	return nil
-}
-
-type ListLowStockRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListLowStockRequest) Reset() {
-	*x = ListLowStockRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListLowStockRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListLowStockRequest) ProtoMessage() {}
-
-func (x *ListLowStockRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListLowStockRequest.ProtoReflect.Descriptor instead.
-func (*ListLowStockRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *ListLowStockRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type ListLowStockResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*BranchInventory     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListLowStockResponse) Reset() {
-	*x = ListLowStockResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListLowStockResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListLowStockResponse) ProtoMessage() {}
-
-func (x *ListLowStockResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListLowStockResponse.ProtoReflect.Descriptor instead.
-func (*ListLowStockResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *ListLowStockResponse) GetItems() []*BranchInventory {
-	if x != nil {
-		return x.Items
-	}
-	return nil
-}
-
-func (x *ListLowStockResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
 }
 
 type ListStockMovementsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	MenuItemId    int64                  `protobuf:"varint,2,opt,name=menu_item_id,json=menuItemId,proto3" json:"menu_item_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListStockMovementsRequest) Reset() {
 	*x = ListStockMovementsRequest{}
-	mi := &file_pos_v1_stock_proto_msgTypes[12]
+	mi := &file_pos_v1_stock_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -789,7 +267,7 @@ func (x *ListStockMovementsRequest) String() string {
 func (*ListStockMovementsRequest) ProtoMessage() {}
 
 func (x *ListStockMovementsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[12]
+	mi := &file_pos_v1_stock_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -802,41 +280,33 @@ func (x *ListStockMovementsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStockMovementsRequest.ProtoReflect.Descriptor instead.
 func (*ListStockMovementsRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{12}
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListStockMovementsRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListStockMovementsRequest) GetBranchId() int64 {
 	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListStockMovementsRequest) GetMenuItemId() int64 {
-	if x != nil {
-		return x.MenuItemId
+		return x.BranchId
 	}
 	return 0
 }
 
-func (x *ListStockMovementsRequest) GetType() string {
+func (x *ListStockMovementsRequest) GetProductId() int64 {
 	if x != nil {
-		return x.Type
+		return x.ProductId
 	}
-	return ""
+	return 0
 }
 
 type ListStockMovementsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Movements     []*StockMovement       `protobuf:"bytes,1,rep,name=movements,proto3" json:"movements,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListStockMovementsResponse) Reset() {
 	*x = ListStockMovementsResponse{}
-	mi := &file_pos_v1_stock_proto_msgTypes[13]
+	mi := &file_pos_v1_stock_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -848,7 +318,7 @@ func (x *ListStockMovementsResponse) String() string {
 func (*ListStockMovementsResponse) ProtoMessage() {}
 
 func (x *ListStockMovementsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_stock_proto_msgTypes[13]
+	mi := &file_pos_v1_stock_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -861,7 +331,7 @@ func (x *ListStockMovementsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStockMovementsResponse.ProtoReflect.Descriptor instead.
 func (*ListStockMovementsResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_stock_proto_rawDescGZIP(), []int{13}
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListStockMovementsResponse) GetMovements() []*StockMovement {
@@ -871,9 +341,698 @@ func (x *ListStockMovementsResponse) GetMovements() []*StockMovement {
 	return nil
 }
 
-func (x *ListStockMovementsResponse) GetPagination() *v1.PaginationResponse {
+type ReceiveStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Note          string                 `protobuf:"bytes,4,opt,name=note,proto3" json:"note,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,5,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReceiveStockRequest) Reset() {
+	*x = ReceiveStockRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReceiveStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReceiveStockRequest) ProtoMessage() {}
+
+func (x *ReceiveStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[4]
 	if x != nil {
-		return x.Pagination
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReceiveStockRequest.ProtoReflect.Descriptor instead.
+func (*ReceiveStockRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ReceiveStockRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *ReceiveStockRequest) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *ReceiveStockRequest) GetQuantity() float64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *ReceiveStockRequest) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *ReceiveStockRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+type ReceiveStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReceiveStockResponse) Reset() {
+	*x = ReceiveStockResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReceiveStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReceiveStockResponse) ProtoMessage() {}
+
+func (x *ReceiveStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReceiveStockResponse.ProtoReflect.Descriptor instead.
+func (*ReceiveStockResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ReceiveStockResponse) GetMovementId() int64 {
+	if x != nil {
+		return x.MovementId
+	}
+	return 0
+}
+
+func (x *ReceiveStockResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type AdjustStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Note          string                 `protobuf:"bytes,4,opt,name=note,proto3" json:"note,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,5,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdjustStockRequest) Reset() {
+	*x = AdjustStockRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdjustStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdjustStockRequest) ProtoMessage() {}
+
+func (x *AdjustStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdjustStockRequest.ProtoReflect.Descriptor instead.
+func (*AdjustStockRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AdjustStockRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *AdjustStockRequest) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *AdjustStockRequest) GetQuantity() float64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *AdjustStockRequest) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *AdjustStockRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+type AdjustStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdjustStockResponse) Reset() {
+	*x = AdjustStockResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdjustStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdjustStockResponse) ProtoMessage() {}
+
+func (x *AdjustStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdjustStockResponse.ProtoReflect.Descriptor instead.
+func (*AdjustStockResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AdjustStockResponse) GetMovementId() int64 {
+	if x != nil {
+		return x.MovementId
+	}
+	return 0
+}
+
+func (x *AdjustStockResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type WasteStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Note          string                 `protobuf:"bytes,4,opt,name=note,proto3" json:"note,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,5,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WasteStockRequest) Reset() {
+	*x = WasteStockRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WasteStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WasteStockRequest) ProtoMessage() {}
+
+func (x *WasteStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WasteStockRequest.ProtoReflect.Descriptor instead.
+func (*WasteStockRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *WasteStockRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *WasteStockRequest) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *WasteStockRequest) GetQuantity() float64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *WasteStockRequest) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *WasteStockRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+type WasteStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WasteStockResponse) Reset() {
+	*x = WasteStockResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WasteStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WasteStockResponse) ProtoMessage() {}
+
+func (x *WasteStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WasteStockResponse.ProtoReflect.Descriptor instead.
+func (*WasteStockResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *WasteStockResponse) GetMovementId() int64 {
+	if x != nil {
+		return x.MovementId
+	}
+	return 0
+}
+
+func (x *WasteStockResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type TransferStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromBranchId  int64                  `protobuf:"varint,1,opt,name=from_branch_id,json=fromBranchId,proto3" json:"from_branch_id,omitempty"`
+	ToBranchId    int64                  `protobuf:"varint,2,opt,name=to_branch_id,json=toBranchId,proto3" json:"to_branch_id,omitempty"`
+	ProductId     int64                  `protobuf:"varint,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Note          string                 `protobuf:"bytes,5,opt,name=note,proto3" json:"note,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,6,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferStockRequest) Reset() {
+	*x = TransferStockRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferStockRequest) ProtoMessage() {}
+
+func (x *TransferStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferStockRequest.ProtoReflect.Descriptor instead.
+func (*TransferStockRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *TransferStockRequest) GetFromBranchId() int64 {
+	if x != nil {
+		return x.FromBranchId
+	}
+	return 0
+}
+
+func (x *TransferStockRequest) GetToBranchId() int64 {
+	if x != nil {
+		return x.ToBranchId
+	}
+	return 0
+}
+
+func (x *TransferStockRequest) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *TransferStockRequest) GetQuantity() float64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *TransferStockRequest) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *TransferStockRequest) GetEmployeeId() int64 {
+	if x != nil {
+		return x.EmployeeId
+	}
+	return 0
+}
+
+type TransferStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MovementId    int64                  `protobuf:"varint,1,opt,name=movement_id,json=movementId,proto3" json:"movement_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferStockResponse) Reset() {
+	*x = TransferStockResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferStockResponse) ProtoMessage() {}
+
+func (x *TransferStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferStockResponse.ProtoReflect.Descriptor instead.
+func (*TransferStockResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *TransferStockResponse) GetMovementId() int64 {
+	if x != nil {
+		return x.MovementId
+	}
+	return 0
+}
+
+func (x *TransferStockResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ListInventoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListInventoryRequest) Reset() {
+	*x = ListInventoryRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInventoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInventoryRequest) ProtoMessage() {}
+
+func (x *ListInventoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListInventoryRequest.ProtoReflect.Descriptor instead.
+func (*ListInventoryRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListInventoryRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+type ListInventoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Inventory     []*BranchInventory     `protobuf:"bytes,1,rep,name=inventory,proto3" json:"inventory,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListInventoryResponse) Reset() {
+	*x = ListInventoryResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInventoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInventoryResponse) ProtoMessage() {}
+
+func (x *ListInventoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListInventoryResponse.ProtoReflect.Descriptor instead.
+func (*ListInventoryResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListInventoryResponse) GetInventory() []*BranchInventory {
+	if x != nil {
+		return x.Inventory
+	}
+	return nil
+}
+
+type LowStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LowStockRequest) Reset() {
+	*x = LowStockRequest{}
+	mi := &file_pos_v1_stock_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LowStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LowStockRequest) ProtoMessage() {}
+
+func (x *LowStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LowStockRequest.ProtoReflect.Descriptor instead.
+func (*LowStockRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *LowStockRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+type LowStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*BranchInventory     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LowStockResponse) Reset() {
+	*x = LowStockResponse{}
+	mi := &file_pos_v1_stock_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LowStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LowStockResponse) ProtoMessage() {}
+
+func (x *LowStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_stock_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LowStockResponse.ProtoReflect.Descriptor instead.
+func (*LowStockResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_stock_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *LowStockResponse) GetItems() []*BranchInventory {
+	if x != nil {
+		return x.Items
 	}
 	return nil
 }
@@ -882,84 +1041,100 @@ var File_pos_v1_stock_proto protoreflect.FileDescriptor
 
 const file_pos_v1_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/stock.proto\x12\x03pos\x1a\x1acommon/v1/pagination.proto\"\x91\x03\n" +
+	"\x12pos/v1/stock.proto\x12\x03pos\"\xca\x02\n" +
 	"\rStockMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12 \n" +
-	"\fmenu_item_id\x18\x03 \x01(\x03R\n" +
-	"menuItemId\x12\x1b\n" +
-	"\titem_name\x18\x04 \x01(\tR\bitemName\x12\x12\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x04 \x01(\x03R\tproductId\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1a\n" +
-	"\bquantity\x18\x06 \x01(\x05R\bquantity\x12'\n" +
-	"\x0fquantity_before\x18\a \x01(\x05R\x0equantityBefore\x12%\n" +
-	"\x0equantity_after\x18\b \x01(\x05R\rquantityAfter\x12\x16\n" +
-	"\x06reason\x18\t \x01(\tR\x06reason\x126\n" +
-	"\x17destination_location_id\x18\n" +
-	" \x01(\x03R\x15destinationLocationId\x12!\n" +
-	"\fperformed_by\x18\v \x01(\tR\vperformedBy\x12\x1d\n" +
+	"\bquantity\x18\x06 \x01(\x01R\bquantity\x12!\n" +
+	"\freference_id\x18\a \x01(\x03R\vreferenceId\x12%\n" +
+	"\x0ereference_type\x18\b \x01(\tR\rreferenceType\x12\x12\n" +
+	"\x04note\x18\t \x01(\tR\x04note\x12\x1f\n" +
+	"\vemployee_id\x18\n" +
+	" \x01(\x03R\n" +
+	"employeeId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\f \x01(\tR\tcreatedAt\"\xf8\x01\n" +
-	"\x0fBranchInventory\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
-	"menuItemId\x12\x1b\n" +
-	"\titem_name\x18\x02 \x01(\tR\bitemName\x12\x10\n" +
-	"\x03sku\x18\x03 \x01(\tR\x03sku\x12\x1a\n" +
-	"\bquantity\x18\x04 \x01(\x05R\bquantity\x12.\n" +
-	"\x13low_stock_threshold\x18\x05 \x01(\x05R\x11lowStockThreshold\x12 \n" +
-	"\fis_low_stock\x18\x06 \x01(\bR\n" +
-	"isLowStock\x12&\n" +
-	"\x0flast_updated_at\x18\a \x01(\tR\rlastUpdatedAt\"k\n" +
-	"\x13ReceiveStockRequest\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
-	"menuItemId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x05R\bquantity\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"F\n" +
-	"\x14ReceiveStockResponse\x12.\n" +
-	"\bmovement\x18\x01 \x01(\v2\x12.pos.StockMovementR\bmovement\"j\n" +
-	"\x12AdjustStockRequest\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
-	"menuItemId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x05R\bquantity\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"E\n" +
-	"\x13AdjustStockResponse\x12.\n" +
-	"\bmovement\x18\x01 \x01(\v2\x12.pos.StockMovementR\bmovement\"i\n" +
-	"\x11WasteStockRequest\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
-	"menuItemId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x05R\bquantity\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"D\n" +
-	"\x12WasteStockResponse\x12.\n" +
-	"\bmovement\x18\x01 \x01(\v2\x12.pos.StockMovementR\bmovement\"\xa4\x01\n" +
-	"\x14TransferStockRequest\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
-	"menuItemId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x05R\bquantity\x126\n" +
-	"\x17destination_location_id\x18\x03 \x01(\x03R\x15destinationLocationId\x12\x16\n" +
-	"\x06reason\x18\x04 \x01(\tR\x06reason\"G\n" +
-	"\x15TransferStockResponse\x12.\n" +
-	"\bmovement\x18\x01 \x01(\v2\x12.pos.StockMovementR\bmovement\"P\n" +
-	"\x13ListLowStockRequest\x129\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\"\x89\x02\n" +
+	"\x0fBranchInventory\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"~\n" +
-	"\x14ListLowStockResponse\x12*\n" +
-	"\x05items\x18\x01 \x03(\v2\x14.pos.BranchInventoryR\x05items\x12:\n" +
+	"product_id\x18\x04 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x05 \x01(\x01R\bquantity\x12#\n" +
+	"\rreorder_point\x18\x06 \x01(\x01R\freorderPoint\x12)\n" +
+	"\x10reorder_quantity\x18\a \x01(\x01R\x0freorderQuantity\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"\x8c\x01\n" +
-	"\x19ListStockMovementsRequest\x129\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"W\n" +
+	"\x19ListStockMovementsRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12 \n" +
-	"\fmenu_item_id\x18\x02 \x01(\x03R\n" +
-	"menuItemId\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"\x8a\x01\n" +
+	"product_id\x18\x02 \x01(\x03R\tproductId\"N\n" +
 	"\x1aListStockMovementsResponse\x120\n" +
-	"\tmovements\x18\x01 \x03(\v2\x12.pos.StockMovementR\tmovements\x12:\n" +
+	"\tmovements\x18\x01 \x03(\v2\x12.pos.StockMovementR\tmovements\"\xa2\x01\n" +
+	"\x13ReceiveStockRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"paginationB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"product_id\x18\x02 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x01R\bquantity\x12\x12\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12\x1f\n" +
+	"\vemployee_id\x18\x05 \x01(\x03R\n" +
+	"employeeId\"Q\n" +
+	"\x14ReceiveStockResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xa1\x01\n" +
+	"\x12AdjustStockRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x02 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x01R\bquantity\x12\x12\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12\x1f\n" +
+	"\vemployee_id\x18\x05 \x01(\x03R\n" +
+	"employeeId\"P\n" +
+	"\x13AdjustStockResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xa0\x01\n" +
+	"\x11WasteStockRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x02 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x01R\bquantity\x12\x12\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12\x1f\n" +
+	"\vemployee_id\x18\x05 \x01(\x03R\n" +
+	"employeeId\"O\n" +
+	"\x12WasteStockResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xce\x01\n" +
+	"\x14TransferStockRequest\x12$\n" +
+	"\x0efrom_branch_id\x18\x01 \x01(\x03R\ffromBranchId\x12 \n" +
+	"\fto_branch_id\x18\x02 \x01(\x03R\n" +
+	"toBranchId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x03 \x01(\x03R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x04 \x01(\x01R\bquantity\x12\x12\n" +
+	"\x04note\x18\x05 \x01(\tR\x04note\x12\x1f\n" +
+	"\vemployee_id\x18\x06 \x01(\x03R\n" +
+	"employeeId\"R\n" +
+	"\x15TransferStockResponse\x12\x1f\n" +
+	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"movementId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"3\n" +
+	"\x14ListInventoryRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"K\n" +
+	"\x15ListInventoryResponse\x122\n" +
+	"\tinventory\x18\x01 \x03(\v2\x14.pos.BranchInventoryR\tinventory\".\n" +
+	"\x0fLowStockRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\">\n" +
+	"\x10LowStockResponse\x12*\n" +
+	"\x05items\x18\x01 \x03(\v2\x14.pos.BranchInventoryR\x05itemsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_stock_proto_rawDescOnce sync.Once
@@ -973,41 +1148,34 @@ func file_pos_v1_stock_proto_rawDescGZIP() []byte {
 	return file_pos_v1_stock_proto_rawDescData
 }
 
-var file_pos_v1_stock_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_pos_v1_stock_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_pos_v1_stock_proto_goTypes = []any{
 	(*StockMovement)(nil),              // 0: pos.StockMovement
 	(*BranchInventory)(nil),            // 1: pos.BranchInventory
-	(*ReceiveStockRequest)(nil),        // 2: pos.ReceiveStockRequest
-	(*ReceiveStockResponse)(nil),       // 3: pos.ReceiveStockResponse
-	(*AdjustStockRequest)(nil),         // 4: pos.AdjustStockRequest
-	(*AdjustStockResponse)(nil),        // 5: pos.AdjustStockResponse
-	(*WasteStockRequest)(nil),          // 6: pos.WasteStockRequest
-	(*WasteStockResponse)(nil),         // 7: pos.WasteStockResponse
-	(*TransferStockRequest)(nil),       // 8: pos.TransferStockRequest
-	(*TransferStockResponse)(nil),      // 9: pos.TransferStockResponse
-	(*ListLowStockRequest)(nil),        // 10: pos.ListLowStockRequest
-	(*ListLowStockResponse)(nil),       // 11: pos.ListLowStockResponse
-	(*ListStockMovementsRequest)(nil),  // 12: pos.ListStockMovementsRequest
-	(*ListStockMovementsResponse)(nil), // 13: pos.ListStockMovementsResponse
-	(*v1.PaginationRequest)(nil),       // 14: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),      // 15: common.PaginationResponse
+	(*ListStockMovementsRequest)(nil),  // 2: pos.ListStockMovementsRequest
+	(*ListStockMovementsResponse)(nil), // 3: pos.ListStockMovementsResponse
+	(*ReceiveStockRequest)(nil),        // 4: pos.ReceiveStockRequest
+	(*ReceiveStockResponse)(nil),       // 5: pos.ReceiveStockResponse
+	(*AdjustStockRequest)(nil),         // 6: pos.AdjustStockRequest
+	(*AdjustStockResponse)(nil),        // 7: pos.AdjustStockResponse
+	(*WasteStockRequest)(nil),          // 8: pos.WasteStockRequest
+	(*WasteStockResponse)(nil),         // 9: pos.WasteStockResponse
+	(*TransferStockRequest)(nil),       // 10: pos.TransferStockRequest
+	(*TransferStockResponse)(nil),      // 11: pos.TransferStockResponse
+	(*ListInventoryRequest)(nil),       // 12: pos.ListInventoryRequest
+	(*ListInventoryResponse)(nil),      // 13: pos.ListInventoryResponse
+	(*LowStockRequest)(nil),            // 14: pos.LowStockRequest
+	(*LowStockResponse)(nil),           // 15: pos.LowStockResponse
 }
 var file_pos_v1_stock_proto_depIdxs = []int32{
-	0,  // 0: pos.ReceiveStockResponse.movement:type_name -> pos.StockMovement
-	0,  // 1: pos.AdjustStockResponse.movement:type_name -> pos.StockMovement
-	0,  // 2: pos.WasteStockResponse.movement:type_name -> pos.StockMovement
-	0,  // 3: pos.TransferStockResponse.movement:type_name -> pos.StockMovement
-	14, // 4: pos.ListLowStockRequest.pagination:type_name -> common.PaginationRequest
-	1,  // 5: pos.ListLowStockResponse.items:type_name -> pos.BranchInventory
-	15, // 6: pos.ListLowStockResponse.pagination:type_name -> common.PaginationResponse
-	14, // 7: pos.ListStockMovementsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 8: pos.ListStockMovementsResponse.movements:type_name -> pos.StockMovement
-	15, // 9: pos.ListStockMovementsResponse.pagination:type_name -> common.PaginationResponse
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	0, // 0: pos.ListStockMovementsResponse.movements:type_name -> pos.StockMovement
+	1, // 1: pos.ListInventoryResponse.inventory:type_name -> pos.BranchInventory
+	1, // 2: pos.LowStockResponse.items:type_name -> pos.BranchInventory
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_stock_proto_init() }
@@ -1021,7 +1189,7 @@ func file_pos_v1_stock_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_stock_proto_rawDesc), len(file_pos_v1_stock_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

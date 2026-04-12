@@ -5,41 +5,46 @@
 // source: hr/v1/departments.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Department {
   id: number;
+  ownerId: number;
   name: string;
   description: string;
-  managerId: number;
-  managerName: string;
-  memberCount: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListDepartmentsRequest {
-  pagination: PaginationRequest | undefined;
 }
 
 export interface ListDepartmentsResponse {
   departments: Department[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetDepartmentRequest {
-  id: number;
-}
-
-export interface GetDepartmentResponse {
-  department: Department | undefined;
 }
 
 export interface CreateDepartmentRequest {
   name: string;
   description: string;
-  managerId: number;
 }
 
 export interface CreateDepartmentResponse {
-  department: Department | undefined;
+  id: number;
+}
+
+export interface UpdateDepartmentRequest {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface UpdateDepartmentResponse {
+  success: boolean;
+}
+
+export interface DeleteDepartmentRequest {
+  id: number;
+}
+
+export interface DeleteDepartmentResponse {
+  success: boolean;
 }

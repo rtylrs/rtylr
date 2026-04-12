@@ -5,125 +5,68 @@
 // source: store/v1/products.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface ProductVariant {
+export interface StoreProduct {
   id: number;
-  name: string;
-  sku: string;
-  price: number;
-  compareAtPrice: number;
-  stockQuantity: number;
-  trackInventory: boolean;
-  weight: number;
-  weightUnit: string;
-}
-
-export interface ProductImage {
-  id: number;
-  url: string;
-  altText: string;
-  sortOrder: number;
-  isPrimary: boolean;
-}
-
-export interface Product {
-  id: number;
-  storeId: number;
+  ownerId: number;
+  productId: number;
   title: string;
-  description: string;
   slug: string;
-  /** draft, active, archived */
-  status: string;
+  description: string;
+  images: string;
   price: number;
   compareAtPrice: number;
-  sku: string;
-  stockQuantity: number;
-  trackInventory: boolean;
-  weight: number;
-  weightUnit: string;
-  categoryId: number;
-  categoryName: string;
-  tags: string[];
-  variants: ProductVariant[];
-  images: ProductImage[];
-  isFeatured: boolean;
-  seoTitle: string;
-  seoDescription: string;
+  isPublished: boolean;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ListProductsRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-  categoryId: number;
-  search: string;
-  featuredOnly: boolean;
+export interface ListStoreProductsRequest {
 }
 
-export interface ListProductsResponse {
-  products: Product[];
-  pagination: PaginationResponse | undefined;
+export interface ListStoreProductsResponse {
+  products: StoreProduct[];
 }
 
-export interface GetProductRequest {
-  id: number;
-}
-
-export interface GetProductResponse {
-  product: Product | undefined;
-}
-
-export interface CreateProductRequest {
+export interface CreateStoreProductRequest {
+  productId: number;
   title: string;
+  slug: string;
   description: string;
+  images: string;
   price: number;
   compareAtPrice: number;
-  sku: string;
-  stockQuantity: number;
-  trackInventory: boolean;
-  weight: number;
-  weightUnit: string;
-  categoryId: number;
-  tags: string[];
-  status: string;
-  isFeatured: boolean;
-  seoTitle: string;
-  seoDescription: string;
+  isPublished: boolean;
+  sortOrder: number;
 }
 
-export interface CreateProductResponse {
-  product: Product | undefined;
-}
-
-export interface UpdateProductRequest {
+export interface CreateStoreProductResponse {
   id: number;
+  message: string;
+}
+
+export interface UpdateStoreProductRequest {
+  id: number;
+  productId: number;
   title: string;
+  slug: string;
   description: string;
+  images: string;
   price: number;
   compareAtPrice: number;
-  sku: string;
-  stockQuantity: number;
-  trackInventory: boolean;
-  weight: number;
-  weightUnit: string;
-  categoryId: number;
-  tags: string[];
-  status: string;
-  isFeatured: boolean;
-  seoTitle: string;
-  seoDescription: string;
+  isPublished: boolean;
+  sortOrder: number;
 }
 
-export interface UpdateProductResponse {
-  product: Product | undefined;
+export interface UpdateStoreProductResponse {
+  message: string;
 }
 
-export interface DeleteProductRequest {
+export interface DeleteStoreProductRequest {
   id: number;
 }
 
-export interface DeleteProductResponse {
-  success: boolean;
+export interface DeleteStoreProductResponse {
+  message: string;
 }

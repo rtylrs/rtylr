@@ -21,183 +21,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type FlowDashboard struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	TotalTasks     int32                  `protobuf:"varint,1,opt,name=total_tasks,json=totalTasks,proto3" json:"total_tasks,omitempty"`
-	Todo           int32                  `protobuf:"varint,2,opt,name=todo,proto3" json:"todo,omitempty"`
-	InProgress     int32                  `protobuf:"varint,3,opt,name=in_progress,json=inProgress,proto3" json:"in_progress,omitempty"`
-	InReview       int32                  `protobuf:"varint,4,opt,name=in_review,json=inReview,proto3" json:"in_review,omitempty"`
-	Done           int32                  `protobuf:"varint,5,opt,name=done,proto3" json:"done,omitempty"`
-	Overdue        int32                  `protobuf:"varint,6,opt,name=overdue,proto3" json:"overdue,omitempty"`
-	TotalProjects  int32                  `protobuf:"varint,7,opt,name=total_projects,json=totalProjects,proto3" json:"total_projects,omitempty"`
-	ActiveProjects int32                  `protobuf:"varint,8,opt,name=active_projects,json=activeProjects,proto3" json:"active_projects,omitempty"`
-	TasksByProject []*TasksByProject      `protobuf:"bytes,9,rep,name=tasks_by_project,json=tasksByProject,proto3" json:"tasks_by_project,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *FlowDashboard) Reset() {
-	*x = FlowDashboard{}
-	mi := &file_flow_v1_dashboard_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *FlowDashboard) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*FlowDashboard) ProtoMessage() {}
-
-func (x *FlowDashboard) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_dashboard_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use FlowDashboard.ProtoReflect.Descriptor instead.
-func (*FlowDashboard) Descriptor() ([]byte, []int) {
-	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *FlowDashboard) GetTotalTasks() int32 {
-	if x != nil {
-		return x.TotalTasks
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetTodo() int32 {
-	if x != nil {
-		return x.Todo
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetInProgress() int32 {
-	if x != nil {
-		return x.InProgress
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetInReview() int32 {
-	if x != nil {
-		return x.InReview
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetDone() int32 {
-	if x != nil {
-		return x.Done
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetOverdue() int32 {
-	if x != nil {
-		return x.Overdue
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetTotalProjects() int32 {
-	if x != nil {
-		return x.TotalProjects
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetActiveProjects() int32 {
-	if x != nil {
-		return x.ActiveProjects
-	}
-	return 0
-}
-
-func (x *FlowDashboard) GetTasksByProject() []*TasksByProject {
-	if x != nil {
-		return x.TasksByProject
-	}
-	return nil
-}
-
-type TasksByProject struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProjectName   string                 `protobuf:"bytes,1,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Completed     int32                  `protobuf:"varint,3,opt,name=completed,proto3" json:"completed,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TasksByProject) Reset() {
-	*x = TasksByProject{}
-	mi := &file_flow_v1_dashboard_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TasksByProject) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TasksByProject) ProtoMessage() {}
-
-func (x *TasksByProject) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_dashboard_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TasksByProject.ProtoReflect.Descriptor instead.
-func (*TasksByProject) Descriptor() ([]byte, []int) {
-	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *TasksByProject) GetProjectName() string {
-	if x != nil {
-		return x.ProjectName
-	}
-	return ""
-}
-
-func (x *TasksByProject) GetTotal() int32 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *TasksByProject) GetCompleted() int32 {
-	if x != nil {
-		return x.Completed
-	}
-	return 0
-}
-
 type GetFlowDashboardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetFlowDashboardRequest) Reset() {
 	*x = GetFlowDashboardRequest{}
-	mi := &file_flow_v1_dashboard_proto_msgTypes[2]
+	mi := &file_flow_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -209,7 +42,7 @@ func (x *GetFlowDashboardRequest) String() string {
 func (*GetFlowDashboardRequest) ProtoMessage() {}
 
 func (x *GetFlowDashboardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_dashboard_proto_msgTypes[2]
+	mi := &file_flow_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -222,19 +55,30 @@ func (x *GetFlowDashboardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFlowDashboardRequest.ProtoReflect.Descriptor instead.
 func (*GetFlowDashboardRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{2}
+	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetFlowDashboardRequest) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
 }
 
 type GetFlowDashboardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Dashboard     *FlowDashboard         `protobuf:"bytes,1,opt,name=dashboard,proto3" json:"dashboard,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	OpenTasks         int64                  `protobuf:"varint,1,opt,name=open_tasks,json=openTasks,proto3" json:"open_tasks,omitempty"`
+	InProgressTasks   int64                  `protobuf:"varint,2,opt,name=in_progress_tasks,json=inProgressTasks,proto3" json:"in_progress_tasks,omitempty"`
+	CompletedThisWeek int64                  `protobuf:"varint,3,opt,name=completed_this_week,json=completedThisWeek,proto3" json:"completed_this_week,omitempty"`
+	OverdueTasks      int64                  `protobuf:"varint,4,opt,name=overdue_tasks,json=overdueTasks,proto3" json:"overdue_tasks,omitempty"`
+	MyTasks           []*Task                `protobuf:"bytes,5,rep,name=my_tasks,json=myTasks,proto3" json:"my_tasks,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *GetFlowDashboardResponse) Reset() {
 	*x = GetFlowDashboardResponse{}
-	mi := &file_flow_v1_dashboard_proto_msgTypes[3]
+	mi := &file_flow_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -246,7 +90,7 @@ func (x *GetFlowDashboardResponse) String() string {
 func (*GetFlowDashboardResponse) ProtoMessage() {}
 
 func (x *GetFlowDashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_dashboard_proto_msgTypes[3]
+	mi := &file_flow_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,12 +103,40 @@ func (x *GetFlowDashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFlowDashboardResponse.ProtoReflect.Descriptor instead.
 func (*GetFlowDashboardResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{3}
+	return file_flow_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetFlowDashboardResponse) GetDashboard() *FlowDashboard {
+func (x *GetFlowDashboardResponse) GetOpenTasks() int64 {
 	if x != nil {
-		return x.Dashboard
+		return x.OpenTasks
+	}
+	return 0
+}
+
+func (x *GetFlowDashboardResponse) GetInProgressTasks() int64 {
+	if x != nil {
+		return x.InProgressTasks
+	}
+	return 0
+}
+
+func (x *GetFlowDashboardResponse) GetCompletedThisWeek() int64 {
+	if x != nil {
+		return x.CompletedThisWeek
+	}
+	return 0
+}
+
+func (x *GetFlowDashboardResponse) GetOverdueTasks() int64 {
+	if x != nil {
+		return x.OverdueTasks
+	}
+	return 0
+}
+
+func (x *GetFlowDashboardResponse) GetMyTasks() []*Task {
+	if x != nil {
+		return x.MyTasks
 	}
 	return nil
 }
@@ -273,26 +145,17 @@ var File_flow_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_flow_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x17flow/v1/dashboard.proto\x12\x04flow\"\xc0\x02\n" +
-	"\rFlowDashboard\x12\x1f\n" +
-	"\vtotal_tasks\x18\x01 \x01(\x05R\n" +
-	"totalTasks\x12\x12\n" +
-	"\x04todo\x18\x02 \x01(\x05R\x04todo\x12\x1f\n" +
-	"\vin_progress\x18\x03 \x01(\x05R\n" +
-	"inProgress\x12\x1b\n" +
-	"\tin_review\x18\x04 \x01(\x05R\binReview\x12\x12\n" +
-	"\x04done\x18\x05 \x01(\x05R\x04done\x12\x18\n" +
-	"\aoverdue\x18\x06 \x01(\x05R\aoverdue\x12%\n" +
-	"\x0etotal_projects\x18\a \x01(\x05R\rtotalProjects\x12'\n" +
-	"\x0factive_projects\x18\b \x01(\x05R\x0eactiveProjects\x12>\n" +
-	"\x10tasks_by_project\x18\t \x03(\v2\x14.flow.TasksByProjectR\x0etasksByProject\"g\n" +
-	"\x0eTasksByProject\x12!\n" +
-	"\fproject_name\x18\x01 \x01(\tR\vprojectName\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x1c\n" +
-	"\tcompleted\x18\x03 \x01(\x05R\tcompleted\"\x19\n" +
-	"\x17GetFlowDashboardRequest\"M\n" +
-	"\x18GetFlowDashboardResponse\x121\n" +
-	"\tdashboard\x18\x01 \x01(\v2\x13.flow.FlowDashboardR\tdashboardB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\x17flow/v1/dashboard.proto\x12\x04flow\x1a\x13flow/v1/tasks.proto\"<\n" +
+	"\x17GetFlowDashboardRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"\xe1\x01\n" +
+	"\x18GetFlowDashboardResponse\x12\x1d\n" +
+	"\n" +
+	"open_tasks\x18\x01 \x01(\x03R\topenTasks\x12*\n" +
+	"\x11in_progress_tasks\x18\x02 \x01(\x03R\x0finProgressTasks\x12.\n" +
+	"\x13completed_this_week\x18\x03 \x01(\x03R\x11completedThisWeek\x12#\n" +
+	"\roverdue_tasks\x18\x04 \x01(\x03R\foverdueTasks\x12%\n" +
+	"\bmy_tasks\x18\x05 \x03(\v2\n" +
+	".flow.TaskR\amyTasksB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_dashboard_proto_rawDescOnce sync.Once
@@ -306,21 +169,19 @@ func file_flow_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_flow_v1_dashboard_proto_rawDescData
 }
 
-var file_flow_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_flow_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_flow_v1_dashboard_proto_goTypes = []any{
-	(*FlowDashboard)(nil),            // 0: flow.FlowDashboard
-	(*TasksByProject)(nil),           // 1: flow.TasksByProject
-	(*GetFlowDashboardRequest)(nil),  // 2: flow.GetFlowDashboardRequest
-	(*GetFlowDashboardResponse)(nil), // 3: flow.GetFlowDashboardResponse
+	(*GetFlowDashboardRequest)(nil),  // 0: flow.GetFlowDashboardRequest
+	(*GetFlowDashboardResponse)(nil), // 1: flow.GetFlowDashboardResponse
+	(*Task)(nil),                     // 2: flow.Task
 }
 var file_flow_v1_dashboard_proto_depIdxs = []int32{
-	1, // 0: flow.FlowDashboard.tasks_by_project:type_name -> flow.TasksByProject
-	0, // 1: flow.GetFlowDashboardResponse.dashboard:type_name -> flow.FlowDashboard
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	2, // 0: flow.GetFlowDashboardResponse.my_tasks:type_name -> flow.Task
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_flow_v1_dashboard_proto_init() }
@@ -328,13 +189,14 @@ func file_flow_v1_dashboard_proto_init() {
 	if File_flow_v1_dashboard_proto != nil {
 		return
 	}
+	file_flow_v1_tasks_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_v1_dashboard_proto_rawDesc), len(file_flow_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

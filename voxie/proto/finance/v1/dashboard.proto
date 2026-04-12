@@ -6,35 +6,11 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
 // ── Finance Dashboard ───────────────────────────────────────────────
 
-message FinanceDashboard {
-  double total_revenue = 1;
-  double revenue_change = 2;
-  double total_expenses = 3;
-  double expenses_change = 4;
-  double net_income = 5;
-  double net_income_change = 6;
-  double outstanding_invoices = 7;
-  double outstanding_bills = 8;
-  double cash_on_hand = 9;
-  repeated RevenuePoint revenue_chart = 10;
-  repeated ExpenseBreakdown expense_breakdown = 11;
-}
-
-message RevenuePoint {
-  string date = 1;
-  double amount = 2;
-}
-
-message ExpenseBreakdown {
-  string category = 1;
-  double amount = 2;
-  double percentage = 3;
-}
-
-message GetFinanceDashboardRequest {
-  string period = 1; // this_month, last_month, this_quarter, this_year
-}
+message GetFinanceDashboardRequest {}
 
 message GetFinanceDashboardResponse {
-  FinanceDashboard dashboard = 1;
+  double total_receivable = 1;
+  double overdue_amount = 2;
+  double total_expenses_mtd = 3;
+  double net_profit_mtd = 4;
 }

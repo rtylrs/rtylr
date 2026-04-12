@@ -24,9 +24,10 @@ const (
 type Label struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
-	TaskCount     int32                  `protobuf:"varint,4,opt,name=task_count,json=taskCount,proto3" json:"task_count,omitempty"`
+	WorkspaceId   int64                  `protobuf:"varint,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -68,6 +69,13 @@ func (x *Label) GetId() int64 {
 	return 0
 }
 
+func (x *Label) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
+}
+
 func (x *Label) GetName() string {
 	if x != nil {
 		return x.Name
@@ -82,15 +90,16 @@ func (x *Label) GetColor() string {
 	return ""
 }
 
-func (x *Label) GetTaskCount() int32 {
+func (x *Label) GetCreatedAt() string {
 	if x != nil {
-		return x.TaskCount
+		return x.CreatedAt
 	}
-	return 0
+	return ""
 }
 
 type ListLabelsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -123,6 +132,13 @@ func (x *ListLabelsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListLabelsRequest.ProtoReflect.Descriptor instead.
 func (*ListLabelsRequest) Descriptor() ([]byte, []int) {
 	return file_flow_v1_labels_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ListLabelsRequest) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
 }
 
 type ListLabelsResponse struct {
@@ -171,8 +187,9 @@ func (x *ListLabelsResponse) GetLabels() []*Label {
 
 type CreateLabelRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Color         string                 `protobuf:"bytes,2,opt,name=color,proto3" json:"color,omitempty"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -205,6 +222,13 @@ func (x *CreateLabelRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateLabelRequest.ProtoReflect.Descriptor instead.
 func (*CreateLabelRequest) Descriptor() ([]byte, []int) {
 	return file_flow_v1_labels_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreateLabelRequest) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
 }
 
 func (x *CreateLabelRequest) GetName() string {
@@ -269,19 +293,22 @@ var File_flow_v1_labels_proto protoreflect.FileDescriptor
 
 const file_flow_v1_labels_proto_rawDesc = "" +
 	"\n" +
-	"\x14flow/v1/labels.proto\x12\x04flow\"`\n" +
+	"\x14flow/v1/labels.proto\x12\x04flow\"\x83\x01\n" +
 	"\x05Label\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05color\x18\x03 \x01(\tR\x05color\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
-	"task_count\x18\x04 \x01(\x05R\ttaskCount\"\x13\n" +
-	"\x11ListLabelsRequest\"9\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\"6\n" +
+	"\x11ListLabelsRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"9\n" +
 	"\x12ListLabelsResponse\x12#\n" +
-	"\x06labels\x18\x01 \x03(\v2\v.flow.LabelR\x06labels\">\n" +
-	"\x12CreateLabelRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05color\x18\x02 \x01(\tR\x05color\"8\n" +
+	"\x06labels\x18\x01 \x03(\v2\v.flow.LabelR\x06labels\"a\n" +
+	"\x12CreateLabelRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05color\x18\x03 \x01(\tR\x05color\"8\n" +
 	"\x13CreateLabelResponse\x12!\n" +
 	"\x05label\x18\x01 \x01(\v2\v.flow.LabelR\x05labelB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 

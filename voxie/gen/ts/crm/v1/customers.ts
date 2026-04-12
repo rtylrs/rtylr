@@ -5,54 +5,45 @@
 // source: crm/v1/customers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
+import type { Segment } from "./segments";
 
 export interface Customer {
   id: number;
+  ownerId: number;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  company: string;
-  /** active, inactive, lead */
-  status: string;
-  /** walk-in, web, referral, import */
-  source: string;
-  segment: string;
-  totalOrders: number;
-  totalSpent: number;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  city: string;
+  country: string;
   loyaltyPoints: number;
+  totalSpent: number;
+  visitCount: number;
+  lastVisitAt: string;
+  loyaltyTier: string;
+  tags: string[];
   notes: string;
-  customFields: { [key: string]: string };
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  lastVisitAt: string;
-}
-
-export interface Customer_CustomFieldsEntry {
-  key: string;
-  value: string;
 }
 
 export interface ListCustomersRequest {
-  pagination: PaginationRequest | undefined;
   search: string;
-  status: string;
-  segment: string;
-  source: string;
+  tier: string;
+  tag: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface ListCustomersResponse {
   customers: Customer[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetCustomerRequest {
-  id: number;
-}
-
-export interface GetCustomerResponse {
-  customer: Customer | undefined;
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface CreateCustomerRequest {
@@ -60,20 +51,18 @@ export interface CreateCustomerRequest {
   lastName: string;
   email: string;
   phone: string;
-  company: string;
-  source: string;
-  segment: string;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  city: string;
+  country: string;
+  tags: string[];
   notes: string;
-  customFields: { [key: string]: string };
-}
-
-export interface CreateCustomerRequest_CustomFieldsEntry {
-  key: string;
-  value: string;
 }
 
 export interface CreateCustomerResponse {
-  customer: Customer | undefined;
+  customerId: number;
+  message: string;
 }
 
 export interface UpdateCustomerRequest {
@@ -82,20 +71,18 @@ export interface UpdateCustomerRequest {
   lastName: string;
   email: string;
   phone: string;
-  company: string;
-  status: string;
-  segment: string;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  city: string;
+  country: string;
+  tags: string[];
   notes: string;
-  customFields: { [key: string]: string };
-}
-
-export interface UpdateCustomerRequest_CustomFieldsEntry {
-  key: string;
-  value: string;
+  isActive?: boolean | undefined;
 }
 
 export interface UpdateCustomerResponse {
-  customer: Customer | undefined;
+  message: string;
 }
 
 export interface DeleteCustomerRequest {
@@ -103,47 +90,27 @@ export interface DeleteCustomerRequest {
 }
 
 export interface DeleteCustomerResponse {
-  success: boolean;
+  message: string;
 }
 
-export interface ImportCustomersRequest {
-  csvData: Uint8Array;
-  /** JSON field mapping */
-  mapping: string;
+export interface GetSegmentDetailRequest {
+  id: number;
 }
 
-export interface ImportCustomersResponse {
-  imported: number;
-  skipped: number;
-  errors: string[];
+export interface GetSegmentDetailResponse {
+  segment: Segment | undefined;
+  customers: Customer[];
 }
 
-export interface MergeCustomersRequest {
-  primaryId: number;
-  secondaryId: number;
+export interface GetSegmentCustomersRequest {
+  segmentId: number;
+  page: number;
+  pageSize: number;
 }
 
-export interface MergeCustomersResponse {
-  customer: Customer | undefined;
-}
-
-export interface ExportCustomersRequest {
-  /** csv, xlsx */
-  format: string;
-  status: string;
-  segment: string;
-}
-
-export interface ExportCustomersResponse {
-  data: Uint8Array;
-  filename: string;
-}
-
-export interface RecordVisitRequest {
-  customerId: number;
-  notes: string;
-}
-
-export interface RecordVisitResponse {
-  success: boolean;
+export interface GetSegmentCustomersResponse {
+  customers: Customer[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

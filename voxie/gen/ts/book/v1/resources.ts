@@ -6,81 +6,45 @@
 
 /* eslint-disable */
 
-export interface WorkingHours {
-  /** 0=Sunday, 6=Saturday */
-  dayOfWeek: number;
-  /** HH:MM */
-  startTime: string;
-  /** HH:MM */
-  endTime: string;
-  isOff: boolean;
-}
-
 export interface Resource {
   id: number;
-  businessId: number;
-  locationId: number;
+  ownerId: number;
   name: string;
-  email: string;
-  phone: string;
-  /** e.g., "Senior Stylist" */
-  title: string;
-  imageUrl: string;
-  color: string;
+  type: string;
+  capacity: number;
   isActive: boolean;
-  serviceIds: number[];
-  workingHours: WorkingHours[];
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ListResourcesRequest {
-  activeOnly: boolean;
-  serviceId: number;
 }
 
 export interface ListResourcesResponse {
   resources: Resource[];
 }
 
-export interface GetResourceRequest {
-  id: number;
-}
-
-export interface GetResourceResponse {
-  resource: Resource | undefined;
-}
-
 export interface CreateResourceRequest {
   name: string;
-  email: string;
-  phone: string;
-  title: string;
-  imageUrl: string;
-  color: string;
-  serviceIds: number[];
-  workingHours: WorkingHours[];
+  type: string;
+  capacity: number;
+  isActive: boolean;
 }
 
 export interface CreateResourceResponse {
-  resource: Resource | undefined;
+  id: number;
+  message: string;
 }
 
 export interface UpdateResourceRequest {
   id: number;
   name: string;
-  email: string;
-  phone: string;
-  title: string;
-  imageUrl: string;
-  color: string;
+  type: string;
+  capacity: number;
   isActive: boolean;
-  serviceIds: number[];
-  workingHours: WorkingHours[];
 }
 
 export interface UpdateResourceResponse {
-  resource: Resource | undefined;
+  message: string;
 }
 
 export interface DeleteResourceRequest {
@@ -88,5 +52,5 @@ export interface DeleteResourceRequest {
 }
 
 export interface DeleteResourceResponse {
-  success: boolean;
+  message: string;
 }

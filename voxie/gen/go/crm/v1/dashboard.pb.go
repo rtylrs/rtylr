@@ -21,127 +21,22 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DashboardStats struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	TotalCustomers        int32                  `protobuf:"varint,1,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
-	CustomersChange       float64                `protobuf:"fixed64,2,opt,name=customers_change,json=customersChange,proto3" json:"customers_change,omitempty"`
-	ActiveCustomers       int32                  `protobuf:"varint,3,opt,name=active_customers,json=activeCustomers,proto3" json:"active_customers,omitempty"`
-	NewCustomersThisMonth int32                  `protobuf:"varint,4,opt,name=new_customers_this_month,json=newCustomersThisMonth,proto3" json:"new_customers_this_month,omitempty"`
-	AvgLifetimeValue      float64                `protobuf:"fixed64,5,opt,name=avg_lifetime_value,json=avgLifetimeValue,proto3" json:"avg_lifetime_value,omitempty"`
-	TotalLoyaltyPoints    float64                `protobuf:"fixed64,6,opt,name=total_loyalty_points,json=totalLoyaltyPoints,proto3" json:"total_loyalty_points,omitempty"`
-	ActiveCampaigns       int32                  `protobuf:"varint,7,opt,name=active_campaigns,json=activeCampaigns,proto3" json:"active_campaigns,omitempty"`
-	TotalSegments         int32                  `protobuf:"varint,8,opt,name=total_segments,json=totalSegments,proto3" json:"total_segments,omitempty"`
-	TopCustomers          []*TopCustomer         `protobuf:"bytes,9,rep,name=top_customers,json=topCustomers,proto3" json:"top_customers,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
-}
-
-func (x *DashboardStats) Reset() {
-	*x = DashboardStats{}
-	mi := &file_crm_v1_dashboard_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DashboardStats) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DashboardStats) ProtoMessage() {}
-
-func (x *DashboardStats) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_dashboard_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DashboardStats.ProtoReflect.Descriptor instead.
-func (*DashboardStats) Descriptor() ([]byte, []int) {
-	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *DashboardStats) GetTotalCustomers() int32 {
-	if x != nil {
-		return x.TotalCustomers
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetCustomersChange() float64 {
-	if x != nil {
-		return x.CustomersChange
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetActiveCustomers() int32 {
-	if x != nil {
-		return x.ActiveCustomers
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetNewCustomersThisMonth() int32 {
-	if x != nil {
-		return x.NewCustomersThisMonth
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetAvgLifetimeValue() float64 {
-	if x != nil {
-		return x.AvgLifetimeValue
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetTotalLoyaltyPoints() float64 {
-	if x != nil {
-		return x.TotalLoyaltyPoints
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetActiveCampaigns() int32 {
-	if x != nil {
-		return x.ActiveCampaigns
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetTotalSegments() int32 {
-	if x != nil {
-		return x.TotalSegments
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetTopCustomers() []*TopCustomer {
-	if x != nil {
-		return x.TopCustomers
-	}
-	return nil
-}
-
 type TopCustomer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	TotalSpent    float64                `protobuf:"fixed64,3,opt,name=total_spent,json=totalSpent,proto3" json:"total_spent,omitempty"`
-	VisitCount    int32                  `protobuf:"varint,4,opt,name=visit_count,json=visitCount,proto3" json:"visit_count,omitempty"`
+	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	TotalSpent    float64                `protobuf:"fixed64,5,opt,name=total_spent,json=totalSpent,proto3" json:"total_spent,omitempty"`
+	LoyaltyPoints int32                  `protobuf:"varint,6,opt,name=loyalty_points,json=loyaltyPoints,proto3" json:"loyalty_points,omitempty"`
+	LoyaltyTier   string                 `protobuf:"bytes,7,opt,name=loyalty_tier,json=loyaltyTier,proto3" json:"loyalty_tier,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TopCustomer) Reset() {
 	*x = TopCustomer{}
-	mi := &file_crm_v1_dashboard_proto_msgTypes[1]
+	mi := &file_crm_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -153,7 +48,7 @@ func (x *TopCustomer) String() string {
 func (*TopCustomer) ProtoMessage() {}
 
 func (x *TopCustomer) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_dashboard_proto_msgTypes[1]
+	mi := &file_crm_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -166,7 +61,7 @@ func (x *TopCustomer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopCustomer.ProtoReflect.Descriptor instead.
 func (*TopCustomer) Descriptor() ([]byte, []int) {
-	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{1}
+	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TopCustomer) GetId() int64 {
@@ -176,9 +71,23 @@ func (x *TopCustomer) GetId() int64 {
 	return 0
 }
 
-func (x *TopCustomer) GetName() string {
+func (x *TopCustomer) GetFirstName() string {
 	if x != nil {
-		return x.Name
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *TopCustomer) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *TopCustomer) GetEmail() string {
+	if x != nil {
+		return x.Email
 	}
 	return ""
 }
@@ -190,33 +99,80 @@ func (x *TopCustomer) GetTotalSpent() float64 {
 	return 0
 }
 
-func (x *TopCustomer) GetVisitCount() int32 {
+func (x *TopCustomer) GetLoyaltyPoints() int32 {
 	if x != nil {
-		return x.VisitCount
+		return x.LoyaltyPoints
 	}
 	return 0
 }
 
-type GetDashboardStatsRequest struct {
+func (x *TopCustomer) GetLoyaltyTier() string {
+	if x != nil {
+		return x.LoyaltyTier
+	}
+	return ""
+}
+
+type GetDashboardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetDashboardStatsRequest) Reset() {
-	*x = GetDashboardStatsRequest{}
+func (x *GetDashboardRequest) Reset() {
+	*x = GetDashboardRequest{}
+	mi := &file_crm_v1_dashboard_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDashboardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDashboardRequest) ProtoMessage() {}
+
+func (x *GetDashboardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_dashboard_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDashboardRequest.ProtoReflect.Descriptor instead.
+func (*GetDashboardRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{1}
+}
+
+type GetDashboardResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	TotalCustomers       int32                  `protobuf:"varint,1,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
+	NewThisMonth         int32                  `protobuf:"varint,2,opt,name=new_this_month,json=newThisMonth,proto3" json:"new_this_month,omitempty"`
+	ActiveLoyaltyMembers int32                  `protobuf:"varint,3,opt,name=active_loyalty_members,json=activeLoyaltyMembers,proto3" json:"active_loyalty_members,omitempty"`
+	TopCustomers         []*TopCustomer         `protobuf:"bytes,4,rep,name=top_customers,json=topCustomers,proto3" json:"top_customers,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetDashboardResponse) Reset() {
+	*x = GetDashboardResponse{}
 	mi := &file_crm_v1_dashboard_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetDashboardStatsRequest) String() string {
+func (x *GetDashboardResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetDashboardStatsRequest) ProtoMessage() {}
+func (*GetDashboardResponse) ProtoMessage() {}
 
-func (x *GetDashboardStatsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetDashboardResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_crm_v1_dashboard_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -228,51 +184,35 @@ func (x *GetDashboardStatsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetDashboardStatsRequest.ProtoReflect.Descriptor instead.
-func (*GetDashboardStatsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetDashboardResponse.ProtoReflect.Descriptor instead.
+func (*GetDashboardResponse) Descriptor() ([]byte, []int) {
 	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{2}
 }
 
-type GetDashboardStatsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Stats         *DashboardStats        `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDashboardStatsResponse) Reset() {
-	*x = GetDashboardStatsResponse{}
-	mi := &file_crm_v1_dashboard_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDashboardStatsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDashboardStatsResponse) ProtoMessage() {}
-
-func (x *GetDashboardStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_dashboard_proto_msgTypes[3]
+func (x *GetDashboardResponse) GetTotalCustomers() int32 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.TotalCustomers
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use GetDashboardStatsResponse.ProtoReflect.Descriptor instead.
-func (*GetDashboardStatsResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetDashboardStatsResponse) GetStats() *DashboardStats {
+func (x *GetDashboardResponse) GetNewThisMonth() int32 {
 	if x != nil {
-		return x.Stats
+		return x.NewThisMonth
+	}
+	return 0
+}
+
+func (x *GetDashboardResponse) GetActiveLoyaltyMembers() int32 {
+	if x != nil {
+		return x.ActiveLoyaltyMembers
+	}
+	return 0
+}
+
+func (x *GetDashboardResponse) GetTopCustomers() []*TopCustomer {
+	if x != nil {
+		return x.TopCustomers
 	}
 	return nil
 }
@@ -281,27 +221,23 @@ var File_crm_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_crm_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/dashboard.proto\x12\x03crm\"\xb1\x03\n" +
-	"\x0eDashboardStats\x12'\n" +
-	"\x0ftotal_customers\x18\x01 \x01(\x05R\x0etotalCustomers\x12)\n" +
-	"\x10customers_change\x18\x02 \x01(\x01R\x0fcustomersChange\x12)\n" +
-	"\x10active_customers\x18\x03 \x01(\x05R\x0factiveCustomers\x127\n" +
-	"\x18new_customers_this_month\x18\x04 \x01(\x05R\x15newCustomersThisMonth\x12,\n" +
-	"\x12avg_lifetime_value\x18\x05 \x01(\x01R\x10avgLifetimeValue\x120\n" +
-	"\x14total_loyalty_points\x18\x06 \x01(\x01R\x12totalLoyaltyPoints\x12)\n" +
-	"\x10active_campaigns\x18\a \x01(\x05R\x0factiveCampaigns\x12%\n" +
-	"\x0etotal_segments\x18\b \x01(\x05R\rtotalSegments\x125\n" +
-	"\rtop_customers\x18\t \x03(\v2\x10.crm.TopCustomerR\ftopCustomers\"s\n" +
+	"\x16crm/v1/dashboard.proto\x12\x03crm\"\xda\x01\n" +
 	"\vTopCustomer\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
-	"\vtotal_spent\x18\x03 \x01(\x01R\n" +
-	"totalSpent\x12\x1f\n" +
-	"\vvisit_count\x18\x04 \x01(\x05R\n" +
-	"visitCount\"\x1a\n" +
-	"\x18GetDashboardStatsRequest\"F\n" +
-	"\x19GetDashboardStatsResponse\x12)\n" +
-	"\x05stats\x18\x01 \x01(\v2\x13.crm.DashboardStatsR\x05statsB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\x12\x1f\n" +
+	"\vtotal_spent\x18\x05 \x01(\x01R\n" +
+	"totalSpent\x12%\n" +
+	"\x0eloyalty_points\x18\x06 \x01(\x05R\rloyaltyPoints\x12!\n" +
+	"\floyalty_tier\x18\a \x01(\tR\vloyaltyTier\"\x15\n" +
+	"\x13GetDashboardRequest\"\xd2\x01\n" +
+	"\x14GetDashboardResponse\x12'\n" +
+	"\x0ftotal_customers\x18\x01 \x01(\x05R\x0etotalCustomers\x12$\n" +
+	"\x0enew_this_month\x18\x02 \x01(\x05R\fnewThisMonth\x124\n" +
+	"\x16active_loyalty_members\x18\x03 \x01(\x05R\x14activeLoyaltyMembers\x125\n" +
+	"\rtop_customers\x18\x04 \x03(\v2\x10.crm.TopCustomerR\ftopCustomersB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_dashboard_proto_rawDescOnce sync.Once
@@ -315,21 +251,19 @@ func file_crm_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_crm_v1_dashboard_proto_rawDescData
 }
 
-var file_crm_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_crm_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_crm_v1_dashboard_proto_goTypes = []any{
-	(*DashboardStats)(nil),            // 0: crm.DashboardStats
-	(*TopCustomer)(nil),               // 1: crm.TopCustomer
-	(*GetDashboardStatsRequest)(nil),  // 2: crm.GetDashboardStatsRequest
-	(*GetDashboardStatsResponse)(nil), // 3: crm.GetDashboardStatsResponse
+	(*TopCustomer)(nil),          // 0: crm.TopCustomer
+	(*GetDashboardRequest)(nil),  // 1: crm.GetDashboardRequest
+	(*GetDashboardResponse)(nil), // 2: crm.GetDashboardResponse
 }
 var file_crm_v1_dashboard_proto_depIdxs = []int32{
-	1, // 0: crm.DashboardStats.top_customers:type_name -> crm.TopCustomer
-	0, // 1: crm.GetDashboardStatsResponse.stats:type_name -> crm.DashboardStats
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: crm.GetDashboardResponse.top_customers:type_name -> crm.TopCustomer
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_crm_v1_dashboard_proto_init() }
@@ -343,7 +277,7 @@ func file_crm_v1_dashboard_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_v1_dashboard_proto_rawDesc), len(file_crm_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -21,33 +21,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ProfitLossReport struct {
+type GetPLReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TotalRevenue  float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	TotalExpenses float64                `protobuf:"fixed64,2,opt,name=total_expenses,json=totalExpenses,proto3" json:"total_expenses,omitempty"`
-	NetIncome     float64                `protobuf:"fixed64,3,opt,name=net_income,json=netIncome,proto3" json:"net_income,omitempty"`
-	RevenueLines  []*ReportLine          `protobuf:"bytes,4,rep,name=revenue_lines,json=revenueLines,proto3" json:"revenue_lines,omitempty"`
-	ExpenseLines  []*ReportLine          `protobuf:"bytes,5,rep,name=expense_lines,json=expenseLines,proto3" json:"expense_lines,omitempty"`
-	FromDate      string                 `protobuf:"bytes,6,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,7,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProfitLossReport) Reset() {
-	*x = ProfitLossReport{}
+func (x *GetPLReportRequest) Reset() {
+	*x = GetPLReportRequest{}
 	mi := &file_finance_v1_reports_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProfitLossReport) String() string {
+func (x *GetPLReportRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProfitLossReport) ProtoMessage() {}
+func (*GetPLReportRequest) ProtoMessage() {}
 
-func (x *ProfitLossReport) ProtoReflect() protoreflect.Message {
+func (x *GetPLReportRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_finance_v1_reports_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -59,87 +54,52 @@ func (x *ProfitLossReport) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProfitLossReport.ProtoReflect.Descriptor instead.
-func (*ProfitLossReport) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetPLReportRequest.ProtoReflect.Descriptor instead.
+func (*GetPLReportRequest) Descriptor() ([]byte, []int) {
 	return file_finance_v1_reports_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ProfitLossReport) GetTotalRevenue() float64 {
+func (x *GetPLReportRequest) GetPeriod() string {
 	if x != nil {
-		return x.TotalRevenue
-	}
-	return 0
-}
-
-func (x *ProfitLossReport) GetTotalExpenses() float64 {
-	if x != nil {
-		return x.TotalExpenses
-	}
-	return 0
-}
-
-func (x *ProfitLossReport) GetNetIncome() float64 {
-	if x != nil {
-		return x.NetIncome
-	}
-	return 0
-}
-
-func (x *ProfitLossReport) GetRevenueLines() []*ReportLine {
-	if x != nil {
-		return x.RevenueLines
-	}
-	return nil
-}
-
-func (x *ProfitLossReport) GetExpenseLines() []*ReportLine {
-	if x != nil {
-		return x.ExpenseLines
-	}
-	return nil
-}
-
-func (x *ProfitLossReport) GetFromDate() string {
-	if x != nil {
-		return x.FromDate
+		return x.Period
 	}
 	return ""
 }
 
-func (x *ProfitLossReport) GetToDate() string {
+func (x *GetPLReportRequest) GetDate() string {
 	if x != nil {
-		return x.ToDate
+		return x.Date
 	}
 	return ""
 }
 
-type BalanceSheetReport struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	TotalAssets      float64                `protobuf:"fixed64,1,opt,name=total_assets,json=totalAssets,proto3" json:"total_assets,omitempty"`
-	TotalLiabilities float64                `protobuf:"fixed64,2,opt,name=total_liabilities,json=totalLiabilities,proto3" json:"total_liabilities,omitempty"`
-	TotalEquity      float64                `protobuf:"fixed64,3,opt,name=total_equity,json=totalEquity,proto3" json:"total_equity,omitempty"`
-	AssetLines       []*ReportLine          `protobuf:"bytes,4,rep,name=asset_lines,json=assetLines,proto3" json:"asset_lines,omitempty"`
-	LiabilityLines   []*ReportLine          `protobuf:"bytes,5,rep,name=liability_lines,json=liabilityLines,proto3" json:"liability_lines,omitempty"`
-	EquityLines      []*ReportLine          `protobuf:"bytes,6,rep,name=equity_lines,json=equityLines,proto3" json:"equity_lines,omitempty"`
-	AsOfDate         string                 `protobuf:"bytes,7,opt,name=as_of_date,json=asOfDate,proto3" json:"as_of_date,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+type GetPLReportResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Period            string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	Revenue           float64                `protobuf:"fixed64,2,opt,name=revenue,proto3" json:"revenue,omitempty"`
+	Cogs              float64                `protobuf:"fixed64,3,opt,name=cogs,proto3" json:"cogs,omitempty"`
+	GrossProfit       float64                `protobuf:"fixed64,4,opt,name=gross_profit,json=grossProfit,proto3" json:"gross_profit,omitempty"`
+	OperatingExpenses float64                `protobuf:"fixed64,5,opt,name=operating_expenses,json=operatingExpenses,proto3" json:"operating_expenses,omitempty"`
+	NetProfit         float64                `protobuf:"fixed64,6,opt,name=net_profit,json=netProfit,proto3" json:"net_profit,omitempty"`
+	MarginPct         float64                `protobuf:"fixed64,7,opt,name=margin_pct,json=marginPct,proto3" json:"margin_pct,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
-func (x *BalanceSheetReport) Reset() {
-	*x = BalanceSheetReport{}
+func (x *GetPLReportResponse) Reset() {
+	*x = GetPLReportResponse{}
 	mi := &file_finance_v1_reports_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BalanceSheetReport) String() string {
+func (x *GetPLReportResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BalanceSheetReport) ProtoMessage() {}
+func (*GetPLReportResponse) ProtoMessage() {}
 
-func (x *BalanceSheetReport) ProtoReflect() protoreflect.Message {
+func (x *GetPLReportResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_finance_v1_reports_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -151,91 +111,88 @@ func (x *BalanceSheetReport) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BalanceSheetReport.ProtoReflect.Descriptor instead.
-func (*BalanceSheetReport) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetPLReportResponse.ProtoReflect.Descriptor instead.
+func (*GetPLReportResponse) Descriptor() ([]byte, []int) {
 	return file_finance_v1_reports_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *BalanceSheetReport) GetTotalAssets() float64 {
+func (x *GetPLReportResponse) GetPeriod() string {
 	if x != nil {
-		return x.TotalAssets
-	}
-	return 0
-}
-
-func (x *BalanceSheetReport) GetTotalLiabilities() float64 {
-	if x != nil {
-		return x.TotalLiabilities
-	}
-	return 0
-}
-
-func (x *BalanceSheetReport) GetTotalEquity() float64 {
-	if x != nil {
-		return x.TotalEquity
-	}
-	return 0
-}
-
-func (x *BalanceSheetReport) GetAssetLines() []*ReportLine {
-	if x != nil {
-		return x.AssetLines
-	}
-	return nil
-}
-
-func (x *BalanceSheetReport) GetLiabilityLines() []*ReportLine {
-	if x != nil {
-		return x.LiabilityLines
-	}
-	return nil
-}
-
-func (x *BalanceSheetReport) GetEquityLines() []*ReportLine {
-	if x != nil {
-		return x.EquityLines
-	}
-	return nil
-}
-
-func (x *BalanceSheetReport) GetAsOfDate() string {
-	if x != nil {
-		return x.AsOfDate
+		return x.Period
 	}
 	return ""
 }
 
-type CashFlowReport struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Operating      float64                `protobuf:"fixed64,1,opt,name=operating,proto3" json:"operating,omitempty"`
-	Investing      float64                `protobuf:"fixed64,2,opt,name=investing,proto3" json:"investing,omitempty"`
-	Financing      float64                `protobuf:"fixed64,3,opt,name=financing,proto3" json:"financing,omitempty"`
-	NetChange      float64                `protobuf:"fixed64,4,opt,name=net_change,json=netChange,proto3" json:"net_change,omitempty"`
-	OpeningBalance float64                `protobuf:"fixed64,5,opt,name=opening_balance,json=openingBalance,proto3" json:"opening_balance,omitempty"`
-	ClosingBalance float64                `protobuf:"fixed64,6,opt,name=closing_balance,json=closingBalance,proto3" json:"closing_balance,omitempty"`
-	OperatingLines []*ReportLine          `protobuf:"bytes,7,rep,name=operating_lines,json=operatingLines,proto3" json:"operating_lines,omitempty"`
-	InvestingLines []*ReportLine          `protobuf:"bytes,8,rep,name=investing_lines,json=investingLines,proto3" json:"investing_lines,omitempty"`
-	FinancingLines []*ReportLine          `protobuf:"bytes,9,rep,name=financing_lines,json=financingLines,proto3" json:"financing_lines,omitempty"`
-	FromDate       string                 `protobuf:"bytes,10,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate         string                 `protobuf:"bytes,11,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+func (x *GetPLReportResponse) GetRevenue() float64 {
+	if x != nil {
+		return x.Revenue
+	}
+	return 0
 }
 
-func (x *CashFlowReport) Reset() {
-	*x = CashFlowReport{}
+func (x *GetPLReportResponse) GetCogs() float64 {
+	if x != nil {
+		return x.Cogs
+	}
+	return 0
+}
+
+func (x *GetPLReportResponse) GetGrossProfit() float64 {
+	if x != nil {
+		return x.GrossProfit
+	}
+	return 0
+}
+
+func (x *GetPLReportResponse) GetOperatingExpenses() float64 {
+	if x != nil {
+		return x.OperatingExpenses
+	}
+	return 0
+}
+
+func (x *GetPLReportResponse) GetNetProfit() float64 {
+	if x != nil {
+		return x.NetProfit
+	}
+	return 0
+}
+
+func (x *GetPLReportResponse) GetMarginPct() float64 {
+	if x != nil {
+		return x.MarginPct
+	}
+	return 0
+}
+
+type TaxConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Rate          float64                `protobuf:"fixed64,4,opt,name=rate,proto3" json:"rate,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	IsDefault     bool                   `protobuf:"varint,6,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
+	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TaxConfig) Reset() {
+	*x = TaxConfig{}
 	mi := &file_finance_v1_reports_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CashFlowReport) String() string {
+func (x *TaxConfig) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CashFlowReport) ProtoMessage() {}
+func (*TaxConfig) ProtoMessage() {}
 
-func (x *CashFlowReport) ProtoReflect() protoreflect.Message {
+func (x *TaxConfig) ProtoReflect() protoreflect.Message {
 	mi := &file_finance_v1_reports_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -247,322 +204,236 @@ func (x *CashFlowReport) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CashFlowReport.ProtoReflect.Descriptor instead.
-func (*CashFlowReport) Descriptor() ([]byte, []int) {
+// Deprecated: Use TaxConfig.ProtoReflect.Descriptor instead.
+func (*TaxConfig) Descriptor() ([]byte, []int) {
 	return file_finance_v1_reports_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CashFlowReport) GetOperating() float64 {
+func (x *TaxConfig) GetId() int64 {
 	if x != nil {
-		return x.Operating
+		return x.Id
 	}
 	return 0
 }
 
-func (x *CashFlowReport) GetInvesting() float64 {
+func (x *TaxConfig) GetOwnerId() int64 {
 	if x != nil {
-		return x.Investing
+		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *CashFlowReport) GetFinancing() float64 {
-	if x != nil {
-		return x.Financing
-	}
-	return 0
-}
-
-func (x *CashFlowReport) GetNetChange() float64 {
-	if x != nil {
-		return x.NetChange
-	}
-	return 0
-}
-
-func (x *CashFlowReport) GetOpeningBalance() float64 {
-	if x != nil {
-		return x.OpeningBalance
-	}
-	return 0
-}
-
-func (x *CashFlowReport) GetClosingBalance() float64 {
-	if x != nil {
-		return x.ClosingBalance
-	}
-	return 0
-}
-
-func (x *CashFlowReport) GetOperatingLines() []*ReportLine {
-	if x != nil {
-		return x.OperatingLines
-	}
-	return nil
-}
-
-func (x *CashFlowReport) GetInvestingLines() []*ReportLine {
-	if x != nil {
-		return x.InvestingLines
-	}
-	return nil
-}
-
-func (x *CashFlowReport) GetFinancingLines() []*ReportLine {
-	if x != nil {
-		return x.FinancingLines
-	}
-	return nil
-}
-
-func (x *CashFlowReport) GetFromDate() string {
-	if x != nil {
-		return x.FromDate
-	}
-	return ""
-}
-
-func (x *CashFlowReport) GetToDate() string {
-	if x != nil {
-		return x.ToDate
-	}
-	return ""
-}
-
-type TaxReport struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TaxableIncome float64                `protobuf:"fixed64,1,opt,name=taxable_income,json=taxableIncome,proto3" json:"taxable_income,omitempty"`
-	TaxCollected  float64                `protobuf:"fixed64,2,opt,name=tax_collected,json=taxCollected,proto3" json:"tax_collected,omitempty"`
-	TaxPaid       float64                `protobuf:"fixed64,3,opt,name=tax_paid,json=taxPaid,proto3" json:"tax_paid,omitempty"`
-	NetTax        float64                `protobuf:"fixed64,4,opt,name=net_tax,json=netTax,proto3" json:"net_tax,omitempty"`
-	Lines         []*TaxLine             `protobuf:"bytes,5,rep,name=lines,proto3" json:"lines,omitempty"`
-	FromDate      string                 `protobuf:"bytes,6,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,7,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TaxReport) Reset() {
-	*x = TaxReport{}
-	mi := &file_finance_v1_reports_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TaxReport) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TaxReport) ProtoMessage() {}
-
-func (x *TaxReport) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TaxReport.ProtoReflect.Descriptor instead.
-func (*TaxReport) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *TaxReport) GetTaxableIncome() float64 {
-	if x != nil {
-		return x.TaxableIncome
-	}
-	return 0
-}
-
-func (x *TaxReport) GetTaxCollected() float64 {
-	if x != nil {
-		return x.TaxCollected
-	}
-	return 0
-}
-
-func (x *TaxReport) GetTaxPaid() float64 {
-	if x != nil {
-		return x.TaxPaid
-	}
-	return 0
-}
-
-func (x *TaxReport) GetNetTax() float64 {
-	if x != nil {
-		return x.NetTax
-	}
-	return 0
-}
-
-func (x *TaxReport) GetLines() []*TaxLine {
-	if x != nil {
-		return x.Lines
-	}
-	return nil
-}
-
-func (x *TaxReport) GetFromDate() string {
-	if x != nil {
-		return x.FromDate
-	}
-	return ""
-}
-
-func (x *TaxReport) GetToDate() string {
-	if x != nil {
-		return x.ToDate
-	}
-	return ""
-}
-
-type ReportLine struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReportLine) Reset() {
-	*x = ReportLine{}
-	mi := &file_finance_v1_reports_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReportLine) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReportLine) ProtoMessage() {}
-
-func (x *ReportLine) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReportLine.ProtoReflect.Descriptor instead.
-func (*ReportLine) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ReportLine) GetName() string {
+func (x *TaxConfig) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *ReportLine) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-type TaxLine struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	Rate          float64                `protobuf:"fixed64,2,opt,name=rate,proto3" json:"rate,omitempty"`
-	Taxable       float64                `protobuf:"fixed64,3,opt,name=taxable,proto3" json:"taxable,omitempty"`
-	Tax           float64                `protobuf:"fixed64,4,opt,name=tax,proto3" json:"tax,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TaxLine) Reset() {
-	*x = TaxLine{}
-	mi := &file_finance_v1_reports_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TaxLine) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TaxLine) ProtoMessage() {}
-
-func (x *TaxLine) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TaxLine.ProtoReflect.Descriptor instead.
-func (*TaxLine) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *TaxLine) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *TaxLine) GetRate() float64 {
+func (x *TaxConfig) GetRate() float64 {
 	if x != nil {
 		return x.Rate
 	}
 	return 0
 }
 
-func (x *TaxLine) GetTaxable() float64 {
+func (x *TaxConfig) GetType() string {
 	if x != nil {
-		return x.Taxable
+		return x.Type
 	}
-	return 0
+	return ""
 }
 
-func (x *TaxLine) GetTax() float64 {
+func (x *TaxConfig) GetIsDefault() bool {
 	if x != nil {
-		return x.Tax
+		return x.IsDefault
 	}
-	return 0
+	return false
 }
 
-type GetProfitLossRequest struct {
+func (x *TaxConfig) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *TaxConfig) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListTaxConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FromDate      string                 `protobuf:"bytes,1,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,2,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetProfitLossRequest) Reset() {
-	*x = GetProfitLossRequest{}
+func (x *ListTaxConfigRequest) Reset() {
+	*x = ListTaxConfigRequest{}
+	mi := &file_finance_v1_reports_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaxConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaxConfigRequest) ProtoMessage() {}
+
+func (x *ListTaxConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaxConfigRequest.ProtoReflect.Descriptor instead.
+func (*ListTaxConfigRequest) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{3}
+}
+
+type ListTaxConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Configs       []*TaxConfig           `protobuf:"bytes,1,rep,name=configs,proto3" json:"configs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTaxConfigResponse) Reset() {
+	*x = ListTaxConfigResponse{}
+	mi := &file_finance_v1_reports_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaxConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaxConfigResponse) ProtoMessage() {}
+
+func (x *ListTaxConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaxConfigResponse.ProtoReflect.Descriptor instead.
+func (*ListTaxConfigResponse) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListTaxConfigResponse) GetConfigs() []*TaxConfig {
+	if x != nil {
+		return x.Configs
+	}
+	return nil
+}
+
+type CreateTaxConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Rate          float64                `protobuf:"fixed64,2,opt,name=rate,proto3" json:"rate,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	IsDefault     bool                   `protobuf:"varint,4,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTaxConfigRequest) Reset() {
+	*x = CreateTaxConfigRequest{}
+	mi := &file_finance_v1_reports_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTaxConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTaxConfigRequest) ProtoMessage() {}
+
+func (x *CreateTaxConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTaxConfigRequest.ProtoReflect.Descriptor instead.
+func (*CreateTaxConfigRequest) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateTaxConfigRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateTaxConfigRequest) GetRate() float64 {
+	if x != nil {
+		return x.Rate
+	}
+	return 0
+}
+
+func (x *CreateTaxConfigRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *CreateTaxConfigRequest) GetIsDefault() bool {
+	if x != nil {
+		return x.IsDefault
+	}
+	return false
+}
+
+type CreateTaxConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *TaxConfig             `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTaxConfigResponse) Reset() {
+	*x = CreateTaxConfigResponse{}
 	mi := &file_finance_v1_reports_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetProfitLossRequest) String() string {
+func (x *CreateTaxConfigResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetProfitLossRequest) ProtoMessage() {}
+func (*CreateTaxConfigResponse) ProtoMessage() {}
 
-func (x *GetProfitLossRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateTaxConfigResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_finance_v1_reports_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -574,264 +445,29 @@ func (x *GetProfitLossRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetProfitLossRequest.ProtoReflect.Descriptor instead.
-func (*GetProfitLossRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateTaxConfigResponse.ProtoReflect.Descriptor instead.
+func (*CreateTaxConfigResponse) Descriptor() ([]byte, []int) {
 	return file_finance_v1_reports_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetProfitLossRequest) GetFromDate() string {
+func (x *CreateTaxConfigResponse) GetConfig() *TaxConfig {
 	if x != nil {
-		return x.FromDate
-	}
-	return ""
-}
-
-func (x *GetProfitLossRequest) GetToDate() string {
-	if x != nil {
-		return x.ToDate
-	}
-	return ""
-}
-
-type GetProfitLossResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Report        *ProfitLossReport      `protobuf:"bytes,1,opt,name=report,proto3" json:"report,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetProfitLossResponse) Reset() {
-	*x = GetProfitLossResponse{}
-	mi := &file_finance_v1_reports_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetProfitLossResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetProfitLossResponse) ProtoMessage() {}
-
-func (x *GetProfitLossResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetProfitLossResponse.ProtoReflect.Descriptor instead.
-func (*GetProfitLossResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetProfitLossResponse) GetReport() *ProfitLossReport {
-	if x != nil {
-		return x.Report
-	}
-	return nil
-}
-
-type GetBalanceSheetRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AsOfDate      string                 `protobuf:"bytes,1,opt,name=as_of_date,json=asOfDate,proto3" json:"as_of_date,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetBalanceSheetRequest) Reset() {
-	*x = GetBalanceSheetRequest{}
-	mi := &file_finance_v1_reports_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetBalanceSheetRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetBalanceSheetRequest) ProtoMessage() {}
-
-func (x *GetBalanceSheetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetBalanceSheetRequest.ProtoReflect.Descriptor instead.
-func (*GetBalanceSheetRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *GetBalanceSheetRequest) GetAsOfDate() string {
-	if x != nil {
-		return x.AsOfDate
-	}
-	return ""
-}
-
-type GetBalanceSheetResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Report        *BalanceSheetReport    `protobuf:"bytes,1,opt,name=report,proto3" json:"report,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetBalanceSheetResponse) Reset() {
-	*x = GetBalanceSheetResponse{}
-	mi := &file_finance_v1_reports_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetBalanceSheetResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetBalanceSheetResponse) ProtoMessage() {}
-
-func (x *GetBalanceSheetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetBalanceSheetResponse.ProtoReflect.Descriptor instead.
-func (*GetBalanceSheetResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetBalanceSheetResponse) GetReport() *BalanceSheetReport {
-	if x != nil {
-		return x.Report
-	}
-	return nil
-}
-
-type GetCashFlowRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FromDate      string                 `protobuf:"bytes,1,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,2,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCashFlowRequest) Reset() {
-	*x = GetCashFlowRequest{}
-	mi := &file_finance_v1_reports_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCashFlowRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCashFlowRequest) ProtoMessage() {}
-
-func (x *GetCashFlowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCashFlowRequest.ProtoReflect.Descriptor instead.
-func (*GetCashFlowRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *GetCashFlowRequest) GetFromDate() string {
-	if x != nil {
-		return x.FromDate
-	}
-	return ""
-}
-
-func (x *GetCashFlowRequest) GetToDate() string {
-	if x != nil {
-		return x.ToDate
-	}
-	return ""
-}
-
-type GetCashFlowResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Report        *CashFlowReport        `protobuf:"bytes,1,opt,name=report,proto3" json:"report,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCashFlowResponse) Reset() {
-	*x = GetCashFlowResponse{}
-	mi := &file_finance_v1_reports_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCashFlowResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCashFlowResponse) ProtoMessage() {}
-
-func (x *GetCashFlowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCashFlowResponse.ProtoReflect.Descriptor instead.
-func (*GetCashFlowResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *GetCashFlowResponse) GetReport() *CashFlowReport {
-	if x != nil {
-		return x.Report
+		return x.Config
 	}
 	return nil
 }
 
 type GetTaxReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FromDate      string                 `protobuf:"bytes,1,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	ToDate        string                 `protobuf:"bytes,2,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetTaxReportRequest) Reset() {
 	*x = GetTaxReportRequest{}
-	mi := &file_finance_v1_reports_proto_msgTypes[12]
+	mi := &file_finance_v1_reports_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -843,7 +479,7 @@ func (x *GetTaxReportRequest) String() string {
 func (*GetTaxReportRequest) ProtoMessage() {}
 
 func (x *GetTaxReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[12]
+	mi := &file_finance_v1_reports_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -856,33 +492,35 @@ func (x *GetTaxReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTaxReportRequest.ProtoReflect.Descriptor instead.
 func (*GetTaxReportRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_reports_proto_rawDescGZIP(), []int{12}
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetTaxReportRequest) GetFromDate() string {
+func (x *GetTaxReportRequest) GetPeriod() string {
 	if x != nil {
-		return x.FromDate
+		return x.Period
 	}
 	return ""
 }
 
-func (x *GetTaxReportRequest) GetToDate() string {
+func (x *GetTaxReportRequest) GetDate() string {
 	if x != nil {
-		return x.ToDate
+		return x.Date
 	}
 	return ""
 }
 
 type GetTaxReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Report        *TaxReport             `protobuf:"bytes,1,opt,name=report,proto3" json:"report,omitempty"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	TaxCollected  float64                `protobuf:"fixed64,2,opt,name=tax_collected,json=taxCollected,proto3" json:"tax_collected,omitempty"`
+	TaxOwed       float64                `protobuf:"fixed64,3,opt,name=tax_owed,json=taxOwed,proto3" json:"tax_owed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetTaxReportResponse) Reset() {
 	*x = GetTaxReportResponse{}
-	mi := &file_finance_v1_reports_proto_msgTypes[13]
+	mi := &file_finance_v1_reports_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -894,7 +532,7 @@ func (x *GetTaxReportResponse) String() string {
 func (*GetTaxReportResponse) ProtoMessage() {}
 
 func (x *GetTaxReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_reports_proto_msgTypes[13]
+	mi := &file_finance_v1_reports_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -907,12 +545,294 @@ func (x *GetTaxReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTaxReportResponse.ProtoReflect.Descriptor instead.
 func (*GetTaxReportResponse) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetTaxReportResponse) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+func (x *GetTaxReportResponse) GetTaxCollected() float64 {
+	if x != nil {
+		return x.TaxCollected
+	}
+	return 0
+}
+
+func (x *GetTaxReportResponse) GetTaxOwed() float64 {
+	if x != nil {
+		return x.TaxOwed
+	}
+	return 0
+}
+
+type ExpenseCategoryDetail struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	Icon          string                 `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExpenseCategoryDetail) Reset() {
+	*x = ExpenseCategoryDetail{}
+	mi := &file_finance_v1_reports_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExpenseCategoryDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExpenseCategoryDetail) ProtoMessage() {}
+
+func (x *ExpenseCategoryDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExpenseCategoryDetail.ProtoReflect.Descriptor instead.
+func (*ExpenseCategoryDetail) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ExpenseCategoryDetail) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ExpenseCategoryDetail) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *ExpenseCategoryDetail) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ExpenseCategoryDetail) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *ExpenseCategoryDetail) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+func (x *ExpenseCategoryDetail) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListExpenseCategoryDetailsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListExpenseCategoryDetailsRequest) Reset() {
+	*x = ListExpenseCategoryDetailsRequest{}
+	mi := &file_finance_v1_reports_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListExpenseCategoryDetailsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListExpenseCategoryDetailsRequest) ProtoMessage() {}
+
+func (x *ListExpenseCategoryDetailsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListExpenseCategoryDetailsRequest.ProtoReflect.Descriptor instead.
+func (*ListExpenseCategoryDetailsRequest) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{10}
+}
+
+type ListExpenseCategoryDetailsResponse struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Categories    []*ExpenseCategoryDetail `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListExpenseCategoryDetailsResponse) Reset() {
+	*x = ListExpenseCategoryDetailsResponse{}
+	mi := &file_finance_v1_reports_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListExpenseCategoryDetailsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListExpenseCategoryDetailsResponse) ProtoMessage() {}
+
+func (x *ListExpenseCategoryDetailsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListExpenseCategoryDetailsResponse.ProtoReflect.Descriptor instead.
+func (*ListExpenseCategoryDetailsResponse) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListExpenseCategoryDetailsResponse) GetCategories() []*ExpenseCategoryDetail {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
+type CreateExpenseCategoryDetailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Color         string                 `protobuf:"bytes,2,opt,name=color,proto3" json:"color,omitempty"`
+	Icon          string                 `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateExpenseCategoryDetailRequest) Reset() {
+	*x = CreateExpenseCategoryDetailRequest{}
+	mi := &file_finance_v1_reports_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateExpenseCategoryDetailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateExpenseCategoryDetailRequest) ProtoMessage() {}
+
+func (x *CreateExpenseCategoryDetailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateExpenseCategoryDetailRequest.ProtoReflect.Descriptor instead.
+func (*CreateExpenseCategoryDetailRequest) Descriptor() ([]byte, []int) {
+	return file_finance_v1_reports_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CreateExpenseCategoryDetailRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateExpenseCategoryDetailRequest) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *CreateExpenseCategoryDetailRequest) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+type CreateExpenseCategoryDetailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Category      *ExpenseCategoryDetail `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateExpenseCategoryDetailResponse) Reset() {
+	*x = CreateExpenseCategoryDetailResponse{}
+	mi := &file_finance_v1_reports_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateExpenseCategoryDetailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateExpenseCategoryDetailResponse) ProtoMessage() {}
+
+func (x *CreateExpenseCategoryDetailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_v1_reports_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateExpenseCategoryDetailResponse.ProtoReflect.Descriptor instead.
+func (*CreateExpenseCategoryDetailResponse) Descriptor() ([]byte, []int) {
 	return file_finance_v1_reports_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *GetTaxReportResponse) GetReport() *TaxReport {
+func (x *CreateExpenseCategoryDetailResponse) GetCategory() *ExpenseCategoryDetail {
 	if x != nil {
-		return x.Report
+		return x.Category
 	}
 	return nil
 }
@@ -921,77 +841,68 @@ var File_finance_v1_reports_proto protoreflect.FileDescriptor
 
 const file_finance_v1_reports_proto_rawDesc = "" +
 	"\n" +
-	"\x18finance/v1/reports.proto\x12\afinance\"\xa7\x02\n" +
-	"\x10ProfitLossReport\x12#\n" +
-	"\rtotal_revenue\x18\x01 \x01(\x01R\ftotalRevenue\x12%\n" +
-	"\x0etotal_expenses\x18\x02 \x01(\x01R\rtotalExpenses\x12\x1d\n" +
+	"\x18finance/v1/reports.proto\x12\afinance\"@\n" +
+	"\x12GetPLReportRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12\x12\n" +
+	"\x04date\x18\x02 \x01(\tR\x04date\"\xeb\x01\n" +
+	"\x13GetPLReportResponse\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12\x18\n" +
+	"\arevenue\x18\x02 \x01(\x01R\arevenue\x12\x12\n" +
+	"\x04cogs\x18\x03 \x01(\x01R\x04cogs\x12!\n" +
+	"\fgross_profit\x18\x04 \x01(\x01R\vgrossProfit\x12-\n" +
+	"\x12operating_expenses\x18\x05 \x01(\x01R\x11operatingExpenses\x12\x1d\n" +
 	"\n" +
-	"net_income\x18\x03 \x01(\x01R\tnetIncome\x128\n" +
-	"\rrevenue_lines\x18\x04 \x03(\v2\x13.finance.ReportLineR\frevenueLines\x128\n" +
-	"\rexpense_lines\x18\x05 \x03(\v2\x13.finance.ReportLineR\fexpenseLines\x12\x1b\n" +
-	"\tfrom_date\x18\x06 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\a \x01(\tR\x06toDate\"\xd1\x02\n" +
-	"\x12BalanceSheetReport\x12!\n" +
-	"\ftotal_assets\x18\x01 \x01(\x01R\vtotalAssets\x12+\n" +
-	"\x11total_liabilities\x18\x02 \x01(\x01R\x10totalLiabilities\x12!\n" +
-	"\ftotal_equity\x18\x03 \x01(\x01R\vtotalEquity\x124\n" +
-	"\vasset_lines\x18\x04 \x03(\v2\x13.finance.ReportLineR\n" +
-	"assetLines\x12<\n" +
-	"\x0fliability_lines\x18\x05 \x03(\v2\x13.finance.ReportLineR\x0eliabilityLines\x126\n" +
-	"\fequity_lines\x18\x06 \x03(\v2\x13.finance.ReportLineR\vequityLines\x12\x1c\n" +
+	"net_profit\x18\x06 \x01(\x01R\tnetProfit\x12\x1d\n" +
 	"\n" +
-	"as_of_date\x18\a \x01(\tR\basOfDate\"\xcb\x03\n" +
-	"\x0eCashFlowReport\x12\x1c\n" +
-	"\toperating\x18\x01 \x01(\x01R\toperating\x12\x1c\n" +
-	"\tinvesting\x18\x02 \x01(\x01R\tinvesting\x12\x1c\n" +
-	"\tfinancing\x18\x03 \x01(\x01R\tfinancing\x12\x1d\n" +
+	"margin_pct\x18\a \x01(\x01R\tmarginPct\"\xcd\x01\n" +
+	"\tTaxConfig\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
+	"\x04rate\x18\x04 \x01(\x01R\x04rate\x12\x12\n" +
+	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1d\n" +
 	"\n" +
-	"net_change\x18\x04 \x01(\x01R\tnetChange\x12'\n" +
-	"\x0fopening_balance\x18\x05 \x01(\x01R\x0eopeningBalance\x12'\n" +
-	"\x0fclosing_balance\x18\x06 \x01(\x01R\x0eclosingBalance\x12<\n" +
-	"\x0foperating_lines\x18\a \x03(\v2\x13.finance.ReportLineR\x0eoperatingLines\x12<\n" +
-	"\x0finvesting_lines\x18\b \x03(\v2\x13.finance.ReportLineR\x0einvestingLines\x12<\n" +
-	"\x0ffinancing_lines\x18\t \x03(\v2\x13.finance.ReportLineR\x0efinancingLines\x12\x1b\n" +
-	"\tfrom_date\x18\n" +
-	" \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\v \x01(\tR\x06toDate\"\xe9\x01\n" +
-	"\tTaxReport\x12%\n" +
-	"\x0etaxable_income\x18\x01 \x01(\x01R\rtaxableIncome\x12#\n" +
+	"is_default\x18\x06 \x01(\bR\tisDefault\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"\x16\n" +
+	"\x14ListTaxConfigRequest\"E\n" +
+	"\x15ListTaxConfigResponse\x12,\n" +
+	"\aconfigs\x18\x01 \x03(\v2\x12.finance.TaxConfigR\aconfigs\"s\n" +
+	"\x16CreateTaxConfigRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04rate\x18\x02 \x01(\x01R\x04rate\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x1d\n" +
+	"\n" +
+	"is_default\x18\x04 \x01(\bR\tisDefault\"E\n" +
+	"\x17CreateTaxConfigResponse\x12*\n" +
+	"\x06config\x18\x01 \x01(\v2\x12.finance.TaxConfigR\x06config\"A\n" +
+	"\x13GetTaxReportRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12\x12\n" +
+	"\x04date\x18\x02 \x01(\tR\x04date\"n\n" +
+	"\x14GetTaxReportResponse\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12#\n" +
 	"\rtax_collected\x18\x02 \x01(\x01R\ftaxCollected\x12\x19\n" +
-	"\btax_paid\x18\x03 \x01(\x01R\ataxPaid\x12\x17\n" +
-	"\anet_tax\x18\x04 \x01(\x01R\x06netTax\x12&\n" +
-	"\x05lines\x18\x05 \x03(\v2\x10.finance.TaxLineR\x05lines\x12\x1b\n" +
-	"\tfrom_date\x18\x06 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\a \x01(\tR\x06toDate\"8\n" +
+	"\btax_owed\x18\x03 \x01(\x01R\ataxOwed\"\x9f\x01\n" +
+	"\x15ExpenseCategoryDetail\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\x12\x12\n" +
+	"\x04icon\x18\x05 \x01(\tR\x04icon\x12\x1d\n" +
 	"\n" +
-	"ReportLine\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\"k\n" +
-	"\aTaxLine\x12 \n" +
-	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04rate\x18\x02 \x01(\x01R\x04rate\x12\x18\n" +
-	"\ataxable\x18\x03 \x01(\x01R\ataxable\x12\x10\n" +
-	"\x03tax\x18\x04 \x01(\x01R\x03tax\"L\n" +
-	"\x14GetProfitLossRequest\x12\x1b\n" +
-	"\tfrom_date\x18\x01 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x02 \x01(\tR\x06toDate\"J\n" +
-	"\x15GetProfitLossResponse\x121\n" +
-	"\x06report\x18\x01 \x01(\v2\x19.finance.ProfitLossReportR\x06report\"6\n" +
-	"\x16GetBalanceSheetRequest\x12\x1c\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\"#\n" +
+	"!ListExpenseCategoryDetailsRequest\"d\n" +
+	"\"ListExpenseCategoryDetailsResponse\x12>\n" +
 	"\n" +
-	"as_of_date\x18\x01 \x01(\tR\basOfDate\"N\n" +
-	"\x17GetBalanceSheetResponse\x123\n" +
-	"\x06report\x18\x01 \x01(\v2\x1b.finance.BalanceSheetReportR\x06report\"J\n" +
-	"\x12GetCashFlowRequest\x12\x1b\n" +
-	"\tfrom_date\x18\x01 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x02 \x01(\tR\x06toDate\"F\n" +
-	"\x13GetCashFlowResponse\x12/\n" +
-	"\x06report\x18\x01 \x01(\v2\x17.finance.CashFlowReportR\x06report\"K\n" +
-	"\x13GetTaxReportRequest\x12\x1b\n" +
-	"\tfrom_date\x18\x01 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x02 \x01(\tR\x06toDate\"B\n" +
-	"\x14GetTaxReportResponse\x12*\n" +
-	"\x06report\x18\x01 \x01(\v2\x12.finance.TaxReportR\x06reportB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"categories\x18\x01 \x03(\v2\x1e.finance.ExpenseCategoryDetailR\n" +
+	"categories\"b\n" +
+	"\"CreateExpenseCategoryDetailRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05color\x18\x02 \x01(\tR\x05color\x12\x12\n" +
+	"\x04icon\x18\x03 \x01(\tR\x04icon\"a\n" +
+	"#CreateExpenseCategoryDetailResponse\x12:\n" +
+	"\bcategory\x18\x01 \x01(\v2\x1e.finance.ExpenseCategoryDetailR\bcategoryB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_reports_proto_rawDescOnce sync.Once
@@ -1007,40 +918,31 @@ func file_finance_v1_reports_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_reports_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_finance_v1_reports_proto_goTypes = []any{
-	(*ProfitLossReport)(nil),        // 0: finance.ProfitLossReport
-	(*BalanceSheetReport)(nil),      // 1: finance.BalanceSheetReport
-	(*CashFlowReport)(nil),          // 2: finance.CashFlowReport
-	(*TaxReport)(nil),               // 3: finance.TaxReport
-	(*ReportLine)(nil),              // 4: finance.ReportLine
-	(*TaxLine)(nil),                 // 5: finance.TaxLine
-	(*GetProfitLossRequest)(nil),    // 6: finance.GetProfitLossRequest
-	(*GetProfitLossResponse)(nil),   // 7: finance.GetProfitLossResponse
-	(*GetBalanceSheetRequest)(nil),  // 8: finance.GetBalanceSheetRequest
-	(*GetBalanceSheetResponse)(nil), // 9: finance.GetBalanceSheetResponse
-	(*GetCashFlowRequest)(nil),      // 10: finance.GetCashFlowRequest
-	(*GetCashFlowResponse)(nil),     // 11: finance.GetCashFlowResponse
-	(*GetTaxReportRequest)(nil),     // 12: finance.GetTaxReportRequest
-	(*GetTaxReportResponse)(nil),    // 13: finance.GetTaxReportResponse
+	(*GetPLReportRequest)(nil),                  // 0: finance.GetPLReportRequest
+	(*GetPLReportResponse)(nil),                 // 1: finance.GetPLReportResponse
+	(*TaxConfig)(nil),                           // 2: finance.TaxConfig
+	(*ListTaxConfigRequest)(nil),                // 3: finance.ListTaxConfigRequest
+	(*ListTaxConfigResponse)(nil),               // 4: finance.ListTaxConfigResponse
+	(*CreateTaxConfigRequest)(nil),              // 5: finance.CreateTaxConfigRequest
+	(*CreateTaxConfigResponse)(nil),             // 6: finance.CreateTaxConfigResponse
+	(*GetTaxReportRequest)(nil),                 // 7: finance.GetTaxReportRequest
+	(*GetTaxReportResponse)(nil),                // 8: finance.GetTaxReportResponse
+	(*ExpenseCategoryDetail)(nil),               // 9: finance.ExpenseCategoryDetail
+	(*ListExpenseCategoryDetailsRequest)(nil),   // 10: finance.ListExpenseCategoryDetailsRequest
+	(*ListExpenseCategoryDetailsResponse)(nil),  // 11: finance.ListExpenseCategoryDetailsResponse
+	(*CreateExpenseCategoryDetailRequest)(nil),  // 12: finance.CreateExpenseCategoryDetailRequest
+	(*CreateExpenseCategoryDetailResponse)(nil), // 13: finance.CreateExpenseCategoryDetailResponse
 }
 var file_finance_v1_reports_proto_depIdxs = []int32{
-	4,  // 0: finance.ProfitLossReport.revenue_lines:type_name -> finance.ReportLine
-	4,  // 1: finance.ProfitLossReport.expense_lines:type_name -> finance.ReportLine
-	4,  // 2: finance.BalanceSheetReport.asset_lines:type_name -> finance.ReportLine
-	4,  // 3: finance.BalanceSheetReport.liability_lines:type_name -> finance.ReportLine
-	4,  // 4: finance.BalanceSheetReport.equity_lines:type_name -> finance.ReportLine
-	4,  // 5: finance.CashFlowReport.operating_lines:type_name -> finance.ReportLine
-	4,  // 6: finance.CashFlowReport.investing_lines:type_name -> finance.ReportLine
-	4,  // 7: finance.CashFlowReport.financing_lines:type_name -> finance.ReportLine
-	5,  // 8: finance.TaxReport.lines:type_name -> finance.TaxLine
-	0,  // 9: finance.GetProfitLossResponse.report:type_name -> finance.ProfitLossReport
-	1,  // 10: finance.GetBalanceSheetResponse.report:type_name -> finance.BalanceSheetReport
-	2,  // 11: finance.GetCashFlowResponse.report:type_name -> finance.CashFlowReport
-	3,  // 12: finance.GetTaxReportResponse.report:type_name -> finance.TaxReport
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	2, // 0: finance.ListTaxConfigResponse.configs:type_name -> finance.TaxConfig
+	2, // 1: finance.CreateTaxConfigResponse.config:type_name -> finance.TaxConfig
+	9, // 2: finance.ListExpenseCategoryDetailsResponse.categories:type_name -> finance.ExpenseCategoryDetail
+	9, // 3: finance.CreateExpenseCategoryDetailResponse.category:type_name -> finance.ExpenseCategoryDetail
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_finance_v1_reports_proto_init() }

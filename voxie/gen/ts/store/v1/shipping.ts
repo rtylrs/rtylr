@@ -6,98 +6,45 @@
 
 /* eslint-disable */
 
-export interface ShippingZone {
-  id: number;
-  storeId: number;
-  name: string;
-  countries: string[];
-  states: string[];
-  methods: ShippingMethod[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface ShippingMethod {
   id: number;
-  zoneId: number;
+  ownerId: number;
   name: string;
-  /** flat_rate, free, weight_based, price_based */
-  type: string;
   price: number;
-  minOrderAmount: number;
-  minWeight: number;
-  maxWeight: number;
-  estimatedDays: string;
+  estimatedDays: number;
   isActive: boolean;
+  createdAt: string;
 }
 
-export interface ListShippingZonesRequest {
+export interface ListShippingMethodsRequest {
 }
 
-export interface ListShippingZonesResponse {
-  zones: ShippingZone[];
-}
-
-export interface CreateShippingZoneRequest {
-  name: string;
-  countries: string[];
-  states: string[];
-}
-
-export interface CreateShippingZoneResponse {
-  zone: ShippingZone | undefined;
-}
-
-export interface UpdateShippingZoneRequest {
-  id: number;
-  name: string;
-  countries: string[];
-  states: string[];
-  isActive: boolean;
-}
-
-export interface UpdateShippingZoneResponse {
-  zone: ShippingZone | undefined;
-}
-
-export interface DeleteShippingZoneRequest {
-  id: number;
-}
-
-export interface DeleteShippingZoneResponse {
-  success: boolean;
+export interface ListShippingMethodsResponse {
+  methods: ShippingMethod[];
 }
 
 export interface CreateShippingMethodRequest {
-  zoneId: number;
   name: string;
-  type: string;
   price: number;
-  minOrderAmount: number;
-  minWeight: number;
-  maxWeight: number;
-  estimatedDays: string;
+  estimatedDays: number;
+  isActive: boolean;
 }
 
 export interface CreateShippingMethodResponse {
-  method: ShippingMethod | undefined;
+  id: number;
+  message: string;
 }
 
 export interface UpdateShippingMethodRequest {
   id: number;
   name: string;
-  type: string;
   price: number;
-  minOrderAmount: number;
-  minWeight: number;
-  maxWeight: number;
-  estimatedDays: string;
+  estimatedDays: number;
   isActive: boolean;
 }
 
 export interface UpdateShippingMethodResponse {
-  method: ShippingMethod | undefined;
+  message: string;
 }
 
 export interface DeleteShippingMethodRequest {
@@ -105,5 +52,5 @@ export interface DeleteShippingMethodRequest {
 }
 
 export interface DeleteShippingMethodResponse {
-  success: boolean;
+  message: string;
 }

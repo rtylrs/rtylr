@@ -5,54 +5,67 @@
 // source: pos/v1/cash.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface CashMovement {
   id: number;
+  businessId: number;
+  branchId: number;
+  terminalId: number;
   sessionId: number;
-  locationId: number;
-  /** drop, pickup, adjustment */
+  employeeId: number;
   type: string;
   amount: number;
   reason: string;
-  performedBy: string;
+  approvedBy: number;
   createdAt: string;
 }
 
 export interface ListCashMovementsRequest {
-  pagination: PaginationRequest | undefined;
   sessionId: number;
-  type: string;
 }
 
 export interface ListCashMovementsResponse {
   movements: CashMovement[];
-  pagination: PaginationResponse | undefined;
 }
 
 export interface CashDropRequest {
+  branchId: number;
+  terminalId: number;
+  sessionId: number;
+  employeeId: number;
   amount: number;
   reason: string;
 }
 
 export interface CashDropResponse {
-  movement: CashMovement | undefined;
+  movementId: number;
+  message: string;
 }
 
 export interface CashPickupRequest {
+  branchId: number;
+  terminalId: number;
+  sessionId: number;
+  employeeId: number;
   amount: number;
   reason: string;
 }
 
 export interface CashPickupResponse {
-  movement: CashMovement | undefined;
+  movementId: number;
+  message: string;
 }
 
 export interface CashAdjustRequest {
+  branchId: number;
+  terminalId: number;
+  sessionId: number;
+  employeeId: number;
   amount: number;
   reason: string;
 }
 
 export interface CashAdjustResponse {
-  movement: CashMovement | undefined;
+  movementId: number;
+  message: string;
 }

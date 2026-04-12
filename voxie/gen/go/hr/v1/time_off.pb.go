@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,17 +24,19 @@ const (
 type TimeOffRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
-	StaffName     string                 `protobuf:"bytes,3,opt,name=staff_name,json=staffName,proto3" json:"staff_name,omitempty"`
-	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`     // vacation, sick, personal, other
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"` // pending, approved, rejected
-	StartDate     string                 `protobuf:"bytes,6,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       string                 `protobuf:"bytes,7,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	Days          int32                  `protobuf:"varint,8,opt,name=days,proto3" json:"days,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,3,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	StartDate     string                 `protobuf:"bytes,5,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate       string                 `protobuf:"bytes,6,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	DaysCount     float64                `protobuf:"fixed64,7,opt,name=days_count,json=daysCount,proto3" json:"days_count,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	Reason        string                 `protobuf:"bytes,9,opt,name=reason,proto3" json:"reason,omitempty"`
-	ReviewerName  string                 `protobuf:"bytes,10,opt,name=reviewer_name,json=reviewerName,proto3" json:"reviewer_name,omitempty"`
-	ReviewedAt    string                 `protobuf:"bytes,11,opt,name=reviewed_at,json=reviewedAt,proto3" json:"reviewed_at,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ApprovedBy    int64                  `protobuf:"varint,10,opt,name=approved_by,json=approvedBy,proto3" json:"approved_by,omitempty"`
+	ApprovedAt    string                 `protobuf:"bytes,11,opt,name=approved_at,json=approvedAt,proto3" json:"approved_at,omitempty"`
+	Notes         string                 `protobuf:"bytes,12,opt,name=notes,proto3" json:"notes,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,6 +78,13 @@ func (x *TimeOffRequest) GetId() int64 {
 	return 0
 }
 
+func (x *TimeOffRequest) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *TimeOffRequest) GetStaffId() int64 {
 	if x != nil {
 		return x.StaffId
@@ -84,23 +92,9 @@ func (x *TimeOffRequest) GetStaffId() int64 {
 	return 0
 }
 
-func (x *TimeOffRequest) GetStaffName() string {
-	if x != nil {
-		return x.StaffName
-	}
-	return ""
-}
-
 func (x *TimeOffRequest) GetType() string {
 	if x != nil {
 		return x.Type
-	}
-	return ""
-}
-
-func (x *TimeOffRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
 	}
 	return ""
 }
@@ -119,11 +113,18 @@ func (x *TimeOffRequest) GetEndDate() string {
 	return ""
 }
 
-func (x *TimeOffRequest) GetDays() int32 {
+func (x *TimeOffRequest) GetDaysCount() float64 {
 	if x != nil {
-		return x.Days
+		return x.DaysCount
 	}
 	return 0
+}
+
+func (x *TimeOffRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 func (x *TimeOffRequest) GetReason() string {
@@ -133,16 +134,23 @@ func (x *TimeOffRequest) GetReason() string {
 	return ""
 }
 
-func (x *TimeOffRequest) GetReviewerName() string {
+func (x *TimeOffRequest) GetApprovedBy() int64 {
 	if x != nil {
-		return x.ReviewerName
+		return x.ApprovedBy
+	}
+	return 0
+}
+
+func (x *TimeOffRequest) GetApprovedAt() string {
+	if x != nil {
+		return x.ApprovedAt
 	}
 	return ""
 }
 
-func (x *TimeOffRequest) GetReviewedAt() string {
+func (x *TimeOffRequest) GetNotes() string {
 	if x != nil {
-		return x.ReviewedAt
+		return x.Notes
 	}
 	return ""
 }
@@ -154,30 +162,33 @@ func (x *TimeOffRequest) GetCreatedAt() string {
 	return ""
 }
 
-type ListTimeOffRequestsRequest struct {
+func (x *TimeOffRequest) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListTimeOffRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListTimeOffRequestsRequest) Reset() {
-	*x = ListTimeOffRequestsRequest{}
+func (x *ListTimeOffRequest) Reset() {
+	*x = ListTimeOffRequest{}
 	mi := &file_hr_v1_time_off_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListTimeOffRequestsRequest) String() string {
+func (x *ListTimeOffRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListTimeOffRequestsRequest) ProtoMessage() {}
+func (*ListTimeOffRequest) ProtoMessage() {}
 
-func (x *ListTimeOffRequestsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListTimeOffRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_v1_time_off_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -189,61 +200,32 @@ func (x *ListTimeOffRequestsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListTimeOffRequestsRequest.ProtoReflect.Descriptor instead.
-func (*ListTimeOffRequestsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListTimeOffRequest.ProtoReflect.Descriptor instead.
+func (*ListTimeOffRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListTimeOffRequestsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListTimeOffRequestsRequest) GetStaffId() int64 {
-	if x != nil {
-		return x.StaffId
-	}
-	return 0
-}
-
-func (x *ListTimeOffRequestsRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListTimeOffRequestsRequest) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-type ListTimeOffRequestsResponse struct {
+type ListTimeOffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Requests      []*TimeOffRequest      `protobuf:"bytes,1,rep,name=requests,proto3" json:"requests,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListTimeOffRequestsResponse) Reset() {
-	*x = ListTimeOffRequestsResponse{}
+func (x *ListTimeOffResponse) Reset() {
+	*x = ListTimeOffResponse{}
 	mi := &file_hr_v1_time_off_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListTimeOffRequestsResponse) String() string {
+func (x *ListTimeOffResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListTimeOffRequestsResponse) ProtoMessage() {}
+func (*ListTimeOffResponse) ProtoMessage() {}
 
-func (x *ListTimeOffRequestsResponse) ProtoReflect() protoreflect.Message {
+func (x *ListTimeOffResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_v1_time_off_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -255,139 +237,46 @@ func (x *ListTimeOffRequestsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListTimeOffRequestsResponse.ProtoReflect.Descriptor instead.
-func (*ListTimeOffRequestsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListTimeOffResponse.ProtoReflect.Descriptor instead.
+func (*ListTimeOffResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListTimeOffRequestsResponse) GetRequests() []*TimeOffRequest {
+func (x *ListTimeOffResponse) GetRequests() []*TimeOffRequest {
 	if x != nil {
 		return x.Requests
 	}
 	return nil
 }
 
-func (x *ListTimeOffRequestsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetTimeOffRequestRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetTimeOffRequestRequest) Reset() {
-	*x = GetTimeOffRequestRequest{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetTimeOffRequestRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetTimeOffRequestRequest) ProtoMessage() {}
-
-func (x *GetTimeOffRequestRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetTimeOffRequestRequest.ProtoReflect.Descriptor instead.
-func (*GetTimeOffRequestRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetTimeOffRequestRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetTimeOffRequestResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Request       *TimeOffRequest        `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetTimeOffRequestResponse) Reset() {
-	*x = GetTimeOffRequestResponse{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetTimeOffRequestResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetTimeOffRequestResponse) ProtoMessage() {}
-
-func (x *GetTimeOffRequestResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetTimeOffRequestResponse.ProtoReflect.Descriptor instead.
-func (*GetTimeOffRequestResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetTimeOffRequestResponse) GetRequest() *TimeOffRequest {
-	if x != nil {
-		return x.Request
-	}
-	return nil
-}
-
-type CreateTimeOffRequestRequest struct {
+type SubmitTimeOffRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StaffId       int64                  `protobuf:"varint,1,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	StartDate     string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
 	EndDate       string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	Reason        string                 `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`
+	DaysCount     float64                `protobuf:"fixed64,5,opt,name=days_count,json=daysCount,proto3" json:"days_count,omitempty"`
+	Reason        string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
+	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateTimeOffRequestRequest) Reset() {
-	*x = CreateTimeOffRequestRequest{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[5]
+func (x *SubmitTimeOffRequest) Reset() {
+	*x = SubmitTimeOffRequest{}
+	mi := &file_hr_v1_time_off_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateTimeOffRequestRequest) String() string {
+func (x *SubmitTimeOffRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateTimeOffRequestRequest) ProtoMessage() {}
+func (*SubmitTimeOffRequest) ProtoMessage() {}
 
-func (x *CreateTimeOffRequestRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[5]
+func (x *SubmitTimeOffRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_time_off_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -398,114 +287,82 @@ func (x *CreateTimeOffRequestRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateTimeOffRequestRequest.ProtoReflect.Descriptor instead.
-func (*CreateTimeOffRequestRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use SubmitTimeOffRequest.ProtoReflect.Descriptor instead.
+func (*SubmitTimeOffRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateTimeOffRequestRequest) GetStaffId() int64 {
+func (x *SubmitTimeOffRequest) GetStaffId() int64 {
 	if x != nil {
 		return x.StaffId
 	}
 	return 0
 }
 
-func (x *CreateTimeOffRequestRequest) GetType() string {
+func (x *SubmitTimeOffRequest) GetType() string {
 	if x != nil {
 		return x.Type
 	}
 	return ""
 }
 
-func (x *CreateTimeOffRequestRequest) GetStartDate() string {
+func (x *SubmitTimeOffRequest) GetStartDate() string {
 	if x != nil {
 		return x.StartDate
 	}
 	return ""
 }
 
-func (x *CreateTimeOffRequestRequest) GetEndDate() string {
+func (x *SubmitTimeOffRequest) GetEndDate() string {
 	if x != nil {
 		return x.EndDate
 	}
 	return ""
 }
 
-func (x *CreateTimeOffRequestRequest) GetReason() string {
+func (x *SubmitTimeOffRequest) GetDaysCount() float64 {
+	if x != nil {
+		return x.DaysCount
+	}
+	return 0
+}
+
+func (x *SubmitTimeOffRequest) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-type CreateTimeOffRequestResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Request       *TimeOffRequest        `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateTimeOffRequestResponse) Reset() {
-	*x = CreateTimeOffRequestResponse{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateTimeOffRequestResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateTimeOffRequestResponse) ProtoMessage() {}
-
-func (x *CreateTimeOffRequestResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[6]
+func (x *SubmitTimeOffRequest) GetNotes() string {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.Notes
 	}
-	return mi.MessageOf(x)
+	return ""
 }
 
-// Deprecated: Use CreateTimeOffRequestResponse.ProtoReflect.Descriptor instead.
-func (*CreateTimeOffRequestResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CreateTimeOffRequestResponse) GetRequest() *TimeOffRequest {
-	if x != nil {
-		return x.Request
-	}
-	return nil
-}
-
-type ApproveTimeOffRequest struct {
+type SubmitTimeOffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Approved      bool                   `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ApproveTimeOffRequest) Reset() {
-	*x = ApproveTimeOffRequest{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[7]
+func (x *SubmitTimeOffResponse) Reset() {
+	*x = SubmitTimeOffResponse{}
+	mi := &file_hr_v1_time_off_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ApproveTimeOffRequest) String() string {
+func (x *SubmitTimeOffResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApproveTimeOffRequest) ProtoMessage() {}
+func (*SubmitTimeOffResponse) ProtoMessage() {}
 
-func (x *ApproveTimeOffRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[7]
+func (x *SubmitTimeOffResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_time_off_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,42 +373,88 @@ func (x *ApproveTimeOffRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApproveTimeOffRequest.ProtoReflect.Descriptor instead.
-func (*ApproveTimeOffRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{7}
+// Deprecated: Use SubmitTimeOffResponse.ProtoReflect.Descriptor instead.
+func (*SubmitTimeOffResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ApproveTimeOffRequest) GetId() int64 {
+func (x *SubmitTimeOffResponse) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *ApproveTimeOffRequest) GetApproved() bool {
-	if x != nil {
-		return x.Approved
-	}
-	return false
+type ApproveTimeOffRequestMsg struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Notes         string                 `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ApproveTimeOffRequest) GetReason() string {
+func (x *ApproveTimeOffRequestMsg) Reset() {
+	*x = ApproveTimeOffRequestMsg{}
+	mi := &file_hr_v1_time_off_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveTimeOffRequestMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveTimeOffRequestMsg) ProtoMessage() {}
+
+func (x *ApproveTimeOffRequestMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_time_off_proto_msgTypes[5]
 	if x != nil {
-		return x.Reason
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveTimeOffRequestMsg.ProtoReflect.Descriptor instead.
+func (*ApproveTimeOffRequestMsg) Descriptor() ([]byte, []int) {
+	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ApproveTimeOffRequestMsg) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ApproveTimeOffRequestMsg) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ApproveTimeOffRequestMsg) GetNotes() string {
+	if x != nil {
+		return x.Notes
 	}
 	return ""
 }
 
 type ApproveTimeOffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Request       *TimeOffRequest        `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ApproveTimeOffResponse) Reset() {
 	*x = ApproveTimeOffResponse{}
-	mi := &file_hr_v1_time_off_proto_msgTypes[8]
+	mi := &file_hr_v1_time_off_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -563,7 +466,7 @@ func (x *ApproveTimeOffResponse) String() string {
 func (*ApproveTimeOffResponse) ProtoMessage() {}
 
 func (x *ApproveTimeOffResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_time_off_proto_msgTypes[8]
+	mi := &file_hr_v1_time_off_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -576,70 +479,64 @@ func (x *ApproveTimeOffResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveTimeOffResponse.ProtoReflect.Descriptor instead.
 func (*ApproveTimeOffResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{8}
+	return file_hr_v1_time_off_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ApproveTimeOffResponse) GetRequest() *TimeOffRequest {
+func (x *ApproveTimeOffResponse) GetSuccess() bool {
 	if x != nil {
-		return x.Request
+		return x.Success
 	}
-	return nil
+	return false
 }
 
 var File_hr_v1_time_off_proto protoreflect.FileDescriptor
 
 const file_hr_v1_time_off_proto_rawDesc = "" +
 	"\n" +
-	"\x14hr/v1/time_off.proto\x12\x02hr\x1a\x1acommon/v1/pagination.proto\"\xd1\x02\n" +
+	"\x14hr/v1/time_off.proto\x12\x02hr\"\x89\x03\n" +
 	"\x0eTimeOffRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x1d\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x19\n" +
+	"\bstaff_id\x18\x03 \x01(\x03R\astaffId\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1d\n" +
 	"\n" +
-	"staff_name\x18\x03 \x01(\tR\tstaffName\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1d\n" +
+	"start_date\x18\x05 \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x06 \x01(\tR\aendDate\x12\x1d\n" +
 	"\n" +
-	"start_date\x18\x06 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\a \x01(\tR\aendDate\x12\x12\n" +
-	"\x04days\x18\b \x01(\x05R\x04days\x12\x16\n" +
-	"\x06reason\x18\t \x01(\tR\x06reason\x12#\n" +
-	"\rreviewer_name\x18\n" +
-	" \x01(\tR\freviewerName\x12\x1f\n" +
-	"\vreviewed_at\x18\v \x01(\tR\n" +
-	"reviewedAt\x12\x1d\n" +
+	"days_count\x18\a \x01(\x01R\tdaysCount\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12\x16\n" +
+	"\x06reason\x18\t \x01(\tR\x06reason\x12\x1f\n" +
+	"\vapproved_by\x18\n" +
+	" \x01(\x03R\n" +
+	"approvedBy\x12\x1f\n" +
+	"\vapproved_at\x18\v \x01(\tR\n" +
+	"approvedAt\x12\x14\n" +
+	"\x05notes\x18\f \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\f \x01(\tR\tcreatedAt\"\x9e\x01\n" +
-	"\x1aListTimeOffRequestsRequest\x129\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\"\x89\x01\n" +
-	"\x1bListTimeOffRequestsResponse\x12.\n" +
-	"\brequests\x18\x01 \x03(\v2\x12.hr.TimeOffRequestR\brequests\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"*\n" +
-	"\x18GetTimeOffRequestRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"I\n" +
-	"\x19GetTimeOffRequestResponse\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.hr.TimeOffRequestR\arequest\"\x9e\x01\n" +
-	"\x1bCreateTimeOffRequestRequest\x12\x19\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"\x14\n" +
+	"\x12ListTimeOffRequest\"E\n" +
+	"\x13ListTimeOffResponse\x12.\n" +
+	"\brequests\x18\x01 \x03(\v2\x12.hr.TimeOffRequestR\brequests\"\xcc\x01\n" +
+	"\x14SubmitTimeOffRequest\x12\x19\n" +
 	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x03 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x04 \x01(\tR\aendDate\x12\x16\n" +
-	"\x06reason\x18\x05 \x01(\tR\x06reason\"L\n" +
-	"\x1cCreateTimeOffRequestResponse\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.hr.TimeOffRequestR\arequest\"[\n" +
-	"\x15ApproveTimeOffRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"F\n" +
-	"\x16ApproveTimeOffResponse\x12,\n" +
-	"\arequest\x18\x01 \x01(\v2\x12.hr.TimeOffRequestR\arequestB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
+	"\bend_date\x18\x04 \x01(\tR\aendDate\x12\x1d\n" +
+	"\n" +
+	"days_count\x18\x05 \x01(\x01R\tdaysCount\x12\x16\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\x12\x14\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\"'\n" +
+	"\x15SubmitTimeOffResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"X\n" +
+	"\x18ApproveTimeOffRequestMsg\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x14\n" +
+	"\x05notes\x18\x03 \x01(\tR\x05notes\"2\n" +
+	"\x16ApproveTimeOffResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
 
 var (
 	file_hr_v1_time_off_proto_rawDescOnce sync.Once
@@ -653,32 +550,23 @@ func file_hr_v1_time_off_proto_rawDescGZIP() []byte {
 	return file_hr_v1_time_off_proto_rawDescData
 }
 
-var file_hr_v1_time_off_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_hr_v1_time_off_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_hr_v1_time_off_proto_goTypes = []any{
-	(*TimeOffRequest)(nil),               // 0: hr.TimeOffRequest
-	(*ListTimeOffRequestsRequest)(nil),   // 1: hr.ListTimeOffRequestsRequest
-	(*ListTimeOffRequestsResponse)(nil),  // 2: hr.ListTimeOffRequestsResponse
-	(*GetTimeOffRequestRequest)(nil),     // 3: hr.GetTimeOffRequestRequest
-	(*GetTimeOffRequestResponse)(nil),    // 4: hr.GetTimeOffRequestResponse
-	(*CreateTimeOffRequestRequest)(nil),  // 5: hr.CreateTimeOffRequestRequest
-	(*CreateTimeOffRequestResponse)(nil), // 6: hr.CreateTimeOffRequestResponse
-	(*ApproveTimeOffRequest)(nil),        // 7: hr.ApproveTimeOffRequest
-	(*ApproveTimeOffResponse)(nil),       // 8: hr.ApproveTimeOffResponse
-	(*v1.PaginationRequest)(nil),         // 9: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),        // 10: common.PaginationResponse
+	(*TimeOffRequest)(nil),           // 0: hr.TimeOffRequest
+	(*ListTimeOffRequest)(nil),       // 1: hr.ListTimeOffRequest
+	(*ListTimeOffResponse)(nil),      // 2: hr.ListTimeOffResponse
+	(*SubmitTimeOffRequest)(nil),     // 3: hr.SubmitTimeOffRequest
+	(*SubmitTimeOffResponse)(nil),    // 4: hr.SubmitTimeOffResponse
+	(*ApproveTimeOffRequestMsg)(nil), // 5: hr.ApproveTimeOffRequestMsg
+	(*ApproveTimeOffResponse)(nil),   // 6: hr.ApproveTimeOffResponse
 }
 var file_hr_v1_time_off_proto_depIdxs = []int32{
-	9,  // 0: hr.ListTimeOffRequestsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: hr.ListTimeOffRequestsResponse.requests:type_name -> hr.TimeOffRequest
-	10, // 2: hr.ListTimeOffRequestsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: hr.GetTimeOffRequestResponse.request:type_name -> hr.TimeOffRequest
-	0,  // 4: hr.CreateTimeOffRequestResponse.request:type_name -> hr.TimeOffRequest
-	0,  // 5: hr.ApproveTimeOffResponse.request:type_name -> hr.TimeOffRequest
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: hr.ListTimeOffResponse.requests:type_name -> hr.TimeOffRequest
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_time_off_proto_init() }
@@ -692,7 +580,7 @@ func file_hr_v1_time_off_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_v1_time_off_proto_rawDesc), len(file_hr_v1_time_off_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

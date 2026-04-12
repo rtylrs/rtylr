@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,14 +22,24 @@ const (
 )
 
 type LoyaltyConfig struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Enabled         bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	PointsPerDollar float64                `protobuf:"fixed64,2,opt,name=points_per_dollar,json=pointsPerDollar,proto3" json:"points_per_dollar,omitempty"`
-	RedemptionRate  float64                `protobuf:"fixed64,3,opt,name=redemption_rate,json=redemptionRate,proto3" json:"redemption_rate,omitempty"` // points per $1 discount
-	MinRedeemPoints int32                  `protobuf:"varint,4,opt,name=min_redeem_points,json=minRedeemPoints,proto3" json:"min_redeem_points,omitempty"`
-	AutoEnroll      bool                   `protobuf:"varint,5,opt,name=auto_enroll,json=autoEnroll,proto3" json:"auto_enroll,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId               int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	IsEnabled             bool                   `protobuf:"varint,3,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
+	PointsPerCurrencyUnit float64                `protobuf:"fixed64,4,opt,name=points_per_currency_unit,json=pointsPerCurrencyUnit,proto3" json:"points_per_currency_unit,omitempty"`
+	CurrencyPerPoint      float64                `protobuf:"fixed64,5,opt,name=currency_per_point,json=currencyPerPoint,proto3" json:"currency_per_point,omitempty"`
+	BronzeMin             int32                  `protobuf:"varint,6,opt,name=bronze_min,json=bronzeMin,proto3" json:"bronze_min,omitempty"`
+	SilverMin             int32                  `protobuf:"varint,7,opt,name=silver_min,json=silverMin,proto3" json:"silver_min,omitempty"`
+	GoldMin               int32                  `protobuf:"varint,8,opt,name=gold_min,json=goldMin,proto3" json:"gold_min,omitempty"`
+	PlatinumMin           int32                  `protobuf:"varint,9,opt,name=platinum_min,json=platinumMin,proto3" json:"platinum_min,omitempty"`
+	BronzeDiscountPct     float64                `protobuf:"fixed64,10,opt,name=bronze_discount_pct,json=bronzeDiscountPct,proto3" json:"bronze_discount_pct,omitempty"`
+	SilverDiscountPct     float64                `protobuf:"fixed64,11,opt,name=silver_discount_pct,json=silverDiscountPct,proto3" json:"silver_discount_pct,omitempty"`
+	GoldDiscountPct       float64                `protobuf:"fixed64,12,opt,name=gold_discount_pct,json=goldDiscountPct,proto3" json:"gold_discount_pct,omitempty"`
+	PlatinumDiscountPct   float64                `protobuf:"fixed64,13,opt,name=platinum_discount_pct,json=platinumDiscountPct,proto3" json:"platinum_discount_pct,omitempty"`
+	PointsExpiryDays      int32                  `protobuf:"varint,14,opt,name=points_expiry_days,json=pointsExpiryDays,proto3" json:"points_expiry_days,omitempty"`
+	UpdatedAt             string                 `protobuf:"bytes,15,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *LoyaltyConfig) Reset() {
@@ -63,39 +72,109 @@ func (*LoyaltyConfig) Descriptor() ([]byte, []int) {
 	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LoyaltyConfig) GetEnabled() bool {
+func (x *LoyaltyConfig) GetId() int64 {
 	if x != nil {
-		return x.Enabled
+		return x.Id
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetIsEnabled() bool {
+	if x != nil {
+		return x.IsEnabled
 	}
 	return false
 }
 
-func (x *LoyaltyConfig) GetPointsPerDollar() float64 {
+func (x *LoyaltyConfig) GetPointsPerCurrencyUnit() float64 {
 	if x != nil {
-		return x.PointsPerDollar
+		return x.PointsPerCurrencyUnit
 	}
 	return 0
 }
 
-func (x *LoyaltyConfig) GetRedemptionRate() float64 {
+func (x *LoyaltyConfig) GetCurrencyPerPoint() float64 {
 	if x != nil {
-		return x.RedemptionRate
+		return x.CurrencyPerPoint
 	}
 	return 0
 }
 
-func (x *LoyaltyConfig) GetMinRedeemPoints() int32 {
+func (x *LoyaltyConfig) GetBronzeMin() int32 {
 	if x != nil {
-		return x.MinRedeemPoints
+		return x.BronzeMin
 	}
 	return 0
 }
 
-func (x *LoyaltyConfig) GetAutoEnroll() bool {
+func (x *LoyaltyConfig) GetSilverMin() int32 {
 	if x != nil {
-		return x.AutoEnroll
+		return x.SilverMin
 	}
-	return false
+	return 0
+}
+
+func (x *LoyaltyConfig) GetGoldMin() int32 {
+	if x != nil {
+		return x.GoldMin
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetPlatinumMin() int32 {
+	if x != nil {
+		return x.PlatinumMin
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetBronzeDiscountPct() float64 {
+	if x != nil {
+		return x.BronzeDiscountPct
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetSilverDiscountPct() float64 {
+	if x != nil {
+		return x.SilverDiscountPct
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetGoldDiscountPct() float64 {
+	if x != nil {
+		return x.GoldDiscountPct
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetPlatinumDiscountPct() float64 {
+	if x != nil {
+		return x.PlatinumDiscountPct
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetPointsExpiryDays() int32 {
+	if x != nil {
+		return x.PointsExpiryDays
+	}
+	return 0
+}
+
+func (x *LoyaltyConfig) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
 }
 
 type GetLoyaltyConfigRequest struct {
@@ -179,10 +258,21 @@ func (x *GetLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
 }
 
 type UpdateLoyaltyConfigRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *LoyaltyConfig         `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	IsEnabled             bool                   `protobuf:"varint,1,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
+	PointsPerCurrencyUnit float64                `protobuf:"fixed64,2,opt,name=points_per_currency_unit,json=pointsPerCurrencyUnit,proto3" json:"points_per_currency_unit,omitempty"`
+	CurrencyPerPoint      float64                `protobuf:"fixed64,3,opt,name=currency_per_point,json=currencyPerPoint,proto3" json:"currency_per_point,omitempty"`
+	BronzeMin             int32                  `protobuf:"varint,4,opt,name=bronze_min,json=bronzeMin,proto3" json:"bronze_min,omitempty"`
+	SilverMin             int32                  `protobuf:"varint,5,opt,name=silver_min,json=silverMin,proto3" json:"silver_min,omitempty"`
+	GoldMin               int32                  `protobuf:"varint,6,opt,name=gold_min,json=goldMin,proto3" json:"gold_min,omitempty"`
+	PlatinumMin           int32                  `protobuf:"varint,7,opt,name=platinum_min,json=platinumMin,proto3" json:"platinum_min,omitempty"`
+	BronzeDiscountPct     float64                `protobuf:"fixed64,8,opt,name=bronze_discount_pct,json=bronzeDiscountPct,proto3" json:"bronze_discount_pct,omitempty"`
+	SilverDiscountPct     float64                `protobuf:"fixed64,9,opt,name=silver_discount_pct,json=silverDiscountPct,proto3" json:"silver_discount_pct,omitempty"`
+	GoldDiscountPct       float64                `protobuf:"fixed64,10,opt,name=gold_discount_pct,json=goldDiscountPct,proto3" json:"gold_discount_pct,omitempty"`
+	PlatinumDiscountPct   float64                `protobuf:"fixed64,11,opt,name=platinum_discount_pct,json=platinumDiscountPct,proto3" json:"platinum_discount_pct,omitempty"`
+	PointsExpiryDays      int32                  `protobuf:"varint,12,opt,name=points_expiry_days,json=pointsExpiryDays,proto3" json:"points_expiry_days,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *UpdateLoyaltyConfigRequest) Reset() {
@@ -215,16 +305,93 @@ func (*UpdateLoyaltyConfigRequest) Descriptor() ([]byte, []int) {
 	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpdateLoyaltyConfigRequest) GetConfig() *LoyaltyConfig {
+func (x *UpdateLoyaltyConfigRequest) GetIsEnabled() bool {
 	if x != nil {
-		return x.Config
+		return x.IsEnabled
 	}
-	return nil
+	return false
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPointsPerCurrencyUnit() float64 {
+	if x != nil {
+		return x.PointsPerCurrencyUnit
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetCurrencyPerPoint() float64 {
+	if x != nil {
+		return x.CurrencyPerPoint
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetBronzeMin() int32 {
+	if x != nil {
+		return x.BronzeMin
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetSilverMin() int32 {
+	if x != nil {
+		return x.SilverMin
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetGoldMin() int32 {
+	if x != nil {
+		return x.GoldMin
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPlatinumMin() int32 {
+	if x != nil {
+		return x.PlatinumMin
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetBronzeDiscountPct() float64 {
+	if x != nil {
+		return x.BronzeDiscountPct
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetSilverDiscountPct() float64 {
+	if x != nil {
+		return x.SilverDiscountPct
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetGoldDiscountPct() float64 {
+	if x != nil {
+		return x.GoldDiscountPct
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPlatinumDiscountPct() float64 {
+	if x != nil {
+		return x.PlatinumDiscountPct
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPointsExpiryDays() int32 {
+	if x != nil {
+		return x.PointsExpiryDays
+	}
+	return 0
 }
 
 type UpdateLoyaltyConfigResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *LoyaltyConfig         `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,22 +426,26 @@ func (*UpdateLoyaltyConfigResponse) Descriptor() ([]byte, []int) {
 	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
+func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
 	if x != nil {
-		return x.Config
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type LoyaltyTransaction struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	CustomerId    int64                  `protobuf:"varint,2,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // earn, redeem, adjust
-	Points        float64                `protobuf:"fixed64,4,opt,name=points,proto3" json:"points,omitempty"`
-	BalanceAfter  float64                `protobuf:"fixed64,5,opt,name=balance_after,json=balanceAfter,proto3" json:"balance_after,omitempty"`
-	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	CustomerId    int64                  `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	Points        int32                  `protobuf:"varint,5,opt,name=points,proto3" json:"points,omitempty"`
+	BalanceBefore int32                  `protobuf:"varint,6,opt,name=balance_before,json=balanceBefore,proto3" json:"balance_before,omitempty"`
+	BalanceAfter  int32                  `protobuf:"varint,7,opt,name=balance_after,json=balanceAfter,proto3" json:"balance_after,omitempty"`
+	Description   string                 `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
+	ReferenceId   *int64                 `protobuf:"varint,9,opt,name=reference_id,json=referenceId,proto3,oneof" json:"reference_id,omitempty"`
+	ReferenceType string                 `protobuf:"bytes,10,opt,name=reference_type,json=referenceType,proto3" json:"reference_type,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -316,6 +487,13 @@ func (x *LoyaltyTransaction) GetId() int64 {
 	return 0
 }
 
+func (x *LoyaltyTransaction) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *LoyaltyTransaction) GetCustomerId() int64 {
 	if x != nil {
 		return x.CustomerId
@@ -330,14 +508,21 @@ func (x *LoyaltyTransaction) GetType() string {
 	return ""
 }
 
-func (x *LoyaltyTransaction) GetPoints() float64 {
+func (x *LoyaltyTransaction) GetPoints() int32 {
 	if x != nil {
 		return x.Points
 	}
 	return 0
 }
 
-func (x *LoyaltyTransaction) GetBalanceAfter() float64 {
+func (x *LoyaltyTransaction) GetBalanceBefore() int32 {
+	if x != nil {
+		return x.BalanceBefore
+	}
+	return 0
+}
+
+func (x *LoyaltyTransaction) GetBalanceAfter() int32 {
 	if x != nil {
 		return x.BalanceAfter
 	}
@@ -347,6 +532,20 @@ func (x *LoyaltyTransaction) GetBalanceAfter() float64 {
 func (x *LoyaltyTransaction) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *LoyaltyTransaction) GetReferenceId() int64 {
+	if x != nil && x.ReferenceId != nil {
+		return *x.ReferenceId
+	}
+	return 0
+}
+
+func (x *LoyaltyTransaction) GetReferenceType() string {
+	if x != nil {
+		return x.ReferenceType
 	}
 	return ""
 }
@@ -361,7 +560,8 @@ func (x *LoyaltyTransaction) GetCreatedAt() string {
 type ListLoyaltyTransactionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -403,17 +603,26 @@ func (x *ListLoyaltyTransactionsRequest) GetCustomerId() int64 {
 	return 0
 }
 
-func (x *ListLoyaltyTransactionsRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListLoyaltyTransactionsRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *ListLoyaltyTransactionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type ListLoyaltyTransactionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Transactions  []*LoyaltyTransaction  `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -455,18 +664,34 @@ func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransactio
 	return nil
 }
 
-func (x *ListLoyaltyTransactionsResponse) GetPagination() *v1.PaginationResponse {
+func (x *ListLoyaltyTransactionsResponse) GetTotal() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Total
 	}
-	return nil
+	return 0
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
 }
 
 type AwardPointsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Points        float64                `protobuf:"fixed64,2,opt,name=points,proto3" json:"points,omitempty"`
+	Points        int32                  `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ReferenceId   *int64                 `protobuf:"varint,4,opt,name=reference_id,json=referenceId,proto3,oneof" json:"reference_id,omitempty"`
+	ReferenceType string                 `protobuf:"bytes,5,opt,name=reference_type,json=referenceType,proto3" json:"reference_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -508,7 +733,7 @@ func (x *AwardPointsRequest) GetCustomerId() int64 {
 	return 0
 }
 
-func (x *AwardPointsRequest) GetPoints() float64 {
+func (x *AwardPointsRequest) GetPoints() int32 {
 	if x != nil {
 		return x.Points
 	}
@@ -522,9 +747,23 @@ func (x *AwardPointsRequest) GetDescription() string {
 	return ""
 }
 
+func (x *AwardPointsRequest) GetReferenceId() int64 {
+	if x != nil && x.ReferenceId != nil {
+		return *x.ReferenceId
+	}
+	return 0
+}
+
+func (x *AwardPointsRequest) GetReferenceType() string {
+	if x != nil {
+		return x.ReferenceType
+	}
+	return ""
+}
+
 type AwardPointsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	NewBalance    float64                `protobuf:"fixed64,1,opt,name=new_balance,json=newBalance,proto3" json:"new_balance,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -559,18 +798,20 @@ func (*AwardPointsResponse) Descriptor() ([]byte, []int) {
 	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *AwardPointsResponse) GetNewBalance() float64 {
+func (x *AwardPointsResponse) GetMessage() string {
 	if x != nil {
-		return x.NewBalance
+		return x.Message
 	}
-	return 0
+	return ""
 }
 
 type RedeemPointsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Points        float64                `protobuf:"fixed64,2,opt,name=points,proto3" json:"points,omitempty"`
+	Points        int32                  `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ReferenceId   *int64                 `protobuf:"varint,4,opt,name=reference_id,json=referenceId,proto3,oneof" json:"reference_id,omitempty"`
+	ReferenceType string                 `protobuf:"bytes,5,opt,name=reference_type,json=referenceType,proto3" json:"reference_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -612,7 +853,7 @@ func (x *RedeemPointsRequest) GetCustomerId() int64 {
 	return 0
 }
 
-func (x *RedeemPointsRequest) GetPoints() float64 {
+func (x *RedeemPointsRequest) GetPoints() int32 {
 	if x != nil {
 		return x.Points
 	}
@@ -626,12 +867,25 @@ func (x *RedeemPointsRequest) GetDescription() string {
 	return ""
 }
 
+func (x *RedeemPointsRequest) GetReferenceId() int64 {
+	if x != nil && x.ReferenceId != nil {
+		return *x.ReferenceId
+	}
+	return 0
+}
+
+func (x *RedeemPointsRequest) GetReferenceType() string {
+	if x != nil {
+		return x.ReferenceType
+	}
+	return ""
+}
+
 type RedeemPointsResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	NewBalance     float64                `protobuf:"fixed64,1,opt,name=new_balance,json=newBalance,proto3" json:"new_balance,omitempty"`
-	DiscountAmount float64                `protobuf:"fixed64,2,opt,name=discount_amount,json=discountAmount,proto3" json:"discount_amount,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RedeemPointsResponse) Reset() {
@@ -664,77 +918,590 @@ func (*RedeemPointsResponse) Descriptor() ([]byte, []int) {
 	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *RedeemPointsResponse) GetNewBalance() float64 {
+func (x *RedeemPointsResponse) GetMessage() string {
 	if x != nil {
-		return x.NewBalance
+		return x.Message
+	}
+	return ""
+}
+
+type LoyaltyTier struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	MinPoints     int32                  `protobuf:"varint,4,opt,name=min_points,json=minPoints,proto3" json:"min_points,omitempty"`
+	DiscountPct   float64                `protobuf:"fixed64,5,opt,name=discount_pct,json=discountPct,proto3" json:"discount_pct,omitempty"`
+	Perks         string                 `protobuf:"bytes,6,opt,name=perks,proto3" json:"perks,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,7,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoyaltyTier) Reset() {
+	*x = LoyaltyTier{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoyaltyTier) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoyaltyTier) ProtoMessage() {}
+
+func (x *LoyaltyTier) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoyaltyTier.ProtoReflect.Descriptor instead.
+func (*LoyaltyTier) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *LoyaltyTier) GetId() int64 {
+	if x != nil {
+		return x.Id
 	}
 	return 0
 }
 
-func (x *RedeemPointsResponse) GetDiscountAmount() float64 {
+func (x *LoyaltyTier) GetOwnerId() int64 {
 	if x != nil {
-		return x.DiscountAmount
+		return x.OwnerId
 	}
 	return 0
+}
+
+func (x *LoyaltyTier) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *LoyaltyTier) GetMinPoints() int32 {
+	if x != nil {
+		return x.MinPoints
+	}
+	return 0
+}
+
+func (x *LoyaltyTier) GetDiscountPct() float64 {
+	if x != nil {
+		return x.DiscountPct
+	}
+	return 0
+}
+
+func (x *LoyaltyTier) GetPerks() string {
+	if x != nil {
+		return x.Perks
+	}
+	return ""
+}
+
+func (x *LoyaltyTier) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+func (x *LoyaltyTier) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *LoyaltyTier) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListLoyaltyTiersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListLoyaltyTiersRequest) Reset() {
+	*x = ListLoyaltyTiersRequest{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLoyaltyTiersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLoyaltyTiersRequest) ProtoMessage() {}
+
+func (x *ListLoyaltyTiersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListLoyaltyTiersRequest.ProtoReflect.Descriptor instead.
+func (*ListLoyaltyTiersRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{13}
+}
+
+type ListLoyaltyTiersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tiers         []*LoyaltyTier         `protobuf:"bytes,1,rep,name=tiers,proto3" json:"tiers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListLoyaltyTiersResponse) Reset() {
+	*x = ListLoyaltyTiersResponse{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLoyaltyTiersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLoyaltyTiersResponse) ProtoMessage() {}
+
+func (x *ListLoyaltyTiersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListLoyaltyTiersResponse.ProtoReflect.Descriptor instead.
+func (*ListLoyaltyTiersResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListLoyaltyTiersResponse) GetTiers() []*LoyaltyTier {
+	if x != nil {
+		return x.Tiers
+	}
+	return nil
+}
+
+type CreateLoyaltyTierRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	MinPoints     int32                  `protobuf:"varint,2,opt,name=min_points,json=minPoints,proto3" json:"min_points,omitempty"`
+	DiscountPct   float64                `protobuf:"fixed64,3,opt,name=discount_pct,json=discountPct,proto3" json:"discount_pct,omitempty"`
+	Perks         string                 `protobuf:"bytes,4,opt,name=perks,proto3" json:"perks,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,5,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLoyaltyTierRequest) Reset() {
+	*x = CreateLoyaltyTierRequest{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLoyaltyTierRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLoyaltyTierRequest) ProtoMessage() {}
+
+func (x *CreateLoyaltyTierRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLoyaltyTierRequest.ProtoReflect.Descriptor instead.
+func (*CreateLoyaltyTierRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CreateLoyaltyTierRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateLoyaltyTierRequest) GetMinPoints() int32 {
+	if x != nil {
+		return x.MinPoints
+	}
+	return 0
+}
+
+func (x *CreateLoyaltyTierRequest) GetDiscountPct() float64 {
+	if x != nil {
+		return x.DiscountPct
+	}
+	return 0
+}
+
+func (x *CreateLoyaltyTierRequest) GetPerks() string {
+	if x != nil {
+		return x.Perks
+	}
+	return ""
+}
+
+func (x *CreateLoyaltyTierRequest) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+type CreateLoyaltyTierResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TierId        int64                  `protobuf:"varint,1,opt,name=tier_id,json=tierId,proto3" json:"tier_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLoyaltyTierResponse) Reset() {
+	*x = CreateLoyaltyTierResponse{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLoyaltyTierResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLoyaltyTierResponse) ProtoMessage() {}
+
+func (x *CreateLoyaltyTierResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLoyaltyTierResponse.ProtoReflect.Descriptor instead.
+func (*CreateLoyaltyTierResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CreateLoyaltyTierResponse) GetTierId() int64 {
+	if x != nil {
+		return x.TierId
+	}
+	return 0
+}
+
+func (x *CreateLoyaltyTierResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type UpdateLoyaltyTierRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	MinPoints     int32                  `protobuf:"varint,3,opt,name=min_points,json=minPoints,proto3" json:"min_points,omitempty"`
+	DiscountPct   float64                `protobuf:"fixed64,4,opt,name=discount_pct,json=discountPct,proto3" json:"discount_pct,omitempty"`
+	Perks         string                 `protobuf:"bytes,5,opt,name=perks,proto3" json:"perks,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,6,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLoyaltyTierRequest) Reset() {
+	*x = UpdateLoyaltyTierRequest{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLoyaltyTierRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLoyaltyTierRequest) ProtoMessage() {}
+
+func (x *UpdateLoyaltyTierRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLoyaltyTierRequest.ProtoReflect.Descriptor instead.
+func (*UpdateLoyaltyTierRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateLoyaltyTierRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyTierRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateLoyaltyTierRequest) GetMinPoints() int32 {
+	if x != nil {
+		return x.MinPoints
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyTierRequest) GetDiscountPct() float64 {
+	if x != nil {
+		return x.DiscountPct
+	}
+	return 0
+}
+
+func (x *UpdateLoyaltyTierRequest) GetPerks() string {
+	if x != nil {
+		return x.Perks
+	}
+	return ""
+}
+
+func (x *UpdateLoyaltyTierRequest) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+type UpdateLoyaltyTierResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLoyaltyTierResponse) Reset() {
+	*x = UpdateLoyaltyTierResponse{}
+	mi := &file_crm_v1_loyalty_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLoyaltyTierResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLoyaltyTierResponse) ProtoMessage() {}
+
+func (x *UpdateLoyaltyTierResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_loyalty_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLoyaltyTierResponse.ProtoReflect.Descriptor instead.
+func (*UpdateLoyaltyTierResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_loyalty_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdateLoyaltyTierResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_crm_v1_loyalty_proto protoreflect.FileDescriptor
 
 const file_crm_v1_loyalty_proto_rawDesc = "" +
 	"\n" +
-	"\x14crm/v1/loyalty.proto\x12\x03crm\x1a\x1acommon/v1/pagination.proto\"\xcb\x01\n" +
-	"\rLoyaltyConfig\x12\x18\n" +
-	"\aenabled\x18\x01 \x01(\bR\aenabled\x12*\n" +
-	"\x11points_per_dollar\x18\x02 \x01(\x01R\x0fpointsPerDollar\x12'\n" +
-	"\x0fredemption_rate\x18\x03 \x01(\x01R\x0eredemptionRate\x12*\n" +
-	"\x11min_redeem_points\x18\x04 \x01(\x05R\x0fminRedeemPoints\x12\x1f\n" +
-	"\vauto_enroll\x18\x05 \x01(\bR\n" +
-	"autoEnroll\"\x19\n" +
+	"\x14crm/v1/loyalty.proto\x12\x03crm\"\xc9\x04\n" +
+	"\rLoyaltyConfig\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
+	"\n" +
+	"is_enabled\x18\x03 \x01(\bR\tisEnabled\x127\n" +
+	"\x18points_per_currency_unit\x18\x04 \x01(\x01R\x15pointsPerCurrencyUnit\x12,\n" +
+	"\x12currency_per_point\x18\x05 \x01(\x01R\x10currencyPerPoint\x12\x1d\n" +
+	"\n" +
+	"bronze_min\x18\x06 \x01(\x05R\tbronzeMin\x12\x1d\n" +
+	"\n" +
+	"silver_min\x18\a \x01(\x05R\tsilverMin\x12\x19\n" +
+	"\bgold_min\x18\b \x01(\x05R\agoldMin\x12!\n" +
+	"\fplatinum_min\x18\t \x01(\x05R\vplatinumMin\x12.\n" +
+	"\x13bronze_discount_pct\x18\n" +
+	" \x01(\x01R\x11bronzeDiscountPct\x12.\n" +
+	"\x13silver_discount_pct\x18\v \x01(\x01R\x11silverDiscountPct\x12*\n" +
+	"\x11gold_discount_pct\x18\f \x01(\x01R\x0fgoldDiscountPct\x122\n" +
+	"\x15platinum_discount_pct\x18\r \x01(\x01R\x13platinumDiscountPct\x12,\n" +
+	"\x12points_expiry_days\x18\x0e \x01(\x05R\x10pointsExpiryDays\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\x19\n" +
 	"\x17GetLoyaltyConfigRequest\"F\n" +
 	"\x18GetLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.crm.LoyaltyConfigR\x06config\"H\n" +
-	"\x1aUpdateLoyaltyConfigRequest\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.crm.LoyaltyConfigR\x06config\"I\n" +
-	"\x1bUpdateLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.crm.LoyaltyConfigR\x06config\"\xd7\x01\n" +
-	"\x12LoyaltyTransaction\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vcustomer_id\x18\x02 \x01(\x03R\n" +
-	"customerId\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
-	"\x06points\x18\x04 \x01(\x01R\x06points\x12#\n" +
-	"\rbalance_after\x18\x05 \x01(\x01R\fbalanceAfter\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x1d\n" +
+	"\x06config\x18\x01 \x01(\v2\x12.crm.LoyaltyConfigR\x06config\"\x8c\x04\n" +
+	"\x1aUpdateLoyaltyConfigRequest\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"|\n" +
+	"is_enabled\x18\x01 \x01(\bR\tisEnabled\x127\n" +
+	"\x18points_per_currency_unit\x18\x02 \x01(\x01R\x15pointsPerCurrencyUnit\x12,\n" +
+	"\x12currency_per_point\x18\x03 \x01(\x01R\x10currencyPerPoint\x12\x1d\n" +
+	"\n" +
+	"bronze_min\x18\x04 \x01(\x05R\tbronzeMin\x12\x1d\n" +
+	"\n" +
+	"silver_min\x18\x05 \x01(\x05R\tsilverMin\x12\x19\n" +
+	"\bgold_min\x18\x06 \x01(\x05R\agoldMin\x12!\n" +
+	"\fplatinum_min\x18\a \x01(\x05R\vplatinumMin\x12.\n" +
+	"\x13bronze_discount_pct\x18\b \x01(\x01R\x11bronzeDiscountPct\x12.\n" +
+	"\x13silver_discount_pct\x18\t \x01(\x01R\x11silverDiscountPct\x12*\n" +
+	"\x11gold_discount_pct\x18\n" +
+	" \x01(\x01R\x0fgoldDiscountPct\x122\n" +
+	"\x15platinum_discount_pct\x18\v \x01(\x01R\x13platinumDiscountPct\x12,\n" +
+	"\x12points_expiry_days\x18\f \x01(\x05R\x10pointsExpiryDays\"7\n" +
+	"\x1bUpdateLoyaltyConfigResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xf9\x02\n" +
+	"\x12LoyaltyTransaction\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
+	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
+	"customerId\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12\x16\n" +
+	"\x06points\x18\x05 \x01(\x05R\x06points\x12%\n" +
+	"\x0ebalance_before\x18\x06 \x01(\x05R\rbalanceBefore\x12#\n" +
+	"\rbalance_after\x18\a \x01(\x05R\fbalanceAfter\x12 \n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x12&\n" +
+	"\freference_id\x18\t \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
+	"\x0ereference_type\x18\n" +
+	" \x01(\tR\rreferenceType\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAtB\x0f\n" +
+	"\r_reference_id\"r\n" +
 	"\x1eListLoyaltyTransactionsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x129\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x9a\x01\n" +
+	"customerId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\xa5\x01\n" +
 	"\x1fListLoyaltyTransactionsResponse\x12;\n" +
-	"\ftransactions\x18\x01 \x03(\v2\x17.crm.LoyaltyTransactionR\ftransactions\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"o\n" +
+	"\ftransactions\x18\x01 \x03(\v2\x17.crm.LoyaltyTransactionR\ftransactions\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\xcf\x01\n" +
 	"\x12AwardPointsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\x12\x16\n" +
-	"\x06points\x18\x02 \x01(\x01R\x06points\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"6\n" +
-	"\x13AwardPointsResponse\x12\x1f\n" +
-	"\vnew_balance\x18\x01 \x01(\x01R\n" +
-	"newBalance\"p\n" +
+	"\x06points\x18\x02 \x01(\x05R\x06points\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12&\n" +
+	"\freference_id\x18\x04 \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
+	"\x0ereference_type\x18\x05 \x01(\tR\rreferenceTypeB\x0f\n" +
+	"\r_reference_id\"/\n" +
+	"\x13AwardPointsResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xd0\x01\n" +
 	"\x13RedeemPointsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\x12\x16\n" +
-	"\x06points\x18\x02 \x01(\x01R\x06points\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"`\n" +
-	"\x14RedeemPointsResponse\x12\x1f\n" +
-	"\vnew_balance\x18\x01 \x01(\x01R\n" +
-	"newBalance\x12'\n" +
-	"\x0fdiscount_amount\x18\x02 \x01(\x01R\x0ediscountAmountB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x06points\x18\x02 \x01(\x05R\x06points\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12&\n" +
+	"\freference_id\x18\x04 \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
+	"\x0ereference_type\x18\x05 \x01(\tR\rreferenceTypeB\x0f\n" +
+	"\r_reference_id\"0\n" +
+	"\x14RedeemPointsResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x81\x02\n" +
+	"\vLoyaltyTier\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"min_points\x18\x04 \x01(\x05R\tminPoints\x12!\n" +
+	"\fdiscount_pct\x18\x05 \x01(\x01R\vdiscountPct\x12\x14\n" +
+	"\x05perks\x18\x06 \x01(\tR\x05perks\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\a \x01(\x05R\tsortOrder\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x19\n" +
+	"\x17ListLoyaltyTiersRequest\"B\n" +
+	"\x18ListLoyaltyTiersResponse\x12&\n" +
+	"\x05tiers\x18\x01 \x03(\v2\x10.crm.LoyaltyTierR\x05tiers\"\xa5\x01\n" +
+	"\x18CreateLoyaltyTierRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"min_points\x18\x02 \x01(\x05R\tminPoints\x12!\n" +
+	"\fdiscount_pct\x18\x03 \x01(\x01R\vdiscountPct\x12\x14\n" +
+	"\x05perks\x18\x04 \x01(\tR\x05perks\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\x05 \x01(\x05R\tsortOrder\"N\n" +
+	"\x19CreateLoyaltyTierResponse\x12\x17\n" +
+	"\atier_id\x18\x01 \x01(\x03R\x06tierId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xb5\x01\n" +
+	"\x18UpdateLoyaltyTierRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"min_points\x18\x03 \x01(\x05R\tminPoints\x12!\n" +
+	"\fdiscount_pct\x18\x04 \x01(\x01R\vdiscountPct\x12\x14\n" +
+	"\x05perks\x18\x05 \x01(\tR\x05perks\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\x06 \x01(\x05R\tsortOrder\"5\n" +
+	"\x19UpdateLoyaltyTierResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_loyalty_proto_rawDescOnce sync.Once
@@ -748,7 +1515,7 @@ func file_crm_v1_loyalty_proto_rawDescGZIP() []byte {
 	return file_crm_v1_loyalty_proto_rawDescData
 }
 
-var file_crm_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_crm_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_crm_v1_loyalty_proto_goTypes = []any{
 	(*LoyaltyConfig)(nil),                   // 0: crm.LoyaltyConfig
 	(*GetLoyaltyConfigRequest)(nil),         // 1: crm.GetLoyaltyConfigRequest
@@ -762,21 +1529,23 @@ var file_crm_v1_loyalty_proto_goTypes = []any{
 	(*AwardPointsResponse)(nil),             // 9: crm.AwardPointsResponse
 	(*RedeemPointsRequest)(nil),             // 10: crm.RedeemPointsRequest
 	(*RedeemPointsResponse)(nil),            // 11: crm.RedeemPointsResponse
-	(*v1.PaginationRequest)(nil),            // 12: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),           // 13: common.PaginationResponse
+	(*LoyaltyTier)(nil),                     // 12: crm.LoyaltyTier
+	(*ListLoyaltyTiersRequest)(nil),         // 13: crm.ListLoyaltyTiersRequest
+	(*ListLoyaltyTiersResponse)(nil),        // 14: crm.ListLoyaltyTiersResponse
+	(*CreateLoyaltyTierRequest)(nil),        // 15: crm.CreateLoyaltyTierRequest
+	(*CreateLoyaltyTierResponse)(nil),       // 16: crm.CreateLoyaltyTierResponse
+	(*UpdateLoyaltyTierRequest)(nil),        // 17: crm.UpdateLoyaltyTierRequest
+	(*UpdateLoyaltyTierResponse)(nil),       // 18: crm.UpdateLoyaltyTierResponse
 }
 var file_crm_v1_loyalty_proto_depIdxs = []int32{
 	0,  // 0: crm.GetLoyaltyConfigResponse.config:type_name -> crm.LoyaltyConfig
-	0,  // 1: crm.UpdateLoyaltyConfigRequest.config:type_name -> crm.LoyaltyConfig
-	0,  // 2: crm.UpdateLoyaltyConfigResponse.config:type_name -> crm.LoyaltyConfig
-	12, // 3: crm.ListLoyaltyTransactionsRequest.pagination:type_name -> common.PaginationRequest
-	5,  // 4: crm.ListLoyaltyTransactionsResponse.transactions:type_name -> crm.LoyaltyTransaction
-	13, // 5: crm.ListLoyaltyTransactionsResponse.pagination:type_name -> common.PaginationResponse
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	5,  // 1: crm.ListLoyaltyTransactionsResponse.transactions:type_name -> crm.LoyaltyTransaction
+	12, // 2: crm.ListLoyaltyTiersResponse.tiers:type_name -> crm.LoyaltyTier
+	3,  // [3:3] is the sub-list for method output_type
+	3,  // [3:3] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_crm_v1_loyalty_proto_init() }
@@ -784,13 +1553,16 @@ func file_crm_v1_loyalty_proto_init() {
 	if File_crm_v1_loyalty_proto != nil {
 		return
 	}
+	file_crm_v1_loyalty_proto_msgTypes[5].OneofWrappers = []any{}
+	file_crm_v1_loyalty_proto_msgTypes[8].OneofWrappers = []any{}
+	file_crm_v1_loyalty_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_v1_loyalty_proto_rawDesc), len(file_crm_v1_loyalty_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

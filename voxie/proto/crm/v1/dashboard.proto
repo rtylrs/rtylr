@@ -6,27 +6,21 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/v1";
 
 // ── Dashboard ───────────────────────────────────────────────────────
 
-message DashboardStats {
-  int32 total_customers = 1;
-  double customers_change = 2;
-  int32 active_customers = 3;
-  int32 new_customers_this_month = 4;
-  double avg_lifetime_value = 5;
-  double total_loyalty_points = 6;
-  int32 active_campaigns = 7;
-  int32 total_segments = 8;
-  repeated TopCustomer top_customers = 9;
-}
-
 message TopCustomer {
   int64 id = 1;
-  string name = 2;
-  double total_spent = 3;
-  int32 visit_count = 4;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  double total_spent = 5;
+  int32 loyalty_points = 6;
+  string loyalty_tier = 7;
 }
 
-message GetDashboardStatsRequest {}
+message GetDashboardRequest {}
 
-message GetDashboardStatsResponse {
-  DashboardStats stats = 1;
+message GetDashboardResponse {
+  int32 total_customers = 1;
+  int32 new_this_month = 2;
+  int32 active_loyalty_members = 3;
+  repeated TopCustomer top_customers = 4;
 }

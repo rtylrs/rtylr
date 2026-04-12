@@ -21,352 +21,15 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type TodayAppointment struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	CustomerName  string                 `protobuf:"bytes,2,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	ServiceName   string                 `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	ResourceName  string                 `protobuf:"bytes,4,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	StartTime     string                 `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       string                 `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TodayAppointment) Reset() {
-	*x = TodayAppointment{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TodayAppointment) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TodayAppointment) ProtoMessage() {}
-
-func (x *TodayAppointment) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TodayAppointment.ProtoReflect.Descriptor instead.
-func (*TodayAppointment) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *TodayAppointment) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *TodayAppointment) GetCustomerName() string {
-	if x != nil {
-		return x.CustomerName
-	}
-	return ""
-}
-
-func (x *TodayAppointment) GetServiceName() string {
-	if x != nil {
-		return x.ServiceName
-	}
-	return ""
-}
-
-func (x *TodayAppointment) GetResourceName() string {
-	if x != nil {
-		return x.ResourceName
-	}
-	return ""
-}
-
-func (x *TodayAppointment) GetStartTime() string {
-	if x != nil {
-		return x.StartTime
-	}
-	return ""
-}
-
-func (x *TodayAppointment) GetEndTime() string {
-	if x != nil {
-		return x.EndTime
-	}
-	return ""
-}
-
-func (x *TodayAppointment) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-type AppointmentsByDay struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-	Revenue       float64                `protobuf:"fixed64,3,opt,name=revenue,proto3" json:"revenue,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AppointmentsByDay) Reset() {
-	*x = AppointmentsByDay{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AppointmentsByDay) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AppointmentsByDay) ProtoMessage() {}
-
-func (x *AppointmentsByDay) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AppointmentsByDay.ProtoReflect.Descriptor instead.
-func (*AppointmentsByDay) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AppointmentsByDay) GetDate() string {
-	if x != nil {
-		return x.Date
-	}
-	return ""
-}
-
-func (x *AppointmentsByDay) GetCount() int32 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
-func (x *AppointmentsByDay) GetRevenue() float64 {
-	if x != nil {
-		return x.Revenue
-	}
-	return 0
-}
-
-type TopService struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId     int64                  `protobuf:"varint,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	BookingCount  int32                  `protobuf:"varint,3,opt,name=booking_count,json=bookingCount,proto3" json:"booking_count,omitempty"`
-	Revenue       float64                `protobuf:"fixed64,4,opt,name=revenue,proto3" json:"revenue,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TopService) Reset() {
-	*x = TopService{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TopService) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TopService) ProtoMessage() {}
-
-func (x *TopService) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TopService.ProtoReflect.Descriptor instead.
-func (*TopService) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *TopService) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *TopService) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *TopService) GetBookingCount() int32 {
-	if x != nil {
-		return x.BookingCount
-	}
-	return 0
-}
-
-func (x *TopService) GetRevenue() float64 {
-	if x != nil {
-		return x.Revenue
-	}
-	return 0
-}
-
-type DashboardStats struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	TodayAppointments    int32                  `protobuf:"varint,1,opt,name=today_appointments,json=todayAppointments,proto3" json:"today_appointments,omitempty"`
-	UpcomingAppointments int32                  `protobuf:"varint,2,opt,name=upcoming_appointments,json=upcomingAppointments,proto3" json:"upcoming_appointments,omitempty"`
-	TotalCustomers       int32                  `protobuf:"varint,3,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
-	TotalRevenue         float64                `protobuf:"fixed64,4,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	RevenueChange        float64                `protobuf:"fixed64,5,opt,name=revenue_change,json=revenueChange,proto3" json:"revenue_change,omitempty"`
-	NoShowCount          int32                  `protobuf:"varint,6,opt,name=no_show_count,json=noShowCount,proto3" json:"no_show_count,omitempty"`
-	CancellationCount    int32                  `protobuf:"varint,7,opt,name=cancellation_count,json=cancellationCount,proto3" json:"cancellation_count,omitempty"`
-	UtilizationRate      float64                `protobuf:"fixed64,8,opt,name=utilization_rate,json=utilizationRate,proto3" json:"utilization_rate,omitempty"`
-	AppointmentsByDay    []*AppointmentsByDay   `protobuf:"bytes,9,rep,name=appointments_by_day,json=appointmentsByDay,proto3" json:"appointments_by_day,omitempty"`
-	TopServices          []*TopService          `protobuf:"bytes,10,rep,name=top_services,json=topServices,proto3" json:"top_services,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
-}
-
-func (x *DashboardStats) Reset() {
-	*x = DashboardStats{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DashboardStats) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DashboardStats) ProtoMessage() {}
-
-func (x *DashboardStats) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DashboardStats.ProtoReflect.Descriptor instead.
-func (*DashboardStats) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *DashboardStats) GetTodayAppointments() int32 {
-	if x != nil {
-		return x.TodayAppointments
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetUpcomingAppointments() int32 {
-	if x != nil {
-		return x.UpcomingAppointments
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetTotalCustomers() int32 {
-	if x != nil {
-		return x.TotalCustomers
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetTotalRevenue() float64 {
-	if x != nil {
-		return x.TotalRevenue
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetRevenueChange() float64 {
-	if x != nil {
-		return x.RevenueChange
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetNoShowCount() int32 {
-	if x != nil {
-		return x.NoShowCount
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetCancellationCount() int32 {
-	if x != nil {
-		return x.CancellationCount
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetUtilizationRate() float64 {
-	if x != nil {
-		return x.UtilizationRate
-	}
-	return 0
-}
-
-func (x *DashboardStats) GetAppointmentsByDay() []*AppointmentsByDay {
-	if x != nil {
-		return x.AppointmentsByDay
-	}
-	return nil
-}
-
-func (x *DashboardStats) GetTopServices() []*TopService {
-	if x != nil {
-		return x.TopServices
-	}
-	return nil
-}
-
 type GetBookDashboardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"` // today, week, month
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetBookDashboardRequest) Reset() {
 	*x = GetBookDashboardRequest{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[4]
+	mi := &file_book_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -378,7 +41,7 @@ func (x *GetBookDashboardRequest) String() string {
 func (*GetBookDashboardRequest) ProtoMessage() {}
 
 func (x *GetBookDashboardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[4]
+	mi := &file_book_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,26 +54,22 @@ func (x *GetBookDashboardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBookDashboardRequest.ProtoReflect.Descriptor instead.
 func (*GetBookDashboardRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetBookDashboardRequest) GetPeriod() string {
-	if x != nil {
-		return x.Period
-	}
-	return ""
+	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
 type GetBookDashboardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Stats         *DashboardStats        `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TodayCount       int32                  `protobuf:"varint,1,opt,name=today_count,json=todayCount,proto3" json:"today_count,omitempty"`
+	UpcomingCount    int32                  `protobuf:"varint,2,opt,name=upcoming_count,json=upcomingCount,proto3" json:"upcoming_count,omitempty"`
+	CancellationRate float64                `protobuf:"fixed64,3,opt,name=cancellation_rate,json=cancellationRate,proto3" json:"cancellation_rate,omitempty"`
+	Revenue          float64                `protobuf:"fixed64,4,opt,name=revenue,proto3" json:"revenue,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetBookDashboardResponse) Reset() {
 	*x = GetBookDashboardResponse{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[5]
+	mi := &file_book_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -422,7 +81,7 @@ func (x *GetBookDashboardResponse) String() string {
 func (*GetBookDashboardResponse) ProtoMessage() {}
 
 func (x *GetBookDashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[5]
+	mi := &file_book_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -435,140 +94,49 @@ func (x *GetBookDashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBookDashboardResponse.ProtoReflect.Descriptor instead.
 func (*GetBookDashboardResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{5}
+	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetBookDashboardResponse) GetStats() *DashboardStats {
+func (x *GetBookDashboardResponse) GetTodayCount() int32 {
 	if x != nil {
-		return x.Stats
+		return x.TodayCount
 	}
-	return nil
+	return 0
 }
 
-type GetTodayAppointmentsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetTodayAppointmentsRequest) Reset() {
-	*x = GetTodayAppointmentsRequest{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetTodayAppointmentsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetTodayAppointmentsRequest) ProtoMessage() {}
-
-func (x *GetTodayAppointmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[6]
+func (x *GetBookDashboardResponse) GetUpcomingCount() int32 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.UpcomingCount
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use GetTodayAppointmentsRequest.ProtoReflect.Descriptor instead.
-func (*GetTodayAppointmentsRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{6}
-}
-
-type GetTodayAppointmentsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Appointments  []*TodayAppointment    `protobuf:"bytes,1,rep,name=appointments,proto3" json:"appointments,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetTodayAppointmentsResponse) Reset() {
-	*x = GetTodayAppointmentsResponse{}
-	mi := &file_book_v1_dashboard_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetTodayAppointmentsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetTodayAppointmentsResponse) ProtoMessage() {}
-
-func (x *GetTodayAppointmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_dashboard_proto_msgTypes[7]
+func (x *GetBookDashboardResponse) GetCancellationRate() float64 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.CancellationRate
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use GetTodayAppointmentsResponse.ProtoReflect.Descriptor instead.
-func (*GetTodayAppointmentsResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetTodayAppointmentsResponse) GetAppointments() []*TodayAppointment {
+func (x *GetBookDashboardResponse) GetRevenue() float64 {
 	if x != nil {
-		return x.Appointments
+		return x.Revenue
 	}
-	return nil
+	return 0
 }
 
 var File_book_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_book_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x17book/v1/dashboard.proto\x12\x04book\"\xe1\x01\n" +
-	"\x10TodayAppointment\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
-	"\rcustomer_name\x18\x02 \x01(\tR\fcustomerName\x12!\n" +
-	"\fservice_name\x18\x03 \x01(\tR\vserviceName\x12#\n" +
-	"\rresource_name\x18\x04 \x01(\tR\fresourceName\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\x05 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x06 \x01(\tR\aendTime\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\"W\n" +
-	"\x11AppointmentsByDay\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x18\n" +
-	"\arevenue\x18\x03 \x01(\x01R\arevenue\"~\n" +
-	"\n" +
-	"TopService\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\x03R\tserviceId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
-	"\rbooking_count\x18\x03 \x01(\x05R\fbookingCount\x12\x18\n" +
-	"\arevenue\x18\x04 \x01(\x01R\arevenue\"\xe5\x03\n" +
-	"\x0eDashboardStats\x12-\n" +
-	"\x12today_appointments\x18\x01 \x01(\x05R\x11todayAppointments\x123\n" +
-	"\x15upcoming_appointments\x18\x02 \x01(\x05R\x14upcomingAppointments\x12'\n" +
-	"\x0ftotal_customers\x18\x03 \x01(\x05R\x0etotalCustomers\x12#\n" +
-	"\rtotal_revenue\x18\x04 \x01(\x01R\ftotalRevenue\x12%\n" +
-	"\x0erevenue_change\x18\x05 \x01(\x01R\rrevenueChange\x12\"\n" +
-	"\rno_show_count\x18\x06 \x01(\x05R\vnoShowCount\x12-\n" +
-	"\x12cancellation_count\x18\a \x01(\x05R\x11cancellationCount\x12)\n" +
-	"\x10utilization_rate\x18\b \x01(\x01R\x0futilizationRate\x12G\n" +
-	"\x13appointments_by_day\x18\t \x03(\v2\x17.book.AppointmentsByDayR\x11appointmentsByDay\x123\n" +
-	"\ftop_services\x18\n" +
-	" \x03(\v2\x10.book.TopServiceR\vtopServices\"1\n" +
-	"\x17GetBookDashboardRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"F\n" +
-	"\x18GetBookDashboardResponse\x12*\n" +
-	"\x05stats\x18\x01 \x01(\v2\x14.book.DashboardStatsR\x05stats\"\x1d\n" +
-	"\x1bGetTodayAppointmentsRequest\"Z\n" +
-	"\x1cGetTodayAppointmentsResponse\x12:\n" +
-	"\fappointments\x18\x01 \x03(\v2\x16.book.TodayAppointmentR\fappointmentsB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
+	"\x17book/v1/dashboard.proto\x12\x04book\"\x19\n" +
+	"\x17GetBookDashboardRequest\"\xa9\x01\n" +
+	"\x18GetBookDashboardResponse\x12\x1f\n" +
+	"\vtoday_count\x18\x01 \x01(\x05R\n" +
+	"todayCount\x12%\n" +
+	"\x0eupcoming_count\x18\x02 \x01(\x05R\rupcomingCount\x12+\n" +
+	"\x11cancellation_rate\x18\x03 \x01(\x01R\x10cancellationRate\x12\x18\n" +
+	"\arevenue\x18\x04 \x01(\x01R\arevenueB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
 
 var (
 	file_book_v1_dashboard_proto_rawDescOnce sync.Once
@@ -582,27 +150,17 @@ func file_book_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_book_v1_dashboard_proto_rawDescData
 }
 
-var file_book_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_book_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_book_v1_dashboard_proto_goTypes = []any{
-	(*TodayAppointment)(nil),             // 0: book.TodayAppointment
-	(*AppointmentsByDay)(nil),            // 1: book.AppointmentsByDay
-	(*TopService)(nil),                   // 2: book.TopService
-	(*DashboardStats)(nil),               // 3: book.DashboardStats
-	(*GetBookDashboardRequest)(nil),      // 4: book.GetBookDashboardRequest
-	(*GetBookDashboardResponse)(nil),     // 5: book.GetBookDashboardResponse
-	(*GetTodayAppointmentsRequest)(nil),  // 6: book.GetTodayAppointmentsRequest
-	(*GetTodayAppointmentsResponse)(nil), // 7: book.GetTodayAppointmentsResponse
+	(*GetBookDashboardRequest)(nil),  // 0: book.GetBookDashboardRequest
+	(*GetBookDashboardResponse)(nil), // 1: book.GetBookDashboardResponse
 }
 var file_book_v1_dashboard_proto_depIdxs = []int32{
-	1, // 0: book.DashboardStats.appointments_by_day:type_name -> book.AppointmentsByDay
-	2, // 1: book.DashboardStats.top_services:type_name -> book.TopService
-	3, // 2: book.GetBookDashboardResponse.stats:type_name -> book.DashboardStats
-	0, // 3: book.GetTodayAppointmentsResponse.appointments:type_name -> book.TodayAppointment
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_book_v1_dashboard_proto_init() }
@@ -616,7 +174,7 @@ func file_book_v1_dashboard_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_book_v1_dashboard_proto_rawDesc), len(file_book_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

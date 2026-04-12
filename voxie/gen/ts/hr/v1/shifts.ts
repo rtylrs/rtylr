@@ -5,41 +5,28 @@
 // source: hr/v1/shifts.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Shift {
   id: number;
+  ownerId: number;
   staffId: number;
-  staffName: string;
   date: string;
   startTime: string;
   endTime: string;
-  hours: number;
-  /** scheduled, in_progress, completed, missed */
+  breakMinutes: number;
   status: string;
   notes: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListShiftsRequest {
-  pagination: PaginationRequest | undefined;
   staffId: number;
-  fromDate: string;
-  toDate: string;
-  status: string;
+  date: string;
 }
 
 export interface ListShiftsResponse {
   shifts: Shift[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetShiftRequest {
-  id: number;
-}
-
-export interface GetShiftResponse {
-  shift: Shift | undefined;
 }
 
 export interface CreateShiftRequest {
@@ -47,9 +34,33 @@ export interface CreateShiftRequest {
   date: string;
   startTime: string;
   endTime: string;
+  breakMinutes: number;
+  status: string;
   notes: string;
 }
 
 export interface CreateShiftResponse {
-  shift: Shift | undefined;
+  id: number;
+}
+
+export interface UpdateShiftRequest {
+  id: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes: number;
+  status: string;
+  notes: string;
+}
+
+export interface UpdateShiftResponse {
+  success: boolean;
+}
+
+export interface DeleteShiftRequest {
+  id: number;
+}
+
+export interface DeleteShiftResponse {
+  success: boolean;
 }

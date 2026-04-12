@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,21 +22,22 @@ const (
 )
 
 type Project struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Status         string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // active, archived, completed
-	Color          string                 `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
-	WorkspaceId    int64                  `protobuf:"varint,6,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
-	WorkspaceName  string                 `protobuf:"bytes,7,opt,name=workspace_name,json=workspaceName,proto3" json:"workspace_name,omitempty"`
-	TaskCount      int32                  `protobuf:"varint,8,opt,name=task_count,json=taskCount,proto3" json:"task_count,omitempty"`
-	CompletedTasks int32                  `protobuf:"varint,9,opt,name=completed_tasks,json=completedTasks,proto3" json:"completed_tasks,omitempty"`
-	Progress       float64                `protobuf:"fixed64,10,opt,name=progress,proto3" json:"progress,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	WorkspaceId   int64                  `protobuf:"varint,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,3,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color         string                 `protobuf:"bytes,7,opt,name=color,proto3" json:"color,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
+	StartDate     string                 `protobuf:"bytes,9,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	DueDate       string                 `protobuf:"bytes,10,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,11,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Project) Reset() {
@@ -77,6 +77,20 @@ func (x *Project) GetId() int64 {
 	return 0
 }
 
+func (x *Project) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
+}
+
+func (x *Project) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Project) GetName() string {
 	if x != nil {
 		return x.Name
@@ -91,9 +105,9 @@ func (x *Project) GetDescription() string {
 	return ""
 }
 
-func (x *Project) GetStatus() string {
+func (x *Project) GetIcon() string {
 	if x != nil {
-		return x.Status
+		return x.Icon
 	}
 	return ""
 }
@@ -105,37 +119,30 @@ func (x *Project) GetColor() string {
 	return ""
 }
 
-func (x *Project) GetWorkspaceId() int64 {
+func (x *Project) GetStatus() string {
 	if x != nil {
-		return x.WorkspaceId
-	}
-	return 0
-}
-
-func (x *Project) GetWorkspaceName() string {
-	if x != nil {
-		return x.WorkspaceName
+		return x.Status
 	}
 	return ""
 }
 
-func (x *Project) GetTaskCount() int32 {
+func (x *Project) GetStartDate() string {
 	if x != nil {
-		return x.TaskCount
+		return x.StartDate
 	}
-	return 0
+	return ""
 }
 
-func (x *Project) GetCompletedTasks() int32 {
+func (x *Project) GetDueDate() string {
 	if x != nil {
-		return x.CompletedTasks
+		return x.DueDate
 	}
-	return 0
+	return ""
 }
 
-func (x *Project) GetProgress() float64 {
+func (x *Project) GetCreatedBy() int64 {
 	if x != nil {
-		return x.Progress
+		return x.CreatedBy
 	}
 	return 0
 }
@@ -156,10 +163,7 @@ func (x *Project) GetUpdatedAt() string {
 
 type ListProjectsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	WorkspaceId   int64                  `protobuf:"varint,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Search        string                 `protobuf:"bytes,4,opt,name=search,proto3" json:"search,omitempty"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,13 +198,6 @@ func (*ListProjectsRequest) Descriptor() ([]byte, []int) {
 	return file_flow_v1_projects_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListProjectsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListProjectsRequest) GetWorkspaceId() int64 {
 	if x != nil {
 		return x.WorkspaceId
@@ -208,24 +205,9 @@ func (x *ListProjectsRequest) GetWorkspaceId() int64 {
 	return 0
 }
 
-func (x *ListProjectsRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListProjectsRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
 type ListProjectsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Projects      []*Project             `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -267,114 +249,22 @@ func (x *ListProjectsResponse) GetProjects() []*Project {
 	return nil
 }
 
-func (x *ListProjectsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetProjectRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetProjectRequest) Reset() {
-	*x = GetProjectRequest{}
-	mi := &file_flow_v1_projects_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetProjectRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetProjectRequest) ProtoMessage() {}
-
-func (x *GetProjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetProjectRequest.ProtoReflect.Descriptor instead.
-func (*GetProjectRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetProjectRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetProjectResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Project       *Project               `protobuf:"bytes,1,opt,name=project,proto3" json:"project,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetProjectResponse) Reset() {
-	*x = GetProjectResponse{}
-	mi := &file_flow_v1_projects_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetProjectResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetProjectResponse) ProtoMessage() {}
-
-func (x *GetProjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetProjectResponse.ProtoReflect.Descriptor instead.
-func (*GetProjectResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetProjectResponse) GetProject() *Project {
-	if x != nil {
-		return x.Project
-	}
-	return nil
-}
-
 type CreateProjectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	WorkspaceId   int64                  `protobuf:"varint,3,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
-	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color         string                 `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	StartDate     string                 `protobuf:"bytes,6,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	DueDate       string                 `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateProjectRequest) Reset() {
 	*x = CreateProjectRequest{}
-	mi := &file_flow_v1_projects_proto_msgTypes[5]
+	mi := &file_flow_v1_projects_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -386,7 +276,7 @@ func (x *CreateProjectRequest) String() string {
 func (*CreateProjectRequest) ProtoMessage() {}
 
 func (x *CreateProjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[5]
+	mi := &file_flow_v1_projects_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -399,7 +289,14 @@ func (x *CreateProjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateProjectRequest.ProtoReflect.Descriptor instead.
 func (*CreateProjectRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{5}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreateProjectRequest) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
 }
 
 func (x *CreateProjectRequest) GetName() string {
@@ -416,16 +313,30 @@ func (x *CreateProjectRequest) GetDescription() string {
 	return ""
 }
 
-func (x *CreateProjectRequest) GetWorkspaceId() int64 {
+func (x *CreateProjectRequest) GetIcon() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.Icon
 	}
-	return 0
+	return ""
 }
 
 func (x *CreateProjectRequest) GetColor() string {
 	if x != nil {
 		return x.Color
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetDueDate() string {
+	if x != nil {
+		return x.DueDate
 	}
 	return ""
 }
@@ -439,7 +350,7 @@ type CreateProjectResponse struct {
 
 func (x *CreateProjectResponse) Reset() {
 	*x = CreateProjectResponse{}
-	mi := &file_flow_v1_projects_proto_msgTypes[6]
+	mi := &file_flow_v1_projects_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +362,7 @@ func (x *CreateProjectResponse) String() string {
 func (*CreateProjectResponse) ProtoMessage() {}
 
 func (x *CreateProjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[6]
+	mi := &file_flow_v1_projects_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +375,7 @@ func (x *CreateProjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateProjectResponse.ProtoReflect.Descriptor instead.
 func (*CreateProjectResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{6}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateProjectResponse) GetProject() *Project {
@@ -479,15 +390,18 @@ type UpdateProjectRequest struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Icon          string                 `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
 	Color         string                 `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	StartDate     string                 `protobuf:"bytes,7,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	DueDate       string                 `protobuf:"bytes,8,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateProjectRequest) Reset() {
 	*x = UpdateProjectRequest{}
-	mi := &file_flow_v1_projects_proto_msgTypes[7]
+	mi := &file_flow_v1_projects_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -499,7 +413,7 @@ func (x *UpdateProjectRequest) String() string {
 func (*UpdateProjectRequest) ProtoMessage() {}
 
 func (x *UpdateProjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[7]
+	mi := &file_flow_v1_projects_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +426,7 @@ func (x *UpdateProjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProjectRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProjectRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{7}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateProjectRequest) GetId() int64 {
@@ -536,9 +450,9 @@ func (x *UpdateProjectRequest) GetDescription() string {
 	return ""
 }
 
-func (x *UpdateProjectRequest) GetStatus() string {
+func (x *UpdateProjectRequest) GetIcon() string {
 	if x != nil {
-		return x.Status
+		return x.Icon
 	}
 	return ""
 }
@@ -550,16 +464,37 @@ func (x *UpdateProjectRequest) GetColor() string {
 	return ""
 }
 
+func (x *UpdateProjectRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateProjectRequest) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
+	}
+	return ""
+}
+
+func (x *UpdateProjectRequest) GetDueDate() string {
+	if x != nil {
+		return x.DueDate
+	}
+	return ""
+}
+
 type UpdateProjectResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Project       *Project               `protobuf:"bytes,1,opt,name=project,proto3" json:"project,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateProjectResponse) Reset() {
 	*x = UpdateProjectResponse{}
-	mi := &file_flow_v1_projects_proto_msgTypes[8]
+	mi := &file_flow_v1_projects_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -571,7 +506,7 @@ func (x *UpdateProjectResponse) String() string {
 func (*UpdateProjectResponse) ProtoMessage() {}
 
 func (x *UpdateProjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[8]
+	mi := &file_flow_v1_projects_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -584,14 +519,14 @@ func (x *UpdateProjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProjectResponse.ProtoReflect.Descriptor instead.
 func (*UpdateProjectResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{8}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateProjectResponse) GetProject() *Project {
+func (x *UpdateProjectResponse) GetMessage() string {
 	if x != nil {
-		return x.Project
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type DeleteProjectRequest struct {
@@ -603,7 +538,7 @@ type DeleteProjectRequest struct {
 
 func (x *DeleteProjectRequest) Reset() {
 	*x = DeleteProjectRequest{}
-	mi := &file_flow_v1_projects_proto_msgTypes[9]
+	mi := &file_flow_v1_projects_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -615,7 +550,7 @@ func (x *DeleteProjectRequest) String() string {
 func (*DeleteProjectRequest) ProtoMessage() {}
 
 func (x *DeleteProjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[9]
+	mi := &file_flow_v1_projects_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -628,7 +563,7 @@ func (x *DeleteProjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProjectRequest.ProtoReflect.Descriptor instead.
 func (*DeleteProjectRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{9}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteProjectRequest) GetId() int64 {
@@ -640,14 +575,14 @@ func (x *DeleteProjectRequest) GetId() int64 {
 
 type DeleteProjectResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteProjectResponse) Reset() {
 	*x = DeleteProjectResponse{}
-	mi := &file_flow_v1_projects_proto_msgTypes[10]
+	mi := &file_flow_v1_projects_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -659,7 +594,7 @@ func (x *DeleteProjectResponse) String() string {
 func (*DeleteProjectResponse) ProtoMessage() {}
 
 func (x *DeleteProjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_projects_proto_msgTypes[10]
+	mi := &file_flow_v1_projects_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -672,73 +607,71 @@ func (x *DeleteProjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProjectResponse.ProtoReflect.Descriptor instead.
 func (*DeleteProjectResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_projects_proto_rawDescGZIP(), []int{10}
+	return file_flow_v1_projects_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteProjectResponse) GetSuccess() bool {
+func (x *DeleteProjectResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_flow_v1_projects_proto protoreflect.FileDescriptor
 
 const file_flow_v1_projects_proto_rawDesc = "" +
 	"\n" +
-	"\x16flow/v1/projects.proto\x12\x04flow\x1a\x1acommon/v1/pagination.proto\"\xe9\x02\n" +
+	"\x16flow/v1/projects.proto\x12\x04flow\"\xe6\x02\n" +
 	"\aProject\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x14\n" +
-	"\x05color\x18\x05 \x01(\tR\x05color\x12!\n" +
-	"\fworkspace_id\x18\x06 \x01(\x03R\vworkspaceId\x12%\n" +
-	"\x0eworkspace_name\x18\a \x01(\tR\rworkspaceName\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x19\n" +
+	"\bowner_id\x18\x03 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x06 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\a \x01(\tR\x05color\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"task_count\x18\b \x01(\x05R\ttaskCount\x12'\n" +
-	"\x0fcompleted_tasks\x18\t \x01(\x05R\x0ecompletedTasks\x12\x1a\n" +
-	"\bprogress\x18\n" +
-	" \x01(\x01R\bprogress\x12\x1d\n" +
+	"start_date\x18\t \x01(\tR\tstartDate\x12\x19\n" +
+	"\bdue_date\x18\n" +
+	" \x01(\tR\adueDate\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_by\x18\v \x01(\x03R\tcreatedBy\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\xa3\x01\n" +
-	"\x13ListProjectsRequest\x129\n" +
+	"created_at\x18\f \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12!\n" +
-	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12\x16\n" +
-	"\x06search\x18\x04 \x01(\tR\x06search\"}\n" +
+	"updated_at\x18\r \x01(\tR\tupdatedAt\"8\n" +
+	"\x13ListProjectsRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"A\n" +
 	"\x14ListProjectsResponse\x12)\n" +
-	"\bprojects\x18\x01 \x03(\v2\r.flow.ProjectR\bprojects\x12:\n" +
+	"\bprojects\x18\x01 \x03(\v2\r.flow.ProjectR\bprojects\"\xd3\x01\n" +
+	"\x14CreateProjectRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\x05 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"#\n" +
-	"\x11GetProjectRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"=\n" +
-	"\x12GetProjectResponse\x12'\n" +
-	"\aproject\x18\x01 \x01(\v2\r.flow.ProjectR\aproject\"\x85\x01\n" +
-	"\x14CreateProjectRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12!\n" +
-	"\fworkspace_id\x18\x03 \x01(\x03R\vworkspaceId\x12\x14\n" +
-	"\x05color\x18\x04 \x01(\tR\x05color\"@\n" +
+	"start_date\x18\x06 \x01(\tR\tstartDate\x12\x19\n" +
+	"\bdue_date\x18\a \x01(\tR\adueDate\"@\n" +
 	"\x15CreateProjectResponse\x12'\n" +
-	"\aproject\x18\x01 \x01(\v2\r.flow.ProjectR\aproject\"\x8a\x01\n" +
+	"\aproject\x18\x01 \x01(\v2\r.flow.ProjectR\aproject\"\xd8\x01\n" +
 	"\x14UpdateProjectRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x14\n" +
-	"\x05color\x18\x05 \x01(\tR\x05color\"@\n" +
-	"\x15UpdateProjectResponse\x12'\n" +
-	"\aproject\x18\x01 \x01(\v2\r.flow.ProjectR\aproject\"&\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\x05 \x01(\tR\x05color\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"start_date\x18\a \x01(\tR\tstartDate\x12\x19\n" +
+	"\bdue_date\x18\b \x01(\tR\adueDate\"1\n" +
+	"\x15UpdateProjectResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\x14DeleteProjectRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteProjectResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_projects_proto_rawDescOnce sync.Once
@@ -752,34 +685,26 @@ func file_flow_v1_projects_proto_rawDescGZIP() []byte {
 	return file_flow_v1_projects_proto_rawDescData
 }
 
-var file_flow_v1_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_flow_v1_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_flow_v1_projects_proto_goTypes = []any{
 	(*Project)(nil),               // 0: flow.Project
 	(*ListProjectsRequest)(nil),   // 1: flow.ListProjectsRequest
 	(*ListProjectsResponse)(nil),  // 2: flow.ListProjectsResponse
-	(*GetProjectRequest)(nil),     // 3: flow.GetProjectRequest
-	(*GetProjectResponse)(nil),    // 4: flow.GetProjectResponse
-	(*CreateProjectRequest)(nil),  // 5: flow.CreateProjectRequest
-	(*CreateProjectResponse)(nil), // 6: flow.CreateProjectResponse
-	(*UpdateProjectRequest)(nil),  // 7: flow.UpdateProjectRequest
-	(*UpdateProjectResponse)(nil), // 8: flow.UpdateProjectResponse
-	(*DeleteProjectRequest)(nil),  // 9: flow.DeleteProjectRequest
-	(*DeleteProjectResponse)(nil), // 10: flow.DeleteProjectResponse
-	(*v1.PaginationRequest)(nil),  // 11: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 12: common.PaginationResponse
+	(*CreateProjectRequest)(nil),  // 3: flow.CreateProjectRequest
+	(*CreateProjectResponse)(nil), // 4: flow.CreateProjectResponse
+	(*UpdateProjectRequest)(nil),  // 5: flow.UpdateProjectRequest
+	(*UpdateProjectResponse)(nil), // 6: flow.UpdateProjectResponse
+	(*DeleteProjectRequest)(nil),  // 7: flow.DeleteProjectRequest
+	(*DeleteProjectResponse)(nil), // 8: flow.DeleteProjectResponse
 }
 var file_flow_v1_projects_proto_depIdxs = []int32{
-	11, // 0: flow.ListProjectsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: flow.ListProjectsResponse.projects:type_name -> flow.Project
-	12, // 2: flow.ListProjectsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: flow.GetProjectResponse.project:type_name -> flow.Project
-	0,  // 4: flow.CreateProjectResponse.project:type_name -> flow.Project
-	0,  // 5: flow.UpdateProjectResponse.project:type_name -> flow.Project
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: flow.ListProjectsResponse.projects:type_name -> flow.Project
+	0, // 1: flow.CreateProjectResponse.project:type_name -> flow.Project
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_flow_v1_projects_proto_init() }
@@ -793,7 +718,7 @@ func file_flow_v1_projects_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_v1_projects_proto_rawDesc), len(file_flow_v1_projects_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

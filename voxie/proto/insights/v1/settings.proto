@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package insights;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
+
+// ── Insights Settings ───────────────────────────────────────────────
+
+message InsightsSettings {
+  string default_period = 1; // this_month, this_quarter, this_year
+  string currency = 2;
+  bool compare_previous = 3;
+  repeated string dashboard_widgets = 4;
+  repeated string favorite_reports = 5;
+}
+
+message GetInsightsSettingsRequest {}
+
+message GetInsightsSettingsResponse {
+  InsightsSettings settings = 1;
+}
+
+message UpdateInsightsSettingsRequest {
+  InsightsSettings settings = 1;
+}
+
+message UpdateInsightsSettingsResponse {
+  InsightsSettings settings = 1;
+}

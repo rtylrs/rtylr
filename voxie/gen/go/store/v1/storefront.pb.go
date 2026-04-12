@@ -21,115 +21,37 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type StorefrontTheme struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	PrimaryColor   string                 `protobuf:"bytes,1,opt,name=primary_color,json=primaryColor,proto3" json:"primary_color,omitempty"`
-	SecondaryColor string                 `protobuf:"bytes,2,opt,name=secondary_color,json=secondaryColor,proto3" json:"secondary_color,omitempty"`
-	FontFamily     string                 `protobuf:"bytes,3,opt,name=font_family,json=fontFamily,proto3" json:"font_family,omitempty"`
-	LogoUrl        string                 `protobuf:"bytes,4,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
-	FaviconUrl     string                 `protobuf:"bytes,5,opt,name=favicon_url,json=faviconUrl,proto3" json:"favicon_url,omitempty"`
-	BannerUrl      string                 `protobuf:"bytes,6,opt,name=banner_url,json=bannerUrl,proto3" json:"banner_url,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *StorefrontTheme) Reset() {
-	*x = StorefrontTheme{}
-	mi := &file_store_v1_storefront_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StorefrontTheme) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StorefrontTheme) ProtoMessage() {}
-
-func (x *StorefrontTheme) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_storefront_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use StorefrontTheme.ProtoReflect.Descriptor instead.
-func (*StorefrontTheme) Descriptor() ([]byte, []int) {
-	return file_store_v1_storefront_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *StorefrontTheme) GetPrimaryColor() string {
-	if x != nil {
-		return x.PrimaryColor
-	}
-	return ""
-}
-
-func (x *StorefrontTheme) GetSecondaryColor() string {
-	if x != nil {
-		return x.SecondaryColor
-	}
-	return ""
-}
-
-func (x *StorefrontTheme) GetFontFamily() string {
-	if x != nil {
-		return x.FontFamily
-	}
-	return ""
-}
-
-func (x *StorefrontTheme) GetLogoUrl() string {
-	if x != nil {
-		return x.LogoUrl
-	}
-	return ""
-}
-
-func (x *StorefrontTheme) GetFaviconUrl() string {
-	if x != nil {
-		return x.FaviconUrl
-	}
-	return ""
-}
-
-func (x *StorefrontTheme) GetBannerUrl() string {
-	if x != nil {
-		return x.BannerUrl
-	}
-	return ""
-}
-
-type StorefrontSEO struct {
+type Theme struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Keywords      string                 `protobuf:"bytes,3,opt,name=keywords,proto3" json:"keywords,omitempty"`
-	OgImageUrl    string                 `protobuf:"bytes,4,opt,name=og_image_url,json=ogImageUrl,proto3" json:"og_image_url,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	PrimaryColor  string                 `protobuf:"bytes,4,opt,name=primary_color,json=primaryColor,proto3" json:"primary_color,omitempty"`
+	Font          string                 `protobuf:"bytes,5,opt,name=font,proto3" json:"font,omitempty"`
+	HeaderStyle   string                 `protobuf:"bytes,6,opt,name=header_style,json=headerStyle,proto3" json:"header_style,omitempty"`
+	FooterStyle   string                 `protobuf:"bytes,7,opt,name=footer_style,json=footerStyle,proto3" json:"footer_style,omitempty"`
+	CustomCss     string                 `protobuf:"bytes,8,opt,name=custom_css,json=customCss,proto3" json:"custom_css,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *StorefrontSEO) Reset() {
-	*x = StorefrontSEO{}
-	mi := &file_store_v1_storefront_proto_msgTypes[1]
+func (x *Theme) Reset() {
+	*x = Theme{}
+	mi := &file_store_v1_storefront_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StorefrontSEO) String() string {
+func (x *Theme) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StorefrontSEO) ProtoMessage() {}
+func (*Theme) ProtoMessage() {}
 
-func (x *StorefrontSEO) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_storefront_proto_msgTypes[1]
+func (x *Theme) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_storefront_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -140,191 +62,187 @@ func (x *StorefrontSEO) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StorefrontSEO.ProtoReflect.Descriptor instead.
-func (*StorefrontSEO) Descriptor() ([]byte, []int) {
-	return file_store_v1_storefront_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use Theme.ProtoReflect.Descriptor instead.
+func (*Theme) Descriptor() ([]byte, []int) {
+	return file_store_v1_storefront_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *StorefrontSEO) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *StorefrontSEO) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *StorefrontSEO) GetKeywords() string {
-	if x != nil {
-		return x.Keywords
-	}
-	return ""
-}
-
-func (x *StorefrontSEO) GetOgImageUrl() string {
-	if x != nil {
-		return x.OgImageUrl
-	}
-	return ""
-}
-
-type StorefrontConfig struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StoreId          int64                  `protobuf:"varint,2,opt,name=store_id,json=storeId,proto3" json:"store_id,omitempty"`
-	StoreName        string                 `protobuf:"bytes,3,opt,name=store_name,json=storeName,proto3" json:"store_name,omitempty"`
-	Domain           string                 `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain,omitempty"`
-	Subdomain        string                 `protobuf:"bytes,5,opt,name=subdomain,proto3" json:"subdomain,omitempty"`
-	Theme            *StorefrontTheme       `protobuf:"bytes,6,opt,name=theme,proto3" json:"theme,omitempty"`
-	Seo              *StorefrontSEO         `protobuf:"bytes,7,opt,name=seo,proto3" json:"seo,omitempty"`
-	IsPublished      bool                   `protobuf:"varint,8,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	MaintenanceMode  bool                   `protobuf:"varint,9,opt,name=maintenance_mode,json=maintenanceMode,proto3" json:"maintenance_mode,omitempty"`
-	AnnouncementText string                 `protobuf:"bytes,10,opt,name=announcement_text,json=announcementText,proto3" json:"announcement_text,omitempty"`
-	CreatedAt        string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt        string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *StorefrontConfig) Reset() {
-	*x = StorefrontConfig{}
-	mi := &file_store_v1_storefront_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StorefrontConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StorefrontConfig) ProtoMessage() {}
-
-func (x *StorefrontConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_storefront_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use StorefrontConfig.ProtoReflect.Descriptor instead.
-func (*StorefrontConfig) Descriptor() ([]byte, []int) {
-	return file_store_v1_storefront_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *StorefrontConfig) GetId() int64 {
+func (x *Theme) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *StorefrontConfig) GetStoreId() int64 {
+func (x *Theme) GetOwnerId() int64 {
 	if x != nil {
-		return x.StoreId
+		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *StorefrontConfig) GetStoreName() string {
+func (x *Theme) GetName() string {
 	if x != nil {
-		return x.StoreName
+		return x.Name
 	}
 	return ""
 }
 
-func (x *StorefrontConfig) GetDomain() string {
+func (x *Theme) GetPrimaryColor() string {
 	if x != nil {
-		return x.Domain
+		return x.PrimaryColor
 	}
 	return ""
 }
 
-func (x *StorefrontConfig) GetSubdomain() string {
+func (x *Theme) GetFont() string {
 	if x != nil {
-		return x.Subdomain
+		return x.Font
 	}
 	return ""
 }
 
-func (x *StorefrontConfig) GetTheme() *StorefrontTheme {
+func (x *Theme) GetHeaderStyle() string {
 	if x != nil {
-		return x.Theme
-	}
-	return nil
-}
-
-func (x *StorefrontConfig) GetSeo() *StorefrontSEO {
-	if x != nil {
-		return x.Seo
-	}
-	return nil
-}
-
-func (x *StorefrontConfig) GetIsPublished() bool {
-	if x != nil {
-		return x.IsPublished
-	}
-	return false
-}
-
-func (x *StorefrontConfig) GetMaintenanceMode() bool {
-	if x != nil {
-		return x.MaintenanceMode
-	}
-	return false
-}
-
-func (x *StorefrontConfig) GetAnnouncementText() string {
-	if x != nil {
-		return x.AnnouncementText
+		return x.HeaderStyle
 	}
 	return ""
 }
 
-func (x *StorefrontConfig) GetCreatedAt() string {
+func (x *Theme) GetFooterStyle() string {
+	if x != nil {
+		return x.FooterStyle
+	}
+	return ""
+}
+
+func (x *Theme) GetCustomCss() string {
+	if x != nil {
+		return x.CustomCss
+	}
+	return ""
+}
+
+func (x *Theme) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *StorefrontConfig) GetUpdatedAt() string {
+func (x *Theme) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
 	}
 	return ""
 }
 
-type GetStorefrontConfigRequest struct {
+type ListThemesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetStorefrontConfigRequest) Reset() {
-	*x = GetStorefrontConfigRequest{}
+func (x *ListThemesRequest) Reset() {
+	*x = ListThemesRequest{}
+	mi := &file_store_v1_storefront_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListThemesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListThemesRequest) ProtoMessage() {}
+
+func (x *ListThemesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_storefront_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListThemesRequest.ProtoReflect.Descriptor instead.
+func (*ListThemesRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_storefront_proto_rawDescGZIP(), []int{1}
+}
+
+type ListThemesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Themes        []*Theme               `protobuf:"bytes,1,rep,name=themes,proto3" json:"themes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListThemesResponse) Reset() {
+	*x = ListThemesResponse{}
+	mi := &file_store_v1_storefront_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListThemesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListThemesResponse) ProtoMessage() {}
+
+func (x *ListThemesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_storefront_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListThemesResponse.ProtoReflect.Descriptor instead.
+func (*ListThemesResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_storefront_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListThemesResponse) GetThemes() []*Theme {
+	if x != nil {
+		return x.Themes
+	}
+	return nil
+}
+
+type CreateThemeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PrimaryColor  string                 `protobuf:"bytes,2,opt,name=primary_color,json=primaryColor,proto3" json:"primary_color,omitempty"`
+	Font          string                 `protobuf:"bytes,3,opt,name=font,proto3" json:"font,omitempty"`
+	HeaderStyle   string                 `protobuf:"bytes,4,opt,name=header_style,json=headerStyle,proto3" json:"header_style,omitempty"`
+	FooterStyle   string                 `protobuf:"bytes,5,opt,name=footer_style,json=footerStyle,proto3" json:"footer_style,omitempty"`
+	CustomCss     string                 `protobuf:"bytes,6,opt,name=custom_css,json=customCss,proto3" json:"custom_css,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateThemeRequest) Reset() {
+	*x = CreateThemeRequest{}
 	mi := &file_store_v1_storefront_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetStorefrontConfigRequest) String() string {
+func (x *CreateThemeRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetStorefrontConfigRequest) ProtoMessage() {}
+func (*CreateThemeRequest) ProtoMessage() {}
 
-func (x *GetStorefrontConfigRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateThemeRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_storefront_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -336,32 +254,75 @@ func (x *GetStorefrontConfigRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetStorefrontConfigRequest.ProtoReflect.Descriptor instead.
-func (*GetStorefrontConfigRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateThemeRequest.ProtoReflect.Descriptor instead.
+func (*CreateThemeRequest) Descriptor() ([]byte, []int) {
 	return file_store_v1_storefront_proto_rawDescGZIP(), []int{3}
 }
 
-type GetStorefrontConfigResponse struct {
+func (x *CreateThemeRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateThemeRequest) GetPrimaryColor() string {
+	if x != nil {
+		return x.PrimaryColor
+	}
+	return ""
+}
+
+func (x *CreateThemeRequest) GetFont() string {
+	if x != nil {
+		return x.Font
+	}
+	return ""
+}
+
+func (x *CreateThemeRequest) GetHeaderStyle() string {
+	if x != nil {
+		return x.HeaderStyle
+	}
+	return ""
+}
+
+func (x *CreateThemeRequest) GetFooterStyle() string {
+	if x != nil {
+		return x.FooterStyle
+	}
+	return ""
+}
+
+func (x *CreateThemeRequest) GetCustomCss() string {
+	if x != nil {
+		return x.CustomCss
+	}
+	return ""
+}
+
+type CreateThemeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *StorefrontConfig      `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetStorefrontConfigResponse) Reset() {
-	*x = GetStorefrontConfigResponse{}
+func (x *CreateThemeResponse) Reset() {
+	*x = CreateThemeResponse{}
 	mi := &file_store_v1_storefront_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetStorefrontConfigResponse) String() string {
+func (x *CreateThemeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetStorefrontConfigResponse) ProtoMessage() {}
+func (*CreateThemeResponse) ProtoMessage() {}
 
-func (x *GetStorefrontConfigResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateThemeResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_storefront_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -373,139 +334,138 @@ func (x *GetStorefrontConfigResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetStorefrontConfigResponse.ProtoReflect.Descriptor instead.
-func (*GetStorefrontConfigResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateThemeResponse.ProtoReflect.Descriptor instead.
+func (*CreateThemeResponse) Descriptor() ([]byte, []int) {
 	return file_store_v1_storefront_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetStorefrontConfigResponse) GetConfig() *StorefrontConfig {
+func (x *CreateThemeResponse) GetId() int64 {
 	if x != nil {
-		return x.Config
+		return x.Id
 	}
-	return nil
+	return 0
 }
 
-type UpdateStorefrontConfigRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	StoreName        string                 `protobuf:"bytes,1,opt,name=store_name,json=storeName,proto3" json:"store_name,omitempty"`
-	Domain           string                 `protobuf:"bytes,2,opt,name=domain,proto3" json:"domain,omitempty"`
-	Subdomain        string                 `protobuf:"bytes,3,opt,name=subdomain,proto3" json:"subdomain,omitempty"`
-	Theme            *StorefrontTheme       `protobuf:"bytes,4,opt,name=theme,proto3" json:"theme,omitempty"`
-	Seo              *StorefrontSEO         `protobuf:"bytes,5,opt,name=seo,proto3" json:"seo,omitempty"`
-	IsPublished      bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	MaintenanceMode  bool                   `protobuf:"varint,7,opt,name=maintenance_mode,json=maintenanceMode,proto3" json:"maintenance_mode,omitempty"`
-	AnnouncementText string                 `protobuf:"bytes,8,opt,name=announcement_text,json=announcementText,proto3" json:"announcement_text,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *UpdateStorefrontConfigRequest) Reset() {
-	*x = UpdateStorefrontConfigRequest{}
-	mi := &file_store_v1_storefront_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateStorefrontConfigRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateStorefrontConfigRequest) ProtoMessage() {}
-
-func (x *UpdateStorefrontConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_storefront_proto_msgTypes[5]
+func (x *CreateThemeResponse) GetMessage() string {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateStorefrontConfigRequest.ProtoReflect.Descriptor instead.
-func (*UpdateStorefrontConfigRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_storefront_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *UpdateStorefrontConfigRequest) GetStoreName() string {
-	if x != nil {
-		return x.StoreName
+		return x.Message
 	}
 	return ""
 }
 
-func (x *UpdateStorefrontConfigRequest) GetDomain() string {
-	if x != nil {
-		return x.Domain
-	}
-	return ""
-}
-
-func (x *UpdateStorefrontConfigRequest) GetSubdomain() string {
-	if x != nil {
-		return x.Subdomain
-	}
-	return ""
-}
-
-func (x *UpdateStorefrontConfigRequest) GetTheme() *StorefrontTheme {
-	if x != nil {
-		return x.Theme
-	}
-	return nil
-}
-
-func (x *UpdateStorefrontConfigRequest) GetSeo() *StorefrontSEO {
-	if x != nil {
-		return x.Seo
-	}
-	return nil
-}
-
-func (x *UpdateStorefrontConfigRequest) GetIsPublished() bool {
-	if x != nil {
-		return x.IsPublished
-	}
-	return false
-}
-
-func (x *UpdateStorefrontConfigRequest) GetMaintenanceMode() bool {
-	if x != nil {
-		return x.MaintenanceMode
-	}
-	return false
-}
-
-func (x *UpdateStorefrontConfigRequest) GetAnnouncementText() string {
-	if x != nil {
-		return x.AnnouncementText
-	}
-	return ""
-}
-
-type UpdateStorefrontConfigResponse struct {
+type UpdateThemeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *StorefrontConfig      `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	PrimaryColor  string                 `protobuf:"bytes,3,opt,name=primary_color,json=primaryColor,proto3" json:"primary_color,omitempty"`
+	Font          string                 `protobuf:"bytes,4,opt,name=font,proto3" json:"font,omitempty"`
+	HeaderStyle   string                 `protobuf:"bytes,5,opt,name=header_style,json=headerStyle,proto3" json:"header_style,omitempty"`
+	FooterStyle   string                 `protobuf:"bytes,6,opt,name=footer_style,json=footerStyle,proto3" json:"footer_style,omitempty"`
+	CustomCss     string                 `protobuf:"bytes,7,opt,name=custom_css,json=customCss,proto3" json:"custom_css,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateStorefrontConfigResponse) Reset() {
-	*x = UpdateStorefrontConfigResponse{}
+func (x *UpdateThemeRequest) Reset() {
+	*x = UpdateThemeRequest{}
+	mi := &file_store_v1_storefront_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateThemeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateThemeRequest) ProtoMessage() {}
+
+func (x *UpdateThemeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_storefront_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateThemeRequest.ProtoReflect.Descriptor instead.
+func (*UpdateThemeRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_storefront_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateThemeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateThemeRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateThemeRequest) GetPrimaryColor() string {
+	if x != nil {
+		return x.PrimaryColor
+	}
+	return ""
+}
+
+func (x *UpdateThemeRequest) GetFont() string {
+	if x != nil {
+		return x.Font
+	}
+	return ""
+}
+
+func (x *UpdateThemeRequest) GetHeaderStyle() string {
+	if x != nil {
+		return x.HeaderStyle
+	}
+	return ""
+}
+
+func (x *UpdateThemeRequest) GetFooterStyle() string {
+	if x != nil {
+		return x.FooterStyle
+	}
+	return ""
+}
+
+func (x *UpdateThemeRequest) GetCustomCss() string {
+	if x != nil {
+		return x.CustomCss
+	}
+	return ""
+}
+
+type UpdateThemeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateThemeResponse) Reset() {
+	*x = UpdateThemeResponse{}
 	mi := &file_store_v1_storefront_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateStorefrontConfigResponse) String() string {
+func (x *UpdateThemeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateStorefrontConfigResponse) ProtoMessage() {}
+func (*UpdateThemeResponse) ProtoMessage() {}
 
-func (x *UpdateStorefrontConfigResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdateThemeResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_storefront_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -517,71 +477,63 @@ func (x *UpdateStorefrontConfigResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateStorefrontConfigResponse.ProtoReflect.Descriptor instead.
-func (*UpdateStorefrontConfigResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateThemeResponse.ProtoReflect.Descriptor instead.
+func (*UpdateThemeResponse) Descriptor() ([]byte, []int) {
 	return file_store_v1_storefront_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateStorefrontConfigResponse) GetConfig() *StorefrontConfig {
+func (x *UpdateThemeResponse) GetMessage() string {
 	if x != nil {
-		return x.Config
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_store_v1_storefront_proto protoreflect.FileDescriptor
 
 const file_store_v1_storefront_proto_rawDesc = "" +
 	"\n" +
-	"\x19store/v1/storefront.proto\x12\x05store\"\xdb\x01\n" +
-	"\x0fStorefrontTheme\x12#\n" +
-	"\rprimary_color\x18\x01 \x01(\tR\fprimaryColor\x12'\n" +
-	"\x0fsecondary_color\x18\x02 \x01(\tR\x0esecondaryColor\x12\x1f\n" +
-	"\vfont_family\x18\x03 \x01(\tR\n" +
-	"fontFamily\x12\x19\n" +
-	"\blogo_url\x18\x04 \x01(\tR\alogoUrl\x12\x1f\n" +
-	"\vfavicon_url\x18\x05 \x01(\tR\n" +
-	"faviconUrl\x12\x1d\n" +
-	"\n" +
-	"banner_url\x18\x06 \x01(\tR\tbannerUrl\"\x85\x01\n" +
-	"\rStorefrontSEO\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1a\n" +
-	"\bkeywords\x18\x03 \x01(\tR\bkeywords\x12 \n" +
-	"\fog_image_url\x18\x04 \x01(\tR\n" +
-	"ogImageUrl\"\xa1\x03\n" +
-	"\x10StorefrontConfig\x12\x0e\n" +
+	"\x19store/v1/storefront.proto\x12\x05store\"\xa2\x02\n" +
+	"\x05Theme\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstore_id\x18\x02 \x01(\x03R\astoreId\x12\x1d\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12#\n" +
+	"\rprimary_color\x18\x04 \x01(\tR\fprimaryColor\x12\x12\n" +
+	"\x04font\x18\x05 \x01(\tR\x04font\x12!\n" +
+	"\fheader_style\x18\x06 \x01(\tR\vheaderStyle\x12!\n" +
+	"\ffooter_style\x18\a \x01(\tR\vfooterStyle\x12\x1d\n" +
 	"\n" +
-	"store_name\x18\x03 \x01(\tR\tstoreName\x12\x16\n" +
-	"\x06domain\x18\x04 \x01(\tR\x06domain\x12\x1c\n" +
-	"\tsubdomain\x18\x05 \x01(\tR\tsubdomain\x12,\n" +
-	"\x05theme\x18\x06 \x01(\v2\x16.store.StorefrontThemeR\x05theme\x12&\n" +
-	"\x03seo\x18\a \x01(\v2\x14.store.StorefrontSEOR\x03seo\x12!\n" +
-	"\fis_published\x18\b \x01(\bR\visPublished\x12)\n" +
-	"\x10maintenance_mode\x18\t \x01(\bR\x0fmaintenanceMode\x12+\n" +
-	"\x11announcement_text\x18\n" +
-	" \x01(\tR\x10announcementText\x12\x1d\n" +
+	"custom_css\x18\b \x01(\tR\tcustomCss\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\x1c\n" +
-	"\x1aGetStorefrontConfigRequest\"N\n" +
-	"\x1bGetStorefrontConfigResponse\x12/\n" +
-	"\x06config\x18\x01 \x01(\v2\x17.store.StorefrontConfigR\x06config\"\xc5\x02\n" +
-	"\x1dUpdateStorefrontConfigRequest\x12\x1d\n" +
+	"updated_at\x18\n" +
+	" \x01(\tR\tupdatedAt\"\x13\n" +
+	"\x11ListThemesRequest\":\n" +
+	"\x12ListThemesResponse\x12$\n" +
+	"\x06themes\x18\x01 \x03(\v2\f.store.ThemeR\x06themes\"\xc6\x01\n" +
+	"\x12CreateThemeRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
+	"\rprimary_color\x18\x02 \x01(\tR\fprimaryColor\x12\x12\n" +
+	"\x04font\x18\x03 \x01(\tR\x04font\x12!\n" +
+	"\fheader_style\x18\x04 \x01(\tR\vheaderStyle\x12!\n" +
+	"\ffooter_style\x18\x05 \x01(\tR\vfooterStyle\x12\x1d\n" +
 	"\n" +
-	"store_name\x18\x01 \x01(\tR\tstoreName\x12\x16\n" +
-	"\x06domain\x18\x02 \x01(\tR\x06domain\x12\x1c\n" +
-	"\tsubdomain\x18\x03 \x01(\tR\tsubdomain\x12,\n" +
-	"\x05theme\x18\x04 \x01(\v2\x16.store.StorefrontThemeR\x05theme\x12&\n" +
-	"\x03seo\x18\x05 \x01(\v2\x14.store.StorefrontSEOR\x03seo\x12!\n" +
-	"\fis_published\x18\x06 \x01(\bR\visPublished\x12)\n" +
-	"\x10maintenance_mode\x18\a \x01(\bR\x0fmaintenanceMode\x12+\n" +
-	"\x11announcement_text\x18\b \x01(\tR\x10announcementText\"Q\n" +
-	"\x1eUpdateStorefrontConfigResponse\x12/\n" +
-	"\x06config\x18\x01 \x01(\v2\x17.store.StorefrontConfigR\x06configB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
+	"custom_css\x18\x06 \x01(\tR\tcustomCss\"?\n" +
+	"\x13CreateThemeResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xd6\x01\n" +
+	"\x12UpdateThemeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
+	"\rprimary_color\x18\x03 \x01(\tR\fprimaryColor\x12\x12\n" +
+	"\x04font\x18\x04 \x01(\tR\x04font\x12!\n" +
+	"\fheader_style\x18\x05 \x01(\tR\vheaderStyle\x12!\n" +
+	"\ffooter_style\x18\x06 \x01(\tR\vfooterStyle\x12\x1d\n" +
+	"\n" +
+	"custom_css\x18\a \x01(\tR\tcustomCss\"/\n" +
+	"\x13UpdateThemeResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
 
 var (
 	file_store_v1_storefront_proto_rawDescOnce sync.Once
@@ -597,26 +549,21 @@ func file_store_v1_storefront_proto_rawDescGZIP() []byte {
 
 var file_store_v1_storefront_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_store_v1_storefront_proto_goTypes = []any{
-	(*StorefrontTheme)(nil),                // 0: store.StorefrontTheme
-	(*StorefrontSEO)(nil),                  // 1: store.StorefrontSEO
-	(*StorefrontConfig)(nil),               // 2: store.StorefrontConfig
-	(*GetStorefrontConfigRequest)(nil),     // 3: store.GetStorefrontConfigRequest
-	(*GetStorefrontConfigResponse)(nil),    // 4: store.GetStorefrontConfigResponse
-	(*UpdateStorefrontConfigRequest)(nil),  // 5: store.UpdateStorefrontConfigRequest
-	(*UpdateStorefrontConfigResponse)(nil), // 6: store.UpdateStorefrontConfigResponse
+	(*Theme)(nil),               // 0: store.Theme
+	(*ListThemesRequest)(nil),   // 1: store.ListThemesRequest
+	(*ListThemesResponse)(nil),  // 2: store.ListThemesResponse
+	(*CreateThemeRequest)(nil),  // 3: store.CreateThemeRequest
+	(*CreateThemeResponse)(nil), // 4: store.CreateThemeResponse
+	(*UpdateThemeRequest)(nil),  // 5: store.UpdateThemeRequest
+	(*UpdateThemeResponse)(nil), // 6: store.UpdateThemeResponse
 }
 var file_store_v1_storefront_proto_depIdxs = []int32{
-	0, // 0: store.StorefrontConfig.theme:type_name -> store.StorefrontTheme
-	1, // 1: store.StorefrontConfig.seo:type_name -> store.StorefrontSEO
-	2, // 2: store.GetStorefrontConfigResponse.config:type_name -> store.StorefrontConfig
-	0, // 3: store.UpdateStorefrontConfigRequest.theme:type_name -> store.StorefrontTheme
-	1, // 4: store.UpdateStorefrontConfigRequest.seo:type_name -> store.StorefrontSEO
-	2, // 5: store.UpdateStorefrontConfigResponse.config:type_name -> store.StorefrontConfig
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0, // 0: store.ListThemesResponse.themes:type_name -> store.Theme
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_store_v1_storefront_proto_init() }

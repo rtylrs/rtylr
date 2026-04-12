@@ -8,15 +8,16 @@
 
 export interface Floor {
   id: number;
-  locationId: number;
+  businessId: number;
+  branchId: number;
   name: string;
   sortOrder: number;
-  tableCount: number;
+  isActive: boolean;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ListFloorsRequest {
+  branchId: number;
 }
 
 export interface ListFloorsResponse {
@@ -24,28 +25,28 @@ export interface ListFloorsResponse {
 }
 
 export interface CreateFloorRequest {
+  branchId: number;
   name: string;
   sortOrder: number;
 }
 
 export interface CreateFloorResponse {
-  floor: Floor | undefined;
+  floorId: number;
+  message: string;
 }
 
 export interface UpdateFloorRequest {
-  id: number;
   name: string;
   sortOrder: number;
 }
 
 export interface UpdateFloorResponse {
-  floor: Floor | undefined;
+  message: string;
 }
 
 export interface DeleteFloorRequest {
-  id: number;
 }
 
 export interface DeleteFloorResponse {
-  success: boolean;
+  message: string;
 }

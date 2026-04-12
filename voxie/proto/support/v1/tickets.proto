@@ -4,52 +4,43 @@ package support;
 
 option go_package = "github.com/voxire/voxie/gen/go/support/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Tickets ─────────────────────────────────────────────────────────
 
 message Ticket {
   int64 id = 1;
-  string number = 2;
-  string subject = 3;
-  string description = 4;
-  string status = 5; // open, pending, in_progress, resolved, closed
-  string priority = 6; // low, medium, high, urgent
-  string channel = 7; // email, chat, phone, web
-  int64 customer_id = 8;
-  string customer_name = 9;
-  string customer_email = 10;
-  int64 assignee_id = 11;
-  string assignee_name = 12;
-  repeated string tags = 13;
-  repeated TicketMessage messages = 14;
-  string created_at = 15;
-  string updated_at = 16;
-  string resolved_at = 17;
+  int64 business_id = 2;
+  string customer_name = 3;
+  string customer_email = 4;
+  string subject = 5;
+  string status = 6;
+  string priority = 7;
+  optional int64 assigned_to = 8;
+  string channel = 9;
+  string created_at = 10;
+  string updated_at = 11;
 }
 
 message TicketMessage {
   int64 id = 1;
   int64 ticket_id = 2;
-  string sender_type = 3; // agent, customer
+  string sender_type = 3;
   string sender_name = 4;
   string body = 5;
-  repeated string attachments = 6;
+  bool is_internal = 6;
   string created_at = 7;
 }
 
 message ListTicketsRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  string priority = 3;
-  int64 assignee_id = 4;
-  int64 customer_id = 5;
-  string search = 6;
+  string status = 1;
+  int32 page = 2;
+  int32 page_size = 3;
 }
 
 message ListTicketsResponse {
   repeated Ticket tickets = 1;
-  common.PaginationResponse pagination = 2;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message GetTicketRequest {
@@ -58,65 +49,34 @@ message GetTicketRequest {
 
 message GetTicketResponse {
   Ticket ticket = 1;
+  repeated TicketMessage messages = 2;
 }
 
 message CreateTicketRequest {
-  string subject = 1;
-  string description = 2;
-  string priority = 3;
-  string channel = 4;
-  int64 customer_id = 5;
-  string customer_email = 6;
-  repeated string tags = 7;
+  string customer_name = 1;
+  string customer_email = 2;
+  string subject = 3;
+  string priority = 4;
+  string channel = 5;
+  optional int64 assigned_to = 6;
+  string body = 7;
+  string sender_name = 8;
 }
 
 message CreateTicketResponse {
-  Ticket ticket = 1;
+  int64 ticket_id = 1;
+  string message = 2;
 }
 
 message UpdateTicketRequest {
   int64 id = 1;
   string subject = 2;
-  string priority = 3;
-  repeated string tags = 4;
+  string status = 3;
+  string priority = 4;
+  optional int64 assigned_to = 5;
+  string channel = 6;
 }
 
 message UpdateTicketResponse {
-  Ticket ticket = 1;
-}
-
-message DeleteTicketRequest {
-  int64 id = 1;
-}
-
-message DeleteTicketResponse {
-  bool success = 1;
-}
-
-message UpdateTicketStatusRequest {
-  int64 id = 1;
-  string status = 2;
-}
-
-message UpdateTicketStatusResponse {
-  Ticket ticket = 1;
-}
-
-message AssignTicketRequest {
-  int64 id = 1;
-  int64 assignee_id = 2;
-}
-
-message AssignTicketResponse {
-  Ticket ticket = 1;
-}
-
-message SendTicketMessageRequest {
-  int64 ticket_id = 1;
-  string body = 2;
-  repeated string attachments = 3;
-}
-
-message SendTicketMessageResponse {
-  TicketMessage message = 1;
+  string message = 1;
 }

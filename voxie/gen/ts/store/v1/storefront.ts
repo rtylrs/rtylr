@@ -6,55 +6,50 @@
 
 /* eslint-disable */
 
-export interface StorefrontTheme {
-  primaryColor: string;
-  secondaryColor: string;
-  fontFamily: string;
-  logoUrl: string;
-  faviconUrl: string;
-  bannerUrl: string;
-}
-
-export interface StorefrontSEO {
-  title: string;
-  description: string;
-  keywords: string;
-  ogImageUrl: string;
-}
-
-export interface StorefrontConfig {
+export interface Theme {
   id: number;
-  storeId: number;
-  storeName: string;
-  domain: string;
-  subdomain: string;
-  theme: StorefrontTheme | undefined;
-  seo: StorefrontSEO | undefined;
-  isPublished: boolean;
-  maintenanceMode: boolean;
-  announcementText: string;
+  ownerId: number;
+  name: string;
+  primaryColor: string;
+  font: string;
+  headerStyle: string;
+  footerStyle: string;
+  customCss: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface GetStorefrontConfigRequest {
+export interface ListThemesRequest {
 }
 
-export interface GetStorefrontConfigResponse {
-  config: StorefrontConfig | undefined;
+export interface ListThemesResponse {
+  themes: Theme[];
 }
 
-export interface UpdateStorefrontConfigRequest {
-  storeName: string;
-  domain: string;
-  subdomain: string;
-  theme: StorefrontTheme | undefined;
-  seo: StorefrontSEO | undefined;
-  isPublished: boolean;
-  maintenanceMode: boolean;
-  announcementText: string;
+export interface CreateThemeRequest {
+  name: string;
+  primaryColor: string;
+  font: string;
+  headerStyle: string;
+  footerStyle: string;
+  customCss: string;
 }
 
-export interface UpdateStorefrontConfigResponse {
-  config: StorefrontConfig | undefined;
+export interface CreateThemeResponse {
+  id: number;
+  message: string;
+}
+
+export interface UpdateThemeRequest {
+  id: number;
+  name: string;
+  primaryColor: string;
+  font: string;
+  headerStyle: string;
+  footerStyle: string;
+  customCss: string;
+}
+
+export interface UpdateThemeResponse {
+  message: string;
 }

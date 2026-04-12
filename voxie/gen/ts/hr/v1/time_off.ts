@@ -5,63 +5,51 @@
 // source: hr/v1/time_off.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface TimeOffRequest {
   id: number;
+  ownerId: number;
   staffId: number;
-  staffName: string;
-  /** vacation, sick, personal, other */
   type: string;
-  /** pending, approved, rejected */
-  status: string;
   startDate: string;
   endDate: string;
-  days: number;
+  daysCount: number;
+  status: string;
   reason: string;
-  reviewerName: string;
-  reviewedAt: string;
+  approvedBy: number;
+  approvedAt: string;
+  notes: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface ListTimeOffRequestsRequest {
-  pagination: PaginationRequest | undefined;
-  staffId: number;
-  status: string;
-  type: string;
+export interface ListTimeOffRequest {
 }
 
-export interface ListTimeOffRequestsResponse {
+export interface ListTimeOffResponse {
   requests: TimeOffRequest[];
-  pagination: PaginationResponse | undefined;
 }
 
-export interface GetTimeOffRequestRequest {
-  id: number;
-}
-
-export interface GetTimeOffRequestResponse {
-  request: TimeOffRequest | undefined;
-}
-
-export interface CreateTimeOffRequestRequest {
+export interface SubmitTimeOffRequest {
   staffId: number;
   type: string;
   startDate: string;
   endDate: string;
+  daysCount: number;
   reason: string;
+  notes: string;
 }
 
-export interface CreateTimeOffRequestResponse {
-  request: TimeOffRequest | undefined;
-}
-
-export interface ApproveTimeOffRequest {
+export interface SubmitTimeOffResponse {
   id: number;
-  approved: boolean;
-  reason: string;
+}
+
+export interface ApproveTimeOffRequestMsg {
+  id: number;
+  status: string;
+  notes: string;
 }
 
 export interface ApproveTimeOffResponse {
-  request: TimeOffRequest | undefined;
+  success: boolean;
 }

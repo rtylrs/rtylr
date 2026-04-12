@@ -21,38 +21,35 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Category struct {
+type StoreCategory struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StoreId       int64                  `protobuf:"varint,2,opt,name=store_id,json=storeId,proto3" json:"store_id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Slug          string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
 	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	ParentId      int64                  `protobuf:"varint,6,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,7,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	ImageUrl      string                 `protobuf:"bytes,6,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	ParentId      int64                  `protobuf:"varint,7,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
 	SortOrder     int32                  `protobuf:"varint,8,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	ProductCount  int32                  `protobuf:"varint,9,opt,name=product_count,json=productCount,proto3" json:"product_count,omitempty"`
-	IsActive      bool                   `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Category) Reset() {
-	*x = Category{}
+func (x *StoreCategory) Reset() {
+	*x = StoreCategory{}
 	mi := &file_store_v1_categories_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Category) String() string {
+func (x *StoreCategory) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Category) ProtoMessage() {}
+func (*StoreCategory) ProtoMessage() {}
 
-func (x *Category) ProtoReflect() protoreflect.Message {
+func (x *StoreCategory) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_categories_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -64,160 +61,131 @@ func (x *Category) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Category.ProtoReflect.Descriptor instead.
-func (*Category) Descriptor() ([]byte, []int) {
+// Deprecated: Use StoreCategory.ProtoReflect.Descriptor instead.
+func (*StoreCategory) Descriptor() ([]byte, []int) {
 	return file_store_v1_categories_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Category) GetId() int64 {
+func (x *StoreCategory) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *Category) GetStoreId() int64 {
+func (x *StoreCategory) GetOwnerId() int64 {
 	if x != nil {
-		return x.StoreId
+		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *Category) GetName() string {
+func (x *StoreCategory) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Category) GetSlug() string {
+func (x *StoreCategory) GetSlug() string {
 	if x != nil {
 		return x.Slug
 	}
 	return ""
 }
 
-func (x *Category) GetDescription() string {
+func (x *StoreCategory) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *Category) GetParentId() int64 {
-	if x != nil {
-		return x.ParentId
-	}
-	return 0
-}
-
-func (x *Category) GetImageUrl() string {
+func (x *StoreCategory) GetImageUrl() string {
 	if x != nil {
 		return x.ImageUrl
 	}
 	return ""
 }
 
-func (x *Category) GetSortOrder() int32 {
+func (x *StoreCategory) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *StoreCategory) GetSortOrder() int32 {
 	if x != nil {
 		return x.SortOrder
 	}
 	return 0
 }
 
-func (x *Category) GetProductCount() int32 {
-	if x != nil {
-		return x.ProductCount
-	}
-	return 0
-}
-
-func (x *Category) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *Category) GetCreatedAt() string {
+func (x *StoreCategory) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *Category) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
-type ListCategoriesRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	IncludeInactive bool                   `protobuf:"varint,1,opt,name=include_inactive,json=includeInactive,proto3" json:"include_inactive,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *ListCategoriesRequest) Reset() {
-	*x = ListCategoriesRequest{}
-	mi := &file_store_v1_categories_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListCategoriesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListCategoriesRequest) ProtoMessage() {}
-
-func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListCategoriesRequest.ProtoReflect.Descriptor instead.
-func (*ListCategoriesRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ListCategoriesRequest) GetIncludeInactive() bool {
-	if x != nil {
-		return x.IncludeInactive
-	}
-	return false
-}
-
-type ListCategoriesResponse struct {
+type ListStoreCategoriesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Categories    []*Category            `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListCategoriesResponse) Reset() {
-	*x = ListCategoriesResponse{}
+func (x *ListStoreCategoriesRequest) Reset() {
+	*x = ListStoreCategoriesRequest{}
+	mi := &file_store_v1_categories_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListStoreCategoriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListStoreCategoriesRequest) ProtoMessage() {}
+
+func (x *ListStoreCategoriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_categories_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListStoreCategoriesRequest.ProtoReflect.Descriptor instead.
+func (*ListStoreCategoriesRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_categories_proto_rawDescGZIP(), []int{1}
+}
+
+type ListStoreCategoriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Categories    []*StoreCategory       `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListStoreCategoriesResponse) Reset() {
+	*x = ListStoreCategoriesResponse{}
 	mi := &file_store_v1_categories_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListCategoriesResponse) String() string {
+func (x *ListStoreCategoriesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListCategoriesResponse) ProtoMessage() {}
+func (*ListStoreCategoriesResponse) ProtoMessage() {}
 
-func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
+func (x *ListStoreCategoriesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_categories_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -229,39 +197,44 @@ func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListCategoriesResponse.ProtoReflect.Descriptor instead.
-func (*ListCategoriesResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListStoreCategoriesResponse.ProtoReflect.Descriptor instead.
+func (*ListStoreCategoriesResponse) Descriptor() ([]byte, []int) {
 	return file_store_v1_categories_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListCategoriesResponse) GetCategories() []*Category {
+func (x *ListStoreCategoriesResponse) GetCategories() []*StoreCategory {
 	if x != nil {
 		return x.Categories
 	}
 	return nil
 }
 
-type GetCategoryRequest struct {
+type CreateStoreCategoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Slug          string                 `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ImageUrl      string                 `protobuf:"bytes,4,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	ParentId      int64                  `protobuf:"varint,5,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,6,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetCategoryRequest) Reset() {
-	*x = GetCategoryRequest{}
+func (x *CreateStoreCategoryRequest) Reset() {
+	*x = CreateStoreCategoryRequest{}
 	mi := &file_store_v1_categories_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetCategoryRequest) String() string {
+func (x *CreateStoreCategoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCategoryRequest) ProtoMessage() {}
+func (*CreateStoreCategoryRequest) ProtoMessage() {}
 
-func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateStoreCategoryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_categories_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -273,39 +246,75 @@ func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCategoryRequest.ProtoReflect.Descriptor instead.
-func (*GetCategoryRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateStoreCategoryRequest.ProtoReflect.Descriptor instead.
+func (*CreateStoreCategoryRequest) Descriptor() ([]byte, []int) {
 	return file_store_v1_categories_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetCategoryRequest) GetId() int64 {
+func (x *CreateStoreCategoryRequest) GetName() string {
 	if x != nil {
-		return x.Id
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateStoreCategoryRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *CreateStoreCategoryRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateStoreCategoryRequest) GetImageUrl() string {
+	if x != nil {
+		return x.ImageUrl
+	}
+	return ""
+}
+
+func (x *CreateStoreCategoryRequest) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
 	}
 	return 0
 }
 
-type GetCategoryResponse struct {
+func (x *CreateStoreCategoryRequest) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+type CreateStoreCategoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Category      *Category              `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetCategoryResponse) Reset() {
-	*x = GetCategoryResponse{}
+func (x *CreateStoreCategoryResponse) Reset() {
+	*x = CreateStoreCategoryResponse{}
 	mi := &file_store_v1_categories_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetCategoryResponse) String() string {
+func (x *CreateStoreCategoryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCategoryResponse) ProtoMessage() {}
+func (*CreateStoreCategoryResponse) ProtoMessage() {}
 
-func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateStoreCategoryResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_store_v1_categories_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -317,166 +326,53 @@ func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCategoryResponse.ProtoReflect.Descriptor instead.
-func (*GetCategoryResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateStoreCategoryResponse.ProtoReflect.Descriptor instead.
+func (*CreateStoreCategoryResponse) Descriptor() ([]byte, []int) {
 	return file_store_v1_categories_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetCategoryResponse) GetCategory() *Category {
+func (x *CreateStoreCategoryResponse) GetId() int64 {
 	if x != nil {
-		return x.Category
-	}
-	return nil
-}
-
-type CreateCategoryRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	ParentId      int64                  `protobuf:"varint,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,4,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,5,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateCategoryRequest) Reset() {
-	*x = CreateCategoryRequest{}
-	mi := &file_store_v1_categories_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateCategoryRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateCategoryRequest) ProtoMessage() {}
-
-func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateCategoryRequest.ProtoReflect.Descriptor instead.
-func (*CreateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *CreateCategoryRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *CreateCategoryRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *CreateCategoryRequest) GetParentId() int64 {
-	if x != nil {
-		return x.ParentId
+		return x.Id
 	}
 	return 0
 }
 
-func (x *CreateCategoryRequest) GetImageUrl() string {
+func (x *CreateStoreCategoryResponse) GetMessage() string {
 	if x != nil {
-		return x.ImageUrl
+		return x.Message
 	}
 	return ""
 }
 
-func (x *CreateCategoryRequest) GetSortOrder() int32 {
-	if x != nil {
-		return x.SortOrder
-	}
-	return 0
-}
-
-type CreateCategoryResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Category      *Category              `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateCategoryResponse) Reset() {
-	*x = CreateCategoryResponse{}
-	mi := &file_store_v1_categories_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateCategoryResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateCategoryResponse) ProtoMessage() {}
-
-func (x *CreateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateCategoryResponse.ProtoReflect.Descriptor instead.
-func (*CreateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CreateCategoryResponse) GetCategory() *Category {
-	if x != nil {
-		return x.Category
-	}
-	return nil
-}
-
-type UpdateCategoryRequest struct {
+type UpdateStoreCategoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	ParentId      int64                  `protobuf:"varint,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Slug          string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	ImageUrl      string                 `protobuf:"bytes,5,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,6,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	ParentId      int64                  `protobuf:"varint,6,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,7,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateCategoryRequest) Reset() {
-	*x = UpdateCategoryRequest{}
-	mi := &file_store_v1_categories_proto_msgTypes[7]
+func (x *UpdateStoreCategoryRequest) Reset() {
+	*x = UpdateStoreCategoryRequest{}
+	mi := &file_store_v1_categories_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateCategoryRequest) String() string {
+func (x *UpdateStoreCategoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateCategoryRequest) ProtoMessage() {}
+func (*UpdateStoreCategoryRequest) ProtoMessage() {}
 
-func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[7]
+func (x *UpdateStoreCategoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_categories_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -487,82 +383,82 @@ func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateCategoryRequest.ProtoReflect.Descriptor instead.
-func (*UpdateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{7}
+// Deprecated: Use UpdateStoreCategoryRequest.ProtoReflect.Descriptor instead.
+func (*UpdateStoreCategoryRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_categories_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateCategoryRequest) GetId() int64 {
+func (x *UpdateStoreCategoryRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *UpdateCategoryRequest) GetName() string {
+func (x *UpdateStoreCategoryRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *UpdateCategoryRequest) GetDescription() string {
+func (x *UpdateStoreCategoryRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *UpdateStoreCategoryRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *UpdateCategoryRequest) GetParentId() int64 {
-	if x != nil {
-		return x.ParentId
-	}
-	return 0
-}
-
-func (x *UpdateCategoryRequest) GetImageUrl() string {
+func (x *UpdateStoreCategoryRequest) GetImageUrl() string {
 	if x != nil {
 		return x.ImageUrl
 	}
 	return ""
 }
 
-func (x *UpdateCategoryRequest) GetSortOrder() int32 {
+func (x *UpdateStoreCategoryRequest) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *UpdateStoreCategoryRequest) GetSortOrder() int32 {
 	if x != nil {
 		return x.SortOrder
 	}
 	return 0
 }
 
-func (x *UpdateCategoryRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-type UpdateCategoryResponse struct {
+type UpdateStoreCategoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Category      *Category              `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateCategoryResponse) Reset() {
-	*x = UpdateCategoryResponse{}
-	mi := &file_store_v1_categories_proto_msgTypes[8]
+func (x *UpdateStoreCategoryResponse) Reset() {
+	*x = UpdateStoreCategoryResponse{}
+	mi := &file_store_v1_categories_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateCategoryResponse) String() string {
+func (x *UpdateStoreCategoryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateCategoryResponse) ProtoMessage() {}
+func (*UpdateStoreCategoryResponse) ProtoMessage() {}
 
-func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[8]
+func (x *UpdateStoreCategoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_categories_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -573,40 +469,40 @@ func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateCategoryResponse.ProtoReflect.Descriptor instead.
-func (*UpdateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{8}
+// Deprecated: Use UpdateStoreCategoryResponse.ProtoReflect.Descriptor instead.
+func (*UpdateStoreCategoryResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_categories_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateCategoryResponse) GetCategory() *Category {
+func (x *UpdateStoreCategoryResponse) GetMessage() string {
 	if x != nil {
-		return x.Category
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
-type DeleteCategoryRequest struct {
+type DeleteStoreCategoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteCategoryRequest) Reset() {
-	*x = DeleteCategoryRequest{}
-	mi := &file_store_v1_categories_proto_msgTypes[9]
+func (x *DeleteStoreCategoryRequest) Reset() {
+	*x = DeleteStoreCategoryRequest{}
+	mi := &file_store_v1_categories_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteCategoryRequest) String() string {
+func (x *DeleteStoreCategoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteCategoryRequest) ProtoMessage() {}
+func (*DeleteStoreCategoryRequest) ProtoMessage() {}
 
-func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[9]
+func (x *DeleteStoreCategoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_categories_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -617,40 +513,40 @@ func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteCategoryRequest.ProtoReflect.Descriptor instead.
-func (*DeleteCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{9}
+// Deprecated: Use DeleteStoreCategoryRequest.ProtoReflect.Descriptor instead.
+func (*DeleteStoreCategoryRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_categories_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *DeleteCategoryRequest) GetId() int64 {
+func (x *DeleteStoreCategoryRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type DeleteCategoryResponse struct {
+type DeleteStoreCategoryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteCategoryResponse) Reset() {
-	*x = DeleteCategoryResponse{}
-	mi := &file_store_v1_categories_proto_msgTypes[10]
+func (x *DeleteStoreCategoryResponse) Reset() {
+	*x = DeleteStoreCategoryResponse{}
+	mi := &file_store_v1_categories_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteCategoryResponse) String() string {
+func (x *DeleteStoreCategoryResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteCategoryResponse) ProtoMessage() {}
+func (*DeleteStoreCategoryResponse) ProtoMessage() {}
 
-func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_categories_proto_msgTypes[10]
+func (x *DeleteStoreCategoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_categories_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -661,74 +557,66 @@ func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteCategoryResponse.ProtoReflect.Descriptor instead.
-func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_store_v1_categories_proto_rawDescGZIP(), []int{10}
+// Deprecated: Use DeleteStoreCategoryResponse.ProtoReflect.Descriptor instead.
+func (*DeleteStoreCategoryResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_categories_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteCategoryResponse) GetSuccess() bool {
+func (x *DeleteStoreCategoryResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_store_v1_categories_proto protoreflect.FileDescriptor
 
 const file_store_v1_categories_proto_rawDesc = "" +
 	"\n" +
-	"\x19store/v1/categories.proto\x12\x05store\"\xd8\x02\n" +
-	"\bCategory\x12\x0e\n" +
+	"\x19store/v1/categories.proto\x12\x05store\"\xfc\x01\n" +
+	"\rStoreCategory\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstore_id\x18\x02 \x01(\x03R\astoreId\x12\x12\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x04 \x01(\tR\x04slug\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tparent_id\x18\x06 \x01(\x03R\bparentId\x12\x1b\n" +
-	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1d\n" +
+	"\timage_url\x18\x06 \x01(\tR\bimageUrl\x12\x1b\n" +
+	"\tparent_id\x18\a \x01(\x03R\bparentId\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\b \x01(\x05R\tsortOrder\x12#\n" +
-	"\rproduct_count\x18\t \x01(\x05R\fproductCount\x12\x1b\n" +
-	"\tis_active\x18\n" +
-	" \x01(\bR\bisActive\x12\x1d\n" +
+	"sort_order\x18\b \x01(\x05R\tsortOrder\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\"\x1c\n" +
+	"\x1aListStoreCategoriesRequest\"S\n" +
+	"\x1bListStoreCategoriesResponse\x124\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"B\n" +
-	"\x15ListCategoriesRequest\x12)\n" +
-	"\x10include_inactive\x18\x01 \x01(\bR\x0fincludeInactive\"I\n" +
-	"\x16ListCategoriesResponse\x12/\n" +
-	"\n" +
-	"categories\x18\x01 \x03(\v2\x0f.store.CategoryR\n" +
-	"categories\"$\n" +
-	"\x12GetCategoryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"B\n" +
-	"\x13GetCategoryResponse\x12+\n" +
-	"\bcategory\x18\x01 \x01(\v2\x0f.store.CategoryR\bcategory\"\xa6\x01\n" +
-	"\x15CreateCategoryRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tparent_id\x18\x03 \x01(\x03R\bparentId\x12\x1b\n" +
-	"\timage_url\x18\x04 \x01(\tR\bimageUrl\x12\x1d\n" +
-	"\n" +
-	"sort_order\x18\x05 \x01(\x05R\tsortOrder\"E\n" +
-	"\x16CreateCategoryResponse\x12+\n" +
-	"\bcategory\x18\x01 \x01(\v2\x0f.store.CategoryR\bcategory\"\xd3\x01\n" +
-	"\x15UpdateCategoryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"categories\x18\x01 \x03(\v2\x14.store.StoreCategoryR\n" +
+	"categories\"\xbf\x01\n" +
+	"\x1aCreateStoreCategoryRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x02 \x01(\tR\x04slug\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tparent_id\x18\x04 \x01(\x03R\bparentId\x12\x1b\n" +
-	"\timage_url\x18\x05 \x01(\tR\bimageUrl\x12\x1d\n" +
+	"\timage_url\x18\x04 \x01(\tR\bimageUrl\x12\x1b\n" +
+	"\tparent_id\x18\x05 \x01(\x03R\bparentId\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x06 \x01(\x05R\tsortOrder\x12\x1b\n" +
-	"\tis_active\x18\a \x01(\bR\bisActive\"E\n" +
-	"\x16UpdateCategoryResponse\x12+\n" +
-	"\bcategory\x18\x01 \x01(\v2\x0f.store.CategoryR\bcategory\"'\n" +
-	"\x15DeleteCategoryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
-	"\x16DeleteCategoryResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
+	"sort_order\x18\x06 \x01(\x05R\tsortOrder\"G\n" +
+	"\x1bCreateStoreCategoryResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xcf\x01\n" +
+	"\x1aUpdateStoreCategoryRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1b\n" +
+	"\timage_url\x18\x05 \x01(\tR\bimageUrl\x12\x1b\n" +
+	"\tparent_id\x18\x06 \x01(\x03R\bparentId\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\a \x01(\x05R\tsortOrder\"7\n" +
+	"\x1bUpdateStoreCategoryResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\",\n" +
+	"\x1aDeleteStoreCategoryRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
+	"\x1bDeleteStoreCategoryResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
 
 var (
 	file_store_v1_categories_proto_rawDescOnce sync.Once
@@ -742,30 +630,25 @@ func file_store_v1_categories_proto_rawDescGZIP() []byte {
 	return file_store_v1_categories_proto_rawDescData
 }
 
-var file_store_v1_categories_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_store_v1_categories_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_store_v1_categories_proto_goTypes = []any{
-	(*Category)(nil),               // 0: store.Category
-	(*ListCategoriesRequest)(nil),  // 1: store.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil), // 2: store.ListCategoriesResponse
-	(*GetCategoryRequest)(nil),     // 3: store.GetCategoryRequest
-	(*GetCategoryResponse)(nil),    // 4: store.GetCategoryResponse
-	(*CreateCategoryRequest)(nil),  // 5: store.CreateCategoryRequest
-	(*CreateCategoryResponse)(nil), // 6: store.CreateCategoryResponse
-	(*UpdateCategoryRequest)(nil),  // 7: store.UpdateCategoryRequest
-	(*UpdateCategoryResponse)(nil), // 8: store.UpdateCategoryResponse
-	(*DeleteCategoryRequest)(nil),  // 9: store.DeleteCategoryRequest
-	(*DeleteCategoryResponse)(nil), // 10: store.DeleteCategoryResponse
+	(*StoreCategory)(nil),               // 0: store.StoreCategory
+	(*ListStoreCategoriesRequest)(nil),  // 1: store.ListStoreCategoriesRequest
+	(*ListStoreCategoriesResponse)(nil), // 2: store.ListStoreCategoriesResponse
+	(*CreateStoreCategoryRequest)(nil),  // 3: store.CreateStoreCategoryRequest
+	(*CreateStoreCategoryResponse)(nil), // 4: store.CreateStoreCategoryResponse
+	(*UpdateStoreCategoryRequest)(nil),  // 5: store.UpdateStoreCategoryRequest
+	(*UpdateStoreCategoryResponse)(nil), // 6: store.UpdateStoreCategoryResponse
+	(*DeleteStoreCategoryRequest)(nil),  // 7: store.DeleteStoreCategoryRequest
+	(*DeleteStoreCategoryResponse)(nil), // 8: store.DeleteStoreCategoryResponse
 }
 var file_store_v1_categories_proto_depIdxs = []int32{
-	0, // 0: store.ListCategoriesResponse.categories:type_name -> store.Category
-	0, // 1: store.GetCategoryResponse.category:type_name -> store.Category
-	0, // 2: store.CreateCategoryResponse.category:type_name -> store.Category
-	0, // 3: store.UpdateCategoryResponse.category:type_name -> store.Category
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 0: store.ListStoreCategoriesResponse.categories:type_name -> store.StoreCategory
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_store_v1_categories_proto_init() }
@@ -779,7 +662,7 @@ func file_store_v1_categories_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_store_v1_categories_proto_rawDesc), len(file_store_v1_categories_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -21,252 +21,15 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type FinanceDashboard struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	TotalRevenue        float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	RevenueChange       float64                `protobuf:"fixed64,2,opt,name=revenue_change,json=revenueChange,proto3" json:"revenue_change,omitempty"`
-	TotalExpenses       float64                `protobuf:"fixed64,3,opt,name=total_expenses,json=totalExpenses,proto3" json:"total_expenses,omitempty"`
-	ExpensesChange      float64                `protobuf:"fixed64,4,opt,name=expenses_change,json=expensesChange,proto3" json:"expenses_change,omitempty"`
-	NetIncome           float64                `protobuf:"fixed64,5,opt,name=net_income,json=netIncome,proto3" json:"net_income,omitempty"`
-	NetIncomeChange     float64                `protobuf:"fixed64,6,opt,name=net_income_change,json=netIncomeChange,proto3" json:"net_income_change,omitempty"`
-	OutstandingInvoices float64                `protobuf:"fixed64,7,opt,name=outstanding_invoices,json=outstandingInvoices,proto3" json:"outstanding_invoices,omitempty"`
-	OutstandingBills    float64                `protobuf:"fixed64,8,opt,name=outstanding_bills,json=outstandingBills,proto3" json:"outstanding_bills,omitempty"`
-	CashOnHand          float64                `protobuf:"fixed64,9,opt,name=cash_on_hand,json=cashOnHand,proto3" json:"cash_on_hand,omitempty"`
-	RevenueChart        []*RevenuePoint        `protobuf:"bytes,10,rep,name=revenue_chart,json=revenueChart,proto3" json:"revenue_chart,omitempty"`
-	ExpenseBreakdown    []*ExpenseBreakdown    `protobuf:"bytes,11,rep,name=expense_breakdown,json=expenseBreakdown,proto3" json:"expense_breakdown,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *FinanceDashboard) Reset() {
-	*x = FinanceDashboard{}
-	mi := &file_finance_v1_dashboard_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *FinanceDashboard) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*FinanceDashboard) ProtoMessage() {}
-
-func (x *FinanceDashboard) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_dashboard_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use FinanceDashboard.ProtoReflect.Descriptor instead.
-func (*FinanceDashboard) Descriptor() ([]byte, []int) {
-	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *FinanceDashboard) GetTotalRevenue() float64 {
-	if x != nil {
-		return x.TotalRevenue
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetRevenueChange() float64 {
-	if x != nil {
-		return x.RevenueChange
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetTotalExpenses() float64 {
-	if x != nil {
-		return x.TotalExpenses
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetExpensesChange() float64 {
-	if x != nil {
-		return x.ExpensesChange
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetNetIncome() float64 {
-	if x != nil {
-		return x.NetIncome
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetNetIncomeChange() float64 {
-	if x != nil {
-		return x.NetIncomeChange
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetOutstandingInvoices() float64 {
-	if x != nil {
-		return x.OutstandingInvoices
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetOutstandingBills() float64 {
-	if x != nil {
-		return x.OutstandingBills
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetCashOnHand() float64 {
-	if x != nil {
-		return x.CashOnHand
-	}
-	return 0
-}
-
-func (x *FinanceDashboard) GetRevenueChart() []*RevenuePoint {
-	if x != nil {
-		return x.RevenueChart
-	}
-	return nil
-}
-
-func (x *FinanceDashboard) GetExpenseBreakdown() []*ExpenseBreakdown {
-	if x != nil {
-		return x.ExpenseBreakdown
-	}
-	return nil
-}
-
-type RevenuePoint struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RevenuePoint) Reset() {
-	*x = RevenuePoint{}
-	mi := &file_finance_v1_dashboard_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RevenuePoint) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RevenuePoint) ProtoMessage() {}
-
-func (x *RevenuePoint) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_dashboard_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RevenuePoint.ProtoReflect.Descriptor instead.
-func (*RevenuePoint) Descriptor() ([]byte, []int) {
-	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *RevenuePoint) GetDate() string {
-	if x != nil {
-		return x.Date
-	}
-	return ""
-}
-
-func (x *RevenuePoint) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-type ExpenseBreakdown struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
-	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	Percentage    float64                `protobuf:"fixed64,3,opt,name=percentage,proto3" json:"percentage,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ExpenseBreakdown) Reset() {
-	*x = ExpenseBreakdown{}
-	mi := &file_finance_v1_dashboard_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ExpenseBreakdown) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExpenseBreakdown) ProtoMessage() {}
-
-func (x *ExpenseBreakdown) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_dashboard_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExpenseBreakdown.ProtoReflect.Descriptor instead.
-func (*ExpenseBreakdown) Descriptor() ([]byte, []int) {
-	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ExpenseBreakdown) GetCategory() string {
-	if x != nil {
-		return x.Category
-	}
-	return ""
-}
-
-func (x *ExpenseBreakdown) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-func (x *ExpenseBreakdown) GetPercentage() float64 {
-	if x != nil {
-		return x.Percentage
-	}
-	return 0
-}
-
 type GetFinanceDashboardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"` // this_month, last_month, this_quarter, this_year
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetFinanceDashboardRequest) Reset() {
 	*x = GetFinanceDashboardRequest{}
-	mi := &file_finance_v1_dashboard_proto_msgTypes[3]
+	mi := &file_finance_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +41,7 @@ func (x *GetFinanceDashboardRequest) String() string {
 func (*GetFinanceDashboardRequest) ProtoMessage() {}
 
 func (x *GetFinanceDashboardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_dashboard_proto_msgTypes[3]
+	mi := &file_finance_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -291,26 +54,22 @@ func (x *GetFinanceDashboardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFinanceDashboardRequest.ProtoReflect.Descriptor instead.
 func (*GetFinanceDashboardRequest) Descriptor() ([]byte, []int) {
-	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetFinanceDashboardRequest) GetPeriod() string {
-	if x != nil {
-		return x.Period
-	}
-	return ""
+	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
 type GetFinanceDashboardResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Dashboard     *FinanceDashboard      `protobuf:"bytes,1,opt,name=dashboard,proto3" json:"dashboard,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TotalReceivable  float64                `protobuf:"fixed64,1,opt,name=total_receivable,json=totalReceivable,proto3" json:"total_receivable,omitempty"`
+	OverdueAmount    float64                `protobuf:"fixed64,2,opt,name=overdue_amount,json=overdueAmount,proto3" json:"overdue_amount,omitempty"`
+	TotalExpensesMtd float64                `protobuf:"fixed64,3,opt,name=total_expenses_mtd,json=totalExpensesMtd,proto3" json:"total_expenses_mtd,omitempty"`
+	NetProfitMtd     float64                `protobuf:"fixed64,4,opt,name=net_profit_mtd,json=netProfitMtd,proto3" json:"net_profit_mtd,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetFinanceDashboardResponse) Reset() {
 	*x = GetFinanceDashboardResponse{}
-	mi := &file_finance_v1_dashboard_proto_msgTypes[4]
+	mi := &file_finance_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -322,7 +81,7 @@ func (x *GetFinanceDashboardResponse) String() string {
 func (*GetFinanceDashboardResponse) ProtoMessage() {}
 
 func (x *GetFinanceDashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_v1_dashboard_proto_msgTypes[4]
+	mi := &file_finance_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,49 +94,48 @@ func (x *GetFinanceDashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFinanceDashboardResponse.ProtoReflect.Descriptor instead.
 func (*GetFinanceDashboardResponse) Descriptor() ([]byte, []int) {
-	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{4}
+	return file_finance_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetFinanceDashboardResponse) GetDashboard() *FinanceDashboard {
+func (x *GetFinanceDashboardResponse) GetTotalReceivable() float64 {
 	if x != nil {
-		return x.Dashboard
+		return x.TotalReceivable
 	}
-	return nil
+	return 0
+}
+
+func (x *GetFinanceDashboardResponse) GetOverdueAmount() float64 {
+	if x != nil {
+		return x.OverdueAmount
+	}
+	return 0
+}
+
+func (x *GetFinanceDashboardResponse) GetTotalExpensesMtd() float64 {
+	if x != nil {
+		return x.TotalExpensesMtd
+	}
+	return 0
+}
+
+func (x *GetFinanceDashboardResponse) GetNetProfitMtd() float64 {
+	if x != nil {
+		return x.NetProfitMtd
+	}
+	return 0
 }
 
 var File_finance_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_finance_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x1afinance/v1/dashboard.proto\x12\afinance\"\xff\x03\n" +
-	"\x10FinanceDashboard\x12#\n" +
-	"\rtotal_revenue\x18\x01 \x01(\x01R\ftotalRevenue\x12%\n" +
-	"\x0erevenue_change\x18\x02 \x01(\x01R\rrevenueChange\x12%\n" +
-	"\x0etotal_expenses\x18\x03 \x01(\x01R\rtotalExpenses\x12'\n" +
-	"\x0fexpenses_change\x18\x04 \x01(\x01R\x0eexpensesChange\x12\x1d\n" +
-	"\n" +
-	"net_income\x18\x05 \x01(\x01R\tnetIncome\x12*\n" +
-	"\x11net_income_change\x18\x06 \x01(\x01R\x0fnetIncomeChange\x121\n" +
-	"\x14outstanding_invoices\x18\a \x01(\x01R\x13outstandingInvoices\x12+\n" +
-	"\x11outstanding_bills\x18\b \x01(\x01R\x10outstandingBills\x12 \n" +
-	"\fcash_on_hand\x18\t \x01(\x01R\n" +
-	"cashOnHand\x12:\n" +
-	"\rrevenue_chart\x18\n" +
-	" \x03(\v2\x15.finance.RevenuePointR\frevenueChart\x12F\n" +
-	"\x11expense_breakdown\x18\v \x03(\v2\x19.finance.ExpenseBreakdownR\x10expenseBreakdown\":\n" +
-	"\fRevenuePoint\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\"f\n" +
-	"\x10ExpenseBreakdown\x12\x1a\n" +
-	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1e\n" +
-	"\n" +
-	"percentage\x18\x03 \x01(\x01R\n" +
-	"percentage\"4\n" +
-	"\x1aGetFinanceDashboardRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"V\n" +
-	"\x1bGetFinanceDashboardResponse\x127\n" +
-	"\tdashboard\x18\x01 \x01(\v2\x19.finance.FinanceDashboardR\tdashboardB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\x1afinance/v1/dashboard.proto\x12\afinance\"\x1c\n" +
+	"\x1aGetFinanceDashboardRequest\"\xc3\x01\n" +
+	"\x1bGetFinanceDashboardResponse\x12)\n" +
+	"\x10total_receivable\x18\x01 \x01(\x01R\x0ftotalReceivable\x12%\n" +
+	"\x0eoverdue_amount\x18\x02 \x01(\x01R\roverdueAmount\x12,\n" +
+	"\x12total_expenses_mtd\x18\x03 \x01(\x01R\x10totalExpensesMtd\x12$\n" +
+	"\x0enet_profit_mtd\x18\x04 \x01(\x01R\fnetProfitMtdB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_dashboard_proto_rawDescOnce sync.Once
@@ -391,23 +149,17 @@ func file_finance_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_finance_v1_dashboard_proto_rawDescData
 }
 
-var file_finance_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_finance_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_finance_v1_dashboard_proto_goTypes = []any{
-	(*FinanceDashboard)(nil),            // 0: finance.FinanceDashboard
-	(*RevenuePoint)(nil),                // 1: finance.RevenuePoint
-	(*ExpenseBreakdown)(nil),            // 2: finance.ExpenseBreakdown
-	(*GetFinanceDashboardRequest)(nil),  // 3: finance.GetFinanceDashboardRequest
-	(*GetFinanceDashboardResponse)(nil), // 4: finance.GetFinanceDashboardResponse
+	(*GetFinanceDashboardRequest)(nil),  // 0: finance.GetFinanceDashboardRequest
+	(*GetFinanceDashboardResponse)(nil), // 1: finance.GetFinanceDashboardResponse
 }
 var file_finance_v1_dashboard_proto_depIdxs = []int32{
-	1, // 0: finance.FinanceDashboard.revenue_chart:type_name -> finance.RevenuePoint
-	2, // 1: finance.FinanceDashboard.expense_breakdown:type_name -> finance.ExpenseBreakdown
-	0, // 2: finance.GetFinanceDashboardResponse.dashboard:type_name -> finance.FinanceDashboard
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_finance_v1_dashboard_proto_init() }
@@ -421,7 +173,7 @@ func file_finance_v1_dashboard_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_finance_v1_dashboard_proto_rawDesc), len(file_finance_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

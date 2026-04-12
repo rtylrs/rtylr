@@ -6,67 +6,57 @@
 
 /* eslint-disable */
 
-export interface Category {
+export interface StoreCategory {
   id: number;
-  storeId: number;
+  ownerId: number;
   name: string;
   slug: string;
   description: string;
-  parentId: number;
   imageUrl: string;
+  parentId: number;
   sortOrder: number;
-  productCount: number;
-  isActive: boolean;
   createdAt: string;
-  updatedAt: string;
 }
 
-export interface ListCategoriesRequest {
-  includeInactive: boolean;
+export interface ListStoreCategoriesRequest {
 }
 
-export interface ListCategoriesResponse {
-  categories: Category[];
+export interface ListStoreCategoriesResponse {
+  categories: StoreCategory[];
 }
 
-export interface GetCategoryRequest {
-  id: number;
-}
-
-export interface GetCategoryResponse {
-  category: Category | undefined;
-}
-
-export interface CreateCategoryRequest {
+export interface CreateStoreCategoryRequest {
   name: string;
+  slug: string;
   description: string;
-  parentId: number;
   imageUrl: string;
+  parentId: number;
   sortOrder: number;
 }
 
-export interface CreateCategoryResponse {
-  category: Category | undefined;
+export interface CreateStoreCategoryResponse {
+  id: number;
+  message: string;
 }
 
-export interface UpdateCategoryRequest {
+export interface UpdateStoreCategoryRequest {
   id: number;
   name: string;
+  slug: string;
   description: string;
-  parentId: number;
   imageUrl: string;
+  parentId: number;
   sortOrder: number;
-  isActive: boolean;
 }
 
-export interface UpdateCategoryResponse {
-  category: Category | undefined;
+export interface UpdateStoreCategoryResponse {
+  message: string;
 }
 
-export interface DeleteCategoryRequest {
+export interface DeleteStoreCategoryRequest {
   id: number;
 }
 
-export interface DeleteCategoryResponse {
-  success: boolean;
+export interface DeleteStoreCategoryResponse {
+  message: string;
 }

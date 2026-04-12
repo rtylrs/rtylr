@@ -5,80 +5,57 @@
 // source: finance/v1/expenses.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Expense {
   id: number;
-  description: string;
+  ownerId: number;
+  categoryId?: number | undefined;
   amount: number;
-  category: string;
-  categoryId: number;
+  currency: string;
+  description: string;
   vendor: string;
-  /** pending, approved, rejected, paid */
-  status: string;
   receiptUrl: string;
-  date: string;
-  notes: string;
+  expenseDate: string;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ExpenseCategory {
-  id: number;
-  name: string;
-  description: string;
-  budget: number;
-  spent: number;
-}
-
 export interface ListExpensesRequest {
-  pagination: PaginationRequest | undefined;
-  category: string;
-  status: string;
-  fromDate: string;
-  toDate: string;
 }
 
 export interface ListExpensesResponse {
   expenses: Expense[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetExpenseRequest {
-  id: number;
-}
-
-export interface GetExpenseResponse {
-  expense: Expense | undefined;
 }
 
 export interface CreateExpenseRequest {
-  description: string;
+  categoryId?: number | undefined;
   amount: number;
-  categoryId: number;
+  currency: string;
+  description: string;
   vendor: string;
-  date: string;
-  notes: string;
   receiptUrl: string;
+  expenseDate: string;
 }
 
 export interface CreateExpenseResponse {
-  expense: Expense | undefined;
+  expenseId: number;
+  message: string;
 }
 
 export interface UpdateExpenseRequest {
   id: number;
-  description: string;
+  categoryId?: number | undefined;
   amount: number;
-  categoryId: number;
+  currency: string;
+  description: string;
   vendor: string;
-  date: string;
-  notes: string;
-  status: string;
+  receiptUrl: string;
+  expenseDate: string;
 }
 
 export interface UpdateExpenseResponse {
-  expense: Expense | undefined;
+  message: string;
 }
 
 export interface DeleteExpenseRequest {
@@ -86,7 +63,15 @@ export interface DeleteExpenseRequest {
 }
 
 export interface DeleteExpenseResponse {
-  success: boolean;
+  message: string;
+}
+
+export interface ExpenseCategory {
+  id: number;
+  ownerId: number;
+  name: string;
+  color: string;
+  createdAt: string;
 }
 
 export interface ListExpenseCategoriesRequest {
@@ -94,14 +79,4 @@ export interface ListExpenseCategoriesRequest {
 
 export interface ListExpenseCategoriesResponse {
   categories: ExpenseCategory[];
-}
-
-export interface CreateExpenseCategoryRequest {
-  name: string;
-  description: string;
-  budget: number;
-}
-
-export interface CreateExpenseCategoryResponse {
-  category: ExpenseCategory | undefined;
 }

@@ -4,53 +4,5 @@ package book;
 
 option go_package = "github.com/voxire/voxie/gen/go/book/v1";
 
-// ── BookSettings ───────────────────────────────────────────────────
-
-message BookSettings {
-  int64 id = 1;
-  int64 business_id = 2;
-  string timezone = 3;
-  int32 slot_duration_minutes = 4;
-  int32 min_booking_notice_hours = 5;
-  int32 max_booking_advance_days = 6;
-  bool allow_online_booking = 7;
-  bool require_confirmation = 8;
-  bool send_reminders = 9;
-  int32 reminder_hours_before = 10;
-  bool allow_cancellation = 11;
-  int32 cancellation_notice_hours = 12;
-  string booking_page_url = 13;
-  string cancellation_policy = 14;
-  string confirmation_message = 15;
-  string created_at = 16;
-  string updated_at = 17;
-}
-
-// ── Get ────────────────────────────────────────────────────────────
-
-message GetBookSettingsRequest {}
-
-message GetBookSettingsResponse {
-  BookSettings settings = 1;
-}
-
-// ── Update ─────────────────────────────────────────────────────────
-
-message UpdateBookSettingsRequest {
-  string timezone = 1;
-  int32 slot_duration_minutes = 2;
-  int32 min_booking_notice_hours = 3;
-  int32 max_booking_advance_days = 4;
-  bool allow_online_booking = 5;
-  bool require_confirmation = 6;
-  bool send_reminders = 7;
-  int32 reminder_hours_before = 8;
-  bool allow_cancellation = 9;
-  int32 cancellation_notice_hours = 10;
-  string cancellation_policy = 11;
-  string confirmation_message = 12;
-}
-
-message UpdateBookSettingsResponse {
-  BookSettings settings = 1;
-}
+// No handler exists for booking settings yet.
+// This file is kept as a placeholder.

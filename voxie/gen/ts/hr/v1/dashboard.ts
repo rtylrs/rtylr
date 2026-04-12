@@ -6,26 +6,16 @@
 
 /* eslint-disable */
 
-export interface HRDashboard {
+export interface DashboardStats {
   totalStaff: number;
-  activeStaff: number;
-  onLeave: number;
-  clockedIn: number;
-  openShifts: number;
+  onShiftToday: number;
   pendingTimeOff: number;
-  payrollThisMonth: number;
-  departments: DepartmentSummary[];
-}
-
-export interface DepartmentSummary {
-  name: string;
-  memberCount: number;
-  active: number;
+  payrollDraft: number;
 }
 
 export interface GetHRDashboardRequest {
 }
 
 export interface GetHRDashboardResponse {
-  dashboard: HRDashboard | undefined;
+  stats: DashboardStats | undefined;
 }

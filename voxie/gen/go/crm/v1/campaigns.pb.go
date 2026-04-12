@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,23 +22,27 @@ const (
 )
 
 type Campaign struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`     // email, sms, push
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // draft, active, paused, completed
-	Subject       string                 `protobuf:"bytes,5,opt,name=subject,proto3" json:"subject,omitempty"`
-	Body          string                 `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`
-	SegmentId     string                 `protobuf:"bytes,7,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
-	Recipients    int32                  `protobuf:"varint,8,opt,name=recipients,proto3" json:"recipients,omitempty"`
-	Delivered     int32                  `protobuf:"varint,9,opt,name=delivered,proto3" json:"delivered,omitempty"`
-	Opened        int32                  `protobuf:"varint,10,opt,name=opened,proto3" json:"opened,omitempty"`
-	Clicked       int32                  `protobuf:"varint,11,opt,name=clicked,proto3" json:"clicked,omitempty"`
-	ScheduledAt   string                 `protobuf:"bytes,12,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
-	SentAt        string                 `protobuf:"bytes,13,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,14,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId        int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name           string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Channel        string                 `protobuf:"bytes,5,opt,name=channel,proto3" json:"channel,omitempty"`
+	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	SegmentId      *int64                 `protobuf:"varint,7,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
+	Subject        string                 `protobuf:"bytes,8,opt,name=subject,proto3" json:"subject,omitempty"`
+	Content        string                 `protobuf:"bytes,9,opt,name=content,proto3" json:"content,omitempty"`
+	ScheduledAt    string                 `protobuf:"bytes,10,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	SentAt         string                 `protobuf:"bytes,11,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
+	AudienceCount  int32                  `protobuf:"varint,12,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
+	SentCount      int32                  `protobuf:"varint,13,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
+	DeliveredCount int32                  `protobuf:"varint,14,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
+	OpenedCount    int32                  `protobuf:"varint,15,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
+	ClickedCount   int32                  `protobuf:"varint,16,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
+	CreatedAt      string                 `protobuf:"bytes,17,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      string                 `protobuf:"bytes,18,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Campaign) Reset() {
@@ -79,6 +82,13 @@ func (x *Campaign) GetId() int64 {
 	return 0
 }
 
+func (x *Campaign) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Campaign) GetName() string {
 	if x != nil {
 		return x.Name
@@ -86,9 +96,16 @@ func (x *Campaign) GetName() string {
 	return ""
 }
 
-func (x *Campaign) GetType() string {
+func (x *Campaign) GetDescription() string {
 	if x != nil {
-		return x.Type
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Campaign) GetChannel() string {
+	if x != nil {
+		return x.Channel
 	}
 	return ""
 }
@@ -100,6 +117,13 @@ func (x *Campaign) GetStatus() string {
 	return ""
 }
 
+func (x *Campaign) GetSegmentId() int64 {
+	if x != nil && x.SegmentId != nil {
+		return *x.SegmentId
+	}
+	return 0
+}
+
 func (x *Campaign) GetSubject() string {
 	if x != nil {
 		return x.Subject
@@ -107,46 +131,11 @@ func (x *Campaign) GetSubject() string {
 	return ""
 }
 
-func (x *Campaign) GetBody() string {
+func (x *Campaign) GetContent() string {
 	if x != nil {
-		return x.Body
+		return x.Content
 	}
 	return ""
-}
-
-func (x *Campaign) GetSegmentId() string {
-	if x != nil {
-		return x.SegmentId
-	}
-	return ""
-}
-
-func (x *Campaign) GetRecipients() int32 {
-	if x != nil {
-		return x.Recipients
-	}
-	return 0
-}
-
-func (x *Campaign) GetDelivered() int32 {
-	if x != nil {
-		return x.Delivered
-	}
-	return 0
-}
-
-func (x *Campaign) GetOpened() int32 {
-	if x != nil {
-		return x.Opened
-	}
-	return 0
-}
-
-func (x *Campaign) GetClicked() int32 {
-	if x != nil {
-		return x.Clicked
-	}
-	return 0
 }
 
 func (x *Campaign) GetScheduledAt() string {
@@ -163,6 +152,41 @@ func (x *Campaign) GetSentAt() string {
 	return ""
 }
 
+func (x *Campaign) GetAudienceCount() int32 {
+	if x != nil {
+		return x.AudienceCount
+	}
+	return 0
+}
+
+func (x *Campaign) GetSentCount() int32 {
+	if x != nil {
+		return x.SentCount
+	}
+	return 0
+}
+
+func (x *Campaign) GetDeliveredCount() int32 {
+	if x != nil {
+		return x.DeliveredCount
+	}
+	return 0
+}
+
+func (x *Campaign) GetOpenedCount() int32 {
+	if x != nil {
+		return x.OpenedCount
+	}
+	return 0
+}
+
+func (x *Campaign) GetClickedCount() int32 {
+	if x != nil {
+		return x.ClickedCount
+	}
+	return 0
+}
+
 func (x *Campaign) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
@@ -170,11 +194,16 @@ func (x *Campaign) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Campaign) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 type ListCampaignsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -209,13 +238,6 @@ func (*ListCampaignsRequest) Descriptor() ([]byte, []int) {
 	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListCampaignsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListCampaignsRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
@@ -223,17 +245,9 @@ func (x *ListCampaignsRequest) GetStatus() string {
 	return ""
 }
 
-func (x *ListCampaignsRequest) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
 type ListCampaignsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Campaigns     []*Campaign            `protobuf:"bytes,1,rep,name=campaigns,proto3" json:"campaigns,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -275,116 +289,22 @@ func (x *ListCampaignsResponse) GetCampaigns() []*Campaign {
 	return nil
 }
 
-func (x *ListCampaignsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetCampaignRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCampaignRequest) Reset() {
-	*x = GetCampaignRequest{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCampaignRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCampaignRequest) ProtoMessage() {}
-
-func (x *GetCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCampaignRequest.ProtoReflect.Descriptor instead.
-func (*GetCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetCampaignRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetCampaignResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Campaign      *Campaign              `protobuf:"bytes,1,opt,name=campaign,proto3" json:"campaign,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCampaignResponse) Reset() {
-	*x = GetCampaignResponse{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCampaignResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCampaignResponse) ProtoMessage() {}
-
-func (x *GetCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCampaignResponse.ProtoReflect.Descriptor instead.
-func (*GetCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetCampaignResponse) GetCampaign() *Campaign {
-	if x != nil {
-		return x.Campaign
-	}
-	return nil
-}
-
 type CreateCampaignRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Subject       string                 `protobuf:"bytes,3,opt,name=subject,proto3" json:"subject,omitempty"`
-	Body          string                 `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
-	SegmentId     string                 `protobuf:"bytes,5,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
-	ScheduledAt   string                 `protobuf:"bytes,6,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Channel       string                 `protobuf:"bytes,3,opt,name=channel,proto3" json:"channel,omitempty"`
+	SegmentId     *int64                 `protobuf:"varint,4,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
+	Subject       string                 `protobuf:"bytes,5,opt,name=subject,proto3" json:"subject,omitempty"`
+	Content       string                 `protobuf:"bytes,6,opt,name=content,proto3" json:"content,omitempty"`
+	ScheduledAt   string                 `protobuf:"bytes,7,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateCampaignRequest) Reset() {
 	*x = CreateCampaignRequest{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[5]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -396,7 +316,7 @@ func (x *CreateCampaignRequest) String() string {
 func (*CreateCampaignRequest) ProtoMessage() {}
 
 func (x *CreateCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[5]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -409,7 +329,7 @@ func (x *CreateCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCampaignRequest.ProtoReflect.Descriptor instead.
 func (*CreateCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{5}
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateCampaignRequest) GetName() string {
@@ -419,11 +339,25 @@ func (x *CreateCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateCampaignRequest) GetType() string {
+func (x *CreateCampaignRequest) GetDescription() string {
 	if x != nil {
-		return x.Type
+		return x.Description
 	}
 	return ""
+}
+
+func (x *CreateCampaignRequest) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
+func (x *CreateCampaignRequest) GetSegmentId() int64 {
+	if x != nil && x.SegmentId != nil {
+		return *x.SegmentId
+	}
+	return 0
 }
 
 func (x *CreateCampaignRequest) GetSubject() string {
@@ -433,16 +367,9 @@ func (x *CreateCampaignRequest) GetSubject() string {
 	return ""
 }
 
-func (x *CreateCampaignRequest) GetBody() string {
+func (x *CreateCampaignRequest) GetContent() string {
 	if x != nil {
-		return x.Body
-	}
-	return ""
-}
-
-func (x *CreateCampaignRequest) GetSegmentId() string {
-	if x != nil {
-		return x.SegmentId
+		return x.Content
 	}
 	return ""
 }
@@ -456,14 +383,15 @@ func (x *CreateCampaignRequest) GetScheduledAt() string {
 
 type CreateCampaignResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Campaign      *Campaign              `protobuf:"bytes,1,opt,name=campaign,proto3" json:"campaign,omitempty"`
+	CampaignId    int64                  `protobuf:"varint,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateCampaignResponse) Reset() {
 	*x = CreateCampaignResponse{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[6]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +403,7 @@ func (x *CreateCampaignResponse) String() string {
 func (*CreateCampaignResponse) ProtoMessage() {}
 
 func (x *CreateCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[6]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,31 +416,40 @@ func (x *CreateCampaignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCampaignResponse.ProtoReflect.Descriptor instead.
 func (*CreateCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{6}
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateCampaignResponse) GetCampaign() *Campaign {
+func (x *CreateCampaignResponse) GetCampaignId() int64 {
 	if x != nil {
-		return x.Campaign
+		return x.CampaignId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateCampaignResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateCampaignRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Subject       string                 `protobuf:"bytes,3,opt,name=subject,proto3" json:"subject,omitempty"`
-	Body          string                 `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
-	SegmentId     string                 `protobuf:"bytes,5,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
-	ScheduledAt   string                 `protobuf:"bytes,6,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Channel       string                 `protobuf:"bytes,4,opt,name=channel,proto3" json:"channel,omitempty"`
+	SegmentId     *int64                 `protobuf:"varint,5,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
+	Subject       string                 `protobuf:"bytes,6,opt,name=subject,proto3" json:"subject,omitempty"`
+	Content       string                 `protobuf:"bytes,7,opt,name=content,proto3" json:"content,omitempty"`
+	ScheduledAt   string                 `protobuf:"bytes,8,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignRequest) Reset() {
 	*x = UpdateCampaignRequest{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[7]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -524,7 +461,7 @@ func (x *UpdateCampaignRequest) String() string {
 func (*UpdateCampaignRequest) ProtoMessage() {}
 
 func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[7]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -537,7 +474,7 @@ func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{7}
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateCampaignRequest) GetId() int64 {
@@ -554,6 +491,27 @@ func (x *UpdateCampaignRequest) GetName() string {
 	return ""
 }
 
+func (x *UpdateCampaignRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateCampaignRequest) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
+func (x *UpdateCampaignRequest) GetSegmentId() int64 {
+	if x != nil && x.SegmentId != nil {
+		return *x.SegmentId
+	}
+	return 0
+}
+
 func (x *UpdateCampaignRequest) GetSubject() string {
 	if x != nil {
 		return x.Subject
@@ -561,16 +519,9 @@ func (x *UpdateCampaignRequest) GetSubject() string {
 	return ""
 }
 
-func (x *UpdateCampaignRequest) GetBody() string {
+func (x *UpdateCampaignRequest) GetContent() string {
 	if x != nil {
-		return x.Body
-	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetSegmentId() string {
-	if x != nil {
-		return x.SegmentId
+		return x.Content
 	}
 	return ""
 }
@@ -584,14 +535,14 @@ func (x *UpdateCampaignRequest) GetScheduledAt() string {
 
 type UpdateCampaignResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Campaign      *Campaign              `protobuf:"bytes,1,opt,name=campaign,proto3" json:"campaign,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignResponse) Reset() {
 	*x = UpdateCampaignResponse{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[8]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -603,7 +554,7 @@ func (x *UpdateCampaignResponse) String() string {
 func (*UpdateCampaignResponse) ProtoMessage() {}
 
 func (x *UpdateCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[8]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -616,27 +567,27 @@ func (x *UpdateCampaignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{8}
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateCampaignResponse) GetCampaign() *Campaign {
+func (x *UpdateCampaignResponse) GetMessage() string {
 	if x != nil {
-		return x.Campaign
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type UpdateCampaignStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"` // active, paused, completed
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignStatusRequest) Reset() {
 	*x = UpdateCampaignStatusRequest{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[9]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -648,7 +599,7 @@ func (x *UpdateCampaignStatusRequest) String() string {
 func (*UpdateCampaignStatusRequest) ProtoMessage() {}
 
 func (x *UpdateCampaignStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[9]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -661,7 +612,7 @@ func (x *UpdateCampaignStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignStatusRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{9}
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateCampaignStatusRequest) GetId() int64 {
@@ -680,14 +631,14 @@ func (x *UpdateCampaignStatusRequest) GetStatus() string {
 
 type UpdateCampaignStatusResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignStatusResponse) Reset() {
 	*x = UpdateCampaignStatusResponse{}
-	mi := &file_crm_v1_campaigns_proto_msgTypes[10]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +650,7 @@ func (x *UpdateCampaignStatusResponse) String() string {
 func (*UpdateCampaignStatusResponse) ProtoMessage() {}
 
 func (x *UpdateCampaignStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_campaigns_proto_msgTypes[10]
+	mi := &file_crm_v1_campaigns_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,81 +663,387 @@ func (x *UpdateCampaignStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignStatusResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateCampaignStatusResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type CampaignStats struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId     int64                  `protobuf:"varint,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	AudienceCount  int32                  `protobuf:"varint,2,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
+	SentCount      int32                  `protobuf:"varint,3,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
+	DeliveredCount int32                  `protobuf:"varint,4,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
+	OpenedCount    int32                  `protobuf:"varint,5,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
+	ClickedCount   int32                  `protobuf:"varint,6,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
+	BouncedCount   int32                  `protobuf:"varint,7,opt,name=bounced_count,json=bouncedCount,proto3" json:"bounced_count,omitempty"`
+	FailedCount    int32                  `protobuf:"varint,8,opt,name=failed_count,json=failedCount,proto3" json:"failed_count,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CampaignStats) Reset() {
+	*x = CampaignStats{}
+	mi := &file_crm_v1_campaigns_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CampaignStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CampaignStats) ProtoMessage() {}
+
+func (x *CampaignStats) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_campaigns_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CampaignStats.ProtoReflect.Descriptor instead.
+func (*CampaignStats) Descriptor() ([]byte, []int) {
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CampaignStats) GetCampaignId() int64 {
+	if x != nil {
+		return x.CampaignId
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetAudienceCount() int32 {
+	if x != nil {
+		return x.AudienceCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetSentCount() int32 {
+	if x != nil {
+		return x.SentCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetDeliveredCount() int32 {
+	if x != nil {
+		return x.DeliveredCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetOpenedCount() int32 {
+	if x != nil {
+		return x.OpenedCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetClickedCount() int32 {
+	if x != nil {
+		return x.ClickedCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetBouncedCount() int32 {
+	if x != nil {
+		return x.BouncedCount
+	}
+	return 0
+}
+
+func (x *CampaignStats) GetFailedCount() int32 {
+	if x != nil {
+		return x.FailedCount
+	}
+	return 0
+}
+
+type GetCampaignStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    int64                  `protobuf:"varint,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCampaignStatsRequest) Reset() {
+	*x = GetCampaignStatsRequest{}
+	mi := &file_crm_v1_campaigns_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCampaignStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCampaignStatsRequest) ProtoMessage() {}
+
+func (x *GetCampaignStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_campaigns_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCampaignStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetCampaignStatsRequest) Descriptor() ([]byte, []int) {
 	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *UpdateCampaignStatusResponse) GetSuccess() bool {
+func (x *GetCampaignStatsRequest) GetCampaignId() int64 {
 	if x != nil {
-		return x.Success
+		return x.CampaignId
 	}
-	return false
+	return 0
+}
+
+type GetCampaignStatsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Stats         *CampaignStats         `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCampaignStatsResponse) Reset() {
+	*x = GetCampaignStatsResponse{}
+	mi := &file_crm_v1_campaigns_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCampaignStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCampaignStatsResponse) ProtoMessage() {}
+
+func (x *GetCampaignStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_campaigns_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCampaignStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetCampaignStatsResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetCampaignStatsResponse) GetStats() *CampaignStats {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
+type GetCampaignDetailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCampaignDetailRequest) Reset() {
+	*x = GetCampaignDetailRequest{}
+	mi := &file_crm_v1_campaigns_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCampaignDetailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCampaignDetailRequest) ProtoMessage() {}
+
+func (x *GetCampaignDetailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_campaigns_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCampaignDetailRequest.ProtoReflect.Descriptor instead.
+func (*GetCampaignDetailRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetCampaignDetailRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetCampaignDetailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Campaign      *Campaign              `protobuf:"bytes,1,opt,name=campaign,proto3" json:"campaign,omitempty"`
+	Stats         *CampaignStats         `protobuf:"bytes,2,opt,name=stats,proto3" json:"stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCampaignDetailResponse) Reset() {
+	*x = GetCampaignDetailResponse{}
+	mi := &file_crm_v1_campaigns_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCampaignDetailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCampaignDetailResponse) ProtoMessage() {}
+
+func (x *GetCampaignDetailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_campaigns_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCampaignDetailResponse.ProtoReflect.Descriptor instead.
+func (*GetCampaignDetailResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_campaigns_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetCampaignDetailResponse) GetCampaign() *Campaign {
+	if x != nil {
+		return x.Campaign
+	}
+	return nil
+}
+
+func (x *GetCampaignDetailResponse) GetStats() *CampaignStats {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
 }
 
 var File_crm_v1_campaigns_proto protoreflect.FileDescriptor
 
 const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/campaigns.proto\x12\x03crm\x1a\x1acommon/v1/pagination.proto\"\xf2\x02\n" +
+	"\x16crm/v1/campaigns.proto\x12\x03crm\"\xb5\x04\n" +
 	"\bCampaign\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x18\n" +
-	"\asubject\x18\x05 \x01(\tR\asubject\x12\x12\n" +
-	"\x04body\x18\x06 \x01(\tR\x04body\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x18\n" +
+	"\achannel\x18\x05 \x01(\tR\achannel\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\"\n" +
 	"\n" +
-	"segment_id\x18\a \x01(\tR\tsegmentId\x12\x1e\n" +
+	"segment_id\x18\a \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
+	"\asubject\x18\b \x01(\tR\asubject\x12\x18\n" +
+	"\acontent\x18\t \x01(\tR\acontent\x12!\n" +
+	"\fscheduled_at\x18\n" +
+	" \x01(\tR\vscheduledAt\x12\x17\n" +
+	"\asent_at\x18\v \x01(\tR\x06sentAt\x12%\n" +
+	"\x0eaudience_count\x18\f \x01(\x05R\raudienceCount\x12\x1d\n" +
 	"\n" +
-	"recipients\x18\b \x01(\x05R\n" +
-	"recipients\x12\x1c\n" +
-	"\tdelivered\x18\t \x01(\x05R\tdelivered\x12\x16\n" +
-	"\x06opened\x18\n" +
-	" \x01(\x05R\x06opened\x12\x18\n" +
-	"\aclicked\x18\v \x01(\x05R\aclicked\x12!\n" +
-	"\fscheduled_at\x18\f \x01(\tR\vscheduledAt\x12\x17\n" +
-	"\asent_at\x18\r \x01(\tR\x06sentAt\x12\x1d\n" +
+	"sent_count\x18\r \x01(\x05R\tsentCount\x12'\n" +
+	"\x0fdelivered_count\x18\x0e \x01(\x05R\x0edeliveredCount\x12!\n" +
+	"\fopened_count\x18\x0f \x01(\x05R\vopenedCount\x12#\n" +
+	"\rclicked_count\x18\x10 \x01(\x05R\fclickedCount\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x0e \x01(\tR\tcreatedAt\"}\n" +
-	"\x14ListCampaignsRequest\x129\n" +
+	"created_at\x18\x11 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"\x80\x01\n" +
+	"updated_at\x18\x12 \x01(\tR\tupdatedAtB\r\n" +
+	"\v_segment_id\".\n" +
+	"\x14ListCampaignsRequest\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"D\n" +
 	"\x15ListCampaignsResponse\x12+\n" +
-	"\tcampaigns\x18\x01 \x03(\v2\r.crm.CampaignR\tcampaigns\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"$\n" +
-	"\x12GetCampaignRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"@\n" +
-	"\x13GetCampaignResponse\x12)\n" +
-	"\bcampaign\x18\x01 \x01(\v2\r.crm.CampaignR\bcampaign\"\xaf\x01\n" +
+	"\tcampaigns\x18\x01 \x03(\v2\r.crm.CampaignR\tcampaigns\"\xf1\x01\n" +
 	"\x15CreateCampaignRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x18\n" +
-	"\asubject\x18\x03 \x01(\tR\asubject\x12\x12\n" +
-	"\x04body\x18\x04 \x01(\tR\x04body\x12\x1d\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
+	"\achannel\x18\x03 \x01(\tR\achannel\x12\"\n" +
 	"\n" +
-	"segment_id\x18\x05 \x01(\tR\tsegmentId\x12!\n" +
-	"\fscheduled_at\x18\x06 \x01(\tR\vscheduledAt\"C\n" +
-	"\x16CreateCampaignResponse\x12)\n" +
-	"\bcampaign\x18\x01 \x01(\v2\r.crm.CampaignR\bcampaign\"\xab\x01\n" +
+	"segment_id\x18\x04 \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
+	"\asubject\x18\x05 \x01(\tR\asubject\x12\x18\n" +
+	"\acontent\x18\x06 \x01(\tR\acontent\x12!\n" +
+	"\fscheduled_at\x18\a \x01(\tR\vscheduledAtB\r\n" +
+	"\v_segment_id\"S\n" +
+	"\x16CreateCampaignResponse\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
+	"campaignId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x81\x02\n" +
 	"\x15UpdateCampaignRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
-	"\asubject\x18\x03 \x01(\tR\asubject\x12\x12\n" +
-	"\x04body\x18\x04 \x01(\tR\x04body\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x18\n" +
+	"\achannel\x18\x04 \x01(\tR\achannel\x12\"\n" +
 	"\n" +
-	"segment_id\x18\x05 \x01(\tR\tsegmentId\x12!\n" +
-	"\fscheduled_at\x18\x06 \x01(\tR\vscheduledAt\"C\n" +
-	"\x16UpdateCampaignResponse\x12)\n" +
-	"\bcampaign\x18\x01 \x01(\v2\r.crm.CampaignR\bcampaign\"E\n" +
+	"segment_id\x18\x05 \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
+	"\asubject\x18\x06 \x01(\tR\asubject\x12\x18\n" +
+	"\acontent\x18\a \x01(\tR\acontent\x12!\n" +
+	"\fscheduled_at\x18\b \x01(\tR\vscheduledAtB\r\n" +
+	"\v_segment_id\"2\n" +
+	"\x16UpdateCampaignResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"E\n" +
 	"\x1bUpdateCampaignStatusRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"8\n" +
 	"\x1cUpdateCampaignStatusResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xaf\x02\n" +
+	"\rCampaignStats\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
+	"campaignId\x12%\n" +
+	"\x0eaudience_count\x18\x02 \x01(\x05R\raudienceCount\x12\x1d\n" +
+	"\n" +
+	"sent_count\x18\x03 \x01(\x05R\tsentCount\x12'\n" +
+	"\x0fdelivered_count\x18\x04 \x01(\x05R\x0edeliveredCount\x12!\n" +
+	"\fopened_count\x18\x05 \x01(\x05R\vopenedCount\x12#\n" +
+	"\rclicked_count\x18\x06 \x01(\x05R\fclickedCount\x12#\n" +
+	"\rbounced_count\x18\a \x01(\x05R\fbouncedCount\x12!\n" +
+	"\ffailed_count\x18\b \x01(\x05R\vfailedCount\":\n" +
+	"\x17GetCampaignStatsRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
+	"campaignId\"D\n" +
+	"\x18GetCampaignStatsResponse\x12(\n" +
+	"\x05stats\x18\x01 \x01(\v2\x12.crm.CampaignStatsR\x05stats\"*\n" +
+	"\x18GetCampaignDetailRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"p\n" +
+	"\x19GetCampaignDetailResponse\x12)\n" +
+	"\bcampaign\x18\x01 \x01(\v2\r.crm.CampaignR\bcampaign\x12(\n" +
+	"\x05stats\x18\x02 \x01(\v2\x12.crm.CampaignStatsR\x05statsB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_campaigns_proto_rawDescOnce sync.Once
@@ -800,34 +1057,33 @@ func file_crm_v1_campaigns_proto_rawDescGZIP() []byte {
 	return file_crm_v1_campaigns_proto_rawDescData
 }
 
-var file_crm_v1_campaigns_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_crm_v1_campaigns_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_crm_v1_campaigns_proto_goTypes = []any{
 	(*Campaign)(nil),                     // 0: crm.Campaign
 	(*ListCampaignsRequest)(nil),         // 1: crm.ListCampaignsRequest
 	(*ListCampaignsResponse)(nil),        // 2: crm.ListCampaignsResponse
-	(*GetCampaignRequest)(nil),           // 3: crm.GetCampaignRequest
-	(*GetCampaignResponse)(nil),          // 4: crm.GetCampaignResponse
-	(*CreateCampaignRequest)(nil),        // 5: crm.CreateCampaignRequest
-	(*CreateCampaignResponse)(nil),       // 6: crm.CreateCampaignResponse
-	(*UpdateCampaignRequest)(nil),        // 7: crm.UpdateCampaignRequest
-	(*UpdateCampaignResponse)(nil),       // 8: crm.UpdateCampaignResponse
-	(*UpdateCampaignStatusRequest)(nil),  // 9: crm.UpdateCampaignStatusRequest
-	(*UpdateCampaignStatusResponse)(nil), // 10: crm.UpdateCampaignStatusResponse
-	(*v1.PaginationRequest)(nil),         // 11: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),        // 12: common.PaginationResponse
+	(*CreateCampaignRequest)(nil),        // 3: crm.CreateCampaignRequest
+	(*CreateCampaignResponse)(nil),       // 4: crm.CreateCampaignResponse
+	(*UpdateCampaignRequest)(nil),        // 5: crm.UpdateCampaignRequest
+	(*UpdateCampaignResponse)(nil),       // 6: crm.UpdateCampaignResponse
+	(*UpdateCampaignStatusRequest)(nil),  // 7: crm.UpdateCampaignStatusRequest
+	(*UpdateCampaignStatusResponse)(nil), // 8: crm.UpdateCampaignStatusResponse
+	(*CampaignStats)(nil),                // 9: crm.CampaignStats
+	(*GetCampaignStatsRequest)(nil),      // 10: crm.GetCampaignStatsRequest
+	(*GetCampaignStatsResponse)(nil),     // 11: crm.GetCampaignStatsResponse
+	(*GetCampaignDetailRequest)(nil),     // 12: crm.GetCampaignDetailRequest
+	(*GetCampaignDetailResponse)(nil),    // 13: crm.GetCampaignDetailResponse
 }
 var file_crm_v1_campaigns_proto_depIdxs = []int32{
-	11, // 0: crm.ListCampaignsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: crm.ListCampaignsResponse.campaigns:type_name -> crm.Campaign
-	12, // 2: crm.ListCampaignsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: crm.GetCampaignResponse.campaign:type_name -> crm.Campaign
-	0,  // 4: crm.CreateCampaignResponse.campaign:type_name -> crm.Campaign
-	0,  // 5: crm.UpdateCampaignResponse.campaign:type_name -> crm.Campaign
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: crm.ListCampaignsResponse.campaigns:type_name -> crm.Campaign
+	9, // 1: crm.GetCampaignStatsResponse.stats:type_name -> crm.CampaignStats
+	0, // 2: crm.GetCampaignDetailResponse.campaign:type_name -> crm.Campaign
+	9, // 3: crm.GetCampaignDetailResponse.stats:type_name -> crm.CampaignStats
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_crm_v1_campaigns_proto_init() }
@@ -835,13 +1091,16 @@ func file_crm_v1_campaigns_proto_init() {
 	if File_crm_v1_campaigns_proto != nil {
 		return
 	}
+	file_crm_v1_campaigns_proto_msgTypes[0].OneofWrappers = []any{}
+	file_crm_v1_campaigns_proto_msgTypes[3].OneofWrappers = []any{}
+	file_crm_v1_campaigns_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_v1_campaigns_proto_rawDesc), len(file_crm_v1_campaigns_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

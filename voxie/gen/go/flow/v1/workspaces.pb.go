@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,13 +24,15 @@ const (
 type Workspace struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
-	ProjectCount  int32                  `protobuf:"varint,5,opt,name=project_count,json=projectCount,proto3" json:"project_count,omitempty"`
-	MemberCount   int32                  `protobuf:"varint,6,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
-	Members       []*WorkspaceMember     `protobuf:"bytes,7,rep,name=members,proto3" json:"members,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,5,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color         string                 `protobuf:"bytes,6,opt,name=color,proto3" json:"color,omitempty"`
+	IsDefault     bool                   `protobuf:"varint,7,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,8,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,6 +74,13 @@ func (x *Workspace) GetId() int64 {
 	return 0
 }
 
+func (x *Workspace) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Workspace) GetName() string {
 	if x != nil {
 		return x.Name
@@ -87,6 +95,13 @@ func (x *Workspace) GetDescription() string {
 	return ""
 }
 
+func (x *Workspace) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
 func (x *Workspace) GetColor() string {
 	if x != nil {
 		return x.Color
@@ -94,25 +109,18 @@ func (x *Workspace) GetColor() string {
 	return ""
 }
 
-func (x *Workspace) GetProjectCount() int32 {
+func (x *Workspace) GetIsDefault() bool {
 	if x != nil {
-		return x.ProjectCount
+		return x.IsDefault
 	}
-	return 0
+	return false
 }
 
-func (x *Workspace) GetMemberCount() int32 {
+func (x *Workspace) GetCreatedBy() int64 {
 	if x != nil {
-		return x.MemberCount
+		return x.CreatedBy
 	}
 	return 0
-}
-
-func (x *Workspace) GetMembers() []*WorkspaceMember {
-	if x != nil {
-		return x.Members
-	}
-	return nil
 }
 
 func (x *Workspace) GetCreatedAt() string {
@@ -122,84 +130,22 @@ func (x *Workspace) GetCreatedAt() string {
 	return ""
 }
 
-type WorkspaceMember struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"` // owner, member
-	AvatarUrl     string                 `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *WorkspaceMember) Reset() {
-	*x = WorkspaceMember{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *WorkspaceMember) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WorkspaceMember) ProtoMessage() {}
-
-func (x *WorkspaceMember) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[1]
+func (x *Workspace) GetUpdatedAt() string {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WorkspaceMember.ProtoReflect.Descriptor instead.
-func (*WorkspaceMember) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *WorkspaceMember) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *WorkspaceMember) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *WorkspaceMember) GetRole() string {
-	if x != nil {
-		return x.Role
-	}
-	return ""
-}
-
-func (x *WorkspaceMember) GetAvatarUrl() string {
-	if x != nil {
-		return x.AvatarUrl
+		return x.UpdatedAt
 	}
 	return ""
 }
 
 type ListWorkspacesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListWorkspacesRequest) Reset() {
 	*x = ListWorkspacesRequest{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[2]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -211,7 +157,7 @@ func (x *ListWorkspacesRequest) String() string {
 func (*ListWorkspacesRequest) ProtoMessage() {}
 
 func (x *ListWorkspacesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[2]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -224,27 +170,19 @@ func (x *ListWorkspacesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkspacesRequest.ProtoReflect.Descriptor instead.
 func (*ListWorkspacesRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListWorkspacesRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{1}
 }
 
 type ListWorkspacesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Workspaces    []*Workspace           `protobuf:"bytes,1,rep,name=workspaces,proto3" json:"workspaces,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListWorkspacesResponse) Reset() {
 	*x = ListWorkspacesResponse{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[3]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -256,7 +194,7 @@ func (x *ListWorkspacesResponse) String() string {
 func (*ListWorkspacesResponse) ProtoMessage() {}
 
 func (x *ListWorkspacesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[3]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -269,7 +207,7 @@ func (x *ListWorkspacesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkspacesResponse.ProtoReflect.Descriptor instead.
 func (*ListWorkspacesResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{3}
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListWorkspacesResponse) GetWorkspaces() []*Workspace {
@@ -279,113 +217,19 @@ func (x *ListWorkspacesResponse) GetWorkspaces() []*Workspace {
 	return nil
 }
 
-func (x *ListWorkspacesResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetWorkspaceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetWorkspaceRequest) Reset() {
-	*x = GetWorkspaceRequest{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetWorkspaceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetWorkspaceRequest) ProtoMessage() {}
-
-func (x *GetWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetWorkspaceRequest.ProtoReflect.Descriptor instead.
-func (*GetWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetWorkspaceRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetWorkspaceResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Workspace     *Workspace             `protobuf:"bytes,1,opt,name=workspace,proto3" json:"workspace,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetWorkspaceResponse) Reset() {
-	*x = GetWorkspaceResponse{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetWorkspaceResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetWorkspaceResponse) ProtoMessage() {}
-
-func (x *GetWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetWorkspaceResponse.ProtoReflect.Descriptor instead.
-func (*GetWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetWorkspaceResponse) GetWorkspace() *Workspace {
-	if x != nil {
-		return x.Workspace
-	}
-	return nil
-}
-
 type CreateWorkspaceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
+	Icon          string                 `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateWorkspaceRequest) Reset() {
 	*x = CreateWorkspaceRequest{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[6]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -397,7 +241,7 @@ func (x *CreateWorkspaceRequest) String() string {
 func (*CreateWorkspaceRequest) ProtoMessage() {}
 
 func (x *CreateWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[6]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -410,7 +254,7 @@ func (x *CreateWorkspaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkspaceRequest.ProtoReflect.Descriptor instead.
 func (*CreateWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{6}
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateWorkspaceRequest) GetName() string {
@@ -423,6 +267,13 @@ func (x *CreateWorkspaceRequest) GetName() string {
 func (x *CreateWorkspaceRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateWorkspaceRequest) GetIcon() string {
+	if x != nil {
+		return x.Icon
 	}
 	return ""
 }
@@ -443,7 +294,7 @@ type CreateWorkspaceResponse struct {
 
 func (x *CreateWorkspaceResponse) Reset() {
 	*x = CreateWorkspaceResponse{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[7]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +306,7 @@ func (x *CreateWorkspaceResponse) String() string {
 func (*CreateWorkspaceResponse) ProtoMessage() {}
 
 func (x *CreateWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[7]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +319,7 @@ func (x *CreateWorkspaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkspaceResponse.ProtoReflect.Descriptor instead.
 func (*CreateWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{7}
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateWorkspaceResponse) GetWorkspace() *Workspace {
@@ -476,6 +327,214 @@ func (x *CreateWorkspaceResponse) GetWorkspace() *Workspace {
 		return x.Workspace
 	}
 	return nil
+}
+
+type UpdateWorkspaceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color         string                 `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkspaceRequest) Reset() {
+	*x = UpdateWorkspaceRequest{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkspaceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkspaceRequest) ProtoMessage() {}
+
+func (x *UpdateWorkspaceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkspaceRequest.ProtoReflect.Descriptor instead.
+func (*UpdateWorkspaceRequest) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateWorkspaceRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateWorkspaceRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceRequest) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceRequest) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+type UpdateWorkspaceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkspaceResponse) Reset() {
+	*x = UpdateWorkspaceResponse{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkspaceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkspaceResponse) ProtoMessage() {}
+
+func (x *UpdateWorkspaceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkspaceResponse.ProtoReflect.Descriptor instead.
+func (*UpdateWorkspaceResponse) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdateWorkspaceResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type DeleteWorkspaceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteWorkspaceRequest) Reset() {
+	*x = DeleteWorkspaceRequest{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteWorkspaceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteWorkspaceRequest) ProtoMessage() {}
+
+func (x *DeleteWorkspaceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteWorkspaceRequest.ProtoReflect.Descriptor instead.
+func (*DeleteWorkspaceRequest) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteWorkspaceRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteWorkspaceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteWorkspaceResponse) Reset() {
+	*x = DeleteWorkspaceResponse{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteWorkspaceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteWorkspaceResponse) ProtoMessage() {}
+
+func (x *DeleteWorkspaceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteWorkspaceResponse.ProtoReflect.Descriptor instead.
+func (*DeleteWorkspaceResponse) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DeleteWorkspaceResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type AddWorkspaceMemberRequest struct {
@@ -489,7 +548,7 @@ type AddWorkspaceMemberRequest struct {
 
 func (x *AddWorkspaceMemberRequest) Reset() {
 	*x = AddWorkspaceMemberRequest{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[8]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -501,7 +560,7 @@ func (x *AddWorkspaceMemberRequest) String() string {
 func (*AddWorkspaceMemberRequest) ProtoMessage() {}
 
 func (x *AddWorkspaceMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[8]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -514,7 +573,7 @@ func (x *AddWorkspaceMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddWorkspaceMemberRequest.ProtoReflect.Descriptor instead.
 func (*AddWorkspaceMemberRequest) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{8}
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AddWorkspaceMemberRequest) GetWorkspaceId() int64 {
@@ -540,14 +599,14 @@ func (x *AddWorkspaceMemberRequest) GetRole() string {
 
 type AddWorkspaceMemberResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AddWorkspaceMemberResponse) Reset() {
 	*x = AddWorkspaceMemberResponse{}
-	mi := &file_flow_v1_workspaces_proto_msgTypes[9]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -559,7 +618,7 @@ func (x *AddWorkspaceMemberResponse) String() string {
 func (*AddWorkspaceMemberResponse) ProtoMessage() {}
 
 func (x *AddWorkspaceMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_v1_workspaces_proto_msgTypes[9]
+	mi := &file_flow_v1_workspaces_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -572,64 +631,168 @@ func (x *AddWorkspaceMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddWorkspaceMemberResponse.ProtoReflect.Descriptor instead.
 func (*AddWorkspaceMemberResponse) Descriptor() ([]byte, []int) {
-	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{9}
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *AddWorkspaceMemberResponse) GetSuccess() bool {
+func (x *AddWorkspaceMemberResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
+}
+
+type RemoveWorkspaceMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkspaceId   int64                  `protobuf:"varint,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveWorkspaceMemberRequest) Reset() {
+	*x = RemoveWorkspaceMemberRequest{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveWorkspaceMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveWorkspaceMemberRequest) ProtoMessage() {}
+
+func (x *RemoveWorkspaceMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveWorkspaceMemberRequest.ProtoReflect.Descriptor instead.
+func (*RemoveWorkspaceMemberRequest) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RemoveWorkspaceMemberRequest) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
+}
+
+func (x *RemoveWorkspaceMemberRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type RemoveWorkspaceMemberResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveWorkspaceMemberResponse) Reset() {
+	*x = RemoveWorkspaceMemberResponse{}
+	mi := &file_flow_v1_workspaces_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveWorkspaceMemberResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveWorkspaceMemberResponse) ProtoMessage() {}
+
+func (x *RemoveWorkspaceMemberResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_v1_workspaces_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveWorkspaceMemberResponse.ProtoReflect.Descriptor instead.
+func (*RemoveWorkspaceMemberResponse) Descriptor() ([]byte, []int) {
+	return file_flow_v1_workspaces_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *RemoveWorkspaceMemberResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_flow_v1_workspaces_proto protoreflect.FileDescriptor
 
 const file_flow_v1_workspaces_proto_rawDesc = "" +
 	"\n" +
-	"\x18flow/v1/workspaces.proto\x12\x04flow\x1a\x1acommon/v1/pagination.proto\"\xff\x01\n" +
+	"\x18flow/v1/workspaces.proto\x12\x04flow\"\x92\x02\n" +
 	"\tWorkspace\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05color\x18\x04 \x01(\tR\x05color\x12#\n" +
-	"\rproject_count\x18\x05 \x01(\x05R\fprojectCount\x12!\n" +
-	"\fmember_count\x18\x06 \x01(\x05R\vmemberCount\x12/\n" +
-	"\amembers\x18\a \x03(\v2\x15.flow.WorkspaceMemberR\amembers\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x05 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\x06 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\"q\n" +
-	"\x0fWorkspaceMember\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\x12\x1d\n" +
+	"is_default\x18\a \x01(\bR\tisDefault\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\x04 \x01(\tR\tavatarUrl\"R\n" +
-	"\x15ListWorkspacesRequest\x129\n" +
+	"created_by\x18\b \x01(\x03R\tcreatedBy\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x85\x01\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\tR\tupdatedAt\"\x17\n" +
+	"\x15ListWorkspacesRequest\"I\n" +
 	"\x16ListWorkspacesResponse\x12/\n" +
 	"\n" +
 	"workspaces\x18\x01 \x03(\v2\x0f.flow.WorkspaceR\n" +
-	"workspaces\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"%\n" +
-	"\x13GetWorkspaceRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"E\n" +
-	"\x14GetWorkspaceResponse\x12-\n" +
-	"\tworkspace\x18\x01 \x01(\v2\x0f.flow.WorkspaceR\tworkspace\"d\n" +
+	"workspaces\"x\n" +
 	"\x16CreateWorkspaceRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05color\x18\x03 \x01(\tR\x05color\"H\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x03 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\"H\n" +
 	"\x17CreateWorkspaceResponse\x12-\n" +
-	"\tworkspace\x18\x01 \x01(\v2\x0f.flow.WorkspaceR\tworkspace\"k\n" +
+	"\tworkspace\x18\x01 \x01(\v2\x0f.flow.WorkspaceR\tworkspace\"\x88\x01\n" +
+	"\x16UpdateWorkspaceRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\x05 \x01(\tR\x05color\"3\n" +
+	"\x17UpdateWorkspaceResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"(\n" +
+	"\x16DeleteWorkspaceRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
+	"\x17DeleteWorkspaceResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"k\n" +
 	"\x19AddWorkspaceMemberRequest\x12!\n" +
 	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x12\n" +
 	"\x04role\x18\x03 \x01(\tR\x04role\"6\n" +
 	"\x1aAddWorkspaceMemberResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessage\"Z\n" +
+	"\x1cRemoveWorkspaceMemberRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"9\n" +
+	"\x1dRemoveWorkspaceMemberResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_workspaces_proto_rawDescOnce sync.Once
@@ -643,33 +806,30 @@ func file_flow_v1_workspaces_proto_rawDescGZIP() []byte {
 	return file_flow_v1_workspaces_proto_rawDescData
 }
 
-var file_flow_v1_workspaces_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_flow_v1_workspaces_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_flow_v1_workspaces_proto_goTypes = []any{
-	(*Workspace)(nil),                  // 0: flow.Workspace
-	(*WorkspaceMember)(nil),            // 1: flow.WorkspaceMember
-	(*ListWorkspacesRequest)(nil),      // 2: flow.ListWorkspacesRequest
-	(*ListWorkspacesResponse)(nil),     // 3: flow.ListWorkspacesResponse
-	(*GetWorkspaceRequest)(nil),        // 4: flow.GetWorkspaceRequest
-	(*GetWorkspaceResponse)(nil),       // 5: flow.GetWorkspaceResponse
-	(*CreateWorkspaceRequest)(nil),     // 6: flow.CreateWorkspaceRequest
-	(*CreateWorkspaceResponse)(nil),    // 7: flow.CreateWorkspaceResponse
-	(*AddWorkspaceMemberRequest)(nil),  // 8: flow.AddWorkspaceMemberRequest
-	(*AddWorkspaceMemberResponse)(nil), // 9: flow.AddWorkspaceMemberResponse
-	(*v1.PaginationRequest)(nil),       // 10: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),      // 11: common.PaginationResponse
+	(*Workspace)(nil),                     // 0: flow.Workspace
+	(*ListWorkspacesRequest)(nil),         // 1: flow.ListWorkspacesRequest
+	(*ListWorkspacesResponse)(nil),        // 2: flow.ListWorkspacesResponse
+	(*CreateWorkspaceRequest)(nil),        // 3: flow.CreateWorkspaceRequest
+	(*CreateWorkspaceResponse)(nil),       // 4: flow.CreateWorkspaceResponse
+	(*UpdateWorkspaceRequest)(nil),        // 5: flow.UpdateWorkspaceRequest
+	(*UpdateWorkspaceResponse)(nil),       // 6: flow.UpdateWorkspaceResponse
+	(*DeleteWorkspaceRequest)(nil),        // 7: flow.DeleteWorkspaceRequest
+	(*DeleteWorkspaceResponse)(nil),       // 8: flow.DeleteWorkspaceResponse
+	(*AddWorkspaceMemberRequest)(nil),     // 9: flow.AddWorkspaceMemberRequest
+	(*AddWorkspaceMemberResponse)(nil),    // 10: flow.AddWorkspaceMemberResponse
+	(*RemoveWorkspaceMemberRequest)(nil),  // 11: flow.RemoveWorkspaceMemberRequest
+	(*RemoveWorkspaceMemberResponse)(nil), // 12: flow.RemoveWorkspaceMemberResponse
 }
 var file_flow_v1_workspaces_proto_depIdxs = []int32{
-	1,  // 0: flow.Workspace.members:type_name -> flow.WorkspaceMember
-	10, // 1: flow.ListWorkspacesRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 2: flow.ListWorkspacesResponse.workspaces:type_name -> flow.Workspace
-	11, // 3: flow.ListWorkspacesResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 4: flow.GetWorkspaceResponse.workspace:type_name -> flow.Workspace
-	0,  // 5: flow.CreateWorkspaceResponse.workspace:type_name -> flow.Workspace
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: flow.ListWorkspacesResponse.workspaces:type_name -> flow.Workspace
+	0, // 1: flow.CreateWorkspaceResponse.workspace:type_name -> flow.Workspace
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_flow_v1_workspaces_proto_init() }
@@ -683,7 +843,7 @@ func file_flow_v1_workspaces_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_v1_workspaces_proto_rawDesc), len(file_flow_v1_workspaces_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

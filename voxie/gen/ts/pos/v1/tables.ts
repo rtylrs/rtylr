@@ -8,24 +8,16 @@
 
 export interface Table {
   id: number;
+  ownerId: number;
   locationId: number;
-  floorId: number;
-  name: string;
-  capacity: number;
-  /** available, occupied, reserved, dirty */
+  label: string;
+  seats: number;
   status: string;
-  currentOrderId: number;
-  positionX: number;
-  positionY: number;
-  /** square, round, rectangle */
-  shape: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ListTablesRequest {
-  floorId: number;
-  status: string;
 }
 
 export interface ListTablesResponse {
@@ -33,36 +25,30 @@ export interface ListTablesResponse {
 }
 
 export interface CreateTableRequest {
-  floorId: number;
-  name: string;
-  capacity: number;
-  positionX: number;
-  positionY: number;
-  shape: string;
+  locationId: number;
+  label: string;
+  seats: number;
 }
 
 export interface CreateTableResponse {
-  table: Table | undefined;
+  tableId: number;
+  message: string;
 }
 
 export interface UpdateTableRequest {
-  id: number;
-  name: string;
-  capacity: number;
-  positionX: number;
-  positionY: number;
-  shape: string;
-}
-
-export interface UpdateTableResponse {
-  table: Table | undefined;
-}
-
-export interface UpdateTableStatusRequest {
-  id: number;
+  locationId: number;
+  label: string;
+  seats: number;
   status: string;
 }
 
-export interface UpdateTableStatusResponse {
-  table: Table | undefined;
+export interface UpdateTableResponse {
+  message: string;
+}
+
+export interface DeleteTableRequest {
+}
+
+export interface DeleteTableResponse {
+  message: string;
 }

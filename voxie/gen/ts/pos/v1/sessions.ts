@@ -8,46 +8,40 @@
 
 export interface Session {
   id: number;
+  ownerId: number;
   locationId: number;
-  terminalId: number;
-  openedBy: number;
-  closedBy: number;
-  /** open, closed */
-  status: string;
-  openingCash: number;
-  closingCash: number;
-  expectedCash: number;
-  cashDifference: number;
-  totalOrders: number;
+  staffId: number;
+  openingFloat: number;
+  closingFloat: number;
   totalSales: number;
-  totalRefunds: number;
-  totalVoids: number;
+  status: string;
   openedAt: string;
   closedAt: string;
+  createdAt: string;
+}
+
+export interface ListSessionsRequest {
+}
+
+export interface ListSessionsResponse {
+  sessions: Session[];
 }
 
 export interface OpenSessionRequest {
-  terminalId: number;
-  openingCash: number;
+  locationId: number;
+  staffId: number;
+  openingFloat: number;
 }
 
 export interface OpenSessionResponse {
-  session: Session | undefined;
+  sessionId: number;
+  message: string;
 }
 
 export interface CloseSessionRequest {
-  id: number;
-  closingCash: number;
-  notes: string;
+  closingFloat: number;
 }
 
 export interface CloseSessionResponse {
-  session: Session | undefined;
-}
-
-export interface GetCurrentSessionRequest {
-}
-
-export interface GetCurrentSessionResponse {
-  session: Session | undefined;
+  message: string;
 }

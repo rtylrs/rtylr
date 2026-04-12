@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,12 +24,13 @@ const (
 type Segment struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Rules         []*SegmentRule         `protobuf:"bytes,4,rep,name=rules,proto3" json:"rules,omitempty"`
-	CustomerCount int32                  `protobuf:"varint,5,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Filters       string                 `protobuf:"bytes,5,opt,name=filters,proto3" json:"filters,omitempty"`
+	CustomerCount int32                  `protobuf:"varint,6,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,6 +72,13 @@ func (x *Segment) GetId() int64 {
 	return 0
 }
 
+func (x *Segment) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Segment) GetName() string {
 	if x != nil {
 		return x.Name
@@ -86,11 +93,11 @@ func (x *Segment) GetDescription() string {
 	return ""
 }
 
-func (x *Segment) GetRules() []*SegmentRule {
+func (x *Segment) GetFilters() string {
 	if x != nil {
-		return x.Rules
+		return x.Filters
 	}
-	return nil
+	return ""
 }
 
 func (x *Segment) GetCustomerCount() int32 {
@@ -114,76 +121,15 @@ func (x *Segment) GetUpdatedAt() string {
 	return ""
 }
 
-type SegmentRule struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`       // total_spent, visit_count, last_visit, source
-	Operator      string                 `protobuf:"bytes,2,opt,name=operator,proto3" json:"operator,omitempty"` // eq, gt, lt, gte, lte, contains
-	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SegmentRule) Reset() {
-	*x = SegmentRule{}
-	mi := &file_crm_v1_segments_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SegmentRule) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SegmentRule) ProtoMessage() {}
-
-func (x *SegmentRule) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SegmentRule.ProtoReflect.Descriptor instead.
-func (*SegmentRule) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *SegmentRule) GetField() string {
-	if x != nil {
-		return x.Field
-	}
-	return ""
-}
-
-func (x *SegmentRule) GetOperator() string {
-	if x != nil {
-		return x.Operator
-	}
-	return ""
-}
-
-func (x *SegmentRule) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
 type ListSegmentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListSegmentsRequest) Reset() {
 	*x = ListSegmentsRequest{}
-	mi := &file_crm_v1_segments_proto_msgTypes[2]
+	mi := &file_crm_v1_segments_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -195,7 +141,7 @@ func (x *ListSegmentsRequest) String() string {
 func (*ListSegmentsRequest) ProtoMessage() {}
 
 func (x *ListSegmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[2]
+	mi := &file_crm_v1_segments_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -208,27 +154,19 @@ func (x *ListSegmentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSegmentsRequest.ProtoReflect.Descriptor instead.
 func (*ListSegmentsRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListSegmentsRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{1}
 }
 
 type ListSegmentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Segments      []*Segment             `protobuf:"bytes,1,rep,name=segments,proto3" json:"segments,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListSegmentsResponse) Reset() {
 	*x = ListSegmentsResponse{}
-	mi := &file_crm_v1_segments_proto_msgTypes[3]
+	mi := &file_crm_v1_segments_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -240,7 +178,7 @@ func (x *ListSegmentsResponse) String() string {
 func (*ListSegmentsResponse) ProtoMessage() {}
 
 func (x *ListSegmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[3]
+	mi := &file_crm_v1_segments_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -253,7 +191,7 @@ func (x *ListSegmentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSegmentsResponse.ProtoReflect.Descriptor instead.
 func (*ListSegmentsResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{3}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListSegmentsResponse) GetSegments() []*Segment {
@@ -263,113 +201,18 @@ func (x *ListSegmentsResponse) GetSegments() []*Segment {
 	return nil
 }
 
-func (x *ListSegmentsResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetSegmentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSegmentRequest) Reset() {
-	*x = GetSegmentRequest{}
-	mi := &file_crm_v1_segments_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSegmentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSegmentRequest) ProtoMessage() {}
-
-func (x *GetSegmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSegmentRequest.ProtoReflect.Descriptor instead.
-func (*GetSegmentRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetSegmentRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetSegmentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Segment       *Segment               `protobuf:"bytes,1,opt,name=segment,proto3" json:"segment,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSegmentResponse) Reset() {
-	*x = GetSegmentResponse{}
-	mi := &file_crm_v1_segments_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSegmentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSegmentResponse) ProtoMessage() {}
-
-func (x *GetSegmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSegmentResponse.ProtoReflect.Descriptor instead.
-func (*GetSegmentResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetSegmentResponse) GetSegment() *Segment {
-	if x != nil {
-		return x.Segment
-	}
-	return nil
-}
-
 type CreateSegmentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Rules         []*SegmentRule         `protobuf:"bytes,3,rep,name=rules,proto3" json:"rules,omitempty"`
+	Filters       string                 `protobuf:"bytes,3,opt,name=filters,proto3" json:"filters,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateSegmentRequest) Reset() {
 	*x = CreateSegmentRequest{}
-	mi := &file_crm_v1_segments_proto_msgTypes[6]
+	mi := &file_crm_v1_segments_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -381,7 +224,7 @@ func (x *CreateSegmentRequest) String() string {
 func (*CreateSegmentRequest) ProtoMessage() {}
 
 func (x *CreateSegmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[6]
+	mi := &file_crm_v1_segments_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,7 +237,7 @@ func (x *CreateSegmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSegmentRequest.ProtoReflect.Descriptor instead.
 func (*CreateSegmentRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{6}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateSegmentRequest) GetName() string {
@@ -411,23 +254,24 @@ func (x *CreateSegmentRequest) GetDescription() string {
 	return ""
 }
 
-func (x *CreateSegmentRequest) GetRules() []*SegmentRule {
+func (x *CreateSegmentRequest) GetFilters() string {
 	if x != nil {
-		return x.Rules
+		return x.Filters
 	}
-	return nil
+	return ""
 }
 
 type CreateSegmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Segment       *Segment               `protobuf:"bytes,1,opt,name=segment,proto3" json:"segment,omitempty"`
+	SegmentId     int64                  `protobuf:"varint,1,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateSegmentResponse) Reset() {
 	*x = CreateSegmentResponse{}
-	mi := &file_crm_v1_segments_proto_msgTypes[7]
+	mi := &file_crm_v1_segments_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -439,7 +283,7 @@ func (x *CreateSegmentResponse) String() string {
 func (*CreateSegmentResponse) ProtoMessage() {}
 
 func (x *CreateSegmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[7]
+	mi := &file_crm_v1_segments_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -452,14 +296,21 @@ func (x *CreateSegmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSegmentResponse.ProtoReflect.Descriptor instead.
 func (*CreateSegmentResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{7}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateSegmentResponse) GetSegment() *Segment {
+func (x *CreateSegmentResponse) GetSegmentId() int64 {
 	if x != nil {
-		return x.Segment
+		return x.SegmentId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateSegmentResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateSegmentRequest struct {
@@ -467,14 +318,14 @@ type UpdateSegmentRequest struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Rules         []*SegmentRule         `protobuf:"bytes,4,rep,name=rules,proto3" json:"rules,omitempty"`
+	Filters       string                 `protobuf:"bytes,4,opt,name=filters,proto3" json:"filters,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateSegmentRequest) Reset() {
 	*x = UpdateSegmentRequest{}
-	mi := &file_crm_v1_segments_proto_msgTypes[8]
+	mi := &file_crm_v1_segments_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -486,7 +337,7 @@ func (x *UpdateSegmentRequest) String() string {
 func (*UpdateSegmentRequest) ProtoMessage() {}
 
 func (x *UpdateSegmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[8]
+	mi := &file_crm_v1_segments_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +350,7 @@ func (x *UpdateSegmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSegmentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSegmentRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{8}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateSegmentRequest) GetId() int64 {
@@ -523,23 +374,23 @@ func (x *UpdateSegmentRequest) GetDescription() string {
 	return ""
 }
 
-func (x *UpdateSegmentRequest) GetRules() []*SegmentRule {
+func (x *UpdateSegmentRequest) GetFilters() string {
 	if x != nil {
-		return x.Rules
+		return x.Filters
 	}
-	return nil
+	return ""
 }
 
 type UpdateSegmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Segment       *Segment               `protobuf:"bytes,1,opt,name=segment,proto3" json:"segment,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateSegmentResponse) Reset() {
 	*x = UpdateSegmentResponse{}
-	mi := &file_crm_v1_segments_proto_msgTypes[9]
+	mi := &file_crm_v1_segments_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -551,7 +402,7 @@ func (x *UpdateSegmentResponse) String() string {
 func (*UpdateSegmentResponse) ProtoMessage() {}
 
 func (x *UpdateSegmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[9]
+	mi := &file_crm_v1_segments_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -564,14 +415,14 @@ func (x *UpdateSegmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSegmentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateSegmentResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{9}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateSegmentResponse) GetSegment() *Segment {
+func (x *UpdateSegmentResponse) GetMessage() string {
 	if x != nil {
-		return x.Segment
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type DeleteSegmentRequest struct {
@@ -583,7 +434,7 @@ type DeleteSegmentRequest struct {
 
 func (x *DeleteSegmentRequest) Reset() {
 	*x = DeleteSegmentRequest{}
-	mi := &file_crm_v1_segments_proto_msgTypes[10]
+	mi := &file_crm_v1_segments_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +446,7 @@ func (x *DeleteSegmentRequest) String() string {
 func (*DeleteSegmentRequest) ProtoMessage() {}
 
 func (x *DeleteSegmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[10]
+	mi := &file_crm_v1_segments_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +459,7 @@ func (x *DeleteSegmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSegmentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSegmentRequest) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{10}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteSegmentRequest) GetId() int64 {
@@ -620,14 +471,14 @@ func (x *DeleteSegmentRequest) GetId() int64 {
 
 type DeleteSegmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteSegmentResponse) Reset() {
 	*x = DeleteSegmentResponse{}
-	mi := &file_crm_v1_segments_proto_msgTypes[11]
+	mi := &file_crm_v1_segments_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -639,7 +490,7 @@ func (x *DeleteSegmentResponse) String() string {
 func (*DeleteSegmentResponse) ProtoMessage() {}
 
 func (x *DeleteSegmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_v1_segments_proto_msgTypes[11]
+	mi := &file_crm_v1_segments_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -652,65 +503,54 @@ func (x *DeleteSegmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSegmentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteSegmentResponse) Descriptor() ([]byte, []int) {
-	return file_crm_v1_segments_proto_rawDescGZIP(), []int{11}
+	return file_crm_v1_segments_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteSegmentResponse) GetSuccess() bool {
+func (x *DeleteSegmentResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_crm_v1_segments_proto protoreflect.FileDescriptor
 
 const file_crm_v1_segments_proto_rawDesc = "" +
 	"\n" +
-	"\x15crm/v1/segments.proto\x12\x03crm\x1a\x1acommon/v1/pagination.proto\"\xdc\x01\n" +
+	"\x15crm/v1/segments.proto\x12\x03crm\"\xe9\x01\n" +
 	"\aSegment\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12&\n" +
-	"\x05rules\x18\x04 \x03(\v2\x10.crm.SegmentRuleR\x05rules\x12%\n" +
-	"\x0ecustomer_count\x18\x05 \x01(\x05R\rcustomerCount\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x18\n" +
+	"\afilters\x18\x05 \x01(\tR\afilters\x12%\n" +
+	"\x0ecustomer_count\x18\x06 \x01(\x05R\rcustomerCount\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\tR\tupdatedAt\"U\n" +
-	"\vSegmentRule\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12\x1a\n" +
-	"\boperator\x18\x02 \x01(\tR\boperator\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\"P\n" +
-	"\x13ListSegmentsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"|\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x15\n" +
+	"\x13ListSegmentsRequest\"@\n" +
 	"\x14ListSegmentsResponse\x12(\n" +
-	"\bsegments\x18\x01 \x03(\v2\f.crm.SegmentR\bsegments\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"#\n" +
-	"\x11GetSegmentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"<\n" +
-	"\x12GetSegmentResponse\x12&\n" +
-	"\asegment\x18\x01 \x01(\v2\f.crm.SegmentR\asegment\"t\n" +
+	"\bsegments\x18\x01 \x03(\v2\f.crm.SegmentR\bsegments\"f\n" +
 	"\x14CreateSegmentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12&\n" +
-	"\x05rules\x18\x03 \x03(\v2\x10.crm.SegmentRuleR\x05rules\"?\n" +
-	"\x15CreateSegmentResponse\x12&\n" +
-	"\asegment\x18\x01 \x01(\v2\f.crm.SegmentR\asegment\"\x84\x01\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
+	"\afilters\x18\x03 \x01(\tR\afilters\"P\n" +
+	"\x15CreateSegmentResponse\x12\x1d\n" +
+	"\n" +
+	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"v\n" +
 	"\x14UpdateSegmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12&\n" +
-	"\x05rules\x18\x04 \x03(\v2\x10.crm.SegmentRuleR\x05rules\"?\n" +
-	"\x15UpdateSegmentResponse\x12&\n" +
-	"\asegment\x18\x01 \x01(\v2\f.crm.SegmentR\asegment\"&\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x18\n" +
+	"\afilters\x18\x04 \x01(\tR\afilters\"1\n" +
+	"\x15UpdateSegmentResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\x14DeleteSegmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteSegmentResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_segments_proto_rawDescOnce sync.Once
@@ -724,38 +564,25 @@ func file_crm_v1_segments_proto_rawDescGZIP() []byte {
 	return file_crm_v1_segments_proto_rawDescData
 }
 
-var file_crm_v1_segments_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_crm_v1_segments_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_crm_v1_segments_proto_goTypes = []any{
 	(*Segment)(nil),               // 0: crm.Segment
-	(*SegmentRule)(nil),           // 1: crm.SegmentRule
-	(*ListSegmentsRequest)(nil),   // 2: crm.ListSegmentsRequest
-	(*ListSegmentsResponse)(nil),  // 3: crm.ListSegmentsResponse
-	(*GetSegmentRequest)(nil),     // 4: crm.GetSegmentRequest
-	(*GetSegmentResponse)(nil),    // 5: crm.GetSegmentResponse
-	(*CreateSegmentRequest)(nil),  // 6: crm.CreateSegmentRequest
-	(*CreateSegmentResponse)(nil), // 7: crm.CreateSegmentResponse
-	(*UpdateSegmentRequest)(nil),  // 8: crm.UpdateSegmentRequest
-	(*UpdateSegmentResponse)(nil), // 9: crm.UpdateSegmentResponse
-	(*DeleteSegmentRequest)(nil),  // 10: crm.DeleteSegmentRequest
-	(*DeleteSegmentResponse)(nil), // 11: crm.DeleteSegmentResponse
-	(*v1.PaginationRequest)(nil),  // 12: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 13: common.PaginationResponse
+	(*ListSegmentsRequest)(nil),   // 1: crm.ListSegmentsRequest
+	(*ListSegmentsResponse)(nil),  // 2: crm.ListSegmentsResponse
+	(*CreateSegmentRequest)(nil),  // 3: crm.CreateSegmentRequest
+	(*CreateSegmentResponse)(nil), // 4: crm.CreateSegmentResponse
+	(*UpdateSegmentRequest)(nil),  // 5: crm.UpdateSegmentRequest
+	(*UpdateSegmentResponse)(nil), // 6: crm.UpdateSegmentResponse
+	(*DeleteSegmentRequest)(nil),  // 7: crm.DeleteSegmentRequest
+	(*DeleteSegmentResponse)(nil), // 8: crm.DeleteSegmentResponse
 }
 var file_crm_v1_segments_proto_depIdxs = []int32{
-	1,  // 0: crm.Segment.rules:type_name -> crm.SegmentRule
-	12, // 1: crm.ListSegmentsRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 2: crm.ListSegmentsResponse.segments:type_name -> crm.Segment
-	13, // 3: crm.ListSegmentsResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 4: crm.GetSegmentResponse.segment:type_name -> crm.Segment
-	1,  // 5: crm.CreateSegmentRequest.rules:type_name -> crm.SegmentRule
-	0,  // 6: crm.CreateSegmentResponse.segment:type_name -> crm.Segment
-	1,  // 7: crm.UpdateSegmentRequest.rules:type_name -> crm.SegmentRule
-	0,  // 8: crm.UpdateSegmentResponse.segment:type_name -> crm.Segment
-	9,  // [9:9] is the sub-list for method output_type
-	9,  // [9:9] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	0, // 0: crm.ListSegmentsResponse.segments:type_name -> crm.Segment
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_crm_v1_segments_proto_init() }
@@ -769,7 +596,7 @@ func file_crm_v1_segments_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_v1_segments_proto_rawDesc), len(file_crm_v1_segments_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

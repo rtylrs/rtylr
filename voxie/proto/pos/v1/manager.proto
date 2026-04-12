@@ -4,15 +4,14 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── Manager ────────────────────────────────────────────────────────
+// ── Manager ───────────────────────────────────────────────────────
 
-message VerifyManagerPinRequest {
+message VerifyPINRequest {
   string pin = 1;
-  string action = 2; // void, refund, discount, override
 }
 
-message VerifyManagerPinResponse {
+message VerifyPINResponse {
   bool valid = 1;
-  int64 manager_id = 2;
-  string manager_name = 3;
+  int64 staff_id = 2;
+  string message = 3;
 }

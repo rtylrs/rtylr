@@ -22,20 +22,17 @@ const (
 )
 
 type Terminal struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId      int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Name            string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	DeviceId        string                 `protobuf:"bytes,4,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	Status          string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"` // online, offline
-	IsActive        bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	LastHeartbeatAt string                 `protobuf:"bytes,7,opt,name=last_heartbeat_at,json=lastHeartbeatAt,proto3" json:"last_heartbeat_at,omitempty"`
-	IpAddress       string                 `protobuf:"bytes,8,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	AppVersion      string                 `protobuf:"bytes,9,opt,name=app_version,json=appVersion,proto3" json:"app_version,omitempty"`
-	CreatedAt       string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt       string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,5,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	LastSeenAt    string                 `protobuf:"bytes,7,opt,name=last_seen_at,json=lastSeenAt,proto3" json:"last_seen_at,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Terminal) Reset() {
@@ -75,9 +72,16 @@ func (x *Terminal) GetId() int64 {
 	return 0
 }
 
-func (x *Terminal) GetLocationId() int64 {
+func (x *Terminal) GetBusinessId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *Terminal) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
 	}
 	return 0
 }
@@ -96,13 +100,6 @@ func (x *Terminal) GetDeviceId() string {
 	return ""
 }
 
-func (x *Terminal) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
 func (x *Terminal) GetIsActive() bool {
 	if x != nil {
 		return x.IsActive
@@ -110,23 +107,9 @@ func (x *Terminal) GetIsActive() bool {
 	return false
 }
 
-func (x *Terminal) GetLastHeartbeatAt() string {
+func (x *Terminal) GetLastSeenAt() string {
 	if x != nil {
-		return x.LastHeartbeatAt
-	}
-	return ""
-}
-
-func (x *Terminal) GetIpAddress() string {
-	if x != nil {
-		return x.IpAddress
-	}
-	return ""
-}
-
-func (x *Terminal) GetAppVersion() string {
-	if x != nil {
-		return x.AppVersion
+		return x.LastSeenAt
 	}
 	return ""
 }
@@ -134,13 +117,6 @@ func (x *Terminal) GetAppVersion() string {
 func (x *Terminal) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *Terminal) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
 	}
 	return ""
 }
@@ -227,8 +203,9 @@ func (x *ListTerminalsResponse) GetTerminals() []*Terminal {
 
 type CreateTerminalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -263,6 +240,13 @@ func (*CreateTerminalRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *CreateTerminalRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
 func (x *CreateTerminalRequest) GetName() string {
 	if x != nil {
 		return x.Name
@@ -279,7 +263,8 @@ func (x *CreateTerminalRequest) GetDeviceId() string {
 
 type CreateTerminalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Terminal      *Terminal              `protobuf:"bytes,1,opt,name=terminal,proto3" json:"terminal,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,1,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -314,18 +299,26 @@ func (*CreateTerminalResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateTerminalResponse) GetTerminal() *Terminal {
+func (x *CreateTerminalResponse) GetTerminalId() int64 {
 	if x != nil {
-		return x.Terminal
+		return x.TerminalId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateTerminalResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateTerminalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	IsActive      bool                   `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -360,9 +353,9 @@ func (*UpdateTerminalRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateTerminalRequest) GetId() int64 {
+func (x *UpdateTerminalRequest) GetBranchId() int64 {
 	if x != nil {
-		return x.Id
+		return x.BranchId
 	}
 	return 0
 }
@@ -370,6 +363,13 @@ func (x *UpdateTerminalRequest) GetId() int64 {
 func (x *UpdateTerminalRequest) GetName() string {
 	if x != nil {
 		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateTerminalRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
 	}
 	return ""
 }
@@ -383,7 +383,7 @@ func (x *UpdateTerminalRequest) GetIsActive() bool {
 
 type UpdateTerminalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Terminal      *Terminal              `protobuf:"bytes,1,opt,name=terminal,proto3" json:"terminal,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -418,34 +418,34 @@ func (*UpdateTerminalResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateTerminalResponse) GetTerminal() *Terminal {
+func (x *UpdateTerminalResponse) GetMessage() string {
 	if x != nil {
-		return x.Terminal
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
-type DeleteTerminalRequest struct {
+type HeartbeatTerminalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TerminalId    int64                  `protobuf:"varint,1,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteTerminalRequest) Reset() {
-	*x = DeleteTerminalRequest{}
+func (x *HeartbeatTerminalRequest) Reset() {
+	*x = HeartbeatTerminalRequest{}
 	mi := &file_pos_v1_terminals_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteTerminalRequest) String() string {
+func (x *HeartbeatTerminalRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteTerminalRequest) ProtoMessage() {}
+func (*HeartbeatTerminalRequest) ProtoMessage() {}
 
-func (x *DeleteTerminalRequest) ProtoReflect() protoreflect.Message {
+func (x *HeartbeatTerminalRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_terminals_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -457,39 +457,39 @@ func (x *DeleteTerminalRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteTerminalRequest.ProtoReflect.Descriptor instead.
-func (*DeleteTerminalRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use HeartbeatTerminalRequest.ProtoReflect.Descriptor instead.
+func (*HeartbeatTerminalRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *DeleteTerminalRequest) GetId() int64 {
+func (x *HeartbeatTerminalRequest) GetTerminalId() int64 {
 	if x != nil {
-		return x.Id
+		return x.TerminalId
 	}
 	return 0
 }
 
-type DeleteTerminalResponse struct {
+type HeartbeatTerminalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteTerminalResponse) Reset() {
-	*x = DeleteTerminalResponse{}
+func (x *HeartbeatTerminalResponse) Reset() {
+	*x = HeartbeatTerminalResponse{}
 	mi := &file_pos_v1_terminals_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteTerminalResponse) String() string {
+func (x *HeartbeatTerminalResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteTerminalResponse) ProtoMessage() {}
+func (*HeartbeatTerminalResponse) ProtoMessage() {}
 
-func (x *DeleteTerminalResponse) ProtoReflect() protoreflect.Message {
+func (x *HeartbeatTerminalResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_terminals_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -501,171 +501,58 @@ func (x *DeleteTerminalResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteTerminalResponse.ProtoReflect.Descriptor instead.
-func (*DeleteTerminalResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use HeartbeatTerminalResponse.ProtoReflect.Descriptor instead.
+func (*HeartbeatTerminalResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteTerminalResponse) GetSuccess() bool {
+func (x *HeartbeatTerminalResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type TerminalHeartbeatRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	AppVersion    string                 `protobuf:"bytes,2,opt,name=app_version,json=appVersion,proto3" json:"app_version,omitempty"`
-	IpAddress     string                 `protobuf:"bytes,3,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TerminalHeartbeatRequest) Reset() {
-	*x = TerminalHeartbeatRequest{}
-	mi := &file_pos_v1_terminals_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TerminalHeartbeatRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TerminalHeartbeatRequest) ProtoMessage() {}
-
-func (x *TerminalHeartbeatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_terminals_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TerminalHeartbeatRequest.ProtoReflect.Descriptor instead.
-func (*TerminalHeartbeatRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *TerminalHeartbeatRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *TerminalHeartbeatRequest) GetAppVersion() string {
-	if x != nil {
-		return x.AppVersion
+		return x.Message
 	}
 	return ""
-}
-
-func (x *TerminalHeartbeatRequest) GetIpAddress() string {
-	if x != nil {
-		return x.IpAddress
-	}
-	return ""
-}
-
-type TerminalHeartbeatResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TerminalHeartbeatResponse) Reset() {
-	*x = TerminalHeartbeatResponse{}
-	mi := &file_pos_v1_terminals_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TerminalHeartbeatResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TerminalHeartbeatResponse) ProtoMessage() {}
-
-func (x *TerminalHeartbeatResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_terminals_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TerminalHeartbeatResponse.ProtoReflect.Descriptor instead.
-func (*TerminalHeartbeatResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_terminals_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *TerminalHeartbeatResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
 }
 
 var File_pos_v1_terminals_proto protoreflect.FileDescriptor
 
 const file_pos_v1_terminals_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/terminals.proto\x12\x03pos\"\xcb\x02\n" +
+	"\x16pos/v1/terminals.proto\x12\x03pos\"\xe7\x01\n" +
 	"\bTerminal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1b\n" +
-	"\tdevice_id\x18\x04 \x01(\tR\bdeviceId\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12*\n" +
-	"\x11last_heartbeat_at\x18\a \x01(\tR\x0flastHeartbeatAt\x12\x1d\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1b\n" +
+	"\tdevice_id\x18\x05 \x01(\tR\bdeviceId\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12 \n" +
+	"\flast_seen_at\x18\a \x01(\tR\n" +
+	"lastSeenAt\x12\x1d\n" +
 	"\n" +
-	"ip_address\x18\b \x01(\tR\tipAddress\x12\x1f\n" +
-	"\vapp_version\x18\t \x01(\tR\n" +
-	"appVersion\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x16\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"\x16\n" +
 	"\x14ListTerminalsRequest\"D\n" +
 	"\x15ListTerminalsResponse\x12+\n" +
-	"\tterminals\x18\x01 \x03(\v2\r.pos.TerminalR\tterminals\"H\n" +
-	"\x15CreateTerminalRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
-	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\"C\n" +
-	"\x16CreateTerminalResponse\x12)\n" +
-	"\bterminal\x18\x01 \x01(\v2\r.pos.TerminalR\bterminal\"X\n" +
-	"\x15UpdateTerminalRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\tterminals\x18\x01 \x03(\v2\r.pos.TerminalR\tterminals\"e\n" +
+	"\x15CreateTerminalRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
-	"\tis_active\x18\x03 \x01(\bR\bisActive\"C\n" +
-	"\x16UpdateTerminalResponse\x12)\n" +
-	"\bterminal\x18\x01 \x01(\v2\r.pos.TerminalR\bterminal\"'\n" +
-	"\x15DeleteTerminalRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
-	"\x16DeleteTerminalResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"j\n" +
-	"\x18TerminalHeartbeatRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vapp_version\x18\x02 \x01(\tR\n" +
-	"appVersion\x12\x1d\n" +
-	"\n" +
-	"ip_address\x18\x03 \x01(\tR\tipAddress\"5\n" +
-	"\x19TerminalHeartbeatResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\"S\n" +
+	"\x16CreateTerminalResponse\x12\x1f\n" +
+	"\vterminal_id\x18\x01 \x01(\x03R\n" +
+	"terminalId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x82\x01\n" +
+	"\x15UpdateTerminalRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\x12\x1b\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\"2\n" +
+	"\x16UpdateTerminalResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\";\n" +
+	"\x18HeartbeatTerminalRequest\x12\x1f\n" +
+	"\vterminal_id\x18\x01 \x01(\x03R\n" +
+	"terminalId\"5\n" +
+	"\x19HeartbeatTerminalResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_terminals_proto_rawDescOnce sync.Once
@@ -679,7 +566,7 @@ func file_pos_v1_terminals_proto_rawDescGZIP() []byte {
 	return file_pos_v1_terminals_proto_rawDescData
 }
 
-var file_pos_v1_terminals_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_pos_v1_terminals_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_terminals_proto_goTypes = []any{
 	(*Terminal)(nil),                  // 0: pos.Terminal
 	(*ListTerminalsRequest)(nil),      // 1: pos.ListTerminalsRequest
@@ -688,20 +575,16 @@ var file_pos_v1_terminals_proto_goTypes = []any{
 	(*CreateTerminalResponse)(nil),    // 4: pos.CreateTerminalResponse
 	(*UpdateTerminalRequest)(nil),     // 5: pos.UpdateTerminalRequest
 	(*UpdateTerminalResponse)(nil),    // 6: pos.UpdateTerminalResponse
-	(*DeleteTerminalRequest)(nil),     // 7: pos.DeleteTerminalRequest
-	(*DeleteTerminalResponse)(nil),    // 8: pos.DeleteTerminalResponse
-	(*TerminalHeartbeatRequest)(nil),  // 9: pos.TerminalHeartbeatRequest
-	(*TerminalHeartbeatResponse)(nil), // 10: pos.TerminalHeartbeatResponse
+	(*HeartbeatTerminalRequest)(nil),  // 7: pos.HeartbeatTerminalRequest
+	(*HeartbeatTerminalResponse)(nil), // 8: pos.HeartbeatTerminalResponse
 }
 var file_pos_v1_terminals_proto_depIdxs = []int32{
 	0, // 0: pos.ListTerminalsResponse.terminals:type_name -> pos.Terminal
-	0, // 1: pos.CreateTerminalResponse.terminal:type_name -> pos.Terminal
-	0, // 2: pos.UpdateTerminalResponse.terminal:type_name -> pos.Terminal
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_terminals_proto_init() }
@@ -715,7 +598,7 @@ func file_pos_v1_terminals_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_terminals_proto_rawDesc), len(file_pos_v1_terminals_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

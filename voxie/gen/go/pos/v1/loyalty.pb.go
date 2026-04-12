@@ -24,14 +24,13 @@ const (
 type LoyaltyConfig struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId      int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	BusinessId      int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	IsEnabled       bool                   `protobuf:"varint,3,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
 	PointsPerDollar float64                `protobuf:"fixed64,4,opt,name=points_per_dollar,json=pointsPerDollar,proto3" json:"points_per_dollar,omitempty"`
-	RedemptionRate  float64                `protobuf:"fixed64,5,opt,name=redemption_rate,json=redemptionRate,proto3" json:"redemption_rate,omitempty"` // points per dollar of discount
+	RedemptionRate  float64                `protobuf:"fixed64,5,opt,name=redemption_rate,json=redemptionRate,proto3" json:"redemption_rate,omitempty"`
 	MinRedeemPoints int32                  `protobuf:"varint,6,opt,name=min_redeem_points,json=minRedeemPoints,proto3" json:"min_redeem_points,omitempty"`
-	ProgramName     string                 `protobuf:"bytes,7,opt,name=program_name,json=programName,proto3" json:"program_name,omitempty"`
-	CreatedAt       string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt       string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt       string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt       string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -73,9 +72,9 @@ func (x *LoyaltyConfig) GetId() int64 {
 	return 0
 }
 
-func (x *LoyaltyConfig) GetLocationId() int64 {
+func (x *LoyaltyConfig) GetBusinessId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.BusinessId
 	}
 	return 0
 }
@@ -106,13 +105,6 @@ func (x *LoyaltyConfig) GetMinRedeemPoints() int32 {
 		return x.MinRedeemPoints
 	}
 	return 0
-}
-
-func (x *LoyaltyConfig) GetProgramName() string {
-	if x != nil {
-		return x.ProgramName
-	}
-	return ""
 }
 
 func (x *LoyaltyConfig) GetCreatedAt() string {
@@ -215,7 +207,6 @@ type UpdateLoyaltyConfigRequest struct {
 	PointsPerDollar float64                `protobuf:"fixed64,2,opt,name=points_per_dollar,json=pointsPerDollar,proto3" json:"points_per_dollar,omitempty"`
 	RedemptionRate  float64                `protobuf:"fixed64,3,opt,name=redemption_rate,json=redemptionRate,proto3" json:"redemption_rate,omitempty"`
 	MinRedeemPoints int32                  `protobuf:"varint,4,opt,name=min_redeem_points,json=minRedeemPoints,proto3" json:"min_redeem_points,omitempty"`
-	ProgramName     string                 `protobuf:"bytes,5,opt,name=program_name,json=programName,proto3" json:"program_name,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -278,16 +269,9 @@ func (x *UpdateLoyaltyConfigRequest) GetMinRedeemPoints() int32 {
 	return 0
 }
 
-func (x *UpdateLoyaltyConfigRequest) GetProgramName() string {
-	if x != nil {
-		return x.ProgramName
-	}
-	return ""
-}
-
 type UpdateLoyaltyConfigResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *LoyaltyConfig         `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -322,36 +306,42 @@ func (*UpdateLoyaltyConfigResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
+func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
 	if x != nil {
-		return x.Config
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
-type EarnLoyaltyPointsRequest struct {
+type LoyaltyTransaction struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	OrderId       int64                  `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	OrderTotal    float64                `protobuf:"fixed64,3,opt,name=order_total,json=orderTotal,proto3" json:"order_total,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	CustomerId    int64                  `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	OrderId       int64                  `protobuf:"varint,4,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	Points        int32                  `protobuf:"varint,6,opt,name=points,proto3" json:"points,omitempty"`
+	BalanceAfter  int32                  `protobuf:"varint,7,opt,name=balance_after,json=balanceAfter,proto3" json:"balance_after,omitempty"`
+	Note          string                 `protobuf:"bytes,8,opt,name=note,proto3" json:"note,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EarnLoyaltyPointsRequest) Reset() {
-	*x = EarnLoyaltyPointsRequest{}
+func (x *LoyaltyTransaction) Reset() {
+	*x = LoyaltyTransaction{}
 	mi := &file_pos_v1_loyalty_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EarnLoyaltyPointsRequest) String() string {
+func (x *LoyaltyTransaction) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EarnLoyaltyPointsRequest) ProtoMessage() {}
+func (*LoyaltyTransaction) ProtoMessage() {}
 
-func (x *EarnLoyaltyPointsRequest) ProtoReflect() protoreflect.Message {
+func (x *LoyaltyTransaction) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_loyalty_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -363,166 +353,185 @@ func (x *EarnLoyaltyPointsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EarnLoyaltyPointsRequest.ProtoReflect.Descriptor instead.
-func (*EarnLoyaltyPointsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoyaltyTransaction.ProtoReflect.Descriptor instead.
+func (*LoyaltyTransaction) Descriptor() ([]byte, []int) {
 	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *EarnLoyaltyPointsRequest) GetCustomerId() int64 {
+func (x *LoyaltyTransaction) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *LoyaltyTransaction) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *LoyaltyTransaction) GetCustomerId() int64 {
 	if x != nil {
 		return x.CustomerId
 	}
 	return 0
 }
 
-func (x *EarnLoyaltyPointsRequest) GetOrderId() int64 {
+func (x *LoyaltyTransaction) GetOrderId() int64 {
 	if x != nil {
 		return x.OrderId
 	}
 	return 0
 }
 
-func (x *EarnLoyaltyPointsRequest) GetOrderTotal() float64 {
+func (x *LoyaltyTransaction) GetType() string {
 	if x != nil {
-		return x.OrderTotal
+		return x.Type
 	}
-	return 0
+	return ""
 }
 
-type EarnLoyaltyPointsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PointsEarned  int32                  `protobuf:"varint,1,opt,name=points_earned,json=pointsEarned,proto3" json:"points_earned,omitempty"`
-	TotalPoints   int32                  `protobuf:"varint,2,opt,name=total_points,json=totalPoints,proto3" json:"total_points,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EarnLoyaltyPointsResponse) Reset() {
-	*x = EarnLoyaltyPointsResponse{}
-	mi := &file_pos_v1_loyalty_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EarnLoyaltyPointsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EarnLoyaltyPointsResponse) ProtoMessage() {}
-
-func (x *EarnLoyaltyPointsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_loyalty_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EarnLoyaltyPointsResponse.ProtoReflect.Descriptor instead.
-func (*EarnLoyaltyPointsResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *EarnLoyaltyPointsResponse) GetPointsEarned() int32 {
-	if x != nil {
-		return x.PointsEarned
-	}
-	return 0
-}
-
-func (x *EarnLoyaltyPointsResponse) GetTotalPoints() int32 {
-	if x != nil {
-		return x.TotalPoints
-	}
-	return 0
-}
-
-type RedeemLoyaltyPointsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Points        int32                  `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
-	OrderId       int64                  `protobuf:"varint,3,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RedeemLoyaltyPointsRequest) Reset() {
-	*x = RedeemLoyaltyPointsRequest{}
-	mi := &file_pos_v1_loyalty_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RedeemLoyaltyPointsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RedeemLoyaltyPointsRequest) ProtoMessage() {}
-
-func (x *RedeemLoyaltyPointsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_loyalty_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RedeemLoyaltyPointsRequest.ProtoReflect.Descriptor instead.
-func (*RedeemLoyaltyPointsRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *RedeemLoyaltyPointsRequest) GetCustomerId() int64 {
-	if x != nil {
-		return x.CustomerId
-	}
-	return 0
-}
-
-func (x *RedeemLoyaltyPointsRequest) GetPoints() int32 {
+func (x *LoyaltyTransaction) GetPoints() int32 {
 	if x != nil {
 		return x.Points
 	}
 	return 0
 }
 
-func (x *RedeemLoyaltyPointsRequest) GetOrderId() int64 {
+func (x *LoyaltyTransaction) GetBalanceAfter() int32 {
 	if x != nil {
-		return x.OrderId
+		return x.BalanceAfter
 	}
 	return 0
 }
 
-type RedeemLoyaltyPointsResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	DiscountAmount  float64                `protobuf:"fixed64,1,opt,name=discount_amount,json=discountAmount,proto3" json:"discount_amount,omitempty"`
-	RemainingPoints int32                  `protobuf:"varint,2,opt,name=remaining_points,json=remainingPoints,proto3" json:"remaining_points,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+func (x *LoyaltyTransaction) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
 }
 
-func (x *RedeemLoyaltyPointsResponse) Reset() {
-	*x = RedeemLoyaltyPointsResponse{}
+func (x *LoyaltyTransaction) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListLoyaltyTransactionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListLoyaltyTransactionsRequest) Reset() {
+	*x = ListLoyaltyTransactionsRequest{}
+	mi := &file_pos_v1_loyalty_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLoyaltyTransactionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLoyaltyTransactionsRequest) ProtoMessage() {}
+
+func (x *ListLoyaltyTransactionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_loyalty_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListLoyaltyTransactionsRequest.ProtoReflect.Descriptor instead.
+func (*ListLoyaltyTransactionsRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListLoyaltyTransactionsRequest) GetCustomerId() int64 {
+	if x != nil {
+		return x.CustomerId
+	}
+	return 0
+}
+
+type ListLoyaltyTransactionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Transactions  []*LoyaltyTransaction  `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListLoyaltyTransactionsResponse) Reset() {
+	*x = ListLoyaltyTransactionsResponse{}
+	mi := &file_pos_v1_loyalty_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListLoyaltyTransactionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListLoyaltyTransactionsResponse) ProtoMessage() {}
+
+func (x *ListLoyaltyTransactionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_loyalty_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListLoyaltyTransactionsResponse.ProtoReflect.Descriptor instead.
+func (*ListLoyaltyTransactionsResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransaction {
+	if x != nil {
+		return x.Transactions
+	}
+	return nil
+}
+
+type EarnPointsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	OrderId       int64                  `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	Points        int32                  `protobuf:"varint,3,opt,name=points,proto3" json:"points,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EarnPointsRequest) Reset() {
+	*x = EarnPointsRequest{}
 	mi := &file_pos_v1_loyalty_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RedeemLoyaltyPointsResponse) String() string {
+func (x *EarnPointsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RedeemLoyaltyPointsResponse) ProtoMessage() {}
+func (*EarnPointsRequest) ProtoMessage() {}
 
-func (x *RedeemLoyaltyPointsResponse) ProtoReflect() protoreflect.Message {
+func (x *EarnPointsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_loyalty_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -534,23 +543,186 @@ func (x *RedeemLoyaltyPointsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RedeemLoyaltyPointsResponse.ProtoReflect.Descriptor instead.
-func (*RedeemLoyaltyPointsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use EarnPointsRequest.ProtoReflect.Descriptor instead.
+func (*EarnPointsRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *RedeemLoyaltyPointsResponse) GetDiscountAmount() float64 {
+func (x *EarnPointsRequest) GetCustomerId() int64 {
 	if x != nil {
-		return x.DiscountAmount
+		return x.CustomerId
 	}
 	return 0
 }
 
-func (x *RedeemLoyaltyPointsResponse) GetRemainingPoints() int32 {
+func (x *EarnPointsRequest) GetOrderId() int64 {
 	if x != nil {
-		return x.RemainingPoints
+		return x.OrderId
 	}
 	return 0
+}
+
+func (x *EarnPointsRequest) GetPoints() int32 {
+	if x != nil {
+		return x.Points
+	}
+	return 0
+}
+
+type EarnPointsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId int64                  `protobuf:"varint,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EarnPointsResponse) Reset() {
+	*x = EarnPointsResponse{}
+	mi := &file_pos_v1_loyalty_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EarnPointsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EarnPointsResponse) ProtoMessage() {}
+
+func (x *EarnPointsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_loyalty_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EarnPointsResponse.ProtoReflect.Descriptor instead.
+func (*EarnPointsResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *EarnPointsResponse) GetTransactionId() int64 {
+	if x != nil {
+		return x.TransactionId
+	}
+	return 0
+}
+
+func (x *EarnPointsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type RedeemPointsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	Points        int32                  `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RedeemPointsRequest) Reset() {
+	*x = RedeemPointsRequest{}
+	mi := &file_pos_v1_loyalty_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RedeemPointsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RedeemPointsRequest) ProtoMessage() {}
+
+func (x *RedeemPointsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_loyalty_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RedeemPointsRequest.ProtoReflect.Descriptor instead.
+func (*RedeemPointsRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *RedeemPointsRequest) GetCustomerId() int64 {
+	if x != nil {
+		return x.CustomerId
+	}
+	return 0
+}
+
+func (x *RedeemPointsRequest) GetPoints() int32 {
+	if x != nil {
+		return x.Points
+	}
+	return 0
+}
+
+type RedeemPointsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId int64                  `protobuf:"varint,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RedeemPointsResponse) Reset() {
+	*x = RedeemPointsResponse{}
+	mi := &file_pos_v1_loyalty_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RedeemPointsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RedeemPointsResponse) ProtoMessage() {}
+
+func (x *RedeemPointsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_loyalty_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RedeemPointsResponse.ProtoReflect.Descriptor instead.
+func (*RedeemPointsResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RedeemPointsResponse) GetTransactionId() int64 {
+	if x != nil {
+		return x.TransactionId
+	}
+	return 0
+}
+
+func (x *RedeemPointsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type GetLoyaltyBalanceRequest struct {
@@ -562,7 +734,7 @@ type GetLoyaltyBalanceRequest struct {
 
 func (x *GetLoyaltyBalanceRequest) Reset() {
 	*x = GetLoyaltyBalanceRequest{}
-	mi := &file_pos_v1_loyalty_proto_msgTypes[9]
+	mi := &file_pos_v1_loyalty_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -574,7 +746,7 @@ func (x *GetLoyaltyBalanceRequest) String() string {
 func (*GetLoyaltyBalanceRequest) ProtoMessage() {}
 
 func (x *GetLoyaltyBalanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_loyalty_proto_msgTypes[9]
+	mi := &file_pos_v1_loyalty_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -587,7 +759,7 @@ func (x *GetLoyaltyBalanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLoyaltyBalanceRequest.ProtoReflect.Descriptor instead.
 func (*GetLoyaltyBalanceRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{9}
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetLoyaltyBalanceRequest) GetCustomerId() int64 {
@@ -598,16 +770,16 @@ func (x *GetLoyaltyBalanceRequest) GetCustomerId() int64 {
 }
 
 type GetLoyaltyBalanceResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Points          int32                  `protobuf:"varint,1,opt,name=points,proto3" json:"points,omitempty"`
-	EquivalentValue float64                `protobuf:"fixed64,2,opt,name=equivalent_value,json=equivalentValue,proto3" json:"equivalent_value,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CustomerId    int64                  `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	Balance       int32                  `protobuf:"varint,2,opt,name=balance,proto3" json:"balance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetLoyaltyBalanceResponse) Reset() {
 	*x = GetLoyaltyBalanceResponse{}
-	mi := &file_pos_v1_loyalty_proto_msgTypes[10]
+	mi := &file_pos_v1_loyalty_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -619,7 +791,7 @@ func (x *GetLoyaltyBalanceResponse) String() string {
 func (*GetLoyaltyBalanceResponse) ProtoMessage() {}
 
 func (x *GetLoyaltyBalanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_loyalty_proto_msgTypes[10]
+	mi := &file_pos_v1_loyalty_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,19 +804,19 @@ func (x *GetLoyaltyBalanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLoyaltyBalanceResponse.ProtoReflect.Descriptor instead.
 func (*GetLoyaltyBalanceResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{10}
+	return file_pos_v1_loyalty_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *GetLoyaltyBalanceResponse) GetPoints() int32 {
+func (x *GetLoyaltyBalanceResponse) GetCustomerId() int64 {
 	if x != nil {
-		return x.Points
+		return x.CustomerId
 	}
 	return 0
 }
 
-func (x *GetLoyaltyBalanceResponse) GetEquivalentValue() float64 {
+func (x *GetLoyaltyBalanceResponse) GetBalance() int32 {
 	if x != nil {
-		return x.EquivalentValue
+		return x.Balance
 	}
 	return 0
 }
@@ -653,56 +825,71 @@ var File_pos_v1_loyalty_proto protoreflect.FileDescriptor
 
 const file_pos_v1_loyalty_proto_rawDesc = "" +
 	"\n" +
-	"\x14pos/v1/loyalty.proto\x12\x03pos\"\xc1\x02\n" +
+	"\x14pos/v1/loyalty.proto\x12\x03pos\"\x9e\x02\n" +
 	"\rLoyaltyConfig\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x1d\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x03 \x01(\bR\tisEnabled\x12*\n" +
 	"\x11points_per_dollar\x18\x04 \x01(\x01R\x0fpointsPerDollar\x12'\n" +
 	"\x0fredemption_rate\x18\x05 \x01(\x01R\x0eredemptionRate\x12*\n" +
-	"\x11min_redeem_points\x18\x06 \x01(\x05R\x0fminRedeemPoints\x12!\n" +
-	"\fprogram_name\x18\a \x01(\tR\vprogramName\x12\x1d\n" +
+	"\x11min_redeem_points\x18\x06 \x01(\x05R\x0fminRedeemPoints\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x19\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x19\n" +
 	"\x17GetLoyaltyConfigRequest\"F\n" +
 	"\x18GetLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.pos.LoyaltyConfigR\x06config\"\xdf\x01\n" +
+	"\x06config\x18\x01 \x01(\v2\x12.pos.LoyaltyConfigR\x06config\"\xbc\x01\n" +
 	"\x1aUpdateLoyaltyConfigRequest\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x01 \x01(\bR\tisEnabled\x12*\n" +
 	"\x11points_per_dollar\x18\x02 \x01(\x01R\x0fpointsPerDollar\x12'\n" +
 	"\x0fredemption_rate\x18\x03 \x01(\x01R\x0eredemptionRate\x12*\n" +
-	"\x11min_redeem_points\x18\x04 \x01(\x05R\x0fminRedeemPoints\x12!\n" +
-	"\fprogram_name\x18\x05 \x01(\tR\vprogramName\"I\n" +
-	"\x1bUpdateLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.pos.LoyaltyConfigR\x06config\"w\n" +
-	"\x18EarnLoyaltyPointsRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"\x11min_redeem_points\x18\x04 \x01(\x05R\x0fminRedeemPoints\"7\n" +
+	"\x1bUpdateLoyaltyConfigResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x85\x02\n" +
+	"\x12LoyaltyTransaction\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1f\n" +
+	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
 	"customerId\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\x03R\aorderId\x12\x1f\n" +
-	"\vorder_total\x18\x03 \x01(\x01R\n" +
-	"orderTotal\"c\n" +
-	"\x19EarnLoyaltyPointsResponse\x12#\n" +
-	"\rpoints_earned\x18\x01 \x01(\x05R\fpointsEarned\x12!\n" +
-	"\ftotal_points\x18\x02 \x01(\x05R\vtotalPoints\"p\n" +
-	"\x1aRedeemLoyaltyPointsRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12\x16\n" +
-	"\x06points\x18\x02 \x01(\x05R\x06points\x12\x19\n" +
-	"\border_id\x18\x03 \x01(\x03R\aorderId\"q\n" +
-	"\x1bRedeemLoyaltyPointsResponse\x12'\n" +
-	"\x0fdiscount_amount\x18\x01 \x01(\x01R\x0ediscountAmount\x12)\n" +
-	"\x10remaining_points\x18\x02 \x01(\x05R\x0fremainingPoints\";\n" +
-	"\x18GetLoyaltyBalanceRequest\x12\x1f\n" +
+	"\border_id\x18\x04 \x01(\x03R\aorderId\x12\x12\n" +
+	"\x04type\x18\x05 \x01(\tR\x04type\x12\x16\n" +
+	"\x06points\x18\x06 \x01(\x05R\x06points\x12#\n" +
+	"\rbalance_after\x18\a \x01(\x05R\fbalanceAfter\x12\x12\n" +
+	"\x04note\x18\b \x01(\tR\x04note\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\"A\n" +
+	"\x1eListLoyaltyTransactionsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\"^\n" +
-	"\x19GetLoyaltyBalanceResponse\x12\x16\n" +
-	"\x06points\x18\x01 \x01(\x05R\x06points\x12)\n" +
-	"\x10equivalent_value\x18\x02 \x01(\x01R\x0fequivalentValueB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x1fListLoyaltyTransactionsResponse\x12;\n" +
+	"\ftransactions\x18\x01 \x03(\v2\x17.pos.LoyaltyTransactionR\ftransactions\"g\n" +
+	"\x11EarnPointsRequest\x12\x1f\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"customerId\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\x03R\aorderId\x12\x16\n" +
+	"\x06points\x18\x03 \x01(\x05R\x06points\"U\n" +
+	"\x12EarnPointsResponse\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\x03R\rtransactionId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"N\n" +
+	"\x13RedeemPointsRequest\x12\x1f\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"customerId\x12\x16\n" +
+	"\x06points\x18\x02 \x01(\x05R\x06points\"W\n" +
+	"\x14RedeemPointsResponse\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\x03R\rtransactionId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\";\n" +
+	"\x18GetLoyaltyBalanceRequest\x12\x1f\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"customerId\"V\n" +
+	"\x19GetLoyaltyBalanceResponse\x12\x1f\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"customerId\x12\x18\n" +
+	"\abalance\x18\x02 \x01(\x05R\abalanceB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_loyalty_proto_rawDescOnce sync.Once
@@ -716,23 +903,26 @@ func file_pos_v1_loyalty_proto_rawDescGZIP() []byte {
 	return file_pos_v1_loyalty_proto_rawDescData
 }
 
-var file_pos_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_pos_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_pos_v1_loyalty_proto_goTypes = []any{
-	(*LoyaltyConfig)(nil),               // 0: pos.LoyaltyConfig
-	(*GetLoyaltyConfigRequest)(nil),     // 1: pos.GetLoyaltyConfigRequest
-	(*GetLoyaltyConfigResponse)(nil),    // 2: pos.GetLoyaltyConfigResponse
-	(*UpdateLoyaltyConfigRequest)(nil),  // 3: pos.UpdateLoyaltyConfigRequest
-	(*UpdateLoyaltyConfigResponse)(nil), // 4: pos.UpdateLoyaltyConfigResponse
-	(*EarnLoyaltyPointsRequest)(nil),    // 5: pos.EarnLoyaltyPointsRequest
-	(*EarnLoyaltyPointsResponse)(nil),   // 6: pos.EarnLoyaltyPointsResponse
-	(*RedeemLoyaltyPointsRequest)(nil),  // 7: pos.RedeemLoyaltyPointsRequest
-	(*RedeemLoyaltyPointsResponse)(nil), // 8: pos.RedeemLoyaltyPointsResponse
-	(*GetLoyaltyBalanceRequest)(nil),    // 9: pos.GetLoyaltyBalanceRequest
-	(*GetLoyaltyBalanceResponse)(nil),   // 10: pos.GetLoyaltyBalanceResponse
+	(*LoyaltyConfig)(nil),                   // 0: pos.LoyaltyConfig
+	(*GetLoyaltyConfigRequest)(nil),         // 1: pos.GetLoyaltyConfigRequest
+	(*GetLoyaltyConfigResponse)(nil),        // 2: pos.GetLoyaltyConfigResponse
+	(*UpdateLoyaltyConfigRequest)(nil),      // 3: pos.UpdateLoyaltyConfigRequest
+	(*UpdateLoyaltyConfigResponse)(nil),     // 4: pos.UpdateLoyaltyConfigResponse
+	(*LoyaltyTransaction)(nil),              // 5: pos.LoyaltyTransaction
+	(*ListLoyaltyTransactionsRequest)(nil),  // 6: pos.ListLoyaltyTransactionsRequest
+	(*ListLoyaltyTransactionsResponse)(nil), // 7: pos.ListLoyaltyTransactionsResponse
+	(*EarnPointsRequest)(nil),               // 8: pos.EarnPointsRequest
+	(*EarnPointsResponse)(nil),              // 9: pos.EarnPointsResponse
+	(*RedeemPointsRequest)(nil),             // 10: pos.RedeemPointsRequest
+	(*RedeemPointsResponse)(nil),            // 11: pos.RedeemPointsResponse
+	(*GetLoyaltyBalanceRequest)(nil),        // 12: pos.GetLoyaltyBalanceRequest
+	(*GetLoyaltyBalanceResponse)(nil),       // 13: pos.GetLoyaltyBalanceResponse
 }
 var file_pos_v1_loyalty_proto_depIdxs = []int32{
 	0, // 0: pos.GetLoyaltyConfigResponse.config:type_name -> pos.LoyaltyConfig
-	0, // 1: pos.UpdateLoyaltyConfigResponse.config:type_name -> pos.LoyaltyConfig
+	5, // 1: pos.ListLoyaltyTransactionsResponse.transactions:type_name -> pos.LoyaltyTransaction
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -751,7 +941,7 @@ func file_pos_v1_loyalty_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_loyalty_proto_rawDesc), len(file_pos_v1_loyalty_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

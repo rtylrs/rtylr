@@ -21,97 +21,22 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type WorkingHours struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DayOfWeek     int32                  `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3" json:"day_of_week,omitempty"` // 0=Sunday, 6=Saturday
-	StartTime     string                 `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`    // HH:MM
-	EndTime       string                 `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`          // HH:MM
-	IsOff         bool                   `protobuf:"varint,4,opt,name=is_off,json=isOff,proto3" json:"is_off,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *WorkingHours) Reset() {
-	*x = WorkingHours{}
-	mi := &file_book_v1_resources_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *WorkingHours) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WorkingHours) ProtoMessage() {}
-
-func (x *WorkingHours) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WorkingHours.ProtoReflect.Descriptor instead.
-func (*WorkingHours) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *WorkingHours) GetDayOfWeek() int32 {
-	if x != nil {
-		return x.DayOfWeek
-	}
-	return 0
-}
-
-func (x *WorkingHours) GetStartTime() string {
-	if x != nil {
-		return x.StartTime
-	}
-	return ""
-}
-
-func (x *WorkingHours) GetEndTime() string {
-	if x != nil {
-		return x.EndTime
-	}
-	return ""
-}
-
-func (x *WorkingHours) GetIsOff() bool {
-	if x != nil {
-		return x.IsOff
-	}
-	return false
-}
-
 type Resource struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	Title         string                 `protobuf:"bytes,7,opt,name=title,proto3" json:"title,omitempty"` // e.g., "Senior Stylist"
-	ImageUrl      string                 `protobuf:"bytes,8,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	Color         string                 `protobuf:"bytes,9,opt,name=color,proto3" json:"color,omitempty"`
-	IsActive      bool                   `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	ServiceIds    []int64                `protobuf:"varint,11,rep,packed,name=service_ids,json=serviceIds,proto3" json:"service_ids,omitempty"`
-	WorkingHours  []*WorkingHours        `protobuf:"bytes,12,rep,name=working_hours,json=workingHours,proto3" json:"working_hours,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	Capacity      int32                  `protobuf:"varint,5,opt,name=capacity,proto3" json:"capacity,omitempty"`
+	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Resource) Reset() {
 	*x = Resource{}
-	mi := &file_book_v1_resources_proto_msgTypes[1]
+	mi := &file_book_v1_resources_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -123,7 +48,7 @@ func (x *Resource) String() string {
 func (*Resource) ProtoMessage() {}
 
 func (x *Resource) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[1]
+	mi := &file_book_v1_resources_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -136,7 +61,7 @@ func (x *Resource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Resource.ProtoReflect.Descriptor instead.
 func (*Resource) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{1}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Resource) GetId() int64 {
@@ -146,16 +71,9 @@ func (x *Resource) GetId() int64 {
 	return 0
 }
 
-func (x *Resource) GetBusinessId() int64 {
+func (x *Resource) GetOwnerId() int64 {
 	if x != nil {
-		return x.BusinessId
-	}
-	return 0
-}
-
-func (x *Resource) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -167,39 +85,18 @@ func (x *Resource) GetName() string {
 	return ""
 }
 
-func (x *Resource) GetEmail() string {
+func (x *Resource) GetType() string {
 	if x != nil {
-		return x.Email
+		return x.Type
 	}
 	return ""
 }
 
-func (x *Resource) GetPhone() string {
+func (x *Resource) GetCapacity() int32 {
 	if x != nil {
-		return x.Phone
+		return x.Capacity
 	}
-	return ""
-}
-
-func (x *Resource) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *Resource) GetImageUrl() string {
-	if x != nil {
-		return x.ImageUrl
-	}
-	return ""
-}
-
-func (x *Resource) GetColor() string {
-	if x != nil {
-		return x.Color
-	}
-	return ""
+	return 0
 }
 
 func (x *Resource) GetIsActive() bool {
@@ -209,20 +106,6 @@ func (x *Resource) GetIsActive() bool {
 	return false
 }
 
-func (x *Resource) GetServiceIds() []int64 {
-	if x != nil {
-		return x.ServiceIds
-	}
-	return nil
-}
-
-func (x *Resource) GetWorkingHours() []*WorkingHours {
-	if x != nil {
-		return x.WorkingHours
-	}
-	return nil
-}
-
 func (x *Resource) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
@@ -230,24 +113,15 @@ func (x *Resource) GetCreatedAt() string {
 	return ""
 }
 
-func (x *Resource) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
 type ListResourcesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ActiveOnly    bool                   `protobuf:"varint,1,opt,name=active_only,json=activeOnly,proto3" json:"active_only,omitempty"`
-	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListResourcesRequest) Reset() {
 	*x = ListResourcesRequest{}
-	mi := &file_book_v1_resources_proto_msgTypes[2]
+	mi := &file_book_v1_resources_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -259,7 +133,7 @@ func (x *ListResourcesRequest) String() string {
 func (*ListResourcesRequest) ProtoMessage() {}
 
 func (x *ListResourcesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[2]
+	mi := &file_book_v1_resources_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -272,21 +146,7 @@ func (x *ListResourcesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourcesRequest.ProtoReflect.Descriptor instead.
 func (*ListResourcesRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListResourcesRequest) GetActiveOnly() bool {
-	if x != nil {
-		return x.ActiveOnly
-	}
-	return false
-}
-
-func (x *ListResourcesRequest) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{1}
 }
 
 type ListResourcesResponse struct {
@@ -298,7 +158,7 @@ type ListResourcesResponse struct {
 
 func (x *ListResourcesResponse) Reset() {
 	*x = ListResourcesResponse{}
-	mi := &file_book_v1_resources_proto_msgTypes[3]
+	mi := &file_book_v1_resources_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -310,7 +170,7 @@ func (x *ListResourcesResponse) String() string {
 func (*ListResourcesResponse) ProtoMessage() {}
 
 func (x *ListResourcesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[3]
+	mi := &file_book_v1_resources_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -323,7 +183,7 @@ func (x *ListResourcesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResourcesResponse.ProtoReflect.Descriptor instead.
 func (*ListResourcesResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{3}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListResourcesResponse) GetResources() []*Resource {
@@ -333,111 +193,19 @@ func (x *ListResourcesResponse) GetResources() []*Resource {
 	return nil
 }
 
-type GetResourceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetResourceRequest) Reset() {
-	*x = GetResourceRequest{}
-	mi := &file_book_v1_resources_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetResourceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetResourceRequest) ProtoMessage() {}
-
-func (x *GetResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetResourceRequest.ProtoReflect.Descriptor instead.
-func (*GetResourceRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetResourceRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetResourceResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resource      *Resource              `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetResourceResponse) Reset() {
-	*x = GetResourceResponse{}
-	mi := &file_book_v1_resources_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetResourceResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetResourceResponse) ProtoMessage() {}
-
-func (x *GetResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetResourceResponse.ProtoReflect.Descriptor instead.
-func (*GetResourceResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetResourceResponse) GetResource() *Resource {
-	if x != nil {
-		return x.Resource
-	}
-	return nil
-}
-
 type CreateResourceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
-	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,5,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	Color         string                 `protobuf:"bytes,6,opt,name=color,proto3" json:"color,omitempty"`
-	ServiceIds    []int64                `protobuf:"varint,7,rep,packed,name=service_ids,json=serviceIds,proto3" json:"service_ids,omitempty"`
-	WorkingHours  []*WorkingHours        `protobuf:"bytes,8,rep,name=working_hours,json=workingHours,proto3" json:"working_hours,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Capacity      int32                  `protobuf:"varint,3,opt,name=capacity,proto3" json:"capacity,omitempty"`
+	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateResourceRequest) Reset() {
 	*x = CreateResourceRequest{}
-	mi := &file_book_v1_resources_proto_msgTypes[6]
+	mi := &file_book_v1_resources_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -449,7 +217,7 @@ func (x *CreateResourceRequest) String() string {
 func (*CreateResourceRequest) ProtoMessage() {}
 
 func (x *CreateResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[6]
+	mi := &file_book_v1_resources_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -462,7 +230,7 @@ func (x *CreateResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateResourceRequest.ProtoReflect.Descriptor instead.
 func (*CreateResourceRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{6}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateResourceRequest) GetName() string {
@@ -472,65 +240,38 @@ func (x *CreateResourceRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateResourceRequest) GetEmail() string {
+func (x *CreateResourceRequest) GetType() string {
 	if x != nil {
-		return x.Email
+		return x.Type
 	}
 	return ""
 }
 
-func (x *CreateResourceRequest) GetPhone() string {
+func (x *CreateResourceRequest) GetCapacity() int32 {
 	if x != nil {
-		return x.Phone
+		return x.Capacity
 	}
-	return ""
+	return 0
 }
 
-func (x *CreateResourceRequest) GetTitle() string {
+func (x *CreateResourceRequest) GetIsActive() bool {
 	if x != nil {
-		return x.Title
+		return x.IsActive
 	}
-	return ""
-}
-
-func (x *CreateResourceRequest) GetImageUrl() string {
-	if x != nil {
-		return x.ImageUrl
-	}
-	return ""
-}
-
-func (x *CreateResourceRequest) GetColor() string {
-	if x != nil {
-		return x.Color
-	}
-	return ""
-}
-
-func (x *CreateResourceRequest) GetServiceIds() []int64 {
-	if x != nil {
-		return x.ServiceIds
-	}
-	return nil
-}
-
-func (x *CreateResourceRequest) GetWorkingHours() []*WorkingHours {
-	if x != nil {
-		return x.WorkingHours
-	}
-	return nil
+	return false
 }
 
 type CreateResourceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resource      *Resource              `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateResourceResponse) Reset() {
 	*x = CreateResourceResponse{}
-	mi := &file_book_v1_resources_proto_msgTypes[7]
+	mi := &file_book_v1_resources_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -542,7 +283,7 @@ func (x *CreateResourceResponse) String() string {
 func (*CreateResourceResponse) ProtoMessage() {}
 
 func (x *CreateResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[7]
+	mi := &file_book_v1_resources_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -555,35 +296,37 @@ func (x *CreateResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateResourceResponse.ProtoReflect.Descriptor instead.
 func (*CreateResourceResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{7}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateResourceResponse) GetResource() *Resource {
+func (x *CreateResourceResponse) GetId() int64 {
 	if x != nil {
-		return x.Resource
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateResourceResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateResourceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
-	Title         string                 `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,6,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	Color         string                 `protobuf:"bytes,7,opt,name=color,proto3" json:"color,omitempty"`
-	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	ServiceIds    []int64                `protobuf:"varint,9,rep,packed,name=service_ids,json=serviceIds,proto3" json:"service_ids,omitempty"`
-	WorkingHours  []*WorkingHours        `protobuf:"bytes,10,rep,name=working_hours,json=workingHours,proto3" json:"working_hours,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Capacity      int32                  `protobuf:"varint,4,opt,name=capacity,proto3" json:"capacity,omitempty"`
+	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateResourceRequest) Reset() {
 	*x = UpdateResourceRequest{}
-	mi := &file_book_v1_resources_proto_msgTypes[8]
+	mi := &file_book_v1_resources_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +338,7 @@ func (x *UpdateResourceRequest) String() string {
 func (*UpdateResourceRequest) ProtoMessage() {}
 
 func (x *UpdateResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[8]
+	mi := &file_book_v1_resources_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +351,7 @@ func (x *UpdateResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateResourceRequest.ProtoReflect.Descriptor instead.
 func (*UpdateResourceRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{8}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateResourceRequest) GetId() int64 {
@@ -625,39 +368,18 @@ func (x *UpdateResourceRequest) GetName() string {
 	return ""
 }
 
-func (x *UpdateResourceRequest) GetEmail() string {
+func (x *UpdateResourceRequest) GetType() string {
 	if x != nil {
-		return x.Email
+		return x.Type
 	}
 	return ""
 }
 
-func (x *UpdateResourceRequest) GetPhone() string {
+func (x *UpdateResourceRequest) GetCapacity() int32 {
 	if x != nil {
-		return x.Phone
+		return x.Capacity
 	}
-	return ""
-}
-
-func (x *UpdateResourceRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *UpdateResourceRequest) GetImageUrl() string {
-	if x != nil {
-		return x.ImageUrl
-	}
-	return ""
-}
-
-func (x *UpdateResourceRequest) GetColor() string {
-	if x != nil {
-		return x.Color
-	}
-	return ""
+	return 0
 }
 
 func (x *UpdateResourceRequest) GetIsActive() bool {
@@ -667,30 +389,16 @@ func (x *UpdateResourceRequest) GetIsActive() bool {
 	return false
 }
 
-func (x *UpdateResourceRequest) GetServiceIds() []int64 {
-	if x != nil {
-		return x.ServiceIds
-	}
-	return nil
-}
-
-func (x *UpdateResourceRequest) GetWorkingHours() []*WorkingHours {
-	if x != nil {
-		return x.WorkingHours
-	}
-	return nil
-}
-
 type UpdateResourceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resource      *Resource              `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateResourceResponse) Reset() {
 	*x = UpdateResourceResponse{}
-	mi := &file_book_v1_resources_proto_msgTypes[9]
+	mi := &file_book_v1_resources_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -702,7 +410,7 @@ func (x *UpdateResourceResponse) String() string {
 func (*UpdateResourceResponse) ProtoMessage() {}
 
 func (x *UpdateResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[9]
+	mi := &file_book_v1_resources_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -715,14 +423,14 @@ func (x *UpdateResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateResourceResponse.ProtoReflect.Descriptor instead.
 func (*UpdateResourceResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{9}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateResourceResponse) GetResource() *Resource {
+func (x *UpdateResourceResponse) GetMessage() string {
 	if x != nil {
-		return x.Resource
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type DeleteResourceRequest struct {
@@ -734,7 +442,7 @@ type DeleteResourceRequest struct {
 
 func (x *DeleteResourceRequest) Reset() {
 	*x = DeleteResourceRequest{}
-	mi := &file_book_v1_resources_proto_msgTypes[10]
+	mi := &file_book_v1_resources_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -746,7 +454,7 @@ func (x *DeleteResourceRequest) String() string {
 func (*DeleteResourceRequest) ProtoMessage() {}
 
 func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[10]
+	mi := &file_book_v1_resources_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -759,7 +467,7 @@ func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResourceRequest.ProtoReflect.Descriptor instead.
 func (*DeleteResourceRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{10}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteResourceRequest) GetId() int64 {
@@ -771,14 +479,14 @@ func (x *DeleteResourceRequest) GetId() int64 {
 
 type DeleteResourceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteResourceResponse) Reset() {
 	*x = DeleteResourceResponse{}
-	mi := &file_book_v1_resources_proto_msgTypes[11]
+	mi := &file_book_v1_resources_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -790,7 +498,7 @@ func (x *DeleteResourceResponse) String() string {
 func (*DeleteResourceResponse) ProtoMessage() {}
 
 func (x *DeleteResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_resources_proto_msgTypes[11]
+	mi := &file_book_v1_resources_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -803,90 +511,53 @@ func (x *DeleteResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResourceResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResourceResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_resources_proto_rawDescGZIP(), []int{11}
+	return file_book_v1_resources_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteResourceResponse) GetSuccess() bool {
+func (x *DeleteResourceResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_book_v1_resources_proto protoreflect.FileDescriptor
 
 const file_book_v1_resources_proto_rawDesc = "" +
 	"\n" +
-	"\x17book/v1/resources.proto\x12\x04book\"\x7f\n" +
-	"\fWorkingHours\x12\x1e\n" +
-	"\vday_of_week\x18\x01 \x01(\x05R\tdayOfWeek\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\x02 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x03 \x01(\tR\aendTime\x12\x15\n" +
-	"\x06is_off\x18\x04 \x01(\bR\x05isOff\"\x9a\x03\n" +
+	"\x17book/v1/resources.proto\x12\x04book\"\xb5\x01\n" +
 	"\bResource\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05title\x18\a \x01(\tR\x05title\x12\x1b\n" +
-	"\timage_url\x18\b \x01(\tR\bimageUrl\x12\x14\n" +
-	"\x05color\x18\t \x01(\tR\x05color\x12\x1b\n" +
-	"\tis_active\x18\n" +
-	" \x01(\bR\bisActive\x12\x1f\n" +
-	"\vservice_ids\x18\v \x03(\x03R\n" +
-	"serviceIds\x127\n" +
-	"\rworking_hours\x18\f \x03(\v2\x12.book.WorkingHoursR\fworkingHours\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1a\n" +
+	"\bcapacity\x18\x05 \x01(\x05R\bcapacity\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"V\n" +
-	"\x14ListResourcesRequest\x12\x1f\n" +
-	"\vactive_only\x18\x01 \x01(\bR\n" +
-	"activeOnly\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x02 \x01(\x03R\tserviceId\"E\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\"\x16\n" +
+	"\x14ListResourcesRequest\"E\n" +
 	"\x15ListResourcesResponse\x12,\n" +
-	"\tresources\x18\x01 \x03(\v2\x0e.book.ResourceR\tresources\"$\n" +
-	"\x12GetResourceRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"A\n" +
-	"\x13GetResourceResponse\x12*\n" +
-	"\bresource\x18\x01 \x01(\v2\x0e.book.ResourceR\bresource\"\xfa\x01\n" +
+	"\tresources\x18\x01 \x03(\v2\x0e.book.ResourceR\tresources\"x\n" +
 	"\x15CreateResourceRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05title\x18\x04 \x01(\tR\x05title\x12\x1b\n" +
-	"\timage_url\x18\x05 \x01(\tR\bimageUrl\x12\x14\n" +
-	"\x05color\x18\x06 \x01(\tR\x05color\x12\x1f\n" +
-	"\vservice_ids\x18\a \x03(\x03R\n" +
-	"serviceIds\x127\n" +
-	"\rworking_hours\x18\b \x03(\v2\x12.book.WorkingHoursR\fworkingHours\"D\n" +
-	"\x16CreateResourceResponse\x12*\n" +
-	"\bresource\x18\x01 \x01(\v2\x0e.book.ResourceR\bresource\"\xa7\x02\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1a\n" +
+	"\bcapacity\x18\x03 \x01(\x05R\bcapacity\x12\x1b\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\"B\n" +
+	"\x16CreateResourceResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x88\x01\n" +
 	"\x15UpdateResourceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05title\x18\x05 \x01(\tR\x05title\x12\x1b\n" +
-	"\timage_url\x18\x06 \x01(\tR\bimageUrl\x12\x14\n" +
-	"\x05color\x18\a \x01(\tR\x05color\x12\x1b\n" +
-	"\tis_active\x18\b \x01(\bR\bisActive\x12\x1f\n" +
-	"\vservice_ids\x18\t \x03(\x03R\n" +
-	"serviceIds\x127\n" +
-	"\rworking_hours\x18\n" +
-	" \x03(\v2\x12.book.WorkingHoursR\fworkingHours\"D\n" +
-	"\x16UpdateResourceResponse\x12*\n" +
-	"\bresource\x18\x01 \x01(\v2\x0e.book.ResourceR\bresource\"'\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x1a\n" +
+	"\bcapacity\x18\x04 \x01(\x05R\bcapacity\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"2\n" +
+	"\x16UpdateResourceResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"'\n" +
 	"\x15DeleteResourceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
 	"\x16DeleteResourceResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
 
 var (
 	file_book_v1_resources_proto_rawDescOnce sync.Once
@@ -900,34 +571,25 @@ func file_book_v1_resources_proto_rawDescGZIP() []byte {
 	return file_book_v1_resources_proto_rawDescData
 }
 
-var file_book_v1_resources_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_book_v1_resources_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_book_v1_resources_proto_goTypes = []any{
-	(*WorkingHours)(nil),           // 0: book.WorkingHours
-	(*Resource)(nil),               // 1: book.Resource
-	(*ListResourcesRequest)(nil),   // 2: book.ListResourcesRequest
-	(*ListResourcesResponse)(nil),  // 3: book.ListResourcesResponse
-	(*GetResourceRequest)(nil),     // 4: book.GetResourceRequest
-	(*GetResourceResponse)(nil),    // 5: book.GetResourceResponse
-	(*CreateResourceRequest)(nil),  // 6: book.CreateResourceRequest
-	(*CreateResourceResponse)(nil), // 7: book.CreateResourceResponse
-	(*UpdateResourceRequest)(nil),  // 8: book.UpdateResourceRequest
-	(*UpdateResourceResponse)(nil), // 9: book.UpdateResourceResponse
-	(*DeleteResourceRequest)(nil),  // 10: book.DeleteResourceRequest
-	(*DeleteResourceResponse)(nil), // 11: book.DeleteResourceResponse
+	(*Resource)(nil),               // 0: book.Resource
+	(*ListResourcesRequest)(nil),   // 1: book.ListResourcesRequest
+	(*ListResourcesResponse)(nil),  // 2: book.ListResourcesResponse
+	(*CreateResourceRequest)(nil),  // 3: book.CreateResourceRequest
+	(*CreateResourceResponse)(nil), // 4: book.CreateResourceResponse
+	(*UpdateResourceRequest)(nil),  // 5: book.UpdateResourceRequest
+	(*UpdateResourceResponse)(nil), // 6: book.UpdateResourceResponse
+	(*DeleteResourceRequest)(nil),  // 7: book.DeleteResourceRequest
+	(*DeleteResourceResponse)(nil), // 8: book.DeleteResourceResponse
 }
 var file_book_v1_resources_proto_depIdxs = []int32{
-	0, // 0: book.Resource.working_hours:type_name -> book.WorkingHours
-	1, // 1: book.ListResourcesResponse.resources:type_name -> book.Resource
-	1, // 2: book.GetResourceResponse.resource:type_name -> book.Resource
-	0, // 3: book.CreateResourceRequest.working_hours:type_name -> book.WorkingHours
-	1, // 4: book.CreateResourceResponse.resource:type_name -> book.Resource
-	0, // 5: book.UpdateResourceRequest.working_hours:type_name -> book.WorkingHours
-	1, // 6: book.UpdateResourceResponse.resource:type_name -> book.Resource
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	0, // 0: book.ListResourcesResponse.resources:type_name -> book.Resource
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_book_v1_resources_proto_init() }
@@ -941,7 +603,7 @@ func file_book_v1_resources_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_book_v1_resources_proto_rawDesc), len(file_book_v1_resources_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

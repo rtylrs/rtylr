@@ -5,48 +5,19 @@
 // source: pos/v1/customers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface POSCustomer {
+export interface Customer {
   id: number;
-  locationId: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
-  notes: string;
-  totalOrders: number;
-  totalSpent: number;
-  loyaltyPoints: number;
-  lastVisitAt: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface SearchCustomersRequest {
   query: string;
-  pagination: PaginationRequest | undefined;
 }
 
 export interface SearchCustomersResponse {
-  customers: POSCustomer[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface CreateCustomerRequest {
-  name: string;
-  email: string;
-  phone: string;
-  notes: string;
-}
-
-export interface CreateCustomerResponse {
-  customer: POSCustomer | undefined;
-}
-
-export interface GetCustomerRequest {
-  id: number;
-}
-
-export interface GetCustomerResponse {
-  customer: POSCustomer | undefined;
+  customers: Customer[];
 }

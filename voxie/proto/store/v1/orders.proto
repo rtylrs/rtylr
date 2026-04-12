@@ -4,95 +4,100 @@ package store;
 
 option go_package = "github.com/voxire/voxie/gen/go/store/v1";
 
-import "common/v1/pagination.proto";
+// ── StoreOrder ────────────────────────────────────────────────────
 
-// ── Order ──────────────────────────────────────────────────────────
-
-message OrderLineItem {
+message StoreOrder {
   int64 id = 1;
-  int64 product_id = 2;
-  int64 variant_id = 3;
-  string title = 4;
-  string variant_name = 5;
-  string sku = 6;
-  int32 quantity = 7;
-  double unit_price = 8;
-  double total_price = 9;
-  string image_url = 10;
+  int64 owner_id = 2;
+  string customer_email = 3;
+  string customer_name = 4;
+  string customer_phone = 5;
+  string status = 6;
+  double subtotal = 7;
+  double tax = 8;
+  double shipping_cost = 9;
+  double total = 10;
+  string shipping_address = 11;
+  string notes = 12;
+  string created_at = 13;
+  string updated_at = 14;
 }
 
-message OrderAddress {
-  string name = 1;
-  string line1 = 2;
-  string line2 = 3;
-  string city = 4;
-  string state = 5;
-  string postal_code = 6;
-  string country = 7;
-  string phone = 8;
-}
-
-message Order {
+message StoreOrderItem {
   int64 id = 1;
-  int64 store_id = 2;
-  string order_number = 3;
-  string status = 4; // pending, confirmed, processing, shipped, delivered, cancelled, refunded
-  string payment_status = 5; // pending, paid, refunded, failed
-  string fulfillment_status = 6; // unfulfilled, partial, fulfilled
-  repeated OrderLineItem items = 7;
-  OrderAddress shipping_address = 8;
-  OrderAddress billing_address = 9;
-  double subtotal = 10;
-  double shipping_cost = 11;
-  double tax_amount = 12;
-  double discount_amount = 13;
-  double total = 14;
-  string currency = 15;
-  string customer_name = 16;
-  string customer_email = 17;
-  string shipping_method = 18;
-  string tracking_number = 19;
-  string notes = 20;
-  string created_at = 21;
-  string updated_at = 22;
+  int64 order_id = 2;
+  int64 product_id = 3;
+  string name = 4;
+  int32 quantity = 5;
+  double price = 6;
+  double total = 7;
+  string created_at = 8;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
-message ListStoreOrdersRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  string payment_status = 3;
-  string fulfillment_status = 4;
-  string date_from = 5;
-  string date_to = 6;
-  string search = 7;
-}
+message ListStoreOrdersRequest {}
 
 message ListStoreOrdersResponse {
-  repeated Order orders = 1;
-  common.PaginationResponse pagination = 2;
+  repeated StoreOrder orders = 1;
 }
 
-// ── Get ────────────────────────────────────────────────────────────
+// ── Detail ────────────────────────────────────────────────────────
 
-message GetStoreOrderRequest {
+message GetStoreOrderDetailRequest {
   int64 id = 1;
 }
 
-message GetStoreOrderResponse {
-  Order order = 1;
+message GetStoreOrderDetailResponse {
+  StoreOrder order = 1;
+  repeated StoreOrderItem items = 2;
 }
 
-// ── Update Status ──────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
-message UpdateStoreOrderStatusRequest {
+message OrderItemInput {
+  int64 product_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  double price = 4;
+  double total = 5;
+}
+
+message CreateStoreOrderRequest {
+  string customer_email = 1;
+  string customer_name = 2;
+  string customer_phone = 3;
+  string status = 4;
+  double subtotal = 5;
+  double tax = 6;
+  double shipping_cost = 7;
+  double total = 8;
+  string shipping_address = 9;
+  string notes = 10;
+  repeated OrderItemInput items = 11;
+}
+
+message CreateStoreOrderResponse {
   int64 id = 1;
-  string status = 2;
-  string tracking_number = 3;
-  string notes = 4;
+  string message = 2;
 }
 
-message UpdateStoreOrderStatusResponse {
-  Order order = 1;
+// ── Update ────────────────────────────────────────────────────────
+
+message UpdateStoreOrderRequest {
+  int64 id = 1;
+  string customer_email = 2;
+  string customer_name = 3;
+  string customer_phone = 4;
+  string status = 5;
+  double subtotal = 6;
+  double tax = 7;
+  double shipping_cost = 8;
+  double total = 9;
+  string shipping_address = 10;
+  string notes = 11;
+}
+
+message UpdateStoreOrderResponse {
+  string message = 1;
 }

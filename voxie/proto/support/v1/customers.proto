@@ -4,29 +4,29 @@ package support;
 
 option go_package = "github.com/voxire/voxie/gen/go/support/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Support Customers ───────────────────────────────────────────────
 
 message SupportCustomer {
   int64 id = 1;
-  string name = 2;
-  string email = 3;
-  string phone = 4;
-  int32 total_tickets = 5;
-  int32 open_tickets = 6;
-  string last_contact_at = 7;
+  int64 business_id = 2;
+  string name = 3;
+  string email = 4;
+  string phone = 5;
+  int32 total_tickets = 6;
+  string last_ticket_at = 7;
   string created_at = 8;
 }
 
 message ListSupportCustomersRequest {
-  common.PaginationRequest pagination = 1;
-  string search = 2;
+  int32 page = 1;
+  int32 page_size = 2;
 }
 
 message ListSupportCustomersResponse {
   repeated SupportCustomer customers = 1;
-  common.PaginationResponse pagination = 2;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message GetSupportCustomerRequest {
@@ -35,23 +35,4 @@ message GetSupportCustomerRequest {
 
 message GetSupportCustomerResponse {
   SupportCustomer customer = 1;
-}
-
-message GetCustomerTicketsRequest {
-  int64 customer_id = 1;
-  common.PaginationRequest pagination = 2;
-}
-
-message GetCustomerTicketsResponse {
-  repeated CustomerTicketSummary tickets = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message CustomerTicketSummary {
-  int64 id = 1;
-  string number = 2;
-  string subject = 3;
-  string status = 4;
-  string priority = 5;
-  string created_at = 6;
 }

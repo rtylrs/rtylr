@@ -4,42 +4,41 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── MemberLocation ─────────────────────────────────────────────────
+// ── MyLocation ────────────────────────────────────────────────────
 
-message MemberLocation {
-  int64 id = 1;
-  int64 member_id = 2;
-  int64 location_id = 3;
-  string location_name = 4;
-  string role = 5;
-  string assigned_at = 6;
+message MyLocation {
+  int64 location_id = 1;
+  string name = 2;
+  string address = 3;
+  string phone = 4;
 }
 
-// ── My Locations ───────────────────────────────────────────────────
+// ── Get My Locations ──────────────────────────────────────────────
 
 message GetMyLocationsRequest {}
 
 message GetMyLocationsResponse {
-  repeated MemberLocation locations = 1;
+  repeated MyLocation locations = 1;
 }
 
-// ── Assign ─────────────────────────────────────────────────────────
+// ── Assign ────────────────────────────────────────────────────────
 
 message AssignLocationRequest {
-  int64 member_id = 1;
+  int64 user_id = 1;
   int64 location_id = 2;
-  string role = 3;
+  bool can_manage_pos_users = 3;
+  bool can_manage_terminals = 4;
+  bool can_view_reports = 5;
 }
 
 message AssignLocationResponse {
-  MemberLocation assignment = 1;
+  int64 id = 1;
 }
 
-// ── Remove ─────────────────────────────────────────────────────────
+// ── Remove ────────────────────────────────────────────────────────
 
 message RemoveLocationRequest {
-  int64 member_id = 1;
-  int64 location_id = 2;
+  int64 id = 1;
 }
 
 message RemoveLocationResponse {

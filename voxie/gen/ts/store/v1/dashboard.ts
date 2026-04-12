@@ -6,39 +6,4 @@
 
 /* eslint-disable */
 
-export interface SalesOverTime {
-  date: string;
-  revenue: number;
-  orderCount: number;
-}
-
-export interface TopProduct {
-  productId: number;
-  title: string;
-  unitsSold: number;
-  revenue: number;
-}
-
-export interface DashboardStats {
-  totalRevenue: number;
-  revenueChange: number;
-  totalOrders: number;
-  ordersChange: number;
-  totalCustomers: number;
-  customersChange: number;
-  avgOrderValue: number;
-  avgOrderValueChange: number;
-  pendingOrders: number;
-  lowStockProducts: number;
-  salesOverTime: SalesOverTime[];
-  topProducts: TopProduct[];
-}
-
-export interface GetDashboardStatsRequest {
-  /** today, week, month, year */
-  period: string;
-}
-
-export interface GetDashboardStatsResponse {
-  stats: DashboardStats | undefined;
-}
+export {};

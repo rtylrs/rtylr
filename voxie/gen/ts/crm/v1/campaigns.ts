@@ -5,78 +5,99 @@
 // source: crm/v1/campaigns.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface Campaign {
   id: number;
+  ownerId: number;
   name: string;
-  /** email, sms, push */
-  type: string;
-  /** draft, active, paused, completed */
+  description: string;
+  channel: string;
   status: string;
+  segmentId?: number | undefined;
   subject: string;
-  body: string;
-  segmentId: string;
-  recipients: number;
-  delivered: number;
-  opened: number;
-  clicked: number;
+  content: string;
   scheduledAt: string;
   sentAt: string;
+  audienceCount: number;
+  sentCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListCampaignsRequest {
-  pagination: PaginationRequest | undefined;
   status: string;
-  type: string;
 }
 
 export interface ListCampaignsResponse {
   campaigns: Campaign[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetCampaignRequest {
-  id: number;
-}
-
-export interface GetCampaignResponse {
-  campaign: Campaign | undefined;
 }
 
 export interface CreateCampaignRequest {
   name: string;
-  type: string;
+  description: string;
+  channel: string;
+  segmentId?: number | undefined;
   subject: string;
-  body: string;
-  segmentId: string;
+  content: string;
   scheduledAt: string;
 }
 
 export interface CreateCampaignResponse {
-  campaign: Campaign | undefined;
+  campaignId: number;
+  message: string;
 }
 
 export interface UpdateCampaignRequest {
   id: number;
   name: string;
+  description: string;
+  channel: string;
+  segmentId?: number | undefined;
   subject: string;
-  body: string;
-  segmentId: string;
+  content: string;
   scheduledAt: string;
 }
 
 export interface UpdateCampaignResponse {
-  campaign: Campaign | undefined;
+  message: string;
 }
 
 export interface UpdateCampaignStatusRequest {
   id: number;
-  /** active, paused, completed */
   status: string;
 }
 
 export interface UpdateCampaignStatusResponse {
-  success: boolean;
+  message: string;
+}
+
+export interface CampaignStats {
+  campaignId: number;
+  audienceCount: number;
+  sentCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
+  bouncedCount: number;
+  failedCount: number;
+}
+
+export interface GetCampaignStatsRequest {
+  campaignId: number;
+}
+
+export interface GetCampaignStatsResponse {
+  stats: CampaignStats | undefined;
+}
+
+export interface GetCampaignDetailRequest {
+  id: number;
+}
+
+export interface GetCampaignDetailResponse {
+  campaign: Campaign | undefined;
+  stats: CampaignStats | undefined;
 }

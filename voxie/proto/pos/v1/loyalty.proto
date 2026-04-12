@@ -4,21 +4,20 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── LoyaltyConfig ──────────────────────────────────────────────────
+// ── LoyaltyConfig ─────────────────────────────────────────────────
 
 message LoyaltyConfig {
   int64 id = 1;
-  int64 location_id = 2;
+  int64 business_id = 2;
   bool is_enabled = 3;
   double points_per_dollar = 4;
-  double redemption_rate = 5; // points per dollar of discount
+  double redemption_rate = 5;
   int32 min_redeem_points = 6;
-  string program_name = 7;
-  string created_at = 8;
-  string updated_at = 9;
+  string created_at = 7;
+  string updated_at = 8;
 }
 
-// ── Get Config ─────────────────────────────────────────────────────
+// ── Get Config ────────────────────────────────────────────────────
 
 message GetLoyaltyConfigRequest {}
 
@@ -26,53 +25,75 @@ message GetLoyaltyConfigResponse {
   LoyaltyConfig config = 1;
 }
 
-// ── Update Config ──────────────────────────────────────────────────
+// ── Update Config ─────────────────────────────────────────────────
 
 message UpdateLoyaltyConfigRequest {
   bool is_enabled = 1;
   double points_per_dollar = 2;
   double redemption_rate = 3;
   int32 min_redeem_points = 4;
-  string program_name = 5;
 }
 
 message UpdateLoyaltyConfigResponse {
-  LoyaltyConfig config = 1;
+  string message = 1;
 }
 
-// ── Earn ────────────────────────────────────────────────────────────
+// ── Loyalty Transaction ───────────────────────────────────────────
 
-message EarnLoyaltyPointsRequest {
+message LoyaltyTransaction {
+  int64 id = 1;
+  int64 business_id = 2;
+  int64 customer_id = 3;
+  int64 order_id = 4;
+  string type = 5;
+  int32 points = 6;
+  int32 balance_after = 7;
+  string note = 8;
+  string created_at = 9;
+}
+
+// ── List Transactions ─────────────────────────────────────────────
+
+message ListLoyaltyTransactionsRequest {
+  int64 customer_id = 1;
+}
+
+message ListLoyaltyTransactionsResponse {
+  repeated LoyaltyTransaction transactions = 1;
+}
+
+// ── Earn Points ───────────────────────────────────────────────────
+
+message EarnPointsRequest {
   int64 customer_id = 1;
   int64 order_id = 2;
-  double order_total = 3;
+  int32 points = 3;
 }
 
-message EarnLoyaltyPointsResponse {
-  int32 points_earned = 1;
-  int32 total_points = 2;
+message EarnPointsResponse {
+  int64 transaction_id = 1;
+  string message = 2;
 }
 
-// ── Redeem ──────────────────────────────────────────────────────────
+// ── Redeem Points ─────────────────────────────────────────────────
 
-message RedeemLoyaltyPointsRequest {
+message RedeemPointsRequest {
   int64 customer_id = 1;
   int32 points = 2;
-  int64 order_id = 3;
 }
 
-message RedeemLoyaltyPointsResponse {
-  double discount_amount = 1;
-  int32 remaining_points = 2;
+message RedeemPointsResponse {
+  int64 transaction_id = 1;
+  string message = 2;
 }
 
-// ── Balance ────────────────────────────────────────────────────────
+// ── Get Balance ───────────────────────────────────────────────────
 
 message GetLoyaltyBalanceRequest {
   int64 customer_id = 1;
 }
 
 message GetLoyaltyBalanceResponse {
-  int32 points = 1;
-  double equivalent_value = 2;
+  int64 customer_id = 1;
+  int32 balance = 2;
 }

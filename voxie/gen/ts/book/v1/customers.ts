@@ -5,37 +5,5 @@
 // source: book/v1/customers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface BookCustomer {
-  id: number;
-  businessId: number;
-  name: string;
-  email: string;
-  phone: string;
-  notes: string;
-  totalAppointments: number;
-  noShowCount: number;
-  cancelledCount: number;
-  lastVisitAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ListBookCustomersRequest {
-  pagination: PaginationRequest | undefined;
-  search: string;
-}
-
-export interface ListBookCustomersResponse {
-  customers: BookCustomer[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetBookCustomerRequest {
-  id: number;
-}
-
-export interface GetBookCustomerResponse {
-  customer: BookCustomer | undefined;
-}
+export {};

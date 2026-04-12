@@ -4,104 +4,123 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-import "common/v1/pagination.proto";
-
-// ── Stock ──────────────────────────────────────────────────────────
+// ── StockMovement ─────────────────────────────────────────────────
 
 message StockMovement {
   int64 id = 1;
-  int64 location_id = 2;
-  int64 menu_item_id = 3;
-  string item_name = 4;
-  string type = 5; // receive, adjust, waste, transfer
-  int32 quantity = 6;
-  int32 quantity_before = 7;
-  int32 quantity_after = 8;
-  string reason = 9;
-  int64 destination_location_id = 10;
-  string performed_by = 11;
-  string created_at = 12;
+  int64 business_id = 2;
+  int64 branch_id = 3;
+  int64 product_id = 4;
+  string type = 5;
+  double quantity = 6;
+  int64 reference_id = 7;
+  string reference_type = 8;
+  string note = 9;
+  int64 employee_id = 10;
+  string created_at = 11;
 }
+
+// ── BranchInventory ───────────────────────────────────────────────
 
 message BranchInventory {
-  int64 menu_item_id = 1;
-  string item_name = 2;
-  string sku = 3;
-  int32 quantity = 4;
-  int32 low_stock_threshold = 5;
-  bool is_low_stock = 6;
-  string last_updated_at = 7;
+  int64 id = 1;
+  int64 business_id = 2;
+  int64 branch_id = 3;
+  int64 product_id = 4;
+  double quantity = 5;
+  double reorder_point = 6;
+  double reorder_quantity = 7;
+  string updated_at = 8;
 }
 
-// ── Receive ────────────────────────────────────────────────────────
-
-message ReceiveStockRequest {
-  int64 menu_item_id = 1;
-  int32 quantity = 2;
-  string reason = 3;
-}
-
-message ReceiveStockResponse {
-  StockMovement movement = 1;
-}
-
-// ── Adjust ─────────────────────────────────────────────────────────
-
-message AdjustStockRequest {
-  int64 menu_item_id = 1;
-  int32 quantity = 2;
-  string reason = 3;
-}
-
-message AdjustStockResponse {
-  StockMovement movement = 1;
-}
-
-// ── Waste ──────────────────────────────────────────────────────────
-
-message WasteStockRequest {
-  int64 menu_item_id = 1;
-  int32 quantity = 2;
-  string reason = 3;
-}
-
-message WasteStockResponse {
-  StockMovement movement = 1;
-}
-
-// ── Transfer ───────────────────────────────────────────────────────
-
-message TransferStockRequest {
-  int64 menu_item_id = 1;
-  int32 quantity = 2;
-  int64 destination_location_id = 3;
-  string reason = 4;
-}
-
-message TransferStockResponse {
-  StockMovement movement = 1;
-}
-
-// ── Low Stock ──────────────────────────────────────────────────────
-
-message ListLowStockRequest {
-  common.PaginationRequest pagination = 1;
-}
-
-message ListLowStockResponse {
-  repeated BranchInventory items = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-// ── List Movements ─────────────────────────────────────────────────
+// ── List Movements ────────────────────────────────────────────────
 
 message ListStockMovementsRequest {
-  common.PaginationRequest pagination = 1;
-  int64 menu_item_id = 2;
-  string type = 3;
+  int64 branch_id = 1;
+  int64 product_id = 2;
 }
 
 message ListStockMovementsResponse {
   repeated StockMovement movements = 1;
-  common.PaginationResponse pagination = 2;
+}
+
+// ── Receive Stock ─────────────────────────────────────────────────
+
+message ReceiveStockRequest {
+  int64 branch_id = 1;
+  int64 product_id = 2;
+  double quantity = 3;
+  string note = 4;
+  int64 employee_id = 5;
+}
+
+message ReceiveStockResponse {
+  int64 movement_id = 1;
+  string message = 2;
+}
+
+// ── Adjust Stock ──────────────────────────────────────────────────
+
+message AdjustStockRequest {
+  int64 branch_id = 1;
+  int64 product_id = 2;
+  double quantity = 3;
+  string note = 4;
+  int64 employee_id = 5;
+}
+
+message AdjustStockResponse {
+  int64 movement_id = 1;
+  string message = 2;
+}
+
+// ── Waste Stock ───────────────────────────────────────────────────
+
+message WasteStockRequest {
+  int64 branch_id = 1;
+  int64 product_id = 2;
+  double quantity = 3;
+  string note = 4;
+  int64 employee_id = 5;
+}
+
+message WasteStockResponse {
+  int64 movement_id = 1;
+  string message = 2;
+}
+
+// ── Transfer Stock ────────────────────────────────────────────────
+
+message TransferStockRequest {
+  int64 from_branch_id = 1;
+  int64 to_branch_id = 2;
+  int64 product_id = 3;
+  double quantity = 4;
+  string note = 5;
+  int64 employee_id = 6;
+}
+
+message TransferStockResponse {
+  int64 movement_id = 1;
+  string message = 2;
+}
+
+// ── List Inventory ────────────────────────────────────────────────
+
+message ListInventoryRequest {
+  int64 branch_id = 1;
+}
+
+message ListInventoryResponse {
+  repeated BranchInventory inventory = 1;
+}
+
+// ── Low Stock ─────────────────────────────────────────────────────
+
+message LowStockRequest {
+  int64 branch_id = 1;
+}
+
+message LowStockResponse {
+  repeated BranchInventory items = 1;
 }

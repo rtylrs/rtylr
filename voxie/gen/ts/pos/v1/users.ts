@@ -5,69 +5,76 @@
 // source: pos/v1/users.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface POSUser {
   id: number;
+  businessId: number;
   locationId: number;
   name: string;
-  email: string;
-  /** cashier, server, manager, admin */
   role: string;
-  pin: string;
   isActive: boolean;
-  lastLoginAt: string;
-  createdAt: string;
-  updatedAt: string;
+  maxDiscountPct: number;
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
 }
 
 export interface ListPOSUsersRequest {
-  pagination: PaginationRequest | undefined;
-  role: string;
-  activeOnly: boolean;
+  locationId: number;
 }
 
 export interface ListPOSUsersResponse {
   users: POSUser[];
-  pagination: PaginationResponse | undefined;
 }
 
 export interface CreatePOSUserRequest {
+  locationId: number;
   name: string;
-  email: string;
-  role: string;
   pin: string;
+  role: string;
+  hourlyRate: number;
+  maxDiscountPct: number;
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
 }
 
 export interface CreatePOSUserResponse {
-  user: POSUser | undefined;
+  id: number;
 }
 
 export interface UpdatePOSUserRequest {
   id: number;
   name: string;
-  email: string;
+  pin: string;
   role: string;
   isActive: boolean;
+  hourlyRate: number;
+  maxDiscountPct: number;
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
 }
 
 export interface UpdatePOSUserResponse {
-  user: POSUser | undefined;
-}
-
-export interface DeletePOSUserRequest {
-  id: number;
-}
-
-export interface DeletePOSUserResponse {
   success: boolean;
 }
 
-export interface VerifyPOSUserPinRequest {
+export interface DeactivatePOSUserRequest {
+  id: number;
+}
+
+export interface DeactivatePOSUserResponse {
+  success: boolean;
+}
+
+export interface VerifyPOSUserPINRequest {
   pin: string;
 }
 
-export interface VerifyPOSUserPinResponse {
-  valid: boolean;
+export interface VerifyPOSUserPINResponse {
   user: POSUser | undefined;
 }

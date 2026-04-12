@@ -4,49 +4,35 @@ package support;
 
 option go_package = "github.com/voxire/voxie/gen/go/support/v1";
 
-import "common/v1/pagination.proto";
+// ── Inbox / Conversations ──────────────────────────────────────────
 
-// ── Conversations ───────────────────────────────────────────────────
-
-message Conversation {
-  int64 id = 1;
-  string channel = 2; // live_chat, email, whatsapp
-  string status = 3; // active, waiting, closed
-  int64 customer_id = 4;
-  string customer_name = 5;
-  int64 assignee_id = 6;
-  string assignee_name = 7;
+message InboxItem {
+  int64 ticket_id = 1;
+  string customer_name = 2;
+  string customer_email = 3;
+  string subject = 4;
+  string status = 5;
+  string priority = 6;
+  string channel = 7;
   string last_message = 8;
   string last_message_at = 9;
-  int32 unread_count = 10;
-  string created_at = 11;
+  int32 message_count = 10;
 }
 
-message ListConversationsRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  string channel = 3;
-  int64 assignee_id = 4;
+message ListInboxRequest {
+  int32 page = 1;
+  int32 page_size = 2;
 }
 
-message ListConversationsResponse {
-  repeated Conversation conversations = 1;
-  common.PaginationResponse pagination = 2;
+message ListInboxResponse {
+  repeated InboxItem inbox = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
-message GetConversationRequest {
-  int64 id = 1;
-}
+message GetUnreadCountRequest {}
 
-message GetConversationResponse {
-  Conversation conversation = 1;
-}
-
-message AssignConversationRequest {
-  int64 id = 1;
-  int64 assignee_id = 2;
-}
-
-message AssignConversationResponse {
-  Conversation conversation = 1;
+message GetUnreadCountResponse {
+  int32 count = 1;
 }

@@ -4,55 +4,56 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── Floor ──────────────────────────────────────────────────────────
+// ── Floor ─────────────────────────────────────────────────────────
 
 message Floor {
   int64 id = 1;
-  int64 location_id = 2;
-  string name = 3;
-  int32 sort_order = 4;
-  int32 table_count = 5;
-  string created_at = 6;
-  string updated_at = 7;
+  int64 business_id = 2;
+  int64 branch_id = 3;
+  string name = 4;
+  int32 sort_order = 5;
+  bool is_active = 6;
+  string created_at = 7;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
-message ListFloorsRequest {}
+message ListFloorsRequest {
+  int64 branch_id = 1;
+}
 
 message ListFloorsResponse {
   repeated Floor floors = 1;
 }
 
-// ── Create ─────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
 message CreateFloorRequest {
-  string name = 1;
-  int32 sort_order = 2;
-}
-
-message CreateFloorResponse {
-  Floor floor = 1;
-}
-
-// ── Update ─────────────────────────────────────────────────────────
-
-message UpdateFloorRequest {
-  int64 id = 1;
+  int64 branch_id = 1;
   string name = 2;
   int32 sort_order = 3;
 }
 
+message CreateFloorResponse {
+  int64 floor_id = 1;
+  string message = 2;
+}
+
+// ── Update ────────────────────────────────────────────────────────
+
+message UpdateFloorRequest {
+  string name = 1;
+  int32 sort_order = 2;
+}
+
 message UpdateFloorResponse {
-  Floor floor = 1;
+  string message = 1;
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────
 
-message DeleteFloorRequest {
-  int64 id = 1;
-}
+message DeleteFloorRequest {}
 
 message DeleteFloorResponse {
-  bool success = 1;
+  string message = 1;
 }

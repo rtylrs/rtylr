@@ -4,95 +4,60 @@ package book;
 
 option go_package = "github.com/voxire/voxie/gen/go/book/v1";
 
-// ── Resource ───────────────────────────────────────────────────────
-
-message WorkingHours {
-  int32 day_of_week = 1; // 0=Sunday, 6=Saturday
-  string start_time = 2; // HH:MM
-  string end_time = 3;   // HH:MM
-  bool is_off = 4;
-}
+// ── Resource ──────────────────────────────────────────────────────
 
 message Resource {
   int64 id = 1;
-  int64 business_id = 2;
-  int64 location_id = 3;
-  string name = 4;
-  string email = 5;
-  string phone = 6;
-  string title = 7; // e.g., "Senior Stylist"
-  string image_url = 8;
-  string color = 9;
-  bool is_active = 10;
-  repeated int64 service_ids = 11;
-  repeated WorkingHours working_hours = 12;
-  string created_at = 13;
-  string updated_at = 14;
+  int64 owner_id = 2;
+  string name = 3;
+  string type = 4;
+  int32 capacity = 5;
+  bool is_active = 6;
+  string created_at = 7;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
-message ListResourcesRequest {
-  bool active_only = 1;
-  int64 service_id = 2;
-}
+message ListResourcesRequest {}
 
 message ListResourcesResponse {
   repeated Resource resources = 1;
 }
 
-// ── Get ────────────────────────────────────────────────────────────
-
-message GetResourceRequest {
-  int64 id = 1;
-}
-
-message GetResourceResponse {
-  Resource resource = 1;
-}
-
-// ── Create ─────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
 message CreateResourceRequest {
   string name = 1;
-  string email = 2;
-  string phone = 3;
-  string title = 4;
-  string image_url = 5;
-  string color = 6;
-  repeated int64 service_ids = 7;
-  repeated WorkingHours working_hours = 8;
+  string type = 2;
+  int32 capacity = 3;
+  bool is_active = 4;
 }
 
 message CreateResourceResponse {
-  Resource resource = 1;
+  int64 id = 1;
+  string message = 2;
 }
 
-// ── Update ─────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────
 
 message UpdateResourceRequest {
   int64 id = 1;
   string name = 2;
-  string email = 3;
-  string phone = 4;
-  string title = 5;
-  string image_url = 6;
-  string color = 7;
-  bool is_active = 8;
-  repeated int64 service_ids = 9;
-  repeated WorkingHours working_hours = 10;
+  string type = 3;
+  int32 capacity = 4;
+  bool is_active = 5;
 }
 
 message UpdateResourceResponse {
-  Resource resource = 1;
+  string message = 1;
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────
 
 message DeleteResourceRequest {
   int64 id = 1;
 }
 
 message DeleteResourceResponse {
-  bool success = 1;
+  string message = 1;
 }

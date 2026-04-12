@@ -5,61 +5,61 @@
 // source: erp/v1/purchase_orders.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
+
+export interface PurchaseOrderItem {
+  id: number;
+  purchaseOrderId: number;
+  productId: number;
+  quantityOrdered: number;
+  quantityReceived: number;
+  unitCost: number;
+  totalCost: number;
+}
 
 export interface PurchaseOrder {
   id: number;
-  number: string;
+  ownerId: number;
   supplierId: number;
-  supplierName: string;
-  /** draft, sent, received, cancelled */
+  poNumber: string;
   status: string;
-  lines: PurchaseOrderLine[];
   subtotal: number;
-  tax: number;
+  taxAmount: number;
   total: number;
+  expectedDelivery: string;
+  receivedAt: string;
   notes: string;
-  expectedDate: string;
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface PurchaseOrderLine {
-  productId: number;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
+  items: PurchaseOrderItem[];
 }
 
 export interface ListPurchaseOrdersRequest {
-  pagination: PaginationRequest | undefined;
   status: string;
-  supplierId: number;
 }
 
 export interface ListPurchaseOrdersResponse {
-  orders: PurchaseOrder[];
-  pagination: PaginationResponse | undefined;
+  purchaseOrders: PurchaseOrder[];
 }
 
-export interface GetPurchaseOrderRequest {
-  id: number;
-}
-
-export interface GetPurchaseOrderResponse {
-  order: PurchaseOrder | undefined;
+export interface CreatePurchaseOrderItemInput {
+  productId: number;
+  quantityOrdered: number;
+  unitCost: number;
 }
 
 export interface CreatePurchaseOrderRequest {
   supplierId: number;
-  lines: PurchaseOrderLine[];
+  poNumber: string;
+  taxAmount: number;
+  expectedDelivery: string;
   notes: string;
-  expectedDate: string;
+  items: CreatePurchaseOrderItemInput[];
 }
 
 export interface CreatePurchaseOrderResponse {
-  order: PurchaseOrder | undefined;
+  purchaseOrderId: number;
+  message: string;
 }
 
 export interface UpdatePurchaseOrderStatusRequest {
@@ -68,5 +68,5 @@ export interface UpdatePurchaseOrderStatusRequest {
 }
 
 export interface UpdatePurchaseOrderStatusResponse {
-  order: PurchaseOrder | undefined;
+  message: string;
 }

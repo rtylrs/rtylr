@@ -4,28 +4,18 @@ package flow;
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
 
+import "flow/v1/tasks.proto";
+
 // ── Flow Dashboard ──────────────────────────────────────────────────
 
-message FlowDashboard {
-  int32 total_tasks = 1;
-  int32 todo = 2;
-  int32 in_progress = 3;
-  int32 in_review = 4;
-  int32 done = 5;
-  int32 overdue = 6;
-  int32 total_projects = 7;
-  int32 active_projects = 8;
-  repeated TasksByProject tasks_by_project = 9;
+message GetFlowDashboardRequest {
+  int64 workspace_id = 1;
 }
-
-message TasksByProject {
-  string project_name = 1;
-  int32 total = 2;
-  int32 completed = 3;
-}
-
-message GetFlowDashboardRequest {}
 
 message GetFlowDashboardResponse {
-  FlowDashboard dashboard = 1;
+  int64 open_tasks = 1;
+  int64 in_progress_tasks = 2;
+  int64 completed_this_week = 3;
+  int64 overdue_tasks = 4;
+  repeated Task my_tasks = 5;
 }

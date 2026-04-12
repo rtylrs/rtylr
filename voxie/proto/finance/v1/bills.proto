@@ -4,59 +4,51 @@ package finance;
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Bills ───────────────────────────────────────────────────────────
 
 message Bill {
   int64 id = 1;
-  string number = 2;
-  string vendor = 3;
-  string status = 4; // draft, pending, paid, overdue
-  repeated BillLine lines = 5;
-  double subtotal = 6;
-  double tax = 7;
-  double total = 8;
-  string issue_date = 9;
-  string due_date = 10;
-  string paid_at = 11;
-  string notes = 12;
-  string created_at = 13;
+  int64 owner_id = 2;
+  int64 supplier_id = 3;
+  double amount = 4;
+  string currency = 5;
+  string due_date = 6;
+  string status = 7;
+  string description = 8;
+  string created_at = 9;
+  string updated_at = 10;
 }
 
-message BillLine {
-  string description = 1;
-  double amount = 2;
-  int64 account_id = 3;
-}
-
-message ListBillsRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  string from_date = 3;
-  string to_date = 4;
-}
+message ListBillsRequest {}
 
 message ListBillsResponse {
   repeated Bill bills = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message GetBillRequest {
-  int64 id = 1;
-}
-
-message GetBillResponse {
-  Bill bill = 1;
 }
 
 message CreateBillRequest {
-  string vendor = 1;
-  repeated BillLine lines = 2;
-  string due_date = 3;
-  string notes = 4;
+  int64 supplier_id = 1;
+  double amount = 2;
+  string currency = 3;
+  string due_date = 4;
+  string status = 5;
+  string description = 6;
 }
 
 message CreateBillResponse {
-  Bill bill = 1;
+  int64 id = 1;
+  string message = 2;
+}
+
+message UpdateBillRequest {
+  int64 id = 1;
+  int64 supplier_id = 2;
+  double amount = 3;
+  string currency = 4;
+  string due_date = 5;
+  string status = 6;
+  string description = 7;
+}
+
+message UpdateBillResponse {
+  string message = 1;
 }

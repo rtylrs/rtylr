@@ -4,85 +4,105 @@ package flow;
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Tasks ───────────────────────────────────────────────────────────
 
 message Task {
   int64 id = 1;
-  string title = 2;
-  string description = 3;
-  string status = 4; // todo, in_progress, review, done
-  string priority = 5; // low, medium, high, urgent
-  int64 project_id = 6;
-  string project_name = 7;
-  int64 assignee_id = 8;
-  string assignee_name = 9;
-  repeated string labels = 10;
-  string due_date = 11;
-  int32 comment_count = 12;
-  int32 position = 13;
-  string created_at = 14;
-  string updated_at = 15;
+  int64 project_id = 2;
+  int64 workspace_id = 3;
+  int64 owner_id = 4;
+  optional int64 parent_task_id = 5;
+  string title = 6;
+  string description = 7;
+  string status = 8;
+  string priority = 9;
+  optional int64 assignee_id = 10;
+  int64 reporter_id = 11;
+  string due_date = 12;
+  string start_date = 13;
+  string completed_at = 14;
+  optional double estimated_hours = 15;
+  optional double actual_hours = 16;
+  int32 sort_order = 17;
+  repeated int64 labels = 18;
+  string created_at = 19;
+  string updated_at = 20;
 }
 
 message TaskComment {
   int64 id = 1;
   int64 task_id = 2;
-  string author_name = 3;
-  string body = 4;
-  string created_at = 5;
+  int64 user_id = 3;
+  string content = 4;
+  bool is_edited = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message TaskActivity {
+  int64 id = 1;
+  int64 task_id = 2;
+  int64 user_id = 3;
+  string action = 4;
+  string old_value = 5;
+  string new_value = 6;
+  string created_at = 7;
 }
 
 message ListTasksRequest {
-  common.PaginationRequest pagination = 1;
-  int64 project_id = 2;
-  string status = 3;
+  int64 project_id = 1;
+  string status = 2;
+  optional int64 assignee_id = 3;
   string priority = 4;
-  int64 assignee_id = 5;
-  string search = 6;
 }
 
 message ListTasksResponse {
   repeated Task tasks = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message GetTaskRequest {
-  int64 id = 1;
-}
-
-message GetTaskResponse {
-  Task task = 1;
-  repeated TaskComment comments = 2;
 }
 
 message CreateTaskRequest {
-  string title = 1;
-  string description = 2;
-  int64 project_id = 3;
-  string priority = 4;
-  int64 assignee_id = 5;
-  repeated string labels = 6;
-  string due_date = 7;
+  int64 project_id = 1;
+  int64 workspace_id = 2;
+  optional int64 parent_task_id = 3;
+  string title = 4;
+  string description = 5;
+  string priority = 6;
+  optional int64 assignee_id = 7;
+  string due_date = 8;
+  string start_date = 9;
+  optional double estimated_hours = 10;
+  repeated int64 labels = 11;
 }
 
 message CreateTaskResponse {
   Task task = 1;
 }
 
+message GetTaskDetailRequest {
+  int64 id = 1;
+}
+
+message GetTaskDetailResponse {
+  Task task = 1;
+  repeated Task subtasks = 2;
+  repeated TaskComment comments = 3;
+  repeated TaskActivity activity = 4;
+}
+
 message UpdateTaskRequest {
   int64 id = 1;
   string title = 2;
   string description = 3;
-  string priority = 4;
-  int64 assignee_id = 5;
-  repeated string labels = 6;
+  string status = 4;
+  string priority = 5;
+  optional int64 assignee_id = 6;
   string due_date = 7;
+  string start_date = 8;
+  repeated int64 labels = 9;
 }
 
 message UpdateTaskResponse {
-  Task task = 1;
+  string message = 1;
 }
 
 message DeleteTaskRequest {
@@ -90,7 +110,7 @@ message DeleteTaskRequest {
 }
 
 message DeleteTaskResponse {
-  bool success = 1;
+  string message = 1;
 }
 
 message UpdateTaskStatusRequest {
@@ -99,14 +119,137 @@ message UpdateTaskStatusRequest {
 }
 
 message UpdateTaskStatusResponse {
-  Task task = 1;
+  string message = 1;
 }
 
-message AddTaskCommentRequest {
+message GetMyTasksRequest {}
+
+message GetMyTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message AddCommentRequest {
   int64 task_id = 1;
-  string body = 2;
+  string content = 2;
 }
 
-message AddTaskCommentResponse {
+message AddCommentResponse {
   TaskComment comment = 1;
+}
+
+message DeleteCommentRequest {
+  int64 id = 1;
+}
+
+message DeleteCommentResponse {
+  string message = 1;
+}
+
+// ── Task Extras ────────────────────────────────────────────────────
+
+message TaskPayloadCompact {
+  int64 id = 1;
+  string title = 2;
+  string status = 3;
+  string priority = 4;
+  string due_date = 5;
+  string created_at = 6;
+}
+
+message Attachment {
+  int64 id = 1;
+  int64 task_id = 2;
+  string name = 3;
+  string url = 4;
+  int64 size = 5;
+  int64 uploaded_by = 6;
+  string created_at = 7;
+}
+
+message TimeLog {
+  int64 id = 1;
+  int64 task_id = 2;
+  int64 user_id = 3;
+  int32 duration_minutes = 4;
+  string description = 5;
+  string logged_at = 6;
+  string created_at = 7;
+}
+
+message GetSubtasksRequest {
+  int64 task_id = 1;
+}
+
+message GetSubtasksResponse {
+  repeated TaskPayloadCompact subtasks = 1;
+}
+
+message CreateSubtaskRequest {
+  int64 project_id = 1;
+  int64 workspace_id = 2;
+  string title = 3;
+  string description = 4;
+  string priority = 5;
+  optional int64 assignee_id = 6;
+  string due_date = 7;
+  string start_date = 8;
+  optional double estimated_hours = 9;
+}
+
+message CreateSubtaskResponse {
+  int64 task_id = 1;
+  string message = 2;
+}
+
+message GetAttachmentsRequest {
+  int64 task_id = 1;
+}
+
+message GetAttachmentsResponse {
+  repeated Attachment attachments = 1;
+}
+
+message CreateAttachmentRequest {
+  string name = 1;
+  string url = 2;
+  int64 size = 3;
+}
+
+message CreateAttachmentResponse {
+  int64 attachment_id = 1;
+  string message = 2;
+}
+
+message DeleteAttachmentRequest {
+  int64 id = 1;
+}
+
+message DeleteAttachmentResponse {
+  string message = 1;
+}
+
+message GetTimeLogsRequest {
+  int64 task_id = 1;
+}
+
+message GetTimeLogsResponse {
+  repeated TimeLog time_logs = 1;
+}
+
+message CreateTimeLogRequest {
+  int32 duration_minutes = 1;
+  string description = 2;
+}
+
+message CreateTimeLogResponse {
+  int64 time_log_id = 1;
+  string message = 2;
+}
+
+message GetTaskActivityRequest {
+  int64 task_id = 1;
+}
+
+message GetTaskActivityResponse {
+  repeated TaskActivity activity = 1;
 }

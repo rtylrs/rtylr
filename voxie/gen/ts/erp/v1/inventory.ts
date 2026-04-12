@@ -5,61 +5,60 @@
 // source: erp/v1/inventory.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
-export interface InventoryItem {
+export interface AdjustInventoryRequest {
+  productId: number;
+  change: number;
+  type: string;
+  notes: string;
+}
+
+export interface AdjustInventoryResponse {
+  message: string;
+}
+
+export interface InventoryReportItem {
   productId: number;
   productName: string;
   sku: string;
-  quantity: number;
+  unit: string;
+  stockQuantity: number;
   lowStockThreshold: number;
-  /** in_stock, low_stock, out_of_stock */
-  status: string;
-  lastRestockedAt: string;
-}
-
-export interface InventoryReport {
-  totalProducts: number;
-  inStock: number;
-  lowStock: number;
-  outOfStock: number;
-  totalValue: number;
-  items: InventoryItem[];
+  reorderQuantity: number;
+  costPrice: number;
+  salePrice: number;
+  stockValue: number;
+  isLowStock: boolean;
 }
 
 export interface GetInventoryReportRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-  search: string;
 }
 
 export interface GetInventoryReportResponse {
-  report: InventoryReport | undefined;
-  pagination: PaginationResponse | undefined;
-}
-
-export interface LowStockItem {
-  productId: number;
-  productName: string;
-  sku: string;
-  quantity: number;
-  threshold: number;
+  items: InventoryReportItem[];
+  totalValue: number;
 }
 
 export interface GetLowStockRequest {
 }
 
 export interface GetLowStockResponse {
-  items: LowStockItem[];
+  items: InventoryReportItem[];
+  count: number;
 }
 
-export interface AdjustInventoryRequest {
-  productId: number;
-  /** positive = add, negative = remove */
-  adjustment: number;
-  reason: string;
+export interface ValuationItem {
+  categoryName: string;
+  warehouseName: string;
+  totalItems: number;
+  totalValue: number;
+  totalCost: number;
 }
 
-export interface AdjustInventoryResponse {
-  newQuantity: number;
+export interface GetValuationRequest {
+}
+
+export interface GetValuationResponse {
+  items: ValuationItem[];
+  totalValue: number;
 }

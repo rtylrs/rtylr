@@ -4,37 +4,21 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── Combo ──────────────────────────────────────────────────────────
-
-message ComboGroup {
-  int64 id = 1;
-  string name = 2;
-  int32 min_select = 3;
-  int32 max_select = 4;
-  repeated ComboGroupItem items = 5;
-}
-
-message ComboGroupItem {
-  int64 id = 1;
-  int64 menu_item_id = 2;
-  string name = 3;
-  double price_adjustment = 4;
-}
+// ── Combo ─────────────────────────────────────────────────────────
 
 message Combo {
   int64 id = 1;
-  int64 location_id = 2;
+  int64 owner_id = 2;
   string name = 3;
   string description = 4;
   double price = 5;
-  string image_url = 6;
+  string items = 6;
   bool is_active = 7;
-  repeated ComboGroup groups = 8;
-  string created_at = 9;
-  string updated_at = 10;
+  string created_at = 8;
+  string updated_at = 9;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
 message ListCombosRequest {}
 
@@ -42,50 +26,39 @@ message ListCombosResponse {
   repeated Combo combos = 1;
 }
 
-// ── Create ─────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
 message CreateComboRequest {
   string name = 1;
   string description = 2;
   double price = 3;
-  string image_url = 4;
+  string items = 4;
   bool is_active = 5;
-  repeated ComboGroupInput groups = 6;
-}
-
-message ComboGroupInput {
-  string name = 1;
-  int32 min_select = 2;
-  int32 max_select = 3;
-  repeated int64 menu_item_ids = 4;
 }
 
 message CreateComboResponse {
-  Combo combo = 1;
+  int64 combo_id = 1;
+  string message = 2;
 }
 
-// ── Update ─────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────
 
 message UpdateComboRequest {
-  int64 id = 1;
-  string name = 2;
-  string description = 3;
-  double price = 4;
-  string image_url = 5;
-  bool is_active = 6;
-  repeated ComboGroupInput groups = 7;
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  string items = 4;
+  bool is_active = 5;
 }
 
 message UpdateComboResponse {
-  Combo combo = 1;
+  string message = 1;
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────
 
-message DeleteComboRequest {
-  int64 id = 1;
-}
+message DeleteComboRequest {}
 
 message DeleteComboResponse {
-  bool success = 1;
+  string message = 1;
 }

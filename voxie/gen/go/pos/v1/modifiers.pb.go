@@ -21,129 +21,23 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ModifierGroup struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	IsRequired    bool                   `protobuf:"varint,4,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
-	MinSelect     int32                  `protobuf:"varint,5,opt,name=min_select,json=minSelect,proto3" json:"min_select,omitempty"`
-	MaxSelect     int32                  `protobuf:"varint,6,opt,name=max_select,json=maxSelect,proto3" json:"max_select,omitempty"`
-	Modifiers     []*Modifier            `protobuf:"bytes,7,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ModifierGroup) Reset() {
-	*x = ModifierGroup{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ModifierGroup) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ModifierGroup) ProtoMessage() {}
-
-func (x *ModifierGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ModifierGroup.ProtoReflect.Descriptor instead.
-func (*ModifierGroup) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *ModifierGroup) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ModifierGroup) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
-	}
-	return 0
-}
-
-func (x *ModifierGroup) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ModifierGroup) GetIsRequired() bool {
-	if x != nil {
-		return x.IsRequired
-	}
-	return false
-}
-
-func (x *ModifierGroup) GetMinSelect() int32 {
-	if x != nil {
-		return x.MinSelect
-	}
-	return 0
-}
-
-func (x *ModifierGroup) GetMaxSelect() int32 {
-	if x != nil {
-		return x.MaxSelect
-	}
-	return 0
-}
-
-func (x *ModifierGroup) GetModifiers() []*Modifier {
-	if x != nil {
-		return x.Modifiers
-	}
-	return nil
-}
-
-func (x *ModifierGroup) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *ModifierGroup) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
 type Modifier struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	GroupId       int64                  `protobuf:"varint,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Price         float64                `protobuf:"fixed64,4,opt,name=price,proto3" json:"price,omitempty"`
-	IsDefault     bool                   `protobuf:"varint,5,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,6,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	PriceDelta    float64                `protobuf:"fixed64,4,opt,name=price_delta,json=priceDelta,proto3" json:"price_delta,omitempty"`
+	GroupName     string                 `protobuf:"bytes,5,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
+	IsRequired    bool                   `protobuf:"varint,6,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Modifier) Reset() {
 	*x = Modifier{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[1]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +49,7 @@ func (x *Modifier) String() string {
 func (*Modifier) ProtoMessage() {}
 
 func (x *Modifier) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[1]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,7 +62,7 @@ func (x *Modifier) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Modifier.ProtoReflect.Descriptor instead.
 func (*Modifier) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{1}
+	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Modifier) GetId() int64 {
@@ -178,9 +72,9 @@ func (x *Modifier) GetId() int64 {
 	return 0
 }
 
-func (x *Modifier) GetGroupId() int64 {
+func (x *Modifier) GetOwnerId() int64 {
 	if x != nil {
-		return x.GroupId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -192,25 +86,39 @@ func (x *Modifier) GetName() string {
 	return ""
 }
 
-func (x *Modifier) GetPrice() float64 {
+func (x *Modifier) GetPriceDelta() float64 {
 	if x != nil {
-		return x.Price
+		return x.PriceDelta
 	}
 	return 0
 }
 
-func (x *Modifier) GetIsDefault() bool {
+func (x *Modifier) GetGroupName() string {
 	if x != nil {
-		return x.IsDefault
+		return x.GroupName
+	}
+	return ""
+}
+
+func (x *Modifier) GetIsRequired() bool {
+	if x != nil {
+		return x.IsRequired
 	}
 	return false
 }
 
-func (x *Modifier) GetSortOrder() int32 {
+func (x *Modifier) GetCreatedAt() string {
 	if x != nil {
-		return x.SortOrder
+		return x.CreatedAt
 	}
-	return 0
+	return ""
+}
+
+func (x *Modifier) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
 }
 
 type ListModifiersRequest struct {
@@ -221,7 +129,7 @@ type ListModifiersRequest struct {
 
 func (x *ListModifiersRequest) Reset() {
 	*x = ListModifiersRequest{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[2]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -233,7 +141,7 @@ func (x *ListModifiersRequest) String() string {
 func (*ListModifiersRequest) ProtoMessage() {}
 
 func (x *ListModifiersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[2]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -246,19 +154,19 @@ func (x *ListModifiersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListModifiersRequest.ProtoReflect.Descriptor instead.
 func (*ListModifiersRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{2}
+	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{1}
 }
 
 type ListModifiersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Groups        []*ModifierGroup       `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
+	Modifiers     []*Modifier            `protobuf:"bytes,1,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListModifiersResponse) Reset() {
 	*x = ListModifiersResponse{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[3]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -270,7 +178,7 @@ func (x *ListModifiersResponse) String() string {
 func (*ListModifiersResponse) ProtoMessage() {}
 
 func (x *ListModifiersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[3]
+	mi := &file_pos_v1_modifiers_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -283,41 +191,106 @@ func (x *ListModifiersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListModifiersResponse.ProtoReflect.Descriptor instead.
 func (*ListModifiersResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListModifiersResponse) GetModifiers() []*Modifier {
+	if x != nil {
+		return x.Modifiers
+	}
+	return nil
+}
+
+type CreateModifierRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PriceDelta    float64                `protobuf:"fixed64,2,opt,name=price_delta,json=priceDelta,proto3" json:"price_delta,omitempty"`
+	GroupName     string                 `protobuf:"bytes,3,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
+	IsRequired    bool                   `protobuf:"varint,4,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateModifierRequest) Reset() {
+	*x = CreateModifierRequest{}
+	mi := &file_pos_v1_modifiers_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateModifierRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateModifierRequest) ProtoMessage() {}
+
+func (x *CreateModifierRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_modifiers_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateModifierRequest.ProtoReflect.Descriptor instead.
+func (*CreateModifierRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ListModifiersResponse) GetGroups() []*ModifierGroup {
+func (x *CreateModifierRequest) GetName() string {
 	if x != nil {
-		return x.Groups
+		return x.Name
 	}
-	return nil
+	return ""
 }
 
-type CreateModifierGroupRequest struct {
+func (x *CreateModifierRequest) GetPriceDelta() float64 {
+	if x != nil {
+		return x.PriceDelta
+	}
+	return 0
+}
+
+func (x *CreateModifierRequest) GetGroupName() string {
+	if x != nil {
+		return x.GroupName
+	}
+	return ""
+}
+
+func (x *CreateModifierRequest) GetIsRequired() bool {
+	if x != nil {
+		return x.IsRequired
+	}
+	return false
+}
+
+type CreateModifierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	IsRequired    bool                   `protobuf:"varint,2,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
-	MinSelect     int32                  `protobuf:"varint,3,opt,name=min_select,json=minSelect,proto3" json:"min_select,omitempty"`
-	MaxSelect     int32                  `protobuf:"varint,4,opt,name=max_select,json=maxSelect,proto3" json:"max_select,omitempty"`
-	Modifiers     []*CreateModifierInput `protobuf:"bytes,5,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
+	ModifierId    int64                  `protobuf:"varint,1,opt,name=modifier_id,json=modifierId,proto3" json:"modifier_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateModifierGroupRequest) Reset() {
-	*x = CreateModifierGroupRequest{}
+func (x *CreateModifierResponse) Reset() {
+	*x = CreateModifierResponse{}
 	mi := &file_pos_v1_modifiers_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateModifierGroupRequest) String() string {
+func (x *CreateModifierResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateModifierGroupRequest) ProtoMessage() {}
+func (*CreateModifierResponse) ProtoMessage() {}
 
-func (x *CreateModifierGroupRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateModifierResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_modifiers_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -329,70 +302,49 @@ func (x *CreateModifierGroupRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateModifierGroupRequest.ProtoReflect.Descriptor instead.
-func (*CreateModifierGroupRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateModifierResponse.ProtoReflect.Descriptor instead.
+func (*CreateModifierResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateModifierGroupRequest) GetName() string {
+func (x *CreateModifierResponse) GetModifierId() int64 {
 	if x != nil {
-		return x.Name
+		return x.ModifierId
+	}
+	return 0
+}
+
+func (x *CreateModifierResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
 
-func (x *CreateModifierGroupRequest) GetIsRequired() bool {
-	if x != nil {
-		return x.IsRequired
-	}
-	return false
-}
-
-func (x *CreateModifierGroupRequest) GetMinSelect() int32 {
-	if x != nil {
-		return x.MinSelect
-	}
-	return 0
-}
-
-func (x *CreateModifierGroupRequest) GetMaxSelect() int32 {
-	if x != nil {
-		return x.MaxSelect
-	}
-	return 0
-}
-
-func (x *CreateModifierGroupRequest) GetModifiers() []*CreateModifierInput {
-	if x != nil {
-		return x.Modifiers
-	}
-	return nil
-}
-
-type CreateModifierInput struct {
+type UpdateModifierRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Price         float64                `protobuf:"fixed64,2,opt,name=price,proto3" json:"price,omitempty"`
-	IsDefault     bool                   `protobuf:"varint,3,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,4,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	PriceDelta    float64                `protobuf:"fixed64,2,opt,name=price_delta,json=priceDelta,proto3" json:"price_delta,omitempty"`
+	GroupName     string                 `protobuf:"bytes,3,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
+	IsRequired    bool                   `protobuf:"varint,4,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateModifierInput) Reset() {
-	*x = CreateModifierInput{}
+func (x *UpdateModifierRequest) Reset() {
+	*x = UpdateModifierRequest{}
 	mi := &file_pos_v1_modifiers_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateModifierInput) String() string {
+func (x *UpdateModifierRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateModifierInput) ProtoMessage() {}
+func (*UpdateModifierRequest) ProtoMessage() {}
 
-func (x *CreateModifierInput) ProtoReflect() protoreflect.Message {
+func (x *UpdateModifierRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_modifiers_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -404,188 +356,140 @@ func (x *CreateModifierInput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateModifierInput.ProtoReflect.Descriptor instead.
-func (*CreateModifierInput) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateModifierRequest.ProtoReflect.Descriptor instead.
+func (*UpdateModifierRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *CreateModifierInput) GetName() string {
+func (x *UpdateModifierRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *CreateModifierInput) GetPrice() float64 {
+func (x *UpdateModifierRequest) GetPriceDelta() float64 {
 	if x != nil {
-		return x.Price
+		return x.PriceDelta
 	}
 	return 0
 }
 
-func (x *CreateModifierInput) GetIsDefault() bool {
+func (x *UpdateModifierRequest) GetGroupName() string {
 	if x != nil {
-		return x.IsDefault
-	}
-	return false
-}
-
-func (x *CreateModifierInput) GetSortOrder() int32 {
-	if x != nil {
-		return x.SortOrder
-	}
-	return 0
-}
-
-type CreateModifierGroupResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Group         *ModifierGroup         `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateModifierGroupResponse) Reset() {
-	*x = CreateModifierGroupResponse{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateModifierGroupResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateModifierGroupResponse) ProtoMessage() {}
-
-func (x *CreateModifierGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateModifierGroupResponse.ProtoReflect.Descriptor instead.
-func (*CreateModifierGroupResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CreateModifierGroupResponse) GetGroup() *ModifierGroup {
-	if x != nil {
-		return x.Group
-	}
-	return nil
-}
-
-type UpdateModifierGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	IsRequired    bool                   `protobuf:"varint,3,opt,name=is_required,json=isRequired,proto3" json:"is_required,omitempty"`
-	MinSelect     int32                  `protobuf:"varint,4,opt,name=min_select,json=minSelect,proto3" json:"min_select,omitempty"`
-	MaxSelect     int32                  `protobuf:"varint,5,opt,name=max_select,json=maxSelect,proto3" json:"max_select,omitempty"`
-	Modifiers     []*CreateModifierInput `protobuf:"bytes,6,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateModifierGroupRequest) Reset() {
-	*x = UpdateModifierGroupRequest{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateModifierGroupRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateModifierGroupRequest) ProtoMessage() {}
-
-func (x *UpdateModifierGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateModifierGroupRequest.ProtoReflect.Descriptor instead.
-func (*UpdateModifierGroupRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *UpdateModifierGroupRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateModifierGroupRequest) GetName() string {
-	if x != nil {
-		return x.Name
+		return x.GroupName
 	}
 	return ""
 }
 
-func (x *UpdateModifierGroupRequest) GetIsRequired() bool {
+func (x *UpdateModifierRequest) GetIsRequired() bool {
 	if x != nil {
 		return x.IsRequired
 	}
 	return false
 }
 
-func (x *UpdateModifierGroupRequest) GetMinSelect() int32 {
-	if x != nil {
-		return x.MinSelect
-	}
-	return 0
-}
-
-func (x *UpdateModifierGroupRequest) GetMaxSelect() int32 {
-	if x != nil {
-		return x.MaxSelect
-	}
-	return 0
-}
-
-func (x *UpdateModifierGroupRequest) GetModifiers() []*CreateModifierInput {
-	if x != nil {
-		return x.Modifiers
-	}
-	return nil
-}
-
-type UpdateModifierGroupResponse struct {
+type UpdateModifierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Group         *ModifierGroup         `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateModifierGroupResponse) Reset() {
-	*x = UpdateModifierGroupResponse{}
+func (x *UpdateModifierResponse) Reset() {
+	*x = UpdateModifierResponse{}
+	mi := &file_pos_v1_modifiers_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateModifierResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateModifierResponse) ProtoMessage() {}
+
+func (x *UpdateModifierResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_modifiers_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateModifierResponse.ProtoReflect.Descriptor instead.
+func (*UpdateModifierResponse) Descriptor() ([]byte, []int) {
+	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdateModifierResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type DeleteModifierRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteModifierRequest) Reset() {
+	*x = DeleteModifierRequest{}
+	mi := &file_pos_v1_modifiers_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteModifierRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteModifierRequest) ProtoMessage() {}
+
+func (x *DeleteModifierRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_modifiers_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteModifierRequest.ProtoReflect.Descriptor instead.
+func (*DeleteModifierRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{7}
+}
+
+type DeleteModifierResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteModifierResponse) Reset() {
+	*x = DeleteModifierResponse{}
 	mi := &file_pos_v1_modifiers_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateModifierGroupResponse) String() string {
+func (x *DeleteModifierResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateModifierGroupResponse) ProtoMessage() {}
+func (*DeleteModifierResponse) ProtoMessage() {}
 
-func (x *UpdateModifierGroupResponse) ProtoReflect() protoreflect.Message {
+func (x *DeleteModifierResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_modifiers_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -597,173 +501,65 @@ func (x *UpdateModifierGroupResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateModifierGroupResponse.ProtoReflect.Descriptor instead.
-func (*UpdateModifierGroupResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteModifierResponse.ProtoReflect.Descriptor instead.
+func (*DeleteModifierResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *UpdateModifierGroupResponse) GetGroup() *ModifierGroup {
+func (x *DeleteModifierResponse) GetMessage() string {
 	if x != nil {
-		return x.Group
+		return x.Message
 	}
-	return nil
-}
-
-type DeleteModifierGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteModifierGroupRequest) Reset() {
-	*x = DeleteModifierGroupRequest{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteModifierGroupRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteModifierGroupRequest) ProtoMessage() {}
-
-func (x *DeleteModifierGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteModifierGroupRequest.ProtoReflect.Descriptor instead.
-func (*DeleteModifierGroupRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *DeleteModifierGroupRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type DeleteModifierGroupResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteModifierGroupResponse) Reset() {
-	*x = DeleteModifierGroupResponse{}
-	mi := &file_pos_v1_modifiers_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteModifierGroupResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteModifierGroupResponse) ProtoMessage() {}
-
-func (x *DeleteModifierGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_modifiers_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteModifierGroupResponse.ProtoReflect.Descriptor instead.
-func (*DeleteModifierGroupResponse) Descriptor() ([]byte, []int) {
-	return file_pos_v1_modifiers_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *DeleteModifierGroupResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
+	return ""
 }
 
 var File_pos_v1_modifiers_proto protoreflect.FileDescriptor
 
 const file_pos_v1_modifiers_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/modifiers.proto\x12\x03pos\"\x9e\x02\n" +
-	"\rModifierGroup\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1f\n" +
-	"\vis_required\x18\x04 \x01(\bR\n" +
-	"isRequired\x12\x1d\n" +
-	"\n" +
-	"min_select\x18\x05 \x01(\x05R\tminSelect\x12\x1d\n" +
-	"\n" +
-	"max_select\x18\x06 \x01(\x05R\tmaxSelect\x12+\n" +
-	"\tmodifiers\x18\a \x03(\v2\r.pos.ModifierR\tmodifiers\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x9d\x01\n" +
+	"\x16pos/v1/modifiers.proto\x12\x03pos\"\xe8\x01\n" +
 	"\bModifier\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bgroup_id\x18\x02 \x01(\x03R\agroupId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
-	"\x05price\x18\x04 \x01(\x01R\x05price\x12\x1d\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1f\n" +
+	"\vprice_delta\x18\x04 \x01(\x01R\n" +
+	"priceDelta\x12\x1d\n" +
 	"\n" +
-	"is_default\x18\x05 \x01(\bR\tisDefault\x12\x1d\n" +
+	"group_name\x18\x05 \x01(\tR\tgroupName\x12\x1f\n" +
+	"\vis_required\x18\x06 \x01(\bR\n" +
+	"isRequired\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x06 \x01(\x05R\tsortOrder\"\x16\n" +
-	"\x14ListModifiersRequest\"C\n" +
-	"\x15ListModifiersResponse\x12*\n" +
-	"\x06groups\x18\x01 \x03(\v2\x12.pos.ModifierGroupR\x06groups\"\xc7\x01\n" +
-	"\x1aCreateModifierGroupRequest\x12\x12\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x16\n" +
+	"\x14ListModifiersRequest\"D\n" +
+	"\x15ListModifiersResponse\x12+\n" +
+	"\tmodifiers\x18\x01 \x03(\v2\r.pos.ModifierR\tmodifiers\"\x8c\x01\n" +
+	"\x15CreateModifierRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
-	"\vis_required\x18\x02 \x01(\bR\n" +
-	"isRequired\x12\x1d\n" +
+	"\vprice_delta\x18\x02 \x01(\x01R\n" +
+	"priceDelta\x12\x1d\n" +
 	"\n" +
-	"min_select\x18\x03 \x01(\x05R\tminSelect\x12\x1d\n" +
+	"group_name\x18\x03 \x01(\tR\tgroupName\x12\x1f\n" +
+	"\vis_required\x18\x04 \x01(\bR\n" +
+	"isRequired\"S\n" +
+	"\x16CreateModifierResponse\x12\x1f\n" +
+	"\vmodifier_id\x18\x01 \x01(\x03R\n" +
+	"modifierId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x8c\x01\n" +
+	"\x15UpdateModifierRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
+	"\vprice_delta\x18\x02 \x01(\x01R\n" +
+	"priceDelta\x12\x1d\n" +
 	"\n" +
-	"max_select\x18\x04 \x01(\x05R\tmaxSelect\x126\n" +
-	"\tmodifiers\x18\x05 \x03(\v2\x18.pos.CreateModifierInputR\tmodifiers\"}\n" +
-	"\x13CreateModifierInput\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05price\x18\x02 \x01(\x01R\x05price\x12\x1d\n" +
-	"\n" +
-	"is_default\x18\x03 \x01(\bR\tisDefault\x12\x1d\n" +
-	"\n" +
-	"sort_order\x18\x04 \x01(\x05R\tsortOrder\"G\n" +
-	"\x1bCreateModifierGroupResponse\x12(\n" +
-	"\x05group\x18\x01 \x01(\v2\x12.pos.ModifierGroupR\x05group\"\xd7\x01\n" +
-	"\x1aUpdateModifierGroupRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
-	"\vis_required\x18\x03 \x01(\bR\n" +
-	"isRequired\x12\x1d\n" +
-	"\n" +
-	"min_select\x18\x04 \x01(\x05R\tminSelect\x12\x1d\n" +
-	"\n" +
-	"max_select\x18\x05 \x01(\x05R\tmaxSelect\x126\n" +
-	"\tmodifiers\x18\x06 \x03(\v2\x18.pos.CreateModifierInputR\tmodifiers\"G\n" +
-	"\x1bUpdateModifierGroupResponse\x12(\n" +
-	"\x05group\x18\x01 \x01(\v2\x12.pos.ModifierGroupR\x05group\",\n" +
-	"\x1aDeleteModifierGroupRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
-	"\x1bDeleteModifierGroupResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"group_name\x18\x03 \x01(\tR\tgroupName\x12\x1f\n" +
+	"\vis_required\x18\x04 \x01(\bR\n" +
+	"isRequired\"2\n" +
+	"\x16UpdateModifierResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x17\n" +
+	"\x15DeleteModifierRequest\"2\n" +
+	"\x16DeleteModifierResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_modifiers_proto_rawDescOnce sync.Once
@@ -777,32 +573,25 @@ func file_pos_v1_modifiers_proto_rawDescGZIP() []byte {
 	return file_pos_v1_modifiers_proto_rawDescData
 }
 
-var file_pos_v1_modifiers_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_pos_v1_modifiers_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_modifiers_proto_goTypes = []any{
-	(*ModifierGroup)(nil),               // 0: pos.ModifierGroup
-	(*Modifier)(nil),                    // 1: pos.Modifier
-	(*ListModifiersRequest)(nil),        // 2: pos.ListModifiersRequest
-	(*ListModifiersResponse)(nil),       // 3: pos.ListModifiersResponse
-	(*CreateModifierGroupRequest)(nil),  // 4: pos.CreateModifierGroupRequest
-	(*CreateModifierInput)(nil),         // 5: pos.CreateModifierInput
-	(*CreateModifierGroupResponse)(nil), // 6: pos.CreateModifierGroupResponse
-	(*UpdateModifierGroupRequest)(nil),  // 7: pos.UpdateModifierGroupRequest
-	(*UpdateModifierGroupResponse)(nil), // 8: pos.UpdateModifierGroupResponse
-	(*DeleteModifierGroupRequest)(nil),  // 9: pos.DeleteModifierGroupRequest
-	(*DeleteModifierGroupResponse)(nil), // 10: pos.DeleteModifierGroupResponse
+	(*Modifier)(nil),               // 0: pos.Modifier
+	(*ListModifiersRequest)(nil),   // 1: pos.ListModifiersRequest
+	(*ListModifiersResponse)(nil),  // 2: pos.ListModifiersResponse
+	(*CreateModifierRequest)(nil),  // 3: pos.CreateModifierRequest
+	(*CreateModifierResponse)(nil), // 4: pos.CreateModifierResponse
+	(*UpdateModifierRequest)(nil),  // 5: pos.UpdateModifierRequest
+	(*UpdateModifierResponse)(nil), // 6: pos.UpdateModifierResponse
+	(*DeleteModifierRequest)(nil),  // 7: pos.DeleteModifierRequest
+	(*DeleteModifierResponse)(nil), // 8: pos.DeleteModifierResponse
 }
 var file_pos_v1_modifiers_proto_depIdxs = []int32{
-	1, // 0: pos.ModifierGroup.modifiers:type_name -> pos.Modifier
-	0, // 1: pos.ListModifiersResponse.groups:type_name -> pos.ModifierGroup
-	5, // 2: pos.CreateModifierGroupRequest.modifiers:type_name -> pos.CreateModifierInput
-	0, // 3: pos.CreateModifierGroupResponse.group:type_name -> pos.ModifierGroup
-	5, // 4: pos.UpdateModifierGroupRequest.modifiers:type_name -> pos.CreateModifierInput
-	0, // 5: pos.UpdateModifierGroupResponse.group:type_name -> pos.ModifierGroup
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0, // 0: pos.ListModifiersResponse.modifiers:type_name -> pos.Modifier
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_modifiers_proto_init() }
@@ -816,7 +605,7 @@ func file_pos_v1_modifiers_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_v1_modifiers_proto_rawDesc), len(file_pos_v1_modifiers_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -6,30 +6,14 @@
 
 /* eslint-disable */
 
-export interface ComboGroup {
-  id: number;
-  name: string;
-  minSelect: number;
-  maxSelect: number;
-  items: ComboGroupItem[];
-}
-
-export interface ComboGroupItem {
-  id: number;
-  menuItemId: number;
-  name: string;
-  priceAdjustment: number;
-}
-
 export interface Combo {
   id: number;
-  locationId: number;
+  ownerId: number;
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  items: string;
   isActive: boolean;
-  groups: ComboGroup[];
   createdAt: string;
   updatedAt: string;
 }
@@ -45,40 +29,30 @@ export interface CreateComboRequest {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  items: string;
   isActive: boolean;
-  groups: ComboGroupInput[];
-}
-
-export interface ComboGroupInput {
-  name: string;
-  minSelect: number;
-  maxSelect: number;
-  menuItemIds: number[];
 }
 
 export interface CreateComboResponse {
-  combo: Combo | undefined;
+  comboId: number;
+  message: string;
 }
 
 export interface UpdateComboRequest {
-  id: number;
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  items: string;
   isActive: boolean;
-  groups: ComboGroupInput[];
 }
 
 export interface UpdateComboResponse {
-  combo: Combo | undefined;
+  message: string;
 }
 
 export interface DeleteComboRequest {
-  id: number;
 }
 
 export interface DeleteComboResponse {
-  success: boolean;
+  message: string;
 }

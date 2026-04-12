@@ -24,15 +24,11 @@ const (
 type PaymentMethod struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StoreId       int64                  `protobuf:"varint,2,opt,name=store_id,json=storeId,proto3" json:"store_id,omitempty"`
-	Provider      string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"` // stripe, paypal, square, cash_on_delivery
-	DisplayName   string                 `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	IsEnabled     bool                   `protobuf:"varint,5,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
-	IsDefault     bool                   `protobuf:"varint,6,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
-	TestMode      bool                   `protobuf:"varint,7,opt,name=test_mode,json=testMode,proto3" json:"test_mode,omitempty"`
-	Config        map[string]string      `protobuf:"bytes,8,rep,name=config,proto3" json:"config,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Provider      string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"`
+	Config        string                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"`
+	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,9 +70,9 @@ func (x *PaymentMethod) GetId() int64 {
 	return 0
 }
 
-func (x *PaymentMethod) GetStoreId() int64 {
+func (x *PaymentMethod) GetOwnerId() int64 {
 	if x != nil {
-		return x.StoreId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -88,51 +84,23 @@ func (x *PaymentMethod) GetProvider() string {
 	return ""
 }
 
-func (x *PaymentMethod) GetDisplayName() string {
+func (x *PaymentMethod) GetConfig() string {
 	if x != nil {
-		return x.DisplayName
+		return x.Config
 	}
 	return ""
 }
 
-func (x *PaymentMethod) GetIsEnabled() bool {
+func (x *PaymentMethod) GetIsActive() bool {
 	if x != nil {
-		return x.IsEnabled
+		return x.IsActive
 	}
 	return false
-}
-
-func (x *PaymentMethod) GetIsDefault() bool {
-	if x != nil {
-		return x.IsDefault
-	}
-	return false
-}
-
-func (x *PaymentMethod) GetTestMode() bool {
-	if x != nil {
-		return x.TestMode
-	}
-	return false
-}
-
-func (x *PaymentMethod) GetConfig() map[string]string {
-	if x != nil {
-		return x.Config
-	}
-	return nil
 }
 
 func (x *PaymentMethod) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *PaymentMethod) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
 	}
 	return ""
 }
@@ -217,21 +185,131 @@ func (x *ListPaymentMethodsResponse) GetMethods() []*PaymentMethod {
 	return nil
 }
 
+type CreatePaymentMethodRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	Config        string                 `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	IsActive      bool                   `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreatePaymentMethodRequest) Reset() {
+	*x = CreatePaymentMethodRequest{}
+	mi := &file_store_v1_payments_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatePaymentMethodRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePaymentMethodRequest) ProtoMessage() {}
+
+func (x *CreatePaymentMethodRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_payments_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePaymentMethodRequest.ProtoReflect.Descriptor instead.
+func (*CreatePaymentMethodRequest) Descriptor() ([]byte, []int) {
+	return file_store_v1_payments_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreatePaymentMethodRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *CreatePaymentMethodRequest) GetConfig() string {
+	if x != nil {
+		return x.Config
+	}
+	return ""
+}
+
+func (x *CreatePaymentMethodRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+type CreatePaymentMethodResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreatePaymentMethodResponse) Reset() {
+	*x = CreatePaymentMethodResponse{}
+	mi := &file_store_v1_payments_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatePaymentMethodResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePaymentMethodResponse) ProtoMessage() {}
+
+func (x *CreatePaymentMethodResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_store_v1_payments_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePaymentMethodResponse.ProtoReflect.Descriptor instead.
+func (*CreatePaymentMethodResponse) Descriptor() ([]byte, []int) {
+	return file_store_v1_payments_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreatePaymentMethodResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *CreatePaymentMethodResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type UpdatePaymentMethodRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	IsEnabled     bool                   `protobuf:"varint,3,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
-	IsDefault     bool                   `protobuf:"varint,4,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
-	TestMode      bool                   `protobuf:"varint,5,opt,name=test_mode,json=testMode,proto3" json:"test_mode,omitempty"`
-	Config        map[string]string      `protobuf:"bytes,6,rep,name=config,proto3" json:"config,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Provider      string                 `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
+	Config        string                 `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
+	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdatePaymentMethodRequest) Reset() {
 	*x = UpdatePaymentMethodRequest{}
-	mi := &file_store_v1_payments_proto_msgTypes[3]
+	mi := &file_store_v1_payments_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -243,7 +321,7 @@ func (x *UpdatePaymentMethodRequest) String() string {
 func (*UpdatePaymentMethodRequest) ProtoMessage() {}
 
 func (x *UpdatePaymentMethodRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_payments_proto_msgTypes[3]
+	mi := &file_store_v1_payments_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -256,7 +334,7 @@ func (x *UpdatePaymentMethodRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePaymentMethodRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePaymentMethodRequest) Descriptor() ([]byte, []int) {
-	return file_store_v1_payments_proto_rawDescGZIP(), []int{3}
+	return file_store_v1_payments_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdatePaymentMethodRequest) GetId() int64 {
@@ -266,51 +344,37 @@ func (x *UpdatePaymentMethodRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdatePaymentMethodRequest) GetDisplayName() string {
+func (x *UpdatePaymentMethodRequest) GetProvider() string {
 	if x != nil {
-		return x.DisplayName
+		return x.Provider
 	}
 	return ""
 }
 
-func (x *UpdatePaymentMethodRequest) GetIsEnabled() bool {
-	if x != nil {
-		return x.IsEnabled
-	}
-	return false
-}
-
-func (x *UpdatePaymentMethodRequest) GetIsDefault() bool {
-	if x != nil {
-		return x.IsDefault
-	}
-	return false
-}
-
-func (x *UpdatePaymentMethodRequest) GetTestMode() bool {
-	if x != nil {
-		return x.TestMode
-	}
-	return false
-}
-
-func (x *UpdatePaymentMethodRequest) GetConfig() map[string]string {
+func (x *UpdatePaymentMethodRequest) GetConfig() string {
 	if x != nil {
 		return x.Config
 	}
-	return nil
+	return ""
+}
+
+func (x *UpdatePaymentMethodRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 type UpdatePaymentMethodResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Method        *PaymentMethod         `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdatePaymentMethodResponse) Reset() {
 	*x = UpdatePaymentMethodResponse{}
-	mi := &file_store_v1_payments_proto_msgTypes[4]
+	mi := &file_store_v1_payments_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -322,7 +386,7 @@ func (x *UpdatePaymentMethodResponse) String() string {
 func (*UpdatePaymentMethodResponse) ProtoMessage() {}
 
 func (x *UpdatePaymentMethodResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_v1_payments_proto_msgTypes[4]
+	mi := &file_store_v1_payments_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,57 +399,46 @@ func (x *UpdatePaymentMethodResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePaymentMethodResponse.ProtoReflect.Descriptor instead.
 func (*UpdatePaymentMethodResponse) Descriptor() ([]byte, []int) {
-	return file_store_v1_payments_proto_rawDescGZIP(), []int{4}
+	return file_store_v1_payments_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdatePaymentMethodResponse) GetMethod() *PaymentMethod {
+func (x *UpdatePaymentMethodResponse) GetMessage() string {
 	if x != nil {
-		return x.Method
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_store_v1_payments_proto protoreflect.FileDescriptor
 
 const file_store_v1_payments_proto_rawDesc = "" +
 	"\n" +
-	"\x17store/v1/payments.proto\x12\x05store\"\x87\x03\n" +
+	"\x17store/v1/payments.proto\x12\x05store\"\xaa\x01\n" +
 	"\rPaymentMethod\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bstore_id\x18\x02 \x01(\x03R\astoreId\x12\x1a\n" +
-	"\bprovider\x18\x03 \x01(\tR\bprovider\x12!\n" +
-	"\fdisplay_name\x18\x04 \x01(\tR\vdisplayName\x12\x1d\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1a\n" +
+	"\bprovider\x18\x03 \x01(\tR\bprovider\x12\x16\n" +
+	"\x06config\x18\x04 \x01(\tR\x06config\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"is_enabled\x18\x05 \x01(\bR\tisEnabled\x12\x1d\n" +
-	"\n" +
-	"is_default\x18\x06 \x01(\bR\tisDefault\x12\x1b\n" +
-	"\ttest_mode\x18\a \x01(\bR\btestMode\x128\n" +
-	"\x06config\x18\b \x03(\v2 .store.PaymentMethod.ConfigEntryR\x06config\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\x1a9\n" +
-	"\vConfigEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x1b\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x1b\n" +
 	"\x19ListPaymentMethodsRequest\"L\n" +
 	"\x1aListPaymentMethodsResponse\x12.\n" +
-	"\amethods\x18\x01 \x03(\v2\x14.store.PaymentMethodR\amethods\"\xac\x02\n" +
+	"\amethods\x18\x01 \x03(\v2\x14.store.PaymentMethodR\amethods\"m\n" +
+	"\x1aCreatePaymentMethodRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x16\n" +
+	"\x06config\x18\x02 \x01(\tR\x06config\x12\x1b\n" +
+	"\tis_active\x18\x03 \x01(\bR\bisActive\"G\n" +
+	"\x1bCreatePaymentMethodResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"}\n" +
 	"\x1aUpdatePaymentMethodRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x1d\n" +
-	"\n" +
-	"is_enabled\x18\x03 \x01(\bR\tisEnabled\x12\x1d\n" +
-	"\n" +
-	"is_default\x18\x04 \x01(\bR\tisDefault\x12\x1b\n" +
-	"\ttest_mode\x18\x05 \x01(\bR\btestMode\x12E\n" +
-	"\x06config\x18\x06 \x03(\v2-.store.UpdatePaymentMethodRequest.ConfigEntryR\x06config\x1a9\n" +
-	"\vConfigEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"K\n" +
-	"\x1bUpdatePaymentMethodResponse\x12,\n" +
-	"\x06method\x18\x01 \x01(\v2\x14.store.PaymentMethodR\x06methodB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
+	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
+	"\x06config\x18\x03 \x01(\tR\x06config\x12\x1b\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\"7\n" +
+	"\x1bUpdatePaymentMethodResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB)Z'github.com/voxire/voxie/gen/go/store/v1b\x06proto3"
 
 var (
 	file_store_v1_payments_proto_rawDescOnce sync.Once
@@ -404,21 +457,18 @@ var file_store_v1_payments_proto_goTypes = []any{
 	(*PaymentMethod)(nil),               // 0: store.PaymentMethod
 	(*ListPaymentMethodsRequest)(nil),   // 1: store.ListPaymentMethodsRequest
 	(*ListPaymentMethodsResponse)(nil),  // 2: store.ListPaymentMethodsResponse
-	(*UpdatePaymentMethodRequest)(nil),  // 3: store.UpdatePaymentMethodRequest
-	(*UpdatePaymentMethodResponse)(nil), // 4: store.UpdatePaymentMethodResponse
-	nil,                                 // 5: store.PaymentMethod.ConfigEntry
-	nil,                                 // 6: store.UpdatePaymentMethodRequest.ConfigEntry
+	(*CreatePaymentMethodRequest)(nil),  // 3: store.CreatePaymentMethodRequest
+	(*CreatePaymentMethodResponse)(nil), // 4: store.CreatePaymentMethodResponse
+	(*UpdatePaymentMethodRequest)(nil),  // 5: store.UpdatePaymentMethodRequest
+	(*UpdatePaymentMethodResponse)(nil), // 6: store.UpdatePaymentMethodResponse
 }
 var file_store_v1_payments_proto_depIdxs = []int32{
-	5, // 0: store.PaymentMethod.config:type_name -> store.PaymentMethod.ConfigEntry
-	0, // 1: store.ListPaymentMethodsResponse.methods:type_name -> store.PaymentMethod
-	6, // 2: store.UpdatePaymentMethodRequest.config:type_name -> store.UpdatePaymentMethodRequest.ConfigEntry
-	0, // 3: store.UpdatePaymentMethodResponse.method:type_name -> store.PaymentMethod
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 0: store.ListPaymentMethodsResponse.methods:type_name -> store.PaymentMethod
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_store_v1_payments_proto_init() }

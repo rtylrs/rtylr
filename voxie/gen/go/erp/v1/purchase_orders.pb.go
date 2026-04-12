@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,28 +21,122 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type PurchaseOrderItem struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	PurchaseOrderId  int64                  `protobuf:"varint,2,opt,name=purchase_order_id,json=purchaseOrderId,proto3" json:"purchase_order_id,omitempty"`
+	ProductId        int64                  `protobuf:"varint,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	QuantityOrdered  float64                `protobuf:"fixed64,4,opt,name=quantity_ordered,json=quantityOrdered,proto3" json:"quantity_ordered,omitempty"`
+	QuantityReceived float64                `protobuf:"fixed64,5,opt,name=quantity_received,json=quantityReceived,proto3" json:"quantity_received,omitempty"`
+	UnitCost         float64                `protobuf:"fixed64,6,opt,name=unit_cost,json=unitCost,proto3" json:"unit_cost,omitempty"`
+	TotalCost        float64                `protobuf:"fixed64,7,opt,name=total_cost,json=totalCost,proto3" json:"total_cost,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *PurchaseOrderItem) Reset() {
+	*x = PurchaseOrderItem{}
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PurchaseOrderItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PurchaseOrderItem) ProtoMessage() {}
+
+func (x *PurchaseOrderItem) ProtoReflect() protoreflect.Message {
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PurchaseOrderItem.ProtoReflect.Descriptor instead.
+func (*PurchaseOrderItem) Descriptor() ([]byte, []int) {
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *PurchaseOrderItem) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetPurchaseOrderId() int64 {
+	if x != nil {
+		return x.PurchaseOrderId
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetProductId() int64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetQuantityOrdered() float64 {
+	if x != nil {
+		return x.QuantityOrdered
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetQuantityReceived() float64 {
+	if x != nil {
+		return x.QuantityReceived
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetUnitCost() float64 {
+	if x != nil {
+		return x.UnitCost
+	}
+	return 0
+}
+
+func (x *PurchaseOrderItem) GetTotalCost() float64 {
+	if x != nil {
+		return x.TotalCost
+	}
+	return 0
+}
+
 type PurchaseOrder struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Number        string                 `protobuf:"bytes,2,opt,name=number,proto3" json:"number,omitempty"`
-	SupplierId    int64                  `protobuf:"varint,3,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
-	SupplierName  string                 `protobuf:"bytes,4,opt,name=supplier_name,json=supplierName,proto3" json:"supplier_name,omitempty"`
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"` // draft, sent, received, cancelled
-	Lines         []*PurchaseOrderLine   `protobuf:"bytes,6,rep,name=lines,proto3" json:"lines,omitempty"`
-	Subtotal      float64                `protobuf:"fixed64,7,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
-	Tax           float64                `protobuf:"fixed64,8,opt,name=tax,proto3" json:"tax,omitempty"`
-	Total         float64                `protobuf:"fixed64,9,opt,name=total,proto3" json:"total,omitempty"`
-	Notes         string                 `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
-	ExpectedDate  string                 `protobuf:"bytes,11,opt,name=expected_date,json=expectedDate,proto3" json:"expected_date,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId          int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	SupplierId       int64                  `protobuf:"varint,3,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	PoNumber         string                 `protobuf:"bytes,4,opt,name=po_number,json=poNumber,proto3" json:"po_number,omitempty"`
+	Status           string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	Subtotal         float64                `protobuf:"fixed64,6,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
+	TaxAmount        float64                `protobuf:"fixed64,7,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
+	Total            float64                `protobuf:"fixed64,8,opt,name=total,proto3" json:"total,omitempty"`
+	ExpectedDelivery string                 `protobuf:"bytes,9,opt,name=expected_delivery,json=expectedDelivery,proto3" json:"expected_delivery,omitempty"`
+	ReceivedAt       string                 `protobuf:"bytes,10,opt,name=received_at,json=receivedAt,proto3" json:"received_at,omitempty"`
+	Notes            string                 `protobuf:"bytes,11,opt,name=notes,proto3" json:"notes,omitempty"`
+	CreatedBy        int64                  `protobuf:"varint,12,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt        string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string                 `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Items            []*PurchaseOrderItem   `protobuf:"bytes,15,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *PurchaseOrder) Reset() {
 	*x = PurchaseOrder{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[0]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -55,7 +148,7 @@ func (x *PurchaseOrder) String() string {
 func (*PurchaseOrder) ProtoMessage() {}
 
 func (x *PurchaseOrder) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[0]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -68,7 +161,7 @@ func (x *PurchaseOrder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PurchaseOrder.ProtoReflect.Descriptor instead.
 func (*PurchaseOrder) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{0}
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *PurchaseOrder) GetId() int64 {
@@ -78,11 +171,11 @@ func (x *PurchaseOrder) GetId() int64 {
 	return 0
 }
 
-func (x *PurchaseOrder) GetNumber() string {
+func (x *PurchaseOrder) GetOwnerId() int64 {
 	if x != nil {
-		return x.Number
+		return x.OwnerId
 	}
-	return ""
+	return 0
 }
 
 func (x *PurchaseOrder) GetSupplierId() int64 {
@@ -92,9 +185,9 @@ func (x *PurchaseOrder) GetSupplierId() int64 {
 	return 0
 }
 
-func (x *PurchaseOrder) GetSupplierName() string {
+func (x *PurchaseOrder) GetPoNumber() string {
 	if x != nil {
-		return x.SupplierName
+		return x.PoNumber
 	}
 	return ""
 }
@@ -106,13 +199,6 @@ func (x *PurchaseOrder) GetStatus() string {
 	return ""
 }
 
-func (x *PurchaseOrder) GetLines() []*PurchaseOrderLine {
-	if x != nil {
-		return x.Lines
-	}
-	return nil
-}
-
 func (x *PurchaseOrder) GetSubtotal() float64 {
 	if x != nil {
 		return x.Subtotal
@@ -120,9 +206,9 @@ func (x *PurchaseOrder) GetSubtotal() float64 {
 	return 0
 }
 
-func (x *PurchaseOrder) GetTax() float64 {
+func (x *PurchaseOrder) GetTaxAmount() float64 {
 	if x != nil {
-		return x.Tax
+		return x.TaxAmount
 	}
 	return 0
 }
@@ -134,6 +220,20 @@ func (x *PurchaseOrder) GetTotal() float64 {
 	return 0
 }
 
+func (x *PurchaseOrder) GetExpectedDelivery() string {
+	if x != nil {
+		return x.ExpectedDelivery
+	}
+	return ""
+}
+
+func (x *PurchaseOrder) GetReceivedAt() string {
+	if x != nil {
+		return x.ReceivedAt
+	}
+	return ""
+}
+
 func (x *PurchaseOrder) GetNotes() string {
 	if x != nil {
 		return x.Notes
@@ -141,11 +241,11 @@ func (x *PurchaseOrder) GetNotes() string {
 	return ""
 }
 
-func (x *PurchaseOrder) GetExpectedDate() string {
+func (x *PurchaseOrder) GetCreatedBy() int64 {
 	if x != nil {
-		return x.ExpectedDate
+		return x.CreatedBy
 	}
-	return ""
+	return 0
 }
 
 func (x *PurchaseOrder) GetCreatedAt() string {
@@ -162,87 +262,16 @@ func (x *PurchaseOrder) GetUpdatedAt() string {
 	return ""
 }
 
-type PurchaseOrderLine struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProductId     int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	ProductName   string                 `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
-	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	UnitPrice     float64                `protobuf:"fixed64,4,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
-	Total         float64                `protobuf:"fixed64,5,opt,name=total,proto3" json:"total,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PurchaseOrderLine) Reset() {
-	*x = PurchaseOrderLine{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PurchaseOrderLine) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PurchaseOrderLine) ProtoMessage() {}
-
-func (x *PurchaseOrderLine) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[1]
+func (x *PurchaseOrder) GetItems() []*PurchaseOrderItem {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.Items
 	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PurchaseOrderLine.ProtoReflect.Descriptor instead.
-func (*PurchaseOrderLine) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *PurchaseOrderLine) GetProductId() int64 {
-	if x != nil {
-		return x.ProductId
-	}
-	return 0
-}
-
-func (x *PurchaseOrderLine) GetProductName() string {
-	if x != nil {
-		return x.ProductName
-	}
-	return ""
-}
-
-func (x *PurchaseOrderLine) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
-}
-
-func (x *PurchaseOrderLine) GetUnitPrice() float64 {
-	if x != nil {
-		return x.UnitPrice
-	}
-	return 0
-}
-
-func (x *PurchaseOrderLine) GetTotal() float64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
+	return nil
 }
 
 type ListPurchaseOrdersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	SupplierId    int64                  `protobuf:"varint,3,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -277,13 +306,6 @@ func (*ListPurchaseOrdersRequest) Descriptor() ([]byte, []int) {
 	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListPurchaseOrdersRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListPurchaseOrdersRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
@@ -291,19 +313,11 @@ func (x *ListPurchaseOrdersRequest) GetStatus() string {
 	return ""
 }
 
-func (x *ListPurchaseOrdersRequest) GetSupplierId() int64 {
-	if x != nil {
-		return x.SupplierId
-	}
-	return 0
-}
-
 type ListPurchaseOrdersResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Orders        []*PurchaseOrder       `protobuf:"bytes,1,rep,name=orders,proto3" json:"orders,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	PurchaseOrders []*PurchaseOrder       `protobuf:"bytes,1,rep,name=purchase_orders,json=purchaseOrders,proto3" json:"purchase_orders,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ListPurchaseOrdersResponse) Reset() {
@@ -336,41 +350,36 @@ func (*ListPurchaseOrdersResponse) Descriptor() ([]byte, []int) {
 	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ListPurchaseOrdersResponse) GetOrders() []*PurchaseOrder {
+func (x *ListPurchaseOrdersResponse) GetPurchaseOrders() []*PurchaseOrder {
 	if x != nil {
-		return x.Orders
+		return x.PurchaseOrders
 	}
 	return nil
 }
 
-func (x *ListPurchaseOrdersResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
+type CreatePurchaseOrderItemInput struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ProductId       int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	QuantityOrdered float64                `protobuf:"fixed64,2,opt,name=quantity_ordered,json=quantityOrdered,proto3" json:"quantity_ordered,omitempty"`
+	UnitCost        float64                `protobuf:"fixed64,3,opt,name=unit_cost,json=unitCost,proto3" json:"unit_cost,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
-type GetPurchaseOrderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetPurchaseOrderRequest) Reset() {
-	*x = GetPurchaseOrderRequest{}
+func (x *CreatePurchaseOrderItemInput) Reset() {
+	*x = CreatePurchaseOrderItemInput{}
 	mi := &file_erp_v1_purchase_orders_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetPurchaseOrderRequest) String() string {
+func (x *CreatePurchaseOrderItemInput) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetPurchaseOrderRequest) ProtoMessage() {}
+func (*CreatePurchaseOrderItemInput) ProtoMessage() {}
 
-func (x *GetPurchaseOrderRequest) ProtoReflect() protoreflect.Message {
+func (x *CreatePurchaseOrderItemInput) ProtoReflect() protoreflect.Message {
 	mi := &file_erp_v1_purchase_orders_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -382,75 +391,47 @@ func (x *GetPurchaseOrderRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetPurchaseOrderRequest.ProtoReflect.Descriptor instead.
-func (*GetPurchaseOrderRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreatePurchaseOrderItemInput.ProtoReflect.Descriptor instead.
+func (*CreatePurchaseOrderItemInput) Descriptor() ([]byte, []int) {
 	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetPurchaseOrderRequest) GetId() int64 {
+func (x *CreatePurchaseOrderItemInput) GetProductId() int64 {
 	if x != nil {
-		return x.Id
+		return x.ProductId
 	}
 	return 0
 }
 
-type GetPurchaseOrderResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Order         *PurchaseOrder         `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetPurchaseOrderResponse) Reset() {
-	*x = GetPurchaseOrderResponse{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetPurchaseOrderResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetPurchaseOrderResponse) ProtoMessage() {}
-
-func (x *GetPurchaseOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[5]
+func (x *CreatePurchaseOrderItemInput) GetQuantityOrdered() float64 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.QuantityOrdered
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use GetPurchaseOrderResponse.ProtoReflect.Descriptor instead.
-func (*GetPurchaseOrderResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetPurchaseOrderResponse) GetOrder() *PurchaseOrder {
+func (x *CreatePurchaseOrderItemInput) GetUnitCost() float64 {
 	if x != nil {
-		return x.Order
+		return x.UnitCost
 	}
-	return nil
+	return 0
 }
 
 type CreatePurchaseOrderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SupplierId    int64                  `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
-	Lines         []*PurchaseOrderLine   `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
-	Notes         string                 `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	ExpectedDate  string                 `protobuf:"bytes,4,opt,name=expected_date,json=expectedDate,proto3" json:"expected_date,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState          `protogen:"open.v1"`
+	SupplierId       int64                           `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	PoNumber         string                          `protobuf:"bytes,2,opt,name=po_number,json=poNumber,proto3" json:"po_number,omitempty"`
+	TaxAmount        float64                         `protobuf:"fixed64,3,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
+	ExpectedDelivery string                          `protobuf:"bytes,4,opt,name=expected_delivery,json=expectedDelivery,proto3" json:"expected_delivery,omitempty"`
+	Notes            string                          `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
+	Items            []*CreatePurchaseOrderItemInput `protobuf:"bytes,6,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CreatePurchaseOrderRequest) Reset() {
 	*x = CreatePurchaseOrderRequest{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[6]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -462,7 +443,7 @@ func (x *CreatePurchaseOrderRequest) String() string {
 func (*CreatePurchaseOrderRequest) ProtoMessage() {}
 
 func (x *CreatePurchaseOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[6]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -475,7 +456,7 @@ func (x *CreatePurchaseOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePurchaseOrderRequest.ProtoReflect.Descriptor instead.
 func (*CreatePurchaseOrderRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{6}
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreatePurchaseOrderRequest) GetSupplierId() int64 {
@@ -485,11 +466,25 @@ func (x *CreatePurchaseOrderRequest) GetSupplierId() int64 {
 	return 0
 }
 
-func (x *CreatePurchaseOrderRequest) GetLines() []*PurchaseOrderLine {
+func (x *CreatePurchaseOrderRequest) GetPoNumber() string {
 	if x != nil {
-		return x.Lines
+		return x.PoNumber
 	}
-	return nil
+	return ""
+}
+
+func (x *CreatePurchaseOrderRequest) GetTaxAmount() float64 {
+	if x != nil {
+		return x.TaxAmount
+	}
+	return 0
+}
+
+func (x *CreatePurchaseOrderRequest) GetExpectedDelivery() string {
+	if x != nil {
+		return x.ExpectedDelivery
+	}
+	return ""
 }
 
 func (x *CreatePurchaseOrderRequest) GetNotes() string {
@@ -499,23 +494,24 @@ func (x *CreatePurchaseOrderRequest) GetNotes() string {
 	return ""
 }
 
-func (x *CreatePurchaseOrderRequest) GetExpectedDate() string {
+func (x *CreatePurchaseOrderRequest) GetItems() []*CreatePurchaseOrderItemInput {
 	if x != nil {
-		return x.ExpectedDate
+		return x.Items
 	}
-	return ""
+	return nil
 }
 
 type CreatePurchaseOrderResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Order         *PurchaseOrder         `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	PurchaseOrderId int64                  `protobuf:"varint,1,opt,name=purchase_order_id,json=purchaseOrderId,proto3" json:"purchase_order_id,omitempty"`
+	Message         string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreatePurchaseOrderResponse) Reset() {
 	*x = CreatePurchaseOrderResponse{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[7]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -527,7 +523,7 @@ func (x *CreatePurchaseOrderResponse) String() string {
 func (*CreatePurchaseOrderResponse) ProtoMessage() {}
 
 func (x *CreatePurchaseOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[7]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -540,14 +536,21 @@ func (x *CreatePurchaseOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePurchaseOrderResponse.ProtoReflect.Descriptor instead.
 func (*CreatePurchaseOrderResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{7}
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreatePurchaseOrderResponse) GetOrder() *PurchaseOrder {
+func (x *CreatePurchaseOrderResponse) GetPurchaseOrderId() int64 {
 	if x != nil {
-		return x.Order
+		return x.PurchaseOrderId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreatePurchaseOrderResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdatePurchaseOrderStatusRequest struct {
@@ -560,7 +563,7 @@ type UpdatePurchaseOrderStatusRequest struct {
 
 func (x *UpdatePurchaseOrderStatusRequest) Reset() {
 	*x = UpdatePurchaseOrderStatusRequest{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[8]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -572,7 +575,7 @@ func (x *UpdatePurchaseOrderStatusRequest) String() string {
 func (*UpdatePurchaseOrderStatusRequest) ProtoMessage() {}
 
 func (x *UpdatePurchaseOrderStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[8]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -585,7 +588,7 @@ func (x *UpdatePurchaseOrderStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePurchaseOrderStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePurchaseOrderStatusRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{8}
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdatePurchaseOrderStatusRequest) GetId() int64 {
@@ -604,14 +607,14 @@ func (x *UpdatePurchaseOrderStatusRequest) GetStatus() string {
 
 type UpdatePurchaseOrderStatusResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Order         *PurchaseOrder         `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdatePurchaseOrderStatusResponse) Reset() {
 	*x = UpdatePurchaseOrderStatusResponse{}
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[9]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -623,7 +626,7 @@ func (x *UpdatePurchaseOrderStatusResponse) String() string {
 func (*UpdatePurchaseOrderStatusResponse) ProtoMessage() {}
 
 func (x *UpdatePurchaseOrderStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_purchase_orders_proto_msgTypes[9]
+	mi := &file_erp_v1_purchase_orders_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -636,76 +639,80 @@ func (x *UpdatePurchaseOrderStatusResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use UpdatePurchaseOrderStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdatePurchaseOrderStatusResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{9}
+	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *UpdatePurchaseOrderStatusResponse) GetOrder() *PurchaseOrder {
+func (x *UpdatePurchaseOrderStatusResponse) GetMessage() string {
 	if x != nil {
-		return x.Order
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_erp_v1_purchase_orders_proto protoreflect.FileDescriptor
 
 const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\n" +
-	"\x1cerp/v1/purchase_orders.proto\x12\x03erp\x1a\x1acommon/v1/pagination.proto\"\x80\x03\n" +
+	"\x1cerp/v1/purchase_orders.proto\x12\x03erp\"\x82\x02\n" +
+	"\x11PurchaseOrderItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
+	"\x11purchase_order_id\x18\x02 \x01(\x03R\x0fpurchaseOrderId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x03 \x01(\x03R\tproductId\x12)\n" +
+	"\x10quantity_ordered\x18\x04 \x01(\x01R\x0fquantityOrdered\x12+\n" +
+	"\x11quantity_received\x18\x05 \x01(\x01R\x10quantityReceived\x12\x1b\n" +
+	"\tunit_cost\x18\x06 \x01(\x01R\bunitCost\x12\x1d\n" +
+	"\n" +
+	"total_cost\x18\a \x01(\x01R\ttotalCost\"\xd0\x03\n" +
 	"\rPurchaseOrder\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06number\x18\x02 \x01(\tR\x06number\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
 	"\vsupplier_id\x18\x03 \x01(\x03R\n" +
-	"supplierId\x12#\n" +
-	"\rsupplier_name\x18\x04 \x01(\tR\fsupplierName\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12,\n" +
-	"\x05lines\x18\x06 \x03(\v2\x16.erp.PurchaseOrderLineR\x05lines\x12\x1a\n" +
-	"\bsubtotal\x18\a \x01(\x01R\bsubtotal\x12\x10\n" +
-	"\x03tax\x18\b \x01(\x01R\x03tax\x12\x14\n" +
-	"\x05total\x18\t \x01(\x01R\x05total\x12\x14\n" +
-	"\x05notes\x18\n" +
-	" \x01(\tR\x05notes\x12#\n" +
-	"\rexpected_date\x18\v \x01(\tR\fexpectedDate\x12\x1d\n" +
+	"supplierId\x12\x1b\n" +
+	"\tpo_number\x18\x04 \x01(\tR\bpoNumber\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1a\n" +
+	"\bsubtotal\x18\x06 \x01(\x01R\bsubtotal\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\f \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"tax_amount\x18\a \x01(\x01R\ttaxAmount\x12\x14\n" +
+	"\x05total\x18\b \x01(\x01R\x05total\x12+\n" +
+	"\x11expected_delivery\x18\t \x01(\tR\x10expectedDelivery\x12\x1f\n" +
+	"\vreceived_at\x18\n" +
+	" \x01(\tR\n" +
+	"receivedAt\x12\x14\n" +
+	"\x05notes\x18\v \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\r \x01(\tR\tupdatedAt\"\xa6\x01\n" +
-	"\x11PurchaseOrderLine\x12\x1d\n" +
+	"created_by\x18\f \x01(\x03R\tcreatedBy\x12\x1d\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12!\n" +
-	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12\x1a\n" +
-	"\bquantity\x18\x03 \x01(\x05R\bquantity\x12\x1d\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"unit_price\x18\x04 \x01(\x01R\tunitPrice\x12\x14\n" +
-	"\x05total\x18\x05 \x01(\x01R\x05total\"\x8f\x01\n" +
-	"\x19ListPurchaseOrdersRequest\x129\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12,\n" +
+	"\x05items\x18\x0f \x03(\v2\x16.erp.PurchaseOrderItemR\x05items\"3\n" +
+	"\x19ListPurchaseOrdersRequest\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"Y\n" +
+	"\x1aListPurchaseOrdersResponse\x12;\n" +
+	"\x0fpurchase_orders\x18\x01 \x03(\v2\x12.erp.PurchaseOrderR\x0epurchaseOrders\"\x85\x01\n" +
+	"\x1cCreatePurchaseOrderItemInput\x12\x1d\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1f\n" +
-	"\vsupplier_id\x18\x03 \x01(\x03R\n" +
-	"supplierId\"\x84\x01\n" +
-	"\x1aListPurchaseOrdersResponse\x12*\n" +
-	"\x06orders\x18\x01 \x03(\v2\x12.erp.PurchaseOrderR\x06orders\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\")\n" +
-	"\x17GetPurchaseOrderRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"D\n" +
-	"\x18GetPurchaseOrderResponse\x12(\n" +
-	"\x05order\x18\x01 \x01(\v2\x12.erp.PurchaseOrderR\x05order\"\xa6\x01\n" +
+	"product_id\x18\x01 \x01(\x03R\tproductId\x12)\n" +
+	"\x10quantity_ordered\x18\x02 \x01(\x01R\x0fquantityOrdered\x12\x1b\n" +
+	"\tunit_cost\x18\x03 \x01(\x01R\bunitCost\"\xf5\x01\n" +
 	"\x1aCreatePurchaseOrderRequest\x12\x1f\n" +
 	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
-	"supplierId\x12,\n" +
-	"\x05lines\x18\x02 \x03(\v2\x16.erp.PurchaseOrderLineR\x05lines\x12\x14\n" +
-	"\x05notes\x18\x03 \x01(\tR\x05notes\x12#\n" +
-	"\rexpected_date\x18\x04 \x01(\tR\fexpectedDate\"G\n" +
-	"\x1bCreatePurchaseOrderResponse\x12(\n" +
-	"\x05order\x18\x01 \x01(\v2\x12.erp.PurchaseOrderR\x05order\"J\n" +
+	"supplierId\x12\x1b\n" +
+	"\tpo_number\x18\x02 \x01(\tR\bpoNumber\x12\x1d\n" +
+	"\n" +
+	"tax_amount\x18\x03 \x01(\x01R\ttaxAmount\x12+\n" +
+	"\x11expected_delivery\x18\x04 \x01(\tR\x10expectedDelivery\x12\x14\n" +
+	"\x05notes\x18\x05 \x01(\tR\x05notes\x127\n" +
+	"\x05items\x18\x06 \x03(\v2!.erp.CreatePurchaseOrderItemInputR\x05items\"c\n" +
+	"\x1bCreatePurchaseOrderResponse\x12*\n" +
+	"\x11purchase_order_id\x18\x01 \x01(\x03R\x0fpurchaseOrderId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"J\n" +
 	" UpdatePurchaseOrderStatusRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"M\n" +
-	"!UpdatePurchaseOrderStatusResponse\x12(\n" +
-	"\x05order\x18\x01 \x01(\v2\x12.erp.PurchaseOrderR\x05orderB'Z%github.com/voxire/voxie/gen/go/erp/v1b\x06proto3"
+	"\x06status\x18\x02 \x01(\tR\x06status\"=\n" +
+	"!UpdatePurchaseOrderStatusResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/erp/v1b\x06proto3"
 
 var (
 	file_erp_v1_purchase_orders_proto_rawDescOnce sync.Once
@@ -719,35 +726,27 @@ func file_erp_v1_purchase_orders_proto_rawDescGZIP() []byte {
 	return file_erp_v1_purchase_orders_proto_rawDescData
 }
 
-var file_erp_v1_purchase_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_erp_v1_purchase_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_erp_v1_purchase_orders_proto_goTypes = []any{
-	(*PurchaseOrder)(nil),                     // 0: erp.PurchaseOrder
-	(*PurchaseOrderLine)(nil),                 // 1: erp.PurchaseOrderLine
+	(*PurchaseOrderItem)(nil),                 // 0: erp.PurchaseOrderItem
+	(*PurchaseOrder)(nil),                     // 1: erp.PurchaseOrder
 	(*ListPurchaseOrdersRequest)(nil),         // 2: erp.ListPurchaseOrdersRequest
 	(*ListPurchaseOrdersResponse)(nil),        // 3: erp.ListPurchaseOrdersResponse
-	(*GetPurchaseOrderRequest)(nil),           // 4: erp.GetPurchaseOrderRequest
-	(*GetPurchaseOrderResponse)(nil),          // 5: erp.GetPurchaseOrderResponse
-	(*CreatePurchaseOrderRequest)(nil),        // 6: erp.CreatePurchaseOrderRequest
-	(*CreatePurchaseOrderResponse)(nil),       // 7: erp.CreatePurchaseOrderResponse
-	(*UpdatePurchaseOrderStatusRequest)(nil),  // 8: erp.UpdatePurchaseOrderStatusRequest
-	(*UpdatePurchaseOrderStatusResponse)(nil), // 9: erp.UpdatePurchaseOrderStatusResponse
-	(*v1.PaginationRequest)(nil),              // 10: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),             // 11: common.PaginationResponse
+	(*CreatePurchaseOrderItemInput)(nil),      // 4: erp.CreatePurchaseOrderItemInput
+	(*CreatePurchaseOrderRequest)(nil),        // 5: erp.CreatePurchaseOrderRequest
+	(*CreatePurchaseOrderResponse)(nil),       // 6: erp.CreatePurchaseOrderResponse
+	(*UpdatePurchaseOrderStatusRequest)(nil),  // 7: erp.UpdatePurchaseOrderStatusRequest
+	(*UpdatePurchaseOrderStatusResponse)(nil), // 8: erp.UpdatePurchaseOrderStatusResponse
 }
 var file_erp_v1_purchase_orders_proto_depIdxs = []int32{
-	1,  // 0: erp.PurchaseOrder.lines:type_name -> erp.PurchaseOrderLine
-	10, // 1: erp.ListPurchaseOrdersRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 2: erp.ListPurchaseOrdersResponse.orders:type_name -> erp.PurchaseOrder
-	11, // 3: erp.ListPurchaseOrdersResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 4: erp.GetPurchaseOrderResponse.order:type_name -> erp.PurchaseOrder
-	1,  // 5: erp.CreatePurchaseOrderRequest.lines:type_name -> erp.PurchaseOrderLine
-	0,  // 6: erp.CreatePurchaseOrderResponse.order:type_name -> erp.PurchaseOrder
-	0,  // 7: erp.UpdatePurchaseOrderStatusResponse.order:type_name -> erp.PurchaseOrder
-	8,  // [8:8] is the sub-list for method output_type
-	8,  // [8:8] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	0, // 0: erp.PurchaseOrder.items:type_name -> erp.PurchaseOrderItem
+	1, // 1: erp.ListPurchaseOrdersResponse.purchase_orders:type_name -> erp.PurchaseOrder
+	4, // 2: erp.CreatePurchaseOrderRequest.items:type_name -> erp.CreatePurchaseOrderItemInput
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_erp_v1_purchase_orders_proto_init() }
@@ -761,7 +760,7 @@ func file_erp_v1_purchase_orders_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_erp_v1_purchase_orders_proto_rawDesc), len(file_erp_v1_purchase_orders_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

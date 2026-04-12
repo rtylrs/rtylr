@@ -4,63 +4,76 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-import "common/v1/pagination.proto";
-
-// ── CashMovement ───────────────────────────────────────────────────
+// ── CashMovement ──────────────────────────────────────────────────
 
 message CashMovement {
   int64 id = 1;
-  int64 session_id = 2;
-  int64 location_id = 3;
-  string type = 4; // drop, pickup, adjustment
-  double amount = 5;
-  string reason = 6;
-  string performed_by = 7;
-  string created_at = 8;
+  int64 business_id = 2;
+  int64 branch_id = 3;
+  int64 terminal_id = 4;
+  int64 session_id = 5;
+  int64 employee_id = 6;
+  string type = 7;
+  double amount = 8;
+  string reason = 9;
+  int64 approved_by = 10;
+  string created_at = 11;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
 message ListCashMovementsRequest {
-  common.PaginationRequest pagination = 1;
-  int64 session_id = 2;
-  string type = 3;
+  int64 session_id = 1;
 }
 
 message ListCashMovementsResponse {
   repeated CashMovement movements = 1;
-  common.PaginationResponse pagination = 2;
 }
 
-// ── Drop ───────────────────────────────────────────────────────────
+// ── Cash Drop ─────────────────────────────────────────────────────
 
 message CashDropRequest {
-  double amount = 1;
-  string reason = 2;
+  int64 branch_id = 1;
+  int64 terminal_id = 2;
+  int64 session_id = 3;
+  int64 employee_id = 4;
+  double amount = 5;
+  string reason = 6;
 }
 
 message CashDropResponse {
-  CashMovement movement = 1;
+  int64 movement_id = 1;
+  string message = 2;
 }
 
-// ── Pickup ─────────────────────────────────────────────────────────
+// ── Cash Pickup ───────────────────────────────────────────────────
 
 message CashPickupRequest {
-  double amount = 1;
-  string reason = 2;
+  int64 branch_id = 1;
+  int64 terminal_id = 2;
+  int64 session_id = 3;
+  int64 employee_id = 4;
+  double amount = 5;
+  string reason = 6;
 }
 
 message CashPickupResponse {
-  CashMovement movement = 1;
+  int64 movement_id = 1;
+  string message = 2;
 }
 
-// ── Adjust ─────────────────────────────────────────────────────────
+// ── Cash Adjust ───────────────────────────────────────────────────
 
 message CashAdjustRequest {
-  double amount = 1;
-  string reason = 2;
+  int64 branch_id = 1;
+  int64 terminal_id = 2;
+  int64 session_id = 3;
+  int64 employee_id = 4;
+  double amount = 5;
+  string reason = 6;
 }
 
 message CashAdjustResponse {
-  CashMovement movement = 1;
+  int64 movement_id = 1;
+  string message = 2;
 }

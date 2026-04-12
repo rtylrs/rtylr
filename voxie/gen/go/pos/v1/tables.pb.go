@@ -22,21 +22,17 @@ const (
 )
 
 type Table struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId     int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	FloorId        int64                  `protobuf:"varint,3,opt,name=floor_id,json=floorId,proto3" json:"floor_id,omitempty"`
-	Name           string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Capacity       int32                  `protobuf:"varint,5,opt,name=capacity,proto3" json:"capacity,omitempty"`
-	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"` // available, occupied, reserved, dirty
-	CurrentOrderId int64                  `protobuf:"varint,7,opt,name=current_order_id,json=currentOrderId,proto3" json:"current_order_id,omitempty"`
-	PositionX      int32                  `protobuf:"varint,8,opt,name=position_x,json=positionX,proto3" json:"position_x,omitempty"`
-	PositionY      int32                  `protobuf:"varint,9,opt,name=position_y,json=positionY,proto3" json:"position_y,omitempty"`
-	Shape          string                 `protobuf:"bytes,10,opt,name=shape,proto3" json:"shape,omitempty"` // square, round, rectangle
-	CreatedAt      string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Label         string                 `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Seats         int32                  `protobuf:"varint,5,opt,name=seats,proto3" json:"seats,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Table) Reset() {
@@ -76,6 +72,13 @@ func (x *Table) GetId() int64 {
 	return 0
 }
 
+func (x *Table) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Table) GetLocationId() int64 {
 	if x != nil {
 		return x.LocationId
@@ -83,23 +86,16 @@ func (x *Table) GetLocationId() int64 {
 	return 0
 }
 
-func (x *Table) GetFloorId() int64 {
+func (x *Table) GetLabel() string {
 	if x != nil {
-		return x.FloorId
-	}
-	return 0
-}
-
-func (x *Table) GetName() string {
-	if x != nil {
-		return x.Name
+		return x.Label
 	}
 	return ""
 }
 
-func (x *Table) GetCapacity() int32 {
+func (x *Table) GetSeats() int32 {
 	if x != nil {
-		return x.Capacity
+		return x.Seats
 	}
 	return 0
 }
@@ -107,34 +103,6 @@ func (x *Table) GetCapacity() int32 {
 func (x *Table) GetStatus() string {
 	if x != nil {
 		return x.Status
-	}
-	return ""
-}
-
-func (x *Table) GetCurrentOrderId() int64 {
-	if x != nil {
-		return x.CurrentOrderId
-	}
-	return 0
-}
-
-func (x *Table) GetPositionX() int32 {
-	if x != nil {
-		return x.PositionX
-	}
-	return 0
-}
-
-func (x *Table) GetPositionY() int32 {
-	if x != nil {
-		return x.PositionY
-	}
-	return 0
-}
-
-func (x *Table) GetShape() string {
-	if x != nil {
-		return x.Shape
 	}
 	return ""
 }
@@ -155,8 +123,6 @@ func (x *Table) GetUpdatedAt() string {
 
 type ListTablesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FloorId       int64                  `protobuf:"varint,1,opt,name=floor_id,json=floorId,proto3" json:"floor_id,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,20 +155,6 @@ func (x *ListTablesRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListTablesRequest.ProtoReflect.Descriptor instead.
 func (*ListTablesRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ListTablesRequest) GetFloorId() int64 {
-	if x != nil {
-		return x.FloorId
-	}
-	return 0
-}
-
-func (x *ListTablesRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
 }
 
 type ListTablesResponse struct {
@@ -251,12 +203,9 @@ func (x *ListTablesResponse) GetTables() []*Table {
 
 type CreateTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FloorId       int64                  `protobuf:"varint,1,opt,name=floor_id,json=floorId,proto3" json:"floor_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Capacity      int32                  `protobuf:"varint,3,opt,name=capacity,proto3" json:"capacity,omitempty"`
-	PositionX     int32                  `protobuf:"varint,4,opt,name=position_x,json=positionX,proto3" json:"position_x,omitempty"`
-	PositionY     int32                  `protobuf:"varint,5,opt,name=position_y,json=positionY,proto3" json:"position_y,omitempty"`
-	Shape         string                 `protobuf:"bytes,6,opt,name=shape,proto3" json:"shape,omitempty"`
+	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Seats         int32                  `protobuf:"varint,3,opt,name=seats,proto3" json:"seats,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -291,51 +240,31 @@ func (*CreateTableRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateTableRequest) GetFloorId() int64 {
+func (x *CreateTableRequest) GetLocationId() int64 {
 	if x != nil {
-		return x.FloorId
+		return x.LocationId
 	}
 	return 0
 }
 
-func (x *CreateTableRequest) GetName() string {
+func (x *CreateTableRequest) GetLabel() string {
 	if x != nil {
-		return x.Name
+		return x.Label
 	}
 	return ""
 }
 
-func (x *CreateTableRequest) GetCapacity() int32 {
+func (x *CreateTableRequest) GetSeats() int32 {
 	if x != nil {
-		return x.Capacity
+		return x.Seats
 	}
 	return 0
-}
-
-func (x *CreateTableRequest) GetPositionX() int32 {
-	if x != nil {
-		return x.PositionX
-	}
-	return 0
-}
-
-func (x *CreateTableRequest) GetPositionY() int32 {
-	if x != nil {
-		return x.PositionY
-	}
-	return 0
-}
-
-func (x *CreateTableRequest) GetShape() string {
-	if x != nil {
-		return x.Shape
-	}
-	return ""
 }
 
 type CreateTableResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Table         *Table                 `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	TableId       int64                  `protobuf:"varint,1,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -370,21 +299,26 @@ func (*CreateTableResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateTableResponse) GetTable() *Table {
+func (x *CreateTableResponse) GetTableId() int64 {
 	if x != nil {
-		return x.Table
+		return x.TableId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateTableResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Capacity      int32                  `protobuf:"varint,3,opt,name=capacity,proto3" json:"capacity,omitempty"`
-	PositionX     int32                  `protobuf:"varint,4,opt,name=position_x,json=positionX,proto3" json:"position_x,omitempty"`
-	PositionY     int32                  `protobuf:"varint,5,opt,name=position_y,json=positionY,proto3" json:"position_y,omitempty"`
-	Shape         string                 `protobuf:"bytes,6,opt,name=shape,proto3" json:"shape,omitempty"`
+	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	Seats         int32                  `protobuf:"varint,3,opt,name=seats,proto3" json:"seats,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -419,51 +353,37 @@ func (*UpdateTableRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateTableRequest) GetId() int64 {
+func (x *UpdateTableRequest) GetLocationId() int64 {
 	if x != nil {
-		return x.Id
+		return x.LocationId
 	}
 	return 0
 }
 
-func (x *UpdateTableRequest) GetName() string {
+func (x *UpdateTableRequest) GetLabel() string {
 	if x != nil {
-		return x.Name
+		return x.Label
 	}
 	return ""
 }
 
-func (x *UpdateTableRequest) GetCapacity() int32 {
+func (x *UpdateTableRequest) GetSeats() int32 {
 	if x != nil {
-		return x.Capacity
+		return x.Seats
 	}
 	return 0
 }
 
-func (x *UpdateTableRequest) GetPositionX() int32 {
+func (x *UpdateTableRequest) GetStatus() string {
 	if x != nil {
-		return x.PositionX
-	}
-	return 0
-}
-
-func (x *UpdateTableRequest) GetPositionY() int32 {
-	if x != nil {
-		return x.PositionY
-	}
-	return 0
-}
-
-func (x *UpdateTableRequest) GetShape() string {
-	if x != nil {
-		return x.Shape
+		return x.Status
 	}
 	return ""
 }
 
 type UpdateTableResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Table         *Table                 `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -498,86 +418,70 @@ func (*UpdateTableResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateTableResponse) GetTable() *Table {
+func (x *UpdateTableResponse) GetMessage() string {
 	if x != nil {
-		return x.Table
-	}
-	return nil
-}
-
-type UpdateTableStatusRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateTableStatusRequest) Reset() {
-	*x = UpdateTableStatusRequest{}
-	mi := &file_pos_v1_tables_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateTableStatusRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateTableStatusRequest) ProtoMessage() {}
-
-func (x *UpdateTableStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_v1_tables_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateTableStatusRequest.ProtoReflect.Descriptor instead.
-func (*UpdateTableStatusRequest) Descriptor() ([]byte, []int) {
-	return file_pos_v1_tables_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *UpdateTableStatusRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateTableStatusRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
+		return x.Message
 	}
 	return ""
 }
 
-type UpdateTableStatusResponse struct {
+type DeleteTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Table         *Table                 `protobuf:"bytes,1,opt,name=table,proto3" json:"table,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateTableStatusResponse) Reset() {
-	*x = UpdateTableStatusResponse{}
+func (x *DeleteTableRequest) Reset() {
+	*x = DeleteTableRequest{}
+	mi := &file_pos_v1_tables_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTableRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTableRequest) ProtoMessage() {}
+
+func (x *DeleteTableRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_v1_tables_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTableRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTableRequest) Descriptor() ([]byte, []int) {
+	return file_pos_v1_tables_proto_rawDescGZIP(), []int{7}
+}
+
+type DeleteTableResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTableResponse) Reset() {
+	*x = DeleteTableResponse{}
 	mi := &file_pos_v1_tables_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateTableStatusResponse) String() string {
+func (x *DeleteTableResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateTableStatusResponse) ProtoMessage() {}
+func (*DeleteTableResponse) ProtoMessage() {}
 
-func (x *UpdateTableStatusResponse) ProtoReflect() protoreflect.Message {
+func (x *DeleteTableResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_tables_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -589,78 +493,58 @@ func (x *UpdateTableStatusResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateTableStatusResponse.ProtoReflect.Descriptor instead.
-func (*UpdateTableStatusResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteTableResponse.ProtoReflect.Descriptor instead.
+func (*DeleteTableResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_tables_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *UpdateTableStatusResponse) GetTable() *Table {
+func (x *DeleteTableResponse) GetMessage() string {
 	if x != nil {
-		return x.Table
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_pos_v1_tables_proto protoreflect.FileDescriptor
 
 const file_pos_v1_tables_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/tables.proto\x12\x03pos\"\xd7\x02\n" +
+	"\x13pos/v1/tables.proto\x12\x03pos\"\xd5\x01\n" +
 	"\x05Table\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x19\n" +
-	"\bfloor_id\x18\x03 \x01(\x03R\afloorId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1a\n" +
-	"\bcapacity\x18\x05 \x01(\x05R\bcapacity\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12(\n" +
-	"\x10current_order_id\x18\a \x01(\x03R\x0ecurrentOrderId\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
+	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"locationId\x12\x14\n" +
+	"\x05label\x18\x04 \x01(\tR\x05label\x12\x14\n" +
+	"\x05seats\x18\x05 \x01(\x05R\x05seats\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"position_x\x18\b \x01(\x05R\tpositionX\x12\x1d\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"position_y\x18\t \x01(\x05R\tpositionY\x12\x14\n" +
-	"\x05shape\x18\n" +
-	" \x01(\tR\x05shape\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"F\n" +
-	"\x11ListTablesRequest\x12\x19\n" +
-	"\bfloor_id\x18\x01 \x01(\x03R\afloorId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"8\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x13\n" +
+	"\x11ListTablesRequest\"8\n" +
 	"\x12ListTablesResponse\x12\"\n" +
 	"\x06tables\x18\x01 \x03(\v2\n" +
-	".pos.TableR\x06tables\"\xb3\x01\n" +
-	"\x12CreateTableRequest\x12\x19\n" +
-	"\bfloor_id\x18\x01 \x01(\x03R\afloorId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
-	"\bcapacity\x18\x03 \x01(\x05R\bcapacity\x12\x1d\n" +
-	"\n" +
-	"position_x\x18\x04 \x01(\x05R\tpositionX\x12\x1d\n" +
-	"\n" +
-	"position_y\x18\x05 \x01(\x05R\tpositionY\x12\x14\n" +
-	"\x05shape\x18\x06 \x01(\tR\x05shape\"7\n" +
-	"\x13CreateTableResponse\x12 \n" +
-	"\x05table\x18\x01 \x01(\v2\n" +
-	".pos.TableR\x05table\"\xa8\x01\n" +
-	"\x12UpdateTableRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
-	"\bcapacity\x18\x03 \x01(\x05R\bcapacity\x12\x1d\n" +
-	"\n" +
-	"position_x\x18\x04 \x01(\x05R\tpositionX\x12\x1d\n" +
-	"\n" +
-	"position_y\x18\x05 \x01(\x05R\tpositionY\x12\x14\n" +
-	"\x05shape\x18\x06 \x01(\tR\x05shape\"7\n" +
-	"\x13UpdateTableResponse\x12 \n" +
-	"\x05table\x18\x01 \x01(\v2\n" +
-	".pos.TableR\x05table\"B\n" +
-	"\x18UpdateTableStatusRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"=\n" +
-	"\x19UpdateTableStatusResponse\x12 \n" +
-	"\x05table\x18\x01 \x01(\v2\n" +
-	".pos.TableR\x05tableB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	".pos.TableR\x06tables\"a\n" +
+	"\x12CreateTableRequest\x12\x1f\n" +
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\x12\x14\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\x12\x14\n" +
+	"\x05seats\x18\x03 \x01(\x05R\x05seats\"J\n" +
+	"\x13CreateTableResponse\x12\x19\n" +
+	"\btable_id\x18\x01 \x01(\x03R\atableId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"y\n" +
+	"\x12UpdateTableRequest\x12\x1f\n" +
+	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"locationId\x12\x14\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\x12\x14\n" +
+	"\x05seats\x18\x03 \x01(\x05R\x05seats\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"/\n" +
+	"\x13UpdateTableResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
+	"\x12DeleteTableRequest\"/\n" +
+	"\x13DeleteTableResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_tables_proto_rawDescOnce sync.Once
@@ -676,26 +560,23 @@ func file_pos_v1_tables_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_tables_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_tables_proto_goTypes = []any{
-	(*Table)(nil),                     // 0: pos.Table
-	(*ListTablesRequest)(nil),         // 1: pos.ListTablesRequest
-	(*ListTablesResponse)(nil),        // 2: pos.ListTablesResponse
-	(*CreateTableRequest)(nil),        // 3: pos.CreateTableRequest
-	(*CreateTableResponse)(nil),       // 4: pos.CreateTableResponse
-	(*UpdateTableRequest)(nil),        // 5: pos.UpdateTableRequest
-	(*UpdateTableResponse)(nil),       // 6: pos.UpdateTableResponse
-	(*UpdateTableStatusRequest)(nil),  // 7: pos.UpdateTableStatusRequest
-	(*UpdateTableStatusResponse)(nil), // 8: pos.UpdateTableStatusResponse
+	(*Table)(nil),               // 0: pos.Table
+	(*ListTablesRequest)(nil),   // 1: pos.ListTablesRequest
+	(*ListTablesResponse)(nil),  // 2: pos.ListTablesResponse
+	(*CreateTableRequest)(nil),  // 3: pos.CreateTableRequest
+	(*CreateTableResponse)(nil), // 4: pos.CreateTableResponse
+	(*UpdateTableRequest)(nil),  // 5: pos.UpdateTableRequest
+	(*UpdateTableResponse)(nil), // 6: pos.UpdateTableResponse
+	(*DeleteTableRequest)(nil),  // 7: pos.DeleteTableRequest
+	(*DeleteTableResponse)(nil), // 8: pos.DeleteTableResponse
 }
 var file_pos_v1_tables_proto_depIdxs = []int32{
 	0, // 0: pos.ListTablesResponse.tables:type_name -> pos.Table
-	0, // 1: pos.CreateTableResponse.table:type_name -> pos.Table
-	0, // 2: pos.UpdateTableResponse.table:type_name -> pos.Table
-	0, // 3: pos.UpdateTableStatusResponse.table:type_name -> pos.Table
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_tables_proto_init() }

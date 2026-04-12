@@ -24,12 +24,12 @@ const (
 type Floor struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,4,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	TableCount    int32                  `protobuf:"varint,5,opt,name=table_count,json=tableCount,proto3" json:"table_count,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,5,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -71,9 +71,16 @@ func (x *Floor) GetId() int64 {
 	return 0
 }
 
-func (x *Floor) GetLocationId() int64 {
+func (x *Floor) GetBusinessId() int64 {
 	if x != nil {
-		return x.LocationId
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *Floor) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
 	}
 	return 0
 }
@@ -92,11 +99,11 @@ func (x *Floor) GetSortOrder() int32 {
 	return 0
 }
 
-func (x *Floor) GetTableCount() int32 {
+func (x *Floor) GetIsActive() bool {
 	if x != nil {
-		return x.TableCount
+		return x.IsActive
 	}
-	return 0
+	return false
 }
 
 func (x *Floor) GetCreatedAt() string {
@@ -106,15 +113,9 @@ func (x *Floor) GetCreatedAt() string {
 	return ""
 }
 
-func (x *Floor) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
 type ListFloorsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -147,6 +148,13 @@ func (x *ListFloorsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListFloorsRequest.ProtoReflect.Descriptor instead.
 func (*ListFloorsRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ListFloorsRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
 }
 
 type ListFloorsResponse struct {
@@ -195,8 +203,9 @@ func (x *ListFloorsResponse) GetFloors() []*Floor {
 
 type CreateFloorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,2,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	BranchId      int64                  `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,3,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -231,6 +240,13 @@ func (*CreateFloorRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *CreateFloorRequest) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
 func (x *CreateFloorRequest) GetName() string {
 	if x != nil {
 		return x.Name
@@ -247,7 +263,8 @@ func (x *CreateFloorRequest) GetSortOrder() int32 {
 
 type CreateFloorResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Floor         *Floor                 `protobuf:"bytes,1,opt,name=floor,proto3" json:"floor,omitempty"`
+	FloorId       int64                  `protobuf:"varint,1,opt,name=floor_id,json=floorId,proto3" json:"floor_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -282,18 +299,24 @@ func (*CreateFloorResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateFloorResponse) GetFloor() *Floor {
+func (x *CreateFloorResponse) GetFloorId() int64 {
 	if x != nil {
-		return x.Floor
+		return x.FloorId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateFloorResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateFloorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,3,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	SortOrder     int32                  `protobuf:"varint,2,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -328,13 +351,6 @@ func (*UpdateFloorRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateFloorRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
 func (x *UpdateFloorRequest) GetName() string {
 	if x != nil {
 		return x.Name
@@ -351,7 +367,7 @@ func (x *UpdateFloorRequest) GetSortOrder() int32 {
 
 type UpdateFloorResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Floor         *Floor                 `protobuf:"bytes,1,opt,name=floor,proto3" json:"floor,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -386,16 +402,15 @@ func (*UpdateFloorResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateFloorResponse) GetFloor() *Floor {
+func (x *UpdateFloorResponse) GetMessage() string {
 	if x != nil {
-		return x.Floor
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 type DeleteFloorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -430,16 +445,9 @@ func (*DeleteFloorRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *DeleteFloorRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
 type DeleteFloorResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -474,54 +482,51 @@ func (*DeleteFloorResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_floors_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteFloorResponse) GetSuccess() bool {
+func (x *DeleteFloorResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_pos_v1_floors_proto protoreflect.FileDescriptor
 
 const file_pos_v1_floors_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/floors.proto\x12\x03pos\"\xca\x01\n" +
+	"\x13pos/v1/floors.proto\x12\x03pos\"\xc4\x01\n" +
 	"\x05Floor\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
-	"locationId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"businessId\x12\x1b\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x04 \x01(\x05R\tsortOrder\x12\x1f\n" +
-	"\vtable_count\x18\x05 \x01(\x05R\n" +
-	"tableCount\x12\x1d\n" +
+	"sort_order\x18\x05 \x01(\x05R\tsortOrder\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\a \x01(\tR\tupdatedAt\"\x13\n" +
-	"\x11ListFloorsRequest\"8\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\"0\n" +
+	"\x11ListFloorsRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"8\n" +
 	"\x12ListFloorsResponse\x12\"\n" +
 	"\x06floors\x18\x01 \x03(\v2\n" +
-	".pos.FloorR\x06floors\"G\n" +
-	"\x12CreateFloorRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
-	"\n" +
-	"sort_order\x18\x02 \x01(\x05R\tsortOrder\"7\n" +
-	"\x13CreateFloorResponse\x12 \n" +
-	"\x05floor\x18\x01 \x01(\v2\n" +
-	".pos.FloorR\x05floor\"W\n" +
-	"\x12UpdateFloorRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	".pos.FloorR\x06floors\"d\n" +
+	"\x12CreateFloorRequest\x12\x1b\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x03 \x01(\x05R\tsortOrder\"7\n" +
-	"\x13UpdateFloorResponse\x12 \n" +
-	"\x05floor\x18\x01 \x01(\v2\n" +
-	".pos.FloorR\x05floor\"$\n" +
-	"\x12DeleteFloorRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"/\n" +
+	"sort_order\x18\x03 \x01(\x05R\tsortOrder\"J\n" +
+	"\x13CreateFloorResponse\x12\x19\n" +
+	"\bfloor_id\x18\x01 \x01(\x03R\afloorId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"G\n" +
+	"\x12UpdateFloorRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\x02 \x01(\x05R\tsortOrder\"/\n" +
+	"\x13UpdateFloorResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
+	"\x12DeleteFloorRequest\"/\n" +
 	"\x13DeleteFloorResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_floors_proto_rawDescOnce sync.Once
@@ -549,13 +554,11 @@ var file_pos_v1_floors_proto_goTypes = []any{
 }
 var file_pos_v1_floors_proto_depIdxs = []int32{
 	0, // 0: pos.ListFloorsResponse.floors:type_name -> pos.Floor
-	0, // 1: pos.CreateFloorResponse.floor:type_name -> pos.Floor
-	0, // 2: pos.UpdateFloorResponse.floor:type_name -> pos.Floor
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_floors_proto_init() }

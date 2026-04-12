@@ -4,23 +4,20 @@ package pos;
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 
-// ── Terminal ───────────────────────────────────────────────────────
+// ── Terminal ──────────────────────────────────────────────────────
 
 message Terminal {
   int64 id = 1;
-  int64 location_id = 2;
-  string name = 3;
-  string device_id = 4;
-  string status = 5; // online, offline
+  int64 business_id = 2;
+  int64 branch_id = 3;
+  string name = 4;
+  string device_id = 5;
   bool is_active = 6;
-  string last_heartbeat_at = 7;
-  string ip_address = 8;
-  string app_version = 9;
-  string created_at = 10;
-  string updated_at = 11;
+  string last_seen_at = 7;
+  string created_at = 8;
 }
 
-// ── List ───────────────────────────────────────────────────────────
+// ── List ──────────────────────────────────────────────────────────
 
 message ListTerminalsRequest {}
 
@@ -28,47 +25,38 @@ message ListTerminalsResponse {
   repeated Terminal terminals = 1;
 }
 
-// ── Create ─────────────────────────────────────────────────────────
+// ── Create ────────────────────────────────────────────────────────
 
 message CreateTerminalRequest {
-  string name = 1;
-  string device_id = 2;
+  int64 branch_id = 1;
+  string name = 2;
+  string device_id = 3;
 }
 
 message CreateTerminalResponse {
-  Terminal terminal = 1;
+  int64 terminal_id = 1;
+  string message = 2;
 }
 
-// ── Update ─────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────
 
 message UpdateTerminalRequest {
-  int64 id = 1;
+  int64 branch_id = 1;
   string name = 2;
-  bool is_active = 3;
+  string device_id = 3;
+  bool is_active = 4;
 }
 
 message UpdateTerminalResponse {
-  Terminal terminal = 1;
+  string message = 1;
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Heartbeat ─────────────────────────────────────────────────────
 
-message DeleteTerminalRequest {
-  int64 id = 1;
+message HeartbeatTerminalRequest {
+  int64 terminal_id = 1;
 }
 
-message DeleteTerminalResponse {
-  bool success = 1;
-}
-
-// ── Heartbeat ──────────────────────────────────────────────────────
-
-message TerminalHeartbeatRequest {
-  int64 id = 1;
-  string app_version = 2;
-  string ip_address = 3;
-}
-
-message TerminalHeartbeatResponse {
-  bool success = 1;
+message HeartbeatTerminalResponse {
+  string message = 1;
 }

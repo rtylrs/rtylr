@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,26 +22,32 @@ const (
 )
 
 type Staff struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	FirstName      string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName       string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Email          string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Phone          string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	Role           string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
-	DepartmentId   int64                  `protobuf:"varint,7,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	DepartmentName string                 `protobuf:"bytes,8,opt,name=department_name,json=departmentName,proto3" json:"department_name,omitempty"`
-	Status         string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"` // active, inactive, on_leave
-	HourlyRate     float64                `protobuf:"fixed64,10,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
-	Salary         float64                `protobuf:"fixed64,11,opt,name=salary,proto3" json:"salary,omitempty"`
-	HireDate       string                 `protobuf:"bytes,12,opt,name=hire_date,json=hireDate,proto3" json:"hire_date,omitempty"`
-	AvatarUrl      string                 `protobuf:"bytes,13,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
-	ClockStatus    string                 `protobuf:"bytes,14,opt,name=clock_status,json=clockStatus,proto3" json:"clock_status,omitempty"` // clocked_in, clocked_out
-	LastClockIn    string                 `protobuf:"bytes,15,opt,name=last_clock_in,json=lastClockIn,proto3" json:"last_clock_in,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId               int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	UserId                int64                  `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DepartmentId          int64                  `protobuf:"varint,4,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	FirstName             string                 `protobuf:"bytes,5,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName              string                 `protobuf:"bytes,6,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email                 string                 `protobuf:"bytes,7,opt,name=email,proto3" json:"email,omitempty"`
+	Phone                 string                 `protobuf:"bytes,8,opt,name=phone,proto3" json:"phone,omitempty"`
+	Role                  string                 `protobuf:"bytes,9,opt,name=role,proto3" json:"role,omitempty"`
+	EmploymentType        string                 `protobuf:"bytes,10,opt,name=employment_type,json=employmentType,proto3" json:"employment_type,omitempty"`
+	Status                string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
+	Salary                float64                `protobuf:"fixed64,12,opt,name=salary,proto3" json:"salary,omitempty"`
+	HourlyRate            float64                `protobuf:"fixed64,13,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	OvertimeRate          float64                `protobuf:"fixed64,14,opt,name=overtime_rate,json=overtimeRate,proto3" json:"overtime_rate,omitempty"`
+	StartDate             string                 `protobuf:"bytes,15,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate               string                 `protobuf:"bytes,16,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Address               string                 `protobuf:"bytes,17,opt,name=address,proto3" json:"address,omitempty"`
+	EmergencyContactName  string                 `protobuf:"bytes,18,opt,name=emergency_contact_name,json=emergencyContactName,proto3" json:"emergency_contact_name,omitempty"`
+	EmergencyContactPhone string                 `protobuf:"bytes,19,opt,name=emergency_contact_phone,json=emergencyContactPhone,proto3" json:"emergency_contact_phone,omitempty"`
+	Apps                  string                 `protobuf:"bytes,20,opt,name=apps,proto3" json:"apps,omitempty"`
+	Notes                 string                 `protobuf:"bytes,21,opt,name=notes,proto3" json:"notes,omitempty"`
+	CreatedAt             string                 `protobuf:"bytes,22,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt             string                 `protobuf:"bytes,23,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *Staff) Reset() {
@@ -82,6 +87,27 @@ func (x *Staff) GetId() int64 {
 	return 0
 }
 
+func (x *Staff) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *Staff) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *Staff) GetDepartmentId() int64 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
+}
+
 func (x *Staff) GetFirstName() string {
 	if x != nil {
 		return x.FirstName
@@ -117,16 +143,9 @@ func (x *Staff) GetRole() string {
 	return ""
 }
 
-func (x *Staff) GetDepartmentId() int64 {
+func (x *Staff) GetEmploymentType() string {
 	if x != nil {
-		return x.DepartmentId
-	}
-	return 0
-}
-
-func (x *Staff) GetDepartmentName() string {
-	if x != nil {
-		return x.DepartmentName
+		return x.EmploymentType
 	}
 	return ""
 }
@@ -138,13 +157,6 @@ func (x *Staff) GetStatus() string {
 	return ""
 }
 
-func (x *Staff) GetHourlyRate() float64 {
-	if x != nil {
-		return x.HourlyRate
-	}
-	return 0
-}
-
 func (x *Staff) GetSalary() float64 {
 	if x != nil {
 		return x.Salary
@@ -152,30 +164,65 @@ func (x *Staff) GetSalary() float64 {
 	return 0
 }
 
-func (x *Staff) GetHireDate() string {
+func (x *Staff) GetHourlyRate() float64 {
 	if x != nil {
-		return x.HireDate
+		return x.HourlyRate
+	}
+	return 0
+}
+
+func (x *Staff) GetOvertimeRate() float64 {
+	if x != nil {
+		return x.OvertimeRate
+	}
+	return 0
+}
+
+func (x *Staff) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
 	}
 	return ""
 }
 
-func (x *Staff) GetAvatarUrl() string {
+func (x *Staff) GetEndDate() string {
 	if x != nil {
-		return x.AvatarUrl
+		return x.EndDate
 	}
 	return ""
 }
 
-func (x *Staff) GetClockStatus() string {
+func (x *Staff) GetAddress() string {
 	if x != nil {
-		return x.ClockStatus
+		return x.Address
 	}
 	return ""
 }
 
-func (x *Staff) GetLastClockIn() string {
+func (x *Staff) GetEmergencyContactName() string {
 	if x != nil {
-		return x.LastClockIn
+		return x.EmergencyContactName
+	}
+	return ""
+}
+
+func (x *Staff) GetEmergencyContactPhone() string {
+	if x != nil {
+		return x.EmergencyContactPhone
+	}
+	return ""
+}
+
+func (x *Staff) GetApps() string {
+	if x != nil {
+		return x.Apps
+	}
+	return ""
+}
+
+func (x *Staff) GetNotes() string {
+	if x != nil {
+		return x.Notes
 	}
 	return ""
 }
@@ -196,10 +243,9 @@ func (x *Staff) GetUpdatedAt() string {
 
 type ListStaffRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Search        string                 `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
+	Search        string                 `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
+	DepartmentId  string                 `protobuf:"bytes,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
 	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	DepartmentId  int64                  `protobuf:"varint,4,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,16 +280,16 @@ func (*ListStaffRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListStaffRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
 func (x *ListStaffRequest) GetSearch() string {
 	if x != nil {
 		return x.Search
+	}
+	return ""
+}
+
+func (x *ListStaffRequest) GetDepartmentId() string {
+	if x != nil {
+		return x.DepartmentId
 	}
 	return ""
 }
@@ -255,17 +301,9 @@ func (x *ListStaffRequest) GetStatus() string {
 	return ""
 }
 
-func (x *ListStaffRequest) GetDepartmentId() int64 {
-	if x != nil {
-		return x.DepartmentId
-	}
-	return 0
-}
-
 type ListStaffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Staff         []*Staff               `protobuf:"bytes,1,rep,name=staff,proto3" json:"staff,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -303,13 +341,6 @@ func (*ListStaffResponse) Descriptor() ([]byte, []int) {
 func (x *ListStaffResponse) GetStaff() []*Staff {
 	if x != nil {
 		return x.Staff
-	}
-	return nil
-}
-
-func (x *ListStaffResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
 	}
 	return nil
 }
@@ -403,18 +434,28 @@ func (x *GetStaffResponse) GetStaff() *Staff {
 }
 
 type CreateStaffRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FirstName     string                 `protobuf:"bytes,1,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,2,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
-	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	DepartmentId  int64                  `protobuf:"varint,6,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	HourlyRate    float64                `protobuf:"fixed64,7,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
-	Salary        float64                `protobuf:"fixed64,8,opt,name=salary,proto3" json:"salary,omitempty"`
-	HireDate      string                 `protobuf:"bytes,9,opt,name=hire_date,json=hireDate,proto3" json:"hire_date,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	UserId                int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DepartmentId          int64                  `protobuf:"varint,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	FirstName             string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName              string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email                 string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	Phone                 string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
+	Role                  string                 `protobuf:"bytes,7,opt,name=role,proto3" json:"role,omitempty"`
+	EmploymentType        string                 `protobuf:"bytes,8,opt,name=employment_type,json=employmentType,proto3" json:"employment_type,omitempty"`
+	Status                string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	Salary                float64                `protobuf:"fixed64,10,opt,name=salary,proto3" json:"salary,omitempty"`
+	HourlyRate            float64                `protobuf:"fixed64,11,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	OvertimeRate          float64                `protobuf:"fixed64,12,opt,name=overtime_rate,json=overtimeRate,proto3" json:"overtime_rate,omitempty"`
+	StartDate             string                 `protobuf:"bytes,13,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate               string                 `protobuf:"bytes,14,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Address               string                 `protobuf:"bytes,15,opt,name=address,proto3" json:"address,omitempty"`
+	EmergencyContactName  string                 `protobuf:"bytes,16,opt,name=emergency_contact_name,json=emergencyContactName,proto3" json:"emergency_contact_name,omitempty"`
+	EmergencyContactPhone string                 `protobuf:"bytes,17,opt,name=emergency_contact_phone,json=emergencyContactPhone,proto3" json:"emergency_contact_phone,omitempty"`
+	Apps                  string                 `protobuf:"bytes,18,opt,name=apps,proto3" json:"apps,omitempty"`
+	Notes                 string                 `protobuf:"bytes,19,opt,name=notes,proto3" json:"notes,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *CreateStaffRequest) Reset() {
@@ -445,6 +486,20 @@ func (x *CreateStaffRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateStaffRequest.ProtoReflect.Descriptor instead.
 func (*CreateStaffRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateStaffRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *CreateStaffRequest) GetDepartmentId() int64 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
 }
 
 func (x *CreateStaffRequest) GetFirstName() string {
@@ -482,9 +537,23 @@ func (x *CreateStaffRequest) GetRole() string {
 	return ""
 }
 
-func (x *CreateStaffRequest) GetDepartmentId() int64 {
+func (x *CreateStaffRequest) GetEmploymentType() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.EmploymentType
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetSalary() float64 {
+	if x != nil {
+		return x.Salary
 	}
 	return 0
 }
@@ -496,23 +565,65 @@ func (x *CreateStaffRequest) GetHourlyRate() float64 {
 	return 0
 }
 
-func (x *CreateStaffRequest) GetSalary() float64 {
+func (x *CreateStaffRequest) GetOvertimeRate() float64 {
 	if x != nil {
-		return x.Salary
+		return x.OvertimeRate
 	}
 	return 0
 }
 
-func (x *CreateStaffRequest) GetHireDate() string {
+func (x *CreateStaffRequest) GetStartDate() string {
 	if x != nil {
-		return x.HireDate
+		return x.StartDate
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetEndDate() string {
+	if x != nil {
+		return x.EndDate
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetEmergencyContactName() string {
+	if x != nil {
+		return x.EmergencyContactName
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetEmergencyContactPhone() string {
+	if x != nil {
+		return x.EmergencyContactPhone
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetApps() string {
+	if x != nil {
+		return x.Apps
+	}
+	return ""
+}
+
+func (x *CreateStaffRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
 	}
 	return ""
 }
 
 type CreateStaffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Staff         *Staff                 `protobuf:"bytes,1,opt,name=staff,proto3" json:"staff,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -547,27 +658,35 @@ func (*CreateStaffResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateStaffResponse) GetStaff() *Staff {
+func (x *CreateStaffResponse) GetId() int64 {
 	if x != nil {
-		return x.Staff
+		return x.Id
 	}
-	return nil
+	return 0
 }
 
 type UpdateStaffRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
-	DepartmentId  int64                  `protobuf:"varint,7,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	HourlyRate    float64                `protobuf:"fixed64,8,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
-	Salary        float64                `protobuf:"fixed64,9,opt,name=salary,proto3" json:"salary,omitempty"`
-	Status        string                 `protobuf:"bytes,10,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	DepartmentId          int64                  `protobuf:"varint,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	FirstName             string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName              string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email                 string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	Phone                 string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
+	Role                  string                 `protobuf:"bytes,7,opt,name=role,proto3" json:"role,omitempty"`
+	EmploymentType        string                 `protobuf:"bytes,8,opt,name=employment_type,json=employmentType,proto3" json:"employment_type,omitempty"`
+	Status                string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	Salary                float64                `protobuf:"fixed64,10,opt,name=salary,proto3" json:"salary,omitempty"`
+	HourlyRate            float64                `protobuf:"fixed64,11,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	OvertimeRate          float64                `protobuf:"fixed64,12,opt,name=overtime_rate,json=overtimeRate,proto3" json:"overtime_rate,omitempty"`
+	EndDate               string                 `protobuf:"bytes,13,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Address               string                 `protobuf:"bytes,14,opt,name=address,proto3" json:"address,omitempty"`
+	EmergencyContactName  string                 `protobuf:"bytes,15,opt,name=emergency_contact_name,json=emergencyContactName,proto3" json:"emergency_contact_name,omitempty"`
+	EmergencyContactPhone string                 `protobuf:"bytes,16,opt,name=emergency_contact_phone,json=emergencyContactPhone,proto3" json:"emergency_contact_phone,omitempty"`
+	Apps                  string                 `protobuf:"bytes,17,opt,name=apps,proto3" json:"apps,omitempty"`
+	Notes                 string                 `protobuf:"bytes,18,opt,name=notes,proto3" json:"notes,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *UpdateStaffRequest) Reset() {
@@ -607,6 +726,13 @@ func (x *UpdateStaffRequest) GetId() int64 {
 	return 0
 }
 
+func (x *UpdateStaffRequest) GetDepartmentId() int64 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
+}
+
 func (x *UpdateStaffRequest) GetFirstName() string {
 	if x != nil {
 		return x.FirstName
@@ -642,9 +768,23 @@ func (x *UpdateStaffRequest) GetRole() string {
 	return ""
 }
 
-func (x *UpdateStaffRequest) GetDepartmentId() int64 {
+func (x *UpdateStaffRequest) GetEmploymentType() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.EmploymentType
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetSalary() float64 {
+	if x != nil {
+		return x.Salary
 	}
 	return 0
 }
@@ -656,23 +796,58 @@ func (x *UpdateStaffRequest) GetHourlyRate() float64 {
 	return 0
 }
 
-func (x *UpdateStaffRequest) GetSalary() float64 {
+func (x *UpdateStaffRequest) GetOvertimeRate() float64 {
 	if x != nil {
-		return x.Salary
+		return x.OvertimeRate
 	}
 	return 0
 }
 
-func (x *UpdateStaffRequest) GetStatus() string {
+func (x *UpdateStaffRequest) GetEndDate() string {
 	if x != nil {
-		return x.Status
+		return x.EndDate
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetEmergencyContactName() string {
+	if x != nil {
+		return x.EmergencyContactName
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetEmergencyContactPhone() string {
+	if x != nil {
+		return x.EmergencyContactPhone
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetApps() string {
+	if x != nil {
+		return x.Apps
+	}
+	return ""
+}
+
+func (x *UpdateStaffRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
 	}
 	return ""
 }
 
 type UpdateStaffResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Staff         *Staff                 `protobuf:"bytes,1,opt,name=staff,proto3" json:"staff,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -707,11 +882,11 @@ func (*UpdateStaffResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *UpdateStaffResponse) GetStaff() *Staff {
+func (x *UpdateStaffResponse) GetSuccess() bool {
 	if x != nil {
-		return x.Staff
+		return x.Success
 	}
-	return nil
+	return false
 }
 
 type DeleteStaffRequest struct {
@@ -848,7 +1023,7 @@ func (x *ClockInRequest) GetStaffId() int64 {
 
 type ClockInResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClockedInAt   string                 `protobuf:"bytes,1,opt,name=clocked_in_at,json=clockedInAt,proto3" json:"clocked_in_at,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -883,11 +1058,11 @@ func (*ClockInResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *ClockInResponse) GetClockedInAt() string {
+func (x *ClockInResponse) GetSuccess() bool {
 	if x != nil {
-		return x.ClockedInAt
+		return x.Success
 	}
-	return ""
+	return false
 }
 
 type ClockOutRequest struct {
@@ -936,8 +1111,7 @@ func (x *ClockOutRequest) GetStaffId() int64 {
 
 type ClockOutResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClockedOutAt  string                 `protobuf:"bytes,1,opt,name=clocked_out_at,json=clockedOutAt,proto3" json:"clocked_out_at,omitempty"`
-	HoursWorked   float64                `protobuf:"fixed64,2,opt,name=hours_worked,json=hoursWorked,proto3" json:"hours_worked,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -972,108 +1146,120 @@ func (*ClockOutResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_staff_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *ClockOutResponse) GetClockedOutAt() string {
+func (x *ClockOutResponse) GetSuccess() bool {
 	if x != nil {
-		return x.ClockedOutAt
+		return x.Success
 	}
-	return ""
-}
-
-func (x *ClockOutResponse) GetHoursWorked() float64 {
-	if x != nil {
-		return x.HoursWorked
-	}
-	return 0
+	return false
 }
 
 var File_hr_v1_staff_proto protoreflect.FileDescriptor
 
 const file_hr_v1_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x11hr/v1/staff.proto\x12\x02hr\x1a\x1acommon/v1/pagination.proto\"\xf3\x03\n" +
+	"\x11hr/v1/staff.proto\x12\x02hr\"\xb5\x05\n" +
 	"\x05Staff\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\x03R\x06userId\x12#\n" +
+	"\rdepartment_id\x18\x04 \x01(\x03R\fdepartmentId\x12\x1d\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x12\n" +
-	"\x04role\x18\x06 \x01(\tR\x04role\x12#\n" +
-	"\rdepartment_id\x18\a \x01(\x03R\fdepartmentId\x12'\n" +
-	"\x0fdepartment_name\x18\b \x01(\tR\x0edepartmentName\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status\x12\x1f\n" +
-	"\vhourly_rate\x18\n" +
-	" \x01(\x01R\n" +
-	"hourlyRate\x12\x16\n" +
-	"\x06salary\x18\v \x01(\x01R\x06salary\x12\x1b\n" +
-	"\thire_date\x18\f \x01(\tR\bhireDate\x12\x1d\n" +
+	"first_name\x18\x05 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x06 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\a \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\b \x01(\tR\x05phone\x12\x12\n" +
+	"\x04role\x18\t \x01(\tR\x04role\x12'\n" +
+	"\x0femployment_type\x18\n" +
+	" \x01(\tR\x0eemploymentType\x12\x16\n" +
+	"\x06status\x18\v \x01(\tR\x06status\x12\x16\n" +
+	"\x06salary\x18\f \x01(\x01R\x06salary\x12\x1f\n" +
+	"\vhourly_rate\x18\r \x01(\x01R\n" +
+	"hourlyRate\x12#\n" +
+	"\rovertime_rate\x18\x0e \x01(\x01R\fovertimeRate\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\r \x01(\tR\tavatarUrl\x12!\n" +
-	"\fclock_status\x18\x0e \x01(\tR\vclockStatus\x12\"\n" +
-	"\rlast_clock_in\x18\x0f \x01(\tR\vlastClockIn\x12\x1d\n" +
+	"start_date\x18\x0f \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x10 \x01(\tR\aendDate\x12\x18\n" +
+	"\aaddress\x18\x11 \x01(\tR\aaddress\x124\n" +
+	"\x16emergency_contact_name\x18\x12 \x01(\tR\x14emergencyContactName\x126\n" +
+	"\x17emergency_contact_phone\x18\x13 \x01(\tR\x15emergencyContactPhone\x12\x12\n" +
+	"\x04apps\x18\x14 \x01(\tR\x04apps\x12\x14\n" +
+	"\x05notes\x18\x15 \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x10 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\x16 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x11 \x01(\tR\tupdatedAt\"\xa2\x01\n" +
-	"\x10ListStaffRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06search\x18\x02 \x01(\tR\x06search\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12#\n" +
-	"\rdepartment_id\x18\x04 \x01(\x03R\fdepartmentId\"p\n" +
+	"updated_at\x18\x17 \x01(\tR\tupdatedAt\"g\n" +
+	"\x10ListStaffRequest\x12\x16\n" +
+	"\x06search\x18\x01 \x01(\tR\x06search\x12#\n" +
+	"\rdepartment_id\x18\x02 \x01(\tR\fdepartmentId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\"4\n" +
 	"\x11ListStaffResponse\x12\x1f\n" +
-	"\x05staff\x18\x01 \x03(\v2\t.hr.StaffR\x05staff\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"!\n" +
+	"\x05staff\x18\x01 \x03(\v2\t.hr.StaffR\x05staff\"!\n" +
 	"\x0fGetStaffRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
 	"\x10GetStaffResponse\x12\x1f\n" +
-	"\x05staff\x18\x01 \x01(\v2\t.hr.StaffR\x05staff\"\x8b\x02\n" +
-	"\x12CreateStaffRequest\x12\x1d\n" +
+	"\x05staff\x18\x01 \x01(\v2\t.hr.StaffR\x05staff\"\xd9\x04\n" +
+	"\x12CreateStaffRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12#\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03R\fdepartmentId\x12\x1d\n" +
 	"\n" +
-	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x02 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12#\n" +
-	"\rdepartment_id\x18\x06 \x01(\x03R\fdepartmentId\x12\x1f\n" +
-	"\vhourly_rate\x18\a \x01(\x01R\n" +
-	"hourlyRate\x12\x16\n" +
-	"\x06salary\x18\b \x01(\x01R\x06salary\x12\x1b\n" +
-	"\thire_date\x18\t \x01(\tR\bhireDate\"6\n" +
-	"\x13CreateStaffResponse\x12\x1f\n" +
-	"\x05staff\x18\x01 \x01(\v2\t.hr.StaffR\x05staff\"\x96\x02\n" +
+	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x12\n" +
+	"\x04role\x18\a \x01(\tR\x04role\x12'\n" +
+	"\x0femployment_type\x18\b \x01(\tR\x0eemploymentType\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x16\n" +
+	"\x06salary\x18\n" +
+	" \x01(\x01R\x06salary\x12\x1f\n" +
+	"\vhourly_rate\x18\v \x01(\x01R\n" +
+	"hourlyRate\x12#\n" +
+	"\rovertime_rate\x18\f \x01(\x01R\fovertimeRate\x12\x1d\n" +
+	"\n" +
+	"start_date\x18\r \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x0e \x01(\tR\aendDate\x12\x18\n" +
+	"\aaddress\x18\x0f \x01(\tR\aaddress\x124\n" +
+	"\x16emergency_contact_name\x18\x10 \x01(\tR\x14emergencyContactName\x126\n" +
+	"\x17emergency_contact_phone\x18\x11 \x01(\tR\x15emergencyContactPhone\x12\x12\n" +
+	"\x04apps\x18\x12 \x01(\tR\x04apps\x12\x14\n" +
+	"\x05notes\x18\x13 \x01(\tR\x05notes\"%\n" +
+	"\x13CreateStaffResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xb1\x04\n" +
 	"\x12UpdateStaffRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03R\fdepartmentId\x12\x1d\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x12\n" +
-	"\x04role\x18\x06 \x01(\tR\x04role\x12#\n" +
-	"\rdepartment_id\x18\a \x01(\x03R\fdepartmentId\x12\x1f\n" +
-	"\vhourly_rate\x18\b \x01(\x01R\n" +
-	"hourlyRate\x12\x16\n" +
-	"\x06salary\x18\t \x01(\x01R\x06salary\x12\x16\n" +
-	"\x06status\x18\n" +
-	" \x01(\tR\x06status\"6\n" +
-	"\x13UpdateStaffResponse\x12\x1f\n" +
-	"\x05staff\x18\x01 \x01(\v2\t.hr.StaffR\x05staff\"$\n" +
+	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x12\n" +
+	"\x04role\x18\a \x01(\tR\x04role\x12'\n" +
+	"\x0femployment_type\x18\b \x01(\tR\x0eemploymentType\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x16\n" +
+	"\x06salary\x18\n" +
+	" \x01(\x01R\x06salary\x12\x1f\n" +
+	"\vhourly_rate\x18\v \x01(\x01R\n" +
+	"hourlyRate\x12#\n" +
+	"\rovertime_rate\x18\f \x01(\x01R\fovertimeRate\x12\x19\n" +
+	"\bend_date\x18\r \x01(\tR\aendDate\x12\x18\n" +
+	"\aaddress\x18\x0e \x01(\tR\aaddress\x124\n" +
+	"\x16emergency_contact_name\x18\x0f \x01(\tR\x14emergencyContactName\x126\n" +
+	"\x17emergency_contact_phone\x18\x10 \x01(\tR\x15emergencyContactPhone\x12\x12\n" +
+	"\x04apps\x18\x11 \x01(\tR\x04apps\x12\x14\n" +
+	"\x05notes\x18\x12 \x01(\tR\x05notes\"/\n" +
+	"\x13UpdateStaffResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"$\n" +
 	"\x12DeleteStaffRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"/\n" +
 	"\x13DeleteStaffResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\x0eClockInRequest\x12\x19\n" +
-	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\"5\n" +
-	"\x0fClockInResponse\x12\"\n" +
-	"\rclocked_in_at\x18\x01 \x01(\tR\vclockedInAt\",\n" +
+	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\"+\n" +
+	"\x0fClockInResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\",\n" +
 	"\x0fClockOutRequest\x12\x19\n" +
-	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\"[\n" +
-	"\x10ClockOutResponse\x12$\n" +
-	"\x0eclocked_out_at\x18\x01 \x01(\tR\fclockedOutAt\x12!\n" +
-	"\fhours_worked\x18\x02 \x01(\x01R\vhoursWorkedB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
+	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\",\n" +
+	"\x10ClockOutResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"
 
 var (
 	file_hr_v1_staff_proto_rawDescOnce sync.Once
@@ -1089,36 +1275,30 @@ func file_hr_v1_staff_proto_rawDescGZIP() []byte {
 
 var file_hr_v1_staff_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_hr_v1_staff_proto_goTypes = []any{
-	(*Staff)(nil),                 // 0: hr.Staff
-	(*ListStaffRequest)(nil),      // 1: hr.ListStaffRequest
-	(*ListStaffResponse)(nil),     // 2: hr.ListStaffResponse
-	(*GetStaffRequest)(nil),       // 3: hr.GetStaffRequest
-	(*GetStaffResponse)(nil),      // 4: hr.GetStaffResponse
-	(*CreateStaffRequest)(nil),    // 5: hr.CreateStaffRequest
-	(*CreateStaffResponse)(nil),   // 6: hr.CreateStaffResponse
-	(*UpdateStaffRequest)(nil),    // 7: hr.UpdateStaffRequest
-	(*UpdateStaffResponse)(nil),   // 8: hr.UpdateStaffResponse
-	(*DeleteStaffRequest)(nil),    // 9: hr.DeleteStaffRequest
-	(*DeleteStaffResponse)(nil),   // 10: hr.DeleteStaffResponse
-	(*ClockInRequest)(nil),        // 11: hr.ClockInRequest
-	(*ClockInResponse)(nil),       // 12: hr.ClockInResponse
-	(*ClockOutRequest)(nil),       // 13: hr.ClockOutRequest
-	(*ClockOutResponse)(nil),      // 14: hr.ClockOutResponse
-	(*v1.PaginationRequest)(nil),  // 15: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 16: common.PaginationResponse
+	(*Staff)(nil),               // 0: hr.Staff
+	(*ListStaffRequest)(nil),    // 1: hr.ListStaffRequest
+	(*ListStaffResponse)(nil),   // 2: hr.ListStaffResponse
+	(*GetStaffRequest)(nil),     // 3: hr.GetStaffRequest
+	(*GetStaffResponse)(nil),    // 4: hr.GetStaffResponse
+	(*CreateStaffRequest)(nil),  // 5: hr.CreateStaffRequest
+	(*CreateStaffResponse)(nil), // 6: hr.CreateStaffResponse
+	(*UpdateStaffRequest)(nil),  // 7: hr.UpdateStaffRequest
+	(*UpdateStaffResponse)(nil), // 8: hr.UpdateStaffResponse
+	(*DeleteStaffRequest)(nil),  // 9: hr.DeleteStaffRequest
+	(*DeleteStaffResponse)(nil), // 10: hr.DeleteStaffResponse
+	(*ClockInRequest)(nil),      // 11: hr.ClockInRequest
+	(*ClockInResponse)(nil),     // 12: hr.ClockInResponse
+	(*ClockOutRequest)(nil),     // 13: hr.ClockOutRequest
+	(*ClockOutResponse)(nil),    // 14: hr.ClockOutResponse
 }
 var file_hr_v1_staff_proto_depIdxs = []int32{
-	15, // 0: hr.ListStaffRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: hr.ListStaffResponse.staff:type_name -> hr.Staff
-	16, // 2: hr.ListStaffResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: hr.GetStaffResponse.staff:type_name -> hr.Staff
-	0,  // 4: hr.CreateStaffResponse.staff:type_name -> hr.Staff
-	0,  // 5: hr.UpdateStaffResponse.staff:type_name -> hr.Staff
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: hr.ListStaffResponse.staff:type_name -> hr.Staff
+	0, // 1: hr.GetStaffResponse.staff:type_name -> hr.Staff
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_staff_proto_init() }

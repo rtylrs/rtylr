@@ -21,35 +21,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type KDSOrderItem struct {
+type KDSItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderItemId   int64                  `protobuf:"varint,2,opt,name=order_item_id,json=orderItemId,proto3" json:"order_item_id,omitempty"`
+	OrderId       int64                  `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Quantity      int32                  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Quantity      float64                `protobuf:"fixed64,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	Notes         string                 `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
-	Modifiers     []string               `protobuf:"bytes,6,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
-	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"` // pending, preparing, ready
-	StartedAt     string                 `protobuf:"bytes,8,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
-	CompletedAt   string                 `protobuf:"bytes,9,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *KDSOrderItem) Reset() {
-	*x = KDSOrderItem{}
+func (x *KDSItem) Reset() {
+	*x = KDSItem{}
 	mi := &file_pos_v1_kds_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *KDSOrderItem) String() string {
+func (x *KDSItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*KDSOrderItem) ProtoMessage() {}
+func (*KDSItem) ProtoMessage() {}
 
-func (x *KDSOrderItem) ProtoReflect() protoreflect.Message {
+func (x *KDSItem) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_kds_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -61,88 +58,66 @@ func (x *KDSOrderItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use KDSOrderItem.ProtoReflect.Descriptor instead.
-func (*KDSOrderItem) Descriptor() ([]byte, []int) {
+// Deprecated: Use KDSItem.ProtoReflect.Descriptor instead.
+func (*KDSItem) Descriptor() ([]byte, []int) {
 	return file_pos_v1_kds_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *KDSOrderItem) GetId() int64 {
+func (x *KDSItem) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *KDSOrderItem) GetOrderItemId() int64 {
+func (x *KDSItem) GetOrderId() int64 {
 	if x != nil {
-		return x.OrderItemId
+		return x.OrderId
 	}
 	return 0
 }
 
-func (x *KDSOrderItem) GetName() string {
+func (x *KDSItem) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *KDSOrderItem) GetQuantity() int32 {
+func (x *KDSItem) GetQuantity() float64 {
 	if x != nil {
 		return x.Quantity
 	}
 	return 0
 }
 
-func (x *KDSOrderItem) GetNotes() string {
+func (x *KDSItem) GetNotes() string {
 	if x != nil {
 		return x.Notes
 	}
 	return ""
 }
 
-func (x *KDSOrderItem) GetModifiers() []string {
-	if x != nil {
-		return x.Modifiers
-	}
-	return nil
-}
-
-func (x *KDSOrderItem) GetStatus() string {
+func (x *KDSItem) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
 	return ""
 }
 
-func (x *KDSOrderItem) GetStartedAt() string {
-	if x != nil {
-		return x.StartedAt
-	}
-	return ""
-}
-
-func (x *KDSOrderItem) GetCompletedAt() string {
-	if x != nil {
-		return x.CompletedAt
-	}
-	return ""
-}
-
 type KDSOrder struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrderId        int64                  `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	OrderNumber    string                 `protobuf:"bytes,3,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
-	OrderType      string                 `protobuf:"bytes,4,opt,name=order_type,json=orderType,proto3" json:"order_type,omitempty"`
-	TableName      string                 `protobuf:"bytes,5,opt,name=table_name,json=tableName,proto3" json:"table_name,omitempty"`
-	ServerName     string                 `protobuf:"bytes,6,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
-	Items          []*KDSOrderItem        `protobuf:"bytes,7,rep,name=items,proto3" json:"items,omitempty"`
-	Status         string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"` // pending, in_progress, completed
-	ElapsedSeconds int32                  `protobuf:"varint,9,opt,name=elapsed_seconds,json=elapsedSeconds,proto3" json:"elapsed_seconds,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrderNumber   string                 `protobuf:"bytes,2,opt,name=order_number,json=orderNumber,proto3" json:"order_number,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	TableId       int64                  `protobuf:"varint,5,opt,name=table_id,json=tableId,proto3" json:"table_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,6,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	KitchenNotes  string                 `protobuf:"bytes,7,opt,name=kitchen_notes,json=kitchenNotes,proto3" json:"kitchen_notes,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Items         []*KDSItem             `protobuf:"bytes,9,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *KDSOrder) Reset() {
@@ -182,13 +157,6 @@ func (x *KDSOrder) GetId() int64 {
 	return 0
 }
 
-func (x *KDSOrder) GetOrderId() int64 {
-	if x != nil {
-		return x.OrderId
-	}
-	return 0
-}
-
 func (x *KDSOrder) GetOrderNumber() string {
 	if x != nil {
 		return x.OrderNumber
@@ -196,32 +164,11 @@ func (x *KDSOrder) GetOrderNumber() string {
 	return ""
 }
 
-func (x *KDSOrder) GetOrderType() string {
+func (x *KDSOrder) GetType() string {
 	if x != nil {
-		return x.OrderType
+		return x.Type
 	}
 	return ""
-}
-
-func (x *KDSOrder) GetTableName() string {
-	if x != nil {
-		return x.TableName
-	}
-	return ""
-}
-
-func (x *KDSOrder) GetServerName() string {
-	if x != nil {
-		return x.ServerName
-	}
-	return ""
-}
-
-func (x *KDSOrder) GetItems() []*KDSOrderItem {
-	if x != nil {
-		return x.Items
-	}
-	return nil
 }
 
 func (x *KDSOrder) GetStatus() string {
@@ -231,11 +178,25 @@ func (x *KDSOrder) GetStatus() string {
 	return ""
 }
 
-func (x *KDSOrder) GetElapsedSeconds() int32 {
+func (x *KDSOrder) GetTableId() int64 {
 	if x != nil {
-		return x.ElapsedSeconds
+		return x.TableId
 	}
 	return 0
+}
+
+func (x *KDSOrder) GetCustomerName() string {
+	if x != nil {
+		return x.CustomerName
+	}
+	return ""
+}
+
+func (x *KDSOrder) GetKitchenNotes() string {
+	if x != nil {
+		return x.KitchenNotes
+	}
+	return ""
 }
 
 func (x *KDSOrder) GetCreatedAt() string {
@@ -245,10 +206,15 @@ func (x *KDSOrder) GetCreatedAt() string {
 	return ""
 }
 
+func (x *KDSOrder) GetItems() []*KDSItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 type ListKDSOrdersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-	Station       string                 `protobuf:"bytes,2,opt,name=station,proto3" json:"station,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -281,20 +247,6 @@ func (x *ListKDSOrdersRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListKDSOrdersRequest.ProtoReflect.Descriptor instead.
 func (*ListKDSOrdersRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_kds_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListKDSOrdersRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListKDSOrdersRequest) GetStation() string {
-	if x != nil {
-		return x.Station
-	}
-	return ""
 }
 
 type ListKDSOrdersResponse struct {
@@ -343,9 +295,7 @@ func (x *ListKDSOrdersResponse) GetOrders() []*KDSOrder {
 
 type UpdateKDSItemStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	ItemId        int64                  `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -380,20 +330,6 @@ func (*UpdateKDSItemStatusRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_kds_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateKDSItemStatusRequest) GetOrderId() int64 {
-	if x != nil {
-		return x.OrderId
-	}
-	return 0
-}
-
-func (x *UpdateKDSItemStatusRequest) GetItemId() int64 {
-	if x != nil {
-		return x.ItemId
-	}
-	return 0
-}
-
 func (x *UpdateKDSItemStatusRequest) GetStatus() string {
 	if x != nil {
 		return x.Status
@@ -403,7 +339,7 @@ func (x *UpdateKDSItemStatusRequest) GetStatus() string {
 
 type UpdateKDSItemStatusResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Order         *KDSOrder              `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -438,56 +374,43 @@ func (*UpdateKDSItemStatusResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_kds_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateKDSItemStatusResponse) GetOrder() *KDSOrder {
+func (x *UpdateKDSItemStatusResponse) GetMessage() string {
 	if x != nil {
-		return x.Order
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
 var File_pos_v1_kds_proto protoreflect.FileDescriptor
 
 const file_pos_v1_kds_proto_rawDesc = "" +
 	"\n" +
-	"\x10pos/v1/kds.proto\x12\x03pos\"\x80\x02\n" +
-	"\fKDSOrderItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\"\n" +
-	"\rorder_item_id\x18\x02 \x01(\x03R\vorderItemId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1a\n" +
-	"\bquantity\x18\x04 \x01(\x05R\bquantity\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\x12\x1c\n" +
-	"\tmodifiers\x18\x06 \x03(\tR\tmodifiers\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\x12\x1d\n" +
-	"\n" +
-	"started_at\x18\b \x01(\tR\tstartedAt\x12!\n" +
-	"\fcompleted_at\x18\t \x01(\tR\vcompletedAt\"\xc0\x02\n" +
-	"\bKDSOrder\x12\x0e\n" +
+	"\x10pos/v1/kds.proto\x12\x03pos\"\x92\x01\n" +
+	"\aKDSItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\x03R\aorderId\x12!\n" +
-	"\forder_number\x18\x03 \x01(\tR\vorderNumber\x12\x1d\n" +
+	"\border_id\x18\x02 \x01(\x03R\aorderId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1a\n" +
+	"\bquantity\x18\x04 \x01(\x01R\bquantity\x12\x14\n" +
+	"\x05notes\x18\x05 \x01(\tR\x05notes\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"\x91\x02\n" +
+	"\bKDSOrder\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x19\n" +
+	"\btable_id\x18\x05 \x01(\x03R\atableId\x12#\n" +
+	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12#\n" +
+	"\rkitchen_notes\x18\a \x01(\tR\fkitchenNotes\x12\x1d\n" +
 	"\n" +
-	"order_type\x18\x04 \x01(\tR\torderType\x12\x1d\n" +
-	"\n" +
-	"table_name\x18\x05 \x01(\tR\ttableName\x12\x1f\n" +
-	"\vserver_name\x18\x06 \x01(\tR\n" +
-	"serverName\x12'\n" +
-	"\x05items\x18\a \x03(\v2\x11.pos.KDSOrderItemR\x05items\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x12'\n" +
-	"\x0felapsed_seconds\x18\t \x01(\x05R\x0eelapsedSeconds\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\"H\n" +
-	"\x14ListKDSOrdersRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\astation\x18\x02 \x01(\tR\astation\">\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\"\n" +
+	"\x05items\x18\t \x03(\v2\f.pos.KDSItemR\x05items\"\x16\n" +
+	"\x14ListKDSOrdersRequest\">\n" +
 	"\x15ListKDSOrdersResponse\x12%\n" +
-	"\x06orders\x18\x01 \x03(\v2\r.pos.KDSOrderR\x06orders\"h\n" +
-	"\x1aUpdateKDSItemStatusRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x17\n" +
-	"\aitem_id\x18\x02 \x01(\x03R\x06itemId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"B\n" +
-	"\x1bUpdateKDSItemStatusResponse\x12#\n" +
-	"\x05order\x18\x01 \x01(\v2\r.pos.KDSOrderR\x05orderB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x06orders\x18\x01 \x03(\v2\r.pos.KDSOrderR\x06orders\"4\n" +
+	"\x1aUpdateKDSItemStatusRequest\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"7\n" +
+	"\x1bUpdateKDSItemStatusResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_kds_proto_rawDescOnce sync.Once
@@ -503,7 +426,7 @@ func file_pos_v1_kds_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_kds_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_pos_v1_kds_proto_goTypes = []any{
-	(*KDSOrderItem)(nil),                // 0: pos.KDSOrderItem
+	(*KDSItem)(nil),                     // 0: pos.KDSItem
 	(*KDSOrder)(nil),                    // 1: pos.KDSOrder
 	(*ListKDSOrdersRequest)(nil),        // 2: pos.ListKDSOrdersRequest
 	(*ListKDSOrdersResponse)(nil),       // 3: pos.ListKDSOrdersResponse
@@ -511,14 +434,13 @@ var file_pos_v1_kds_proto_goTypes = []any{
 	(*UpdateKDSItemStatusResponse)(nil), // 5: pos.UpdateKDSItemStatusResponse
 }
 var file_pos_v1_kds_proto_depIdxs = []int32{
-	0, // 0: pos.KDSOrder.items:type_name -> pos.KDSOrderItem
+	0, // 0: pos.KDSOrder.items:type_name -> pos.KDSItem
 	1, // 1: pos.ListKDSOrdersResponse.orders:type_name -> pos.KDSOrder
-	1, // 2: pos.UpdateKDSItemStatusResponse.order:type_name -> pos.KDSOrder
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_pos_v1_kds_proto_init() }

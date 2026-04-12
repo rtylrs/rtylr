@@ -6,25 +6,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
 
 // ── HR Dashboard ────────────────────────────────────────────────────
 
-message HRDashboard {
+message DashboardStats {
   int32 total_staff = 1;
-  int32 active_staff = 2;
-  int32 on_leave = 3;
-  int32 clocked_in = 4;
-  int32 open_shifts = 5;
-  int32 pending_time_off = 6;
-  double payroll_this_month = 7;
-  repeated DepartmentSummary departments = 8;
-}
-
-message DepartmentSummary {
-  string name = 1;
-  int32 member_count = 2;
-  int32 active = 3;
+  int32 on_shift_today = 2;
+  int32 pending_time_off = 3;
+  int32 payroll_draft = 4;
 }
 
 message GetHRDashboardRequest {}
 
 message GetHRDashboardResponse {
-  HRDashboard dashboard = 1;
+  DashboardStats stats = 1;
 }

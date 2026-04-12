@@ -21,28 +21,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type VerifyManagerPinRequest struct {
+type VerifyPINRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pin           string                 `protobuf:"bytes,1,opt,name=pin,proto3" json:"pin,omitempty"`
-	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"` // void, refund, discount, override
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyManagerPinRequest) Reset() {
-	*x = VerifyManagerPinRequest{}
+func (x *VerifyPINRequest) Reset() {
+	*x = VerifyPINRequest{}
 	mi := &file_pos_v1_manager_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyManagerPinRequest) String() string {
+func (x *VerifyPINRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyManagerPinRequest) ProtoMessage() {}
+func (*VerifyPINRequest) ProtoMessage() {}
 
-func (x *VerifyManagerPinRequest) ProtoReflect() protoreflect.Message {
+func (x *VerifyPINRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_manager_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,48 +53,41 @@ func (x *VerifyManagerPinRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyManagerPinRequest.ProtoReflect.Descriptor instead.
-func (*VerifyManagerPinRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyPINRequest.ProtoReflect.Descriptor instead.
+func (*VerifyPINRequest) Descriptor() ([]byte, []int) {
 	return file_pos_v1_manager_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *VerifyManagerPinRequest) GetPin() string {
+func (x *VerifyPINRequest) GetPin() string {
 	if x != nil {
 		return x.Pin
 	}
 	return ""
 }
 
-func (x *VerifyManagerPinRequest) GetAction() string {
-	if x != nil {
-		return x.Action
-	}
-	return ""
-}
-
-type VerifyManagerPinResponse struct {
+type VerifyPINResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	ManagerId     int64                  `protobuf:"varint,2,opt,name=manager_id,json=managerId,proto3" json:"manager_id,omitempty"`
-	ManagerName   string                 `protobuf:"bytes,3,opt,name=manager_name,json=managerName,proto3" json:"manager_name,omitempty"`
+	StaffId       int64                  `protobuf:"varint,2,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyManagerPinResponse) Reset() {
-	*x = VerifyManagerPinResponse{}
+func (x *VerifyPINResponse) Reset() {
+	*x = VerifyPINResponse{}
 	mi := &file_pos_v1_manager_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyManagerPinResponse) String() string {
+func (x *VerifyPINResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyManagerPinResponse) ProtoMessage() {}
+func (*VerifyPINResponse) ProtoMessage() {}
 
-func (x *VerifyManagerPinResponse) ProtoReflect() protoreflect.Message {
+func (x *VerifyPINResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pos_v1_manager_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -107,28 +99,28 @@ func (x *VerifyManagerPinResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyManagerPinResponse.ProtoReflect.Descriptor instead.
-func (*VerifyManagerPinResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyPINResponse.ProtoReflect.Descriptor instead.
+func (*VerifyPINResponse) Descriptor() ([]byte, []int) {
 	return file_pos_v1_manager_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *VerifyManagerPinResponse) GetValid() bool {
+func (x *VerifyPINResponse) GetValid() bool {
 	if x != nil {
 		return x.Valid
 	}
 	return false
 }
 
-func (x *VerifyManagerPinResponse) GetManagerId() int64 {
+func (x *VerifyPINResponse) GetStaffId() int64 {
 	if x != nil {
-		return x.ManagerId
+		return x.StaffId
 	}
 	return 0
 }
 
-func (x *VerifyManagerPinResponse) GetManagerName() string {
+func (x *VerifyPINResponse) GetMessage() string {
 	if x != nil {
-		return x.ManagerName
+		return x.Message
 	}
 	return ""
 }
@@ -137,15 +129,13 @@ var File_pos_v1_manager_proto protoreflect.FileDescriptor
 
 const file_pos_v1_manager_proto_rawDesc = "" +
 	"\n" +
-	"\x14pos/v1/manager.proto\x12\x03pos\"C\n" +
-	"\x17VerifyManagerPinRequest\x12\x10\n" +
-	"\x03pin\x18\x01 \x01(\tR\x03pin\x12\x16\n" +
-	"\x06action\x18\x02 \x01(\tR\x06action\"r\n" +
-	"\x18VerifyManagerPinResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x1d\n" +
-	"\n" +
-	"manager_id\x18\x02 \x01(\x03R\tmanagerId\x12!\n" +
-	"\fmanager_name\x18\x03 \x01(\tR\vmanagerNameB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x14pos/v1/manager.proto\x12\x03pos\"$\n" +
+	"\x10VerifyPINRequest\x12\x10\n" +
+	"\x03pin\x18\x01 \x01(\tR\x03pin\"^\n" +
+	"\x11VerifyPINResponse\x12\x14\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x19\n" +
+	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_manager_proto_rawDescOnce sync.Once
@@ -161,8 +151,8 @@ func file_pos_v1_manager_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_pos_v1_manager_proto_goTypes = []any{
-	(*VerifyManagerPinRequest)(nil),  // 0: pos.VerifyManagerPinRequest
-	(*VerifyManagerPinResponse)(nil), // 1: pos.VerifyManagerPinResponse
+	(*VerifyPINRequest)(nil),  // 0: pos.VerifyPINRequest
+	(*VerifyPINResponse)(nil), // 1: pos.VerifyPINResponse
 }
 var file_pos_v1_manager_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

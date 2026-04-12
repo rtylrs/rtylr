@@ -21,37 +21,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type CalendarEntry struct {
+type CalendarAppointment struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	AppointmentId int64                  `protobuf:"varint,2,opt,name=appointment_id,json=appointmentId,proto3" json:"appointment_id,omitempty"`
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	CustomerName  string                 `protobuf:"bytes,3,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
 	StartTime     string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
 	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	CustomerName  string                 `protobuf:"bytes,7,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
-	ServiceName   string                 `protobuf:"bytes,8,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	ResourceName  string                 `protobuf:"bytes,9,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
-	Color         string                 `protobuf:"bytes,10,opt,name=color,proto3" json:"color,omitempty"`
-	IsBlocked     bool                   `protobuf:"varint,11,opt,name=is_blocked,json=isBlocked,proto3" json:"is_blocked,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CalendarEntry) Reset() {
-	*x = CalendarEntry{}
+func (x *CalendarAppointment) Reset() {
+	*x = CalendarAppointment{}
 	mi := &file_book_v1_calendar_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CalendarEntry) String() string {
+func (x *CalendarAppointment) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CalendarEntry) ProtoMessage() {}
+func (*CalendarAppointment) ProtoMessage() {}
 
-func (x *CalendarEntry) ProtoReflect() protoreflect.Message {
+func (x *CalendarAppointment) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_calendar_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -63,111 +58,75 @@ func (x *CalendarEntry) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CalendarEntry.ProtoReflect.Descriptor instead.
-func (*CalendarEntry) Descriptor() ([]byte, []int) {
+// Deprecated: Use CalendarAppointment.ProtoReflect.Descriptor instead.
+func (*CalendarAppointment) Descriptor() ([]byte, []int) {
 	return file_book_v1_calendar_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CalendarEntry) GetId() int64 {
+func (x *CalendarAppointment) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *CalendarEntry) GetAppointmentId() int64 {
+func (x *CalendarAppointment) GetServiceId() int64 {
 	if x != nil {
-		return x.AppointmentId
+		return x.ServiceId
 	}
 	return 0
 }
 
-func (x *CalendarEntry) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *CalendarEntry) GetStartTime() string {
-	if x != nil {
-		return x.StartTime
-	}
-	return ""
-}
-
-func (x *CalendarEntry) GetEndTime() string {
-	if x != nil {
-		return x.EndTime
-	}
-	return ""
-}
-
-func (x *CalendarEntry) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *CalendarEntry) GetCustomerName() string {
+func (x *CalendarAppointment) GetCustomerName() string {
 	if x != nil {
 		return x.CustomerName
 	}
 	return ""
 }
 
-func (x *CalendarEntry) GetServiceName() string {
+func (x *CalendarAppointment) GetStartTime() string {
 	if x != nil {
-		return x.ServiceName
+		return x.StartTime
 	}
 	return ""
 }
 
-func (x *CalendarEntry) GetResourceName() string {
+func (x *CalendarAppointment) GetEndTime() string {
 	if x != nil {
-		return x.ResourceName
+		return x.EndTime
 	}
 	return ""
 }
 
-func (x *CalendarEntry) GetColor() string {
+func (x *CalendarAppointment) GetStatus() string {
 	if x != nil {
-		return x.Color
+		return x.Status
 	}
 	return ""
 }
 
-func (x *CalendarEntry) GetIsBlocked() bool {
-	if x != nil {
-		return x.IsBlocked
-	}
-	return false
-}
-
-type TimeSlot struct {
+type CalendarDay struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	StartTime     string                 `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       string                 `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	IsAvailable   bool                   `protobuf:"varint,3,opt,name=is_available,json=isAvailable,proto3" json:"is_available,omitempty"`
+	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	Appointments  []*CalendarAppointment `protobuf:"bytes,2,rep,name=appointments,proto3" json:"appointments,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TimeSlot) Reset() {
-	*x = TimeSlot{}
+func (x *CalendarDay) Reset() {
+	*x = CalendarDay{}
 	mi := &file_book_v1_calendar_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TimeSlot) String() string {
+func (x *CalendarDay) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TimeSlot) ProtoMessage() {}
+func (*CalendarDay) ProtoMessage() {}
 
-func (x *TimeSlot) ProtoReflect() protoreflect.Message {
+func (x *CalendarDay) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_calendar_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -179,38 +138,29 @@ func (x *TimeSlot) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TimeSlot.ProtoReflect.Descriptor instead.
-func (*TimeSlot) Descriptor() ([]byte, []int) {
+// Deprecated: Use CalendarDay.ProtoReflect.Descriptor instead.
+func (*CalendarDay) Descriptor() ([]byte, []int) {
 	return file_book_v1_calendar_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *TimeSlot) GetStartTime() string {
+func (x *CalendarDay) GetDate() string {
 	if x != nil {
-		return x.StartTime
+		return x.Date
 	}
 	return ""
 }
 
-func (x *TimeSlot) GetEndTime() string {
+func (x *CalendarDay) GetAppointments() []*CalendarAppointment {
 	if x != nil {
-		return x.EndTime
+		return x.Appointments
 	}
-	return ""
-}
-
-func (x *TimeSlot) GetIsAvailable() bool {
-	if x != nil {
-		return x.IsAvailable
-	}
-	return false
+	return nil
 }
 
 type GetCalendarRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DateFrom      string                 `protobuf:"bytes,1,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
-	DateTo        string                 `protobuf:"bytes,2,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
-	ResourceId    int64                  `protobuf:"varint,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	View          string                 `protobuf:"bytes,4,opt,name=view,proto3" json:"view,omitempty"` // day, week, month
+	From          string                 `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`
+	To            string                 `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -245,37 +195,23 @@ func (*GetCalendarRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_calendar_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetCalendarRequest) GetDateFrom() string {
+func (x *GetCalendarRequest) GetFrom() string {
 	if x != nil {
-		return x.DateFrom
+		return x.From
 	}
 	return ""
 }
 
-func (x *GetCalendarRequest) GetDateTo() string {
+func (x *GetCalendarRequest) GetTo() string {
 	if x != nil {
-		return x.DateTo
-	}
-	return ""
-}
-
-func (x *GetCalendarRequest) GetResourceId() int64 {
-	if x != nil {
-		return x.ResourceId
-	}
-	return 0
-}
-
-func (x *GetCalendarRequest) GetView() string {
-	if x != nil {
-		return x.View
+		return x.To
 	}
 	return ""
 }
 
 type GetCalendarResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entries       []*CalendarEntry       `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	Days          []*CalendarDay         `protobuf:"bytes,1,rep,name=days,proto3" json:"days,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -310,113 +246,9 @@ func (*GetCalendarResponse) Descriptor() ([]byte, []int) {
 	return file_book_v1_calendar_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetCalendarResponse) GetEntries() []*CalendarEntry {
+func (x *GetCalendarResponse) GetDays() []*CalendarDay {
 	if x != nil {
-		return x.Entries
-	}
-	return nil
-}
-
-type GetAvailableSlotsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	ServiceId     int64                  `protobuf:"varint,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ResourceId    int64                  `protobuf:"varint,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAvailableSlotsRequest) Reset() {
-	*x = GetAvailableSlotsRequest{}
-	mi := &file_book_v1_calendar_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAvailableSlotsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAvailableSlotsRequest) ProtoMessage() {}
-
-func (x *GetAvailableSlotsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_calendar_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAvailableSlotsRequest.ProtoReflect.Descriptor instead.
-func (*GetAvailableSlotsRequest) Descriptor() ([]byte, []int) {
-	return file_book_v1_calendar_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetAvailableSlotsRequest) GetDate() string {
-	if x != nil {
-		return x.Date
-	}
-	return ""
-}
-
-func (x *GetAvailableSlotsRequest) GetServiceId() int64 {
-	if x != nil {
-		return x.ServiceId
-	}
-	return 0
-}
-
-func (x *GetAvailableSlotsRequest) GetResourceId() int64 {
-	if x != nil {
-		return x.ResourceId
-	}
-	return 0
-}
-
-type GetAvailableSlotsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Slots         []*TimeSlot            `protobuf:"bytes,1,rep,name=slots,proto3" json:"slots,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetAvailableSlotsResponse) Reset() {
-	*x = GetAvailableSlotsResponse{}
-	mi := &file_book_v1_calendar_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetAvailableSlotsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetAvailableSlotsResponse) ProtoMessage() {}
-
-func (x *GetAvailableSlotsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_book_v1_calendar_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetAvailableSlotsResponse.ProtoReflect.Descriptor instead.
-func (*GetAvailableSlotsResponse) Descriptor() ([]byte, []int) {
-	return file_book_v1_calendar_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetAvailableSlotsResponse) GetSlots() []*TimeSlot {
-	if x != nil {
-		return x.Slots
+		return x.Days
 	}
 	return nil
 }
@@ -425,43 +257,24 @@ var File_book_v1_calendar_proto protoreflect.FileDescriptor
 
 const file_book_v1_calendar_proto_rawDesc = "" +
 	"\n" +
-	"\x16book/v1/calendar.proto\x12\x04book\"\xd0\x02\n" +
-	"\rCalendarEntry\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12%\n" +
-	"\x0eappointment_id\x18\x02 \x01(\x03R\rappointmentId\x12\x14\n" +
-	"\x05title\x18\x03 \x01(\tR\x05title\x12\x1d\n" +
+	"\x16book/v1/calendar.proto\x12\x04book\"\xbb\x01\n" +
+	"\x13CalendarAppointment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x02 \x01(\x03R\tserviceId\x12#\n" +
+	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12\x1d\n" +
 	"\n" +
 	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x19\n" +
 	"\bend_time\x18\x05 \x01(\tR\aendTime\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12#\n" +
-	"\rcustomer_name\x18\a \x01(\tR\fcustomerName\x12!\n" +
-	"\fservice_name\x18\b \x01(\tR\vserviceName\x12#\n" +
-	"\rresource_name\x18\t \x01(\tR\fresourceName\x12\x14\n" +
-	"\x05color\x18\n" +
-	" \x01(\tR\x05color\x12\x1d\n" +
-	"\n" +
-	"is_blocked\x18\v \x01(\bR\tisBlocked\"g\n" +
-	"\bTimeSlot\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\x01 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x02 \x01(\tR\aendTime\x12!\n" +
-	"\fis_available\x18\x03 \x01(\bR\visAvailable\"\x7f\n" +
-	"\x12GetCalendarRequest\x12\x1b\n" +
-	"\tdate_from\x18\x01 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x02 \x01(\tR\x06dateTo\x12\x1f\n" +
-	"\vresource_id\x18\x03 \x01(\x03R\n" +
-	"resourceId\x12\x12\n" +
-	"\x04view\x18\x04 \x01(\tR\x04view\"D\n" +
-	"\x13GetCalendarResponse\x12-\n" +
-	"\aentries\x18\x01 \x03(\v2\x13.book.CalendarEntryR\aentries\"n\n" +
-	"\x18GetAvailableSlotsRequest\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x02 \x01(\x03R\tserviceId\x12\x1f\n" +
-	"\vresource_id\x18\x03 \x01(\x03R\n" +
-	"resourceId\"A\n" +
-	"\x19GetAvailableSlotsResponse\x12$\n" +
-	"\x05slots\x18\x01 \x03(\v2\x0e.book.TimeSlotR\x05slotsB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
+	"\x06status\x18\x06 \x01(\tR\x06status\"`\n" +
+	"\vCalendarDay\x12\x12\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\x12=\n" +
+	"\fappointments\x18\x02 \x03(\v2\x19.book.CalendarAppointmentR\fappointments\"8\n" +
+	"\x12GetCalendarRequest\x12\x12\n" +
+	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
+	"\x02to\x18\x02 \x01(\tR\x02to\"<\n" +
+	"\x13GetCalendarResponse\x12%\n" +
+	"\x04days\x18\x01 \x03(\v2\x11.book.CalendarDayR\x04daysB(Z&github.com/voxire/voxie/gen/go/book/v1b\x06proto3"
 
 var (
 	file_book_v1_calendar_proto_rawDescOnce sync.Once
@@ -475,18 +288,16 @@ func file_book_v1_calendar_proto_rawDescGZIP() []byte {
 	return file_book_v1_calendar_proto_rawDescData
 }
 
-var file_book_v1_calendar_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_book_v1_calendar_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_book_v1_calendar_proto_goTypes = []any{
-	(*CalendarEntry)(nil),             // 0: book.CalendarEntry
-	(*TimeSlot)(nil),                  // 1: book.TimeSlot
-	(*GetCalendarRequest)(nil),        // 2: book.GetCalendarRequest
-	(*GetCalendarResponse)(nil),       // 3: book.GetCalendarResponse
-	(*GetAvailableSlotsRequest)(nil),  // 4: book.GetAvailableSlotsRequest
-	(*GetAvailableSlotsResponse)(nil), // 5: book.GetAvailableSlotsResponse
+	(*CalendarAppointment)(nil), // 0: book.CalendarAppointment
+	(*CalendarDay)(nil),         // 1: book.CalendarDay
+	(*GetCalendarRequest)(nil),  // 2: book.GetCalendarRequest
+	(*GetCalendarResponse)(nil), // 3: book.GetCalendarResponse
 }
 var file_book_v1_calendar_proto_depIdxs = []int32{
-	0, // 0: book.GetCalendarResponse.entries:type_name -> book.CalendarEntry
-	1, // 1: book.GetAvailableSlotsResponse.slots:type_name -> book.TimeSlot
+	0, // 0: book.CalendarDay.appointments:type_name -> book.CalendarAppointment
+	1, // 1: book.GetCalendarResponse.days:type_name -> book.CalendarDay
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -505,7 +316,7 @@ func file_book_v1_calendar_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_book_v1_calendar_proto_rawDesc), len(file_book_v1_calendar_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -5,172 +5,144 @@
 // source: pos/v1/orders.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../common/v1/pagination";
 
 export interface OrderItem {
   id: number;
   orderId: number;
   menuItemId: number;
   name: string;
+  sku: string;
   quantity: number;
   unitPrice: number;
-  totalPrice: number;
+  discountPct: number;
+  discountAmount: number;
+  taxRate: number;
+  total: number;
   notes: string;
-  modifiers: OrderItemModifier[];
-  /** pending, preparing, ready, served */
-  status: string;
-  sentAt: string;
-  createdAt: string;
-}
-
-export interface OrderItemModifier {
-  id: number;
-  modifierId: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-export interface OrderDiscount {
-  id: number;
-  /** percentage, fixed */
-  type: string;
-  value: number;
-  reason: string;
-  appliedBy: string;
-}
-
-export interface OrderPayment {
-  id: number;
-  /** cash, card, gift_card */
-  method: string;
-  amount: number;
-  reference: string;
   status: string;
   createdAt: string;
 }
 
 export interface Order {
   id: number;
-  orderNumber: string;
-  locationId: number;
+  ownerId: number;
   sessionId: number;
   tableId: number;
-  customerId: number;
-  /** dine_in, takeout, delivery */
-  orderType: string;
-  /** open, held, closed, voided, refunded */
+  locationId: number;
+  orderNumber: string;
+  type: string;
   status: string;
-  items: OrderItem[];
-  discounts: OrderDiscount[];
-  payments: OrderPayment[];
+  customerId: number;
+  customerName: string;
+  staffId: number;
   subtotal: number;
-  taxAmount: number;
   discountAmount: number;
-  tipAmount: number;
+  taxAmount: number;
   total: number;
+  paymentMethod: string;
+  paymentStatus: string;
+  amountPaid: number;
+  changeDue: number;
   notes: string;
-  createdBy: string;
+  kitchenNotes: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface CreateOrderRequest {
-  locationId: number;
-  tableId: number;
-  customerId: number;
-  orderType: string;
-  items: CreateOrderItemInput[];
-  notes: string;
-}
-
-export interface CreateOrderItemInput {
-  menuItemId: number;
-  quantity: number;
-  notes: string;
-  modifierIds: number[];
-}
-
-export interface CreateOrderResponse {
-  order: Order | undefined;
+  paidAt: string;
+  items: OrderItem[];
 }
 
 export interface ListOrdersRequest {
-  pagination: PaginationRequest | undefined;
+  sessionId: number;
   status: string;
-  orderType: string;
-  tableId: number;
   dateFrom: string;
   dateTo: string;
 }
 
 export interface ListOrdersResponse {
   orders: Order[];
-  pagination: PaginationResponse | undefined;
+}
+
+export interface CreateOrderItemInput {
+  menuItemId: number;
+  name: string;
+  sku: string;
+  quantity: number;
+  unitPrice: number;
+  discountPct: number;
+  taxRate: number;
+  notes: string;
+}
+
+export interface CreateOrderRequest {
+  sessionId: number;
+  tableId: number;
+  locationId: number;
+  type: string;
+  customerId: number;
+  customerName: string;
+  paymentMethod: string;
+  notes: string;
+  kitchenNotes: string;
+  items: CreateOrderItemInput[];
+}
+
+export interface CreateOrderResponse {
+  orderId: number;
+  orderNumber: string;
+  message: string;
+}
+
+export interface GetOrderDetailRequest {
+  orderId: number;
+}
+
+export interface GetOrderDetailResponse {
+  order: Order | undefined;
 }
 
 export interface UpdateOrderStatusRequest {
-  id: number;
+  orderId: number;
   status: string;
 }
 
 export interface UpdateOrderStatusResponse {
-  order: Order | undefined;
+  message: string;
 }
 
-export interface ChargeOrderRequest {
-  id: number;
-  paymentMethod: string;
-  amount: number;
-  tipAmount: number;
-  reference: string;
-}
-
-export interface ChargeOrderResponse {
-  order: Order | undefined;
-  payment: OrderPayment | undefined;
-}
-
-export interface VoidOrderRequest {
-  id: number;
-  reason: string;
-  managerPin: string;
-}
-
-export interface VoidOrderResponse {
-  order: Order | undefined;
-}
-
-export interface RefundOrderRequest {
-  id: number;
-  amount: number;
-  reason: string;
-  managerPin: string;
-}
-
-export interface RefundOrderResponse {
-  order: Order | undefined;
-  refundedAmount: number;
-}
-
-export interface ApplyDiscountRequest {
+export interface UpdateOrderItemStatusRequest {
   orderId: number;
-  /** percentage, fixed */
-  type: string;
-  value: number;
+  itemId: number;
+  status: string;
+}
+
+export interface UpdateOrderItemStatusResponse {
+  message: string;
+}
+
+export interface ProcessPaymentRequest {
+  orderId: number;
+  paymentMethod: string;
+  amountPaid: number;
+}
+
+export interface ProcessPaymentResponse {
+  message: string;
+}
+
+export interface ProcessRefundRequest {
+  orderId: number;
+  amount: number;
   reason: string;
 }
 
-export interface ApplyDiscountResponse {
-  order: Order | undefined;
+export interface ProcessRefundResponse {
+  refundId: number;
+  message: string;
 }
 
 export interface SplitOrderRequest {
   orderId: number;
-  /** number of ways to split */
-  ways: number;
-  /** or explicit item groups */
-  groups: SplitGroup[];
+  splits: SplitGroup[];
 }
 
 export interface SplitGroup {
@@ -178,14 +150,52 @@ export interface SplitGroup {
 }
 
 export interface SplitOrderResponse {
-  orders: Order[];
+  orderIds: number[];
+  message: string;
+}
+
+export interface DiscountOrderRequest {
+  orderId: number;
+  discountType: string;
+  discountValue: number;
+  reason: string;
+}
+
+export interface DiscountOrderResponse {
+  message: string;
+}
+
+export interface VoidOrderRequest {
+  orderId: number;
+  reason: string;
+}
+
+export interface VoidOrderResponse {
+  message: string;
 }
 
 export interface HoldOrderRequest {
-  id: number;
+  orderId: number;
   reason: string;
 }
 
 export interface HoldOrderResponse {
-  order: Order | undefined;
+  message: string;
+}
+
+export interface ListHeldOrdersRequest {
+}
+
+export interface ListHeldOrdersResponse {
+  orders: Order[];
+}
+
+export interface DashboardRequest {
+}
+
+export interface DashboardResponse {
+  totalSales: number;
+  orderCount: number;
+  avgOrder: number;
+  tableTurnover: number;
 }

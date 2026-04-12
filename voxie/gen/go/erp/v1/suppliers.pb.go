@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,17 +24,19 @@ const (
 type Supplier struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	ContactName   string                 `protobuf:"bytes,3,opt,name=contact_name,json=contactName,proto3" json:"contact_name,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
 	Address       string                 `protobuf:"bytes,6,opt,name=address,proto3" json:"address,omitempty"`
-	PaymentTerms  string                 `protobuf:"bytes,7,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"` // net30, net60, cod
-	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`                                 // active, inactive
-	TotalOrders   int32                  `protobuf:"varint,9,opt,name=total_orders,json=totalOrders,proto3" json:"total_orders,omitempty"`
-	Notes         string                 `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	City          string                 `protobuf:"bytes,7,opt,name=city,proto3" json:"city,omitempty"`
+	Country       string                 `protobuf:"bytes,8,opt,name=country,proto3" json:"country,omitempty"`
+	TaxId         string                 `protobuf:"bytes,9,opt,name=tax_id,json=taxId,proto3" json:"tax_id,omitempty"`
+	PaymentTerms  string                 `protobuf:"bytes,10,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"`
+	Notes         string                 `protobuf:"bytes,11,opt,name=notes,proto3" json:"notes,omitempty"`
+	IsActive      bool                   `protobuf:"varint,12,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,16 +78,16 @@ func (x *Supplier) GetId() int64 {
 	return 0
 }
 
+func (x *Supplier) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
 func (x *Supplier) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *Supplier) GetContactName() string {
-	if x != nil {
-		return x.ContactName
 	}
 	return ""
 }
@@ -112,6 +113,27 @@ func (x *Supplier) GetAddress() string {
 	return ""
 }
 
+func (x *Supplier) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *Supplier) GetCountry() string {
+	if x != nil {
+		return x.Country
+	}
+	return ""
+}
+
+func (x *Supplier) GetTaxId() string {
+	if x != nil {
+		return x.TaxId
+	}
+	return ""
+}
+
 func (x *Supplier) GetPaymentTerms() string {
 	if x != nil {
 		return x.PaymentTerms
@@ -119,25 +141,18 @@ func (x *Supplier) GetPaymentTerms() string {
 	return ""
 }
 
-func (x *Supplier) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *Supplier) GetTotalOrders() int32 {
-	if x != nil {
-		return x.TotalOrders
-	}
-	return 0
-}
-
 func (x *Supplier) GetNotes() string {
 	if x != nil {
 		return x.Notes
 	}
 	return ""
+}
+
+func (x *Supplier) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 func (x *Supplier) GetCreatedAt() string {
@@ -156,9 +171,6 @@ func (x *Supplier) GetUpdatedAt() string {
 
 type ListSuppliersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Search        string                 `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -193,31 +205,9 @@ func (*ListSuppliersRequest) Descriptor() ([]byte, []int) {
 	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListSuppliersRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListSuppliersRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
-func (x *ListSuppliersRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
 type ListSuppliersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Suppliers     []*Supplier            `protobuf:"bytes,1,rep,name=suppliers,proto3" json:"suppliers,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,117 +249,25 @@ func (x *ListSuppliersResponse) GetSuppliers() []*Supplier {
 	return nil
 }
 
-func (x *ListSuppliersResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-type GetSupplierRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSupplierRequest) Reset() {
-	*x = GetSupplierRequest{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSupplierRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSupplierRequest) ProtoMessage() {}
-
-func (x *GetSupplierRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSupplierRequest.ProtoReflect.Descriptor instead.
-func (*GetSupplierRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetSupplierRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetSupplierResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Supplier      *Supplier              `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSupplierResponse) Reset() {
-	*x = GetSupplierResponse{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSupplierResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSupplierResponse) ProtoMessage() {}
-
-func (x *GetSupplierResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSupplierResponse.ProtoReflect.Descriptor instead.
-func (*GetSupplierResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetSupplierResponse) GetSupplier() *Supplier {
-	if x != nil {
-		return x.Supplier
-	}
-	return nil
-}
-
 type CreateSupplierRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ContactName   string                 `protobuf:"bytes,2,opt,name=contact_name,json=contactName,proto3" json:"contact_name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
-	Address       string                 `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
-	PaymentTerms  string                 `protobuf:"bytes,6,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"`
-	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Phone         string                 `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
+	Address       string                 `protobuf:"bytes,4,opt,name=address,proto3" json:"address,omitempty"`
+	City          string                 `protobuf:"bytes,5,opt,name=city,proto3" json:"city,omitempty"`
+	Country       string                 `protobuf:"bytes,6,opt,name=country,proto3" json:"country,omitempty"`
+	TaxId         string                 `protobuf:"bytes,7,opt,name=tax_id,json=taxId,proto3" json:"tax_id,omitempty"`
+	PaymentTerms  string                 `protobuf:"bytes,8,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"`
+	Notes         string                 `protobuf:"bytes,9,opt,name=notes,proto3" json:"notes,omitempty"`
+	IsActive      bool                   `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateSupplierRequest) Reset() {
 	*x = CreateSupplierRequest{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[5]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -381,7 +279,7 @@ func (x *CreateSupplierRequest) String() string {
 func (*CreateSupplierRequest) ProtoMessage() {}
 
 func (x *CreateSupplierRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[5]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,19 +292,12 @@ func (x *CreateSupplierRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSupplierRequest.ProtoReflect.Descriptor instead.
 func (*CreateSupplierRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{5}
+	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateSupplierRequest) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *CreateSupplierRequest) GetContactName() string {
-	if x != nil {
-		return x.ContactName
 	}
 	return ""
 }
@@ -432,6 +323,27 @@ func (x *CreateSupplierRequest) GetAddress() string {
 	return ""
 }
 
+func (x *CreateSupplierRequest) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *CreateSupplierRequest) GetCountry() string {
+	if x != nil {
+		return x.Country
+	}
+	return ""
+}
+
+func (x *CreateSupplierRequest) GetTaxId() string {
+	if x != nil {
+		return x.TaxId
+	}
+	return ""
+}
+
 func (x *CreateSupplierRequest) GetPaymentTerms() string {
 	if x != nil {
 		return x.PaymentTerms
@@ -446,16 +358,24 @@ func (x *CreateSupplierRequest) GetNotes() string {
 	return ""
 }
 
+func (x *CreateSupplierRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
 type CreateSupplierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Supplier      *Supplier              `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
+	SupplierId    int64                  `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateSupplierResponse) Reset() {
 	*x = CreateSupplierResponse{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[6]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +387,7 @@ func (x *CreateSupplierResponse) String() string {
 func (*CreateSupplierResponse) ProtoMessage() {}
 
 func (x *CreateSupplierResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[6]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -480,34 +400,43 @@ func (x *CreateSupplierResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSupplierResponse.ProtoReflect.Descriptor instead.
 func (*CreateSupplierResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{6}
+	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateSupplierResponse) GetSupplier() *Supplier {
+func (x *CreateSupplierResponse) GetSupplierId() int64 {
 	if x != nil {
-		return x.Supplier
+		return x.SupplierId
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateSupplierResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateSupplierRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	ContactName   string                 `protobuf:"bytes,3,opt,name=contact_name,json=contactName,proto3" json:"contact_name,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	Address       string                 `protobuf:"bytes,6,opt,name=address,proto3" json:"address,omitempty"`
-	PaymentTerms  string                 `protobuf:"bytes,7,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"`
-	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
-	Notes         string                 `protobuf:"bytes,9,opt,name=notes,proto3" json:"notes,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Phone         string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Address       string                 `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
+	City          string                 `protobuf:"bytes,6,opt,name=city,proto3" json:"city,omitempty"`
+	Country       string                 `protobuf:"bytes,7,opt,name=country,proto3" json:"country,omitempty"`
+	TaxId         string                 `protobuf:"bytes,8,opt,name=tax_id,json=taxId,proto3" json:"tax_id,omitempty"`
+	PaymentTerms  string                 `protobuf:"bytes,9,opt,name=payment_terms,json=paymentTerms,proto3" json:"payment_terms,omitempty"`
+	Notes         string                 `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
+	IsActive      bool                   `protobuf:"varint,11,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateSupplierRequest) Reset() {
 	*x = UpdateSupplierRequest{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[7]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -519,7 +448,7 @@ func (x *UpdateSupplierRequest) String() string {
 func (*UpdateSupplierRequest) ProtoMessage() {}
 
 func (x *UpdateSupplierRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[7]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -532,7 +461,7 @@ func (x *UpdateSupplierRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSupplierRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSupplierRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{7}
+	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateSupplierRequest) GetId() int64 {
@@ -545,13 +474,6 @@ func (x *UpdateSupplierRequest) GetId() int64 {
 func (x *UpdateSupplierRequest) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateSupplierRequest) GetContactName() string {
-	if x != nil {
-		return x.ContactName
 	}
 	return ""
 }
@@ -577,16 +499,30 @@ func (x *UpdateSupplierRequest) GetAddress() string {
 	return ""
 }
 
-func (x *UpdateSupplierRequest) GetPaymentTerms() string {
+func (x *UpdateSupplierRequest) GetCity() string {
 	if x != nil {
-		return x.PaymentTerms
+		return x.City
 	}
 	return ""
 }
 
-func (x *UpdateSupplierRequest) GetStatus() string {
+func (x *UpdateSupplierRequest) GetCountry() string {
 	if x != nil {
-		return x.Status
+		return x.Country
+	}
+	return ""
+}
+
+func (x *UpdateSupplierRequest) GetTaxId() string {
+	if x != nil {
+		return x.TaxId
+	}
+	return ""
+}
+
+func (x *UpdateSupplierRequest) GetPaymentTerms() string {
+	if x != nil {
+		return x.PaymentTerms
 	}
 	return ""
 }
@@ -598,16 +534,23 @@ func (x *UpdateSupplierRequest) GetNotes() string {
 	return ""
 }
 
+func (x *UpdateSupplierRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
 type UpdateSupplierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Supplier      *Supplier              `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateSupplierResponse) Reset() {
 	*x = UpdateSupplierResponse{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[8]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -619,7 +562,7 @@ func (x *UpdateSupplierResponse) String() string {
 func (*UpdateSupplierResponse) ProtoMessage() {}
 
 func (x *UpdateSupplierResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[8]
+	mi := &file_erp_v1_suppliers_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,166 +575,73 @@ func (x *UpdateSupplierResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSupplierResponse.ProtoReflect.Descriptor instead.
 func (*UpdateSupplierResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{8}
+	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateSupplierResponse) GetSupplier() *Supplier {
+func (x *UpdateSupplierResponse) GetMessage() string {
 	if x != nil {
-		return x.Supplier
+		return x.Message
 	}
-	return nil
-}
-
-type DeleteSupplierRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteSupplierRequest) Reset() {
-	*x = DeleteSupplierRequest{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteSupplierRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteSupplierRequest) ProtoMessage() {}
-
-func (x *DeleteSupplierRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteSupplierRequest.ProtoReflect.Descriptor instead.
-func (*DeleteSupplierRequest) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *DeleteSupplierRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type DeleteSupplierResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteSupplierResponse) Reset() {
-	*x = DeleteSupplierResponse{}
-	mi := &file_erp_v1_suppliers_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteSupplierResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteSupplierResponse) ProtoMessage() {}
-
-func (x *DeleteSupplierResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_v1_suppliers_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteSupplierResponse.ProtoReflect.Descriptor instead.
-func (*DeleteSupplierResponse) Descriptor() ([]byte, []int) {
-	return file_erp_v1_suppliers_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *DeleteSupplierResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
+	return ""
 }
 
 var File_erp_v1_suppliers_proto protoreflect.FileDescriptor
 
 const file_erp_v1_suppliers_proto_rawDesc = "" +
 	"\n" +
-	"\x16erp/v1/suppliers.proto\x12\x03erp\x1a\x1acommon/v1/pagination.proto\"\xcb\x02\n" +
+	"\x16erp/v1/suppliers.proto\x12\x03erp\"\xea\x02\n" +
 	"\bSupplier\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
-	"\fcontact_name\x18\x03 \x01(\tR\vcontactName\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x18\n" +
-	"\aaddress\x18\x06 \x01(\tR\aaddress\x12#\n" +
-	"\rpayment_terms\x18\a \x01(\tR\fpaymentTerms\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x12!\n" +
-	"\ftotal_orders\x18\t \x01(\x05R\vtotalOrders\x12\x14\n" +
-	"\x05notes\x18\n" +
-	" \x01(\tR\x05notes\x12\x1d\n" +
+	"\aaddress\x18\x06 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04city\x18\a \x01(\tR\x04city\x12\x18\n" +
+	"\acountry\x18\b \x01(\tR\acountry\x12\x15\n" +
+	"\x06tax_id\x18\t \x01(\tR\x05taxId\x12#\n" +
+	"\rpayment_terms\x18\n" +
+	" \x01(\tR\fpaymentTerms\x12\x14\n" +
+	"\x05notes\x18\v \x01(\tR\x05notes\x12\x1b\n" +
+	"\tis_active\x18\f \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\x81\x01\n" +
-	"\x14ListSuppliersRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06search\x18\x02 \x01(\tR\x06search\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"\x80\x01\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"\x16\n" +
+	"\x14ListSuppliersRequest\"D\n" +
 	"\x15ListSuppliersResponse\x12+\n" +
-	"\tsuppliers\x18\x01 \x03(\v2\r.erp.SupplierR\tsuppliers\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"$\n" +
-	"\x12GetSupplierRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"@\n" +
-	"\x13GetSupplierResponse\x12)\n" +
-	"\bsupplier\x18\x01 \x01(\v2\r.erp.SupplierR\bsupplier\"\xcf\x01\n" +
+	"\tsuppliers\x18\x01 \x03(\v2\r.erp.SupplierR\tsuppliers\"\x8e\x02\n" +
 	"\x15CreateSupplierRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\fcontact_name\x18\x02 \x01(\tR\vcontactName\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x18\n" +
-	"\aaddress\x18\x05 \x01(\tR\aaddress\x12#\n" +
-	"\rpayment_terms\x18\x06 \x01(\tR\fpaymentTerms\x12\x14\n" +
-	"\x05notes\x18\a \x01(\tR\x05notes\"C\n" +
-	"\x16CreateSupplierResponse\x12)\n" +
-	"\bsupplier\x18\x01 \x01(\v2\r.erp.SupplierR\bsupplier\"\xf7\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x18\n" +
+	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04city\x18\x05 \x01(\tR\x04city\x12\x18\n" +
+	"\acountry\x18\x06 \x01(\tR\acountry\x12\x15\n" +
+	"\x06tax_id\x18\a \x01(\tR\x05taxId\x12#\n" +
+	"\rpayment_terms\x18\b \x01(\tR\fpaymentTerms\x12\x14\n" +
+	"\x05notes\x18\t \x01(\tR\x05notes\x12\x1b\n" +
+	"\tis_active\x18\n" +
+	" \x01(\bR\bisActive\"S\n" +
+	"\x16CreateSupplierResponse\x12\x1f\n" +
+	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
+	"supplierId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x9e\x02\n" +
 	"\x15UpdateSupplierRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
-	"\fcontact_name\x18\x03 \x01(\tR\vcontactName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x18\n" +
-	"\aaddress\x18\x06 \x01(\tR\aaddress\x12#\n" +
-	"\rpayment_terms\x18\a \x01(\tR\fpaymentTerms\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x12\x14\n" +
-	"\x05notes\x18\t \x01(\tR\x05notes\"C\n" +
-	"\x16UpdateSupplierResponse\x12)\n" +
-	"\bsupplier\x18\x01 \x01(\v2\r.erp.SupplierR\bsupplier\"'\n" +
-	"\x15DeleteSupplierRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
-	"\x16DeleteSupplierResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/erp/v1b\x06proto3"
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x18\n" +
+	"\aaddress\x18\x05 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04city\x18\x06 \x01(\tR\x04city\x12\x18\n" +
+	"\acountry\x18\a \x01(\tR\acountry\x12\x15\n" +
+	"\x06tax_id\x18\b \x01(\tR\x05taxId\x12#\n" +
+	"\rpayment_terms\x18\t \x01(\tR\fpaymentTerms\x12\x14\n" +
+	"\x05notes\x18\n" +
+	" \x01(\tR\x05notes\x12\x1b\n" +
+	"\tis_active\x18\v \x01(\bR\bisActive\"2\n" +
+	"\x16UpdateSupplierResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/erp/v1b\x06proto3"
 
 var (
 	file_erp_v1_suppliers_proto_rawDescOnce sync.Once
@@ -805,34 +655,23 @@ func file_erp_v1_suppliers_proto_rawDescGZIP() []byte {
 	return file_erp_v1_suppliers_proto_rawDescData
 }
 
-var file_erp_v1_suppliers_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_erp_v1_suppliers_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_erp_v1_suppliers_proto_goTypes = []any{
 	(*Supplier)(nil),               // 0: erp.Supplier
 	(*ListSuppliersRequest)(nil),   // 1: erp.ListSuppliersRequest
 	(*ListSuppliersResponse)(nil),  // 2: erp.ListSuppliersResponse
-	(*GetSupplierRequest)(nil),     // 3: erp.GetSupplierRequest
-	(*GetSupplierResponse)(nil),    // 4: erp.GetSupplierResponse
-	(*CreateSupplierRequest)(nil),  // 5: erp.CreateSupplierRequest
-	(*CreateSupplierResponse)(nil), // 6: erp.CreateSupplierResponse
-	(*UpdateSupplierRequest)(nil),  // 7: erp.UpdateSupplierRequest
-	(*UpdateSupplierResponse)(nil), // 8: erp.UpdateSupplierResponse
-	(*DeleteSupplierRequest)(nil),  // 9: erp.DeleteSupplierRequest
-	(*DeleteSupplierResponse)(nil), // 10: erp.DeleteSupplierResponse
-	(*v1.PaginationRequest)(nil),   // 11: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),  // 12: common.PaginationResponse
+	(*CreateSupplierRequest)(nil),  // 3: erp.CreateSupplierRequest
+	(*CreateSupplierResponse)(nil), // 4: erp.CreateSupplierResponse
+	(*UpdateSupplierRequest)(nil),  // 5: erp.UpdateSupplierRequest
+	(*UpdateSupplierResponse)(nil), // 6: erp.UpdateSupplierResponse
 }
 var file_erp_v1_suppliers_proto_depIdxs = []int32{
-	11, // 0: erp.ListSuppliersRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: erp.ListSuppliersResponse.suppliers:type_name -> erp.Supplier
-	12, // 2: erp.ListSuppliersResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: erp.GetSupplierResponse.supplier:type_name -> erp.Supplier
-	0,  // 4: erp.CreateSupplierResponse.supplier:type_name -> erp.Supplier
-	0,  // 5: erp.UpdateSupplierResponse.supplier:type_name -> erp.Supplier
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0, // 0: erp.ListSuppliersResponse.suppliers:type_name -> erp.Supplier
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_erp_v1_suppliers_proto_init() }
@@ -846,7 +685,7 @@ func file_erp_v1_suppliers_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_erp_v1_suppliers_proto_rawDesc), len(file_erp_v1_suppliers_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

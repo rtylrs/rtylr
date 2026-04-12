@@ -4,60 +4,66 @@ package erp;
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Inventory ───────────────────────────────────────────────────────
 
-message InventoryItem {
+// -- Adjust Inventory --
+
+message AdjustInventoryRequest {
+  int64 product_id = 1;
+  double change = 2;
+  string type = 3;
+  string notes = 4;
+}
+
+message AdjustInventoryResponse {
+  string message = 1;
+}
+
+// -- Inventory Report --
+
+message InventoryReportItem {
   int64 product_id = 1;
   string product_name = 2;
   string sku = 3;
-  int32 quantity = 4;
-  int32 low_stock_threshold = 5;
-  string status = 6; // in_stock, low_stock, out_of_stock
-  string last_restocked_at = 7;
+  string unit = 4;
+  double stock_quantity = 5;
+  double low_stock_threshold = 6;
+  double reorder_quantity = 7;
+  double cost_price = 8;
+  double sale_price = 9;
+  double stock_value = 10;
+  bool is_low_stock = 11;
 }
 
-message InventoryReport {
-  int32 total_products = 1;
-  int32 in_stock = 2;
-  int32 low_stock = 3;
-  int32 out_of_stock = 4;
-  double total_value = 5;
-  repeated InventoryItem items = 6;
-}
-
-message GetInventoryReportRequest {
-  common.PaginationRequest pagination = 1;
-  string status = 2;
-  string search = 3;
-}
+message GetInventoryReportRequest {}
 
 message GetInventoryReportResponse {
-  InventoryReport report = 1;
-  common.PaginationResponse pagination = 2;
+  repeated InventoryReportItem items = 1;
+  double total_value = 2;
 }
 
-message LowStockItem {
-  int64 product_id = 1;
-  string product_name = 2;
-  string sku = 3;
-  int32 quantity = 4;
-  int32 threshold = 5;
-}
+// -- Low Stock --
 
 message GetLowStockRequest {}
 
 message GetLowStockResponse {
-  repeated LowStockItem items = 1;
+  repeated InventoryReportItem items = 1;
+  int32 count = 2;
 }
 
-message AdjustInventoryRequest {
-  int64 product_id = 1;
-  int32 adjustment = 2; // positive = add, negative = remove
-  string reason = 3;
+// -- Valuation --
+
+message ValuationItem {
+  string category_name = 1;
+  string warehouse_name = 2;
+  int64 total_items = 3;
+  double total_value = 4;
+  double total_cost = 5;
 }
 
-message AdjustInventoryResponse {
-  int32 new_quantity = 1;
+message GetValuationRequest {}
+
+message GetValuationResponse {
+  repeated ValuationItem items = 1;
+  double total_value = 2;
 }
