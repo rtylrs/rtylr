@@ -58,7 +58,7 @@ const Settings: React.FC = () => {
   }
 
   type ScheduledRow = {
-    id?: unknown;
+    id?: string | number;
     name?: string;
     reportName?: string;
     schedule?: string;
@@ -214,7 +214,7 @@ const Settings: React.FC = () => {
           />
         ) : (
           <div className="space-y-1">
-            {scheduledList.map((s: any) => (
+            {scheduledList.map((s) => (
               <div
                 key={s.id}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -229,7 +229,7 @@ const Settings: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => handleDeleteScheduled(s.id)}
+                  onClick={() => handleDeleteScheduled(String(s.id ?? ''))}
                   className="h-6 w-6 rounded flex items-center justify-center transition-colors"
                   style={{ color: 'var(--hub-text-dim)' }}
                   onMouseEnter={(e) => {
