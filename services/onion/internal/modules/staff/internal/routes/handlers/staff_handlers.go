@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/staff/internal/application"
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
@@ -25,45 +26,23 @@ type ListStaffRequest struct {
 	Status       string `json:"status"`
 }
 
-type StaffPayload struct {
-	ID                    int64     `json:"id"`
-	OwnerID               int64     `json:"owner_id"`
-	UserID                int64     `json:"user_id"`
-	DepartmentID          int64     `json:"department_id"`
-	FirstName             string    `json:"first_name"`
-	LastName              string    `json:"last_name"`
-	Email                 string    `json:"email"`
-	Phone                 string    `json:"phone"`
-	Role                  string    `json:"role"`
-	EmploymentType        string    `json:"employment_type"`
-	Status                string    `json:"status"`
-	Salary                float64   `json:"salary"`
-	HourlyRate            float64   `json:"hourly_rate"`
-	OvertimeRate          float64   `json:"overtime_rate"`
-	StartDate             time.Time `json:"start_date"`
-	EndDate               time.Time `json:"end_date"`
-	Address               string    `json:"address"`
-	EmergencyContactName  string    `json:"emergency_contact_name"`
-	EmergencyContactPhone string    `json:"emergency_contact_phone"`
-	Apps                  string    `json:"apps"`
-	Notes                 string    `json:"notes"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
-}
-
 type ListStaffResponse struct {
-	Staff []StaffPayload `json:"staff"`
+	Staff []*hrv1.Staff `json:"staff"`
 }
 
-func newStaffPayload(s domain.Staff) StaffPayload {
-	return StaffPayload{
-		ID: s.ID, OwnerID: s.OwnerID, UserID: s.UserID, DepartmentID: s.DepartmentID,
+func newStaffPayload(s domain.Staff) *hrv1.Staff {
+	return &hrv1.Staff{
+		Id: s.ID, OwnerId: s.OwnerID, UserId: s.UserID, DepartmentId: s.DepartmentID,
 		FirstName: s.FirstName, LastName: s.LastName, Email: s.Email, Phone: s.Phone,
 		Role: s.Role, EmploymentType: s.EmploymentType, Status: s.Status,
 		Salary: s.Salary, HourlyRate: s.HourlyRate, OvertimeRate: s.OvertimeRate,
-		StartDate: s.StartDate, EndDate: s.EndDate, Address: s.Address,
+		StartDate: s.StartDate.Format("2006-01-02T15:04:05Z"),
+		EndDate:   s.EndDate.Format("2006-01-02T15:04:05Z"),
+		Address:   s.Address,
 		EmergencyContactName: s.EmergencyContactName, EmergencyContactPhone: s.EmergencyContactPhone,
-		Apps: s.Apps, Notes: s.Notes, CreatedAt: s.CreatedAt, UpdatedAt: s.UpdatedAt,
+		Apps: s.Apps, Notes: s.Notes,
+		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: s.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -78,7 +57,7 @@ func (h *ListStaffHandler) Serve(ctx context.Context, req *ListStaffRequest) (Li
 		return ListStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list staff"}
 	}
 
-	payloads := make([]StaffPayload, 0, len(staffList))
+	payloads := make([]*hrv1.Staff, 0, len(staffList))
 	for _, s := range staffList {
 		payloads = append(payloads, newStaffPayload(s))
 	}
@@ -274,7 +253,7 @@ type GetStaffRequest struct {
 }
 
 type GetStaffResponse struct {
-	Staff StaffPayload `json:"staff"`
+	Staff *hrv1.Staff `json:"staff"`
 }
 
 func (h *GetStaffHandler) Validate(_ context.Context, req *GetStaffRequest) *errorModels.ServerError {
@@ -383,15 +362,8 @@ type DashboardHandler struct {
 
 type DashboardRequest struct{}
 
-type DashboardStatsPayload struct {
-	TotalStaff     int `json:"total_staff"`
-	OnShiftToday   int `json:"on_shift_today"`
-	PendingTimeOff int `json:"pending_time_off"`
-	PayrollDraft   int `json:"payroll_draft"`
-}
-
 type DashboardResponse struct {
-	Stats DashboardStatsPayload `json:"stats"`
+	Stats *hrv1.DashboardStats `json:"stats"`
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
@@ -405,8 +377,8 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get dashboard stats"}
 	}
 
-	return DashboardResponse{Stats: DashboardStatsPayload{
-		TotalStaff: stats.TotalStaff, OnShiftToday: stats.OnShiftToday,
-		PendingTimeOff: stats.PendingTimeOff, PayrollDraft: stats.PayrollDraft,
+	return DashboardResponse{Stats: &hrv1.DashboardStats{
+		TotalStaff: int64(stats.TotalStaff), OnShiftToday: int64(stats.OnShiftToday),
+		PendingTimeOff: int64(stats.PendingTimeOff), PayrollDraft: int64(stats.PayrollDraft),
 	}}, nil
 }
