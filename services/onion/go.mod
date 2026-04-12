@@ -1,6 +1,6 @@
 module github.com/voxire/onion
 
-go 1.25.0
+go 1.26
 
 require (
 	codnect.io/chrono v1.1.3
@@ -20,6 +20,8 @@ require (
 	google.golang.org/api v0.186.0
 	google.golang.org/grpc v1.77.0
 )
+
+require github.com/voxire/voxie v0.0.0-00010101000000-000000000000 // indirect
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
@@ -41,7 +43,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
-	github.com/resend/resend-go/v2 v2.28.0 // indirect
+	github.com/resend/resend-go/v2 v2.28.0
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
@@ -64,3 +66,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+replace github.com/voxire/voxie => ./voxie
