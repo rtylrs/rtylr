@@ -170,6 +170,19 @@ export interface ApiTaskDetail {
 
 // -- API ------------------------------------------------------------------
 
+// -- Per-feature services (re-exported for backwards compat) ---------------
+
+export { projectService } from './projectService';
+export { taskService } from './taskService';
+export { workspaceService } from './workspaceService';
+export { cycleService } from './cycleService';
+export { milestoneService } from './milestoneService';
+export { viewService } from './viewService';
+export { labelService } from './labelService';
+export { insightsService } from './insightsService';
+
+// -- Legacy barrel (delegates to per-feature services) ---------------------
+
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
     safe.get<DashboardStats>('/flow/dashboard', {
