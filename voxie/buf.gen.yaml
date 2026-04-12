@@ -6,7 +6,7 @@ plugins:
     opt:
       - paths=source_relative
 
-  # TypeScript code generation
+  # TypeScript - pure interfaces only (no protobuf runtime)
   - local: protoc-gen-ts_proto
     out: gen/ts
     opt:
@@ -15,3 +15,4 @@ plugins:
       - env=browser
       - useExactTypes=false
       - exportCommonSymbols=false
+      - onlyTypes=true
