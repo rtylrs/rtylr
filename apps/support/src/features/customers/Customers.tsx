@@ -9,7 +9,7 @@ const Customers: React.FC = () => {
   const debouncedSearch = useDebounce(search, 300);
   const { data, isLoading, isError } = useCustomers({ search: debouncedSearch || undefined });
 
-  const customers: any[] = data ?? [];
+  const customers = data ?? [];
 
   return (
     <div>
@@ -127,7 +127,7 @@ const Customers: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map((customer: any) => (
+              {customers.map((customer) => (
                 <tr
                   key={customer.id}
                   className="transition-colors"
@@ -171,7 +171,7 @@ const Customers: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                    {customer.lastContactAt || 'Never'}
+                    {customer.lastContactedAt || 'Never'}
                   </td>
                 </tr>
               ))}

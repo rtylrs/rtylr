@@ -12,7 +12,7 @@ import {
 export function useCustomerAnalytics() {
   return useQuery({
     queryKey: ['insights', 'customers'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getCustomerAnalytics());
       return customerAnalyticsSchema.parse(res);
     },
@@ -22,9 +22,9 @@ export function useCustomerAnalytics() {
 export function useTopCustomers(limit?: number) {
   return useQuery({
     queryKey: ['insights', 'customers-top', limit],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getTopCustomers({ limit }));
-      const raw = (res as any)?.customers ?? res;
+      const raw = (res as Record<string, unknown>)?.customers ?? res;
       return z.array(topCustomerSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -33,7 +33,7 @@ export function useTopCustomers(limit?: number) {
 export function useCustomerChurn() {
   return useQuery({
     queryKey: ['insights', 'customers-churn'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getCustomerChurn());
       return customerChurnSchema.parse(res);
     },
@@ -43,7 +43,7 @@ export function useCustomerChurn() {
 export function useCustomerLtv() {
   return useQuery({
     queryKey: ['insights', 'customers-ltv'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getCustomerLtv());
       return customerLtvSchema.parse(res);
     },

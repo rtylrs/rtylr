@@ -34,9 +34,26 @@ const Financial: React.FC = () => {
   const netProfit = pl?.netProfit ?? totalRevenue - totalExpenses;
   const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
-  const expenseList: any[] = expenses?.data ?? expenses?.categories ?? expenses ?? [];
-  const agingBuckets: any[] = aging?.data ?? aging?.buckets ?? aging ?? [];
-  const cashFlowList: any[] = cashFlow?.data ?? cashFlow ?? [];
+  type ExpenseRow = { id?: string | number; category?: string; name?: string; amount?: number };
+  type AgingRow = {
+    bucket?: string;
+    range?: string;
+    count?: number;
+    amount?: number;
+    total?: number;
+  };
+  type CashFlowRow = {
+    month?: string;
+    period?: string;
+    inflow?: number;
+    revenue?: number;
+    outflow?: number;
+    expenses?: number;
+    net?: number;
+  };
+  const expenseList = (expenses?.data ?? expenses?.categories ?? []) as ExpenseRow[];
+  const agingBuckets = (aging?.data ?? aging?.buckets ?? []) as AgingRow[];
+  const cashFlowList = (cashFlow?.data ?? cashFlow?.periods ?? []) as CashFlowRow[];
 
   return (
     <motion.div
@@ -140,7 +157,7 @@ const Financial: React.FC = () => {
             <EmptyState title="No expense data" description="Expense breakdown will appear here." />
           ) : (
             <div className="space-y-1">
-              {expenseList.map((e: any, i: number) => (
+              {expenseList.map((e, i) => (
                 <div
                   key={e.id ?? i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -180,7 +197,7 @@ const Financial: React.FC = () => {
             <EmptyState title="No invoice data" description="Invoice aging will appear here." />
           ) : (
             <div className="space-y-1">
-              {agingBuckets.map((b: any, i: number) => (
+              {agingBuckets.map((b, i) => (
                 <div
                   key={i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -223,7 +240,7 @@ const Financial: React.FC = () => {
           <EmptyState title="No cash flow data" description="Cash flow data will appear here." />
         ) : (
           <div className="space-y-1">
-            {cashFlowList.map((c: any, i: number) => (
+            {cashFlowList.map((c, i) => (
               <div
                 key={i}
                 className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"

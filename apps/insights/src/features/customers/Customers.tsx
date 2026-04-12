@@ -42,7 +42,16 @@ const Customers: React.FC = () => {
   const churnRate = churn?.rate ?? 0;
   const avgLtv = ltv?.average ?? 0;
 
-  const topList: any[] = topCustomers?.data ?? topCustomers ?? [];
+  type TopRow = {
+    id?: string | number;
+    name?: string;
+    email?: string;
+    orders?: number;
+    orderCount?: number;
+    totalSpend?: number;
+    revenue?: number;
+  };
+  const topList = (topCustomers ?? []) as TopRow[];
 
   return (
     <motion.div
@@ -164,7 +173,7 @@ const Customers: React.FC = () => {
           />
         ) : (
           <div className="space-y-1">
-            {topList.map((c: any, i: number) => (
+            {topList.map((c, i) => (
               <div
                 key={c.id ?? i}
                 className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"

@@ -11,7 +11,7 @@ import {
 export function useRevenue(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue', period],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getRevenue({ period }));
       return revenueDataSchema.parse(res);
     },
@@ -21,9 +21,9 @@ export function useRevenue(period?: string) {
 export function useRevenueByApp(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue-by-app', period],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getRevenueByApp({ period }));
-      const raw = (res as any)?.apps ?? res;
+      const raw = (res as Record<string, unknown>)?.apps ?? res;
       return z.array(revenueByAppSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -32,7 +32,7 @@ export function useRevenueByApp(period?: string) {
 export function useRevenueComparison(period?: string) {
   return useQuery({
     queryKey: ['insights', 'revenue-comparison', period],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getRevenueComparison({ period }));
       return revenueComparisonSchema.parse(res);
     },

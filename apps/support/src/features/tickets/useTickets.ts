@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { supportService } from '../../shared/services/supportService';
+import { supportService, TicketPayload } from '../../shared/services/supportService';
 import { ticketSchema, ticketMessageSchema } from '../../shared/schemas/tickets';
 
 export function useTickets(params?: {
@@ -47,7 +47,7 @@ export function useTicketMessages(ticketId: number) {
 export function useCreateTicket() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(supportService.createTicket(data)),
+    mutationFn: (data: TicketPayload) => unwrap(supportService.createTicket(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tickets'] });
     },
@@ -57,7 +57,7 @@ export function useCreateTicket() {
 export function useUpdateTicket() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<TicketPayload> }) =>
       unwrap(supportService.updateTicket(id, data)),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['tickets'] });

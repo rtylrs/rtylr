@@ -7,9 +7,9 @@ import { reportTemplateSchema } from '../../shared/schemas/reports';
 export function useReportTemplates() {
   return useQuery({
     queryKey: ['insights', 'report-templates'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getReportTemplates());
-      const raw = (res as any)?.templates ?? res;
+      const raw = (res as Record<string, unknown>)?.templates ?? res;
       return z.array(reportTemplateSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

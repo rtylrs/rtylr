@@ -28,7 +28,14 @@ const Reports: React.FC = () => {
     return <ErrorState message="Failed to load report templates." onRetry={refetch} />;
   }
 
-  const templateList: any[] = templates?.data ?? templates ?? [];
+  type TemplateRow = {
+    id?: string | number;
+    templateId?: string;
+    name?: string;
+    title?: string;
+    description?: string;
+  };
+  const templateList = (templates ?? []) as TemplateRow[];
 
   const handleExport = async (templateId: string, format: 'csv' | 'pdf') => {
     setExportingId(templateId);
@@ -91,8 +98,8 @@ const Reports: React.FC = () => {
           />
         ) : (
           <div className="space-y-1">
-            {templateList.map((t: any) => {
-              const id = t.id ?? t.templateId ?? '';
+            {templateList.map((t) => {
+              const id = String(t.id ?? t.templateId ?? '');
               const isExporting = exportingId === id;
               return (
                 <div

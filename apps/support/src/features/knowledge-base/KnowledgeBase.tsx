@@ -13,8 +13,8 @@ const KnowledgeBase: React.FC = () => {
   });
   const { data: categories } = useArticleCategories();
 
-  const articles: any[] = data ?? [];
-  const categoryList: any[] = categories ?? [];
+  const articles = data ?? [];
+  const categoryList = categories ?? [];
 
   return (
     <div>
@@ -63,7 +63,7 @@ const KnowledgeBase: React.FC = () => {
           }}
         >
           <option value="">All categories</option>
-          {categoryList.map((cat: any) => (
+          {categoryList.map((cat) => (
             <option key={cat.id || cat.name} value={cat.name}>
               {cat.name}
             </option>
@@ -115,7 +115,7 @@ const KnowledgeBase: React.FC = () => {
 
       {!isLoading && !isError && articles.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {articles.map((article: any) => (
+          {articles.map((article) => (
             <Link key={article.id} to={`/knowledge/${article.id}/edit`} className="no-underline">
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
@@ -139,7 +139,7 @@ const KnowledgeBase: React.FC = () => {
                   {article.title}
                 </h3>
                 <p className="text-xs line-clamp-2" style={{ color: 'var(--hub-text-muted)' }}>
-                  {article.excerpt || article.body?.slice(0, 120)}
+                  {article.body?.slice(0, 120)}
                 </p>
                 <p className="text-[10px] mt-2" style={{ color: 'var(--hub-text-dim)' }}>
                   {article.updatedAt}

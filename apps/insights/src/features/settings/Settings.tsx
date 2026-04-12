@@ -57,7 +57,14 @@ const Settings: React.FC = () => {
     return <ErrorState message="Failed to load settings." onRetry={refetch} />;
   }
 
-  const scheduledList: any[] = scheduled?.data ?? scheduled ?? [];
+  type ScheduledRow = {
+    id?: unknown;
+    name?: string;
+    reportName?: string;
+    schedule?: string;
+    frequency?: string;
+  };
+  const scheduledList = (scheduled ?? []) as ScheduledRow[];
 
   const handleSave = async () => {
     try {

@@ -6,7 +6,7 @@ import { insightsKpisSchema, insightsDashboardSummarySchema } from '../../shared
 export function useKpis() {
   return useQuery({
     queryKey: ['insights', 'kpis'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getKpis());
       return insightsKpisSchema.parse(res);
     },
@@ -16,7 +16,7 @@ export function useKpis() {
 export function useDashboardSummary() {
   return useQuery({
     queryKey: ['insights', 'dashboard'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getDashboardSummary());
       return insightsDashboardSummarySchema.parse(res);
     },

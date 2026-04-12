@@ -24,7 +24,7 @@ const ArticleEditor: React.FC = () => {
   const [body, setBody] = useState('');
   const [category, setCategory] = useState('');
 
-  const categoryList: any[] = categories ?? [];
+  const categoryList = categories ?? [];
 
   useEffect(() => {
     if (article && isEdit) {
@@ -141,7 +141,7 @@ const ArticleEditor: React.FC = () => {
             }}
           >
             <option value="">Select category</option>
-            {categoryList.map((cat: any) => (
+            {categoryList.map((cat) => (
               <option key={cat.id || cat.name} value={cat.name}>
                 {cat.name}
               </option>

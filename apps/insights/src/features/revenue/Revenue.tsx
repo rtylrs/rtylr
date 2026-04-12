@@ -35,8 +35,16 @@ const Revenue: React.FC = () => {
     return <ErrorState message="Failed to load revenue data." onRetry={refetch} />;
   }
 
-  const revenueData: any[] = revenue?.data ?? revenue ?? [];
-  const appBreakdown: any[] = byApp?.data ?? byApp ?? [];
+  type RevenueRow = {
+    date?: string;
+    period?: string;
+    revenue?: number;
+    amount?: number;
+    value?: number;
+  };
+  type AppRow = { app?: string; name?: string; revenue?: number; amount?: number };
+  const revenueData = (revenue?.data ?? []) as RevenueRow[];
+  const appBreakdown = (byApp ?? []) as AppRow[];
   const compData = comparison ?? {};
 
   return (
@@ -161,7 +169,7 @@ const Revenue: React.FC = () => {
           />
         ) : (
           <div className="space-y-1">
-            {revenueData.map((item: any, i: number) => (
+            {revenueData.map((item, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -198,7 +206,7 @@ const Revenue: React.FC = () => {
           <EmptyState title="No app breakdown" description="Breakdown by app will appear here." />
         ) : (
           <div className="space-y-1">
-            {appBreakdown.map((item: any, i: number) => (
+            {appBreakdown.map((item, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"

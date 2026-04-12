@@ -45,9 +45,27 @@ const Operations: React.FC = () => {
   const shiftsCovered = shifts?.coveredPercent ?? summary?.shiftCoverage ?? 0;
   const pendingTimeOff = timeOff?.pending ?? summary?.pendingTimeOff ?? 0;
 
-  const deptList: any[] = headcount?.data ?? headcount ?? [];
-  const utilizationList: any[] = utilization?.data ?? utilization?.staff ?? [];
-  const timeOffList: any[] = timeOff?.data ?? timeOff?.recent ?? [];
+  type DeptRow = {
+    id?: string | number;
+    name?: string;
+    department?: string;
+    count?: number;
+    headcount?: number;
+  };
+  type StaffRow = { id?: string | number; name?: string; utilization?: number };
+  type TimeOffRow = {
+    id?: string | number;
+    month?: string;
+    period?: string;
+    requests?: number;
+    days?: number;
+    count?: number;
+    approved?: number;
+    denied?: number;
+  };
+  const deptList = (headcount?.data ?? []) as DeptRow[];
+  const utilizationList = (utilization?.data ?? utilization?.staff ?? []) as StaffRow[];
+  const timeOffList = (timeOff?.data ?? timeOff?.recent ?? []) as TimeOffRow[];
 
   return (
     <motion.div
@@ -145,7 +163,7 @@ const Operations: React.FC = () => {
             <EmptyState title="No departments" description="Department data will appear here." />
           ) : (
             <div className="space-y-1">
-              {deptList.map((d: any, i: number) => (
+              {deptList.map((d, i) => (
                 <div
                   key={d.id ?? i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -185,7 +203,7 @@ const Operations: React.FC = () => {
             />
           ) : (
             <div className="space-y-1">
-              {utilizationList.map((s: any, i: number) => (
+              {utilizationList.map((s, i) => (
                 <div
                   key={s.id ?? i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -229,7 +247,7 @@ const Operations: React.FC = () => {
           <EmptyState title="No time off data" description="Time off trends will appear here." />
         ) : (
           <div className="space-y-1">
-            {timeOffList.map((t: any, i: number) => (
+            {timeOffList.map((t, i) => (
               <div
                 key={t.id ?? i}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"
