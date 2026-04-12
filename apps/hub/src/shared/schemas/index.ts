@@ -45,3 +45,6 @@ export type { AnalyticsResponse } from './analytics';
 
 export { menuItemSchema, categorySchema, bannerSchema, menuSchema } from './menu';
 export type { MenuItem, Category, Banner, Menu } from './menu';
+
+export { hubOrderSchema } from './orders';
+export type { HubOrder } from './orders';
