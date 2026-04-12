@@ -7,23 +7,23 @@ interface ContactInfo {
 }
 
 interface ConfigStore {
-  websiteData: any;
-  aboutContent: any;
+  websiteData: unknown;
+  aboutContent: unknown;
   maintanance: boolean;
   businessCount: number;
   contactInfo: ContactInfo;
-  faqs: any[];
+  faqs: unknown[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
-  news: any[];
+  news: unknown[];
   loading: boolean;
-  setWebsiteData: (data: any) => void;
-  setAboutContent: (content: any) => void;
+  setWebsiteData: (data: unknown) => void;
+  setAboutContent: (content: unknown) => void;
   setMaintanance: (value: boolean) => void;
   setBusinessCount: (count: number) => void;
   setContactInfo: (info: ContactInfo) => void;
-  setFaqs: (faqs: any[]) => void;
-  setNews: (news: any[]) => void;
+  setFaqs: (faqs: unknown[]) => void;
+  setNews: (news: unknown[]) => void;
   setLoading: (loading: boolean) => void;
   fetchConfigData: () => Promise<void>;
   updateAboutContent: (data: { aboutContent: string }) => Promise<void>;

@@ -4,7 +4,7 @@ import api from '../shared/lib/api';
 interface MenuItem {
   _id: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Category {
@@ -12,7 +12,7 @@ interface Category {
   name: string;
   type: 'category';
   menuItems: MenuItem[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Banner {
@@ -74,7 +74,10 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
       set({
         status: 'failed',
         allMenus: [],
-        error: (error as any)?.response?.data || (error as any)?.message || null,
+        error:
+          (error as { response?: { data?: string } })?.response?.data ??
+          (error as { message?: string })?.message ??
+          null,
       });
     }
   },
@@ -95,7 +98,7 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
         status: 'failed',
         items: [],
         id: null,
-        error: (error as any)?.message || null,
+        error: (error as { message?: string })?.message ?? null,
       });
     }
   },
@@ -114,7 +117,7 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
         status: 'failed',
         items: [],
         id: null,
-        error: (error as any)?.message || null,
+        error: (error as { message?: string })?.message ?? null,
       });
     }
   },
@@ -123,8 +126,8 @@ export const useMenuStore = create<MenuStore>()((set, get) => ({
     const formData = new FormData();
     Object.keys(item).forEach((key) => {
       if (Array.isArray(item[key])) {
-        item[key].forEach((subItem: any, index: number) => {
-          formData.append(`${key}[${index}]`, subItem);
+        (item[key] as unknown[]).forEach((subItem, index: number) => {
+          formData.append(`${key}[${index}]`, subItem as string | Blob);
         });
       } else {
         formData.append(key, item[key]);
