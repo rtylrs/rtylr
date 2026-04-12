@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
-import { useMilestones } from './useMilestones';
+import { useMilestones, useCreateMilestone } from './useMilestones';
 import { formatDate } from '../../shared/lib/utils';
 import EmptyState from '../../shared/components/EmptyState';
 
@@ -14,6 +15,10 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 
 const Milestones: React.FC = () => {
   const { data: milestones = [], isLoading } = useMilestones();
+  const createMilestone = useCreateMilestone();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDate, setNewDate] = useState('');
 
   if (isLoading)
     return (
@@ -47,12 +52,77 @@ const Milestones: React.FC = () => {
           </p>
         </div>
         <button
+          onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
           style={{ background: '#64C5B9', color: '#0a0a0a' }}
         >
           <Plus size={11} /> New milestone
         </button>
       </div>
+      {showCreate && (
+        <div
+          className="mx-6 mt-4 rounded-xl p-5 space-y-3"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Milestone name"
+            className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+            autoFocus
+          />
+          <input
+            type="date"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="rounded-md px-3 py-2 text-[12px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!newName.trim()) return;
+                createMilestone.mutate(
+                  { name: newName, targetDate: newDate || new Date().toISOString().slice(0, 10) },
+                  {
+                    onSuccess: () => {
+                      toast.success('Milestone created');
+                      setShowCreate(false);
+                      setNewName('');
+                      setNewDate('');
+                    },
+                  }
+                );
+              }}
+              disabled={createMilestone.isPending || !newName.trim()}
+              className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
+              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+            >
+              {createMilestone.isPending ? 'Creating...' : 'Create'}
+            </button>
+            <button
+              onClick={() => {
+                setShowCreate(false);
+                setNewName('');
+                setNewDate('');
+              }}
+              className="px-3 py-1.5 rounded text-[11px]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex-1 overflow-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {milestones.map((m, i) => {
           const style = STATUS_STYLES[m.status];

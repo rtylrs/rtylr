@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Plus, List, LayoutGrid, Activity, Settings as SettingsIcon } from 'lucide-react';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
+import { useUpdateTaskStatus, useCreateTask } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import TaskCard from '../../shared/components/TaskCard';
 
@@ -21,8 +22,9 @@ const ProjectBoard: React.FC = () => {
     projectId: string;
   }>();
 
-  const { projects, tasks, updateTask, setQuickCreateOpen, selectedTaskIds, toggleSelectTask } =
-    useFlowStore();
+  const { projects, tasks, setQuickCreateOpen, selectedTaskIds, toggleSelectTask } = useFlowStore();
+  const updateTaskStatus = useUpdateTaskStatus();
+  const createTask = useCreateTask();
   const [dragOver, setDragOver] = useState<Task['status'] | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
@@ -47,7 +49,7 @@ const ProjectBoard: React.FC = () => {
     if (!id) return;
     const t = projectTasks.find((x) => x.id === id);
     if (t && t.status !== status) {
-      updateTask(id, { status });
+      updateTaskStatus.mutate({ id, status: status as any });
     }
     setDragOver(null);
   };

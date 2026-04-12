@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { MessageSquare, GitBranch, Mail, Trash2, Save } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { useUpdateProject, useDeleteProject } from './useProjects';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 
 const ProjectSettings: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
+  const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
 
   if (!project) {
     return (
@@ -62,11 +66,20 @@ const ProjectSettings: React.FC = () => {
             />
           </Field>
           <button
-            onClick={() => toast.success('Project updated')}
+            onClick={() =>
+              updateProject.mutate(
+                { id: projectId!, data: { name } },
+                {
+                  onSuccess: () => toast.success('Project updated'),
+                  onError: () => toast.error('Failed to update project'),
+                }
+              )
+            }
+            disabled={updateProject.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
             style={{ background: '#64C5B9', color: '#0a0a0a' }}
           >
-            <Save size={11} /> Save changes
+            <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
           </button>
         </Section>
 
@@ -146,9 +159,24 @@ const ProjectSettings: React.FC = () => {
             <button
               className="px-3 py-1 rounded text-[11px] font-semibold"
               style={{ background: '#ef4444', color: '#fff' }}
-              onClick={() => toast.error('Delete project is not yet implemented')}
+              disabled={deleteProject.isPending}
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    'Are you sure you want to delete this project? This cannot be undone.'
+                  )
+                )
+                  return;
+                deleteProject.mutate(projectId!, {
+                  onSuccess: () => {
+                    toast.success('Project deleted');
+                    navigate(`/w/${project.workspaceId}`);
+                  },
+                  onError: () => toast.error('Failed to delete project'),
+                });
+              }}
             >
-              Delete
+              {deleteProject.isPending ? 'Deleting...' : 'Delete'}
             </button>
           </div>
         </Section>

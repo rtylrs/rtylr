@@ -48,6 +48,23 @@ export function useCreateView() {
   });
 }
 
+export function useUpdateView() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }) => {
+      if (isFlowLocal()) {
+        const views = useFlowStore
+          .getState()
+          .views.map((v) => (v.id === id ? { ...v, ...data } : v));
+        useFlowStore.setState({ views });
+        return Promise.resolve();
+      }
+      return unwrap(flowApi.updateView(id, data as any)).then(() => {});
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+  });
+}
+
 export function useDeleteView() {
   const qc = useQueryClient();
   return useMutation({

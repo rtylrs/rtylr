@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { Eye, Plus, Flame, Timer, CheckCircle2 } from 'lucide-react';
 import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
-import { useViews, useFilteredTasks } from './useViews';
+import { useViews, useCreateView, useFilteredTasks } from './useViews';
 import TaskRow from '../../shared/components/TaskRow';
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -13,6 +14,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Views: React.FC = () => {
   const { data: views = [] } = useViews();
+  const createView = useCreateView();
   const { tasks: allTasks } = useFlowStore();
   const [selected, setSelected] = useState<SavedView | null>(null);
   const displayView = selected || views[0] || null;
@@ -35,6 +37,15 @@ const Views: React.FC = () => {
             Saved Views
           </h2>
           <button
+            onClick={() =>
+              createView.mutate(
+                { name: 'New view', icon: 'eye', filters: {} },
+                {
+                  onSuccess: () => toast.success('View created'),
+                }
+              )
+            }
+            disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
           >

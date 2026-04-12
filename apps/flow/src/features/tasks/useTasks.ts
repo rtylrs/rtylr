@@ -148,3 +148,71 @@ export function useUpdateTaskStatus() {
     },
   });
 }
+
+export function useAddComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { taskId: string; content: string }) => {
+      if (isFlowLocal()) {
+        useFlowStore.getState().addComment(data.taskId, data.content);
+        return Promise.resolve();
+      }
+      return unwrap(flowApi.addComment(data)).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      if (isFlowLocal()) {
+        // Local mode: remove from comments list
+        const comments = useFlowStore.getState().comments.filter((c) => c.id !== id);
+        useFlowStore.setState({ comments });
+        return Promise.resolve();
+      }
+      return unwrap(flowApi.deleteComment(id));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+  });
+}
+
+export function useAddSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, title }: { taskId: string; title: string }) => {
+      if (isFlowLocal()) {
+        useFlowStore.getState().addSubtask(taskId, title);
+        return Promise.resolve();
+      }
+      return unwrap(flowApi.createSubtask(taskId, { title })).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+  });
+}
+
+export function useLogTime() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, minutes, note }: { taskId: string; minutes: number; note?: string }) => {
+      if (isFlowLocal()) {
+        useFlowStore.getState().logTime(taskId, minutes, note);
+        return Promise.resolve();
+      }
+      return unwrap(flowApi.logTime(taskId, { durationMinutes: minutes, description: note })).then(
+        () => {}
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+  });
+}

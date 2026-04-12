@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Timer, ArrowRight } from 'lucide-react';
-import { useCycles } from './useCycles';
+import { toast } from 'sonner';
+import { Timer, ArrowRight, Plus } from 'lucide-react';
+import { useCycles, useCreateCycle } from './useCycles';
 import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 
 const Cycles: React.FC = () => {
   const { data: cycles = [], isLoading } = useCycles();
+  const createCycle = useCreateCycle();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newStart, setNewStart] = useState('');
+  const [newEnd, setNewEnd] = useState('');
 
   if (isLoading)
     return (
@@ -21,15 +27,110 @@ const Cycles: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-          Cycles
-        </h1>
-        <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          Two-week delivery sprints
-        </p>
+      <div
+        className="flex items-center justify-between px-6 py-4 shrink-0"
+        style={{ borderBottom: '1px solid var(--flow-border)' }}
+      >
+        <div>
+          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+            Cycles
+          </h1>
+          <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+            Two-week delivery sprints
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+          style={{ background: '#64C5B9', color: '#0a0a0a' }}
+        >
+          <Plus size={11} /> New cycle
+        </button>
       </div>
 
+      {showCreate && (
+        <div
+          className="mx-6 mt-4 rounded-xl p-5 space-y-3"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Cycle name"
+            className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={newStart}
+              onChange={(e) => setNewStart(e.target.value)}
+              className="rounded-md px-3 py-2 text-[12px] outline-none"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            />
+            <input
+              type="date"
+              value={newEnd}
+              onChange={(e) => setNewEnd(e.target.value)}
+              className="rounded-md px-3 py-2 text-[12px] outline-none"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!newName.trim()) return;
+                createCycle.mutate(
+                  {
+                    name: newName,
+                    startDate: newStart || new Date().toISOString().slice(0, 10),
+                    endDate: newEnd || new Date().toISOString().slice(0, 10),
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success('Cycle created');
+                      setShowCreate(false);
+                      setNewName('');
+                      setNewStart('');
+                      setNewEnd('');
+                    },
+                  }
+                );
+              }}
+              disabled={createCycle.isPending || !newName.trim()}
+              className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
+              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+            >
+              {createCycle.isPending ? 'Creating...' : 'Create'}
+            </button>
+            <button
+              onClick={() => {
+                setShowCreate(false);
+                setNewName('');
+                setNewStart('');
+                setNewEnd('');
+              }}
+              className="px-3 py-1.5 rounded text-[11px]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <div className="p-6 max-w-4xl space-y-8">
         {active && (
           <motion.section
