@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,19 +24,9 @@ type GetInvoiceRequest struct {
 	ID int64 `json:"id"`
 }
 
-type PaymentPayload struct {
-	ID          int64   `json:"id"`
-	Amount      float64 `json:"amount"`
-	Currency    string  `json:"currency"`
-	PaymentDate string  `json:"payment_date"`
-	Method      string  `json:"method"`
-	Reference   string  `json:"reference"`
-	Notes       string  `json:"notes"`
-}
-
 type GetInvoiceResponse struct {
-	Invoice  InvoiceDetailPayload `json:"invoice"`
-	Payments []PaymentPayload     `json:"payments"`
+	Invoice  *finv1.InvoiceDetail `json:"invoice"`
+	Payments []*finv1.Payment     `json:"payments"`
 }
 
 func (h *GetInvoiceHandler) Validate(_ context.Context, req *GetInvoiceRequest) *errorModels.ServerError {
@@ -66,10 +58,10 @@ func (h *GetInvoiceHandler) Serve(ctx context.Context, req *GetInvoiceRequest) (
 		}
 	}
 
-	payments := make([]PaymentPayload, 0, len(inv.Payments))
+	payments := make([]*finv1.Payment, 0, len(inv.Payments))
 	for _, p := range inv.Payments {
-		payments = append(payments, PaymentPayload{
-			ID:          p.ID,
+		payments = append(payments, &finv1.Payment{
+			Id:          p.ID,
 			Amount:      p.Amount,
 			Currency:    p.Currency,
 			PaymentDate: p.PaymentDate.Format("2006-01-02"),

@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -29,20 +30,9 @@ type RecordPaymentRequest struct {
 	Notes       string  `json:"notes"`
 }
 
-type RecordPaymentResponsePayload struct {
-	ID          int64     `json:"id"`
-	InvoiceID   int64     `json:"invoice_id"`
-	Amount      float64   `json:"amount"`
-	Currency    string    `json:"currency"`
-	PaymentDate time.Time `json:"payment_date"`
-	Method      string    `json:"method"`
-	Reference   string    `json:"reference"`
-	Notes       string    `json:"notes"`
-}
-
 type RecordPaymentResponse struct {
-	Payment RecordPaymentResponsePayload `json:"payment"`
-	Message string                       `json:"message"`
+	Payment *finv1.RecordPaymentResponsePayload `json:"payment"`
+	Message string                              `json:"message"`
 }
 
 func (h *RecordPaymentHandler) Validate(_ context.Context, req *RecordPaymentRequest) *errorModels.ServerError {
@@ -106,12 +96,12 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 	}
 
 	return RecordPaymentResponse{
-		Payment: RecordPaymentResponsePayload{
-			ID:          p.ID,
-			InvoiceID:   p.InvoiceID,
+		Payment: &finv1.RecordPaymentResponsePayload{
+			Id:          p.ID,
+			InvoiceId:   p.InvoiceID,
 			Amount:      p.Amount,
 			Currency:    p.Currency,
-			PaymentDate: p.PaymentDate,
+			PaymentDate: p.PaymentDate.Format("2006-01-02"),
 			Method:      p.Method,
 			Reference:   p.Reference,
 			Notes:       p.Notes,

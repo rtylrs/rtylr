@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -46,66 +47,42 @@ type CreateInvoiceRequest struct {
 	Items         []InvoiceItemPayload `json:"items"`
 }
 
-type InvoiceDetailPayload struct {
-	ID             int64                `json:"id"`
-	OwnerID        int64                `json:"owner_id"`
-	InvoiceNumber  string               `json:"invoice_number"`
-	ClientName     string               `json:"client_name"`
-	ClientEmail    string               `json:"client_email"`
-	ClientAddress  string               `json:"client_address"`
-	ClientTaxID    string               `json:"client_tax_id"`
-	Status         string               `json:"status"`
-	IssueDate      time.Time            `json:"issue_date"`
-	DueDate        time.Time            `json:"due_date"`
-	PaidDate       *time.Time           `json:"paid_date"`
-	Currency       string               `json:"currency"`
-	Subtotal       float64              `json:"subtotal"`
-	DiscountType   string               `json:"discount_type"`
-	DiscountValue  float64              `json:"discount_value"`
-	DiscountAmount float64              `json:"discount_amount"`
-	TaxRate        float64              `json:"tax_rate"`
-	TaxAmount      float64              `json:"tax_amount"`
-	Total          float64              `json:"total"`
-	AmountPaid     float64              `json:"amount_paid"`
-	AmountDue      float64              `json:"amount_due"`
-	Notes          string               `json:"notes"`
-	Terms          string               `json:"terms"`
-	CreatedAt      time.Time            `json:"created_at"`
-	UpdatedAt      time.Time            `json:"updated_at"`
-	Items          []InvoiceItemPayload `json:"items"`
-}
-
 type CreateInvoiceResponse struct {
-	Invoice InvoiceDetailPayload `json:"invoice"`
+	Invoice *finv1.InvoiceDetail `json:"invoice"`
 }
 
-func newInvoiceDetailPayload(inv *domain.Invoice) InvoiceDetailPayload {
-	items := make([]InvoiceItemPayload, 0, len(inv.Items))
+func newInvoiceDetailPayload(inv *domain.Invoice) *finv1.InvoiceDetail {
+	items := make([]*finv1.InvoiceItem, 0, len(inv.Items))
 	for _, item := range inv.Items {
-		items = append(items, InvoiceItemPayload{
+		items = append(items, &finv1.InvoiceItem{
 			Description: item.Description,
 			Quantity:    item.Quantity,
 			Unit:        item.Unit,
 			UnitPrice:   item.UnitPrice,
 			TaxRate:     item.TaxRate,
 			DiscountPct: item.DiscountPct,
-			SortOrder:   item.SortOrder,
+			SortOrder:   int64(item.SortOrder),
 			Total:       item.Total,
 		})
 	}
 
-	return InvoiceDetailPayload{
-		ID:             inv.ID,
-		OwnerID:        inv.OwnerID,
+	paidDate := ""
+	if inv.PaidDate != nil {
+		paidDate = inv.PaidDate.Format("2006-01-02")
+	}
+
+	return &finv1.InvoiceDetail{
+		Id:             inv.ID,
+		OwnerId:       inv.OwnerID,
 		InvoiceNumber:  inv.InvoiceNumber,
 		ClientName:     inv.ClientName,
 		ClientEmail:    inv.ClientEmail,
 		ClientAddress:  inv.ClientAddress,
-		ClientTaxID:    inv.ClientTaxID,
+		ClientTaxId:    inv.ClientTaxID,
 		Status:         inv.Status,
-		IssueDate:      inv.IssueDate,
-		DueDate:        inv.DueDate,
-		PaidDate:       inv.PaidDate,
+		IssueDate:      inv.IssueDate.Format("2006-01-02"),
+		DueDate:        inv.DueDate.Format("2006-01-02"),
+		PaidDate:       paidDate,
 		Currency:       inv.Currency,
 		Subtotal:       inv.Subtotal,
 		DiscountType:   inv.DiscountType,
@@ -118,8 +95,8 @@ func newInvoiceDetailPayload(inv *domain.Invoice) InvoiceDetailPayload {
 		AmountDue:      inv.AmountDue,
 		Notes:          inv.Notes,
 		Terms:          inv.Terms,
-		CreatedAt:      inv.CreatedAt,
-		UpdatedAt:      inv.UpdatedAt,
+		CreatedAt:      inv.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:      inv.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 		Items:          items,
 	}
 }

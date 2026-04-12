@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -36,7 +38,7 @@ type UpdateInvoiceRequest struct {
 }
 
 type UpdateInvoiceResponse struct {
-	Invoice InvoiceDetailPayload `json:"invoice"`
+	Invoice *finv1.InvoiceDetail `json:"invoice"`
 }
 
 func (h *UpdateInvoiceHandler) Validate(_ context.Context, req *UpdateInvoiceRequest) *errorModels.ServerError {

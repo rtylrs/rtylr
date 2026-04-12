@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -26,39 +27,29 @@ type ListInvoicesRequest struct {
 	DateTo   string `json:"date_to"`
 }
 
-type InvoiceSummary struct {
-	ID            int64      `json:"id"`
-	InvoiceNumber string     `json:"invoice_number"`
-	ClientName    string     `json:"client_name"`
-	Status        string     `json:"status"`
-	IssueDate     time.Time  `json:"issue_date"`
-	DueDate       time.Time  `json:"due_date"`
-	PaidDate      *time.Time `json:"paid_date"`
-	Currency      string     `json:"currency"`
-	Total         float64    `json:"total"`
-	AmountPaid    float64    `json:"amount_paid"`
-	AmountDue     float64    `json:"amount_due"`
-	CreatedAt     time.Time  `json:"created_at"`
-}
-
 type ListInvoicesResponse struct {
-	Invoices []InvoiceSummary `json:"invoices"`
+	Invoices []*finv1.InvoiceSummary `json:"invoices"`
 }
 
-func newInvoiceSummary(inv domain.Invoice) InvoiceSummary {
-	return InvoiceSummary{
-		ID:            inv.ID,
+func newInvoiceSummary(inv domain.Invoice) *finv1.InvoiceSummary {
+	paidDate := ""
+	if inv.PaidDate != nil {
+		paidDate = inv.PaidDate.Format("2006-01-02")
+	}
+
+	return &finv1.InvoiceSummary{
+		Id:            inv.ID,
 		InvoiceNumber: inv.InvoiceNumber,
 		ClientName:    inv.ClientName,
 		Status:        inv.Status,
-		IssueDate:     inv.IssueDate,
-		DueDate:       inv.DueDate,
-		PaidDate:      inv.PaidDate,
+		IssueDate:     inv.IssueDate.Format("2006-01-02"),
+		DueDate:       inv.DueDate.Format("2006-01-02"),
+		PaidDate:      paidDate,
 		Currency:      inv.Currency,
 		Total:         inv.Total,
 		AmountPaid:    inv.AmountPaid,
 		AmountDue:     inv.AmountDue,
-		CreatedAt:     inv.CreatedAt,
+		CreatedAt:     inv.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -73,7 +64,7 @@ func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesReques
 		}
 	}
 
-	summaries := make([]InvoiceSummary, 0, len(invoices))
+	summaries := make([]*finv1.InvoiceSummary, 0, len(invoices))
 	for _, inv := range invoices {
 		summaries = append(summaries, newInvoiceSummary(inv))
 	}

@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/accounts/internal/application"
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
@@ -11,21 +12,11 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type AccountPayload struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	Name      string    `json:"name"`
-	Type      string    `json:"type"`
-	Currency  string    `json:"currency"`
-	Balance   float64   `json:"balance"`
-	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func newPayload(a domain.Account) AccountPayload {
-	return AccountPayload{
-		ID: a.ID, OwnerID: a.OwnerID, Name: a.Name, Type: a.Type,
-		Currency: a.Currency, Balance: a.Balance, IsActive: a.IsActive, CreatedAt: a.CreatedAt,
+func newPayload(a domain.Account) *finv1.Account {
+	return &finv1.Account{
+		Id: a.ID, OwnerId: a.OwnerID, Name: a.Name, Type: a.Type,
+		Currency: a.Currency, Balance: a.Balance, IsActive: a.IsActive,
+		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -34,7 +25,7 @@ func ListRoutes() []string { return []string{"/finance/accounts"} }
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 type ListResponse struct {
-	Accounts []AccountPayload `json:"accounts"`
+	Accounts []*finv1.Account `json:"accounts"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -46,7 +37,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list accounts"}
 	}
-	payloads := make([]AccountPayload, 0, len(items))
+	payloads := make([]*finv1.Account, 0, len(items))
 	for _, item := range items {
 		payloads = append(payloads, newPayload(item))
 	}
