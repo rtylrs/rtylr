@@ -31,7 +31,7 @@ describe('useKpis', () => {
   });
 
   it('fetches KPIs on mount', async () => {
-    const kpis = { revenue: 5000, customers: 120 };
+    const kpis = { totalRevenue: 5000, customerCount: 120 };
     (insightsService.getKpis as any).mockResolvedValue(kpis);
     const { result } = renderHook(() => useKpis(), {
       wrapper: createWrapper(),
@@ -55,7 +55,7 @@ describe('useDashboardSummary', () => {
   });
 
   it('fetches dashboard summary', async () => {
-    const summary = { activeUsers: 50 };
+    const summary = { customerCount: 50, totalRevenue: 10000 };
     (insightsService.getDashboardSummary as any).mockResolvedValue(summary);
     const { result } = renderHook(() => useDashboardSummary(), {
       wrapper: createWrapper(),
