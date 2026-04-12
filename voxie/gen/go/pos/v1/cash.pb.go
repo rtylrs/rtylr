@@ -26,13 +26,13 @@ type CashMovement struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
-	TerminalId    int64                  `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	TerminalId    *int64                 `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3,oneof" json:"terminal_id,omitempty"`
 	SessionId     int64                  `protobuf:"varint,5,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	EmployeeId    int64                  `protobuf:"varint,6,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
 	Type          string                 `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
 	Amount        float64                `protobuf:"fixed64,8,opt,name=amount,proto3" json:"amount,omitempty"`
-	Reason        string                 `protobuf:"bytes,9,opt,name=reason,proto3" json:"reason,omitempty"`
-	ApprovedBy    int64                  `protobuf:"varint,10,opt,name=approved_by,json=approvedBy,proto3" json:"approved_by,omitempty"`
+	Reason        *string                `protobuf:"bytes,9,opt,name=reason,proto3,oneof" json:"reason,omitempty"`
+	ApprovedBy    *int64                 `protobuf:"varint,10,opt,name=approved_by,json=approvedBy,proto3,oneof" json:"approved_by,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -90,8 +90,8 @@ func (x *CashMovement) GetBranchId() int64 {
 }
 
 func (x *CashMovement) GetTerminalId() int64 {
-	if x != nil {
-		return x.TerminalId
+	if x != nil && x.TerminalId != nil {
+		return *x.TerminalId
 	}
 	return 0
 }
@@ -125,15 +125,15 @@ func (x *CashMovement) GetAmount() float64 {
 }
 
 func (x *CashMovement) GetReason() string {
-	if x != nil {
-		return x.Reason
+	if x != nil && x.Reason != nil {
+		return *x.Reason
 	}
 	return ""
 }
 
 func (x *CashMovement) GetApprovedBy() int64 {
-	if x != nil {
-		return x.ApprovedBy
+	if x != nil && x.ApprovedBy != nil {
+		return *x.ApprovedBy
 	}
 	return 0
 }
@@ -645,26 +645,29 @@ var File_pos_v1_cash_proto protoreflect.FileDescriptor
 
 const file_pos_v1_cash_proto_rawDesc = "" +
 	"\n" +
-	"\x11pos/v1/cash.proto\x12\x03pos\"\xc1\x02\n" +
+	"\x11pos/v1/cash.proto\x12\x03pos\"\xfb\x02\n" +
 	"\fCashMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
 	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1f\n" +
-	"\vterminal_id\x18\x04 \x01(\x03R\n" +
-	"terminalId\x12\x1d\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12$\n" +
+	"\vterminal_id\x18\x04 \x01(\x03H\x00R\n" +
+	"terminalId\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x05 \x01(\x03R\tsessionId\x12\x1f\n" +
 	"\vemployee_id\x18\x06 \x01(\x03R\n" +
 	"employeeId\x12\x12\n" +
 	"\x04type\x18\a \x01(\tR\x04type\x12\x16\n" +
-	"\x06amount\x18\b \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06reason\x18\t \x01(\tR\x06reason\x12\x1f\n" +
+	"\x06amount\x18\b \x01(\x01R\x06amount\x12\x1b\n" +
+	"\x06reason\x18\t \x01(\tH\x01R\x06reason\x88\x01\x01\x12$\n" +
 	"\vapproved_by\x18\n" +
-	" \x01(\x03R\n" +
-	"approvedBy\x12\x1d\n" +
+	" \x01(\x03H\x02R\n" +
+	"approvedBy\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"9\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +
+	"\f_terminal_idB\t\n" +
+	"\a_reasonB\x0e\n" +
+	"\f_approved_by\"9\n" +
 	"\x18ListCashMovementsRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\"L\n" +
@@ -751,6 +754,7 @@ func file_pos_v1_cash_proto_init() {
 	if File_pos_v1_cash_proto != nil {
 		return
 	}
+	file_pos_v1_cash_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

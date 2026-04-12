@@ -4,7 +4,7 @@ package crm;
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/v1";
 
-// ── Campaigns (from customers module) ──────────────────────────────
+// ── Campaigns ─────────────────────────────────────────────────────
 
 message Campaign {
   int64 id = 1;
@@ -16,13 +16,13 @@ message Campaign {
   optional int64 segment_id = 7;
   string subject = 8;
   string content = 9;
-  string scheduled_at = 10;
-  string sent_at = 11;
-  int32 audience_count = 12;
-  int32 sent_count = 13;
-  int32 delivered_count = 14;
-  int32 opened_count = 15;
-  int32 clicked_count = 16;
+  optional string scheduled_at = 10;
+  optional string sent_at = 11;
+  int64 audience_count = 12;
+  int64 sent_count = 13;
+  int64 delivered_count = 14;
+  int64 opened_count = 15;
+  int64 clicked_count = 16;
   string created_at = 17;
   string updated_at = 18;
 }
@@ -78,13 +78,13 @@ message UpdateCampaignStatusResponse {
 
 message CampaignStats {
   int64 campaign_id = 1;
-  int32 audience_count = 2;
-  int32 sent_count = 3;
-  int32 delivered_count = 4;
-  int32 opened_count = 5;
-  int32 clicked_count = 6;
-  int32 bounced_count = 7;
-  int32 failed_count = 8;
+  int64 audience_count = 2;
+  int64 sent_count = 3;
+  int64 delivered_count = 4;
+  int64 opened_count = 5;
+  int64 clicked_count = 6;
+  int64 bounced_count = 7;
+  int64 failed_count = 8;
 }
 
 message GetCampaignStatsRequest {

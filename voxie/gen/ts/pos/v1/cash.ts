@@ -10,13 +10,13 @@ export interface CashMovement {
   id: number;
   businessId: number;
   branchId: number;
-  terminalId: number;
+  terminalId?: number | undefined;
   sessionId: number;
   employeeId: number;
   type: string;
   amount: number;
-  reason: string;
-  approvedBy: number;
+  reason?: string | undefined;
+  approvedBy?: number | undefined;
   createdAt: string;
 }
 

@@ -11,9 +11,9 @@ export interface Terminal {
   businessId: number;
   branchId: number;
   name: string;
-  deviceId: string;
+  deviceId?: string | undefined;
   isActive: boolean;
-  lastSeenAt: string;
+  lastSeenAt?: string | undefined;
   createdAt: string;
 }
 

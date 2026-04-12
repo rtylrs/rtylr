@@ -13,10 +13,10 @@ message StockMovement {
   int64 product_id = 4;
   string type = 5;
   double quantity = 6;
-  int64 reference_id = 7;
-  string reference_type = 8;
-  string note = 9;
-  int64 employee_id = 10;
+  optional int64 reference_id = 7;
+  optional string reference_type = 8;
+  optional string note = 9;
+  optional int64 employee_id = 10;
   string created_at = 11;
 }
 

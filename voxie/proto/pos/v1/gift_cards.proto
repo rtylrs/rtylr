@@ -17,7 +17,6 @@ message GiftCard {
   bool is_active = 8;
   string expires_at = 9;
   string created_at = 10;
-  string updated_at = 11;
 }
 
 // ── List ──────────────────────────────────────────────────────────

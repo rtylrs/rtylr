@@ -21,26 +21,26 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type GetBookDashboardRequest struct {
+type DashboardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetBookDashboardRequest) Reset() {
-	*x = GetBookDashboardRequest{}
+func (x *DashboardRequest) Reset() {
+	*x = DashboardRequest{}
 	mi := &file_book_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetBookDashboardRequest) String() string {
+func (x *DashboardRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetBookDashboardRequest) ProtoMessage() {}
+func (*DashboardRequest) ProtoMessage() {}
 
-func (x *GetBookDashboardRequest) ProtoReflect() protoreflect.Message {
+func (x *DashboardRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -52,12 +52,12 @@ func (x *GetBookDashboardRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetBookDashboardRequest.ProtoReflect.Descriptor instead.
-func (*GetBookDashboardRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DashboardRequest.ProtoReflect.Descriptor instead.
+func (*DashboardRequest) Descriptor() ([]byte, []int) {
 	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
-type GetBookDashboardResponse struct {
+type DashboardResponse struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	TodayCount       int32                  `protobuf:"varint,1,opt,name=today_count,json=todayCount,proto3" json:"today_count,omitempty"`
 	UpcomingCount    int32                  `protobuf:"varint,2,opt,name=upcoming_count,json=upcomingCount,proto3" json:"upcoming_count,omitempty"`
@@ -67,20 +67,20 @@ type GetBookDashboardResponse struct {
 	sizeCache        protoimpl.SizeCache
 }
 
-func (x *GetBookDashboardResponse) Reset() {
-	*x = GetBookDashboardResponse{}
+func (x *DashboardResponse) Reset() {
+	*x = DashboardResponse{}
 	mi := &file_book_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetBookDashboardResponse) String() string {
+func (x *DashboardResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetBookDashboardResponse) ProtoMessage() {}
+func (*DashboardResponse) ProtoMessage() {}
 
-func (x *GetBookDashboardResponse) ProtoReflect() protoreflect.Message {
+func (x *DashboardResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_book_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -92,33 +92,33 @@ func (x *GetBookDashboardResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetBookDashboardResponse.ProtoReflect.Descriptor instead.
-func (*GetBookDashboardResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use DashboardResponse.ProtoReflect.Descriptor instead.
+func (*DashboardResponse) Descriptor() ([]byte, []int) {
 	return file_book_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetBookDashboardResponse) GetTodayCount() int32 {
+func (x *DashboardResponse) GetTodayCount() int32 {
 	if x != nil {
 		return x.TodayCount
 	}
 	return 0
 }
 
-func (x *GetBookDashboardResponse) GetUpcomingCount() int32 {
+func (x *DashboardResponse) GetUpcomingCount() int32 {
 	if x != nil {
 		return x.UpcomingCount
 	}
 	return 0
 }
 
-func (x *GetBookDashboardResponse) GetCancellationRate() float64 {
+func (x *DashboardResponse) GetCancellationRate() float64 {
 	if x != nil {
 		return x.CancellationRate
 	}
 	return 0
 }
 
-func (x *GetBookDashboardResponse) GetRevenue() float64 {
+func (x *DashboardResponse) GetRevenue() float64 {
 	if x != nil {
 		return x.Revenue
 	}
@@ -129,9 +129,9 @@ var File_book_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_book_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x17book/v1/dashboard.proto\x12\x04book\"\x19\n" +
-	"\x17GetBookDashboardRequest\"\xa9\x01\n" +
-	"\x18GetBookDashboardResponse\x12\x1f\n" +
+	"\x17book/v1/dashboard.proto\x12\x04book\"\x12\n" +
+	"\x10DashboardRequest\"\xa2\x01\n" +
+	"\x11DashboardResponse\x12\x1f\n" +
 	"\vtoday_count\x18\x01 \x01(\x05R\n" +
 	"todayCount\x12%\n" +
 	"\x0eupcoming_count\x18\x02 \x01(\x05R\rupcomingCount\x12+\n" +
@@ -152,8 +152,8 @@ func file_book_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_book_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_book_v1_dashboard_proto_goTypes = []any{
-	(*GetBookDashboardRequest)(nil),  // 0: book.GetBookDashboardRequest
-	(*GetBookDashboardResponse)(nil), // 1: book.GetBookDashboardResponse
+	(*DashboardRequest)(nil),  // 0: book.DashboardRequest
+	(*DashboardResponse)(nil), // 1: book.DashboardResponse
 }
 var file_book_v1_dashboard_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

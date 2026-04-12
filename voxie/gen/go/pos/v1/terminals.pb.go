@@ -27,9 +27,9 @@ type Terminal struct {
 	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
 	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	DeviceId      string                 `protobuf:"bytes,5,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	DeviceId      *string                `protobuf:"bytes,5,opt,name=device_id,json=deviceId,proto3,oneof" json:"device_id,omitempty"`
 	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	LastSeenAt    string                 `protobuf:"bytes,7,opt,name=last_seen_at,json=lastSeenAt,proto3" json:"last_seen_at,omitempty"`
+	LastSeenAt    *string                `protobuf:"bytes,7,opt,name=last_seen_at,json=lastSeenAt,proto3,oneof" json:"last_seen_at,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -94,8 +94,8 @@ func (x *Terminal) GetName() string {
 }
 
 func (x *Terminal) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
+	if x != nil && x.DeviceId != nil {
+		return *x.DeviceId
 	}
 	return ""
 }
@@ -108,8 +108,8 @@ func (x *Terminal) GetIsActive() bool {
 }
 
 func (x *Terminal) GetLastSeenAt() string {
-	if x != nil {
-		return x.LastSeenAt
+	if x != nil && x.LastSeenAt != nil {
+		return *x.LastSeenAt
 	}
 	return ""
 }
@@ -517,19 +517,22 @@ var File_pos_v1_terminals_proto protoreflect.FileDescriptor
 
 const file_pos_v1_terminals_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/terminals.proto\x12\x03pos\"\xe7\x01\n" +
+	"\x16pos/v1/terminals.proto\x12\x03pos\"\x90\x02\n" +
 	"\bTerminal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
 	"businessId\x12\x1b\n" +
 	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1b\n" +
-	"\tdevice_id\x18\x05 \x01(\tR\bdeviceId\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12 \n" +
-	"\flast_seen_at\x18\a \x01(\tR\n" +
-	"lastSeenAt\x12\x1d\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
+	"\tdevice_id\x18\x05 \x01(\tH\x00R\bdeviceId\x88\x01\x01\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12%\n" +
+	"\flast_seen_at\x18\a \x01(\tH\x01R\n" +
+	"lastSeenAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\"\x16\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAtB\f\n" +
+	"\n" +
+	"_device_idB\x0f\n" +
+	"\r_last_seen_at\"\x16\n" +
 	"\x14ListTerminalsRequest\"D\n" +
 	"\x15ListTerminalsResponse\x12+\n" +
 	"\tterminals\x18\x01 \x03(\v2\r.pos.TerminalR\tterminals\"e\n" +
@@ -592,6 +595,7 @@ func file_pos_v1_terminals_proto_init() {
 	if File_pos_v1_terminals_proto != nil {
 		return
 	}
+	file_pos_v1_terminals_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

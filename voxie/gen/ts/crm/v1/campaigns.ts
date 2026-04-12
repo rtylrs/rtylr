@@ -16,8 +16,8 @@ export interface Campaign {
   segmentId?: number | undefined;
   subject: string;
   content: string;
-  scheduledAt: string;
-  sentAt: string;
+  scheduledAt?: string | undefined;
+  sentAt?: string | undefined;
   audienceCount: number;
   sentCount: number;
   deliveredCount: number;

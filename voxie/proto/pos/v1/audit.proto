@@ -10,13 +10,13 @@ message AuditLog {
   int64 id = 1;
   int64 business_id = 2;
   int64 branch_id = 3;
-  int64 terminal_id = 4;
+  optional int64 terminal_id = 4;
   int64 employee_id = 5;
   string action = 6;
   string entity_type = 7;
-  int64 entity_id = 8;
-  string details = 9;
-  string ip_address = 10;
+  optional int64 entity_id = 8;
+  optional string details = 9;
+  optional string ip_address = 10;
   string created_at = 11;
 }
 

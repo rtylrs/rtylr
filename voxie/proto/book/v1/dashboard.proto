@@ -6,9 +6,9 @@ option go_package = "github.com/voxire/voxie/gen/go/book/v1";
 
 // ── Dashboard ─────────────────────────────────────────────────────
 
-message GetBookDashboardRequest {}
+message DashboardRequest {}
 
-message GetBookDashboardResponse {
+message DashboardResponse {
   int32 today_count = 1;
   int32 upcoming_count = 2;
   double cancellation_rate = 3;

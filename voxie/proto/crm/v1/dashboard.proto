@@ -12,15 +12,15 @@ message TopCustomer {
   string last_name = 3;
   string email = 4;
   double total_spent = 5;
-  int32 loyalty_points = 6;
+  int64 loyalty_points = 6;
   string loyalty_tier = 7;
 }
 
 message GetDashboardRequest {}
 
 message GetDashboardResponse {
-  int32 total_customers = 1;
-  int32 new_this_month = 2;
-  int32 active_loyalty_members = 3;
+  int64 total_customers = 1;
+  int64 new_this_month = 2;
+  int64 active_loyalty_members = 3;
   repeated TopCustomer top_customers = 4;
 }

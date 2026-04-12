@@ -6,10 +6,10 @@
 
 /* eslint-disable */
 
-export interface GetBookDashboardRequest {
+export interface DashboardRequest {
 }
 
-export interface GetBookDashboardResponse {
+export interface DashboardResponse {
   todayCount: number;
   upcomingCount: number;
   cancellationRate: number;

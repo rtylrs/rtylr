@@ -26,13 +26,13 @@ type AuditLog struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	BusinessId    int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	BranchId      int64                  `protobuf:"varint,3,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
-	TerminalId    int64                  `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
+	TerminalId    *int64                 `protobuf:"varint,4,opt,name=terminal_id,json=terminalId,proto3,oneof" json:"terminal_id,omitempty"`
 	EmployeeId    int64                  `protobuf:"varint,5,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
 	Action        string                 `protobuf:"bytes,6,opt,name=action,proto3" json:"action,omitempty"`
 	EntityType    string                 `protobuf:"bytes,7,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	EntityId      int64                  `protobuf:"varint,8,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
-	Details       string                 `protobuf:"bytes,9,opt,name=details,proto3" json:"details,omitempty"`
-	IpAddress     string                 `protobuf:"bytes,10,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
+	EntityId      *int64                 `protobuf:"varint,8,opt,name=entity_id,json=entityId,proto3,oneof" json:"entity_id,omitempty"`
+	Details       *string                `protobuf:"bytes,9,opt,name=details,proto3,oneof" json:"details,omitempty"`
+	IpAddress     *string                `protobuf:"bytes,10,opt,name=ip_address,json=ipAddress,proto3,oneof" json:"ip_address,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -90,8 +90,8 @@ func (x *AuditLog) GetBranchId() int64 {
 }
 
 func (x *AuditLog) GetTerminalId() int64 {
-	if x != nil {
-		return x.TerminalId
+	if x != nil && x.TerminalId != nil {
+		return *x.TerminalId
 	}
 	return 0
 }
@@ -118,22 +118,22 @@ func (x *AuditLog) GetEntityType() string {
 }
 
 func (x *AuditLog) GetEntityId() int64 {
-	if x != nil {
-		return x.EntityId
+	if x != nil && x.EntityId != nil {
+		return *x.EntityId
 	}
 	return 0
 }
 
 func (x *AuditLog) GetDetails() string {
-	if x != nil {
-		return x.Details
+	if x != nil && x.Details != nil {
+		return *x.Details
 	}
 	return ""
 }
 
 func (x *AuditLog) GetIpAddress() string {
-	if x != nil {
-		return x.IpAddress
+	if x != nil && x.IpAddress != nil {
+		return *x.IpAddress
 	}
 	return ""
 }
@@ -421,26 +421,32 @@ var File_pos_v1_audit_proto protoreflect.FileDescriptor
 
 const file_pos_v1_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/audit.proto\x12\x03pos\"\xc8\x02\n" +
+	"\x12pos/v1/audit.proto\x12\x03pos\"\x95\x03\n" +
 	"\bAuditLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
 	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1f\n" +
-	"\vterminal_id\x18\x04 \x01(\x03R\n" +
-	"terminalId\x12\x1f\n" +
+	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12$\n" +
+	"\vterminal_id\x18\x04 \x01(\x03H\x00R\n" +
+	"terminalId\x88\x01\x01\x12\x1f\n" +
 	"\vemployee_id\x18\x05 \x01(\x03R\n" +
 	"employeeId\x12\x16\n" +
 	"\x06action\x18\x06 \x01(\tR\x06action\x12\x1f\n" +
 	"\ventity_type\x18\a \x01(\tR\n" +
-	"entityType\x12\x1b\n" +
-	"\tentity_id\x18\b \x01(\x03R\bentityId\x12\x18\n" +
-	"\adetails\x18\t \x01(\tR\adetails\x12\x1d\n" +
+	"entityType\x12 \n" +
+	"\tentity_id\x18\b \x01(\x03H\x01R\bentityId\x88\x01\x01\x12\x1d\n" +
+	"\adetails\x18\t \x01(\tH\x02R\adetails\x88\x01\x01\x12\"\n" +
 	"\n" +
 	"ip_address\x18\n" +
-	" \x01(\tR\tipAddress\x12\x1d\n" +
+	" \x01(\tH\x03R\tipAddress\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"\xa6\x01\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +
+	"\f_terminal_idB\f\n" +
+	"\n" +
+	"_entity_idB\n" +
+	"\n" +
+	"\b_detailsB\r\n" +
+	"\v_ip_address\"\xa6\x01\n" +
 	"\x10ListAuditRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x1f\n" +
 	"\ventity_type\x18\x02 \x01(\tR\n" +
@@ -504,6 +510,7 @@ func file_pos_v1_audit_proto_init() {
 	if File_pos_v1_audit_proto != nil {
 		return
 	}
+	file_pos_v1_audit_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

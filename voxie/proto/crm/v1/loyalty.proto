@@ -12,15 +12,15 @@ message LoyaltyConfig {
   bool is_enabled = 3;
   double points_per_currency_unit = 4;
   double currency_per_point = 5;
-  int32 bronze_min = 6;
-  int32 silver_min = 7;
-  int32 gold_min = 8;
-  int32 platinum_min = 9;
+  int64 bronze_min = 6;
+  int64 silver_min = 7;
+  int64 gold_min = 8;
+  int64 platinum_min = 9;
   double bronze_discount_pct = 10;
   double silver_discount_pct = 11;
   double gold_discount_pct = 12;
   double platinum_discount_pct = 13;
-  int32 points_expiry_days = 14;
+  int64 points_expiry_days = 14;
   string updated_at = 15;
 }
 
@@ -34,15 +34,15 @@ message UpdateLoyaltyConfigRequest {
   bool is_enabled = 1;
   double points_per_currency_unit = 2;
   double currency_per_point = 3;
-  int32 bronze_min = 4;
-  int32 silver_min = 5;
-  int32 gold_min = 6;
-  int32 platinum_min = 7;
+  int64 bronze_min = 4;
+  int64 silver_min = 5;
+  int64 gold_min = 6;
+  int64 platinum_min = 7;
   double bronze_discount_pct = 8;
   double silver_discount_pct = 9;
   double gold_discount_pct = 10;
   double platinum_discount_pct = 11;
-  int32 points_expiry_days = 12;
+  int64 points_expiry_days = 12;
 }
 
 message UpdateLoyaltyConfigResponse {
@@ -56,9 +56,9 @@ message LoyaltyTransaction {
   int64 owner_id = 2;
   int64 customer_id = 3;
   string type = 4;
-  int32 points = 5;
-  int32 balance_before = 6;
-  int32 balance_after = 7;
+  int64 points = 5;
+  int64 balance_before = 6;
+  int64 balance_after = 7;
   string description = 8;
   optional int64 reference_id = 9;
   string reference_type = 10;
@@ -67,22 +67,22 @@ message LoyaltyTransaction {
 
 message ListLoyaltyTransactionsRequest {
   int64 customer_id = 1;
-  int32 page = 2;
-  int32 page_size = 3;
+  int64 page = 2;
+  int64 page_size = 3;
 }
 
 message ListLoyaltyTransactionsResponse {
   repeated LoyaltyTransaction transactions = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 page_size = 4;
+  int64 total = 2;
+  int64 page = 3;
+  int64 page_size = 4;
 }
 
 // ── Award / Redeem ─────────────────────────────────────────────────
 
 message AwardPointsRequest {
   int64 customer_id = 1;
-  int32 points = 2;
+  int64 points = 2;
   string description = 3;
   optional int64 reference_id = 4;
   string reference_type = 5;
@@ -94,7 +94,7 @@ message AwardPointsResponse {
 
 message RedeemPointsRequest {
   int64 customer_id = 1;
-  int32 points = 2;
+  int64 points = 2;
   string description = 3;
   optional int64 reference_id = 4;
   string reference_type = 5;
@@ -110,10 +110,10 @@ message LoyaltyTier {
   int64 id = 1;
   int64 owner_id = 2;
   string name = 3;
-  int32 min_points = 4;
+  int64 min_points = 4;
   double discount_pct = 5;
   string perks = 6;
-  int32 sort_order = 7;
+  int64 sort_order = 7;
   string created_at = 8;
   string updated_at = 9;
 }
@@ -126,10 +126,10 @@ message ListLoyaltyTiersResponse {
 
 message CreateLoyaltyTierRequest {
   string name = 1;
-  int32 min_points = 2;
+  int64 min_points = 2;
   double discount_pct = 3;
   string perks = 4;
-  int32 sort_order = 5;
+  int64 sort_order = 5;
 }
 
 message CreateLoyaltyTierResponse {
@@ -140,10 +140,10 @@ message CreateLoyaltyTierResponse {
 message UpdateLoyaltyTierRequest {
   int64 id = 1;
   string name = 2;
-  int32 min_points = 3;
+  int64 min_points = 3;
   double discount_pct = 4;
   string perks = 5;
-  int32 sort_order = 6;
+  int64 sort_order = 6;
 }
 
 message UpdateLoyaltyTierResponse {

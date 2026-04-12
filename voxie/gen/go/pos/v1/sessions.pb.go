@@ -25,14 +25,14 @@ type Session struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	StaffId       int64                  `protobuf:"varint,4,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	LocationId    *int64                 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
+	StaffId       *int64                 `protobuf:"varint,4,opt,name=staff_id,json=staffId,proto3,oneof" json:"staff_id,omitempty"`
 	OpeningFloat  float64                `protobuf:"fixed64,5,opt,name=opening_float,json=openingFloat,proto3" json:"opening_float,omitempty"`
 	ClosingFloat  float64                `protobuf:"fixed64,6,opt,name=closing_float,json=closingFloat,proto3" json:"closing_float,omitempty"`
 	TotalSales    float64                `protobuf:"fixed64,7,opt,name=total_sales,json=totalSales,proto3" json:"total_sales,omitempty"`
 	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	OpenedAt      string                 `protobuf:"bytes,9,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`
-	ClosedAt      string                 `protobuf:"bytes,10,opt,name=closed_at,json=closedAt,proto3" json:"closed_at,omitempty"`
+	ClosedAt      *string                `protobuf:"bytes,10,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -83,15 +83,15 @@ func (x *Session) GetOwnerId() int64 {
 }
 
 func (x *Session) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
 	}
 	return 0
 }
 
 func (x *Session) GetStaffId() int64 {
-	if x != nil {
-		return x.StaffId
+	if x != nil && x.StaffId != nil {
+		return *x.StaffId
 	}
 	return 0
 }
@@ -132,8 +132,8 @@ func (x *Session) GetOpenedAt() string {
 }
 
 func (x *Session) GetClosedAt() string {
-	if x != nil {
-		return x.ClosedAt
+	if x != nil && x.ClosedAt != nil {
+		return *x.ClosedAt
 	}
 	return ""
 }
@@ -429,23 +429,27 @@ var File_pos_v1_sessions_proto protoreflect.FileDescriptor
 
 const file_pos_v1_sessions_proto_rawDesc = "" +
 	"\n" +
-	"\x15pos/v1/sessions.proto\x12\x03pos\"\xcc\x02\n" +
+	"\x15pos/v1/sessions.proto\x12\x03pos\"\x86\x03\n" +
 	"\aSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12\x19\n" +
-	"\bstaff_id\x18\x04 \x01(\x03R\astaffId\x12#\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
+	"\vlocation_id\x18\x03 \x01(\x03H\x00R\n" +
+	"locationId\x88\x01\x01\x12\x1e\n" +
+	"\bstaff_id\x18\x04 \x01(\x03H\x01R\astaffId\x88\x01\x01\x12#\n" +
 	"\ropening_float\x18\x05 \x01(\x01R\fopeningFloat\x12#\n" +
 	"\rclosing_float\x18\x06 \x01(\x01R\fclosingFloat\x12\x1f\n" +
 	"\vtotal_sales\x18\a \x01(\x01R\n" +
 	"totalSales\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x1b\n" +
-	"\topened_at\x18\t \x01(\tR\bopenedAt\x12\x1b\n" +
+	"\topened_at\x18\t \x01(\tR\bopenedAt\x12 \n" +
 	"\tclosed_at\x18\n" +
-	" \x01(\tR\bclosedAt\x12\x1d\n" +
+	" \x01(\tH\x02R\bclosedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"\x15\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +
+	"\f_location_idB\v\n" +
+	"\t_staff_idB\f\n" +
+	"\n" +
+	"_closed_at\"\x15\n" +
 	"\x13ListSessionsRequest\"@\n" +
 	"\x14ListSessionsResponse\x12(\n" +
 	"\bsessions\x18\x01 \x03(\v2\f.pos.SessionR\bsessions\"u\n" +
@@ -499,6 +503,7 @@ func file_pos_v1_sessions_proto_init() {
 	if File_pos_v1_sessions_proto != nil {
 		return
 	}
+	file_pos_v1_sessions_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

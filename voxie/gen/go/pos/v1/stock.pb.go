@@ -29,10 +29,10 @@ type StockMovement struct {
 	ProductId     int64                  `protobuf:"varint,4,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
 	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
 	Quantity      float64                `protobuf:"fixed64,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	ReferenceId   int64                  `protobuf:"varint,7,opt,name=reference_id,json=referenceId,proto3" json:"reference_id,omitempty"`
-	ReferenceType string                 `protobuf:"bytes,8,opt,name=reference_type,json=referenceType,proto3" json:"reference_type,omitempty"`
-	Note          string                 `protobuf:"bytes,9,opt,name=note,proto3" json:"note,omitempty"`
-	EmployeeId    int64                  `protobuf:"varint,10,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	ReferenceId   *int64                 `protobuf:"varint,7,opt,name=reference_id,json=referenceId,proto3,oneof" json:"reference_id,omitempty"`
+	ReferenceType *string                `protobuf:"bytes,8,opt,name=reference_type,json=referenceType,proto3,oneof" json:"reference_type,omitempty"`
+	Note          *string                `protobuf:"bytes,9,opt,name=note,proto3,oneof" json:"note,omitempty"`
+	EmployeeId    *int64                 `protobuf:"varint,10,opt,name=employee_id,json=employeeId,proto3,oneof" json:"employee_id,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -111,29 +111,29 @@ func (x *StockMovement) GetQuantity() float64 {
 }
 
 func (x *StockMovement) GetReferenceId() int64 {
-	if x != nil {
-		return x.ReferenceId
+	if x != nil && x.ReferenceId != nil {
+		return *x.ReferenceId
 	}
 	return 0
 }
 
 func (x *StockMovement) GetReferenceType() string {
-	if x != nil {
-		return x.ReferenceType
+	if x != nil && x.ReferenceType != nil {
+		return *x.ReferenceType
 	}
 	return ""
 }
 
 func (x *StockMovement) GetNote() string {
-	if x != nil {
-		return x.Note
+	if x != nil && x.Note != nil {
+		return *x.Note
 	}
 	return ""
 }
 
 func (x *StockMovement) GetEmployeeId() int64 {
-	if x != nil {
-		return x.EmployeeId
+	if x != nil && x.EmployeeId != nil {
+		return *x.EmployeeId
 	}
 	return 0
 }
@@ -1041,7 +1041,7 @@ var File_pos_v1_stock_proto protoreflect.FileDescriptor
 
 const file_pos_v1_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/stock.proto\x12\x03pos\"\xca\x02\n" +
+	"\x12pos/v1/stock.proto\x12\x03pos\"\x9b\x03\n" +
 	"\rStockMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -1050,15 +1050,19 @@ const file_pos_v1_stock_proto_rawDesc = "" +
 	"\n" +
 	"product_id\x18\x04 \x01(\x03R\tproductId\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1a\n" +
-	"\bquantity\x18\x06 \x01(\x01R\bquantity\x12!\n" +
-	"\freference_id\x18\a \x01(\x03R\vreferenceId\x12%\n" +
-	"\x0ereference_type\x18\b \x01(\tR\rreferenceType\x12\x12\n" +
-	"\x04note\x18\t \x01(\tR\x04note\x12\x1f\n" +
+	"\bquantity\x18\x06 \x01(\x01R\bquantity\x12&\n" +
+	"\freference_id\x18\a \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12*\n" +
+	"\x0ereference_type\x18\b \x01(\tH\x01R\rreferenceType\x88\x01\x01\x12\x17\n" +
+	"\x04note\x18\t \x01(\tH\x02R\x04note\x88\x01\x01\x12$\n" +
 	"\vemployee_id\x18\n" +
-	" \x01(\x03R\n" +
-	"employeeId\x12\x1d\n" +
+	" \x01(\x03H\x03R\n" +
+	"employeeId\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"\x89\x02\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAtB\x0f\n" +
+	"\r_reference_idB\x11\n" +
+	"\x0f_reference_typeB\a\n" +
+	"\x05_noteB\x0e\n" +
+	"\f_employee_id\"\x89\x02\n" +
 	"\x0fBranchInventory\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -1183,6 +1187,7 @@ func file_pos_v1_stock_proto_init() {
 	if File_pos_v1_stock_proto != nil {
 		return
 	}
+	file_pos_v1_stock_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

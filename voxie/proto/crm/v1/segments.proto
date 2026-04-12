@@ -11,10 +11,11 @@ message Segment {
   int64 owner_id = 2;
   string name = 3;
   string description = 4;
-  string filters = 5;
-  int32 customer_count = 6;
-  string created_at = 7;
-  string updated_at = 8;
+  string rules = 5;
+  int64 customer_count = 6;
+  optional string last_calculated_at = 7;
+  string created_at = 8;
+  string updated_at = 9;
 }
 
 message ListSegmentsRequest {}
@@ -26,7 +27,7 @@ message ListSegmentsResponse {
 message CreateSegmentRequest {
   string name = 1;
   string description = 2;
-  string filters = 3;
+  string rules = 3;
 }
 
 message CreateSegmentResponse {
@@ -38,7 +39,7 @@ message UpdateSegmentRequest {
   int64 id = 1;
   string name = 2;
   string description = 3;
-  string filters = 4;
+  string rules = 4;
 }
 
 message UpdateSegmentResponse {

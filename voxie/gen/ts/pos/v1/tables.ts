@@ -9,7 +9,7 @@
 export interface Table {
   id: number;
   ownerId: number;
-  locationId: number;
+  locationId?: number | undefined;
   label: string;
   seats: number;
   status: string;
@@ -25,7 +25,7 @@ export interface ListTablesResponse {
 }
 
 export interface CreateTableRequest {
-  locationId: number;
+  locationId?: number | undefined;
   label: string;
   seats: number;
 }
@@ -36,7 +36,7 @@ export interface CreateTableResponse {
 }
 
 export interface UpdateTableRequest {
-  locationId: number;
+  locationId?: number | undefined;
   label: string;
   seats: number;
   status: string;

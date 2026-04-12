@@ -32,13 +32,13 @@ type Campaign struct {
 	SegmentId      *int64                 `protobuf:"varint,7,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
 	Subject        string                 `protobuf:"bytes,8,opt,name=subject,proto3" json:"subject,omitempty"`
 	Content        string                 `protobuf:"bytes,9,opt,name=content,proto3" json:"content,omitempty"`
-	ScheduledAt    string                 `protobuf:"bytes,10,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
-	SentAt         string                 `protobuf:"bytes,11,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
-	AudienceCount  int32                  `protobuf:"varint,12,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
-	SentCount      int32                  `protobuf:"varint,13,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
-	DeliveredCount int32                  `protobuf:"varint,14,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
-	OpenedCount    int32                  `protobuf:"varint,15,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
-	ClickedCount   int32                  `protobuf:"varint,16,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
+	ScheduledAt    *string                `protobuf:"bytes,10,opt,name=scheduled_at,json=scheduledAt,proto3,oneof" json:"scheduled_at,omitempty"`
+	SentAt         *string                `protobuf:"bytes,11,opt,name=sent_at,json=sentAt,proto3,oneof" json:"sent_at,omitempty"`
+	AudienceCount  int64                  `protobuf:"varint,12,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
+	SentCount      int64                  `protobuf:"varint,13,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
+	DeliveredCount int64                  `protobuf:"varint,14,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
+	OpenedCount    int64                  `protobuf:"varint,15,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
+	ClickedCount   int64                  `protobuf:"varint,16,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
 	CreatedAt      string                 `protobuf:"bytes,17,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      string                 `protobuf:"bytes,18,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
@@ -139,48 +139,48 @@ func (x *Campaign) GetContent() string {
 }
 
 func (x *Campaign) GetScheduledAt() string {
-	if x != nil {
-		return x.ScheduledAt
+	if x != nil && x.ScheduledAt != nil {
+		return *x.ScheduledAt
 	}
 	return ""
 }
 
 func (x *Campaign) GetSentAt() string {
-	if x != nil {
-		return x.SentAt
+	if x != nil && x.SentAt != nil {
+		return *x.SentAt
 	}
 	return ""
 }
 
-func (x *Campaign) GetAudienceCount() int32 {
+func (x *Campaign) GetAudienceCount() int64 {
 	if x != nil {
 		return x.AudienceCount
 	}
 	return 0
 }
 
-func (x *Campaign) GetSentCount() int32 {
+func (x *Campaign) GetSentCount() int64 {
 	if x != nil {
 		return x.SentCount
 	}
 	return 0
 }
 
-func (x *Campaign) GetDeliveredCount() int32 {
+func (x *Campaign) GetDeliveredCount() int64 {
 	if x != nil {
 		return x.DeliveredCount
 	}
 	return 0
 }
 
-func (x *Campaign) GetOpenedCount() int32 {
+func (x *Campaign) GetOpenedCount() int64 {
 	if x != nil {
 		return x.OpenedCount
 	}
 	return 0
 }
 
-func (x *Campaign) GetClickedCount() int32 {
+func (x *Campaign) GetClickedCount() int64 {
 	if x != nil {
 		return x.ClickedCount
 	}
@@ -676,13 +676,13 @@ func (x *UpdateCampaignStatusResponse) GetMessage() string {
 type CampaignStats struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	CampaignId     int64                  `protobuf:"varint,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
-	AudienceCount  int32                  `protobuf:"varint,2,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
-	SentCount      int32                  `protobuf:"varint,3,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
-	DeliveredCount int32                  `protobuf:"varint,4,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
-	OpenedCount    int32                  `protobuf:"varint,5,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
-	ClickedCount   int32                  `protobuf:"varint,6,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
-	BouncedCount   int32                  `protobuf:"varint,7,opt,name=bounced_count,json=bouncedCount,proto3" json:"bounced_count,omitempty"`
-	FailedCount    int32                  `protobuf:"varint,8,opt,name=failed_count,json=failedCount,proto3" json:"failed_count,omitempty"`
+	AudienceCount  int64                  `protobuf:"varint,2,opt,name=audience_count,json=audienceCount,proto3" json:"audience_count,omitempty"`
+	SentCount      int64                  `protobuf:"varint,3,opt,name=sent_count,json=sentCount,proto3" json:"sent_count,omitempty"`
+	DeliveredCount int64                  `protobuf:"varint,4,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
+	OpenedCount    int64                  `protobuf:"varint,5,opt,name=opened_count,json=openedCount,proto3" json:"opened_count,omitempty"`
+	ClickedCount   int64                  `protobuf:"varint,6,opt,name=clicked_count,json=clickedCount,proto3" json:"clicked_count,omitempty"`
+	BouncedCount   int64                  `protobuf:"varint,7,opt,name=bounced_count,json=bouncedCount,proto3" json:"bounced_count,omitempty"`
+	FailedCount    int64                  `protobuf:"varint,8,opt,name=failed_count,json=failedCount,proto3" json:"failed_count,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -724,49 +724,49 @@ func (x *CampaignStats) GetCampaignId() int64 {
 	return 0
 }
 
-func (x *CampaignStats) GetAudienceCount() int32 {
+func (x *CampaignStats) GetAudienceCount() int64 {
 	if x != nil {
 		return x.AudienceCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetSentCount() int32 {
+func (x *CampaignStats) GetSentCount() int64 {
 	if x != nil {
 		return x.SentCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetDeliveredCount() int32 {
+func (x *CampaignStats) GetDeliveredCount() int64 {
 	if x != nil {
 		return x.DeliveredCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetOpenedCount() int32 {
+func (x *CampaignStats) GetOpenedCount() int64 {
 	if x != nil {
 		return x.OpenedCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetClickedCount() int32 {
+func (x *CampaignStats) GetClickedCount() int64 {
 	if x != nil {
 		return x.ClickedCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetBouncedCount() int32 {
+func (x *CampaignStats) GetBouncedCount() int64 {
 	if x != nil {
 		return x.BouncedCount
 	}
 	return 0
 }
 
-func (x *CampaignStats) GetFailedCount() int32 {
+func (x *CampaignStats) GetFailedCount() int64 {
 	if x != nil {
 		return x.FailedCount
 	}
@@ -961,7 +961,7 @@ var File_crm_v1_campaigns_proto protoreflect.FileDescriptor
 
 const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/campaigns.proto\x12\x03crm\"\xb5\x04\n" +
+	"\x16crm/v1/campaigns.proto\x12\x03crm\"\xdc\x04\n" +
 	"\bCampaign\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -972,21 +972,24 @@ const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\n" +
 	"segment_id\x18\a \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
 	"\asubject\x18\b \x01(\tR\asubject\x12\x18\n" +
-	"\acontent\x18\t \x01(\tR\acontent\x12!\n" +
+	"\acontent\x18\t \x01(\tR\acontent\x12&\n" +
 	"\fscheduled_at\x18\n" +
-	" \x01(\tR\vscheduledAt\x12\x17\n" +
-	"\asent_at\x18\v \x01(\tR\x06sentAt\x12%\n" +
-	"\x0eaudience_count\x18\f \x01(\x05R\raudienceCount\x12\x1d\n" +
+	" \x01(\tH\x01R\vscheduledAt\x88\x01\x01\x12\x1c\n" +
+	"\asent_at\x18\v \x01(\tH\x02R\x06sentAt\x88\x01\x01\x12%\n" +
+	"\x0eaudience_count\x18\f \x01(\x03R\raudienceCount\x12\x1d\n" +
 	"\n" +
-	"sent_count\x18\r \x01(\x05R\tsentCount\x12'\n" +
-	"\x0fdelivered_count\x18\x0e \x01(\x05R\x0edeliveredCount\x12!\n" +
-	"\fopened_count\x18\x0f \x01(\x05R\vopenedCount\x12#\n" +
-	"\rclicked_count\x18\x10 \x01(\x05R\fclickedCount\x12\x1d\n" +
+	"sent_count\x18\r \x01(\x03R\tsentCount\x12'\n" +
+	"\x0fdelivered_count\x18\x0e \x01(\x03R\x0edeliveredCount\x12!\n" +
+	"\fopened_count\x18\x0f \x01(\x03R\vopenedCount\x12#\n" +
+	"\rclicked_count\x18\x10 \x01(\x03R\fclickedCount\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x11 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x12 \x01(\tR\tupdatedAtB\r\n" +
-	"\v_segment_id\".\n" +
+	"\v_segment_idB\x0f\n" +
+	"\r_scheduled_atB\n" +
+	"\n" +
+	"\b_sent_at\".\n" +
 	"\x14ListCampaignsRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\"D\n" +
 	"\x15ListCampaignsResponse\x12+\n" +
@@ -1026,14 +1029,14 @@ const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\rCampaignStats\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
 	"campaignId\x12%\n" +
-	"\x0eaudience_count\x18\x02 \x01(\x05R\raudienceCount\x12\x1d\n" +
+	"\x0eaudience_count\x18\x02 \x01(\x03R\raudienceCount\x12\x1d\n" +
 	"\n" +
-	"sent_count\x18\x03 \x01(\x05R\tsentCount\x12'\n" +
-	"\x0fdelivered_count\x18\x04 \x01(\x05R\x0edeliveredCount\x12!\n" +
-	"\fopened_count\x18\x05 \x01(\x05R\vopenedCount\x12#\n" +
-	"\rclicked_count\x18\x06 \x01(\x05R\fclickedCount\x12#\n" +
-	"\rbounced_count\x18\a \x01(\x05R\fbouncedCount\x12!\n" +
-	"\ffailed_count\x18\b \x01(\x05R\vfailedCount\":\n" +
+	"sent_count\x18\x03 \x01(\x03R\tsentCount\x12'\n" +
+	"\x0fdelivered_count\x18\x04 \x01(\x03R\x0edeliveredCount\x12!\n" +
+	"\fopened_count\x18\x05 \x01(\x03R\vopenedCount\x12#\n" +
+	"\rclicked_count\x18\x06 \x01(\x03R\fclickedCount\x12#\n" +
+	"\rbounced_count\x18\a \x01(\x03R\fbouncedCount\x12!\n" +
+	"\ffailed_count\x18\b \x01(\x03R\vfailedCount\":\n" +
 	"\x17GetCampaignStatsRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
 	"campaignId\"D\n" +

@@ -10,13 +10,13 @@ export interface AuditLog {
   id: number;
   businessId: number;
   branchId: number;
-  terminalId: number;
+  terminalId?: number | undefined;
   employeeId: number;
   action: string;
   entityType: string;
-  entityId: number;
-  details: string;
-  ipAddress: string;
+  entityId?: number | undefined;
+  details?: string | undefined;
+  ipAddress?: string | undefined;
   createdAt: string;
 }
 

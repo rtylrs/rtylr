@@ -11,9 +11,9 @@ message Terminal {
   int64 business_id = 2;
   int64 branch_id = 3;
   string name = 4;
-  string device_id = 5;
+  optional string device_id = 5;
   bool is_active = 6;
-  string last_seen_at = 7;
+  optional string last_seen_at = 7;
   string created_at = 8;
 }
 

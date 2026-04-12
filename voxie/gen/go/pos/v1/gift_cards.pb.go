@@ -33,7 +33,6 @@ type GiftCard struct {
 	IsActive       bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	ExpiresAt      string                 `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	CreatedAt      string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -134,13 +133,6 @@ func (x *GiftCard) GetExpiresAt() string {
 func (x *GiftCard) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *GiftCard) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
 	}
 	return ""
 }
@@ -461,7 +453,7 @@ var File_pos_v1_gift_cards_proto protoreflect.FileDescriptor
 
 const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/v1/gift_cards.proto\x12\x03pos\"\xdf\x02\n" +
+	"\x17pos/v1/gift_cards.proto\x12\x03pos\"\xc0\x02\n" +
 	"\bGiftCard\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -475,9 +467,7 @@ const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"expires_at\x18\t \x01(\tR\texpiresAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x16\n" +
+	" \x01(\tR\tcreatedAt\"\x16\n" +
 	"\x14ListGiftCardsRequest\"E\n" +
 	"\x15ListGiftCardsResponse\x12,\n" +
 	"\n" +

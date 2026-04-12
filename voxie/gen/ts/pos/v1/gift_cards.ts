@@ -17,7 +17,6 @@ export interface GiftCard {
   isActive: boolean;
   expiresAt: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ListGiftCardsRequest {

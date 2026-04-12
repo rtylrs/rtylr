@@ -25,7 +25,7 @@ type Table struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	LocationId    int64                  `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	LocationId    *int64                 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
 	Label         string                 `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
 	Seats         int32                  `protobuf:"varint,5,opt,name=seats,proto3" json:"seats,omitempty"`
 	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
@@ -80,8 +80,8 @@ func (x *Table) GetOwnerId() int64 {
 }
 
 func (x *Table) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
 	}
 	return 0
 }
@@ -203,7 +203,7 @@ func (x *ListTablesResponse) GetTables() []*Table {
 
 type CreateTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	LocationId    *int64                 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
 	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
 	Seats         int32                  `protobuf:"varint,3,opt,name=seats,proto3" json:"seats,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -241,8 +241,8 @@ func (*CreateTableRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *CreateTableRequest) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
 	}
 	return 0
 }
@@ -315,7 +315,7 @@ func (x *CreateTableResponse) GetMessage() string {
 
 type UpdateTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	LocationId    int64                  `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	LocationId    *int64                 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
 	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
 	Seats         int32                  `protobuf:"varint,3,opt,name=seats,proto3" json:"seats,omitempty"`
 	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
@@ -354,8 +354,8 @@ func (*UpdateTableRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *UpdateTableRequest) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
 	}
 	return 0
 }
@@ -509,37 +509,40 @@ var File_pos_v1_tables_proto protoreflect.FileDescriptor
 
 const file_pos_v1_tables_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/tables.proto\x12\x03pos\"\xd5\x01\n" +
+	"\x13pos/v1/tables.proto\x12\x03pos\"\xea\x01\n" +
 	"\x05Table\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
-	"locationId\x12\x14\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
+	"\vlocation_id\x18\x03 \x01(\x03H\x00R\n" +
+	"locationId\x88\x01\x01\x12\x14\n" +
 	"\x05label\x18\x04 \x01(\tR\x05label\x12\x14\n" +
 	"\x05seats\x18\x05 \x01(\x05R\x05seats\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x13\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAtB\x0e\n" +
+	"\f_location_id\"\x13\n" +
 	"\x11ListTablesRequest\"8\n" +
 	"\x12ListTablesResponse\x12\"\n" +
 	"\x06tables\x18\x01 \x03(\v2\n" +
-	".pos.TableR\x06tables\"a\n" +
-	"\x12CreateTableRequest\x12\x1f\n" +
-	"\vlocation_id\x18\x01 \x01(\x03R\n" +
-	"locationId\x12\x14\n" +
+	".pos.TableR\x06tables\"v\n" +
+	"\x12CreateTableRequest\x12$\n" +
+	"\vlocation_id\x18\x01 \x01(\x03H\x00R\n" +
+	"locationId\x88\x01\x01\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12\x14\n" +
-	"\x05seats\x18\x03 \x01(\x05R\x05seats\"J\n" +
+	"\x05seats\x18\x03 \x01(\x05R\x05seatsB\x0e\n" +
+	"\f_location_id\"J\n" +
 	"\x13CreateTableResponse\x12\x19\n" +
 	"\btable_id\x18\x01 \x01(\x03R\atableId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"y\n" +
-	"\x12UpdateTableRequest\x12\x1f\n" +
-	"\vlocation_id\x18\x01 \x01(\x03R\n" +
-	"locationId\x12\x14\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x8e\x01\n" +
+	"\x12UpdateTableRequest\x12$\n" +
+	"\vlocation_id\x18\x01 \x01(\x03H\x00R\n" +
+	"locationId\x88\x01\x01\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12\x14\n" +
 	"\x05seats\x18\x03 \x01(\x05R\x05seats\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\"/\n" +
+	"\x06status\x18\x04 \x01(\tR\x06statusB\x0e\n" +
+	"\f_location_id\"/\n" +
 	"\x13UpdateTableResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
 	"\x12DeleteTableRequest\"/\n" +
@@ -584,6 +587,9 @@ func file_pos_v1_tables_proto_init() {
 	if File_pos_v1_tables_proto != nil {
 		return
 	}
+	file_pos_v1_tables_proto_msgTypes[0].OneofWrappers = []any{}
+	file_pos_v1_tables_proto_msgTypes[3].OneofWrappers = []any{}
+	file_pos_v1_tables_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

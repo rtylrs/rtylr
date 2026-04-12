@@ -9,14 +9,14 @@
 export interface Session {
   id: number;
   ownerId: number;
-  locationId: number;
-  staffId: number;
+  locationId?: number | undefined;
+  staffId?: number | undefined;
   openingFloat: number;
   closingFloat: number;
   totalSales: number;
   status: string;
   openedAt: string;
-  closedAt: string;
+  closedAt?: string | undefined;
   createdAt: string;
 }
 

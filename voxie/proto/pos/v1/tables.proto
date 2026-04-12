@@ -9,7 +9,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
 message Table {
   int64 id = 1;
   int64 owner_id = 2;
-  int64 location_id = 3;
+  optional int64 location_id = 3;
   string label = 4;
   int32 seats = 5;
   string status = 6;
@@ -28,7 +28,7 @@ message ListTablesResponse {
 // ── Create ────────────────────────────────────────────────────────
 
 message CreateTableRequest {
-  int64 location_id = 1;
+  optional int64 location_id = 1;
   string label = 2;
   int32 seats = 3;
 }
@@ -41,7 +41,7 @@ message CreateTableResponse {
 // ── Update ────────────────────────────────────────────────────────
 
 message UpdateTableRequest {
-  int64 location_id = 1;
+  optional int64 location_id = 1;
   string label = 2;
   int32 seats = 3;
   string status = 4;
