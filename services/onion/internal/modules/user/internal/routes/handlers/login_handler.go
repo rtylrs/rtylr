@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
+	"github.com/voxire/onion/internal/modules/user/internal/infrastructure/persistence/sqlc"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
@@ -96,17 +98,20 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 		}
 	}
 
-	// Record login in history (non-blocking)
+	// Record login in history (non-blocking, via sqlc)
 	go func() {
-		pool := dbclient.Pool()
 		ip := ""
 		if device := authPkg.DeviceCtx(ctx); device.User != nil {
 			ip = device.User.IP
 		}
-		_, _ = pool.Exec(
-			"INSERT INTO login_history (user_id, email, method, ip_address, success) VALUES (?, ?, 'email', ?, true)",
-			userId, req.Email, ip,
-		)
+		q := sqlc.New(dbclient.Pool())
+		_ = q.RecordLoginHistory(context.Background(), sqlc.RecordLoginHistoryParams{
+			UserID:    userId,
+			Email:     req.Email,
+			Method:    "email",
+			IpAddress: sql.NullString{String: ip, Valid: ip != ""},
+			Success:   sql.NullBool{Bool: true, Valid: true},
+		})
 	}()
 
 	return LoginResponse{

@@ -23,3 +23,7 @@ WHERE id = ?;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = ?;
+
+-- name: RecordLoginHistory :exec
+INSERT INTO login_history (user_id, email, method, ip_address, success) VALUES (?, ?, ?, ?, ?);
+
