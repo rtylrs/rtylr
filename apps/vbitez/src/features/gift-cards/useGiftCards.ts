@@ -14,8 +14,9 @@ export function useGiftCards() {
     setError(null);
     try {
       await unwrap(posService.getGiftCards());
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load gift cards');
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load gift cards');
     } finally {
       setLoading(false);
     }

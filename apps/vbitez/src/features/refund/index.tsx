@@ -37,7 +37,7 @@ const RefundScreen: React.FC = () => {
       );
       toast.success('Refund processed');
       navigate('/receipts');
-    } catch (e: any) {
+    } catch {
       toast.error('Refund failed');
     } finally {
       setBusy(false);

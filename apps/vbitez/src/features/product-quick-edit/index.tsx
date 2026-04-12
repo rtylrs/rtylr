@@ -37,7 +37,7 @@ const ProductQuickEditScreen: React.FC = () => {
     (it) => !search || it.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const update = (id: string, field: keyof (typeof drafts)[string], value: any) =>
+  const update = (id: string, field: keyof (typeof drafts)[string], value: unknown) =>
     setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
 
   const save = async (item: MenuItem) => {

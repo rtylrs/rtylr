@@ -14,8 +14,9 @@ export function useOverride() {
       const ok = !!(res?.ok ?? res?.verified ?? res?.success);
       if (!ok) setError('Incorrect manager PIN');
       return ok;
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Incorrect manager PIN');
+    } catch (e) {
+      const err = e as { response?: { data?: { message?: string } } };
+      setError(err?.response?.data?.message ?? 'Incorrect manager PIN');
       return false;
     } finally {
       setVerifying(false);

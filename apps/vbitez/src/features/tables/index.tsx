@@ -29,7 +29,7 @@ const TablesScreen: React.FC = () => {
       try {
         const res = await unwrap(posService.getTables());
         const raw = res?.tables ?? res?.data ?? [];
-        const mapped: TableRow[] = (Array.isArray(raw) ? raw : []).map((t: any) => ({
+        const mapped: TableRow[] = (Array.isArray(raw) ? raw : []).map((t) => ({
           id: Number(t.id),
           number: String(t.number ?? t.name ?? t.id),
           seats: Number(t.seats ?? 4),
@@ -39,8 +39,9 @@ const TablesScreen: React.FC = () => {
           server: t.server,
         }));
         setTables(mapped);
-      } catch (e: any) {
-        setError(e?.response?.data?.message ?? 'Failed to load tables');
+      } catch (e) {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        setError(err?.response?.data?.message ?? 'Failed to load tables');
       } finally {
         setLoading(false);
       }

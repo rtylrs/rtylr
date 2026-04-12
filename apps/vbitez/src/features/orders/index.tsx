@@ -24,7 +24,7 @@ const OrdersScreen: React.FC = () => {
       try {
         const res = await unwrap(posService.getOrders());
         const raw = res?.orders ?? res?.data ?? [];
-        const mapped: Order[] = (Array.isArray(raw) ? raw : []).map((o: any) => ({
+        const mapped: Order[] = (Array.isArray(raw) ? raw : []).map((o) => ({
           id: String(o.id),
           number: o.number,
           tableNumber: o.tableNumber,
@@ -38,8 +38,9 @@ const OrdersScreen: React.FC = () => {
           createdAt: o.createdAt ?? new Date().toISOString(),
         }));
         setOrders(mapped);
-      } catch (e: any) {
-        setError(e?.response?.data?.message ?? 'Failed to load orders');
+      } catch (e) {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        setError(err?.response?.data?.message ?? 'Failed to load orders');
       } finally {
         setLoading(false);
       }

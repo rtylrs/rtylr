@@ -15,6 +15,19 @@ interface Product {
   available?: boolean;
 }
 
+interface RawMenuItem {
+  id?: string | number;
+  name?: string;
+  category?: string;
+  categoryName?: string;
+  price?: number;
+  salePrice?: number;
+  image?: string;
+  imageUrl?: string;
+  available?: boolean;
+  isActive?: boolean;
+}
+
 const POS: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -23,7 +36,7 @@ const POS: React.FC = () => {
     async function loadMenu() {
       try {
         const res = await api.get('/pos/menu/items');
-        const items: any[] = res.data?.items ?? res.data ?? [];
+        const items = (res.data?.items ?? res.data ?? []) as RawMenuItem[];
         const cats = new Set<string>();
         const mapped: Product[] = [];
 
@@ -32,7 +45,7 @@ const POS: React.FC = () => {
           cats.add(cat);
           mapped.push({
             id: String(item.id),
-            name: item.name,
+            name: item.name ?? '',
             price: item.price ?? item.salePrice ?? 0,
             category: cat,
             image: item.image ?? item.imageUrl,

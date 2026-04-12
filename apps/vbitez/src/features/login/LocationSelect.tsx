@@ -46,10 +46,11 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
         // Owner/admin sees all locations
         try {
           const data = await unwrap(posService.getBranches());
-          const branches = Array.isArray(data) ? data : ((data as any)?.locations ?? []);
-          const mapped = branches.map((b: any) => ({
-            locationId: b.id,
-            name: b.name,
+          const rawBranches = Array.isArray(data) ? data : ((data as Record<string, unknown>)?.locations ?? []);
+          const branches = rawBranches as Array<{ id?: number; name?: string; address?: string; phone?: string }>;
+          const mapped: Location[] = branches.map((b) => ({
+            locationId: Number(b.id ?? 0),
+            name: b.name ?? '',
             address: b.address ?? '',
             phone: b.phone ?? '',
           }));
@@ -68,10 +69,12 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     setLoading(true);
     try {
       const data = await unwrap(posService.getTerminals());
-      const all = (data as any)?.terminals ?? (Array.isArray(data) ? data : []);
+      const rawTerminals = (data as Record<string, unknown>)?.terminals ?? (Array.isArray(data) ? data : []);
+      const all = rawTerminals as Terminal[];
       // Filter terminals for this location
       const filtered = all.filter(
-        (t: any) => t.branchId === loc.locationId || t.branch_id === loc.locationId
+        (t) => (t as unknown as Record<string, unknown>).branchId === loc.locationId ||
+               (t as unknown as Record<string, unknown>).branch_id === loc.locationId
       );
       setTerminals(filtered);
     } catch {}
