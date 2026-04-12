@@ -1,5 +1,20 @@
 import { safe } from '../lib/api';
 
+export interface InsightsSettingsPayload {
+  defaultPeriod?: string;
+  currency?: string;
+  timezone?: string;
+  [key: string]: unknown;
+}
+
+export interface ScheduledReportPayload {
+  templateId?: string;
+  frequency?: string;
+  recipients?: string[];
+  format?: 'csv' | 'pdf';
+  [key: string]: unknown;
+}
+
 export const insightsService = {
   // Dashboard / KPIs
   getKpis: () => safe.get('/hub/kpis'),
@@ -58,10 +73,11 @@ export const insightsService = {
 
   // Settings
   getInsightsSettings: () => safe.get('/insights/settings'),
-  updateInsightsSettings: (data: any) => safe.put('/insights/settings', data),
+  updateInsightsSettings: (data: InsightsSettingsPayload) => safe.put('/insights/settings', data),
   getScheduledReports: () => safe.get('/insights/settings/scheduled-reports'),
-  updateScheduledReport: (id: string, data: any) =>
+  updateScheduledReport: (id: string, data: Partial<ScheduledReportPayload>) =>
     safe.put(`/insights/settings/scheduled-reports/${id}`, data),
-  createScheduledReport: (data: any) => safe.post('/insights/settings/scheduled-reports', data),
+  createScheduledReport: (data: ScheduledReportPayload) =>
+    safe.post('/insights/settings/scheduled-reports', data),
   deleteScheduledReport: (id: string) => safe.delete(`/insights/settings/scheduled-reports/${id}`),
 };

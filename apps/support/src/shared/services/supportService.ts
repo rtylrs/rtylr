@@ -1,5 +1,22 @@
 import { safe } from '../lib/api';
 
+export interface TicketPayload {
+  subject: string;
+  body?: string;
+  customerId?: number;
+  channel?: string;
+  priority?: string;
+  assigneeId?: number;
+  [key: string]: unknown;
+}
+
+export interface SupportSettingsPayload {
+  businessHours?: Record<string, unknown>;
+  autoReplyEnabled?: boolean;
+  autoReplyMessage?: string;
+  [key: string]: unknown;
+}
+
 export const supportService = {
   // Conversations / Inbox
   getConversations: (params?: { status?: string; assignee?: string; channel?: string }) =>
@@ -17,8 +34,9 @@ export const supportService = {
     offset?: number;
   }) => safe.get('/support/tickets', { params }),
   getTicket: (id: number) => safe.get(`/support/tickets/${id}`),
-  createTicket: (data: any) => safe.post('/support/tickets', data),
-  updateTicket: (id: number, data: any) => safe.put(`/support/tickets/${id}`, data),
+  createTicket: (data: TicketPayload) => safe.post('/support/tickets', data),
+  updateTicket: (id: number, data: Partial<TicketPayload>) =>
+    safe.put(`/support/tickets/${id}`, data),
   updateTicketStatus: (id: number, status: string) =>
     safe.put(`/support/tickets/${id}/status`, { status }),
 
@@ -56,5 +74,5 @@ export const supportService = {
 
   // Settings
   getSettings: () => safe.get('/support/settings'),
-  updateSettings: (data: any) => safe.put('/support/settings', data),
+  updateSettings: (data: SupportSettingsPayload) => safe.put('/support/settings', data),
 };
