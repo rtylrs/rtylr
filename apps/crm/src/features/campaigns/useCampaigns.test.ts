@@ -44,8 +44,32 @@ function createWrapper() {
 }
 
 const sampleCampaigns = [
-  { id: 1, name: 'Summer Sale', channel: 'email', status: 'active' },
-  { id: 2, name: 'Winter Promo', channel: 'sms', status: 'draft' },
+  {
+    id: 1,
+    name: 'Summer Sale',
+    description: 'Summer deals',
+    channel: 'email',
+    status: 'active',
+    audience: 5000,
+    sent: 4500,
+    openRate: '45%',
+    clickRate: '12%',
+    revenue: '$5000',
+    updatedAt: '2026-04-01',
+  },
+  {
+    id: 2,
+    name: 'Winter Promo',
+    description: 'Winter deals',
+    channel: 'sms',
+    status: 'draft',
+    audience: 3000,
+    sent: 0,
+    openRate: '0%',
+    clickRate: '0%',
+    revenue: '$0',
+    updatedAt: '2026-04-02',
+  },
 ];
 
 describe('useCampaigns', () => {
@@ -92,7 +116,16 @@ describe('useCampaignStats', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches campaign stats', async () => {
-    const stats = { sent: 1000, opened: 450, clicked: 200, revenue: 5000 };
+    const stats = {
+      id: 1,
+      sent: 1000,
+      delivered: 950,
+      opened: 450,
+      clicked: 200,
+      unsubscribed: 5,
+      bounced: 10,
+      revenue: 5000,
+    };
     mockCrmApi.getCampaignStats.mockResolvedValue(stats);
 
     const { result } = renderHook(() => useCampaignStats(1), { wrapper: createWrapper() });

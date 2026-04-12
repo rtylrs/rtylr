@@ -1,11 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { crmApi, Automation } from '../../shared/services/crmApi';
+import { automationSchema } from '../../shared/schemas/automations';
 
 export function useAutomations() {
   return useQuery({
     queryKey: ['automations'],
-    queryFn: () => unwrap(crmApi.getAutomations()),
+    queryFn: async () => {
+      const res = await unwrap(crmApi.getAutomations());
+      const raw = res ?? [];
+      return z.array(automationSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
