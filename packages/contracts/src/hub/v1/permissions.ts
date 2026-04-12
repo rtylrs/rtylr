@@ -30,13 +30,13 @@ export interface GetPermissionsResponse {
   matrix: PermissionMatrix | undefined;
 }
 
-export interface UpdatePermissionsRequest {
+export interface UpdatePermissionMatrixRequest {
   role: string;
   permissionKey: string;
   enabled: boolean;
 }
 
-export interface UpdatePermissionsResponse {
+export interface UpdatePermissionMatrixResponse {
   success: boolean;
 }
 

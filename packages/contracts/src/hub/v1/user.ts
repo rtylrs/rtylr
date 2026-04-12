@@ -6,27 +6,32 @@
 
 /* eslint-disable */
 
-export interface User {
-  id: number;
-  email: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  /** owner, admin, operator, staff, viewer */
-  role: string;
-  businessId: number;
-  businessName: string;
-  avatarUrl: string;
-  /** App IDs the user has access to */
-  apps: string[];
-  isOwner: boolean;
-  onboarded: boolean;
-  theme: string;
-  planType: string;
-}
-
 export interface GetMeRequest {}
 
 export interface GetMeResponse {
-  user: User | undefined;
+  id: number;
+  email: string;
+  fullName: string;
+  apps: string[];
+  role: string;
+  businessId: number;
+  businessName: string;
+  isOwner: boolean;
+  onboarded: boolean;
 }
+
+export interface UpdateProfileRequest {
+  name: string;
+  email: string;
+}
+
+export interface UpdateProfileResponse {
+  user: GetMeResponse | undefined;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {}

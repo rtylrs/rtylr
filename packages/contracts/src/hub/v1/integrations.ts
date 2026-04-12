@@ -8,21 +8,11 @@
 
 export interface Integration {
   id: number;
-  name: string;
-  description: string;
-  /** stripe, square, mailchimp, etc. */
   provider: string;
-  /** payment, marketing, accounting, etc. */
-  category: string;
-  icon: string;
-  isConnected: boolean;
+  status: string;
+  config: Uint8Array;
   connectedAt: string;
-  config: { [key: string]: string };
-}
-
-export interface Integration_ConfigEntry {
-  key: string;
-  value: string;
+  createdAt: string;
 }
 
 export interface ListIntegrationsRequest {}
@@ -33,16 +23,12 @@ export interface ListIntegrationsResponse {
 
 export interface ConnectIntegrationRequest {
   provider: string;
-  credentials: { [key: string]: string };
-}
-
-export interface ConnectIntegrationRequest_CredentialsEntry {
-  key: string;
-  value: string;
+  config: Uint8Array;
 }
 
 export interface ConnectIntegrationResponse {
-  integration: Integration | undefined;
+  id: number;
+  message: string;
 }
 
 export interface DisconnectIntegrationRequest {
@@ -50,5 +36,5 @@ export interface DisconnectIntegrationRequest {
 }
 
 export interface DisconnectIntegrationResponse {
-  success: boolean;
+  message: string;
 }
