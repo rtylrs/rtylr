@@ -115,6 +115,59 @@ export interface ApiRoadmap {
   doneCount: number;
 }
 
+export interface ApiTaskActivity {
+  id: string;
+  taskId: string;
+  userId: string;
+  action: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: string;
+}
+
+export interface ApiTaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  content: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiSubtask {
+  id: string;
+  title: string;
+  status: string;
+  assigneeId?: string;
+}
+
+export interface ApiAttachment {
+  id: string;
+  taskId: string;
+  name: string;
+  url: string;
+  size: number;
+  uploadedBy: string;
+  createdAt: string;
+}
+
+export interface ApiTimeLog {
+  id: string;
+  taskId: string;
+  userId: string;
+  durationMinutes: number;
+  description: string;
+  loggedAt: string;
+}
+
+export interface ApiTaskDetail {
+  task: ApiTask;
+  subtasks: ApiSubtask[];
+  comments: ApiTaskComment[];
+  activity: ApiTaskActivity[];
+}
+
 // -- API ------------------------------------------------------------------
 
 export const flowApi = {
@@ -160,7 +213,7 @@ export const flowApi = {
 
   getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
 
-  getTaskDetail: (id: string) => safe.get<ApiTask>('/flow/tasks/detail', { params: { id } }),
+  getTaskDetail: (id: string) => safe.get<ApiTaskDetail>('/flow/tasks/detail', { params: { id } }),
 
   createTask: (data: {
     projectId: string;
@@ -182,6 +235,28 @@ export const flowApi = {
   addComment: (data: { taskId: string; content: string }) => safe.post('/flow/tasks/comment', data),
 
   deleteComment: (id: string) => safe.delete(`/flow/tasks/comment/${id}`),
+
+  // -- Task Activity ------------------------------------------------------
+
+  getTaskActivity: (id: string) => safe.get<ApiTaskActivity[]>(`/flow/tasks/${id}/activity`),
+
+  // -- Subtasks -----------------------------------------------------------
+
+  getSubtasks: (id: string) => safe.get<ApiSubtask[]>(`/flow/tasks/${id}/subtasks`),
+
+  createSubtask: (taskId: string, data: { title: string; assigneeId?: string }) =>
+    safe.post<ApiSubtask>(`/flow/tasks/${taskId}/subtasks`, data),
+
+  // -- Attachments --------------------------------------------------------
+
+  getAttachments: (id: string) => safe.get<ApiAttachment[]>(`/flow/tasks/${id}/attachments`),
+
+  // -- Time Logs ----------------------------------------------------------
+
+  getTimeLogs: (id: string) => safe.get<ApiTimeLog[]>(`/flow/tasks/${id}/time`),
+
+  logTime: (id: string, data: { durationMinutes: number; description?: string }) =>
+    safe.post<ApiTimeLog>(`/flow/tasks/${id}/time`, data),
 
   // -- Labels -------------------------------------------------------------
 
