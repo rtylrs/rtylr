@@ -6,16 +6,16 @@ interface ContactInfo {
 }
 
 interface ConfigState {
-  websiteData: any;
-  aboutContent: any;
+  websiteData: unknown;
+  aboutContent: unknown;
   businessCount: number;
   contactInfo: ContactInfo;
   loading: boolean;
   error: string | null;
 
   // Actions
-  setWebsiteData: (data: any) => void;
-  setAboutContent: (content: any) => void;
+  setWebsiteData: (data: unknown) => void;
+  setAboutContent: (content: unknown) => void;
   setBusinessCount: (count: number) => void;
   setContactInfo: (info: ContactInfo) => void;
   setLoading: (loading: boolean) => void;
