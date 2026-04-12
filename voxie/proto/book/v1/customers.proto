@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package book;
-
-option go_package = "github.com/voxire/voxie/gen/go/book/v1";
-
-// No handler exists for booking customers yet.
-// This file is kept as a placeholder.

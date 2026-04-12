@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package store;
-
-option go_package = "github.com/voxire/voxie/gen/go/store/v1";
-
-// No handler exists for store dashboard yet.
-// This file is kept as a placeholder.
