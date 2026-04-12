@@ -8,25 +8,54 @@ interface Addons {
   landing: boolean;
 }
 
+export interface StoredUser {
+  // Auth fields
+  email?: string;
+  emailAddress?: string;
+  role?: string;
+  fullName?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  // Business fields
+  businessName?: string;
+  storeName?: string;
+  businessDescription?: string;
+  coverImage?: string;
+  logo?: string;
+  address?: string;
+  phone?: string;
+  hours?: string;
+  averageRating?: number;
+  reviewCount?: number;
+  // Permissions
+  isOwner?: boolean;
+  apps?: string[];
+  // Onboarding
+  onboarded?: boolean;
+  // Server can send additional fields
+  [key: string]: unknown;
+}
+
 interface UserState {
-  user: any | null;
+  user: StoredUser | null;
   token: string | null;
   isAuthenticated: boolean;
   role: string | null;
   userId: string | null;
   addons: Addons;
-  visits: any[];
+  visits: unknown[];
 }
 
 interface UserActions {
-  login: (user: any) => void;
+  login: (user: StoredUser) => void;
   logout: () => void;
   setToken: (token: string) => void;
-  setUser: (user: any) => void;
+  setUser: (user: StoredUser) => void;
   setRole: (role: string) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Addons) => void;
-  setVisits: (visits: any[]) => void;
+  setVisits: (visits: unknown[]) => void;
 }
 
 const initialState: UserState = {

@@ -23,11 +23,15 @@ const today = new Date().toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
+// react-grid-layout's ResponsiveGridLayoutProps misses draggableHandle, isDraggable, isResizable
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GridLayout = ResponsiveGridLayout as React.ComponentType<any>;
+
 // ─── Admin Dashboard ────────────────────────────────────────────────────────
 
 const AdminDashboard: React.FC = () => {
   const { user } = useUserStore();
-  const businessName = (user as any)?.businessName || 'Dashboard';
+  const businessName = (user?.businessName as string | undefined) || 'Dashboard';
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -48,6 +52,7 @@ const AdminDashboard: React.FC = () => {
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
   const [showCatalog, setShowCatalog] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleLayoutChange = useCallback((_: any, allLayouts: any) => {
     setLayouts(allLayouts);
     if (allLayouts.lg) saveLayout(allLayouts.lg);
@@ -91,7 +96,7 @@ const AdminDashboard: React.FC = () => {
 
   const removeWidget = useCallback(
     (widgetId: string) => {
-      const newLayout = (layouts.lg || []).filter((l: any) => l.i !== widgetId);
+      const newLayout = (layouts.lg || []).filter((l: { i: string }) => l.i !== widgetId);
       const newActive = activeWidgets.filter((id) => id !== widgetId);
       setLayouts({ lg: newLayout });
       setActiveWidgets(newActive);
@@ -153,7 +158,7 @@ const AdminDashboard: React.FC = () => {
 
       {/* Grid */}
       {containerWidth > 0 && (
-        <ResponsiveGridLayout
+        <GridLayout
           className="layout"
           layouts={layouts}
           breakpoints={{ lg: 0 }}
@@ -161,7 +166,7 @@ const AdminDashboard: React.FC = () => {
           rowHeight={80}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}
-          {...({ isDraggable: showCatalog, isResizable: showCatalog } as any)}
+          {...({ isDraggable: showCatalog, isResizable: showCatalog } as Record<string, unknown>)}
           draggableHandle=".widget-drag-handle"
           containerPadding={[0, 0]}
           margin={[12, 12]}
@@ -204,7 +209,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             );
           })}
-        </ResponsiveGridLayout>
+        </GridLayout>
       )}
 
       {/* Widget catalog modal (portaled to body) */}
@@ -334,7 +339,7 @@ const StaffDashboard: React.FC<{ userApps: string[] }> = () => (
 const VendorDashboard: React.FC = () => {
   const { user, role } = useUserStore();
   const isAdmin = role === 'admin' || role === 'owner' || !role;
-  const userApps: string[] = (user as any)?.apps ?? [];
+  const userApps: string[] = (user?.apps as string[] | undefined) ?? [];
   if (!isAdmin) return <StaffDashboard userApps={userApps} />;
   return <AdminDashboard />;
 };

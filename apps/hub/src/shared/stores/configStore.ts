@@ -7,23 +7,23 @@ interface ContactInfo {
 }
 
 interface ConfigState {
-  websiteData: any;
-  aboutContent: any;
+  websiteData: Record<string, unknown> | null;
+  aboutContent: Record<string, unknown> | null;
   maintanance: boolean;
   businessCount: number;
   contactInfo: ContactInfo;
-  faqs: any[];
-  news: any[];
+  faqs: Record<string, unknown>[];
+  news: Record<string, unknown>[];
 }
 
 interface ConfigActions {
-  setWebsiteData: (data: any) => void;
-  setAboutContent: (content: any | null) => void;
+  setWebsiteData: (data: Record<string, unknown>) => void;
+  setAboutContent: (content: Record<string, unknown> | null) => void;
   setMaintanance: (maintanance: boolean) => void;
   setBusinessCount: (count: number) => void;
   setContactInfo: (info: ContactInfo) => void;
-  setFaqs: (faqs: any[]) => void;
-  setNews: (news: any[]) => void;
+  setFaqs: (faqs: Record<string, unknown>[]) => void;
+  setNews: (news: Record<string, unknown>[]) => void;
 }
 
 const initialState: ConfigState = {

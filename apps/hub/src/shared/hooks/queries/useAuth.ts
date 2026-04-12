@@ -22,6 +22,10 @@ interface GoogleAuthPayload {
   idToken: string;
 }
 
+interface ApiError extends Error {
+  response?: { data?: { message?: string; error?: string } };
+}
+
 export const useLogin = () => {
   const { setToken, setUser, setRole, setUserId, setAddons, setVisits } = useUserStore();
   const queryClient = useQueryClient();
@@ -40,7 +44,7 @@ export const useLogin = () => {
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       const message =
         error.response?.data?.message || error.response?.data?.error || 'Login failed';
       toast.error(message);
@@ -67,7 +71,7 @@ export const useRegister = () => {
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       const message =
         error.response?.data?.message || error.response?.data?.error || 'Registration failed';
       toast.error(message);
@@ -94,7 +98,7 @@ export const useGoogleAuth = () => {
       setToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       const message =
         error.response?.data?.message || error.response?.data?.error || 'Google login failed';
       toast.error(message);
@@ -126,7 +130,11 @@ export const useGetUserInfo = () => {
       setUserId(userId);
       setToken(token);
       setUser(user);
-      setAddons(user.addons as any);
+      // addons from API is a passthrough object — the schema uses z.array(z.string()) as a placeholder
+      // but the runtime value is an Addons-shaped object due to .passthrough()
+      if (user.addons && !Array.isArray(user.addons)) {
+        setAddons(user.addons as unknown as Parameters<typeof setAddons>[0]);
+      }
       setVisits(visits);
       if (token) {
         const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';
@@ -140,7 +148,7 @@ export const useGetUserInfo = () => {
 
   useEffect(() => {
     if (query.error) {
-      const error: any = query.error;
+      const error = query.error as ApiError;
       const message =
         error.response?.data?.message || error.response?.data?.error || 'Failed to get user info';
       toast.error(message);
