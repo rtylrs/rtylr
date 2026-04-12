@@ -1,0 +1,24 @@
+{
+  "name": "@voxire/contracts",
+  "version": "0.0.1",
+  "description": "Generated TypeScript types from voxie protobuf contracts",
+  "type": "module",
+  "exports": {
+    "./auth/*": "./src/auth/*.ts",
+    "./hub/*": "./src/hub/*.ts",
+    "./pos/*": "./src/pos/*.ts",
+    "./erp/*": "./src/erp/*.ts",
+    "./hr/*": "./src/hr/*.ts",
+    "./crm/*": "./src/crm/*.ts",
+    "./finance/*": "./src/finance/*.ts",
+    "./flow/*": "./src/flow/*.ts",
+    "./store/*": "./src/store/*.ts",
+    "./book/*": "./src/book/*.ts",
+    "./support/*": "./src/support/*.ts",
+    "./insights/*": "./src/insights/*.ts",
+    "./common/*": "./src/common/*.ts"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
