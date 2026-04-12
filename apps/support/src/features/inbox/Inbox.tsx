@@ -15,10 +15,10 @@ const InboxScreen: React.FC = () => {
     channel: channelFilter || undefined,
   });
 
-  const conversations: any[] = data ?? [];
+  const conversations = data ?? [];
   const filtered = search
     ? conversations.filter(
-        (c: any) =>
+        (c) =>
           c.subject?.toLowerCase().includes(search.toLowerCase()) ||
           c.customerName?.toLowerCase().includes(search.toLowerCase())
       )
@@ -109,8 +109,8 @@ const InboxScreen: React.FC = () => {
 
       {!isLoading && !isError && filtered.length > 0 && (
         <div className="space-y-1">
-          {filtered.map((conv: any) => {
-            const Icon = channelIcon(conv.channel);
+          {filtered.map((conv) => {
+            const Icon = channelIcon(conv.channel ?? '');
             return (
               <motion.div
                 key={conv.id}

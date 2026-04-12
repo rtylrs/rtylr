@@ -11,7 +11,7 @@ import {
 export function useProfitLoss(params?: { start?: string; end?: string }) {
   return useQuery({
     queryKey: ['insights', 'pl', params],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getProfitLoss(params));
       return profitLossSchema.parse(res);
     },
@@ -21,7 +21,7 @@ export function useProfitLoss(params?: { start?: string; end?: string }) {
 export function useExpenseBreakdown(params?: { start?: string; end?: string }) {
   return useQuery({
     queryKey: ['insights', 'expenses', params],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getExpenseBreakdown(params));
       return expenseBreakdownSchema.parse(res);
     },
@@ -31,7 +31,7 @@ export function useExpenseBreakdown(params?: { start?: string; end?: string }) {
 export function useInvoiceAging() {
   return useQuery({
     queryKey: ['insights', 'invoice-aging'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getInvoiceAging());
       return invoiceAgingSchema.parse(res);
     },
@@ -41,7 +41,7 @@ export function useInvoiceAging() {
 export function useCashFlow(period?: string) {
   return useQuery({
     queryKey: ['insights', 'cash-flow', period],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getCashFlow({ period }));
       return cashFlowSchema.parse(res);
     },

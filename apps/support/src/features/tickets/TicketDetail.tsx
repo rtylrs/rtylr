@@ -27,7 +27,7 @@ const TicketDetail: React.FC = () => {
   const [reply, setReply] = useState('');
   const [isInternal, setIsInternal] = useState(false);
 
-  const messages: any[] = messagesData ?? [];
+  const messages = messagesData ?? [];
 
   const handleSend = () => {
     if (!reply.trim()) return;
@@ -146,7 +146,7 @@ const TicketDetail: React.FC = () => {
 
         {!messagesLoading && messages.length > 0 && (
           <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
-            {messages.map((msg: any) => (
+            {messages.map((msg) => (
               <div
                 key={msg.id}
                 className="px-5 py-4"
@@ -163,7 +163,7 @@ const TicketDetail: React.FC = () => {
                     <User size={12} />
                   </div>
                   <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {msg.senderName}
+                    {msg.authorName}
                   </span>
                   {msg.isInternal && (
                     <span

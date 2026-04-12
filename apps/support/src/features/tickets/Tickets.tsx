@@ -21,7 +21,7 @@ const Tickets: React.FC = () => {
     search: debouncedSearch || undefined,
   });
 
-  const tickets: any[] = data ?? [];
+  const tickets = data ?? [];
 
   return (
     <div>
@@ -174,7 +174,7 @@ const Tickets: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket: any) => (
+              {tickets.map((ticket) => (
                 <tr
                   key={ticket.id}
                   className="transition-colors cursor-pointer"

@@ -1,13 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { unwrap } from '@voxire/api';
-import { insightsService } from '../../shared/services/insightsService';
+import {
+  insightsService,
+  InsightsSettingsPayload,
+  ScheduledReportPayload,
+} from '../../shared/services/insightsService';
 import { insightsSettingsSchema, scheduledReportSchema } from '../../shared/schemas/settings';
 
 export function useInsightsSettings() {
   return useQuery({
     queryKey: ['insights', 'settings'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getInsightsSettings());
       return insightsSettingsSchema.parse(res);
     },
@@ -17,7 +21,8 @@ export function useInsightsSettings() {
 export function useUpdateInsightsSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(insightsService.updateInsightsSettings(data)),
+    mutationFn: (data: InsightsSettingsPayload) =>
+      unwrap(insightsService.updateInsightsSettings(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'settings'] });
     },
@@ -27,9 +32,9 @@ export function useUpdateInsightsSettings() {
 export function useScheduledReports() {
   return useQuery({
     queryKey: ['insights', 'scheduled-reports'],
-    queryFn: async (): Promise<any> => {
+    queryFn: async () => {
       const res = await unwrap(insightsService.getScheduledReports());
-      const raw = (res as any)?.reports ?? res;
+      const raw = (res as Record<string, unknown>)?.reports ?? res;
       return z.array(scheduledReportSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -38,7 +43,8 @@ export function useScheduledReports() {
 export function useCreateScheduledReport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(insightsService.createScheduledReport(data)),
+    mutationFn: (data: ScheduledReportPayload) =>
+      unwrap(insightsService.createScheduledReport(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'scheduled-reports'] });
     },

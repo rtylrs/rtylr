@@ -36,10 +36,27 @@ const Products: React.FC = () => {
     return <ErrorState message="Failed to load product data." onRetry={refetch} />;
   }
 
-  const bestList: any[] = bestSellers?.data ?? bestSellers ?? [];
-  const slowList: any[] = slowMovers?.data ?? slowMovers ?? [];
+  type ProductRow = {
+    id?: string | number;
+    name?: string;
+    revenue?: number;
+    sales?: number;
+    unitsSold?: number;
+    quantity?: number;
+  };
+  type CategoryRow = {
+    id?: string | number;
+    name?: string;
+    category?: string;
+    revenue?: number;
+    pct?: number;
+    productCount?: number;
+    count?: number;
+  };
+  const bestList = (bestSellers ?? []) as ProductRow[];
+  const slowList = (slowMovers ?? []) as ProductRow[];
   const marginData = margins ?? {};
-  const catList: any[] = categories?.data ?? categories ?? [];
+  const catList = (categories ?? []) as CategoryRow[];
 
   return (
     <motion.div
@@ -146,7 +163,7 @@ const Products: React.FC = () => {
             <EmptyState title="No data" description="Best sellers will appear here." />
           ) : (
             <div className="space-y-1">
-              {bestList.map((p: any, i: number) => (
+              {bestList.map((p, i) => (
                 <div
                   key={p.id ?? i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -194,7 +211,7 @@ const Products: React.FC = () => {
             <EmptyState title="No data" description="Slow movers will appear here." />
           ) : (
             <div className="space-y-1">
-              {slowList.map((p: any, i: number) => (
+              {slowList.map((p, i) => (
                 <div
                   key={p.id ?? i}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
@@ -235,7 +252,7 @@ const Products: React.FC = () => {
           <EmptyState title="No categories" description="Category breakdown will appear here." />
         ) : (
           <div className="space-y-1">
-            {catList.map((c: any, i: number) => (
+            {catList.map((c, i) => (
               <div
                 key={c.id ?? i}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"

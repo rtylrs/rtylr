@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
-import { supportService } from '../../shared/services/supportService';
+import { supportService, SupportSettingsPayload } from '../../shared/services/supportService';
 import { supportSettingsSchema } from '../../shared/schemas/settings';
 
 export function useSupportSettings() {
@@ -16,7 +16,7 @@ export function useSupportSettings() {
 export function useUpdateSupportSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(supportService.updateSettings(data)),
+    mutationFn: (data: SupportSettingsPayload) => unwrap(supportService.updateSettings(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['support-settings'] });
     },

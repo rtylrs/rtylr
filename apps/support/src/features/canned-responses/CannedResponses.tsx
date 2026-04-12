@@ -7,6 +7,7 @@ import {
   useUpdateCannedResponse,
   useDeleteCannedResponse,
 } from './useCannedResponses';
+import { type CannedResponse } from '../../shared/schemas/cannedResponses';
 import { toast } from 'sonner';
 
 const CannedResponses: React.FC = () => {
@@ -21,7 +22,7 @@ const CannedResponses: React.FC = () => {
   const [formTitle, setFormTitle] = useState('');
   const [formBody, setFormBody] = useState('');
 
-  const responses: any[] = data ?? [];
+  const responses = data ?? [];
 
   const resetForm = () => {
     setShowForm(false);
@@ -30,7 +31,7 @@ const CannedResponses: React.FC = () => {
     setFormBody('');
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: CannedResponse) => {
     setEditingId(item.id);
     setFormTitle(item.title);
     setFormBody(item.body);
@@ -208,7 +209,7 @@ const CannedResponses: React.FC = () => {
 
       {!isLoading && !isError && responses.length > 0 && (
         <div className="space-y-2">
-          {responses.map((item: any) => (
+          {responses.map((item) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 4 }}
