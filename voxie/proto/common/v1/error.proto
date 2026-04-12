@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package common;
 
-option go_package = "github.com/voxire/voxie/gen/go/common";
+option go_package = "github.com/voxire/voxie/gen/go/common/v1";
 
 // Standard API error response
 message ErrorResponse {
