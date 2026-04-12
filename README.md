@@ -1,6 +1,6 @@
 # rtylr
 
-All-in-one business operating system for SMBs. 14 apps, 11 shared packages.
+The all-in-one business operating system for SMBs. 14 apps, 11 shared packages, 1,250+ tests.
 
 ## Architecture
 
