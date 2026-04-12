@@ -171,3 +171,14 @@ func (r *Repository) SetUserBusinessID(ctx context.Context, userID, businessID i
 	_, err := r.pool.ExecContext(ctx, "UPDATE users SET business_id = ? WHERE id = ?", businessID, userID)
 	return err
 }
+
+// RecordLogin writes a login history entry via sqlc.
+func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, method, ip string, success bool) error {
+	return r.queries.RecordLoginHistory(ctx, sqlc.RecordLoginHistoryParams{
+		UserID:    userID,
+		Email:     email,
+		Method:    method,
+		IpAddress: sql.NullString{String: ip, Valid: ip != ""},
+		Success:   sql.NullBool{Bool: success, Valid: true},
+	})
+}
