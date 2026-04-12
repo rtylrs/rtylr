@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -20,21 +22,13 @@ type ValuationHandler struct {
 
 type ValuationRequest struct{}
 
-type ValuationItemPayload struct {
-	CategoryName string  `json:"category_name"`
-	WarehouseName string `json:"warehouse_name"`
-	TotalItems   int64   `json:"total_items"`
-	TotalValue   float64 `json:"total_value"`
-	TotalCost    float64 `json:"total_cost"`
-}
-
 type ValuationResponse struct {
-	Items      []ValuationItemPayload `json:"items"`
+	Items      []*erpv1.ValuationItem `json:"items"`
 	TotalValue float64                `json:"total_value"`
 }
 
-func newValuationItemPayload(item domain.ValuationItem) ValuationItemPayload {
-	return ValuationItemPayload{
+func newValuationItemPayload(item domain.ValuationItem) *erpv1.ValuationItem {
+	return &erpv1.ValuationItem{
 		CategoryName:  item.CategoryName,
 		WarehouseName: item.WarehouseName,
 		TotalItems:    item.TotalItems,
@@ -62,7 +56,7 @@ func (h *ValuationHandler) Serve(ctx context.Context, _ *ValuationRequest) (Valu
 		}
 	}
 
-	payloads := make([]ValuationItemPayload, 0, len(items))
+	payloads := make([]*erpv1.ValuationItem, 0, len(items))
 	var totalValue float64
 
 	for _, item := range items {

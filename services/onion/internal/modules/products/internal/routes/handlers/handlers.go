@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+
 	"github.com/voxire/onion/internal/modules/products/internal/application"
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -27,39 +29,18 @@ type ListProductsRequest struct {
 	Offset     int    `json:"offset"`
 }
 
-type ProductPayload struct {
-	ID                int64   `json:"id"`
-	OwnerID           int64   `json:"owner_id"`
-	CategoryID        int64   `json:"category_id"`
-	SupplierID        int64   `json:"supplier_id"`
-	Name              string  `json:"name"`
-	SKU               string  `json:"sku"`
-	Barcode           string  `json:"barcode"`
-	Description       string  `json:"description"`
-	Unit              string  `json:"unit"`
-	CostPrice         float64 `json:"cost_price"`
-	SalePrice         float64 `json:"sale_price"`
-	StockQuantity     float64 `json:"stock_quantity"`
-	LowStockThreshold float64 `json:"low_stock_threshold"`
-	ReorderQuantity   float64 `json:"reorder_quantity"`
-	IsActive          bool    `json:"is_active"`
-	TrackInventory    bool    `json:"track_inventory"`
-	CreatedAt         string  `json:"created_at"`
-	UpdatedAt         string  `json:"updated_at"`
-}
-
 type ListProductsResponse struct {
-	Products []ProductPayload `json:"products"`
+	Products []*erpv1.Product `json:"products"`
 }
 
-func newProductPayload(p domain.Product) ProductPayload {
-	return ProductPayload{
-		ID:                p.ID,
-		OwnerID:           p.OwnerID,
-		CategoryID:        p.CategoryID,
-		SupplierID:        p.SupplierID,
+func newProductPayload(p domain.Product) *erpv1.Product {
+	return &erpv1.Product{
+		Id:                p.ID,
+		OwnerId:          p.OwnerID,
+		CategoryId:       p.CategoryID,
+		SupplierId:       p.SupplierID,
 		Name:              p.Name,
-		SKU:               p.SKU,
+		Sku:               p.SKU,
 		Barcode:           p.Barcode,
 		Description:       p.Description,
 		Unit:              p.Unit,
@@ -94,7 +75,7 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	payloads := make([]ProductPayload, 0, len(products))
+	payloads := make([]*erpv1.Product, 0, len(products))
 	for _, p := range products {
 		payloads = append(payloads, newProductPayload(p))
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,38 +24,21 @@ type ListSuppliersHandler struct {
 
 type ListSuppliersRequest struct{}
 
-type SupplierPayload struct {
-	ID           int64  `json:"id"`
-	OwnerID      int64  `json:"owner_id"`
-	Name         string `json:"name"`
-	Email        string `json:"email"`
-	Phone        string `json:"phone"`
-	Address      string `json:"address"`
-	City         string `json:"city"`
-	Country      string `json:"country"`
-	TaxID        string `json:"tax_id"`
-	PaymentTerms string `json:"payment_terms"`
-	Notes        string `json:"notes"`
-	IsActive     bool   `json:"is_active"`
-	CreatedAt    string `json:"created_at"`
-	UpdatedAt    string `json:"updated_at"`
-}
-
 type ListSuppliersResponse struct {
-	Suppliers []SupplierPayload `json:"suppliers"`
+	Suppliers []*erpv1.Supplier `json:"suppliers"`
 }
 
-func newSupplierPayload(s domain.Supplier) SupplierPayload {
-	return SupplierPayload{
-		ID:           s.ID,
-		OwnerID:      s.OwnerID,
+func newSupplierPayload(s domain.Supplier) *erpv1.Supplier {
+	return &erpv1.Supplier{
+		Id:           s.ID,
+		OwnerId:     s.OwnerID,
 		Name:         s.Name,
 		Email:        s.Email,
 		Phone:        s.Phone,
 		Address:      s.Address,
 		City:         s.City,
 		Country:      s.Country,
-		TaxID:        s.TaxID,
+		TaxId:        s.TaxID,
 		PaymentTerms: s.PaymentTerms,
 		Notes:        s.Notes,
 		IsActive:     s.IsActive,
@@ -81,7 +66,7 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, _ *ListSuppliersReques
 		}
 	}
 
-	payloads := make([]SupplierPayload, 0, len(suppliers))
+	payloads := make([]*erpv1.Supplier, 0, len(suppliers))
 	for _, s := range suppliers {
 		payloads = append(payloads, newSupplierPayload(s))
 	}

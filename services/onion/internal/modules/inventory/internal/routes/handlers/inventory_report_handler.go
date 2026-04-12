@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -20,30 +22,16 @@ type InventoryReportHandler struct {
 
 type InventoryReportRequest struct{}
 
-type InventoryReportItemPayload struct {
-	ProductID         int64   `json:"product_id"`
-	ProductName       string  `json:"product_name"`
-	SKU               string  `json:"sku"`
-	Unit              string  `json:"unit"`
-	StockQuantity     float64 `json:"stock_quantity"`
-	LowStockThreshold float64 `json:"low_stock_threshold"`
-	ReorderQuantity   float64 `json:"reorder_quantity"`
-	CostPrice         float64 `json:"cost_price"`
-	SalePrice         float64 `json:"sale_price"`
-	StockValue        float64 `json:"stock_value"`
-	IsLowStock        bool    `json:"is_low_stock"`
-}
-
 type InventoryReportResponse struct {
-	Items      []InventoryReportItemPayload `json:"items"`
+	Items      []*erpv1.InventoryReportItem `json:"items"`
 	TotalValue float64                      `json:"total_value"`
 }
 
-func newInventoryReportItemPayload(item domain.InventoryReportItem) InventoryReportItemPayload {
-	return InventoryReportItemPayload{
-		ProductID:         item.ProductID,
+func newInventoryReportItemPayload(item domain.InventoryReportItem) *erpv1.InventoryReportItem {
+	return &erpv1.InventoryReportItem{
+		ProductId:         item.ProductID,
 		ProductName:       item.ProductName,
-		SKU:               item.SKU,
+		Sku:               item.SKU,
 		Unit:              item.Unit,
 		StockQuantity:     item.StockQuantity,
 		LowStockThreshold: item.LowStockThreshold,
@@ -74,7 +62,7 @@ func (h *InventoryReportHandler) Serve(ctx context.Context, _ *InventoryReportRe
 		}
 	}
 
-	payloads := make([]InventoryReportItemPayload, 0, len(items))
+	payloads := make([]*erpv1.InventoryReportItem, 0, len(items))
 	var totalValue float64
 
 	for _, item := range items {

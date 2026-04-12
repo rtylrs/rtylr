@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -15,31 +17,16 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 )
 
-type ExpensePayload struct {
-	ID          int64   `json:"id"`
-	OwnerID     int64   `json:"owner_id"`
-	CategoryID  *int64  `json:"category_id"`
-	Amount      float64 `json:"amount"`
-	Currency    string  `json:"currency"`
-	Description string  `json:"description"`
-	Vendor      string  `json:"vendor"`
-	ReceiptURL  string  `json:"receipt_url"`
-	ExpenseDate string  `json:"expense_date"`
-	Status      string  `json:"status"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
-}
-
-func newExpensePayload(e domain.Expense) ExpensePayload {
-	return ExpensePayload{
-		ID:          e.ID,
-		OwnerID:     e.OwnerID,
-		CategoryID:  e.CategoryID,
+func newExpensePayload(e domain.Expense) *finv1.Expense {
+	return &finv1.Expense{
+		Id:          e.ID,
+		OwnerId:    e.OwnerID,
+		CategoryId:  e.CategoryID,
 		Amount:      e.Amount,
 		Currency:    e.Currency,
 		Description: e.Description,
 		Vendor:      e.Vendor,
-		ReceiptURL:  e.ReceiptURL,
+		ReceiptUrl:  e.ReceiptURL,
 		ExpenseDate: e.ExpenseDate.Format("2006-01-02"),
 		Status:      e.Status,
 		CreatedAt:   e.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -54,7 +41,7 @@ func ExpenseListRoutes() []string { return []string{"/finance/expenses"} }
 type ListExpensesHandler struct{ Service *application.Service }
 type ListExpensesRequest struct{}
 type ListExpensesResponse struct {
-	Expenses []ExpensePayload `json:"expenses"`
+	Expenses []*finv1.Expense `json:"expenses"`
 }
 
 func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest) (ListExpensesResponse, *errorModels.ServerError) {
@@ -66,7 +53,7 @@ func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest)
 	if err != nil {
 		return ListExpensesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expenses"}
 	}
-	payloads := make([]ExpensePayload, len(expenses))
+	payloads := make([]*finv1.Expense, len(expenses))
 	for i, e := range expenses {
 		payloads[i] = newExpensePayload(e)
 	}
@@ -226,15 +213,7 @@ func ExpenseCategoriesRoutes() []string { return []string{"/finance/expenses/cat
 type ListCategoriesHandler struct{ Service *application.Service }
 type ListCategoriesRequest struct{}
 type ListCategoriesResponse struct {
-	Categories []CategoryPayload `json:"categories"`
-}
-
-type CategoryPayload struct {
-	ID        int64  `json:"id"`
-	OwnerID   int64  `json:"owner_id"`
-	Name      string `json:"name"`
-	Color     string `json:"color"`
-	CreatedAt string `json:"created_at"`
+	Categories []*finv1.ExpenseCategory `json:"categories"`
 }
 
 func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequest) (ListCategoriesResponse, *errorModels.ServerError) {
@@ -246,11 +225,11 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 	if err != nil {
 		return ListCategoriesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expense categories"}
 	}
-	payloads := make([]CategoryPayload, len(cats))
+	payloads := make([]*finv1.ExpenseCategory, len(cats))
 	for i, c := range cats {
-		payloads[i] = CategoryPayload{
-			ID:        c.ID,
-			OwnerID:   c.OwnerID,
+		payloads[i] = &finv1.ExpenseCategory{
+			Id:        c.ID,
+			OwnerId:  c.OwnerID,
 			Name:      c.Name,
 			Color:     c.Color,
 			CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
