@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@voxire/config": "workspace:*",
+    "@voxire/contracts": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/auth": "workspace:*",

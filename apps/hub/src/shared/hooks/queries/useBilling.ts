@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
+import type { BillingSummary, Invoice as InvoiceContract } from '@voxire/contracts/hub/v1/billing';
 import { safe } from '../../lib/api';
 
 export interface BillingInfo {
@@ -47,7 +48,7 @@ export const useBilling = () => {
     queryKey: ['billing'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/billing/summary'));
-      const raw = res;
+      const raw = res as BillingSummary | undefined;
       const plan = raw?.plan || 'free';
       const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 

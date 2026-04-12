@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type {
+  CreateAppointmentRequest,
+  UpdateAppointmentRequest,
+} from '@voxire/contracts/book/v1/appointments';
 import { bookService } from '../../shared/services/bookService';
 
 export interface AppointmentFilters {
@@ -28,7 +32,7 @@ export function useAppointment(id: number | undefined) {
 export function useCreateAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(bookService.createAppointment(data)),
+    mutationFn: (data: CreateAppointmentRequest) => unwrap(bookService.createAppointment(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });
       qc.invalidateQueries({ queryKey: ['calendar'] });
@@ -40,7 +44,7 @@ export function useCreateAppointment() {
 export function useUpdateAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: number; data: UpdateAppointmentRequest }) =>
       unwrap(bookService.updateAppointment(id, data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['appointments'] });

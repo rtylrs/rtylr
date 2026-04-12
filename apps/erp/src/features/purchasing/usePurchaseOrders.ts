@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
 import { erpApi } from '../../shared/services/erpApi';
 
 export function usePurchaseOrders() {
@@ -12,7 +13,7 @@ export function usePurchaseOrders() {
 export function useCreatePurchaseOrder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(erpApi.createPurchaseOrder(data)),
+    mutationFn: (data: CreatePurchaseOrderRequest) => unwrap(erpApi.createPurchaseOrder(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
   });
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type { CreateWaitlistEntryRequest } from '@voxire/contracts/book/v1/waitlist';
 import { bookService } from '../../shared/services/bookService';
 
 export interface WaitlistFilters {
@@ -19,7 +20,7 @@ export function useWaitlist(filters?: WaitlistFilters) {
 export function useAddToWaitlist() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(bookService.addToWaitlist(data)),
+    mutationFn: (data: CreateWaitlistEntryRequest) => unwrap(bookService.addToWaitlist(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['waitlist'] }),
   });
 }

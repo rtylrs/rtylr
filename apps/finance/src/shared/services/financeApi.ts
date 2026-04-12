@@ -1,4 +1,11 @@
 import { safe } from '../lib/api';
+import type { InvoiceLine } from '@voxire/contracts/finance/v1/invoices';
+import type { CreateRecurringInvoiceRequest } from '@voxire/contracts/finance/v1/recurring_invoices';
+import type { CreateQuoteRequest } from '@voxire/contracts/finance/v1/quotes';
+import type { CreateBillRequest } from '@voxire/contracts/finance/v1/bills';
+import type { CreateBankAccountRequest } from '@voxire/contracts/finance/v1/bank_accounts';
+import type { CreateAccountRequest } from '@voxire/contracts/finance/v1/accounts';
+import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/v1/journal';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -46,13 +53,13 @@ export interface Invoice {
   status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
   dueDate: string;
   issuedDate: string;
-  items?: any[];
+  items?: InvoiceLine[];
   notes?: string;
   discount?: number;
   tax?: number;
   subtotal?: number;
   number?: string;
-  history?: any[];
+  history?: { label: string; at: string }[];
 }
 
 export interface Expense {
@@ -159,31 +166,34 @@ export const financeApi = {
   // Recurring Invoices
   getRecurringInvoices: () => safe.get('/finance/recurring-invoices'),
 
-  createRecurringInvoice: (data: any) => safe.post('/finance/recurring-invoices', data),
+  createRecurringInvoice: (data: CreateRecurringInvoiceRequest) =>
+    safe.post('/finance/recurring-invoices', data),
 
-  updateRecurringInvoice: (id: string, data: any) =>
+  updateRecurringInvoice: (id: string, data: Partial<CreateRecurringInvoiceRequest>) =>
     safe.post('/finance/recurring-invoices', { id, ...data }),
 
   // Quotes
   getQuotes: () => safe.get('/finance/quotes'),
 
-  createQuote: (data: any) => safe.post('/finance/quotes', data),
+  createQuote: (data: CreateQuoteRequest) => safe.post('/finance/quotes', data),
 
-  updateQuote: (id: string, data: any) => safe.post('/finance/quotes', { id, ...data }),
+  updateQuote: (id: string, data: Partial<CreateQuoteRequest>) =>
+    safe.post('/finance/quotes', { id, ...data }),
 
   deleteQuote: (id: string) => safe.post('/finance/quotes', { id, _action: 'delete' }),
 
   // Bills
   getBills: () => safe.get('/finance/bills'),
 
-  createBill: (data: any) => safe.post('/finance/bills', data),
+  createBill: (data: CreateBillRequest) => safe.post('/finance/bills', data),
 
-  updateBill: (id: string, data: any) => safe.post('/finance/bills', { id, ...data }),
+  updateBill: (id: string, data: Partial<CreateBillRequest>) =>
+    safe.post('/finance/bills', { id, ...data }),
 
   // Bank Accounts
   getBankAccounts: () => safe.get('/finance/bank-accounts'),
 
-  createBankAccount: (data: any) => safe.post('/finance/bank-accounts', data),
+  createBankAccount: (data: CreateBankAccountRequest) => safe.post('/finance/bank-accounts', data),
 
   // Balance Sheet
   getBalanceSheet: () => safe.get('/finance/balance-sheet'),
@@ -194,12 +204,12 @@ export const financeApi = {
   // Chart of Accounts
   getAccounts: () => safe.get('/finance/accounts'),
 
-  createAccount: (data: any) => safe.post('/finance/accounts', data),
+  createAccount: (data: CreateAccountRequest) => safe.post('/finance/accounts', data),
 
   // Journal
   getJournal: () => safe.get('/finance/journal'),
 
-  createJournalEntry: (data: any) => safe.post('/finance/journal', data),
+  createJournalEntry: (data: CreateJournalEntryRequest) => safe.post('/finance/journal', data),
 
   // Expense detail
   getExpenseDetail: (id: string) => safe.get('/finance/expenses', { params: { id } }),

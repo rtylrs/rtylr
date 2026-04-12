@@ -333,6 +333,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -570,6 +573,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -691,6 +697,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1367,6 +1376,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config

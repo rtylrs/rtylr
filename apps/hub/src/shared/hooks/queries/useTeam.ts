@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { StaffUserPayload } from '@voxire/contracts/hub/v1/team';
 import api, { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
@@ -24,7 +25,12 @@ export const useTeam = () => {
       const res = await unwrap(safe.get('/team/members'));
       const raw = res?.users ?? res?.members ?? res;
       if (!Array.isArray(raw)) return [];
-      return raw.map((m: any) => ({ ...m, name: m.fullName || m.name || m.email })) as TeamMember[];
+      return raw.map((m: StaffUserPayload) => ({
+        ...m,
+        id: String(m.id),
+        name: m.fullName || m.email,
+        status: m.isActive ? 'active' : 'inactive',
+      })) as TeamMember[];
     },
     staleTime: 30_000,
   });

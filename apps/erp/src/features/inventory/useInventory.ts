@@ -19,7 +19,8 @@ export function useLowStock() {
 export function useAdjustInventory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => unwrap(erpApi.adjustInventory(data)),
+    mutationFn: (data: { productId: number; delta: number }) =>
+      unwrap(erpApi.adjustInventory(data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-report'] });
       qc.invalidateQueries({ queryKey: ['low-stock'] });
