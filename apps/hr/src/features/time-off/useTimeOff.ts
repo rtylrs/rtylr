@@ -1,11 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { hrApi } from '../../shared/services/hrApi';
+import { timeOffRequestSchema } from '../../shared/schemas/timeOff';
 
 export function useTimeOff() {
   return useQuery({
     queryKey: ['time-off'],
-    queryFn: () => unwrap(hrApi.listTimeOff()),
+    queryFn: async () => {
+      const res = await unwrap(hrApi.listTimeOff());
+      const raw = res ?? [];
+      return z.array(timeOffRequestSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

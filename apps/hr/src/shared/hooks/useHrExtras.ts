@@ -1,7 +1,25 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { hrExtras } from '../services/hrExtras';
 import { hrApi, StaffMember } from '../services/hrApi';
+import { staffMemberSchema } from '../schemas/staff';
+import { timeOffEntrySchema } from '../schemas/timeOff';
+import {
+  scheduleShiftSchema,
+  availabilitySchema,
+  swapRequestSchema,
+  breakLogSchema,
+  overtimeAlertSchema,
+} from '../schemas/shifts';
+import { timesheetRowSchema } from '../schemas/timesheets';
+import { reviewSchema, oneOnOneSchema } from '../schemas/reviews';
+import { onboardingTaskSchema, offboardingTaskSchema } from '../schemas/onboarding';
+import { documentItemSchema } from '../schemas/documents';
+import { benefitPlanSchema, benefitEnrollmentSchema } from '../schemas/benefits';
+import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
+import { birthdaySchema, anniversarySchema, employeeProfileSchema } from '../schemas/staff';
+import { hrSettingsSchema } from '../schemas/settings';
 
 /* ── 31. useStaffById ── */
 export function useStaffById(id: number | undefined) {
@@ -10,14 +28,23 @@ export function useStaffById(id: number | undefined) {
     enabled: id !== undefined,
     queryFn: async () => {
       const list = await unwrap(hrApi.listStaff());
-      return list.find((s: StaffMember) => s.id === id) ?? null;
+      const raw = list ?? [];
+      const parsed = z.array(staffMemberSchema).parse(Array.isArray(raw) ? raw : []);
+      return parsed.find((s) => s.id === id) ?? null;
     },
   });
 }
 
 /* ── 32. useTimeOff (extras) ── */
 export function useTimeOff() {
-  return useQuery({ queryKey: ['time-off-extras'], queryFn: () => unwrap(hrExtras.listTimeOff()) });
+  return useQuery({
+    queryKey: ['time-off-extras'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listTimeOff());
+      const raw = res ?? [];
+      return z.array(timeOffEntrySchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useSubmitTimeOff() {
@@ -42,7 +69,11 @@ export function useApproveTimeOff() {
 export function useShiftSchedule(weekStart?: string) {
   return useQuery({
     queryKey: ['schedule', weekStart ?? 'all'],
-    queryFn: () => unwrap(hrExtras.listSchedule(weekStart)),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listSchedule(weekStart));
+      const raw = res ?? [];
+      return z.array(scheduleShiftSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
@@ -73,7 +104,14 @@ export function usePublishWeek() {
 
 /* ── 34. useTimesheets ── */
 export function useTimesheets() {
-  return useQuery({ queryKey: ['timesheets'], queryFn: () => unwrap(hrExtras.listTimesheets()) });
+  return useQuery({
+    queryKey: ['timesheets'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listTimesheets());
+      const raw = res ?? [];
+      return z.array(timesheetRowSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useApproveTimesheet() {
@@ -86,7 +124,14 @@ export function useApproveTimesheet() {
 
 /* ── 35. useReviews ── */
 export function useReviews() {
-  return useQuery({ queryKey: ['reviews'], queryFn: () => unwrap(hrExtras.listReviews()) });
+  return useQuery({
+    queryKey: ['reviews'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listReviews());
+      const raw = res ?? [];
+      return z.array(reviewSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useCreateReview() {
@@ -100,7 +145,14 @@ export function useCreateReview() {
 
 /* ── 36. useOneOnOnes ── */
 export function useOneOnOnes() {
-  return useQuery({ queryKey: ['one-on-ones'], queryFn: () => unwrap(hrExtras.listOneOnOnes()) });
+  return useQuery({
+    queryKey: ['one-on-ones'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listOneOnOnes());
+      const raw = res ?? [];
+      return z.array(oneOnOneSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useCreateOneOnOne() {
@@ -114,7 +166,14 @@ export function useCreateOneOnOne() {
 
 /* ── 37. useOnboardingChecklist ── */
 export function useOnboardingChecklist() {
-  return useQuery({ queryKey: ['onboarding'], queryFn: () => unwrap(hrExtras.listOnboarding()) });
+  return useQuery({
+    queryKey: ['onboarding'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listOnboarding());
+      const raw = res ?? [];
+      return z.array(onboardingTaskSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useToggleOnboardingTask() {
@@ -126,7 +185,14 @@ export function useToggleOnboardingTask() {
 }
 
 export function useOffboardingChecklist() {
-  return useQuery({ queryKey: ['offboarding'], queryFn: () => unwrap(hrExtras.listOffboarding()) });
+  return useQuery({
+    queryKey: ['offboarding'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listOffboarding());
+      const raw = res ?? [];
+      return z.array(offboardingTaskSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useToggleOffboardingTask() {
@@ -139,7 +205,14 @@ export function useToggleOffboardingTask() {
 
 /* ── 38. useDocuments ── */
 export function useDocuments() {
-  return useQuery({ queryKey: ['documents'], queryFn: () => unwrap(hrExtras.listDocuments()) });
+  return useQuery({
+    queryKey: ['documents'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listDocuments());
+      const raw = res ?? [];
+      return z.array(documentItemSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useAddDocument() {
@@ -162,7 +235,11 @@ export function useDeleteDocument() {
 export function useExpiringDocuments(daysAhead = 30) {
   return useQuery({
     queryKey: ['documents', 'expiring', daysAhead],
-    queryFn: () => unwrap(hrExtras.expiringDocuments(daysAhead)),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.expiringDocuments(daysAhead));
+      const raw = res ?? [];
+      return z.array(documentItemSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
@@ -170,14 +247,22 @@ export function useExpiringDocuments(daysAhead = 30) {
 export function useBenefits() {
   return useQuery({
     queryKey: ['benefits', 'plans'],
-    queryFn: () => unwrap(hrExtras.listBenefitPlans()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listBenefitPlans());
+      const raw = res ?? [];
+      return z.array(benefitPlanSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useBenefitEnrollments() {
   return useQuery({
     queryKey: ['benefits', 'enrollments'],
-    queryFn: () => unwrap(hrExtras.listBenefitEnrollments()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listBenefitEnrollments());
+      const raw = res ?? [];
+      return z.array(benefitEnrollmentSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
@@ -194,38 +279,68 @@ export function useEnrollBenefit() {
 export function useTraining() {
   return useQuery({
     queryKey: ['training', 'courses'],
-    queryFn: () => unwrap(hrExtras.listCourses()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listCourses());
+      const raw = res ?? [];
+      return z.array(trainingCourseSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useTrainingProgress() {
   return useQuery({
     queryKey: ['training', 'progress'],
-    queryFn: () => unwrap(hrExtras.listTrainingProgress()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listTrainingProgress());
+      const raw = res ?? [];
+      return z.array(trainingProgressSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 /* ── extras ── */
 export function useBirthdays() {
-  return useQuery({ queryKey: ['birthdays'], queryFn: () => unwrap(hrExtras.listBirthdays()) });
+  return useQuery({
+    queryKey: ['birthdays'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listBirthdays());
+      const raw = res ?? [];
+      return z.array(birthdaySchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useAnniversaries() {
   return useQuery({
     queryKey: ['anniversaries'],
-    queryFn: () => unwrap(hrExtras.listAnniversaries()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listAnniversaries());
+      const raw = res ?? [];
+      return z.array(anniversarySchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useAvailability() {
   return useQuery({
     queryKey: ['availability'],
-    queryFn: () => unwrap(hrExtras.listAvailability()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listAvailability());
+      const raw = res ?? [];
+      return z.array(availabilitySchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useSwaps() {
-  return useQuery({ queryKey: ['swaps'], queryFn: () => unwrap(hrExtras.listSwaps()) });
+  return useQuery({
+    queryKey: ['swaps'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listSwaps());
+      const raw = res ?? [];
+      return z.array(swapRequestSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useResolveSwap() {
@@ -247,7 +362,14 @@ export function useCreateSwap() {
 }
 
 export function useBreaks() {
-  return useQuery({ queryKey: ['breaks'], queryFn: () => unwrap(hrExtras.listBreaks()) });
+  return useQuery({
+    queryKey: ['breaks'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listBreaks());
+      const raw = res ?? [];
+      return z.array(breakLogSchema).parse(Array.isArray(raw) ? raw : []);
+    },
+  });
 }
 
 export function useStartBreak() {
@@ -277,12 +399,22 @@ export function useEndBreak() {
 export function useOvertimeAlerts() {
   return useQuery({
     queryKey: ['overtime-alerts'],
-    queryFn: () => unwrap(hrExtras.listOvertimeAlerts()),
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.listOvertimeAlerts());
+      const raw = res ?? [];
+      return z.array(overtimeAlertSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useHrSettings() {
-  return useQuery({ queryKey: ['settings'], queryFn: () => unwrap(hrExtras.getSettings()) });
+  return useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.getSettings());
+      return hrSettingsSchema.parse(res);
+    },
+  });
 }
 
 export function useUpdateHrSettings() {
@@ -298,6 +430,10 @@ export function useEmployeeProfile(id: number | undefined) {
   return useQuery({
     queryKey: ['profile', id],
     enabled: id !== undefined,
-    queryFn: () => (id !== undefined ? unwrap(hrExtras.getProfile(id)) : Promise.resolve(null)),
+    queryFn: async () => {
+      if (id === undefined) return null;
+      const res = await unwrap(hrExtras.getProfile(id));
+      return employeeProfileSchema.parse(res);
+    },
   });
 }

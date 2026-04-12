@@ -1,11 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../../shared/services/hrApi';
+import { departmentSchema } from '../../shared/schemas/departments';
 
 export function useDepartments() {
   return useQuery({
     queryKey: ['departments'],
-    queryFn: () => unwrap(hrApi.listDepartments()),
+    queryFn: async () => {
+      const res = await unwrap(hrApi.listDepartments());
+      const raw = res ?? [];
+      return z.array(departmentSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
