@@ -38,7 +38,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     rec.continuous = false;
     rec.interimResults = false;
     rec.lang = 'en-US';
-    rec.onresult = (e: any) => {
+    rec.onresult = (e: { results?: ArrayLike<ArrayLike<{ transcript?: string }>> }) => {
       const transcript = e.results?.[0]?.[0]?.transcript ?? '';
       onChange(transcript);
       setListening(false);

@@ -34,9 +34,10 @@ export function useCustomerLookup(initialQuery = '') {
           lastVisit: c.lastVisit ?? undefined,
         }));
         setResults(mapped);
-      } catch (e: any) {
+      } catch (e) {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
         if (!cancelled) {
-          setError(e?.response?.data?.message ?? e?.message ?? 'Search failed');
+          setError(err?.response?.data?.message ?? err?.message ?? 'Search failed');
           setResults([]);
         }
       } finally {
