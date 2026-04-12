@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { safe } from '../../lib/api';
+import { userInfoSchema } from '../../schemas/auth';
 import { useUserStore } from '../../stores/userStore';
 import { toast } from 'sonner';
 
@@ -109,7 +110,8 @@ export const useGetUserInfo = () => {
     queryKey: ['user'],
     queryFn: async () => {
       const response = await unwrap(safe.get('/business/me'));
-      return response.data;
+      // Validate structure; addons is passthrough so store-specific shape is preserved
+      return userInfoSchema.parse(response.data);
     },
     enabled: !!document.cookie
       .split(';')
@@ -124,7 +126,7 @@ export const useGetUserInfo = () => {
       setUserId(userId);
       setToken(token);
       setUser(user);
-      setAddons(user.addons);
+      setAddons(user.addons as any);
       setVisits(visits);
       if (token) {
         const domain = window.location.hostname === 'localhost' ? undefined : '.rtylr.com';

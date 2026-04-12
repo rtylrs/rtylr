@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import type { App as AppContract } from '@voxire/contracts/hub/v1/apps';
+import { z } from 'zod';
 import {
   MonitorSpeaker,
   Package,
@@ -17,6 +17,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { safe } from '../../lib/api';
+import { appContractSchema } from '../../schemas/apps';
 
 export interface RtylrApp {
   key: string;
@@ -122,7 +123,8 @@ export const useApps = () => {
       const res = await unwrap(safe.get('/apps'));
       const remote = res?.apps ?? res;
       if (!Array.isArray(remote)) return [];
-      return remote.map((a: AppContract) => {
+      const validated = z.array(appContractSchema).parse(remote);
+      return validated.map((a) => {
         const meta = APP_META[a.id] ?? {
           href: '#',
           color: '#888',

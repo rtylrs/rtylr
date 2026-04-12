@@ -131,7 +131,14 @@ describe('useMember', () => {
 
   it('fetches a single member by id', async () => {
     mockGet.mockResolvedValue({
-      user: { id: '5', fullName: 'Charlie', email: 'c@c.com', isActive: true, apps: ['pos'] },
+      user: {
+        id: '5',
+        fullName: 'Charlie',
+        email: 'c@c.com',
+        role: 'staff',
+        isActive: true,
+        apps: ['pos'],
+      },
     });
 
     const { result } = renderHook(() => useMember('5'), { wrapper: createWrapper() });

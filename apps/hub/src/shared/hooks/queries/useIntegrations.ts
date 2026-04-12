@@ -1,24 +1,19 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { integrationSchema } from '../../schemas/integrations';
 import { toast } from 'sonner';
 
-export interface Integration {
-  id: string;
-  name: string;
-  category: 'payments' | 'messaging' | 'accounting' | 'analytics' | 'delivery' | 'data';
-  logo: string;
-  status: 'connected' | 'available' | 'coming_soon';
-  description: string;
-  connectedAt?: string;
-}
+export type { Integration } from '../../schemas/integrations';
 
 export const useIntegrations = () => {
-  return useQuery<Integration[]>({
+  return useQuery({
     queryKey: ['integrations'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/integrations'));
-      return (res?.integrations ?? res) as Integration[];
+      const raw = res?.integrations ?? res;
+      return z.array(integrationSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 };

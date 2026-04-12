@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { safe } from '../../lib/api';
+import { configSchema } from '../../schemas/config';
 import { useConfigStore } from '../../stores/configStore';
 import { toast } from 'sonner';
 
@@ -13,7 +14,7 @@ export const useGetConfig = () => {
     queryKey: ['config'],
     queryFn: async () => {
       const response = await unwrap(safe.get('/config'));
-      return response.data.config;
+      return configSchema.parse(response.data.config);
     },
   });
 

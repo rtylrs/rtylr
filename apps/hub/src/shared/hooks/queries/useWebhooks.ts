@@ -1,23 +1,20 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { webhookSchema } from '../../schemas/webhooks';
 import { toast } from 'sonner';
 
-export interface Webhook {
-  id: string;
-  url: string;
-  events: string[];
-  status: 'active' | 'paused' | 'failing';
-  lastDelivery?: string;
-  secretPreview?: string;
-}
+export type { Webhook } from '../../schemas/webhooks';
+type Webhook = z.infer<typeof webhookSchema>;
 
 export const useWebhooks = () => {
   return useQuery<Webhook[]>({
     queryKey: ['webhooks'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/webhooks'));
-      return (res?.webhooks ?? res) as Webhook[];
+      const raw = res?.webhooks ?? res;
+      return z.array(webhookSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 };
@@ -27,7 +24,7 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
       const res = await unwrap(safe.post('/webhooks', payload));
-      return res as Webhook;
+      return webhookSchema.parse(res);
     },
     onSuccess: () => {
       toast.success('Webhook created');

@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { safe } from '../../lib/api';
+import { analyticsResponseSchema } from '../../schemas/analytics';
 import { toast } from 'sonner';
 
 export const useGetAnalytics = (
@@ -13,7 +14,7 @@ export const useGetAnalytics = (
     queryFn: async () => {
       const params = dateRange ? { start: dateRange.start, end: dateRange.end } : {};
       const response = await unwrap(safe.get(`/business/${businessId}/analytics`, { params }));
-      return response.data;
+      return analyticsResponseSchema.parse(response.data);
     },
     enabled: !!businessId,
   });
@@ -39,7 +40,7 @@ export const useGetRevenue = (
       const response = await unwrap(
         safe.get(`/business/${businessId}/analytics/revenue`, { params })
       );
-      return response.data;
+      return analyticsResponseSchema.parse(response.data);
     },
     enabled: !!businessId,
   });
@@ -64,7 +65,7 @@ export const useGetOrders = (
       const response = await unwrap(
         safe.get(`/business/${businessId}/analytics/orders`, { params })
       );
-      return response.data;
+      return analyticsResponseSchema.parse(response.data);
     },
     enabled: !!businessId,
   });
