@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
@@ -23,21 +25,8 @@ type ListActivityRequest struct {
 	Limit int `json:"limit"`
 }
 
-type ActivityPayload struct {
-	ID          int64  `json:"id"`
-	OwnerID     int64  `json:"owner_id"`
-	App         string `json:"app"`
-	EntityType  string `json:"entity_type"`
-	EntityID    int64  `json:"entity_id"`
-	Action      string `json:"action"`
-	Description string `json:"description"`
-	UserID      int64  `json:"user_id"`
-	UserName    string `json:"user_name"`
-	CreatedAt   string `json:"created_at"`
-}
-
 type ListActivityResponse struct {
-	Activities []ActivityPayload `json:"activities"`
+	Activities []*hubv1.ActivityEntry `json:"activities"`
 }
 
 func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityRequest) (ListActivityResponse, *errorModels.ServerError) {
@@ -59,17 +48,17 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		}
 	}
 
-	payloads := make([]ActivityPayload, 0, len(activities))
+	payloads := make([]*hubv1.ActivityEntry, 0, len(activities))
 	for _, a := range activities {
-		payloads = append(payloads, ActivityPayload{
-			ID:          a.ID,
-			OwnerID:     a.OwnerID,
+		payloads = append(payloads, &hubv1.ActivityEntry{
+			Id:          a.ID,
+			OwnerId:     a.OwnerID,
 			App:         a.App,
 			EntityType:  a.EntityType,
-			EntityID:    a.EntityID,
+			EntityId:    a.EntityID,
 			Action:      a.Action,
 			Description: a.Description,
-			UserID:      a.UserID,
+			UserId:      a.UserID,
 			UserName:    a.UserName,
 			CreatedAt:   a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})

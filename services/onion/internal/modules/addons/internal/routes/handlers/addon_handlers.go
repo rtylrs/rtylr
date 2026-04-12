@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+
 	"github.com/voxire/onion/internal/modules/addons/internal/application"
 	"github.com/voxire/onion/internal/modules/addons/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -17,20 +19,8 @@ func ListAddonsRoutes() []string { return []string{"/addons"} }
 type ListAddonsHandler struct{ Service *application.Service }
 type ListAddonsRequest struct{}
 
-type AddonPayload struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Icon        string  `json:"icon"`
-	Price       float64 `json:"price"`
-	IsFree      bool    `json:"is_free"`
-	IsEnabled   bool    `json:"is_enabled"`
-	EnabledAt   *string `json:"enabled_at,omitempty"`
-	DisabledAt  *string `json:"disabled_at,omitempty"`
-}
-
 type ListAddonsResponse struct {
-	Addons []AddonPayload `json:"addons"`
+	Addons []*hubv1.Addon `json:"addons"`
 }
 
 func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (ListAddonsResponse, *errorModels.ServerError) {
@@ -48,29 +38,33 @@ func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (Li
 		}
 	}
 
-	payloads := make([]AddonPayload, 0, len(addons))
+	payloads := make([]*hubv1.Addon, 0, len(addons))
 	for _, a := range addons {
-		p := AddonPayload{
-			ID:          a.AddonID,
-			Name:        a.Name,
-			Description: a.Description,
-			Icon:        a.Icon,
-			Price:       a.Price,
-			IsFree:      a.IsFree,
-			IsEnabled:   a.IsEnabled,
-		}
-		if a.EnabledAt != nil {
-			s := a.EnabledAt.Format("2006-01-02T15:04:05Z07:00")
-			p.EnabledAt = &s
-		}
-		if a.DisabledAt != nil {
-			s := a.DisabledAt.Format("2006-01-02T15:04:05Z07:00")
-			p.DisabledAt = &s
-		}
-		payloads = append(payloads, p)
+		payloads = append(payloads, toProtoAddon(a))
 	}
 
 	return ListAddonsResponse{Addons: payloads}, nil
+}
+
+func toProtoAddon(a domain.Addon) *hubv1.Addon {
+	p := &hubv1.Addon{
+		Id:          a.AddonID,
+		Name:        a.Name,
+		Description: a.Description,
+		Icon:        a.Icon,
+		Price:       a.Price,
+		IsFree:      a.IsFree,
+		IsEnabled:   a.IsEnabled,
+	}
+	if a.EnabledAt != nil {
+		s := a.EnabledAt.Format("2006-01-02T15:04:05Z07:00")
+		p.EnabledAt = &s
+	}
+	if a.DisabledAt != nil {
+		s := a.DisabledAt.Format("2006-01-02T15:04:05Z07:00")
+		p.DisabledAt = &s
+	}
+	return p
 }
 
 // ─── Enable addon ───────────────────────────────────────────────────────────

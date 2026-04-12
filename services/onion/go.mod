@@ -1,6 +1,6 @@
 module github.com/voxire/onion
 
-go 1.26
+go 1.25
 
 require (
 	codnect.io/chrono v1.1.3

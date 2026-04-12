@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
+
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
