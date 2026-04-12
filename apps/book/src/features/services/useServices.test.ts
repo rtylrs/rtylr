@@ -40,13 +40,13 @@ describe('useServices', () => {
   });
 
   it('fetches services on mount', async () => {
-    const data = [{ id: 1, name: 'Haircut' }];
+    const data = [{ id: 1, name: 'Haircut', duration: 30 }];
     (bookService.getServices as any).mockResolvedValue(data);
     const { result } = renderHook(() => useServices(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual([{ id: '1', name: 'Haircut', duration: 30 }]);
   });
 
   it('passes filters to the service', async () => {
@@ -74,13 +74,13 @@ describe('useService', () => {
   });
 
   it('fetches a single service by id', async () => {
-    const svc = { id: 2, name: 'Massage' };
+    const svc = { id: 2, name: 'Massage', duration: 60 };
     (bookService.getService as any).mockResolvedValue(svc);
     const { result } = renderHook(() => useService(2), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(svc);
+    expect(result.current.data).toEqual({ id: '2', name: 'Massage', duration: 60 });
   });
 
   it('does not fetch when id is undefined', () => {

@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import type {
   CreateBookServiceRequest,
   UpdateBookServiceRequest,
 } from '@voxire/contracts/book/v1/services';
 import { bookService } from '../../shared/services/bookService';
+import { bookServiceSchema } from '../../shared/schemas/services';
 
 export interface ServiceFilters {
   search?: string;
@@ -15,7 +17,11 @@ export interface ServiceFilters {
 export function useServices(filters?: ServiceFilters) {
   return useQuery({
     queryKey: ['services', filters],
-    queryFn: () => unwrap(bookService.getServices(filters)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getServices(filters));
+      const raw = (res as any)?.services ?? res;
+      return z.array(bookServiceSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
@@ -23,7 +29,10 @@ export function useService(id: number | undefined) {
   return useQuery({
     queryKey: ['service', id],
     enabled: !!id,
-    queryFn: () => unwrap(bookService.getService(id!)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getService(id!));
+      return bookServiceSchema.parse(res);
+    },
   });
 }
 

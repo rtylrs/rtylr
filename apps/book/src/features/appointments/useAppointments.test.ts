@@ -40,13 +40,15 @@ describe('useAppointments', () => {
   });
 
   it('fetches appointments on mount', async () => {
-    const data = [{ id: 1, date: '2026-04-11' }];
+    const data = [{ id: 1, date: '2026-04-11', startTime: '09:00', endTime: '10:00' }];
     (bookService.getAppointments as any).mockResolvedValue(data);
     const { result } = renderHook(() => useAppointments(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual([
+      { id: '1', date: '2026-04-11', startTime: '09:00', endTime: '10:00', status: 'pending' },
+    ]);
     expect(bookService.getAppointments).toHaveBeenCalledWith(undefined);
   });
 
@@ -75,13 +77,19 @@ describe('useAppointment', () => {
   });
 
   it('fetches a single appointment by id', async () => {
-    const appt = { id: 5, date: '2026-04-12' };
+    const appt = { id: 5, date: '2026-04-12', startTime: '14:00', endTime: '15:00' };
     (bookService.getAppointment as any).mockResolvedValue(appt);
     const { result } = renderHook(() => useAppointment(5), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(appt);
+    expect(result.current.data).toEqual({
+      id: '5',
+      date: '2026-04-12',
+      startTime: '14:00',
+      endTime: '15:00',
+      status: 'pending',
+    });
   });
 
   it('does not fetch when id is undefined', () => {

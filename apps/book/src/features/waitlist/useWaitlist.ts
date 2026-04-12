@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import type { CreateWaitlistEntryRequest } from '@voxire/contracts/book/v1/waitlist';
 import { bookService } from '../../shared/services/bookService';
+import { waitlistEntrySchema } from '../../shared/schemas/waitlist';
 
 export interface WaitlistFilters {
   search?: string;
@@ -13,7 +15,11 @@ export interface WaitlistFilters {
 export function useWaitlist(filters?: WaitlistFilters) {
   return useQuery({
     queryKey: ['waitlist', filters],
-    queryFn: () => unwrap(bookService.getWaitlist(filters)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getWaitlist(filters));
+      const raw = (res as any)?.entries ?? res;
+      return z.array(waitlistEntrySchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
