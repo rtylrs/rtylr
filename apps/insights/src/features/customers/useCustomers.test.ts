@@ -38,7 +38,7 @@ describe('useCustomerAnalytics', () => {
   });
 
   it('fetches customer analytics on mount', async () => {
-    const data = { totalCustomers: 300, newThisMonth: 25 };
+    const data = { totalCustomers: 300, newCustomers: 25, returningCustomers: 275 };
     (insightsService.getCustomerAnalytics as any).mockResolvedValue(data);
     const { result } = renderHook(() => useCustomerAnalytics(), {
       wrapper: createWrapper(),
@@ -62,13 +62,13 @@ describe('useTopCustomers', () => {
   });
 
   it('fetches top customers', async () => {
-    const data = [{ id: 1, name: 'VIP Corp', revenue: 50000 }];
-    (insightsService.getTopCustomers as any).mockResolvedValue(data);
+    const input = [{ id: 1, name: 'VIP Corp', totalSpend: 50000 }];
+    (insightsService.getTopCustomers as any).mockResolvedValue(input);
     const { result } = renderHook(() => useTopCustomers(10), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual([{ id: '1', name: 'VIP Corp', totalSpend: 50000 }]);
     expect(insightsService.getTopCustomers).toHaveBeenCalledWith({ limit: 10 });
   });
 });
@@ -95,7 +95,7 @@ describe('useCustomerLtv', () => {
   });
 
   it('fetches customer LTV data', async () => {
-    const data = { averageLtv: 1200 };
+    const data = { average: 1200, avgLtv: 1200, medianLtv: 900 };
     (insightsService.getCustomerLtv as any).mockResolvedValue(data);
     const { result } = renderHook(() => useCustomerLtv(), {
       wrapper: createWrapper(),

@@ -1,31 +1,51 @@
 import { useQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { insightsService } from '../../shared/services/insightsService';
+import {
+  customerAnalyticsSchema,
+  topCustomerSchema,
+  customerChurnSchema,
+  customerLtvSchema,
+} from '../../shared/schemas/customers';
 
 export function useCustomerAnalytics() {
   return useQuery({
     queryKey: ['insights', 'customers'],
-    queryFn: () => unwrap(insightsService.getCustomerAnalytics()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getCustomerAnalytics());
+      return customerAnalyticsSchema.parse(res);
+    },
   });
 }
 
 export function useTopCustomers(limit?: number) {
   return useQuery({
     queryKey: ['insights', 'customers-top', limit],
-    queryFn: () => unwrap(insightsService.getTopCustomers({ limit })),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getTopCustomers({ limit }));
+      const raw = (res as any)?.customers ?? res;
+      return z.array(topCustomerSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useCustomerChurn() {
   return useQuery({
     queryKey: ['insights', 'customers-churn'],
-    queryFn: () => unwrap(insightsService.getCustomerChurn()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getCustomerChurn());
+      return customerChurnSchema.parse(res);
+    },
   });
 }
 
 export function useCustomerLtv() {
   return useQuery({
     queryKey: ['insights', 'customers-ltv'],
-    queryFn: () => unwrap(insightsService.getCustomerLtv()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getCustomerLtv());
+      return customerLtvSchema.parse(res);
+    },
   });
 }

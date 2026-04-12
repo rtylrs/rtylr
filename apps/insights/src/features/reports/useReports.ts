@@ -1,11 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { insightsService } from '../../shared/services/insightsService';
+import { reportTemplateSchema } from '../../shared/schemas/reports';
 
 export function useReportTemplates() {
   return useQuery({
     queryKey: ['insights', 'report-templates'],
-    queryFn: () => unwrap(insightsService.getReportTemplates()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getReportTemplates());
+      const raw = (res as any)?.templates ?? res;
+      return z.array(reportTemplateSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

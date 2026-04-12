@@ -1,11 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { insightsService } from '../../shared/services/insightsService';
+import { insightsSettingsSchema, scheduledReportSchema } from '../../shared/schemas/settings';
 
 export function useInsightsSettings() {
   return useQuery({
     queryKey: ['insights', 'settings'],
-    queryFn: () => unwrap(insightsService.getInsightsSettings()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getInsightsSettings());
+      return insightsSettingsSchema.parse(res);
+    },
   });
 }
 
@@ -22,7 +27,11 @@ export function useUpdateInsightsSettings() {
 export function useScheduledReports() {
   return useQuery({
     queryKey: ['insights', 'scheduled-reports'],
-    queryFn: () => unwrap(insightsService.getScheduledReports()),
+    queryFn: async (): Promise<any> => {
+      const res = await unwrap(insightsService.getScheduledReports());
+      const raw = (res as any)?.reports ?? res;
+      return z.array(scheduledReportSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
