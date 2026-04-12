@@ -16,9 +16,9 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/storeService', () => ({
   storeApi: {
-    listOrders: (...args: any[]) => mockStoreApi.listOrders(...args),
-    getOrder: (...args: any[]) => mockStoreApi.getOrder(...args),
-    updateOrderStatus: (...args: any[]) => mockStoreApi.updateOrderStatus(...args),
+    listOrders: (...args: unknown[]) => mockStoreApi.listOrders(...args),
+    getOrder: (...args: unknown[]) => mockStoreApi.getOrder(...args),
+    updateOrderStatus: (...args: unknown[]) => mockStoreApi.updateOrderStatus(...args),
   },
 }));
 

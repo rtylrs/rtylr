@@ -24,11 +24,11 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/erpApi', () => ({
   erpApi: {
-    listProducts: (...args: any[]) => mockErpApi.listProducts(...args),
-    getProduct: (...args: any[]) => mockErpApi.getProduct(...args),
-    createProduct: (...args: any[]) => mockErpApi.createProduct(...args),
-    updateProduct: (...args: any[]) => mockErpApi.updateProduct(...args),
-    deleteProduct: (...args: any[]) => mockErpApi.deleteProduct(...args),
+    listProducts: (...args: unknown[]) => mockErpApi.listProducts(...args),
+    getProduct: (...args: unknown[]) => mockErpApi.getProduct(...args),
+    createProduct: (...args: unknown[]) => mockErpApi.createProduct(...args),
+    updateProduct: (...args: unknown[]) => mockErpApi.updateProduct(...args),
+    deleteProduct: (...args: unknown[]) => mockErpApi.deleteProduct(...args),
   },
 }));
 

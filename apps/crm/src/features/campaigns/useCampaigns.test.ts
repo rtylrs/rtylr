@@ -26,12 +26,12 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/crmApi', () => ({
   crmApi: {
-    getCampaigns: (...args: any[]) => mockCrmApi.getCampaigns(...args),
-    getCampaignById: (...args: any[]) => mockCrmApi.getCampaignById(...args),
-    getCampaignStats: (...args: any[]) => mockCrmApi.getCampaignStats(...args),
-    createCampaign: (...args: any[]) => mockCrmApi.createCampaign(...args),
-    updateCampaign: (...args: any[]) => mockCrmApi.updateCampaign(...args),
-    updateCampaignStatus: (...args: any[]) => mockCrmApi.updateCampaignStatus(...args),
+    getCampaigns: (...args: unknown[]) => mockCrmApi.getCampaigns(...args),
+    getCampaignById: (...args: unknown[]) => mockCrmApi.getCampaignById(...args),
+    getCampaignStats: (...args: unknown[]) => mockCrmApi.getCampaignStats(...args),
+    createCampaign: (...args: unknown[]) => mockCrmApi.createCampaign(...args),
+    updateCampaign: (...args: unknown[]) => mockCrmApi.updateCampaign(...args),
+    updateCampaignStatus: (...args: unknown[]) => mockCrmApi.updateCampaignStatus(...args),
   },
 }));
 

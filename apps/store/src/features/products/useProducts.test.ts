@@ -24,11 +24,11 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/storeService', () => ({
   storeApi: {
-    listProducts: (...args: any[]) => mockStoreApi.listProducts(...args),
-    getProduct: (...args: any[]) => mockStoreApi.getProduct(...args),
-    createProduct: (...args: any[]) => mockStoreApi.createProduct(...args),
-    updateProduct: (...args: any[]) => mockStoreApi.updateProduct(...args),
-    deleteProduct: (...args: any[]) => mockStoreApi.deleteProduct(...args),
+    listProducts: (...args: unknown[]) => mockStoreApi.listProducts(...args),
+    getProduct: (...args: unknown[]) => mockStoreApi.getProduct(...args),
+    createProduct: (...args: unknown[]) => mockStoreApi.createProduct(...args),
+    updateProduct: (...args: unknown[]) => mockStoreApi.updateProduct(...args),
+    deleteProduct: (...args: unknown[]) => mockStoreApi.deleteProduct(...args),
   },
 }));
 

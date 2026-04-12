@@ -11,7 +11,7 @@ vi.mock('../lib/api', () => ({
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v: any) => v),
+  unwrap: vi.fn((v: unknown) => v),
 }));
 
 import { crmApi } from './crmApi';
