@@ -32,15 +32,15 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/crmApi', () => ({
   crmApi: {
-    getLoyaltyTransactions: (...args: any[]) => mockCrmApi.getLoyaltyTransactions(...args),
-    getLoyaltyConfig: (...args: any[]) => mockCrmApi.getLoyaltyConfig(...args),
-    getLoyaltyMembers: (...args: any[]) => mockCrmApi.getLoyaltyMembers(...args),
-    getLoyaltyRewards: (...args: any[]) => mockCrmApi.getLoyaltyRewards(...args),
-    getLoyaltyTiers: (...args: any[]) => mockCrmApi.getLoyaltyTiers(...args),
-    updateLoyaltyTier: (...args: any[]) => mockCrmApi.updateLoyaltyTier(...args),
-    updateLoyaltyConfig: (...args: any[]) => mockCrmApi.updateLoyaltyConfig(...args),
-    awardPoints: (...args: any[]) => mockCrmApi.awardPoints(...args),
-    redeemPoints: (...args: any[]) => mockCrmApi.redeemPoints(...args),
+    getLoyaltyTransactions: (...args: unknown[]) => mockCrmApi.getLoyaltyTransactions(...args),
+    getLoyaltyConfig: (...args: unknown[]) => mockCrmApi.getLoyaltyConfig(...args),
+    getLoyaltyMembers: (...args: unknown[]) => mockCrmApi.getLoyaltyMembers(...args),
+    getLoyaltyRewards: (...args: unknown[]) => mockCrmApi.getLoyaltyRewards(...args),
+    getLoyaltyTiers: (...args: unknown[]) => mockCrmApi.getLoyaltyTiers(...args),
+    updateLoyaltyTier: (...args: unknown[]) => mockCrmApi.updateLoyaltyTier(...args),
+    updateLoyaltyConfig: (...args: unknown[]) => mockCrmApi.updateLoyaltyConfig(...args),
+    awardPoints: (...args: unknown[]) => mockCrmApi.awardPoints(...args),
+    redeemPoints: (...args: unknown[]) => mockCrmApi.redeemPoints(...args),
   },
 }));
 

@@ -34,16 +34,16 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/crmApi', () => ({
   crmApi: {
-    getCustomers: (...args: any[]) => mockCrmApi.getCustomers(...args),
-    getCustomerDetail: (...args: any[]) => mockCrmApi.getCustomerDetail(...args),
-    getCustomerTimeline: (...args: any[]) => mockCrmApi.getCustomerTimeline(...args),
-    createCustomer: (...args: any[]) => mockCrmApi.createCustomer(...args),
-    updateCustomer: (...args: any[]) => mockCrmApi.updateCustomer(...args),
-    deleteCustomer: (...args: any[]) => mockCrmApi.deleteCustomer(...args),
-    recordVisit: (...args: any[]) => mockCrmApi.recordVisit(...args),
-    importCustomers: (...args: any[]) => mockCrmApi.importCustomers(...args),
-    mergeCustomers: (...args: any[]) => mockCrmApi.mergeCustomers(...args),
-    exportCustomerData: (...args: any[]) => mockCrmApi.exportCustomerData(...args),
+    getCustomers: (...args: unknown[]) => mockCrmApi.getCustomers(...args),
+    getCustomerDetail: (...args: unknown[]) => mockCrmApi.getCustomerDetail(...args),
+    getCustomerTimeline: (...args: unknown[]) => mockCrmApi.getCustomerTimeline(...args),
+    createCustomer: (...args: unknown[]) => mockCrmApi.createCustomer(...args),
+    updateCustomer: (...args: unknown[]) => mockCrmApi.updateCustomer(...args),
+    deleteCustomer: (...args: unknown[]) => mockCrmApi.deleteCustomer(...args),
+    recordVisit: (...args: unknown[]) => mockCrmApi.recordVisit(...args),
+    importCustomers: (...args: unknown[]) => mockCrmApi.importCustomers(...args),
+    mergeCustomers: (...args: unknown[]) => mockCrmApi.mergeCustomers(...args),
+    exportCustomerData: (...args: unknown[]) => mockCrmApi.exportCustomerData(...args),
   },
 }));
 

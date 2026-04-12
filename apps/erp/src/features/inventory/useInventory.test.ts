@@ -16,9 +16,9 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/erpApi', () => ({
   erpApi: {
-    getInventoryReport: (...args: any[]) => mockErpApi.getInventoryReport(...args),
-    getLowStock: (...args: any[]) => mockErpApi.getLowStock(...args),
-    adjustInventory: (...args: any[]) => mockErpApi.adjustInventory(...args),
+    getInventoryReport: (...args: unknown[]) => mockErpApi.getInventoryReport(...args),
+    getLowStock: (...args: unknown[]) => mockErpApi.getLowStock(...args),
+    adjustInventory: (...args: unknown[]) => mockErpApi.adjustInventory(...args),
   },
 }));
 

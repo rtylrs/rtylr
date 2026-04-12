@@ -14,7 +14,7 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('../../shared/services/storeService', () => ({
   storeApi: {
-    getDashboardStats: (...args: any[]) => mockStoreApi.getDashboardStats(...args),
+    getDashboardStats: (...args: unknown[]) => mockStoreApi.getDashboardStats(...args),
   },
 }));
 
