@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
 
         {!todayError && !isLoading && todayAppts && todayAppts.length > 0 && (
           <div className="space-y-1">
-            {todayAppts.map((appt: any) => {
+            {todayAppts.map((appt) => {
               const statusColor = getStatusColor(appt.status);
               return (
                 <div
@@ -206,7 +206,7 @@ const Dashboard: React.FC = () => {
                 >
                   <div>
                     <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {appt.time}
+                      {appt.startTime}
                     </p>
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
                       {appt.duration} min
