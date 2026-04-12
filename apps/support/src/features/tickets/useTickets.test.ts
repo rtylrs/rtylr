@@ -44,7 +44,7 @@ describe('useTickets', () => {
   });
 
   it('fetches tickets on mount', async () => {
-    const data = [{ id: 1, subject: 'Bug report' }];
+    const data = [{ id: 1, subject: 'Bug report', status: 'open' }];
     (supportService.getTickets as any).mockResolvedValue(data);
     const { result } = renderHook(() => useTickets(), {
       wrapper: createWrapper(),
@@ -78,7 +78,7 @@ describe('useTicket', () => {
   });
 
   it('fetches a single ticket', async () => {
-    const ticket = { id: 5, subject: 'Help' };
+    const ticket = { id: 5, subject: 'Help', status: 'open' };
     (supportService.getTicket as any).mockResolvedValue(ticket);
     const { result } = renderHook(() => useTicket(5), {
       wrapper: createWrapper(),
@@ -94,7 +94,7 @@ describe('useTicketMessages', () => {
   });
 
   it('fetches messages for a ticket', async () => {
-    const msgs = [{ id: 1, body: 'Hello' }];
+    const msgs = [{ id: 1, body: 'Hello', ticketId: 5 }];
     (supportService.getTicketMessages as any).mockResolvedValue(msgs);
     const { result } = renderHook(() => useTicketMessages(5), {
       wrapper: createWrapper(),

@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { supportService } from '../../shared/services/supportService';
+import { supportSettingsSchema } from '../../shared/schemas/settings';
 
 export function useSupportSettings() {
   return useQuery({
     queryKey: ['support-settings'],
-    queryFn: () => unwrap(supportService.getSettings()),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getSettings());
+      return supportSettingsSchema.parse(res);
+    },
   });
 }
 

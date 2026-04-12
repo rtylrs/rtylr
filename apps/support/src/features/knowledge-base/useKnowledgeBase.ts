@@ -1,18 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { supportService } from '../../shared/services/supportService';
+import { articleSchema, articleCategorySchema } from '../../shared/schemas/knowledgeBase';
 
 export function useArticles(params?: { search?: string; category?: string }) {
   return useQuery({
     queryKey: ['articles', params],
-    queryFn: () => unwrap(supportService.getArticles(params)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getArticles(params));
+      const raw = res ?? [];
+      return z.array(articleSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useArticle(id: number) {
   return useQuery({
     queryKey: ['article', id],
-    queryFn: () => unwrap(supportService.getArticle(id)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getArticle(id));
+      return articleSchema.parse(res);
+    },
     enabled: !!id,
   });
 }
@@ -20,7 +29,11 @@ export function useArticle(id: number) {
 export function useArticleCategories() {
   return useQuery({
     queryKey: ['article-categories'],
-    queryFn: () => unwrap(supportService.getArticleCategories()),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getArticleCategories());
+      const raw = res ?? [];
+      return z.array(articleCategorySchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
