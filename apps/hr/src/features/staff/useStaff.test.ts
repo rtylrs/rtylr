@@ -42,7 +42,17 @@ describe('useStaff', () => {
   });
 
   it('fetches staff list on mount', async () => {
-    const data = [{ id: 1, name: 'Jane' }];
+    const data = [
+      {
+        id: 1,
+        name: 'Jane',
+        role: 'Manager',
+        department: 'Sales',
+        email: 'jane@example.com',
+        employmentType: 'Full-time',
+        status: 'Active',
+      },
+    ];
     (hrApi.listStaff as any).mockResolvedValue(data);
     const { result } = renderHook(() => useStaff(), {
       wrapper: createWrapper(),

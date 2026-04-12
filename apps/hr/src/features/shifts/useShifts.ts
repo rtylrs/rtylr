@@ -1,11 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { hrApi, CreateShiftInput, UpdateShiftInput } from '../../shared/services/hrApi';
+import { shiftSchema } from '../../shared/schemas/shifts';
 
 export function useShifts(params?: { day?: string; staffId?: number }) {
   return useQuery({
     queryKey: ['shifts', params],
-    queryFn: () => unwrap(hrApi.listShifts(params)),
+    queryFn: async () => {
+      const res = await unwrap(hrApi.listShifts(params));
+      const raw = res ?? [];
+      return z.array(shiftSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

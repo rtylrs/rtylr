@@ -30,7 +30,18 @@ describe('useHRDashboard', () => {
   });
 
   it('fetches HR dashboard data', async () => {
-    const data = { totalStaff: 25, clockedIn: 18 };
+    const data = {
+      totalStaff: 25,
+      onShiftToday: 18,
+      openPositions: 3,
+      monthlyPayroll: 50000,
+      recentActivity: [],
+      todayAtGlance: {
+        shiftsScheduled: 10,
+        newApplications: 2,
+        pendingApprovals: 1,
+      },
+    };
     (hrApi.getDashboard as any).mockResolvedValue(data);
     const { result } = renderHook(() => useHRDashboard(), {
       wrapper: createWrapper(),

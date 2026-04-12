@@ -1,11 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { hrApi, CreateStaffInput, UpdateStaffInput } from '../../shared/services/hrApi';
+import { staffMemberSchema } from '../../shared/schemas/staff';
 
 export function useStaff() {
   return useQuery({
     queryKey: ['staff'],
-    queryFn: () => unwrap(hrApi.listStaff()),
+    queryFn: async () => {
+      const res = await unwrap(hrApi.listStaff());
+      const raw = res ?? [];
+      return z.array(staffMemberSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

@@ -32,7 +32,17 @@ describe('usePayroll', () => {
   });
 
   it('fetches payroll list on mount', async () => {
-    const data = [{ id: 1, period: '2026-03', total: 5000 }];
+    const data = [
+      {
+        id: 1,
+        name: 'Jane Doe',
+        role: 'Manager',
+        hoursWorked: 160,
+        basePay: 4000,
+        overtime: 500,
+        deductions: 500,
+      },
+    ];
     (hrApi.listPayroll as any).mockResolvedValue(data);
     const { result } = renderHook(() => usePayroll(), {
       wrapper: createWrapper(),
