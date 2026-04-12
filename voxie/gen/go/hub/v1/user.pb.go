@@ -21,154 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type User struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	FirstName     string                 `protobuf:"bytes,4,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,5,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"` // owner, admin, operator, staff, viewer
-	BusinessId    int64                  `protobuf:"varint,7,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
-	BusinessName  string                 `protobuf:"bytes,8,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
-	AvatarUrl     string                 `protobuf:"bytes,9,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
-	Apps          []string               `protobuf:"bytes,10,rep,name=apps,proto3" json:"apps,omitempty"` // App IDs the user has access to
-	IsOwner       bool                   `protobuf:"varint,11,opt,name=is_owner,json=isOwner,proto3" json:"is_owner,omitempty"`
-	Onboarded     bool                   `protobuf:"varint,12,opt,name=onboarded,proto3" json:"onboarded,omitempty"`
-	Theme         string                 `protobuf:"bytes,13,opt,name=theme,proto3" json:"theme,omitempty"`
-	PlanType      string                 `protobuf:"bytes,14,opt,name=plan_type,json=planType,proto3" json:"plan_type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *User) Reset() {
-	*x = User{}
-	mi := &file_hub_v1_user_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *User) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*User) ProtoMessage() {}
-
-func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_user_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use User.ProtoReflect.Descriptor instead.
-func (*User) Descriptor() ([]byte, []int) {
-	return file_hub_v1_user_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *User) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *User) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *User) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *User) GetFirstName() string {
-	if x != nil {
-		return x.FirstName
-	}
-	return ""
-}
-
-func (x *User) GetLastName() string {
-	if x != nil {
-		return x.LastName
-	}
-	return ""
-}
-
-func (x *User) GetRole() string {
-	if x != nil {
-		return x.Role
-	}
-	return ""
-}
-
-func (x *User) GetBusinessId() int64 {
-	if x != nil {
-		return x.BusinessId
-	}
-	return 0
-}
-
-func (x *User) GetBusinessName() string {
-	if x != nil {
-		return x.BusinessName
-	}
-	return ""
-}
-
-func (x *User) GetAvatarUrl() string {
-	if x != nil {
-		return x.AvatarUrl
-	}
-	return ""
-}
-
-func (x *User) GetApps() []string {
-	if x != nil {
-		return x.Apps
-	}
-	return nil
-}
-
-func (x *User) GetIsOwner() bool {
-	if x != nil {
-		return x.IsOwner
-	}
-	return false
-}
-
-func (x *User) GetOnboarded() bool {
-	if x != nil {
-		return x.Onboarded
-	}
-	return false
-}
-
-func (x *User) GetTheme() string {
-	if x != nil {
-		return x.Theme
-	}
-	return ""
-}
-
-func (x *User) GetPlanType() string {
-	if x != nil {
-		return x.PlanType
-	}
-	return ""
-}
-
 type GetMeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -177,7 +29,7 @@ type GetMeRequest struct {
 
 func (x *GetMeRequest) Reset() {
 	*x = GetMeRequest{}
-	mi := &file_hub_v1_user_proto_msgTypes[1]
+	mi := &file_hub_v1_user_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -189,7 +41,7 @@ func (x *GetMeRequest) String() string {
 func (*GetMeRequest) ProtoMessage() {}
 
 func (x *GetMeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_user_proto_msgTypes[1]
+	mi := &file_hub_v1_user_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -202,19 +54,27 @@ func (x *GetMeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMeRequest.ProtoReflect.Descriptor instead.
 func (*GetMeRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_user_proto_rawDescGZIP(), []int{1}
+	return file_hub_v1_user_proto_rawDescGZIP(), []int{0}
 }
 
 type GetMeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Apps          []string               `protobuf:"bytes,4,rep,name=apps,proto3" json:"apps,omitempty"`
+	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	BusinessId    int64                  `protobuf:"varint,6,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	BusinessName  string                 `protobuf:"bytes,7,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
+	IsOwner       bool                   `protobuf:"varint,8,opt,name=is_owner,json=isOwner,proto3" json:"is_owner,omitempty"`
+	Onboarded     bool                   `protobuf:"varint,9,opt,name=onboarded,proto3" json:"onboarded,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetMeResponse) Reset() {
 	*x = GetMeResponse{}
-	mi := &file_hub_v1_user_proto_msgTypes[2]
+	mi := &file_hub_v1_user_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -226,7 +86,7 @@ func (x *GetMeResponse) String() string {
 func (*GetMeResponse) ProtoMessage() {}
 
 func (x *GetMeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_user_proto_msgTypes[2]
+	mi := &file_hub_v1_user_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -239,43 +99,282 @@ func (x *GetMeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMeResponse.ProtoReflect.Descriptor instead.
 func (*GetMeResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_user_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetMeResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetMeResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *GetMeResponse) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *GetMeResponse) GetApps() []string {
+	if x != nil {
+		return x.Apps
+	}
+	return nil
+}
+
+func (x *GetMeResponse) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *GetMeResponse) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *GetMeResponse) GetBusinessName() string {
+	if x != nil {
+		return x.BusinessName
+	}
+	return ""
+}
+
+func (x *GetMeResponse) GetIsOwner() bool {
+	if x != nil {
+		return x.IsOwner
+	}
+	return false
+}
+
+func (x *GetMeResponse) GetOnboarded() bool {
+	if x != nil {
+		return x.Onboarded
+	}
+	return false
+}
+
+type UpdateProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProfileRequest) Reset() {
+	*x = UpdateProfileRequest{}
+	mi := &file_hub_v1_user_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProfileRequest) ProtoMessage() {}
+
+func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_user_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_user_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetMeResponse) GetUser() *User {
+func (x *UpdateProfileRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateProfileRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type UpdateProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *GetMeResponse         `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProfileResponse) Reset() {
+	*x = UpdateProfileResponse{}
+	mi := &file_hub_v1_user_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProfileResponse) ProtoMessage() {}
+
+func (x *UpdateProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_user_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProfileResponse.ProtoReflect.Descriptor instead.
+func (*UpdateProfileResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_user_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateProfileResponse) GetUser() *GetMeResponse {
 	if x != nil {
 		return x.User
 	}
 	return nil
 }
 
+type ChangePasswordRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	CurrentPassword string                 `protobuf:"bytes,1,opt,name=current_password,json=currentPassword,proto3" json:"current_password,omitempty"`
+	NewPassword     string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ChangePasswordRequest) Reset() {
+	*x = ChangePasswordRequest{}
+	mi := &file_hub_v1_user_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordRequest) ProtoMessage() {}
+
+func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_user_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
+func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_user_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ChangePasswordRequest) GetCurrentPassword() string {
+	if x != nil {
+		return x.CurrentPassword
+	}
+	return ""
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+type ChangePasswordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangePasswordResponse) Reset() {
+	*x = ChangePasswordResponse{}
+	mi := &file_hub_v1_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordResponse) ProtoMessage() {}
+
+func (x *ChangePasswordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordResponse.ProtoReflect.Descriptor instead.
+func (*ChangePasswordResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
 var File_hub_v1_user_proto protoreflect.FileDescriptor
 
 const file_hub_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/user.proto\x12\x03hub\"\xf5\x02\n" +
-	"\x04User\x12\x0e\n" +
+	"\x11hub/v1/user.proto\x12\x03hub\"\x0e\n" +
+	"\fGetMeRequest\"\xf9\x01\n" +
+	"\rGetMeResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
-	"\n" +
-	"first_name\x18\x04 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x05 \x01(\tR\blastName\x12\x12\n" +
-	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1f\n" +
-	"\vbusiness_id\x18\a \x01(\x03R\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x12\n" +
+	"\x04apps\x18\x04 \x03(\tR\x04apps\x12\x12\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1f\n" +
+	"\vbusiness_id\x18\x06 \x01(\x03R\n" +
 	"businessId\x12#\n" +
-	"\rbusiness_name\x18\b \x01(\tR\fbusinessName\x12\x1d\n" +
-	"\n" +
-	"avatar_url\x18\t \x01(\tR\tavatarUrl\x12\x12\n" +
-	"\x04apps\x18\n" +
-	" \x03(\tR\x04apps\x12\x19\n" +
-	"\bis_owner\x18\v \x01(\bR\aisOwner\x12\x1c\n" +
-	"\tonboarded\x18\f \x01(\bR\tonboarded\x12\x14\n" +
-	"\x05theme\x18\r \x01(\tR\x05theme\x12\x1b\n" +
-	"\tplan_type\x18\x0e \x01(\tR\bplanType\"\x0e\n" +
-	"\fGetMeRequest\".\n" +
-	"\rGetMeResponse\x12\x1d\n" +
-	"\x04user\x18\x01 \x01(\v2\t.hub.UserR\x04userB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\rbusiness_name\x18\a \x01(\tR\fbusinessName\x12\x19\n" +
+	"\bis_owner\x18\b \x01(\bR\aisOwner\x12\x1c\n" +
+	"\tonboarded\x18\t \x01(\bR\tonboarded\"@\n" +
+	"\x14UpdateProfileRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\"?\n" +
+	"\x15UpdateProfileResponse\x12&\n" +
+	"\x04user\x18\x01 \x01(\v2\x12.hub.GetMeResponseR\x04user\"e\n" +
+	"\x15ChangePasswordRequest\x12)\n" +
+	"\x10current_password\x18\x01 \x01(\tR\x0fcurrentPassword\x12!\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"\x18\n" +
+	"\x16ChangePasswordResponseB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_user_proto_rawDescOnce sync.Once
@@ -289,14 +388,17 @@ func file_hub_v1_user_proto_rawDescGZIP() []byte {
 	return file_hub_v1_user_proto_rawDescData
 }
 
-var file_hub_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_hub_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_hub_v1_user_proto_goTypes = []any{
-	(*User)(nil),          // 0: hub.User
-	(*GetMeRequest)(nil),  // 1: hub.GetMeRequest
-	(*GetMeResponse)(nil), // 2: hub.GetMeResponse
+	(*GetMeRequest)(nil),           // 0: hub.GetMeRequest
+	(*GetMeResponse)(nil),          // 1: hub.GetMeResponse
+	(*UpdateProfileRequest)(nil),   // 2: hub.UpdateProfileRequest
+	(*UpdateProfileResponse)(nil),  // 3: hub.UpdateProfileResponse
+	(*ChangePasswordRequest)(nil),  // 4: hub.ChangePasswordRequest
+	(*ChangePasswordResponse)(nil), // 5: hub.ChangePasswordResponse
 }
 var file_hub_v1_user_proto_depIdxs = []int32{
-	0, // 0: hub.GetMeResponse.user:type_name -> hub.User
+	1, // 0: hub.UpdateProfileResponse.user:type_name -> hub.GetMeResponse
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -315,7 +417,7 @@ func file_hub_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_user_proto_rawDesc), len(file_hub_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

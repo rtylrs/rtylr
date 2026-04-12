@@ -8,11 +8,14 @@
 
 export interface ActivityEntry {
   id: number;
+  ownerId: number;
+  app: string;
+  entityType: string;
+  entityId: number;
   action: string;
-  actor: string;
-  target: string;
   description: string;
-  ipAddress: string;
+  userId: number;
+  userName: string;
   createdAt: string;
 }
 
@@ -21,5 +24,5 @@ export interface ListActivityRequest {
 }
 
 export interface ListActivityResponse {
-  entries: ActivityEntry[];
+  activities: ActivityEntry[];
 }

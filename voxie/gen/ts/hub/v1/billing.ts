@@ -8,19 +8,10 @@
 
 export interface BillingSummary {
   plan: string;
-  monthlyCost: number;
-  memberCount: number;
-  memberLimit: number;
-  addonCharges: AddonCharge[];
+  status: string;
+  currentUsage: number;
+  usageLimit: number;
   nextBillingDate: string;
-  paymentMethod: string;
-  cardLast4: string;
-}
-
-export interface AddonCharge {
-  addonId: string;
-  addonName: string;
-  price: number;
 }
 
 export interface GetBillingSummaryRequest {
@@ -32,13 +23,11 @@ export interface GetBillingSummaryResponse {
 
 export interface Invoice {
   id: number;
-  number: string;
   amount: number;
-  /** paid, pending, failed */
+  currency: string;
   status: string;
-  period: string;
-  createdAt: string;
-  pdfUrl: string;
+  issuedAt: string;
+  paidAt: string;
 }
 
 export interface ListInvoicesRequest {

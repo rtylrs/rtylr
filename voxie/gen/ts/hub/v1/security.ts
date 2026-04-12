@@ -8,18 +8,14 @@
 
 export interface SecurityState {
   twoFactorEnabled: boolean;
-  /** totp, sms */
-  twoFactorMethod: string;
-  lastPasswordChange: string;
-  sessions: ActiveSession[];
+  activeSessions: ActiveSession[];
 }
 
 export interface ActiveSession {
-  id: number;
-  device: string;
-  ipAddress: string;
-  location: string;
-  lastActiveAt: string;
+  id: string;
+  ip: string;
+  userAgent: string;
+  createdAt: string;
   isCurrent: boolean;
 }
 
@@ -32,23 +28,31 @@ export interface GetSecurityStateResponse {
 
 export interface Update2FARequest {
   enabled: boolean;
-  /** totp, sms */
-  method: string;
-  verificationCode: string;
 }
 
 export interface Update2FAResponse {
-  success: boolean;
-  /** TOTP secret (only on enable) */
-  secret: string;
-  /** QR code data URI (only on enable) */
-  qrCodeUrl: string;
+  message: string;
 }
 
-export interface RevokeSessionRequest {
-  sessionId: number;
+export interface LoginEntry {
+  email: string;
+  method: string;
+  ip: string;
+  userAgent: string;
+  success: boolean;
+  createdAt: string;
 }
 
-export interface RevokeSessionResponse {
-  success: boolean;
+export interface LoginHistoryRequest {
+}
+
+export interface LoginHistoryResponse {
+  history: LoginEntry[];
+}
+
+export interface InvalidateSessionsRequest {
+}
+
+export interface InvalidateSessionsResponse {
+  message: string;
 }

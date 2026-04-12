@@ -26,9 +26,11 @@ type ApiKey struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	KeyPrefix     string                 `protobuf:"bytes,3,opt,name=key_prefix,json=keyPrefix,proto3" json:"key_prefix,omitempty"` // First 8 chars shown
-	Permissions   string                 `protobuf:"bytes,4,opt,name=permissions,proto3" json:"permissions,omitempty"`
+	Scopes        []string               `protobuf:"bytes,4,rep,name=scopes,proto3" json:"scopes,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	LastUsedAt    string                 `protobuf:"bytes,6,opt,name=last_used_at,json=lastUsedAt,proto3" json:"last_used_at,omitempty"`
+	ExpiresAt     string                 `protobuf:"bytes,7,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -84,11 +86,11 @@ func (x *ApiKey) GetKeyPrefix() string {
 	return ""
 }
 
-func (x *ApiKey) GetPermissions() string {
+func (x *ApiKey) GetScopes() []string {
 	if x != nil {
-		return x.Permissions
+		return x.Scopes
 	}
-	return ""
+	return nil
 }
 
 func (x *ApiKey) GetCreatedAt() string {
@@ -103,6 +105,20 @@ func (x *ApiKey) GetLastUsedAt() string {
 		return x.LastUsedAt
 	}
 	return ""
+}
+
+func (x *ApiKey) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
+func (x *ApiKey) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 type ListApiKeysRequest struct {
@@ -188,7 +204,7 @@ func (x *ListApiKeysResponse) GetKeys() []*ApiKey {
 type CreateApiKeyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Permissions   string                 `protobuf:"bytes,2,opt,name=permissions,proto3" json:"permissions,omitempty"`
+	Scopes        []string               `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -230,17 +246,18 @@ func (x *CreateApiKeyRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateApiKeyRequest) GetPermissions() string {
+func (x *CreateApiKeyRequest) GetScopes() []string {
 	if x != nil {
-		return x.Permissions
+		return x.Scopes
 	}
-	return ""
+	return nil
 }
 
 type CreateApiKeyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"` // Full key (shown only once)
-	Meta          *ApiKey                `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -275,6 +292,13 @@ func (*CreateApiKeyResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_developer_proto_rawDescGZIP(), []int{4}
 }
 
+func (x *CreateApiKeyResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
 func (x *CreateApiKeyResponse) GetKey() string {
 	if x != nil {
 		return x.Key
@@ -282,34 +306,34 @@ func (x *CreateApiKeyResponse) GetKey() string {
 	return ""
 }
 
-func (x *CreateApiKeyResponse) GetMeta() *ApiKey {
+func (x *CreateApiKeyResponse) GetMessage() string {
 	if x != nil {
-		return x.Meta
+		return x.Message
 	}
-	return nil
+	return ""
 }
 
-type DeleteApiKeyRequest struct {
+type RevokeApiKeyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteApiKeyRequest) Reset() {
-	*x = DeleteApiKeyRequest{}
+func (x *RevokeApiKeyRequest) Reset() {
+	*x = RevokeApiKeyRequest{}
 	mi := &file_hub_v1_developer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteApiKeyRequest) String() string {
+func (x *RevokeApiKeyRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteApiKeyRequest) ProtoMessage() {}
+func (*RevokeApiKeyRequest) ProtoMessage() {}
 
-func (x *DeleteApiKeyRequest) ProtoReflect() protoreflect.Message {
+func (x *RevokeApiKeyRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_developer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -321,39 +345,39 @@ func (x *DeleteApiKeyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteApiKeyRequest.ProtoReflect.Descriptor instead.
-func (*DeleteApiKeyRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use RevokeApiKeyRequest.ProtoReflect.Descriptor instead.
+func (*RevokeApiKeyRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_developer_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DeleteApiKeyRequest) GetId() int64 {
+func (x *RevokeApiKeyRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type DeleteApiKeyResponse struct {
+type RevokeApiKeyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteApiKeyResponse) Reset() {
-	*x = DeleteApiKeyResponse{}
+func (x *RevokeApiKeyResponse) Reset() {
+	*x = RevokeApiKeyResponse{}
 	mi := &file_hub_v1_developer_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteApiKeyResponse) String() string {
+func (x *RevokeApiKeyResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteApiKeyResponse) ProtoMessage() {}
+func (*RevokeApiKeyResponse) ProtoMessage() {}
 
-func (x *DeleteApiKeyResponse) ProtoReflect() protoreflect.Message {
+func (x *RevokeApiKeyResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_developer_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -365,16 +389,16 @@ func (x *DeleteApiKeyResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteApiKeyResponse.ProtoReflect.Descriptor instead.
-func (*DeleteApiKeyResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use RevokeApiKeyResponse.ProtoReflect.Descriptor instead.
+func (*RevokeApiKeyResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_developer_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DeleteApiKeyResponse) GetSuccess() bool {
+func (x *RevokeApiKeyResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 type Webhook struct {
@@ -383,9 +407,8 @@ type Webhook struct {
 	Url             string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 	Events          []string               `protobuf:"bytes,3,rep,name=events,proto3" json:"events,omitempty"`
 	IsActive        bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	Secret          string                 `protobuf:"bytes,5,opt,name=secret,proto3" json:"secret,omitempty"`
-	CreatedAt       string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	LastTriggeredAt string                 `protobuf:"bytes,7,opt,name=last_triggered_at,json=lastTriggeredAt,proto3" json:"last_triggered_at,omitempty"`
+	CreatedAt       string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	LastTriggeredAt string                 `protobuf:"bytes,6,opt,name=last_triggered_at,json=lastTriggeredAt,proto3" json:"last_triggered_at,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -446,13 +469,6 @@ func (x *Webhook) GetIsActive() bool {
 		return x.IsActive
 	}
 	return false
-}
-
-func (x *Webhook) GetSecret() string {
-	if x != nil {
-		return x.Secret
-	}
-	return ""
 }
 
 func (x *Webhook) GetCreatedAt() string {
@@ -603,7 +619,8 @@ func (x *CreateWebhookRequest) GetEvents() []string {
 
 type CreateWebhookResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Webhook       *Webhook               `protobuf:"bytes,1,opt,name=webhook,proto3" json:"webhook,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -638,11 +655,18 @@ func (*CreateWebhookResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_developer_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *CreateWebhookResponse) GetWebhook() *Webhook {
+func (x *CreateWebhookResponse) GetId() int64 {
 	if x != nil {
-		return x.Webhook
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *CreateWebhookResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type UpdateWebhookRequest struct {
@@ -803,7 +827,7 @@ func (x *DeleteWebhookRequest) GetId() int64 {
 
 type DeleteWebhookResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -838,58 +862,62 @@ func (*DeleteWebhookResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_developer_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *DeleteWebhookResponse) GetSuccess() bool {
+func (x *DeleteWebhookResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_hub_v1_developer_proto protoreflect.FileDescriptor
 
 const file_hub_v1_developer_proto_rawDesc = "" +
 	"\n" +
-	"\x16hub/v1/developer.proto\x12\x03hub\"\xae\x01\n" +
+	"\x16hub/v1/developer.proto\x12\x03hub\"\xe0\x01\n" +
 	"\x06ApiKey\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"key_prefix\x18\x03 \x01(\tR\tkeyPrefix\x12 \n" +
-	"\vpermissions\x18\x04 \x01(\tR\vpermissions\x12\x1d\n" +
+	"key_prefix\x18\x03 \x01(\tR\tkeyPrefix\x12\x16\n" +
+	"\x06scopes\x18\x04 \x03(\tR\x06scopes\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12 \n" +
 	"\flast_used_at\x18\x06 \x01(\tR\n" +
-	"lastUsedAt\"\x14\n" +
+	"lastUsedAt\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\a \x01(\tR\texpiresAt\x12\x1b\n" +
+	"\tis_active\x18\b \x01(\bR\bisActive\"\x14\n" +
 	"\x12ListApiKeysRequest\"6\n" +
 	"\x13ListApiKeysResponse\x12\x1f\n" +
-	"\x04keys\x18\x01 \x03(\v2\v.hub.ApiKeyR\x04keys\"K\n" +
+	"\x04keys\x18\x01 \x03(\v2\v.hub.ApiKeyR\x04keys\"A\n" +
 	"\x13CreateApiKeyRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vpermissions\x18\x02 \x01(\tR\vpermissions\"I\n" +
-	"\x14CreateApiKeyResponse\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1f\n" +
-	"\x04meta\x18\x02 \x01(\v2\v.hub.ApiKeyR\x04meta\"%\n" +
-	"\x13DeleteApiKeyRequest\x12\x0e\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06scopes\x18\x02 \x03(\tR\x06scopes\"R\n" +
+	"\x14CreateApiKeyResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"%\n" +
+	"\x13RevokeApiKeyRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"0\n" +
-	"\x14DeleteApiKeyResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xc3\x01\n" +
+	"\x14RevokeApiKeyResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xab\x01\n" +
 	"\aWebhook\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
 	"\x06events\x18\x03 \x03(\tR\x06events\x12\x1b\n" +
-	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x16\n" +
-	"\x06secret\x18\x05 \x01(\tR\x06secret\x12\x1d\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12*\n" +
-	"\x11last_triggered_at\x18\a \x01(\tR\x0flastTriggeredAt\"\x15\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12*\n" +
+	"\x11last_triggered_at\x18\x06 \x01(\tR\x0flastTriggeredAt\"\x15\n" +
 	"\x13ListWebhooksRequest\"@\n" +
 	"\x14ListWebhooksResponse\x12(\n" +
 	"\bwebhooks\x18\x01 \x03(\v2\f.hub.WebhookR\bwebhooks\"@\n" +
 	"\x14CreateWebhookRequest\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x16\n" +
-	"\x06events\x18\x02 \x03(\tR\x06events\"?\n" +
-	"\x15CreateWebhookResponse\x12&\n" +
-	"\awebhook\x18\x01 \x01(\v2\f.hub.WebhookR\awebhook\"m\n" +
+	"\x06events\x18\x02 \x03(\tR\x06events\"A\n" +
+	"\x15CreateWebhookResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"m\n" +
 	"\x14UpdateWebhookRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
@@ -900,7 +928,7 @@ const file_hub_v1_developer_proto_rawDesc = "" +
 	"\x14DeleteWebhookRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteWebhookResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_developer_proto_rawDescOnce sync.Once
@@ -921,8 +949,8 @@ var file_hub_v1_developer_proto_goTypes = []any{
 	(*ListApiKeysResponse)(nil),   // 2: hub.ListApiKeysResponse
 	(*CreateApiKeyRequest)(nil),   // 3: hub.CreateApiKeyRequest
 	(*CreateApiKeyResponse)(nil),  // 4: hub.CreateApiKeyResponse
-	(*DeleteApiKeyRequest)(nil),   // 5: hub.DeleteApiKeyRequest
-	(*DeleteApiKeyResponse)(nil),  // 6: hub.DeleteApiKeyResponse
+	(*RevokeApiKeyRequest)(nil),   // 5: hub.RevokeApiKeyRequest
+	(*RevokeApiKeyResponse)(nil),  // 6: hub.RevokeApiKeyResponse
 	(*Webhook)(nil),               // 7: hub.Webhook
 	(*ListWebhooksRequest)(nil),   // 8: hub.ListWebhooksRequest
 	(*ListWebhooksResponse)(nil),  // 9: hub.ListWebhooksResponse
@@ -935,15 +963,13 @@ var file_hub_v1_developer_proto_goTypes = []any{
 }
 var file_hub_v1_developer_proto_depIdxs = []int32{
 	0, // 0: hub.ListApiKeysResponse.keys:type_name -> hub.ApiKey
-	0, // 1: hub.CreateApiKeyResponse.meta:type_name -> hub.ApiKey
-	7, // 2: hub.ListWebhooksResponse.webhooks:type_name -> hub.Webhook
-	7, // 3: hub.CreateWebhookResponse.webhook:type_name -> hub.Webhook
-	7, // 4: hub.UpdateWebhookResponse.webhook:type_name -> hub.Webhook
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	7, // 1: hub.ListWebhooksResponse.webhooks:type_name -> hub.Webhook
+	7, // 2: hub.UpdateWebhookResponse.webhook:type_name -> hub.Webhook
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_developer_proto_init() }

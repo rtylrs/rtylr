@@ -24,13 +24,13 @@ message GetPermissionsResponse {
   PermissionMatrix matrix = 1;
 }
 
-message UpdatePermissionsRequest {
+message UpdatePermissionMatrixRequest {
   string role = 1;
   string permission_key = 2;
   bool enabled = 3;
 }
 
-message UpdatePermissionsResponse {
+message UpdatePermissionMatrixResponse {
   bool success = 1;
 }
 

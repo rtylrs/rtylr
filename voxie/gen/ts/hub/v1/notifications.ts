@@ -14,6 +14,7 @@ export interface Notification {
   type: string;
   read: boolean;
   createdAt: string;
+  link: string;
 }
 
 export interface ListNotificationsRequest {
@@ -21,7 +22,6 @@ export interface ListNotificationsRequest {
 
 export interface ListNotificationsResponse {
   notifications: Notification[];
-  unreadCount: number;
 }
 
 export interface MarkNotificationReadRequest {
@@ -29,5 +29,12 @@ export interface MarkNotificationReadRequest {
 }
 
 export interface MarkNotificationReadResponse {
-  success: boolean;
+  message: string;
+}
+
+export interface MarkAllReadRequest {
+}
+
+export interface MarkAllReadResponse {
+  message: string;
 }

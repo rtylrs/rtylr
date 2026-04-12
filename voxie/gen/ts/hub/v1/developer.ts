@@ -11,9 +11,11 @@ export interface ApiKey {
   name: string;
   /** First 8 chars shown */
   keyPrefix: string;
-  permissions: string;
+  scopes: string[];
   createdAt: string;
   lastUsedAt: string;
+  expiresAt: string;
+  isActive: boolean;
 }
 
 export interface ListApiKeysRequest {
@@ -25,21 +27,21 @@ export interface ListApiKeysResponse {
 
 export interface CreateApiKeyRequest {
   name: string;
-  permissions: string;
+  scopes: string[];
 }
 
 export interface CreateApiKeyResponse {
-  /** Full key (shown only once) */
+  id: number;
   key: string;
-  meta: ApiKey | undefined;
+  message: string;
 }
 
-export interface DeleteApiKeyRequest {
+export interface RevokeApiKeyRequest {
   id: number;
 }
 
-export interface DeleteApiKeyResponse {
-  success: boolean;
+export interface RevokeApiKeyResponse {
+  message: string;
 }
 
 export interface Webhook {
@@ -47,7 +49,6 @@ export interface Webhook {
   url: string;
   events: string[];
   isActive: boolean;
-  secret: string;
   createdAt: string;
   lastTriggeredAt: string;
 }
@@ -65,7 +66,8 @@ export interface CreateWebhookRequest {
 }
 
 export interface CreateWebhookResponse {
-  webhook: Webhook | undefined;
+  id: number;
+  message: string;
 }
 
 export interface UpdateWebhookRequest {
@@ -84,5 +86,5 @@ export interface DeleteWebhookRequest {
 }
 
 export interface DeleteWebhookResponse {
-  success: boolean;
+  message: string;
 }

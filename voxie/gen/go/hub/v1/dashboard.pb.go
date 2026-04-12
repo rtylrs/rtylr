@@ -21,114 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type KPIs struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	TotalRevenue    float64                `protobuf:"fixed64,1,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	RevenueChange   float64                `protobuf:"fixed64,2,opt,name=revenue_change,json=revenueChange,proto3" json:"revenue_change,omitempty"`
-	TotalOrders     int32                  `protobuf:"varint,3,opt,name=total_orders,json=totalOrders,proto3" json:"total_orders,omitempty"`
-	OrdersChange    float64                `protobuf:"fixed64,4,opt,name=orders_change,json=ordersChange,proto3" json:"orders_change,omitempty"`
-	TotalCustomers  int32                  `protobuf:"varint,5,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
-	CustomersChange float64                `protobuf:"fixed64,6,opt,name=customers_change,json=customersChange,proto3" json:"customers_change,omitempty"`
-	ActiveStaff     int32                  `protobuf:"varint,7,opt,name=active_staff,json=activeStaff,proto3" json:"active_staff,omitempty"`
-	AvgOrderValue   float64                `protobuf:"fixed64,8,opt,name=avg_order_value,json=avgOrderValue,proto3" json:"avg_order_value,omitempty"`
-	TopProduct      string                 `protobuf:"bytes,9,opt,name=top_product,json=topProduct,proto3" json:"top_product,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *KPIs) Reset() {
-	*x = KPIs{}
-	mi := &file_hub_v1_dashboard_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *KPIs) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*KPIs) ProtoMessage() {}
-
-func (x *KPIs) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_dashboard_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use KPIs.ProtoReflect.Descriptor instead.
-func (*KPIs) Descriptor() ([]byte, []int) {
-	return file_hub_v1_dashboard_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *KPIs) GetTotalRevenue() float64 {
-	if x != nil {
-		return x.TotalRevenue
-	}
-	return 0
-}
-
-func (x *KPIs) GetRevenueChange() float64 {
-	if x != nil {
-		return x.RevenueChange
-	}
-	return 0
-}
-
-func (x *KPIs) GetTotalOrders() int32 {
-	if x != nil {
-		return x.TotalOrders
-	}
-	return 0
-}
-
-func (x *KPIs) GetOrdersChange() float64 {
-	if x != nil {
-		return x.OrdersChange
-	}
-	return 0
-}
-
-func (x *KPIs) GetTotalCustomers() int32 {
-	if x != nil {
-		return x.TotalCustomers
-	}
-	return 0
-}
-
-func (x *KPIs) GetCustomersChange() float64 {
-	if x != nil {
-		return x.CustomersChange
-	}
-	return 0
-}
-
-func (x *KPIs) GetActiveStaff() int32 {
-	if x != nil {
-		return x.ActiveStaff
-	}
-	return 0
-}
-
-func (x *KPIs) GetAvgOrderValue() float64 {
-	if x != nil {
-		return x.AvgOrderValue
-	}
-	return 0
-}
-
-func (x *KPIs) GetTopProduct() string {
-	if x != nil {
-		return x.TopProduct
-	}
-	return ""
-}
-
 type GetKPIsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -137,7 +29,7 @@ type GetKPIsRequest struct {
 
 func (x *GetKPIsRequest) Reset() {
 	*x = GetKPIsRequest{}
-	mi := &file_hub_v1_dashboard_proto_msgTypes[1]
+	mi := &file_hub_v1_dashboard_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -149,7 +41,7 @@ func (x *GetKPIsRequest) String() string {
 func (*GetKPIsRequest) ProtoMessage() {}
 
 func (x *GetKPIsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_dashboard_proto_msgTypes[1]
+	mi := &file_hub_v1_dashboard_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,19 +54,24 @@ func (x *GetKPIsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetKPIsRequest.ProtoReflect.Descriptor instead.
 func (*GetKPIsRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_dashboard_proto_rawDescGZIP(), []int{1}
+	return file_hub_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
 type GetKPIsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Kpis          *KPIs                  `protobuf:"bytes,1,opt,name=kpis,proto3" json:"kpis,omitempty"`
+	Revenue       float64                `protobuf:"fixed64,1,opt,name=revenue,proto3" json:"revenue,omitempty"`
+	OrderCount    int64                  `protobuf:"varint,2,opt,name=order_count,json=orderCount,proto3" json:"order_count,omitempty"`
+	StaffCount    int64                  `protobuf:"varint,3,opt,name=staff_count,json=staffCount,proto3" json:"staff_count,omitempty"`
+	CustomerCount int64                  `protobuf:"varint,4,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
+	LowStockCount int64                  `protobuf:"varint,5,opt,name=low_stock_count,json=lowStockCount,proto3" json:"low_stock_count,omitempty"`
+	ActiveApps    int64                  `protobuf:"varint,6,opt,name=active_apps,json=activeApps,proto3" json:"active_apps,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetKPIsResponse) Reset() {
 	*x = GetKPIsResponse{}
-	mi := &file_hub_v1_dashboard_proto_msgTypes[2]
+	mi := &file_hub_v1_dashboard_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -186,7 +83,7 @@ func (x *GetKPIsResponse) String() string {
 func (*GetKPIsResponse) ProtoMessage() {}
 
 func (x *GetKPIsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_dashboard_proto_msgTypes[2]
+	mi := &file_hub_v1_dashboard_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -199,35 +96,67 @@ func (x *GetKPIsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetKPIsResponse.ProtoReflect.Descriptor instead.
 func (*GetKPIsResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_dashboard_proto_rawDescGZIP(), []int{2}
+	return file_hub_v1_dashboard_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetKPIsResponse) GetKpis() *KPIs {
+func (x *GetKPIsResponse) GetRevenue() float64 {
 	if x != nil {
-		return x.Kpis
+		return x.Revenue
 	}
-	return nil
+	return 0
+}
+
+func (x *GetKPIsResponse) GetOrderCount() int64 {
+	if x != nil {
+		return x.OrderCount
+	}
+	return 0
+}
+
+func (x *GetKPIsResponse) GetStaffCount() int64 {
+	if x != nil {
+		return x.StaffCount
+	}
+	return 0
+}
+
+func (x *GetKPIsResponse) GetCustomerCount() int64 {
+	if x != nil {
+		return x.CustomerCount
+	}
+	return 0
+}
+
+func (x *GetKPIsResponse) GetLowStockCount() int64 {
+	if x != nil {
+		return x.LowStockCount
+	}
+	return 0
+}
+
+func (x *GetKPIsResponse) GetActiveApps() int64 {
+	if x != nil {
+		return x.ActiveApps
+	}
+	return 0
 }
 
 var File_hub_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_hub_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x16hub/v1/dashboard.proto\x12\x03hub\"\xda\x02\n" +
-	"\x04KPIs\x12#\n" +
-	"\rtotal_revenue\x18\x01 \x01(\x01R\ftotalRevenue\x12%\n" +
-	"\x0erevenue_change\x18\x02 \x01(\x01R\rrevenueChange\x12!\n" +
-	"\ftotal_orders\x18\x03 \x01(\x05R\vtotalOrders\x12#\n" +
-	"\rorders_change\x18\x04 \x01(\x01R\fordersChange\x12'\n" +
-	"\x0ftotal_customers\x18\x05 \x01(\x05R\x0etotalCustomers\x12)\n" +
-	"\x10customers_change\x18\x06 \x01(\x01R\x0fcustomersChange\x12!\n" +
-	"\factive_staff\x18\a \x01(\x05R\vactiveStaff\x12&\n" +
-	"\x0favg_order_value\x18\b \x01(\x01R\ravgOrderValue\x12\x1f\n" +
-	"\vtop_product\x18\t \x01(\tR\n" +
-	"topProduct\"\x10\n" +
-	"\x0eGetKPIsRequest\"0\n" +
-	"\x0fGetKPIsResponse\x12\x1d\n" +
-	"\x04kpis\x18\x01 \x01(\v2\t.hub.KPIsR\x04kpisB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\x16hub/v1/dashboard.proto\x12\x03hub\"\x10\n" +
+	"\x0eGetKPIsRequest\"\xdd\x01\n" +
+	"\x0fGetKPIsResponse\x12\x18\n" +
+	"\arevenue\x18\x01 \x01(\x01R\arevenue\x12\x1f\n" +
+	"\vorder_count\x18\x02 \x01(\x03R\n" +
+	"orderCount\x12\x1f\n" +
+	"\vstaff_count\x18\x03 \x01(\x03R\n" +
+	"staffCount\x12%\n" +
+	"\x0ecustomer_count\x18\x04 \x01(\x03R\rcustomerCount\x12&\n" +
+	"\x0flow_stock_count\x18\x05 \x01(\x03R\rlowStockCount\x12\x1f\n" +
+	"\vactive_apps\x18\x06 \x01(\x03R\n" +
+	"activeAppsB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_dashboard_proto_rawDescOnce sync.Once
@@ -241,19 +170,17 @@ func file_hub_v1_dashboard_proto_rawDescGZIP() []byte {
 	return file_hub_v1_dashboard_proto_rawDescData
 }
 
-var file_hub_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_hub_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hub_v1_dashboard_proto_goTypes = []any{
-	(*KPIs)(nil),            // 0: hub.KPIs
-	(*GetKPIsRequest)(nil),  // 1: hub.GetKPIsRequest
-	(*GetKPIsResponse)(nil), // 2: hub.GetKPIsResponse
+	(*GetKPIsRequest)(nil),  // 0: hub.GetKPIsRequest
+	(*GetKPIsResponse)(nil), // 1: hub.GetKPIsResponse
 }
 var file_hub_v1_dashboard_proto_depIdxs = []int32{
-	0, // 0: hub.GetKPIsResponse.kpis:type_name -> hub.KPIs
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_dashboard_proto_init() }
@@ -267,7 +194,7 @@ func file_hub_v1_dashboard_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_dashboard_proto_rawDesc), len(file_hub_v1_dashboard_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

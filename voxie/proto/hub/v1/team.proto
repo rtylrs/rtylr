@@ -4,79 +4,76 @@ package hub;
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
-import "common/v1/pagination.proto";
-
 // ── Team ────────────────────────────────────────────────────────────
 
-message TeamMember {
+message StaffUserPayload {
   int64 id = 1;
-  string name = 2;
-  string email = 3;
-  string role = 4;
-  string status = 5; // active, pending, suspended
-  repeated string apps = 6;
-  string avatar_url = 7;
-  string created_at = 8;
-  string last_active_at = 9;
+  string email = 2;
+  string full_name = 3;
+  string created_at = 4;
+  repeated string apps = 5;
+  string role = 6;
+  bool is_active = 7;
 }
 
-message ListTeamRequest {
-  common.PaginationRequest pagination = 1;
-  string role_filter = 2;
-  string search = 3;
-}
+message ListTeamRequest {}
 
 message ListTeamResponse {
-  repeated TeamMember members = 1;
-  common.PaginationResponse pagination = 2;
+  repeated StaffUserPayload users = 1;
 }
 
 message InviteUserRequest {
   string email = 1;
-  string name = 2;
+  string full_name = 2;
   string role = 3;
   repeated string apps = 4;
-  string password = 5; // Optional: for manual password flow
-  string auth_method = 6; // "invite" or "manual"
+  string password = 5;
 }
 
 message InviteUserResponse {
-  int64 id = 1;
+  int64 user_id = 1;
   string message = 2;
 }
 
-message UpdateMemberRoleRequest {
+message UpdatePermissionsRequest {
   int64 user_id = 1;
-  string role = 2;
-  repeated string apps = 3;
+  repeated string apps = 2;
+  string role = 3;
 }
 
-message UpdateMemberRoleResponse {
-  bool success = 1;
-}
+message UpdatePermissionsResponse {}
 
 message RemoveMemberRequest {
   int64 user_id = 1;
 }
 
 message RemoveMemberResponse {
-  bool success = 1;
+  string message = 1;
 }
 
-message GetMemberDetailRequest {
-  int64 user_id = 1;
+message VerifyInviteRequest {
+  string token = 1;
 }
 
-message GetMemberDetailResponse {
-  TeamMember member = 1;
-  repeated AccessRequest access_requests = 2;
+message VerifyInviteResponse {
+  string email = 1;
+  string full_name = 2;
+  bool valid = 3;
 }
 
-message AccessRequest {
-  int64 id = 1;
-  string app = 2;
-  string requested_at = 3;
-  string status = 4; // pending, approved, denied
+message AcceptInviteRequest {
+  string token = 1;
+  string password = 2;
+}
+
+message AcceptInviteResponse {
+  string message = 1;
+}
+
+message MarkOnboardedRequest {}
+
+message MarkOnboardedResponse {
+  string message = 1;
 }
 
 message RequestAccessRequest {
@@ -84,5 +81,5 @@ message RequestAccessRequest {
 }
 
 message RequestAccessResponse {
-  bool success = 1;
+  string message = 1;
 }

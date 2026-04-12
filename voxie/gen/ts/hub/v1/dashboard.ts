@@ -6,21 +6,14 @@
 
 /* eslint-disable */
 
-export interface KPIs {
-  totalRevenue: number;
-  revenueChange: number;
-  totalOrders: number;
-  ordersChange: number;
-  totalCustomers: number;
-  customersChange: number;
-  activeStaff: number;
-  avgOrderValue: number;
-  topProduct: string;
-}
-
 export interface GetKPIsRequest {
 }
 
 export interface GetKPIsResponse {
-  kpis: KPIs | undefined;
+  revenue: number;
+  orderCount: number;
+  staffCount: number;
+  customerCount: number;
+  lowStockCount: number;
+  activeApps: number;
 }

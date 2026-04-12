@@ -30,6 +30,8 @@ message Addon {
   double price = 5;
   bool is_free = 6;
   bool is_enabled = 7;
+  optional string enabled_at = 8;
+  optional string disabled_at = 9;
 }
 
 message ListAddonsRequest {}
@@ -43,7 +45,7 @@ message EnableAddonRequest {
 }
 
 message EnableAddonResponse {
-  bool success = 1;
+  string message = 1;
 }
 
 message DisableAddonRequest {
@@ -51,5 +53,13 @@ message DisableAddonRequest {
 }
 
 message DisableAddonResponse {
-  bool success = 1;
+  string message = 1;
+}
+
+message AddonStatusRequest {
+  string addon_id = 1;
+}
+
+message AddonStatusResponse {
+  bool is_enabled = 1;
 }

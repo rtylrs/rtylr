@@ -24,12 +24,15 @@ const (
 type ActivityEntry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
-	Actor         string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
-	Target        string                 `protobuf:"bytes,4,opt,name=target,proto3" json:"target,omitempty"`
-	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	IpAddress     string                 `protobuf:"bytes,6,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	App           string                 `protobuf:"bytes,3,opt,name=app,proto3" json:"app,omitempty"`
+	EntityType    string                 `protobuf:"bytes,4,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EntityId      int64                  `protobuf:"varint,5,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Action        string                 `protobuf:"bytes,6,opt,name=action,proto3" json:"action,omitempty"`
+	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	UserId        int64                  `protobuf:"varint,8,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserName      string                 `protobuf:"bytes,9,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -71,23 +74,37 @@ func (x *ActivityEntry) GetId() int64 {
 	return 0
 }
 
+func (x *ActivityEntry) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *ActivityEntry) GetApp() string {
+	if x != nil {
+		return x.App
+	}
+	return ""
+}
+
+func (x *ActivityEntry) GetEntityType() string {
+	if x != nil {
+		return x.EntityType
+	}
+	return ""
+}
+
+func (x *ActivityEntry) GetEntityId() int64 {
+	if x != nil {
+		return x.EntityId
+	}
+	return 0
+}
+
 func (x *ActivityEntry) GetAction() string {
 	if x != nil {
 		return x.Action
-	}
-	return ""
-}
-
-func (x *ActivityEntry) GetActor() string {
-	if x != nil {
-		return x.Actor
-	}
-	return ""
-}
-
-func (x *ActivityEntry) GetTarget() string {
-	if x != nil {
-		return x.Target
 	}
 	return ""
 }
@@ -99,9 +116,16 @@ func (x *ActivityEntry) GetDescription() string {
 	return ""
 }
 
-func (x *ActivityEntry) GetIpAddress() string {
+func (x *ActivityEntry) GetUserId() int64 {
 	if x != nil {
-		return x.IpAddress
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ActivityEntry) GetUserName() string {
+	if x != nil {
+		return x.UserName
 	}
 	return ""
 }
@@ -159,7 +183,7 @@ func (x *ListActivityRequest) GetLimit() int32 {
 
 type ListActivityResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entries       []*ActivityEntry       `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	Activities    []*ActivityEntry       `protobuf:"bytes,1,rep,name=activities,proto3" json:"activities,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,9 +218,9 @@ func (*ListActivityResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_activity_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListActivityResponse) GetEntries() []*ActivityEntry {
+func (x *ListActivityResponse) GetActivities() []*ActivityEntry {
 	if x != nil {
-		return x.Entries
+		return x.Activities
 	}
 	return nil
 }
@@ -205,21 +229,27 @@ var File_hub_v1_activity_proto protoreflect.FileDescriptor
 
 const file_hub_v1_activity_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/activity.proto\x12\x03hub\"\xc5\x01\n" +
+	"\x15hub/v1/activity.proto\x12\x03hub\"\x99\x02\n" +
 	"\rActivityEntry\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06action\x18\x02 \x01(\tR\x06action\x12\x14\n" +
-	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x16\n" +
-	"\x06target\x18\x04 \x01(\tR\x06target\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x10\n" +
+	"\x03app\x18\x03 \x01(\tR\x03app\x12\x1f\n" +
+	"\ventity_type\x18\x04 \x01(\tR\n" +
+	"entityType\x12\x1b\n" +
+	"\tentity_id\x18\x05 \x01(\x03R\bentityId\x12\x16\n" +
+	"\x06action\x18\x06 \x01(\tR\x06action\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x17\n" +
+	"\auser_id\x18\b \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tuser_name\x18\t \x01(\tR\buserName\x12\x1d\n" +
 	"\n" +
-	"ip_address\x18\x06 \x01(\tR\tipAddress\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"+\n" +
+	"created_at\x18\n" +
+	" \x01(\tR\tcreatedAt\"+\n" +
 	"\x13ListActivityRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\"D\n" +
-	"\x14ListActivityResponse\x12,\n" +
-	"\aentries\x18\x01 \x03(\v2\x12.hub.ActivityEntryR\aentriesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"J\n" +
+	"\x14ListActivityResponse\x122\n" +
+	"\n" +
+	"activities\x18\x01 \x03(\v2\x12.hub.ActivityEntryR\n" +
+	"activitiesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_activity_proto_rawDescOnce sync.Once
@@ -240,7 +270,7 @@ var file_hub_v1_activity_proto_goTypes = []any{
 	(*ListActivityResponse)(nil), // 2: hub.ListActivityResponse
 }
 var file_hub_v1_activity_proto_depIdxs = []int32{
-	0, // 0: hub.ListActivityResponse.entries:type_name -> hub.ActivityEntry
+	0, // 0: hub.ListActivityResponse.activities:type_name -> hub.ActivityEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

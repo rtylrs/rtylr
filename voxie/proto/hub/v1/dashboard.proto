@@ -6,20 +6,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
 // ── Dashboard KPIs ──────────────────────────────────────────────────
 
-message KPIs {
-  double total_revenue = 1;
-  double revenue_change = 2;
-  int32 total_orders = 3;
-  double orders_change = 4;
-  int32 total_customers = 5;
-  double customers_change = 6;
-  int32 active_staff = 7;
-  double avg_order_value = 8;
-  string top_product = 9;
-}
-
 message GetKPIsRequest {}
 
 message GetKPIsResponse {
-  KPIs kpis = 1;
+  double revenue = 1;
+  int64 order_count = 2;
+  int64 staff_count = 3;
+  int64 customer_count = 4;
+  int64 low_stock_count = 5;
+  int64 active_apps = 6;
 }

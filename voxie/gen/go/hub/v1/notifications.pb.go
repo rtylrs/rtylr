@@ -29,6 +29,7 @@ type Notification struct {
 	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"` // info, warning, success, error
 	Read          bool                   `protobuf:"varint,5,opt,name=read,proto3" json:"read,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Link          string                 `protobuf:"bytes,7,opt,name=link,proto3" json:"link,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +106,13 @@ func (x *Notification) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Notification) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
 type ListNotificationsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -144,7 +152,6 @@ func (*ListNotificationsRequest) Descriptor() ([]byte, []int) {
 type ListNotificationsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Notifications []*Notification        `protobuf:"bytes,1,rep,name=notifications,proto3" json:"notifications,omitempty"`
-	UnreadCount   int32                  `protobuf:"varint,2,opt,name=unread_count,json=unreadCount,proto3" json:"unread_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -184,13 +191,6 @@ func (x *ListNotificationsResponse) GetNotifications() []*Notification {
 		return x.Notifications
 	}
 	return nil
-}
-
-func (x *ListNotificationsResponse) GetUnreadCount() int32 {
-	if x != nil {
-		return x.UnreadCount
-	}
-	return 0
 }
 
 type MarkNotificationReadRequest struct {
@@ -239,7 +239,7 @@ func (x *MarkNotificationReadRequest) GetId() int64 {
 
 type MarkNotificationReadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -274,18 +274,98 @@ func (*MarkNotificationReadResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_notifications_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *MarkNotificationReadResponse) GetSuccess() bool {
+func (x *MarkNotificationReadResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
+}
+
+type MarkAllReadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkAllReadRequest) Reset() {
+	*x = MarkAllReadRequest{}
+	mi := &file_hub_v1_notifications_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkAllReadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkAllReadRequest) ProtoMessage() {}
+
+func (x *MarkAllReadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_notifications_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkAllReadRequest.ProtoReflect.Descriptor instead.
+func (*MarkAllReadRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_notifications_proto_rawDescGZIP(), []int{5}
+}
+
+type MarkAllReadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkAllReadResponse) Reset() {
+	*x = MarkAllReadResponse{}
+	mi := &file_hub_v1_notifications_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkAllReadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkAllReadResponse) ProtoMessage() {}
+
+func (x *MarkAllReadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_notifications_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkAllReadResponse.ProtoReflect.Descriptor instead.
+func (*MarkAllReadResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_notifications_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *MarkAllReadResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_hub_v1_notifications_proto protoreflect.FileDescriptor
 
 const file_hub_v1_notifications_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahub/v1/notifications.proto\x12\x03hub\"\x8f\x01\n" +
+	"\x1ahub/v1/notifications.proto\x12\x03hub\"\xa3\x01\n" +
 	"\fNotification\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -293,15 +373,18 @@ const file_hub_v1_notifications_proto_rawDesc = "" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x12\n" +
 	"\x04read\x18\x05 \x01(\bR\x04read\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x1a\n" +
-	"\x18ListNotificationsRequest\"w\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04link\x18\a \x01(\tR\x04link\"\x1a\n" +
+	"\x18ListNotificationsRequest\"T\n" +
 	"\x19ListNotificationsResponse\x127\n" +
-	"\rnotifications\x18\x01 \x03(\v2\x11.hub.NotificationR\rnotifications\x12!\n" +
-	"\funread_count\x18\x02 \x01(\x05R\vunreadCount\"-\n" +
+	"\rnotifications\x18\x01 \x03(\v2\x11.hub.NotificationR\rnotifications\"-\n" +
 	"\x1bMarkNotificationReadRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"8\n" +
 	"\x1cMarkNotificationReadResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
+	"\x12MarkAllReadRequest\"/\n" +
+	"\x13MarkAllReadResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_notifications_proto_rawDescOnce sync.Once
@@ -315,13 +398,15 @@ func file_hub_v1_notifications_proto_rawDescGZIP() []byte {
 	return file_hub_v1_notifications_proto_rawDescData
 }
 
-var file_hub_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_hub_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_hub_v1_notifications_proto_goTypes = []any{
 	(*Notification)(nil),                 // 0: hub.Notification
 	(*ListNotificationsRequest)(nil),     // 1: hub.ListNotificationsRequest
 	(*ListNotificationsResponse)(nil),    // 2: hub.ListNotificationsResponse
 	(*MarkNotificationReadRequest)(nil),  // 3: hub.MarkNotificationReadRequest
 	(*MarkNotificationReadResponse)(nil), // 4: hub.MarkNotificationReadResponse
+	(*MarkAllReadRequest)(nil),           // 5: hub.MarkAllReadRequest
+	(*MarkAllReadResponse)(nil),          // 6: hub.MarkAllReadResponse
 }
 var file_hub_v1_notifications_proto_depIdxs = []int32{
 	0, // 0: hub.ListNotificationsResponse.notifications:type_name -> hub.Notification
@@ -343,7 +428,7 @@ func file_hub_v1_notifications_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_notifications_proto_rawDesc), len(file_hub_v1_notifications_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

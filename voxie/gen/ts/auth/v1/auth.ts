@@ -13,7 +13,10 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user: AuthUser | undefined;
+  message: string;
+  userId: number;
+  email: string;
+  name: string;
 }
 
 export interface RegisterRequest {
@@ -21,23 +24,14 @@ export interface RegisterRequest {
   password: string;
   name: string;
   businessName: string;
-  referred: string;
 }
 
 export interface RegisterResponse {
   token: string;
-  user: AuthUser | undefined;
-}
-
-export interface AuthUser {
-  id: number;
+  message: string;
+  userId: number;
   email: string;
   name: string;
-  role: string;
-  businessId: number;
-  businessName: string;
-  isOwner: boolean;
-  apps: string[];
 }
 
 export interface ResetPasswordRequest {
@@ -45,27 +39,16 @@ export interface ResetPasswordRequest {
 }
 
 export interface ResetPasswordResponse {
-  success: boolean;
   message: string;
-}
-
-export interface VerifyEmailRequest {
-  token: string;
-}
-
-export interface VerifyEmailResponse {
-  success: boolean;
 }
 
 export interface InviteAcceptRequest {
   token: string;
   password: string;
-  name: string;
 }
 
 export interface InviteAcceptResponse {
-  authToken: string;
-  user: AuthUser | undefined;
+  message: string;
 }
 
 export interface GoogleAuthRequest {
@@ -75,6 +58,5 @@ export interface GoogleAuthRequest {
 
 export interface GoogleAuthResponse {
   token: string;
-  user: AuthUser | undefined;
   isNew: boolean;
 }

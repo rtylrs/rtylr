@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,35 +21,33 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type TeamMember struct {
+type StaffUserPayload struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
-	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"` // active, pending, suspended
-	Apps          []string               `protobuf:"bytes,6,rep,name=apps,proto3" json:"apps,omitempty"`
-	AvatarUrl     string                 `protobuf:"bytes,7,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	LastActiveAt  string                 `protobuf:"bytes,9,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Apps          []string               `protobuf:"bytes,5,rep,name=apps,proto3" json:"apps,omitempty"`
+	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TeamMember) Reset() {
-	*x = TeamMember{}
+func (x *StaffUserPayload) Reset() {
+	*x = StaffUserPayload{}
 	mi := &file_hub_v1_team_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TeamMember) String() string {
+func (x *StaffUserPayload) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TeamMember) ProtoMessage() {}
+func (*StaffUserPayload) ProtoMessage() {}
 
-func (x *TeamMember) ProtoReflect() protoreflect.Message {
+func (x *StaffUserPayload) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_team_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,79 +59,62 @@ func (x *TeamMember) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TeamMember.ProtoReflect.Descriptor instead.
-func (*TeamMember) Descriptor() ([]byte, []int) {
+// Deprecated: Use StaffUserPayload.ProtoReflect.Descriptor instead.
+func (*StaffUserPayload) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *TeamMember) GetId() int64 {
+func (x *StaffUserPayload) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *TeamMember) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *TeamMember) GetEmail() string {
+func (x *StaffUserPayload) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *TeamMember) GetRole() string {
+func (x *StaffUserPayload) GetFullName() string {
 	if x != nil {
-		return x.Role
+		return x.FullName
 	}
 	return ""
 }
 
-func (x *TeamMember) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *TeamMember) GetApps() []string {
-	if x != nil {
-		return x.Apps
-	}
-	return nil
-}
-
-func (x *TeamMember) GetAvatarUrl() string {
-	if x != nil {
-		return x.AvatarUrl
-	}
-	return ""
-}
-
-func (x *TeamMember) GetCreatedAt() string {
+func (x *StaffUserPayload) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *TeamMember) GetLastActiveAt() string {
+func (x *StaffUserPayload) GetApps() []string {
 	if x != nil {
-		return x.LastActiveAt
+		return x.Apps
+	}
+	return nil
+}
+
+func (x *StaffUserPayload) GetRole() string {
+	if x != nil {
+		return x.Role
 	}
 	return ""
 }
 
+func (x *StaffUserPayload) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
 type ListTeamRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *v1.PaginationRequest  `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	RoleFilter    string                 `protobuf:"bytes,2,opt,name=role_filter,json=roleFilter,proto3" json:"role_filter,omitempty"`
-	Search        string                 `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -169,31 +149,9 @@ func (*ListTeamRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListTeamRequest) GetPagination() *v1.PaginationRequest {
-	if x != nil {
-		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListTeamRequest) GetRoleFilter() string {
-	if x != nil {
-		return x.RoleFilter
-	}
-	return ""
-}
-
-func (x *ListTeamRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
 type ListTeamResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Members       []*TeamMember          `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Users         []*StaffUserPayload    `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -228,16 +186,9 @@ func (*ListTeamResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListTeamResponse) GetMembers() []*TeamMember {
+func (x *ListTeamResponse) GetUsers() []*StaffUserPayload {
 	if x != nil {
-		return x.Members
-	}
-	return nil
-}
-
-func (x *ListTeamResponse) GetPagination() *v1.PaginationResponse {
-	if x != nil {
-		return x.Pagination
+		return x.Users
 	}
 	return nil
 }
@@ -245,11 +196,10 @@ func (x *ListTeamResponse) GetPagination() *v1.PaginationResponse {
 type InviteUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	Apps          []string               `protobuf:"bytes,4,rep,name=apps,proto3" json:"apps,omitempty"`
-	Password      string                 `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`                       // Optional: for manual password flow
-	AuthMethod    string                 `protobuf:"bytes,6,opt,name=auth_method,json=authMethod,proto3" json:"auth_method,omitempty"` // "invite" or "manual"
+	Password      string                 `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -291,9 +241,9 @@ func (x *InviteUserRequest) GetEmail() string {
 	return ""
 }
 
-func (x *InviteUserRequest) GetName() string {
+func (x *InviteUserRequest) GetFullName() string {
 	if x != nil {
-		return x.Name
+		return x.FullName
 	}
 	return ""
 }
@@ -319,16 +269,9 @@ func (x *InviteUserRequest) GetPassword() string {
 	return ""
 }
 
-func (x *InviteUserRequest) GetAuthMethod() string {
-	if x != nil {
-		return x.AuthMethod
-	}
-	return ""
-}
-
 type InviteUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -364,9 +307,9 @@ func (*InviteUserResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *InviteUserResponse) GetId() int64 {
+func (x *InviteUserResponse) GetUserId() int64 {
 	if x != nil {
-		return x.Id
+		return x.UserId
 	}
 	return 0
 }
@@ -378,29 +321,29 @@ func (x *InviteUserResponse) GetMessage() string {
 	return ""
 }
 
-type UpdateMemberRoleRequest struct {
+type UpdatePermissionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
-	Apps          []string               `protobuf:"bytes,3,rep,name=apps,proto3" json:"apps,omitempty"`
+	Apps          []string               `protobuf:"bytes,2,rep,name=apps,proto3" json:"apps,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateMemberRoleRequest) Reset() {
-	*x = UpdateMemberRoleRequest{}
+func (x *UpdatePermissionsRequest) Reset() {
+	*x = UpdatePermissionsRequest{}
 	mi := &file_hub_v1_team_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateMemberRoleRequest) String() string {
+func (x *UpdatePermissionsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateMemberRoleRequest) ProtoMessage() {}
+func (*UpdatePermissionsRequest) ProtoMessage() {}
 
-func (x *UpdateMemberRoleRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdatePermissionsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_team_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -412,53 +355,52 @@ func (x *UpdateMemberRoleRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateMemberRoleRequest.ProtoReflect.Descriptor instead.
-func (*UpdateMemberRoleRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdatePermissionsRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionsRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateMemberRoleRequest) GetUserId() int64 {
+func (x *UpdatePermissionsRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
-func (x *UpdateMemberRoleRequest) GetRole() string {
-	if x != nil {
-		return x.Role
-	}
-	return ""
-}
-
-func (x *UpdateMemberRoleRequest) GetApps() []string {
+func (x *UpdatePermissionsRequest) GetApps() []string {
 	if x != nil {
 		return x.Apps
 	}
 	return nil
 }
 
-type UpdateMemberRoleResponse struct {
+func (x *UpdatePermissionsRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+type UpdatePermissionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateMemberRoleResponse) Reset() {
-	*x = UpdateMemberRoleResponse{}
+func (x *UpdatePermissionsResponse) Reset() {
+	*x = UpdatePermissionsResponse{}
 	mi := &file_hub_v1_team_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateMemberRoleResponse) String() string {
+func (x *UpdatePermissionsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateMemberRoleResponse) ProtoMessage() {}
+func (*UpdatePermissionsResponse) ProtoMessage() {}
 
-func (x *UpdateMemberRoleResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdatePermissionsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_team_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -470,16 +412,9 @@ func (x *UpdateMemberRoleResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateMemberRoleResponse.ProtoReflect.Descriptor instead.
-func (*UpdateMemberRoleResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdatePermissionsResponse.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionsResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *UpdateMemberRoleResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
 }
 
 type RemoveMemberRequest struct {
@@ -528,7 +463,7 @@ func (x *RemoveMemberRequest) GetUserId() int64 {
 
 type RemoveMemberResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -563,133 +498,139 @@ func (*RemoveMemberResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *RemoveMemberResponse) GetSuccess() bool {
+func (x *RemoveMemberResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
+	}
+	return ""
+}
+
+type VerifyInviteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyInviteRequest) Reset() {
+	*x = VerifyInviteRequest{}
+	mi := &file_hub_v1_team_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyInviteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyInviteRequest) ProtoMessage() {}
+
+func (x *VerifyInviteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_team_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyInviteRequest.ProtoReflect.Descriptor instead.
+func (*VerifyInviteRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *VerifyInviteRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type VerifyInviteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Valid         bool                   `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyInviteResponse) Reset() {
+	*x = VerifyInviteResponse{}
+	mi := &file_hub_v1_team_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyInviteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyInviteResponse) ProtoMessage() {}
+
+func (x *VerifyInviteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_team_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyInviteResponse.ProtoReflect.Descriptor instead.
+func (*VerifyInviteResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *VerifyInviteResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *VerifyInviteResponse) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *VerifyInviteResponse) GetValid() bool {
+	if x != nil {
+		return x.Valid
 	}
 	return false
 }
 
-type GetMemberDetailRequest struct {
+type AcceptInviteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetMemberDetailRequest) Reset() {
-	*x = GetMemberDetailRequest{}
-	mi := &file_hub_v1_team_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetMemberDetailRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetMemberDetailRequest) ProtoMessage() {}
-
-func (x *GetMemberDetailRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_team_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetMemberDetailRequest.ProtoReflect.Descriptor instead.
-func (*GetMemberDetailRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_team_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetMemberDetailRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type GetMemberDetailResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Member         *TeamMember            `protobuf:"bytes,1,opt,name=member,proto3" json:"member,omitempty"`
-	AccessRequests []*AccessRequest       `protobuf:"bytes,2,rep,name=access_requests,json=accessRequests,proto3" json:"access_requests,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *GetMemberDetailResponse) Reset() {
-	*x = GetMemberDetailResponse{}
-	mi := &file_hub_v1_team_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetMemberDetailResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetMemberDetailResponse) ProtoMessage() {}
-
-func (x *GetMemberDetailResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_team_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetMemberDetailResponse.ProtoReflect.Descriptor instead.
-func (*GetMemberDetailResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_team_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *GetMemberDetailResponse) GetMember() *TeamMember {
-	if x != nil {
-		return x.Member
-	}
-	return nil
-}
-
-func (x *GetMemberDetailResponse) GetAccessRequests() []*AccessRequest {
-	if x != nil {
-		return x.AccessRequests
-	}
-	return nil
-}
-
-type AccessRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	App           string                 `protobuf:"bytes,2,opt,name=app,proto3" json:"app,omitempty"`
-	RequestedAt   string                 `protobuf:"bytes,3,opt,name=requested_at,json=requestedAt,proto3" json:"requested_at,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // pending, approved, denied
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AccessRequest) Reset() {
-	*x = AccessRequest{}
+func (x *AcceptInviteRequest) Reset() {
+	*x = AcceptInviteRequest{}
 	mi := &file_hub_v1_team_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AccessRequest) String() string {
+func (x *AcceptInviteRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AccessRequest) ProtoMessage() {}
+func (*AcceptInviteRequest) ProtoMessage() {}
 
-func (x *AccessRequest) ProtoReflect() protoreflect.Message {
+func (x *AcceptInviteRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_team_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -701,35 +642,145 @@ func (x *AccessRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AccessRequest.ProtoReflect.Descriptor instead.
-func (*AccessRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use AcceptInviteRequest.ProtoReflect.Descriptor instead.
+func (*AcceptInviteRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_team_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *AccessRequest) GetId() int64 {
+func (x *AcceptInviteRequest) GetToken() string {
 	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *AccessRequest) GetApp() string {
-	if x != nil {
-		return x.App
+		return x.Token
 	}
 	return ""
 }
 
-func (x *AccessRequest) GetRequestedAt() string {
+func (x *AcceptInviteRequest) GetPassword() string {
 	if x != nil {
-		return x.RequestedAt
+		return x.Password
 	}
 	return ""
 }
 
-func (x *AccessRequest) GetStatus() string {
+type AcceptInviteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptInviteResponse) Reset() {
+	*x = AcceptInviteResponse{}
+	mi := &file_hub_v1_team_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptInviteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptInviteResponse) ProtoMessage() {}
+
+func (x *AcceptInviteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_team_proto_msgTypes[12]
 	if x != nil {
-		return x.Status
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptInviteResponse.ProtoReflect.Descriptor instead.
+func (*AcceptInviteResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *AcceptInviteResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type MarkOnboardedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkOnboardedRequest) Reset() {
+	*x = MarkOnboardedRequest{}
+	mi := &file_hub_v1_team_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkOnboardedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkOnboardedRequest) ProtoMessage() {}
+
+func (x *MarkOnboardedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_team_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkOnboardedRequest.ProtoReflect.Descriptor instead.
+func (*MarkOnboardedRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{13}
+}
+
+type MarkOnboardedResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkOnboardedResponse) Reset() {
+	*x = MarkOnboardedResponse{}
+	mi := &file_hub_v1_team_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkOnboardedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkOnboardedResponse) ProtoMessage() {}
+
+func (x *MarkOnboardedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_team_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkOnboardedResponse.ProtoReflect.Descriptor instead.
+func (*MarkOnboardedResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *MarkOnboardedResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -743,7 +794,7 @@ type RequestAccessRequest struct {
 
 func (x *RequestAccessRequest) Reset() {
 	*x = RequestAccessRequest{}
-	mi := &file_hub_v1_team_proto_msgTypes[12]
+	mi := &file_hub_v1_team_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -755,7 +806,7 @@ func (x *RequestAccessRequest) String() string {
 func (*RequestAccessRequest) ProtoMessage() {}
 
 func (x *RequestAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_team_proto_msgTypes[12]
+	mi := &file_hub_v1_team_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,7 +819,7 @@ func (x *RequestAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequestAccessRequest.ProtoReflect.Descriptor instead.
 func (*RequestAccessRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_team_proto_rawDescGZIP(), []int{12}
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *RequestAccessRequest) GetApp() string {
@@ -780,14 +831,14 @@ func (x *RequestAccessRequest) GetApp() string {
 
 type RequestAccessResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RequestAccessResponse) Reset() {
 	*x = RequestAccessResponse{}
-	mi := &file_hub_v1_team_proto_msgTypes[13]
+	mi := &file_hub_v1_team_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -799,7 +850,7 @@ func (x *RequestAccessResponse) String() string {
 func (*RequestAccessResponse) ProtoMessage() {}
 
 func (x *RequestAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_team_proto_msgTypes[13]
+	mi := &file_hub_v1_team_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -812,81 +863,69 @@ func (x *RequestAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequestAccessResponse.ProtoReflect.Descriptor instead.
 func (*RequestAccessResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_team_proto_rawDescGZIP(), []int{13}
+	return file_hub_v1_team_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *RequestAccessResponse) GetSuccess() bool {
+func (x *RequestAccessResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_hub_v1_team_proto protoreflect.FileDescriptor
 
 const file_hub_v1_team_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/team.proto\x12\x03hub\x1a\x1acommon/v1/pagination.proto\"\xea\x01\n" +
+	"\x11hub/v1/team.proto\x12\x03hub\"\xb9\x01\n" +
+	"\x10StaffUserPayload\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x1d\n" +
 	"\n" +
-	"TeamMember\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
-	"\x04role\x18\x04 \x01(\tR\x04role\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12\x12\n" +
-	"\x04apps\x18\x06 \x03(\tR\x04apps\x12\x1d\n" +
-	"\n" +
-	"avatar_url\x18\a \x01(\tR\tavatarUrl\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\x12$\n" +
-	"\x0elast_active_at\x18\t \x01(\tR\flastActiveAt\"\x85\x01\n" +
-	"\x0fListTeamRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x1f\n" +
-	"\vrole_filter\x18\x02 \x01(\tR\n" +
-	"roleFilter\x12\x16\n" +
-	"\x06search\x18\x03 \x01(\tR\x06search\"y\n" +
-	"\x10ListTeamResponse\x12)\n" +
-	"\amembers\x18\x01 \x03(\v2\x0f.hub.TeamMemberR\amembers\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"\xa2\x01\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04apps\x18\x05 \x03(\tR\x04apps\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\"\x11\n" +
+	"\x0fListTeamRequest\"?\n" +
+	"\x10ListTeamResponse\x12+\n" +
+	"\x05users\x18\x01 \x03(\v2\x15.hub.StaffUserPayloadR\x05users\"\x8a\x01\n" +
 	"\x11InviteUserRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x12\n" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x12\x12\n" +
 	"\x04apps\x18\x04 \x03(\tR\x04apps\x12\x1a\n" +
-	"\bpassword\x18\x05 \x01(\tR\bpassword\x12\x1f\n" +
-	"\vauth_method\x18\x06 \x01(\tR\n" +
-	"authMethod\">\n" +
-	"\x12InviteUserResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"Z\n" +
-	"\x17UpdateMemberRoleRequest\x12\x17\n" +
+	"\bpassword\x18\x05 \x01(\tR\bpassword\"G\n" +
+	"\x12InviteUserResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"[\n" +
+	"\x18UpdatePermissionsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x12\n" +
-	"\x04role\x18\x02 \x01(\tR\x04role\x12\x12\n" +
-	"\x04apps\x18\x03 \x03(\tR\x04apps\"4\n" +
-	"\x18UpdateMemberRoleResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\".\n" +
+	"\x04apps\x18\x02 \x03(\tR\x04apps\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\"\x1b\n" +
+	"\x19UpdatePermissionsResponse\".\n" +
 	"\x13RemoveMemberRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\"0\n" +
 	"\x14RemoveMemberResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"1\n" +
-	"\x16GetMemberDetailRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\x7f\n" +
-	"\x17GetMemberDetailResponse\x12'\n" +
-	"\x06member\x18\x01 \x01(\v2\x0f.hub.TeamMemberR\x06member\x12;\n" +
-	"\x0faccess_requests\x18\x02 \x03(\v2\x12.hub.AccessRequestR\x0eaccessRequests\"l\n" +
-	"\rAccessRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
-	"\x03app\x18\x02 \x01(\tR\x03app\x12!\n" +
-	"\frequested_at\x18\x03 \x01(\tR\vrequestedAt\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\"(\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"+\n" +
+	"\x13VerifyInviteRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"_\n" +
+	"\x14VerifyInviteResponse\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x14\n" +
+	"\x05valid\x18\x03 \x01(\bR\x05valid\"G\n" +
+	"\x13AcceptInviteRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"0\n" +
+	"\x14AcceptInviteResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x16\n" +
+	"\x14MarkOnboardedRequest\"1\n" +
+	"\x15MarkOnboardedResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"(\n" +
 	"\x14RequestAccessRequest\x12\x10\n" +
 	"\x03app\x18\x01 \x01(\tR\x03app\"1\n" +
 	"\x15RequestAccessResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_team_proto_rawDescOnce sync.Once
@@ -900,36 +939,33 @@ func file_hub_v1_team_proto_rawDescGZIP() []byte {
 	return file_hub_v1_team_proto_rawDescData
 }
 
-var file_hub_v1_team_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_hub_v1_team_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_hub_v1_team_proto_goTypes = []any{
-	(*TeamMember)(nil),               // 0: hub.TeamMember
-	(*ListTeamRequest)(nil),          // 1: hub.ListTeamRequest
-	(*ListTeamResponse)(nil),         // 2: hub.ListTeamResponse
-	(*InviteUserRequest)(nil),        // 3: hub.InviteUserRequest
-	(*InviteUserResponse)(nil),       // 4: hub.InviteUserResponse
-	(*UpdateMemberRoleRequest)(nil),  // 5: hub.UpdateMemberRoleRequest
-	(*UpdateMemberRoleResponse)(nil), // 6: hub.UpdateMemberRoleResponse
-	(*RemoveMemberRequest)(nil),      // 7: hub.RemoveMemberRequest
-	(*RemoveMemberResponse)(nil),     // 8: hub.RemoveMemberResponse
-	(*GetMemberDetailRequest)(nil),   // 9: hub.GetMemberDetailRequest
-	(*GetMemberDetailResponse)(nil),  // 10: hub.GetMemberDetailResponse
-	(*AccessRequest)(nil),            // 11: hub.AccessRequest
-	(*RequestAccessRequest)(nil),     // 12: hub.RequestAccessRequest
-	(*RequestAccessResponse)(nil),    // 13: hub.RequestAccessResponse
-	(*v1.PaginationRequest)(nil),     // 14: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),    // 15: common.PaginationResponse
+	(*StaffUserPayload)(nil),          // 0: hub.StaffUserPayload
+	(*ListTeamRequest)(nil),           // 1: hub.ListTeamRequest
+	(*ListTeamResponse)(nil),          // 2: hub.ListTeamResponse
+	(*InviteUserRequest)(nil),         // 3: hub.InviteUserRequest
+	(*InviteUserResponse)(nil),        // 4: hub.InviteUserResponse
+	(*UpdatePermissionsRequest)(nil),  // 5: hub.UpdatePermissionsRequest
+	(*UpdatePermissionsResponse)(nil), // 6: hub.UpdatePermissionsResponse
+	(*RemoveMemberRequest)(nil),       // 7: hub.RemoveMemberRequest
+	(*RemoveMemberResponse)(nil),      // 8: hub.RemoveMemberResponse
+	(*VerifyInviteRequest)(nil),       // 9: hub.VerifyInviteRequest
+	(*VerifyInviteResponse)(nil),      // 10: hub.VerifyInviteResponse
+	(*AcceptInviteRequest)(nil),       // 11: hub.AcceptInviteRequest
+	(*AcceptInviteResponse)(nil),      // 12: hub.AcceptInviteResponse
+	(*MarkOnboardedRequest)(nil),      // 13: hub.MarkOnboardedRequest
+	(*MarkOnboardedResponse)(nil),     // 14: hub.MarkOnboardedResponse
+	(*RequestAccessRequest)(nil),      // 15: hub.RequestAccessRequest
+	(*RequestAccessResponse)(nil),     // 16: hub.RequestAccessResponse
 }
 var file_hub_v1_team_proto_depIdxs = []int32{
-	14, // 0: hub.ListTeamRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: hub.ListTeamResponse.members:type_name -> hub.TeamMember
-	15, // 2: hub.ListTeamResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: hub.GetMemberDetailResponse.member:type_name -> hub.TeamMember
-	11, // 4: hub.GetMemberDetailResponse.access_requests:type_name -> hub.AccessRequest
-	5,  // [5:5] is the sub-list for method output_type
-	5,  // [5:5] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0, // 0: hub.ListTeamResponse.users:type_name -> hub.StaffUserPayload
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_team_proto_init() }
@@ -943,7 +979,7 @@ func file_hub_v1_team_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_team_proto_rawDesc), len(file_hub_v1_team_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

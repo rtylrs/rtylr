@@ -221,7 +221,7 @@ func (x *GetPermissionsResponse) GetMatrix() *PermissionMatrix {
 	return nil
 }
 
-type UpdatePermissionsRequest struct {
+type UpdatePermissionMatrixRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Role          string                 `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
 	PermissionKey string                 `protobuf:"bytes,2,opt,name=permission_key,json=permissionKey,proto3" json:"permission_key,omitempty"`
@@ -230,20 +230,20 @@ type UpdatePermissionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdatePermissionsRequest) Reset() {
-	*x = UpdatePermissionsRequest{}
+func (x *UpdatePermissionMatrixRequest) Reset() {
+	*x = UpdatePermissionMatrixRequest{}
 	mi := &file_hub_v1_permissions_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdatePermissionsRequest) String() string {
+func (x *UpdatePermissionMatrixRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdatePermissionsRequest) ProtoMessage() {}
+func (*UpdatePermissionMatrixRequest) ProtoMessage() {}
 
-func (x *UpdatePermissionsRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdatePermissionMatrixRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_permissions_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -255,53 +255,53 @@ func (x *UpdatePermissionsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdatePermissionsRequest.ProtoReflect.Descriptor instead.
-func (*UpdatePermissionsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdatePermissionMatrixRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionMatrixRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_permissions_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdatePermissionsRequest) GetRole() string {
+func (x *UpdatePermissionMatrixRequest) GetRole() string {
 	if x != nil {
 		return x.Role
 	}
 	return ""
 }
 
-func (x *UpdatePermissionsRequest) GetPermissionKey() string {
+func (x *UpdatePermissionMatrixRequest) GetPermissionKey() string {
 	if x != nil {
 		return x.PermissionKey
 	}
 	return ""
 }
 
-func (x *UpdatePermissionsRequest) GetEnabled() bool {
+func (x *UpdatePermissionMatrixRequest) GetEnabled() bool {
 	if x != nil {
 		return x.Enabled
 	}
 	return false
 }
 
-type UpdatePermissionsResponse struct {
+type UpdatePermissionMatrixResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdatePermissionsResponse) Reset() {
-	*x = UpdatePermissionsResponse{}
+func (x *UpdatePermissionMatrixResponse) Reset() {
+	*x = UpdatePermissionMatrixResponse{}
 	mi := &file_hub_v1_permissions_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdatePermissionsResponse) String() string {
+func (x *UpdatePermissionMatrixResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdatePermissionsResponse) ProtoMessage() {}
+func (*UpdatePermissionMatrixResponse) ProtoMessage() {}
 
-func (x *UpdatePermissionsResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdatePermissionMatrixResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_permissions_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -313,12 +313,12 @@ func (x *UpdatePermissionsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdatePermissionsResponse.ProtoReflect.Descriptor instead.
-func (*UpdatePermissionsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdatePermissionMatrixResponse.ProtoReflect.Descriptor instead.
+func (*UpdatePermissionMatrixResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_permissions_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdatePermissionsResponse) GetSuccess() bool {
+func (x *UpdatePermissionMatrixResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
@@ -612,12 +612,12 @@ const file_hub_v1_permissions_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\"\x17\n" +
 	"\x15GetPermissionsRequest\"G\n" +
 	"\x16GetPermissionsResponse\x12-\n" +
-	"\x06matrix\x18\x01 \x01(\v2\x15.hub.PermissionMatrixR\x06matrix\"o\n" +
-	"\x18UpdatePermissionsRequest\x12\x12\n" +
+	"\x06matrix\x18\x01 \x01(\v2\x15.hub.PermissionMatrixR\x06matrix\"t\n" +
+	"\x1dUpdatePermissionMatrixRequest\x12\x12\n" +
 	"\x04role\x18\x01 \x01(\tR\x04role\x12%\n" +
 	"\x0epermission_key\x18\x02 \x01(\tR\rpermissionKey\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\"5\n" +
-	"\x19UpdatePermissionsResponse\x12\x18\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\":\n" +
+	"\x1eUpdatePermissionMatrixResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xb6\x01\n" +
 	"\n" +
 	"CustomRole\x12\x0e\n" +
@@ -652,18 +652,18 @@ func file_hub_v1_permissions_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_permissions_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_hub_v1_permissions_proto_goTypes = []any{
-	(*PermissionMatrix)(nil),          // 0: hub.PermissionMatrix
-	(*PermissionRow)(nil),             // 1: hub.PermissionRow
-	(*GetPermissionsRequest)(nil),     // 2: hub.GetPermissionsRequest
-	(*GetPermissionsResponse)(nil),    // 3: hub.GetPermissionsResponse
-	(*UpdatePermissionsRequest)(nil),  // 4: hub.UpdatePermissionsRequest
-	(*UpdatePermissionsResponse)(nil), // 5: hub.UpdatePermissionsResponse
-	(*CustomRole)(nil),                // 6: hub.CustomRole
-	(*ListRolesRequest)(nil),          // 7: hub.ListRolesRequest
-	(*ListRolesResponse)(nil),         // 8: hub.ListRolesResponse
-	(*CreateRoleRequest)(nil),         // 9: hub.CreateRoleRequest
-	(*CreateRoleResponse)(nil),        // 10: hub.CreateRoleResponse
-	nil,                               // 11: hub.PermissionRow.RoleValuesEntry
+	(*PermissionMatrix)(nil),               // 0: hub.PermissionMatrix
+	(*PermissionRow)(nil),                  // 1: hub.PermissionRow
+	(*GetPermissionsRequest)(nil),          // 2: hub.GetPermissionsRequest
+	(*GetPermissionsResponse)(nil),         // 3: hub.GetPermissionsResponse
+	(*UpdatePermissionMatrixRequest)(nil),  // 4: hub.UpdatePermissionMatrixRequest
+	(*UpdatePermissionMatrixResponse)(nil), // 5: hub.UpdatePermissionMatrixResponse
+	(*CustomRole)(nil),                     // 6: hub.CustomRole
+	(*ListRolesRequest)(nil),               // 7: hub.ListRolesRequest
+	(*ListRolesResponse)(nil),              // 8: hub.ListRolesResponse
+	(*CreateRoleRequest)(nil),              // 9: hub.CreateRoleRequest
+	(*CreateRoleResponse)(nil),             // 10: hub.CreateRoleResponse
+	nil,                                    // 11: hub.PermissionRow.RoleValuesEntry
 }
 var file_hub_v1_permissions_proto_depIdxs = []int32{
 	1,  // 0: hub.PermissionMatrix.rows:type_name -> hub.PermissionRow

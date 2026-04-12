@@ -10,9 +10,11 @@ message ApiKey {
   int64 id = 1;
   string name = 2;
   string key_prefix = 3; // First 8 chars shown
-  string permissions = 4;
+  repeated string scopes = 4;
   string created_at = 5;
   string last_used_at = 6;
+  string expires_at = 7;
+  bool is_active = 8;
 }
 
 message ListApiKeysRequest {}
@@ -23,20 +25,21 @@ message ListApiKeysResponse {
 
 message CreateApiKeyRequest {
   string name = 1;
-  string permissions = 2;
+  repeated string scopes = 2;
 }
 
 message CreateApiKeyResponse {
-  string key = 1; // Full key (shown only once)
-  ApiKey meta = 2;
+  int64 id = 1;
+  string key = 2;
+  string message = 3;
 }
 
-message DeleteApiKeyRequest {
+message RevokeApiKeyRequest {
   int64 id = 1;
 }
 
-message DeleteApiKeyResponse {
-  bool success = 1;
+message RevokeApiKeyResponse {
+  string message = 1;
 }
 
 // ── Webhooks ────────────────────────────────────────────────────────
@@ -46,9 +49,8 @@ message Webhook {
   string url = 2;
   repeated string events = 3;
   bool is_active = 4;
-  string secret = 5;
-  string created_at = 6;
-  string last_triggered_at = 7;
+  string created_at = 5;
+  string last_triggered_at = 6;
 }
 
 message ListWebhooksRequest {}
@@ -63,7 +65,8 @@ message CreateWebhookRequest {
 }
 
 message CreateWebhookResponse {
-  Webhook webhook = 1;
+  int64 id = 1;
+  string message = 2;
 }
 
 message UpdateWebhookRequest {
@@ -82,5 +85,5 @@ message DeleteWebhookRequest {
 }
 
 message DeleteWebhookResponse {
-  bool success = 1;
+  string message = 1;
 }

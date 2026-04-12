@@ -186,6 +186,8 @@ type Addon struct {
 	Price         float64                `protobuf:"fixed64,5,opt,name=price,proto3" json:"price,omitempty"`
 	IsFree        bool                   `protobuf:"varint,6,opt,name=is_free,json=isFree,proto3" json:"is_free,omitempty"`
 	IsEnabled     bool                   `protobuf:"varint,7,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
+	EnabledAt     *string                `protobuf:"bytes,8,opt,name=enabled_at,json=enabledAt,proto3,oneof" json:"enabled_at,omitempty"`
+	DisabledAt    *string                `protobuf:"bytes,9,opt,name=disabled_at,json=disabledAt,proto3,oneof" json:"disabled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -267,6 +269,20 @@ func (x *Addon) GetIsEnabled() bool {
 		return x.IsEnabled
 	}
 	return false
+}
+
+func (x *Addon) GetEnabledAt() string {
+	if x != nil && x.EnabledAt != nil {
+		return *x.EnabledAt
+	}
+	return ""
+}
+
+func (x *Addon) GetDisabledAt() string {
+	if x != nil && x.DisabledAt != nil {
+		return *x.DisabledAt
+	}
+	return ""
 }
 
 type ListAddonsRequest struct {
@@ -395,7 +411,7 @@ func (x *EnableAddonRequest) GetAddonId() string {
 
 type EnableAddonResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -430,11 +446,11 @@ func (*EnableAddonResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_apps_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *EnableAddonResponse) GetSuccess() bool {
+func (x *EnableAddonResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 type DisableAddonRequest struct {
@@ -483,7 +499,7 @@ func (x *DisableAddonRequest) GetAddonId() string {
 
 type DisableAddonResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -518,9 +534,97 @@ func (*DisableAddonResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_apps_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *DisableAddonResponse) GetSuccess() bool {
+func (x *DisableAddonResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
+	}
+	return ""
+}
+
+type AddonStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AddonId       string                 `protobuf:"bytes,1,opt,name=addon_id,json=addonId,proto3" json:"addon_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddonStatusRequest) Reset() {
+	*x = AddonStatusRequest{}
+	mi := &file_hub_v1_apps_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddonStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddonStatusRequest) ProtoMessage() {}
+
+func (x *AddonStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_apps_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddonStatusRequest.ProtoReflect.Descriptor instead.
+func (*AddonStatusRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_apps_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *AddonStatusRequest) GetAddonId() string {
+	if x != nil {
+		return x.AddonId
+	}
+	return ""
+}
+
+type AddonStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsEnabled     bool                   `protobuf:"varint,1,opt,name=is_enabled,json=isEnabled,proto3" json:"is_enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddonStatusResponse) Reset() {
+	*x = AddonStatusResponse{}
+	mi := &file_hub_v1_apps_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddonStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddonStatusResponse) ProtoMessage() {}
+
+func (x *AddonStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_apps_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddonStatusResponse.ProtoReflect.Descriptor instead.
+func (*AddonStatusResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_apps_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AddonStatusResponse) GetIsEnabled() bool {
+	if x != nil {
+		return x.IsEnabled
 	}
 	return false
 }
@@ -539,7 +643,7 @@ const file_hub_v1_apps_proto_rawDesc = "" +
 	"is_enabled\x18\x05 \x01(\bR\tisEnabled\"\x11\n" +
 	"\x0fListAppsRequest\"0\n" +
 	"\x10ListAppsResponse\x12\x1c\n" +
-	"\x04apps\x18\x01 \x03(\v2\b.hub.AppR\x04apps\"\xaf\x01\n" +
+	"\x04apps\x18\x01 \x03(\v2\b.hub.AppR\x04apps\"\x98\x02\n" +
 	"\x05Addon\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -548,7 +652,13 @@ const file_hub_v1_apps_proto_rawDesc = "" +
 	"\x05price\x18\x05 \x01(\x01R\x05price\x12\x17\n" +
 	"\ais_free\x18\x06 \x01(\bR\x06isFree\x12\x1d\n" +
 	"\n" +
-	"is_enabled\x18\a \x01(\bR\tisEnabled\"\x13\n" +
+	"is_enabled\x18\a \x01(\bR\tisEnabled\x12\"\n" +
+	"\n" +
+	"enabled_at\x18\b \x01(\tH\x00R\tenabledAt\x88\x01\x01\x12$\n" +
+	"\vdisabled_at\x18\t \x01(\tH\x01R\n" +
+	"disabledAt\x88\x01\x01B\r\n" +
+	"\v_enabled_atB\x0e\n" +
+	"\f_disabled_at\"\x13\n" +
 	"\x11ListAddonsRequest\"8\n" +
 	"\x12ListAddonsResponse\x12\"\n" +
 	"\x06addons\x18\x01 \x03(\v2\n" +
@@ -556,11 +666,16 @@ const file_hub_v1_apps_proto_rawDesc = "" +
 	"\x12EnableAddonRequest\x12\x19\n" +
 	"\baddon_id\x18\x01 \x01(\tR\aaddonId\"/\n" +
 	"\x13EnableAddonResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"0\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"0\n" +
 	"\x13DisableAddonRequest\x12\x19\n" +
 	"\baddon_id\x18\x01 \x01(\tR\aaddonId\"0\n" +
 	"\x14DisableAddonResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessage\"/\n" +
+	"\x12AddonStatusRequest\x12\x19\n" +
+	"\baddon_id\x18\x01 \x01(\tR\aaddonId\"4\n" +
+	"\x13AddonStatusResponse\x12\x1d\n" +
+	"\n" +
+	"is_enabled\x18\x01 \x01(\bR\tisEnabledB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_apps_proto_rawDescOnce sync.Once
@@ -574,7 +689,7 @@ func file_hub_v1_apps_proto_rawDescGZIP() []byte {
 	return file_hub_v1_apps_proto_rawDescData
 }
 
-var file_hub_v1_apps_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_hub_v1_apps_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_hub_v1_apps_proto_goTypes = []any{
 	(*App)(nil),                  // 0: hub.App
 	(*ListAppsRequest)(nil),      // 1: hub.ListAppsRequest
@@ -586,6 +701,8 @@ var file_hub_v1_apps_proto_goTypes = []any{
 	(*EnableAddonResponse)(nil),  // 7: hub.EnableAddonResponse
 	(*DisableAddonRequest)(nil),  // 8: hub.DisableAddonRequest
 	(*DisableAddonResponse)(nil), // 9: hub.DisableAddonResponse
+	(*AddonStatusRequest)(nil),   // 10: hub.AddonStatusRequest
+	(*AddonStatusResponse)(nil),  // 11: hub.AddonStatusResponse
 }
 var file_hub_v1_apps_proto_depIdxs = []int32{
 	0, // 0: hub.ListAppsResponse.apps:type_name -> hub.App
@@ -602,13 +719,14 @@ func file_hub_v1_apps_proto_init() {
 	if File_hub_v1_apps_proto != nil {
 		return
 	}
+	file_hub_v1_apps_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_apps_proto_rawDesc), len(file_hub_v1_apps_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

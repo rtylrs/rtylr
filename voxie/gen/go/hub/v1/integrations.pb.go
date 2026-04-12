@@ -24,14 +24,11 @@ const (
 type Integration struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Provider      string                 `protobuf:"bytes,4,opt,name=provider,proto3" json:"provider,omitempty"` // stripe, square, mailchimp, etc.
-	Category      string                 `protobuf:"bytes,5,opt,name=category,proto3" json:"category,omitempty"` // payment, marketing, accounting, etc.
-	Icon          string                 `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	IsConnected   bool                   `protobuf:"varint,7,opt,name=is_connected,json=isConnected,proto3" json:"is_connected,omitempty"`
-	ConnectedAt   string                 `protobuf:"bytes,8,opt,name=connected_at,json=connectedAt,proto3" json:"connected_at,omitempty"`
-	Config        map[string]string      `protobuf:"bytes,9,rep,name=config,proto3" json:"config,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Provider      string                 `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Config        []byte                 `protobuf:"bytes,4,opt,name=config,proto3" json:"config,omitempty"`
+	ConnectedAt   string                 `protobuf:"bytes,5,opt,name=connected_at,json=connectedAt,proto3" json:"connected_at,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,20 +70,6 @@ func (x *Integration) GetId() int64 {
 	return 0
 }
 
-func (x *Integration) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Integration) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
 func (x *Integration) GetProvider() string {
 	if x != nil {
 		return x.Provider
@@ -94,25 +77,18 @@ func (x *Integration) GetProvider() string {
 	return ""
 }
 
-func (x *Integration) GetCategory() string {
+func (x *Integration) GetStatus() string {
 	if x != nil {
-		return x.Category
+		return x.Status
 	}
 	return ""
 }
 
-func (x *Integration) GetIcon() string {
+func (x *Integration) GetConfig() []byte {
 	if x != nil {
-		return x.Icon
+		return x.Config
 	}
-	return ""
-}
-
-func (x *Integration) GetIsConnected() bool {
-	if x != nil {
-		return x.IsConnected
-	}
-	return false
+	return nil
 }
 
 func (x *Integration) GetConnectedAt() string {
@@ -122,11 +98,11 @@ func (x *Integration) GetConnectedAt() string {
 	return ""
 }
 
-func (x *Integration) GetConfig() map[string]string {
+func (x *Integration) GetCreatedAt() string {
 	if x != nil {
-		return x.Config
+		return x.CreatedAt
 	}
-	return nil
+	return ""
 }
 
 type ListIntegrationsRequest struct {
@@ -212,7 +188,7 @@ func (x *ListIntegrationsResponse) GetIntegrations() []*Integration {
 type ConnectIntegrationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
-	Credentials   map[string]string      `protobuf:"bytes,2,rep,name=credentials,proto3" json:"credentials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Config        []byte                 `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -254,16 +230,17 @@ func (x *ConnectIntegrationRequest) GetProvider() string {
 	return ""
 }
 
-func (x *ConnectIntegrationRequest) GetCredentials() map[string]string {
+func (x *ConnectIntegrationRequest) GetConfig() []byte {
 	if x != nil {
-		return x.Credentials
+		return x.Config
 	}
 	return nil
 }
 
 type ConnectIntegrationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Integration   *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -298,11 +275,18 @@ func (*ConnectIntegrationResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_integrations_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ConnectIntegrationResponse) GetIntegration() *Integration {
+func (x *ConnectIntegrationResponse) GetId() int64 {
 	if x != nil {
-		return x.Integration
+		return x.Id
 	}
-	return nil
+	return 0
+}
+
+func (x *ConnectIntegrationResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 type DisconnectIntegrationRequest struct {
@@ -351,7 +335,7 @@ func (x *DisconnectIntegrationRequest) GetId() int64 {
 
 type DisconnectIntegrationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -386,46 +370,39 @@ func (*DisconnectIntegrationResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_integrations_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DisconnectIntegrationResponse) GetSuccess() bool {
+func (x *DisconnectIntegrationResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
+		return x.Message
 	}
-	return false
+	return ""
 }
 
 var File_hub_v1_integrations_proto protoreflect.FileDescriptor
 
 const file_hub_v1_integrations_proto_rawDesc = "" +
 	"\n" +
-	"\x19hub/v1/integrations.proto\x12\x03hub\"\xd6\x02\n" +
+	"\x19hub/v1/integrations.proto\x12\x03hub\"\xab\x01\n" +
 	"\vIntegration\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
-	"\bprovider\x18\x04 \x01(\tR\bprovider\x12\x1a\n" +
-	"\bcategory\x18\x05 \x01(\tR\bcategory\x12\x12\n" +
-	"\x04icon\x18\x06 \x01(\tR\x04icon\x12!\n" +
-	"\fis_connected\x18\a \x01(\bR\visConnected\x12!\n" +
-	"\fconnected_at\x18\b \x01(\tR\vconnectedAt\x124\n" +
-	"\x06config\x18\t \x03(\v2\x1c.hub.Integration.ConfigEntryR\x06config\x1a9\n" +
-	"\vConfigEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x19\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
+	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x16\n" +
+	"\x06config\x18\x04 \x01(\fR\x06config\x12!\n" +
+	"\fconnected_at\x18\x05 \x01(\tR\vconnectedAt\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x19\n" +
 	"\x17ListIntegrationsRequest\"P\n" +
 	"\x18ListIntegrationsResponse\x124\n" +
-	"\fintegrations\x18\x01 \x03(\v2\x10.hub.IntegrationR\fintegrations\"\xca\x01\n" +
+	"\fintegrations\x18\x01 \x03(\v2\x10.hub.IntegrationR\fintegrations\"O\n" +
 	"\x19ConnectIntegrationRequest\x12\x1a\n" +
-	"\bprovider\x18\x01 \x01(\tR\bprovider\x12Q\n" +
-	"\vcredentials\x18\x02 \x03(\v2/.hub.ConnectIntegrationRequest.CredentialsEntryR\vcredentials\x1a>\n" +
-	"\x10CredentialsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"P\n" +
-	"\x1aConnectIntegrationResponse\x122\n" +
-	"\vintegration\x18\x01 \x01(\v2\x10.hub.IntegrationR\vintegration\".\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x16\n" +
+	"\x06config\x18\x02 \x01(\fR\x06config\"F\n" +
+	"\x1aConnectIntegrationResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\".\n" +
 	"\x1cDisconnectIntegrationRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"9\n" +
 	"\x1dDisconnectIntegrationResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_integrations_proto_rawDescOnce sync.Once
@@ -439,7 +416,7 @@ func file_hub_v1_integrations_proto_rawDescGZIP() []byte {
 	return file_hub_v1_integrations_proto_rawDescData
 }
 
-var file_hub_v1_integrations_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_hub_v1_integrations_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_hub_v1_integrations_proto_goTypes = []any{
 	(*Integration)(nil),                   // 0: hub.Integration
 	(*ListIntegrationsRequest)(nil),       // 1: hub.ListIntegrationsRequest
@@ -448,19 +425,14 @@ var file_hub_v1_integrations_proto_goTypes = []any{
 	(*ConnectIntegrationResponse)(nil),    // 4: hub.ConnectIntegrationResponse
 	(*DisconnectIntegrationRequest)(nil),  // 5: hub.DisconnectIntegrationRequest
 	(*DisconnectIntegrationResponse)(nil), // 6: hub.DisconnectIntegrationResponse
-	nil,                                   // 7: hub.Integration.ConfigEntry
-	nil,                                   // 8: hub.ConnectIntegrationRequest.CredentialsEntry
 }
 var file_hub_v1_integrations_proto_depIdxs = []int32{
-	7, // 0: hub.Integration.config:type_name -> hub.Integration.ConfigEntry
-	0, // 1: hub.ListIntegrationsResponse.integrations:type_name -> hub.Integration
-	8, // 2: hub.ConnectIntegrationRequest.credentials:type_name -> hub.ConnectIntegrationRequest.CredentialsEntry
-	0, // 3: hub.ConnectIntegrationResponse.integration:type_name -> hub.Integration
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 0: hub.ListIntegrationsResponse.integrations:type_name -> hub.Integration
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_integrations_proto_init() }
@@ -474,7 +446,7 @@ func file_hub_v1_integrations_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_integrations_proto_rawDesc), len(file_hub_v1_integrations_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

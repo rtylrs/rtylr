@@ -22,13 +22,11 @@ const (
 )
 
 type SecurityState struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	TwoFactorEnabled   bool                   `protobuf:"varint,1,opt,name=two_factor_enabled,json=twoFactorEnabled,proto3" json:"two_factor_enabled,omitempty"`
-	TwoFactorMethod    string                 `protobuf:"bytes,2,opt,name=two_factor_method,json=twoFactorMethod,proto3" json:"two_factor_method,omitempty"` // totp, sms
-	LastPasswordChange string                 `protobuf:"bytes,3,opt,name=last_password_change,json=lastPasswordChange,proto3" json:"last_password_change,omitempty"`
-	Sessions           []*ActiveSession       `protobuf:"bytes,4,rep,name=sessions,proto3" json:"sessions,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TwoFactorEnabled bool                   `protobuf:"varint,1,opt,name=two_factor_enabled,json=twoFactorEnabled,proto3" json:"two_factor_enabled,omitempty"`
+	ActiveSessions   []*ActiveSession       `protobuf:"bytes,2,rep,name=active_sessions,json=activeSessions,proto3" json:"active_sessions,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SecurityState) Reset() {
@@ -68,35 +66,20 @@ func (x *SecurityState) GetTwoFactorEnabled() bool {
 	return false
 }
 
-func (x *SecurityState) GetTwoFactorMethod() string {
+func (x *SecurityState) GetActiveSessions() []*ActiveSession {
 	if x != nil {
-		return x.TwoFactorMethod
-	}
-	return ""
-}
-
-func (x *SecurityState) GetLastPasswordChange() string {
-	if x != nil {
-		return x.LastPasswordChange
-	}
-	return ""
-}
-
-func (x *SecurityState) GetSessions() []*ActiveSession {
-	if x != nil {
-		return x.Sessions
+		return x.ActiveSessions
 	}
 	return nil
 }
 
 type ActiveSession struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Device        string                 `protobuf:"bytes,2,opt,name=device,proto3" json:"device,omitempty"`
-	IpAddress     string                 `protobuf:"bytes,3,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	Location      string                 `protobuf:"bytes,4,opt,name=location,proto3" json:"location,omitempty"`
-	LastActiveAt  string                 `protobuf:"bytes,5,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
-	IsCurrent     bool                   `protobuf:"varint,6,opt,name=is_current,json=isCurrent,proto3" json:"is_current,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Ip            string                 `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	UserAgent     string                 `protobuf:"bytes,3,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	IsCurrent     bool                   `protobuf:"varint,5,opt,name=is_current,json=isCurrent,proto3" json:"is_current,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -131,37 +114,30 @@ func (*ActiveSession) Descriptor() ([]byte, []int) {
 	return file_hub_v1_security_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ActiveSession) GetId() int64 {
+func (x *ActiveSession) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-func (x *ActiveSession) GetDevice() string {
+func (x *ActiveSession) GetIp() string {
 	if x != nil {
-		return x.Device
+		return x.Ip
 	}
 	return ""
 }
 
-func (x *ActiveSession) GetIpAddress() string {
+func (x *ActiveSession) GetUserAgent() string {
 	if x != nil {
-		return x.IpAddress
+		return x.UserAgent
 	}
 	return ""
 }
 
-func (x *ActiveSession) GetLocation() string {
+func (x *ActiveSession) GetCreatedAt() string {
 	if x != nil {
-		return x.Location
-	}
-	return ""
-}
-
-func (x *ActiveSession) GetLastActiveAt() string {
-	if x != nil {
-		return x.LastActiveAt
+		return x.CreatedAt
 	}
 	return ""
 }
@@ -254,12 +230,10 @@ func (x *GetSecurityStateResponse) GetState() *SecurityState {
 }
 
 type Update2FARequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Enabled          bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Method           string                 `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"` // totp, sms
-	VerificationCode string                 `protobuf:"bytes,3,opt,name=verification_code,json=verificationCode,proto3" json:"verification_code,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Update2FARequest) Reset() {
@@ -299,25 +273,9 @@ func (x *Update2FARequest) GetEnabled() bool {
 	return false
 }
 
-func (x *Update2FARequest) GetMethod() string {
-	if x != nil {
-		return x.Method
-	}
-	return ""
-}
-
-func (x *Update2FARequest) GetVerificationCode() string {
-	if x != nil {
-		return x.VerificationCode
-	}
-	return ""
-}
-
 type Update2FAResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Secret        string                 `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`                          // TOTP secret (only on enable)
-	QrCodeUrl     string                 `protobuf:"bytes,3,opt,name=qr_code_url,json=qrCodeUrl,proto3" json:"qr_code_url,omitempty"` // QR code data URI (only on enable)
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -352,48 +310,39 @@ func (*Update2FAResponse) Descriptor() ([]byte, []int) {
 	return file_hub_v1_security_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Update2FAResponse) GetSuccess() bool {
+func (x *Update2FAResponse) GetMessage() string {
 	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *Update2FAResponse) GetSecret() string {
-	if x != nil {
-		return x.Secret
+		return x.Message
 	}
 	return ""
 }
 
-func (x *Update2FAResponse) GetQrCodeUrl() string {
-	if x != nil {
-		return x.QrCodeUrl
-	}
-	return ""
-}
-
-type RevokeSessionRequest struct {
+type LoginEntry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Method        string                 `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`
+	Ip            string                 `protobuf:"bytes,3,opt,name=ip,proto3" json:"ip,omitempty"`
+	UserAgent     string                 `protobuf:"bytes,4,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	Success       bool                   `protobuf:"varint,5,opt,name=success,proto3" json:"success,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RevokeSessionRequest) Reset() {
-	*x = RevokeSessionRequest{}
+func (x *LoginEntry) Reset() {
+	*x = LoginEntry{}
 	mi := &file_hub_v1_security_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RevokeSessionRequest) String() string {
+func (x *LoginEntry) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RevokeSessionRequest) ProtoMessage() {}
+func (*LoginEntry) ProtoMessage() {}
 
-func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
+func (x *LoginEntry) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_security_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -405,39 +354,73 @@ func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
-func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginEntry.ProtoReflect.Descriptor instead.
+func (*LoginEntry) Descriptor() ([]byte, []int) {
 	return file_hub_v1_security_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *RevokeSessionRequest) GetSessionId() int64 {
+func (x *LoginEntry) GetEmail() string {
 	if x != nil {
-		return x.SessionId
+		return x.Email
 	}
-	return 0
+	return ""
 }
 
-type RevokeSessionResponse struct {
+func (x *LoginEntry) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *LoginEntry) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *LoginEntry) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
+	}
+	return ""
+}
+
+func (x *LoginEntry) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *LoginEntry) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type LoginHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RevokeSessionResponse) Reset() {
-	*x = RevokeSessionResponse{}
+func (x *LoginHistoryRequest) Reset() {
+	*x = LoginHistoryRequest{}
 	mi := &file_hub_v1_security_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RevokeSessionResponse) String() string {
+func (x *LoginHistoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RevokeSessionResponse) ProtoMessage() {}
+func (*LoginHistoryRequest) ProtoMessage() {}
 
-func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
+func (x *LoginHistoryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hub_v1_security_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -449,53 +432,175 @@ func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RevokeSessionResponse.ProtoReflect.Descriptor instead.
-func (*RevokeSessionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginHistoryRequest.ProtoReflect.Descriptor instead.
+func (*LoginHistoryRequest) Descriptor() ([]byte, []int) {
 	return file_hub_v1_security_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *RevokeSessionResponse) GetSuccess() bool {
+type LoginHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	History       []*LoginEntry          `protobuf:"bytes,1,rep,name=history,proto3" json:"history,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginHistoryResponse) Reset() {
+	*x = LoginHistoryResponse{}
+	mi := &file_hub_v1_security_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginHistoryResponse) ProtoMessage() {}
+
+func (x *LoginHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_security_proto_msgTypes[8]
 	if x != nil {
-		return x.Success
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return false
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginHistoryResponse.ProtoReflect.Descriptor instead.
+func (*LoginHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_security_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *LoginHistoryResponse) GetHistory() []*LoginEntry {
+	if x != nil {
+		return x.History
+	}
+	return nil
+}
+
+type InvalidateSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InvalidateSessionsRequest) Reset() {
+	*x = InvalidateSessionsRequest{}
+	mi := &file_hub_v1_security_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InvalidateSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InvalidateSessionsRequest) ProtoMessage() {}
+
+func (x *InvalidateSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_security_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InvalidateSessionsRequest.ProtoReflect.Descriptor instead.
+func (*InvalidateSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_security_proto_rawDescGZIP(), []int{9}
+}
+
+type InvalidateSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InvalidateSessionsResponse) Reset() {
+	*x = InvalidateSessionsResponse{}
+	mi := &file_hub_v1_security_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InvalidateSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InvalidateSessionsResponse) ProtoMessage() {}
+
+func (x *InvalidateSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_security_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InvalidateSessionsResponse.ProtoReflect.Descriptor instead.
+func (*InvalidateSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_security_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *InvalidateSessionsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_hub_v1_security_proto protoreflect.FileDescriptor
 
 const file_hub_v1_security_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/security.proto\x12\x03hub\"\xcb\x01\n" +
+	"\x15hub/v1/security.proto\x12\x03hub\"z\n" +
 	"\rSecurityState\x12,\n" +
-	"\x12two_factor_enabled\x18\x01 \x01(\bR\x10twoFactorEnabled\x12*\n" +
-	"\x11two_factor_method\x18\x02 \x01(\tR\x0ftwoFactorMethod\x120\n" +
-	"\x14last_password_change\x18\x03 \x01(\tR\x12lastPasswordChange\x12.\n" +
-	"\bsessions\x18\x04 \x03(\v2\x12.hub.ActiveSessionR\bsessions\"\xb7\x01\n" +
+	"\x12two_factor_enabled\x18\x01 \x01(\bR\x10twoFactorEnabled\x12;\n" +
+	"\x0factive_sessions\x18\x02 \x03(\v2\x12.hub.ActiveSessionR\x0eactiveSessions\"\x8c\x01\n" +
 	"\rActiveSession\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06device\x18\x02 \x01(\tR\x06device\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x0e\n" +
+	"\x02ip\x18\x02 \x01(\tR\x02ip\x12\x1d\n" +
 	"\n" +
-	"ip_address\x18\x03 \x01(\tR\tipAddress\x12\x1a\n" +
-	"\blocation\x18\x04 \x01(\tR\blocation\x12$\n" +
-	"\x0elast_active_at\x18\x05 \x01(\tR\flastActiveAt\x12\x1d\n" +
+	"user_agent\x18\x03 \x01(\tR\tuserAgent\x12\x1d\n" +
 	"\n" +
-	"is_current\x18\x06 \x01(\bR\tisCurrent\"\x19\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"is_current\x18\x05 \x01(\bR\tisCurrent\"\x19\n" +
 	"\x17GetSecurityStateRequest\"D\n" +
 	"\x18GetSecurityStateResponse\x12(\n" +
-	"\x05state\x18\x01 \x01(\v2\x12.hub.SecurityStateR\x05state\"q\n" +
+	"\x05state\x18\x01 \x01(\v2\x12.hub.SecurityStateR\x05state\",\n" +
 	"\x10Update2FARequest\x12\x18\n" +
-	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x16\n" +
-	"\x06method\x18\x02 \x01(\tR\x06method\x12+\n" +
-	"\x11verification_code\x18\x03 \x01(\tR\x10verificationCode\"e\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\"-\n" +
 	"\x11Update2FAResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x16\n" +
-	"\x06secret\x18\x02 \x01(\tR\x06secret\x12\x1e\n" +
-	"\vqr_code_url\x18\x03 \x01(\tR\tqrCodeUrl\"5\n" +
-	"\x14RevokeSessionRequest\x12\x1d\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xa2\x01\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03R\tsessionId\"1\n" +
-	"\x15RevokeSessionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"LoginEntry\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x16\n" +
+	"\x06method\x18\x02 \x01(\tR\x06method\x12\x0e\n" +
+	"\x02ip\x18\x03 \x01(\tR\x02ip\x12\x1d\n" +
+	"\n" +
+	"user_agent\x18\x04 \x01(\tR\tuserAgent\x12\x18\n" +
+	"\asuccess\x18\x05 \x01(\bR\asuccess\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x15\n" +
+	"\x13LoginHistoryRequest\"A\n" +
+	"\x14LoginHistoryResponse\x12)\n" +
+	"\ahistory\x18\x01 \x03(\v2\x0f.hub.LoginEntryR\ahistory\"\x1b\n" +
+	"\x19InvalidateSessionsRequest\"6\n" +
+	"\x1aInvalidateSessionsResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_security_proto_rawDescOnce sync.Once
@@ -509,25 +614,29 @@ func file_hub_v1_security_proto_rawDescGZIP() []byte {
 	return file_hub_v1_security_proto_rawDescData
 }
 
-var file_hub_v1_security_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_hub_v1_security_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_hub_v1_security_proto_goTypes = []any{
-	(*SecurityState)(nil),            // 0: hub.SecurityState
-	(*ActiveSession)(nil),            // 1: hub.ActiveSession
-	(*GetSecurityStateRequest)(nil),  // 2: hub.GetSecurityStateRequest
-	(*GetSecurityStateResponse)(nil), // 3: hub.GetSecurityStateResponse
-	(*Update2FARequest)(nil),         // 4: hub.Update2FARequest
-	(*Update2FAResponse)(nil),        // 5: hub.Update2FAResponse
-	(*RevokeSessionRequest)(nil),     // 6: hub.RevokeSessionRequest
-	(*RevokeSessionResponse)(nil),    // 7: hub.RevokeSessionResponse
+	(*SecurityState)(nil),              // 0: hub.SecurityState
+	(*ActiveSession)(nil),              // 1: hub.ActiveSession
+	(*GetSecurityStateRequest)(nil),    // 2: hub.GetSecurityStateRequest
+	(*GetSecurityStateResponse)(nil),   // 3: hub.GetSecurityStateResponse
+	(*Update2FARequest)(nil),           // 4: hub.Update2FARequest
+	(*Update2FAResponse)(nil),          // 5: hub.Update2FAResponse
+	(*LoginEntry)(nil),                 // 6: hub.LoginEntry
+	(*LoginHistoryRequest)(nil),        // 7: hub.LoginHistoryRequest
+	(*LoginHistoryResponse)(nil),       // 8: hub.LoginHistoryResponse
+	(*InvalidateSessionsRequest)(nil),  // 9: hub.InvalidateSessionsRequest
+	(*InvalidateSessionsResponse)(nil), // 10: hub.InvalidateSessionsResponse
 }
 var file_hub_v1_security_proto_depIdxs = []int32{
-	1, // 0: hub.SecurityState.sessions:type_name -> hub.ActiveSession
+	1, // 0: hub.SecurityState.active_sessions:type_name -> hub.ActiveSession
 	0, // 1: hub.GetSecurityStateResponse.state:type_name -> hub.SecurityState
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 2: hub.LoginHistoryResponse.history:type_name -> hub.LoginEntry
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_security_proto_init() }
@@ -541,7 +650,7 @@ func file_hub_v1_security_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_security_proto_rawDesc), len(file_hub_v1_security_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

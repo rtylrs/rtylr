@@ -8,14 +8,11 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
 message Integration {
   int64 id = 1;
-  string name = 2;
-  string description = 3;
-  string provider = 4; // stripe, square, mailchimp, etc.
-  string category = 5; // payment, marketing, accounting, etc.
-  string icon = 6;
-  bool is_connected = 7;
-  string connected_at = 8;
-  map<string, string> config = 9;
+  string provider = 2;
+  string status = 3;
+  bytes config = 4;
+  string connected_at = 5;
+  string created_at = 6;
 }
 
 message ListIntegrationsRequest {}
@@ -26,11 +23,12 @@ message ListIntegrationsResponse {
 
 message ConnectIntegrationRequest {
   string provider = 1;
-  map<string, string> credentials = 2;
+  bytes config = 2;
 }
 
 message ConnectIntegrationResponse {
-  Integration integration = 1;
+  int64 id = 1;
+  string message = 2;
 }
 
 message DisconnectIntegrationRequest {
@@ -38,5 +36,5 @@ message DisconnectIntegrationRequest {
 }
 
 message DisconnectIntegrationResponse {
-  bool success = 1;
+  string message = 1;
 }

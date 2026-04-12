@@ -24,13 +24,10 @@ const (
 type BillingSummary struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Plan            string                 `protobuf:"bytes,1,opt,name=plan,proto3" json:"plan,omitempty"`
-	MonthlyCost     float64                `protobuf:"fixed64,2,opt,name=monthly_cost,json=monthlyCost,proto3" json:"monthly_cost,omitempty"`
-	MemberCount     int32                  `protobuf:"varint,3,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
-	MemberLimit     int32                  `protobuf:"varint,4,opt,name=member_limit,json=memberLimit,proto3" json:"member_limit,omitempty"`
-	AddonCharges    []*AddonCharge         `protobuf:"bytes,5,rep,name=addon_charges,json=addonCharges,proto3" json:"addon_charges,omitempty"`
-	NextBillingDate string                 `protobuf:"bytes,6,opt,name=next_billing_date,json=nextBillingDate,proto3" json:"next_billing_date,omitempty"`
-	PaymentMethod   string                 `protobuf:"bytes,7,opt,name=payment_method,json=paymentMethod,proto3" json:"payment_method,omitempty"`
-	CardLast4       string                 `protobuf:"bytes,8,opt,name=card_last4,json=cardLast4,proto3" json:"card_last4,omitempty"`
+	Status          string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	CurrentUsage    float64                `protobuf:"fixed64,3,opt,name=current_usage,json=currentUsage,proto3" json:"current_usage,omitempty"`
+	UsageLimit      float64                `protobuf:"fixed64,4,opt,name=usage_limit,json=usageLimit,proto3" json:"usage_limit,omitempty"`
+	NextBillingDate string                 `protobuf:"bytes,5,opt,name=next_billing_date,json=nextBillingDate,proto3" json:"next_billing_date,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -72,32 +69,25 @@ func (x *BillingSummary) GetPlan() string {
 	return ""
 }
 
-func (x *BillingSummary) GetMonthlyCost() float64 {
+func (x *BillingSummary) GetStatus() string {
 	if x != nil {
-		return x.MonthlyCost
+		return x.Status
+	}
+	return ""
+}
+
+func (x *BillingSummary) GetCurrentUsage() float64 {
+	if x != nil {
+		return x.CurrentUsage
 	}
 	return 0
 }
 
-func (x *BillingSummary) GetMemberCount() int32 {
+func (x *BillingSummary) GetUsageLimit() float64 {
 	if x != nil {
-		return x.MemberCount
+		return x.UsageLimit
 	}
 	return 0
-}
-
-func (x *BillingSummary) GetMemberLimit() int32 {
-	if x != nil {
-		return x.MemberLimit
-	}
-	return 0
-}
-
-func (x *BillingSummary) GetAddonCharges() []*AddonCharge {
-	if x != nil {
-		return x.AddonCharges
-	}
-	return nil
 }
 
 func (x *BillingSummary) GetNextBillingDate() string {
@@ -105,80 +95,6 @@ func (x *BillingSummary) GetNextBillingDate() string {
 		return x.NextBillingDate
 	}
 	return ""
-}
-
-func (x *BillingSummary) GetPaymentMethod() string {
-	if x != nil {
-		return x.PaymentMethod
-	}
-	return ""
-}
-
-func (x *BillingSummary) GetCardLast4() string {
-	if x != nil {
-		return x.CardLast4
-	}
-	return ""
-}
-
-type AddonCharge struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AddonId       string                 `protobuf:"bytes,1,opt,name=addon_id,json=addonId,proto3" json:"addon_id,omitempty"`
-	AddonName     string                 `protobuf:"bytes,2,opt,name=addon_name,json=addonName,proto3" json:"addon_name,omitempty"`
-	Price         float64                `protobuf:"fixed64,3,opt,name=price,proto3" json:"price,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AddonCharge) Reset() {
-	*x = AddonCharge{}
-	mi := &file_hub_v1_billing_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AddonCharge) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AddonCharge) ProtoMessage() {}
-
-func (x *AddonCharge) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AddonCharge.ProtoReflect.Descriptor instead.
-func (*AddonCharge) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AddonCharge) GetAddonId() string {
-	if x != nil {
-		return x.AddonId
-	}
-	return ""
-}
-
-func (x *AddonCharge) GetAddonName() string {
-	if x != nil {
-		return x.AddonName
-	}
-	return ""
-}
-
-func (x *AddonCharge) GetPrice() float64 {
-	if x != nil {
-		return x.Price
-	}
-	return 0
 }
 
 type GetBillingSummaryRequest struct {
@@ -189,7 +105,7 @@ type GetBillingSummaryRequest struct {
 
 func (x *GetBillingSummaryRequest) Reset() {
 	*x = GetBillingSummaryRequest{}
-	mi := &file_hub_v1_billing_proto_msgTypes[2]
+	mi := &file_hub_v1_billing_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -201,7 +117,7 @@ func (x *GetBillingSummaryRequest) String() string {
 func (*GetBillingSummaryRequest) ProtoMessage() {}
 
 func (x *GetBillingSummaryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[2]
+	mi := &file_hub_v1_billing_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -214,7 +130,7 @@ func (x *GetBillingSummaryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBillingSummaryRequest.ProtoReflect.Descriptor instead.
 func (*GetBillingSummaryRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{2}
+	return file_hub_v1_billing_proto_rawDescGZIP(), []int{1}
 }
 
 type GetBillingSummaryResponse struct {
@@ -226,7 +142,7 @@ type GetBillingSummaryResponse struct {
 
 func (x *GetBillingSummaryResponse) Reset() {
 	*x = GetBillingSummaryResponse{}
-	mi := &file_hub_v1_billing_proto_msgTypes[3]
+	mi := &file_hub_v1_billing_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -238,7 +154,7 @@ func (x *GetBillingSummaryResponse) String() string {
 func (*GetBillingSummaryResponse) ProtoMessage() {}
 
 func (x *GetBillingSummaryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[3]
+	mi := &file_hub_v1_billing_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -251,7 +167,7 @@ func (x *GetBillingSummaryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBillingSummaryResponse.ProtoReflect.Descriptor instead.
 func (*GetBillingSummaryResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{3}
+	return file_hub_v1_billing_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetBillingSummaryResponse) GetSummary() *BillingSummary {
@@ -264,19 +180,18 @@ func (x *GetBillingSummaryResponse) GetSummary() *BillingSummary {
 type Invoice struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Number        string                 `protobuf:"bytes,2,opt,name=number,proto3" json:"number,omitempty"`
-	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"` // paid, pending, failed
-	Period        string                 `protobuf:"bytes,5,opt,name=period,proto3" json:"period,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	PdfUrl        string                 `protobuf:"bytes,7,opt,name=pdf_url,json=pdfUrl,proto3" json:"pdf_url,omitempty"`
+	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency      string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	IssuedAt      string                 `protobuf:"bytes,5,opt,name=issued_at,json=issuedAt,proto3" json:"issued_at,omitempty"`
+	PaidAt        string                 `protobuf:"bytes,6,opt,name=paid_at,json=paidAt,proto3" json:"paid_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Invoice) Reset() {
 	*x = Invoice{}
-	mi := &file_hub_v1_billing_proto_msgTypes[4]
+	mi := &file_hub_v1_billing_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -288,7 +203,7 @@ func (x *Invoice) String() string {
 func (*Invoice) ProtoMessage() {}
 
 func (x *Invoice) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[4]
+	mi := &file_hub_v1_billing_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +216,7 @@ func (x *Invoice) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Invoice.ProtoReflect.Descriptor instead.
 func (*Invoice) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{4}
+	return file_hub_v1_billing_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Invoice) GetId() int64 {
@@ -311,18 +226,18 @@ func (x *Invoice) GetId() int64 {
 	return 0
 }
 
-func (x *Invoice) GetNumber() string {
-	if x != nil {
-		return x.Number
-	}
-	return ""
-}
-
 func (x *Invoice) GetAmount() float64 {
 	if x != nil {
 		return x.Amount
 	}
 	return 0
+}
+
+func (x *Invoice) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
 }
 
 func (x *Invoice) GetStatus() string {
@@ -332,23 +247,16 @@ func (x *Invoice) GetStatus() string {
 	return ""
 }
 
-func (x *Invoice) GetPeriod() string {
+func (x *Invoice) GetIssuedAt() string {
 	if x != nil {
-		return x.Period
+		return x.IssuedAt
 	}
 	return ""
 }
 
-func (x *Invoice) GetCreatedAt() string {
+func (x *Invoice) GetPaidAt() string {
 	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *Invoice) GetPdfUrl() string {
-	if x != nil {
-		return x.PdfUrl
+		return x.PaidAt
 	}
 	return ""
 }
@@ -361,7 +269,7 @@ type ListInvoicesRequest struct {
 
 func (x *ListInvoicesRequest) Reset() {
 	*x = ListInvoicesRequest{}
-	mi := &file_hub_v1_billing_proto_msgTypes[5]
+	mi := &file_hub_v1_billing_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -373,7 +281,7 @@ func (x *ListInvoicesRequest) String() string {
 func (*ListInvoicesRequest) ProtoMessage() {}
 
 func (x *ListInvoicesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[5]
+	mi := &file_hub_v1_billing_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -386,7 +294,7 @@ func (x *ListInvoicesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvoicesRequest.ProtoReflect.Descriptor instead.
 func (*ListInvoicesRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{5}
+	return file_hub_v1_billing_proto_rawDescGZIP(), []int{4}
 }
 
 type ListInvoicesResponse struct {
@@ -398,7 +306,7 @@ type ListInvoicesResponse struct {
 
 func (x *ListInvoicesResponse) Reset() {
 	*x = ListInvoicesResponse{}
-	mi := &file_hub_v1_billing_proto_msgTypes[6]
+	mi := &file_hub_v1_billing_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -410,7 +318,7 @@ func (x *ListInvoicesResponse) String() string {
 func (*ListInvoicesResponse) ProtoMessage() {}
 
 func (x *ListInvoicesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_billing_proto_msgTypes[6]
+	mi := &file_hub_v1_billing_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -423,7 +331,7 @@ func (x *ListInvoicesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvoicesResponse.ProtoReflect.Descriptor instead.
 func (*ListInvoicesResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_billing_proto_rawDescGZIP(), []int{6}
+	return file_hub_v1_billing_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListInvoicesResponse) GetInvoices() []*Invoice {
@@ -437,34 +345,24 @@ var File_hub_v1_billing_proto protoreflect.FileDescriptor
 
 const file_hub_v1_billing_proto_rawDesc = "" +
 	"\n" +
-	"\x14hub/v1/billing.proto\x12\x03hub\"\xb6\x02\n" +
+	"\x14hub/v1/billing.proto\x12\x03hub\"\xae\x01\n" +
 	"\x0eBillingSummary\x12\x12\n" +
-	"\x04plan\x18\x01 \x01(\tR\x04plan\x12!\n" +
-	"\fmonthly_cost\x18\x02 \x01(\x01R\vmonthlyCost\x12!\n" +
-	"\fmember_count\x18\x03 \x01(\x05R\vmemberCount\x12!\n" +
-	"\fmember_limit\x18\x04 \x01(\x05R\vmemberLimit\x125\n" +
-	"\raddon_charges\x18\x05 \x03(\v2\x10.hub.AddonChargeR\faddonCharges\x12*\n" +
-	"\x11next_billing_date\x18\x06 \x01(\tR\x0fnextBillingDate\x12%\n" +
-	"\x0epayment_method\x18\a \x01(\tR\rpaymentMethod\x12\x1d\n" +
-	"\n" +
-	"card_last4\x18\b \x01(\tR\tcardLast4\"]\n" +
-	"\vAddonCharge\x12\x19\n" +
-	"\baddon_id\x18\x01 \x01(\tR\aaddonId\x12\x1d\n" +
-	"\n" +
-	"addon_name\x18\x02 \x01(\tR\taddonName\x12\x14\n" +
-	"\x05price\x18\x03 \x01(\x01R\x05price\"\x1a\n" +
+	"\x04plan\x18\x01 \x01(\tR\x04plan\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12#\n" +
+	"\rcurrent_usage\x18\x03 \x01(\x01R\fcurrentUsage\x12\x1f\n" +
+	"\vusage_limit\x18\x04 \x01(\x01R\n" +
+	"usageLimit\x12*\n" +
+	"\x11next_billing_date\x18\x05 \x01(\tR\x0fnextBillingDate\"\x1a\n" +
 	"\x18GetBillingSummaryRequest\"J\n" +
 	"\x19GetBillingSummaryResponse\x12-\n" +
-	"\asummary\x18\x01 \x01(\v2\x13.hub.BillingSummaryR\asummary\"\xb1\x01\n" +
+	"\asummary\x18\x01 \x01(\v2\x13.hub.BillingSummaryR\asummary\"\x9b\x01\n" +
 	"\aInvoice\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06number\x18\x02 \x01(\tR\x06number\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x16\n" +
-	"\x06period\x18\x05 \x01(\tR\x06period\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x17\n" +
-	"\apdf_url\x18\a \x01(\tR\x06pdfUrl\"\x15\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
+	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1b\n" +
+	"\tissued_at\x18\x05 \x01(\tR\bissuedAt\x12\x17\n" +
+	"\apaid_at\x18\x06 \x01(\tR\x06paidAt\"\x15\n" +
 	"\x13ListInvoicesRequest\"@\n" +
 	"\x14ListInvoicesResponse\x12(\n" +
 	"\binvoices\x18\x01 \x03(\v2\f.hub.InvoiceR\binvoicesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
@@ -481,25 +379,23 @@ func file_hub_v1_billing_proto_rawDescGZIP() []byte {
 	return file_hub_v1_billing_proto_rawDescData
 }
 
-var file_hub_v1_billing_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_hub_v1_billing_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_hub_v1_billing_proto_goTypes = []any{
 	(*BillingSummary)(nil),            // 0: hub.BillingSummary
-	(*AddonCharge)(nil),               // 1: hub.AddonCharge
-	(*GetBillingSummaryRequest)(nil),  // 2: hub.GetBillingSummaryRequest
-	(*GetBillingSummaryResponse)(nil), // 3: hub.GetBillingSummaryResponse
-	(*Invoice)(nil),                   // 4: hub.Invoice
-	(*ListInvoicesRequest)(nil),       // 5: hub.ListInvoicesRequest
-	(*ListInvoicesResponse)(nil),      // 6: hub.ListInvoicesResponse
+	(*GetBillingSummaryRequest)(nil),  // 1: hub.GetBillingSummaryRequest
+	(*GetBillingSummaryResponse)(nil), // 2: hub.GetBillingSummaryResponse
+	(*Invoice)(nil),                   // 3: hub.Invoice
+	(*ListInvoicesRequest)(nil),       // 4: hub.ListInvoicesRequest
+	(*ListInvoicesResponse)(nil),      // 5: hub.ListInvoicesResponse
 }
 var file_hub_v1_billing_proto_depIdxs = []int32{
-	1, // 0: hub.BillingSummary.addon_charges:type_name -> hub.AddonCharge
-	0, // 1: hub.GetBillingSummaryResponse.summary:type_name -> hub.BillingSummary
-	4, // 2: hub.ListInvoicesResponse.invoices:type_name -> hub.Invoice
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: hub.GetBillingSummaryResponse.summary:type_name -> hub.BillingSummary
+	3, // 1: hub.ListInvoicesResponse.invoices:type_name -> hub.Invoice
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_billing_proto_init() }
@@ -513,7 +409,7 @@ func file_hub_v1_billing_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_billing_proto_rawDesc), len(file_hub_v1_billing_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

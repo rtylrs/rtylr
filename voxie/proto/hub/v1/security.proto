@@ -8,18 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
 message SecurityState {
   bool two_factor_enabled = 1;
-  string two_factor_method = 2; // totp, sms
-  string last_password_change = 3;
-  repeated ActiveSession sessions = 4;
+  repeated ActiveSession active_sessions = 2;
 }
 
 message ActiveSession {
-  int64 id = 1;
-  string device = 2;
-  string ip_address = 3;
-  string location = 4;
-  string last_active_at = 5;
-  bool is_current = 6;
+  string id = 1;
+  string ip = 2;
+  string user_agent = 3;
+  string created_at = 4;
+  bool is_current = 5;
 }
 
 message GetSecurityStateRequest {}
@@ -30,20 +27,29 @@ message GetSecurityStateResponse {
 
 message Update2FARequest {
   bool enabled = 1;
-  string method = 2; // totp, sms
-  string verification_code = 3;
 }
 
 message Update2FAResponse {
-  bool success = 1;
-  string secret = 2; // TOTP secret (only on enable)
-  string qr_code_url = 3; // QR code data URI (only on enable)
+  string message = 1;
 }
 
-message RevokeSessionRequest {
-  int64 session_id = 1;
+message LoginEntry {
+  string email = 1;
+  string method = 2;
+  string ip = 3;
+  string user_agent = 4;
+  bool success = 5;
+  string created_at = 6;
 }
 
-message RevokeSessionResponse {
-  bool success = 1;
+message LoginHistoryRequest {}
+
+message LoginHistoryResponse {
+  repeated LoginEntry history = 1;
+}
+
+message InvalidateSessionsRequest {}
+
+message InvalidateSessionsResponse {
+  string message = 1;
 }

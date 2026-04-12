@@ -13,13 +13,13 @@ message Notification {
   string type = 4; // info, warning, success, error
   bool read = 5;
   string created_at = 6;
+  string link = 7;
 }
 
 message ListNotificationsRequest {}
 
 message ListNotificationsResponse {
   repeated Notification notifications = 1;
-  int32 unread_count = 2;
 }
 
 message MarkNotificationReadRequest {
@@ -27,5 +27,11 @@ message MarkNotificationReadRequest {
 }
 
 message MarkNotificationReadResponse {
-  bool success = 1;
+  string message = 1;
+}
+
+message MarkAllReadRequest {}
+
+message MarkAllReadResponse {
+  string message = 1;
 }

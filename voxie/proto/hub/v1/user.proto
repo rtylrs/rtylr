@@ -6,24 +6,32 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
 // ── User / Auth ─────────────────────────────────────────────────────
 
-message User {
+message GetMeRequest {}
+
+message GetMeResponse {
   int64 id = 1;
   string email = 2;
-  string name = 3;
-  string first_name = 4;
-  string last_name = 5;
-  string role = 6; // owner, admin, operator, staff, viewer
-  int64 business_id = 7;
-  string business_name = 8;
-  string avatar_url = 9;
-  repeated string apps = 10; // App IDs the user has access to
-  bool is_owner = 11;
-  bool onboarded = 12;
-  string theme = 13;
-  string plan_type = 14;
+  string full_name = 3;
+  repeated string apps = 4;
+  string role = 5;
+  int64 business_id = 6;
+  string business_name = 7;
+  bool is_owner = 8;
+  bool onboarded = 9;
 }
 
-message GetMeRequest {}
-message GetMeResponse {
-  User user = 1;
+message UpdateProfileRequest {
+  string name = 1;
+  string email = 2;
 }
+
+message UpdateProfileResponse {
+  GetMeResponse user = 1;
+}
+
+message ChangePasswordRequest {
+  string current_password = 1;
+  string new_password = 2;
+}
+
+message ChangePasswordResponse {}
