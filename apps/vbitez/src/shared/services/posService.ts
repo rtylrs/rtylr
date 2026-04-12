@@ -1,74 +1,253 @@
 import { safe } from '../lib/api';
+import type { Order, PaymentEntry } from '../types/pos';
+
+// ── Request body types ─────────────────────────────────────────────────────
+
+export interface BranchPayload {
+  name: string;
+  address?: string;
+  phone?: string;
+  [key: string]: unknown;
+}
+
+export interface FloorPayload {
+  name: string;
+  branchId?: number;
+  [key: string]: unknown;
+}
+
+export interface TerminalPayload {
+  name: string;
+  branchId?: number;
+  [key: string]: unknown;
+}
+
+export interface TablePayload {
+  name: string;
+  floorId?: number;
+  seats?: number;
+  [key: string]: unknown;
+}
+
+/** Full Order object (also used for offline queue replay) */
+export type OrderPayload = Order;
+
+/** Multi-payment or single-payment charge body */
+export interface PaymentPayload {
+  payments?: PaymentEntry[];
+  tip?: number;
+  total?: number;
+  method?: string;
+  amount?: number;
+  [key: string]: unknown;
+}
+
+export interface DiscountPayload {
+  mode: 'flat' | 'percent';
+  value: number;
+  [key: string]: unknown;
+}
+
+export interface SplitPayload {
+  parts: number;
+  [key: string]: unknown;
+}
+
+export interface HoldPayload {
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface VoidRefundPayload {
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface ModifierPayload {
+  name: string;
+  options?: Array<{ name: string; price: number }>;
+  [key: string]: unknown;
+}
+
+export interface ComboPayload {
+  name: string;
+  items?: number[];
+  price?: number;
+  [key: string]: unknown;
+}
+
+export interface SessionPayload {
+  openingBalance?: number;
+  [key: string]: unknown;
+}
+
+export interface CashMovementPayload {
+  amount: number;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface GiftCardPayload {
+  amount: number;
+  code?: string;
+  [key: string]: unknown;
+}
+
+export interface GiftCardRedeemPayload {
+  amount: number;
+  orderId?: number;
+  [key: string]: unknown;
+}
+
+export interface CustomerPayload {
+  name: string;
+  email?: string;
+  phone?: string;
+  [key: string]: unknown;
+}
+
+export interface LoyaltyConfigPayload {
+  pointsPerDollar?: number;
+  redeemRate?: number;
+  [key: string]: unknown;
+}
+
+export interface LoyaltyPayload {
+  customerId: number;
+  amount: number;
+  [key: string]: unknown;
+}
+
+export interface StockPayload {
+  itemId: number;
+  quantity: number;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface POSUserPayload {
+  name: string;
+  pin: string;
+  locationId?: number;
+  [key: string]: unknown;
+}
+
+export interface MemberLocationPayload {
+  memberId: string;
+  locationId: number;
+  [key: string]: unknown;
+}
+
+export interface MenuItemUpdatePayload {
+  name?: string;
+  price?: number;
+  available?: boolean;
+  [key: string]: unknown;
+}
+
+export interface OrderFilterParams {
+  status?: string;
+  date?: string;
+  tableId?: number;
+  [key: string]: unknown;
+}
+
+export interface MenuItemFilterParams {
+  categoryId?: number;
+  available?: boolean;
+  [key: string]: unknown;
+}
+
+export interface ReceiptFilterParams {
+  date?: string;
+  orderId?: number;
+  [key: string]: unknown;
+}
+
+export interface AuditFilterParams {
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+  [key: string]: unknown;
+}
+
+// ── Service ────────────────────────────────────────────────────────────────
 
 export const posService = {
   // ── Branches (locations) ──────────────────────────────────────
   getBranches: () => safe.get('/pos/locations'),
-  createBranch: (data: any) => safe.post('/pos/locations', data),
-  updateBranch: (id: number, data: any) => safe.put(`/pos/locations/${id}`, data),
+  createBranch: (data: BranchPayload) => safe.post('/pos/locations', data),
+  updateBranch: (id: number, data: Partial<BranchPayload>) =>
+    safe.put(`/pos/locations/${id}`, data),
 
   // ── Floors ────────────────────────────────────────────────────
   getFloors: (branchId: number) => safe.get('/pos/floors', { params: { branch_id: branchId } }),
-  createFloor: (data: any) => safe.post('/pos/floors', data),
-  updateFloor: (id: number, data: any) => safe.put(`/pos/floors/${id}`, data),
+  createFloor: (data: FloorPayload) => safe.post('/pos/floors', data),
+  updateFloor: (id: number, data: Partial<FloorPayload>) => safe.put(`/pos/floors/${id}`, data),
   deleteFloor: (id: number) => safe.delete(`/pos/floors/${id}`),
 
   // ── Terminals ─────────────────────────────────────────────────
   getTerminals: () => safe.get('/pos/terminals'),
-  createTerminal: (data: any) => safe.post('/pos/terminals', data),
-  updateTerminal: (id: number, data: any) => safe.put(`/pos/terminals/${id}`, data),
+  createTerminal: (data: TerminalPayload) => safe.post('/pos/terminals', data),
+  updateTerminal: (id: number, data: Partial<TerminalPayload>) =>
+    safe.put(`/pos/terminals/${id}`, data),
   heartbeat: () => safe.post('/pos/terminals/heartbeat'),
 
   // ── Tables ────────────────────────────────────────────────────
   getTables: () => safe.get('/pos/tables'),
-  createTable: (data: any) => safe.post('/pos/tables', data),
-  updateTable: (id: number, data: any) => safe.put(`/pos/tables/${id}`, data),
+  createTable: (data: TablePayload) => safe.post('/pos/tables', data),
+  updateTable: (id: number, data: Partial<TablePayload>) => safe.put(`/pos/tables/${id}`, data),
   updateTableStatus: (id: number, status: string) =>
     safe.put(`/pos/tables/${id}/status`, { status }),
   deleteTable: (id: number) => safe.delete(`/pos/tables/${id}`),
 
   // ── Orders ────────────────────────────────────────────────────
-  getOrders: (params?: any) => safe.get('/pos/orders', { params }),
+  getOrders: (params?: OrderFilterParams) => safe.get('/pos/orders', { params }),
   getOrder: (id: number) => safe.get(`/pos/orders/${id}`),
-  createOrder: (data: any) => safe.post('/pos/orders', data),
+  createOrder: (data: OrderPayload) => safe.post('/pos/orders', data),
   updateOrderStatus: (id: number, status: string) =>
     safe.put(`/pos/orders/${id}/status`, { status }),
-  chargeOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/payment`, data),
-  voidOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/void`, data),
-  refundOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/refund`, data),
-  applyDiscount: (id: number, data: any) => safe.post(`/pos/orders/${id}/discount`, data),
-  splitOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/split`, data),
-  holdOrder: (id: number, data: any) => safe.post(`/pos/orders/${id}/hold`, data),
+  chargeOrder: (id: number, data: PaymentPayload) => safe.post(`/pos/orders/${id}/payment`, data),
+  voidOrder: (id: number, data: VoidRefundPayload) => safe.post(`/pos/orders/${id}/void`, data),
+  refundOrder: (id: number, data: VoidRefundPayload) => safe.post(`/pos/orders/${id}/refund`, data),
+  applyDiscount: (id: number, data: DiscountPayload) =>
+    safe.post(`/pos/orders/${id}/discount`, data),
+  splitOrder: (id: number, data: SplitPayload) => safe.post(`/pos/orders/${id}/split`, data),
+  holdOrder: (id: number, data: HoldPayload) => safe.post(`/pos/orders/${id}/hold`, data),
   getHeldOrders: () => safe.get('/pos/orders/held'),
 
   // ── Menu / Products ───────────────────────────────────────────
-  getMenuItems: (params?: any) => safe.get('/pos/menu-items', { params }),
-  updateMenuItem: (id: number, data: any) => safe.put(`/pos/menu-items/${id}`, data),
+  getMenuItems: (params?: MenuItemFilterParams) => safe.get('/pos/menu-items', { params }),
+  updateMenuItem: (id: number, data: MenuItemUpdatePayload) =>
+    safe.put(`/pos/menu-items/${id}`, data),
   getModifiers: () => safe.get('/pos/modifiers'),
-  createModifier: (data: any) => safe.post('/pos/modifiers', data),
-  updateModifier: (id: number, data: any) => safe.put(`/pos/modifiers/${id}`, data),
+  createModifier: (data: ModifierPayload) => safe.post('/pos/modifiers', data),
+  updateModifier: (id: number, data: Partial<ModifierPayload>) =>
+    safe.put(`/pos/modifiers/${id}`, data),
   deleteModifier: (id: number) => safe.delete(`/pos/modifiers/${id}`),
   getCombos: () => safe.get('/pos/combos'),
-  createCombo: (data: any) => safe.post('/pos/combos', data),
-  updateCombo: (id: number, data: any) => safe.put(`/pos/combos/${id}`, data),
+  createCombo: (data: ComboPayload) => safe.post('/pos/combos', data),
+  updateCombo: (id: number, data: Partial<ComboPayload>) => safe.put(`/pos/combos/${id}`, data),
   deleteCombo: (id: number) => safe.delete(`/pos/combos/${id}`),
 
   // ── Sessions ──────────────────────────────────────────────────
   getSessions: () => safe.get('/pos/sessions'),
   getCurrentSession: () => safe.get('/pos/sessions/current'),
-  openSession: (data: any) => safe.post('/pos/sessions/open', data),
-  closeSession: (data: any) => safe.post('/pos/sessions/close', data),
+  openSession: (data: SessionPayload) => safe.post('/pos/sessions/open', data),
+  closeSession: (data: SessionPayload) => safe.post('/pos/sessions/close', data),
 
   // ── Cash movements ────────────────────────────────────────────
   getCashMovements: (sessionId: number) =>
     safe.get('/pos/cash/movements', { params: { session_id: sessionId } }),
-  cashDrop: (data: any) => safe.post('/pos/cash/drop', data),
-  cashPickup: (data: any) => safe.post('/pos/cash/pickup', data),
-  cashAdjust: (data: any) => safe.post('/pos/cash/adjust', data),
+  cashDrop: (data: CashMovementPayload) => safe.post('/pos/cash/drop', data),
+  cashPickup: (data: CashMovementPayload) => safe.post('/pos/cash/pickup', data),
+  cashAdjust: (data: CashMovementPayload) => safe.post('/pos/cash/adjust', data),
 
   // ── Gift cards ────────────────────────────────────────────────
   getGiftCards: () => safe.get('/pos/gift-cards'),
-  createGiftCard: (data: any) => safe.post('/pos/gift-cards', data),
-  redeemGiftCard: (code: string, data: any) => safe.post(`/pos/gift-cards/${code}/redeem`, data),
+  createGiftCard: (data: GiftCardPayload) => safe.post('/pos/gift-cards', data),
+  redeemGiftCard: (code: string, data: GiftCardRedeemPayload) =>
+    safe.post(`/pos/gift-cards/${code}/redeem`, data),
   getGiftCardBalance: (code: string) => safe.get(`/pos/gift-cards/${code}`),
 
   // ── KDS ────────────────────────────────────────────────────────
@@ -78,11 +257,11 @@ export const posService = {
 
   // ── Customers ─────────────────────────────────────────────────
   searchCustomers: (q: string) => safe.get('/pos/customers', { params: { q } }),
-  createCustomer: (data: any) => safe.post('/pos/customers', data),
+  createCustomer: (data: CustomerPayload) => safe.post('/pos/customers', data),
   getCustomer: (id: number) => safe.get(`/pos/customers/${id}`),
 
   // ── Receipts ──────────────────────────────────────────────────
-  getReceipts: (params?: any) => safe.get('/pos/receipts', { params }),
+  getReceipts: (params?: ReceiptFilterParams) => safe.get('/pos/receipts', { params }),
   emailReceipt: (id: number, email: string) => safe.post(`/pos/receipts/${id}/email`, { email }),
 
   // ── Day summary / Reports ─────────────────────────────────────
@@ -93,35 +272,36 @@ export const posService = {
 
   // ── Loyalty ───────────────────────────────────────────────────
   getLoyaltyConfig: () => safe.get('/pos/loyalty/config'),
-  updateLoyaltyConfig: (data: any) => safe.put('/pos/loyalty/config', data),
+  updateLoyaltyConfig: (data: LoyaltyConfigPayload) => safe.put('/pos/loyalty/config', data),
   getLoyaltyBalance: (customerId: number) =>
     safe.get('/pos/loyalty/balance', { params: { customer_id: customerId } }),
-  earnLoyaltyPoints: (data: any) => safe.post('/pos/loyalty/earn', data),
-  redeemLoyaltyPoints: (data: any) => safe.post('/pos/loyalty/redeem', data),
+  earnLoyaltyPoints: (data: LoyaltyPayload) => safe.post('/pos/loyalty/earn', data),
+  redeemLoyaltyPoints: (data: LoyaltyPayload) => safe.post('/pos/loyalty/redeem', data),
 
   // ── Stock / Inventory ─────────────────────────────────────────
   getBranchInventory: (branchId: number) =>
     safe.get('/pos/stock/inventory', { params: { branch_id: branchId } }),
   getLowStock: (branchId: number) =>
     safe.get('/pos/stock/low-stock', { params: { branch_id: branchId } }),
-  receiveStock: (data: any) => safe.post('/pos/stock/receive', data),
-  adjustStock: (data: any) => safe.post('/pos/stock/adjust', data),
-  wasteStock: (data: any) => safe.post('/pos/stock/waste', data),
-  transferStock: (data: any) => safe.post('/pos/stock/transfer', data),
+  receiveStock: (data: StockPayload) => safe.post('/pos/stock/receive', data),
+  adjustStock: (data: StockPayload) => safe.post('/pos/stock/adjust', data),
+  wasteStock: (data: StockPayload) => safe.post('/pos/stock/waste', data),
+  transferStock: (data: StockPayload) => safe.post('/pos/stock/transfer', data),
 
   // ── Audit ─────────────────────────────────────────────────────
-  getAuditLog: (params?: any) => safe.get('/pos/audit', { params }),
+  getAuditLog: (params?: AuditFilterParams) => safe.get('/pos/audit', { params }),
 
   // ── POS Users (cashiers/staff - PIN login) ────────────────────
   getPOSUsers: (locationId?: number) =>
     safe.get('/pos/users', { params: locationId ? { location_id: locationId } : {} }),
-  createPOSUser: (data: any) => safe.post('/pos/users', data),
-  updatePOSUser: (data: any) => safe.post('/pos/users/update', data),
+  createPOSUser: (data: POSUserPayload) => safe.post('/pos/users', data),
+  updatePOSUser: (data: Partial<POSUserPayload> & { id: number }) =>
+    safe.post('/pos/users/update', data),
   deactivatePOSUser: (id: number) => safe.post('/pos/users/deactivate', { id }),
   verifyPIN: (pin: string) => safe.post('/pos/users/verify-pin', { pin }),
 
-  // ── Member Location Access (which team members can access which locations) ──
+  // ── Member Location Access ────────────────────────────────────
   getMyLocations: () => safe.get('/pos/access/my-locations'),
-  assignMemberToLocation: (data: any) => safe.post('/pos/access/assign', data),
+  assignMemberToLocation: (data: MemberLocationPayload) => safe.post('/pos/access/assign', data),
   removeMemberFromLocation: (id: number) => safe.post('/pos/access/remove', { id }),
 };

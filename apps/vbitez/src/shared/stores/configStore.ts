@@ -8,26 +8,26 @@ interface ContactInfo {
 }
 
 interface ConfigState {
-  websiteData: any;
-  aboutContent: any;
+  websiteData: Record<string, unknown> | null;
+  aboutContent: string | null;
   maintanance: boolean;
   businessCount: number;
   contactInfo: ContactInfo;
-  faqs: any[];
+  faqs: Record<string, unknown>[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
-  news: any[];
+  news: Record<string, unknown>[];
   loading: boolean;
 }
 
 interface ConfigActions {
-  setWebsiteData: (data: any) => void;
-  setAboutContent: (content: any | null) => void;
+  setWebsiteData: (data: Record<string, unknown>) => void;
+  setAboutContent: (content: string | null) => void;
   setMaintanance: (maintanance: boolean) => void;
   setBusinessCount: (count: number) => void;
   setContactInfo: (info: ContactInfo) => void;
-  setFaqs: (faqs: any[]) => void;
-  setNews: (news: any[]) => void;
+  setFaqs: (faqs: Record<string, unknown>[]) => void;
+  setNews: (news: Record<string, unknown>[]) => void;
   setLoading: (loading: boolean) => void;
   setStatus: (status: 'idle' | 'loading' | 'succeeded' | 'failed') => void;
   setError: (error: string | null) => void;
