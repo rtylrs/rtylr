@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from './useProducts';
+import { type Product } from '../../shared/services/erpApi';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
 import ProductCard from '../../shared/components/ProductCard';
@@ -341,7 +342,7 @@ const Products: React.FC = () => {
           <select
             value={filters.status || ''}
             onChange={(e) =>
-              setFilters({ ...filters, status: (e.target.value as any) || undefined })
+              setFilters({ ...filters, status: (e.target.value as Product['status']) || undefined })
             }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
             style={{

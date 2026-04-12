@@ -11,7 +11,7 @@ interface ExportButtonProps {
 function toCSV(data: Array<Record<string, any>>, columns?: string[]): string {
   if (data.length === 0) return '';
   const keys = columns && columns.length ? columns : Object.keys(data[0]);
-  const escape = (v: any) => {
+  const escape = (v: unknown) => {
     if (v == null) return '';
     const s = String(v);
     if (s.includes(',') || s.includes('"') || s.includes('\n')) {
