@@ -5,7 +5,6 @@
 // source: hub/v1/user.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface User {
   id: number;
@@ -30,87 +29,4 @@ export interface GetMeRequest {}
 
 export interface GetMeResponse {
   user: User | undefined;
-}
-
-export interface TeamMember {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  /** active, pending, suspended */
-  status: string;
-  apps: string[];
-  avatarUrl: string;
-  createdAt: string;
-  lastActiveAt: string;
-}
-
-export interface ListTeamRequest {
-  pagination: PaginationRequest | undefined;
-  roleFilter: string;
-  search: string;
-}
-
-export interface ListTeamResponse {
-  members: TeamMember[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface InviteUserRequest {
-  email: string;
-  name: string;
-  role: string;
-  apps: string[];
-  /** Optional: for manual password flow */
-  password: string;
-  /** "invite" or "manual" */
-  authMethod: string;
-}
-
-export interface InviteUserResponse {
-  id: number;
-  message: string;
-}
-
-export interface UpdateMemberRoleRequest {
-  userId: number;
-  role: string;
-  apps: string[];
-}
-
-export interface UpdateMemberRoleResponse {
-  success: boolean;
-}
-
-export interface RemoveMemberRequest {
-  userId: number;
-}
-
-export interface RemoveMemberResponse {
-  success: boolean;
-}
-
-export interface GetMemberDetailRequest {
-  userId: number;
-}
-
-export interface GetMemberDetailResponse {
-  member: TeamMember | undefined;
-  accessRequests: AccessRequest[];
-}
-
-export interface AccessRequest {
-  id: number;
-  app: string;
-  requestedAt: string;
-  /** pending, approved, denied */
-  status: string;
-}
-
-export interface RequestAccessRequest {
-  app: string;
-}
-
-export interface RequestAccessResponse {
-  success: boolean;
 }

@@ -46,10 +46,3 @@ export interface UpdateBusinessRequest {
 export interface UpdateBusinessResponse {
   business: Business | undefined;
 }
-
-export interface GetConfigRequest {}
-
-export interface GetConfigResponse {
-  business: Business | undefined;
-  maintenance: boolean;
-}
