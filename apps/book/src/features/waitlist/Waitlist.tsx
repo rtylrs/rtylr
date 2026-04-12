@@ -30,8 +30,8 @@ const Waitlist: React.FC = () => {
 
   const notifyMutation = useNotifyWaitlist();
 
-  const handleNotify = (id: number) => {
-    notifyMutation.mutate(id, {
+  const handleNotify = (id: string) => {
+    notifyMutation.mutate(Number(id), {
       onSuccess: () => toast.success('Customer notified'),
       onError: () => toast.error('Failed to notify customer'),
     });
@@ -126,7 +126,7 @@ const Waitlist: React.FC = () => {
 
         {!isLoading && !isError && waitlist && waitlist.length > 0 && (
           <div>
-            {waitlist.map((entry: any) => {
+            {waitlist.map((entry) => {
               const statusColor = getStatusColor(entry.status);
               return (
                 <div
@@ -144,9 +144,9 @@ const Waitlist: React.FC = () => {
                     <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
                       {entry.customerName}
                     </p>
-                    {entry.email && (
+                    {entry.customerEmail && (
                       <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                        {entry.email}
+                        {entry.customerEmail}
                       </p>
                     )}
                   </div>
@@ -160,7 +160,7 @@ const Waitlist: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {entry.addedAt ?? entry.createdAt}
+                    {entry.createdAt}
                   </p>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize w-fit"

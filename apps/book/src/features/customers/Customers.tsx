@@ -105,7 +105,7 @@ const Customers: React.FC = () => {
 
         {!isLoading && !isError && customers && customers.length > 0 && (
           <div>
-            {customers.map((customer: any) => (
+            {customers.map((customer) => (
               <div
                 key={customer.id}
                 className="grid grid-cols-6 items-center px-4 py-3 transition-colors"

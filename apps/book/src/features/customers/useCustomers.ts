@@ -15,7 +15,7 @@ export function useCustomers(filters?: CustomerFilters) {
     queryKey: ['customers', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getCustomers(filters));
-      const raw = (res as any)?.customers ?? res;
+      const raw = (res as Record<string, unknown>)?.customers ?? res;
       return z.array(bookCustomerSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

@@ -17,7 +17,7 @@ export function useWaitlist(filters?: WaitlistFilters) {
     queryKey: ['waitlist', filters],
     queryFn: async () => {
       const res = await unwrap(bookService.getWaitlist(filters));
-      const raw = (res as any)?.entries ?? res;
+      const raw = (res as Record<string, unknown>)?.entries ?? res;
       return z.array(waitlistEntrySchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

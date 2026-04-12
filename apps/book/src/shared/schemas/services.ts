@@ -9,6 +9,8 @@ export const bookServiceSchema = z.object({
   category: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
+  staff: z.array(z.string()).optional(),
+  staffCount: z.number().optional(),
   maxBookingsPerSlot: z.number().optional().nullable(),
   bufferTime: z.number().optional().nullable(),
   createdAt: z.string().optional(),

@@ -108,7 +108,7 @@ const Services: React.FC = () => {
 
         {!isLoading && !isError && services && services.length > 0 && (
           <div>
-            {services.map((svc: any) => (
+            {services.map((svc) => (
               <div
                 key={svc.id}
                 className="grid grid-cols-5 items-center px-4 py-3 transition-colors"
@@ -153,11 +153,11 @@ const Services: React.FC = () => {
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{
                       background:
-                        svc.active !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                      color: svc.active !== false ? '#10b981' : '#ef4444',
+                        svc.isActive !== false ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                      color: svc.isActive !== false ? '#10b981' : '#ef4444',
                     }}
                   >
-                    {svc.active !== false ? 'Active' : 'Inactive'}
+                    {svc.isActive !== false ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>

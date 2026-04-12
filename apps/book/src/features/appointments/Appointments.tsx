@@ -136,7 +136,7 @@ const Appointments: React.FC = () => {
 
         {!isLoading && !isError && appointments && appointments.length > 0 && (
           <div>
-            {appointments.map((appt: any) => {
+            {appointments.map((appt) => {
               const statusColor = getStatusColor(appt.status);
               return (
                 <div
@@ -155,7 +155,7 @@ const Appointments: React.FC = () => {
                       {appt.date}
                     </p>
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      {appt.time}
+                      {appt.startTime}
                     </p>
                   </div>
                   <p className="text-xs truncate" style={{ color: 'var(--hub-text)' }}>

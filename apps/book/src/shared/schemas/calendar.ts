@@ -12,6 +12,11 @@ export const calendarEventSchema = z.object({
   color: z.string().optional().nullable(),
   allDay: z.boolean().optional(),
   notes: z.string().optional().nullable(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  customerName: z.string().optional(),
+  serviceName: z.string().optional(),
+  duration: z.number().optional(),
 });
 
 export type CalendarEvent = z.infer<typeof calendarEventSchema>;

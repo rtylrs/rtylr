@@ -207,7 +207,7 @@ const CalendarScreen: React.FC = () => {
                 day != null
                   ? formatDateISO(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))
                   : '';
-              const dayEvents = (events ?? []).filter((e: any) => e.date === dateStr);
+              const dayEvents = (events ?? []).filter((e) => e.date === dateStr);
               return (
                 <div
                   key={i}
@@ -228,7 +228,7 @@ const CalendarScreen: React.FC = () => {
                       >
                         {day}
                       </span>
-                      {dayEvents.slice(0, 3).map((ev: any, j: number) => (
+                      {dayEvents.slice(0, 3).map((ev, j: number) => (
                         <div
                           key={j}
                           className="mt-0.5 px-1 py-0.5 rounded text-[9px] truncate"
@@ -304,7 +304,7 @@ const CalendarScreen: React.FC = () => {
                   const dateStr = formatDateISO(d);
                   const hourStr = String(hour).padStart(2, '0');
                   const hourEvents = (events ?? []).filter(
-                    (e: any) => e.date === dateStr && e.time?.startsWith(hourStr)
+                    (e) => e.date === dateStr && e.time?.startsWith(hourStr)
                   );
                   return (
                     <div
@@ -315,7 +315,7 @@ const CalendarScreen: React.FC = () => {
                         borderLeft: '1px solid var(--hub-border)',
                       }}
                     >
-                      {hourEvents.map((ev: any, j: number) => (
+                      {hourEvents.map((ev, j: number) => (
                         <div
                           key={j}
                           className="px-1 py-0.5 rounded text-[9px] truncate mb-0.5"
@@ -346,7 +346,7 @@ const CalendarScreen: React.FC = () => {
               const dateStr = formatDateISO(currentDate);
               const hourStr = String(hour).padStart(2, '0');
               const hourEvents = (events ?? []).filter(
-                (e: any) => e.date === dateStr && e.time?.startsWith(hourStr)
+                (e) => e.date === dateStr && e.time?.startsWith(hourStr)
               );
               return (
                 <div
@@ -361,7 +361,7 @@ const CalendarScreen: React.FC = () => {
                     {hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? '12:00 PM' : `${hour}:00 AM`}
                   </div>
                   <div className="p-1" style={{ borderLeft: '1px solid var(--hub-border)' }}>
-                    {hourEvents.map((ev: any, j: number) => (
+                    {hourEvents.map((ev, j: number) => (
                       <div
                         key={j}
                         className="px-2 py-1.5 rounded-lg text-xs mb-1"
