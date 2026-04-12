@@ -12,6 +12,7 @@
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "contracts:sync": "bash packages/contracts/scripts/sync.sh",
     "prepare": "husky"
   },
   "private": true,
