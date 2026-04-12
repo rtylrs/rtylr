@@ -25,6 +25,7 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import { useTask } from './useTask';
+import { useUpdateTask, useDeleteTask, useAddComment, useAddSubtask, useLogTime } from './useTasks';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -46,18 +47,18 @@ const TaskDetail: React.FC = () => {
   const navigate = useNavigate();
   const { data: taskData, isLoading } = useTask(id);
   const user = useUserStore((s) => s.user);
+  const updateTaskMut = useUpdateTask();
+  const deleteTaskMut = useDeleteTask();
+  const addCommentMut = useAddComment();
+  const addSubtaskMut = useAddSubtask();
+  const logTimeMut = useLogTime();
   const {
-    updateTask,
-    addComment,
     toggleSubtask,
-    addSubtask,
     labels,
     members,
     cycles,
     milestones,
-    deleteTask,
     archiveTask,
-    logTime,
     comments,
     activity,
     subtasks,
@@ -68,6 +69,26 @@ const TaskDetail: React.FC = () => {
     sections,
     customFieldDefinitions,
   } = useFlowStore();
+
+  const updateTask = (id: string, patch: Partial<Task>) => {
+    updateTaskMut.mutate({ id, data: patch as any });
+  };
+  const deleteTask = (id: string) => {
+    deleteTaskMut.mutate(id);
+  };
+  const addComment = (
+    taskId: string,
+    body: string,
+    _author?: { id: string; name: string; initials: string }
+  ) => {
+    addCommentMut.mutate({ taskId, content: body });
+  };
+  const addSubtask = (taskId: string, title: string) => {
+    addSubtaskMut.mutate({ taskId, title });
+  };
+  const logTime = (taskId: string, minutes: number, note?: string) => {
+    logTimeMut.mutate({ taskId, minutes, note });
+  };
 
   const [tab, setTab] = useState<'activity' | 'comments'>('comments');
   const [depId, setDepId] = useState('');

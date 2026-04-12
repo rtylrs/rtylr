@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Archive as ArchiveIcon } from 'lucide-react';
-import { useFlowStore } from '../../shared/stores/flowStore';
+import { useFlowStore, Task } from '../../shared/stores/flowStore';
+import { useTasks } from '../tasks/useTasks';
+import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
 
 const Archive: React.FC = () => {
-  const { tasks } = useFlowStore();
-  const archived = tasks.filter((t) => t.archived || t.status === 'cancelled');
+  const storeTasks = useFlowStore((s) => s.tasks);
+  const { data: apiTasks } = useTasks({});
+  const tasks = (isFlowLocal() ? storeTasks : (apiTasks ?? storeTasks)) as Task[];
+  const archived = useMemo(
+    () => tasks.filter((t) => t.archived || t.status === 'cancelled'),
+    [tasks]
+  );
 
   return (
     <div className="flex flex-col h-full">

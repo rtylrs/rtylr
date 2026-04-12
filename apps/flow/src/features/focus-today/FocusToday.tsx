@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
+import { useMyIssues } from '../tasks/useMyIssues';
 import { isDueToday } from '../../shared/lib/lifeRhythm';
 import { isTaskMine } from '../../shared/lib/currentUser';
+import { isFlowLocal } from '../../shared/lib/flowLocalMode';
 import { formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { formatDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -12,7 +14,12 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 const ACCENT = '#64C5B9';
 
 const FocusToday: React.FC = () => {
-  const { tasks, projects, activeWorkspaceId } = useFlowStore();
+  const storeTasks = useFlowStore((s) => s.tasks);
+  const { projects, activeWorkspaceId } = useFlowStore();
+  const { data: myTasks } = useMyIssues();
+  const tasks = (
+    isFlowLocal() ? storeTasks : ((myTasks as Task[] | undefined) ?? storeTasks)
+  ) as Task[];
 
   const focusTasks = useMemo(() => {
     const list = tasks.filter(
