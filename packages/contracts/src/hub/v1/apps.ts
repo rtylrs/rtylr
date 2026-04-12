@@ -28,6 +28,8 @@ export interface Addon {
   price: number;
   isFree: boolean;
   isEnabled: boolean;
+  enabledAt?: string | undefined;
+  disabledAt?: string | undefined;
 }
 
 export interface ListAddonsRequest {}
@@ -41,7 +43,7 @@ export interface EnableAddonRequest {
 }
 
 export interface EnableAddonResponse {
-  success: boolean;
+  message: string;
 }
 
 export interface DisableAddonRequest {
@@ -49,5 +51,13 @@ export interface DisableAddonRequest {
 }
 
 export interface DisableAddonResponse {
-  success: boolean;
+  message: string;
+}
+
+export interface AddonStatusRequest {
+  addonId: string;
+}
+
+export interface AddonStatusResponse {
+  isEnabled: boolean;
 }

@@ -5,81 +5,75 @@
 // source: hub/v1/team.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
-export interface TeamMember {
+export interface StaffUserPayload {
   id: number;
-  name: string;
   email: string;
-  role: string;
-  /** active, pending, suspended */
-  status: string;
-  apps: string[];
-  avatarUrl: string;
+  fullName: string;
   createdAt: string;
-  lastActiveAt: string;
+  apps: string[];
+  role: string;
+  isActive: boolean;
 }
 
-export interface ListTeamRequest {
-  pagination: PaginationRequest | undefined;
-  roleFilter: string;
-  search: string;
-}
+export interface ListTeamRequest {}
 
 export interface ListTeamResponse {
-  members: TeamMember[];
-  pagination: PaginationResponse | undefined;
+  users: StaffUserPayload[];
 }
 
 export interface InviteUserRequest {
   email: string;
-  name: string;
+  fullName: string;
   role: string;
   apps: string[];
-  /** Optional: for manual password flow */
   password: string;
-  /** "invite" or "manual" */
-  authMethod: string;
 }
 
 export interface InviteUserResponse {
-  id: number;
+  userId: number;
   message: string;
 }
 
-export interface UpdateMemberRoleRequest {
+export interface UpdatePermissionsRequest {
   userId: number;
-  role: string;
   apps: string[];
+  role: string;
 }
 
-export interface UpdateMemberRoleResponse {
-  success: boolean;
-}
+export interface UpdatePermissionsResponse {}
 
 export interface RemoveMemberRequest {
   userId: number;
 }
 
 export interface RemoveMemberResponse {
-  success: boolean;
+  message: string;
 }
 
-export interface GetMemberDetailRequest {
-  userId: number;
+export interface VerifyInviteRequest {
+  token: string;
 }
 
-export interface GetMemberDetailResponse {
-  member: TeamMember | undefined;
-  accessRequests: AccessRequest[];
+export interface VerifyInviteResponse {
+  email: string;
+  fullName: string;
+  valid: boolean;
 }
 
-export interface AccessRequest {
-  id: number;
-  app: string;
-  requestedAt: string;
-  /** pending, approved, denied */
-  status: string;
+export interface AcceptInviteRequest {
+  token: string;
+  password: string;
+}
+
+export interface AcceptInviteResponse {
+  message: string;
+}
+
+export interface MarkOnboardedRequest {}
+
+export interface MarkOnboardedResponse {
+  message: string;
 }
 
 export interface RequestAccessRequest {
@@ -87,5 +81,5 @@ export interface RequestAccessRequest {
 }
 
 export interface RequestAccessResponse {
-  success: boolean;
+  message: string;
 }
