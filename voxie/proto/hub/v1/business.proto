@@ -45,12 +45,3 @@ message UpdateBusinessRequest {
 message UpdateBusinessResponse {
   Business business = 1;
 }
-
-// ── Config ──────────────────────────────────────────────────────────
-
-message GetConfigRequest {}
-
-message GetConfigResponse {
-  Business business = 1;
-  bool maintenance = 2;
-}

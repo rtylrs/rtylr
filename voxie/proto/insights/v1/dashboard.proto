@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package insights;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
+
+// ── Insights Dashboard ──────────────────────────────────────────────
+
+message KPI {
+  string key = 1;
+  string label = 2;
+  double value = 3;
+  double change = 4; // percentage change
+  string trend = 5; // up, down, flat
+  string period = 6;
+}
+
+message DashboardSummary {
+  repeated KPI kpis = 1;
+  repeated ChartPoint revenue_chart = 2;
+  repeated ChartPoint customer_chart = 3;
+  repeated ChartPoint order_chart = 4;
+}
+
+message ChartPoint {
+  string label = 1;
+  double value = 2;
+}
+
+message GetDashboardSummaryRequest {
+  string period = 1; // today, this_week, this_month, this_quarter, this_year
+}
+
+message GetDashboardSummaryResponse {
+  DashboardSummary summary = 1;
+}

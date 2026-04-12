@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
+
+// ── Menu ────────────────────────────────────────────────────────────
+
+message MenuItem {
+  int64 id = 1;
+  string label = 2;
+  string icon = 3;
+  string path = 4;
+  string app = 5;
+  int32 position = 6;
+  bool visible = 7;
+  repeated MenuItem children = 8;
+}
+
+message ListMenuRequest {}
+
+message ListMenuResponse {
+  repeated MenuItem items = 1;
+}
+
+message UpdateMenuRequest {
+  repeated MenuItem items = 1;
+}
+
+message UpdateMenuResponse {
+  bool success = 1;
+}

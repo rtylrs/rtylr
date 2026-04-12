@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Bills ───────────────────────────────────────────────────────────
+
+message Bill {
+  int64 id = 1;
+  string number = 2;
+  string vendor = 3;
+  string status = 4; // draft, pending, paid, overdue
+  repeated BillLine lines = 5;
+  double subtotal = 6;
+  double tax = 7;
+  double total = 8;
+  string issue_date = 9;
+  string due_date = 10;
+  string paid_at = 11;
+  string notes = 12;
+  string created_at = 13;
+}
+
+message BillLine {
+  string description = 1;
+  double amount = 2;
+  int64 account_id = 3;
+}
+
+message ListBillsRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  string from_date = 3;
+  string to_date = 4;
+}
+
+message ListBillsResponse {
+  repeated Bill bills = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetBillRequest {
+  int64 id = 1;
+}
+
+message GetBillResponse {
+  Bill bill = 1;
+}
+
+message CreateBillRequest {
+  string vendor = 1;
+  repeated BillLine lines = 2;
+  string due_date = 3;
+  string notes = 4;
+}
+
+message CreateBillResponse {
+  Bill bill = 1;
+}

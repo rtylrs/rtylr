@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package erp;
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Suppliers ───────────────────────────────────────────────────────
+
+message Supplier {
+  int64 id = 1;
+  string name = 2;
+  string contact_name = 3;
+  string email = 4;
+  string phone = 5;
+  string address = 6;
+  string payment_terms = 7; // net30, net60, cod
+  string status = 8; // active, inactive
+  int32 total_orders = 9;
+  string notes = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message ListSuppliersRequest {
+  common.PaginationRequest pagination = 1;
+  string search = 2;
+  string status = 3;
+}
+
+message ListSuppliersResponse {
+  repeated Supplier suppliers = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetSupplierRequest {
+  int64 id = 1;
+}
+
+message GetSupplierResponse {
+  Supplier supplier = 1;
+}
+
+message CreateSupplierRequest {
+  string name = 1;
+  string contact_name = 2;
+  string email = 3;
+  string phone = 4;
+  string address = 5;
+  string payment_terms = 6;
+  string notes = 7;
+}
+
+message CreateSupplierResponse {
+  Supplier supplier = 1;
+}
+
+message UpdateSupplierRequest {
+  int64 id = 1;
+  string name = 2;
+  string contact_name = 3;
+  string email = 4;
+  string phone = 5;
+  string address = 6;
+  string payment_terms = 7;
+  string status = 8;
+  string notes = 9;
+}
+
+message UpdateSupplierResponse {
+  Supplier supplier = 1;
+}
+
+message DeleteSupplierRequest {
+  int64 id = 1;
+}
+
+message DeleteSupplierResponse {
+  bool success = 1;
+}

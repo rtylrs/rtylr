@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── Terminal ───────────────────────────────────────────────────────
+
+message Terminal {
+  int64 id = 1;
+  int64 location_id = 2;
+  string name = 3;
+  string device_id = 4;
+  string status = 5; // online, offline
+  bool is_active = 6;
+  string last_heartbeat_at = 7;
+  string ip_address = 8;
+  string app_version = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListTerminalsRequest {}
+
+message ListTerminalsResponse {
+  repeated Terminal terminals = 1;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateTerminalRequest {
+  string name = 1;
+  string device_id = 2;
+}
+
+message CreateTerminalResponse {
+  Terminal terminal = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateTerminalRequest {
+  int64 id = 1;
+  string name = 2;
+  bool is_active = 3;
+}
+
+message UpdateTerminalResponse {
+  Terminal terminal = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteTerminalRequest {
+  int64 id = 1;
+}
+
+message DeleteTerminalResponse {
+  bool success = 1;
+}
+
+// ── Heartbeat ──────────────────────────────────────────────────────
+
+message TerminalHeartbeatRequest {
+  int64 id = 1;
+  string app_version = 2;
+  string ip_address = 3;
+}
+
+message TerminalHeartbeatResponse {
+  bool success = 1;
+}

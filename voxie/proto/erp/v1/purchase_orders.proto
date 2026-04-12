@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package erp;
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Purchase Orders ─────────────────────────────────────────────────
+
+message PurchaseOrder {
+  int64 id = 1;
+  string number = 2;
+  int64 supplier_id = 3;
+  string supplier_name = 4;
+  string status = 5; // draft, sent, received, cancelled
+  repeated PurchaseOrderLine lines = 6;
+  double subtotal = 7;
+  double tax = 8;
+  double total = 9;
+  string notes = 10;
+  string expected_date = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+message PurchaseOrderLine {
+  int64 product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  double unit_price = 4;
+  double total = 5;
+}
+
+message ListPurchaseOrdersRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  int64 supplier_id = 3;
+}
+
+message ListPurchaseOrdersResponse {
+  repeated PurchaseOrder orders = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetPurchaseOrderRequest {
+  int64 id = 1;
+}
+
+message GetPurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+message CreatePurchaseOrderRequest {
+  int64 supplier_id = 1;
+  repeated PurchaseOrderLine lines = 2;
+  string notes = 3;
+  string expected_date = 4;
+}
+
+message CreatePurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+message UpdatePurchaseOrderStatusRequest {
+  int64 id = 1;
+  string status = 2;
+}
+
+message UpdatePurchaseOrderStatusResponse {
+  PurchaseOrder order = 1;
+}

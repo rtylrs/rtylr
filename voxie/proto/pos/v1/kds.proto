@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── KDS ────────────────────────────────────────────────────────────
+
+message KDSOrderItem {
+  int64 id = 1;
+  int64 order_item_id = 2;
+  string name = 3;
+  int32 quantity = 4;
+  string notes = 5;
+  repeated string modifiers = 6;
+  string status = 7; // pending, preparing, ready
+  string started_at = 8;
+  string completed_at = 9;
+}
+
+message KDSOrder {
+  int64 id = 1;
+  int64 order_id = 2;
+  string order_number = 3;
+  string order_type = 4;
+  string table_name = 5;
+  string server_name = 6;
+  repeated KDSOrderItem items = 7;
+  string status = 8; // pending, in_progress, completed
+  int32 elapsed_seconds = 9;
+  string created_at = 10;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListKDSOrdersRequest {
+  string status = 1;
+  string station = 2;
+}
+
+message ListKDSOrdersResponse {
+  repeated KDSOrder orders = 1;
+}
+
+// ── Update Item Status ─────────────────────────────────────────────
+
+message UpdateKDSItemStatusRequest {
+  int64 order_id = 1;
+  int64 item_id = 2;
+  string status = 3;
+}
+
+message UpdateKDSItemStatusResponse {
+  KDSOrder order = 1;
+}

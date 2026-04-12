@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package flow;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Projects ────────────────────────────────────────────────────────
+
+message Project {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4; // active, archived, completed
+  string color = 5;
+  int64 workspace_id = 6;
+  string workspace_name = 7;
+  int32 task_count = 8;
+  int32 completed_tasks = 9;
+  double progress = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message ListProjectsRequest {
+  common.PaginationRequest pagination = 1;
+  int64 workspace_id = 2;
+  string status = 3;
+  string search = 4;
+}
+
+message ListProjectsResponse {
+  repeated Project projects = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetProjectRequest {
+  int64 id = 1;
+}
+
+message GetProjectResponse {
+  Project project = 1;
+}
+
+message CreateProjectRequest {
+  string name = 1;
+  string description = 2;
+  int64 workspace_id = 3;
+  string color = 4;
+}
+
+message CreateProjectResponse {
+  Project project = 1;
+}
+
+message UpdateProjectRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4;
+  string color = 5;
+}
+
+message UpdateProjectResponse {
+  Project project = 1;
+}
+
+message DeleteProjectRequest {
+  int64 id = 1;
+}
+
+message DeleteProjectResponse {
+  bool success = 1;
+}

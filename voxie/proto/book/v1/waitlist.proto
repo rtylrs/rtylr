@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package book;
+
+option go_package = "github.com/voxire/voxie/gen/go/book/v1";
+
+import "common/v1/pagination.proto";
+
+// ── WaitlistEntry ──────────────────────────────────────────────────
+
+message WaitlistEntry {
+  int64 id = 1;
+  int64 business_id = 2;
+  int64 customer_id = 3;
+  string customer_name = 4;
+  string customer_email = 5;
+  string customer_phone = 6;
+  int64 service_id = 7;
+  string service_name = 8;
+  int64 preferred_resource_id = 9;
+  string preferred_resource_name = 10;
+  string preferred_date = 11;
+  string preferred_time_from = 12;
+  string preferred_time_to = 13;
+  string status = 14; // waiting, notified, booked, expired, cancelled
+  string notes = 15;
+  string created_at = 16;
+  string updated_at = 17;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListWaitlistRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  int64 service_id = 3;
+}
+
+message ListWaitlistResponse {
+  repeated WaitlistEntry entries = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetWaitlistEntryRequest {
+  int64 id = 1;
+}
+
+message GetWaitlistEntryResponse {
+  WaitlistEntry entry = 1;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateWaitlistEntryRequest {
+  int64 customer_id = 1;
+  string customer_name = 2;
+  string customer_email = 3;
+  string customer_phone = 4;
+  int64 service_id = 5;
+  int64 preferred_resource_id = 6;
+  string preferred_date = 7;
+  string preferred_time_from = 8;
+  string preferred_time_to = 9;
+  string notes = 10;
+}
+
+message CreateWaitlistEntryResponse {
+  WaitlistEntry entry = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateWaitlistEntryRequest {
+  int64 id = 1;
+  string status = 2;
+  string notes = 3;
+}
+
+message UpdateWaitlistEntryResponse {
+  WaitlistEntry entry = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteWaitlistEntryRequest {
+  int64 id = 1;
+}
+
+message DeleteWaitlistEntryResponse {
+  bool success = 1;
+}

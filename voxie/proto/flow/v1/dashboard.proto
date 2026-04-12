@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package flow;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
+
+// ── Flow Dashboard ──────────────────────────────────────────────────
+
+message FlowDashboard {
+  int32 total_tasks = 1;
+  int32 todo = 2;
+  int32 in_progress = 3;
+  int32 in_review = 4;
+  int32 done = 5;
+  int32 overdue = 6;
+  int32 total_projects = 7;
+  int32 active_projects = 8;
+  repeated TasksByProject tasks_by_project = 9;
+}
+
+message TasksByProject {
+  string project_name = 1;
+  int32 total = 2;
+  int32 completed = 3;
+}
+
+message GetFlowDashboardRequest {}
+
+message GetFlowDashboardResponse {
+  FlowDashboard dashboard = 1;
+}

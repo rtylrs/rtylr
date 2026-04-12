@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package flow;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Tasks ───────────────────────────────────────────────────────────
+
+message Task {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  string status = 4; // todo, in_progress, review, done
+  string priority = 5; // low, medium, high, urgent
+  int64 project_id = 6;
+  string project_name = 7;
+  int64 assignee_id = 8;
+  string assignee_name = 9;
+  repeated string labels = 10;
+  string due_date = 11;
+  int32 comment_count = 12;
+  int32 position = 13;
+  string created_at = 14;
+  string updated_at = 15;
+}
+
+message TaskComment {
+  int64 id = 1;
+  int64 task_id = 2;
+  string author_name = 3;
+  string body = 4;
+  string created_at = 5;
+}
+
+message ListTasksRequest {
+  common.PaginationRequest pagination = 1;
+  int64 project_id = 2;
+  string status = 3;
+  string priority = 4;
+  int64 assignee_id = 5;
+  string search = 6;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetTaskRequest {
+  int64 id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+  repeated TaskComment comments = 2;
+}
+
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  int64 project_id = 3;
+  string priority = 4;
+  int64 assignee_id = 5;
+  repeated string labels = 6;
+  string due_date = 7;
+}
+
+message CreateTaskResponse {
+  Task task = 1;
+}
+
+message UpdateTaskRequest {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  string priority = 4;
+  int64 assignee_id = 5;
+  repeated string labels = 6;
+  string due_date = 7;
+}
+
+message UpdateTaskResponse {
+  Task task = 1;
+}
+
+message DeleteTaskRequest {
+  int64 id = 1;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+}
+
+message UpdateTaskStatusRequest {
+  int64 id = 1;
+  string status = 2;
+}
+
+message UpdateTaskStatusResponse {
+  Task task = 1;
+}
+
+message AddTaskCommentRequest {
+  int64 task_id = 1;
+  string body = 2;
+}
+
+message AddTaskCommentResponse {
+  TaskComment comment = 1;
+}

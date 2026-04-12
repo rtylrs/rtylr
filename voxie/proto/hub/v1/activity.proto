@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hub;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
+
+// ── Activity ────────────────────────────────────────────────────────
+
+message ActivityEntry {
+  int64 id = 1;
+  string action = 2;
+  string actor = 3;
+  string target = 4;
+  string description = 5;
+  string ip_address = 6;
+  string created_at = 7;
+}
+
+message ListActivityRequest {
+  int32 limit = 1;
+}
+
+message ListActivityResponse {
+  repeated ActivityEntry entries = 1;
+}

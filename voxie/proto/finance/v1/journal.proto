@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Journal Entries ─────────────────────────────────────────────────
+
+message JournalEntry {
+  int64 id = 1;
+  string number = 2;
+  string date = 3;
+  string description = 4;
+  repeated JournalLine lines = 5;
+  string status = 6; // draft, posted
+  string created_at = 7;
+}
+
+message JournalLine {
+  int64 account_id = 1;
+  string account_name = 2;
+  double debit = 3;
+  double credit = 4;
+  string description = 5;
+}
+
+message ListJournalEntriesRequest {
+  common.PaginationRequest pagination = 1;
+  string from_date = 2;
+  string to_date = 3;
+}
+
+message ListJournalEntriesResponse {
+  repeated JournalEntry entries = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetJournalEntryRequest {
+  int64 id = 1;
+}
+
+message GetJournalEntryResponse {
+  JournalEntry entry = 1;
+}
+
+message CreateJournalEntryRequest {
+  string date = 1;
+  string description = 2;
+  repeated JournalLine lines = 3;
+}
+
+message CreateJournalEntryResponse {
+  JournalEntry entry = 1;
+}

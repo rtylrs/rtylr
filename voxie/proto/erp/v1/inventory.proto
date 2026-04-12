@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package erp;
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Inventory ───────────────────────────────────────────────────────
+
+message InventoryItem {
+  int64 product_id = 1;
+  string product_name = 2;
+  string sku = 3;
+  int32 quantity = 4;
+  int32 low_stock_threshold = 5;
+  string status = 6; // in_stock, low_stock, out_of_stock
+  string last_restocked_at = 7;
+}
+
+message InventoryReport {
+  int32 total_products = 1;
+  int32 in_stock = 2;
+  int32 low_stock = 3;
+  int32 out_of_stock = 4;
+  double total_value = 5;
+  repeated InventoryItem items = 6;
+}
+
+message GetInventoryReportRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  string search = 3;
+}
+
+message GetInventoryReportResponse {
+  InventoryReport report = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message LowStockItem {
+  int64 product_id = 1;
+  string product_name = 2;
+  string sku = 3;
+  int32 quantity = 4;
+  int32 threshold = 5;
+}
+
+message GetLowStockRequest {}
+
+message GetLowStockResponse {
+  repeated LowStockItem items = 1;
+}
+
+message AdjustInventoryRequest {
+  int64 product_id = 1;
+  int32 adjustment = 2; // positive = add, negative = remove
+  string reason = 3;
+}
+
+message AdjustInventoryResponse {
+  int32 new_quantity = 1;
+}

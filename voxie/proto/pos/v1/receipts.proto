@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Receipt ────────────────────────────────────────────────────────
+
+message Receipt {
+  int64 id = 1;
+  int64 order_id = 2;
+  string order_number = 3;
+  string receipt_number = 4;
+  string type = 5; // sale, refund, void
+  double subtotal = 6;
+  double tax_amount = 7;
+  double discount_amount = 8;
+  double tip_amount = 9;
+  double total = 10;
+  string payment_method = 11;
+  string customer_name = 12;
+  string customer_email = 13;
+  string cashier_name = 14;
+  string location_name = 15;
+  string created_at = 16;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListReceiptsRequest {
+  common.PaginationRequest pagination = 1;
+  string date_from = 2;
+  string date_to = 3;
+}
+
+message ListReceiptsResponse {
+  repeated Receipt receipts = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Email ──────────────────────────────────────────────────────────
+
+message EmailReceiptRequest {
+  int64 receipt_id = 1;
+  string email = 2;
+}
+
+message EmailReceiptResponse {
+  bool success = 1;
+}

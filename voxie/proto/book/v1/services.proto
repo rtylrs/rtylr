@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package book;
+
+option go_package = "github.com/voxire/voxie/gen/go/book/v1";
+
+// ── BookService ────────────────────────────────────────────────────
+
+message BookService {
+  int64 id = 1;
+  int64 business_id = 2;
+  int64 category_id = 3;
+  string name = 4;
+  string description = 5;
+  int32 duration_minutes = 6;
+  int32 buffer_minutes = 7; // time between appointments
+  double price = 8;
+  string color = 9;
+  bool is_active = 10;
+  int32 sort_order = 11;
+  int32 max_capacity = 12; // for group bookings
+  string created_at = 13;
+  string updated_at = 14;
+}
+
+message ServiceCategory {
+  int64 id = 1;
+  string name = 2;
+  int32 sort_order = 3;
+  int32 service_count = 4;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListBookServicesRequest {
+  bool active_only = 1;
+  int64 category_id = 2;
+}
+
+message ListBookServicesResponse {
+  repeated BookService services = 1;
+  repeated ServiceCategory categories = 2;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetBookServiceRequest {
+  int64 id = 1;
+}
+
+message GetBookServiceResponse {
+  BookService service = 1;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateBookServiceRequest {
+  string name = 1;
+  string description = 2;
+  int32 duration_minutes = 3;
+  int32 buffer_minutes = 4;
+  double price = 5;
+  string color = 6;
+  int64 category_id = 7;
+  int32 sort_order = 8;
+  int32 max_capacity = 9;
+}
+
+message CreateBookServiceResponse {
+  BookService service = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateBookServiceRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int32 duration_minutes = 4;
+  int32 buffer_minutes = 5;
+  double price = 6;
+  string color = 7;
+  int64 category_id = 8;
+  int32 sort_order = 9;
+  int32 max_capacity = 10;
+  bool is_active = 11;
+}
+
+message UpdateBookServiceResponse {
+  BookService service = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteBookServiceRequest {
+  int64 id = 1;
+}
+
+message DeleteBookServiceResponse {
+  bool success = 1;
+}

@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+// ── StorefrontConfig ───────────────────────────────────────────────
+
+message StorefrontTheme {
+  string primary_color = 1;
+  string secondary_color = 2;
+  string font_family = 3;
+  string logo_url = 4;
+  string favicon_url = 5;
+  string banner_url = 6;
+}
+
+message StorefrontSEO {
+  string title = 1;
+  string description = 2;
+  string keywords = 3;
+  string og_image_url = 4;
+}
+
+message StorefrontConfig {
+  int64 id = 1;
+  int64 store_id = 2;
+  string store_name = 3;
+  string domain = 4;
+  string subdomain = 5;
+  StorefrontTheme theme = 6;
+  StorefrontSEO seo = 7;
+  bool is_published = 8;
+  bool maintenance_mode = 9;
+  string announcement_text = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetStorefrontConfigRequest {}
+
+message GetStorefrontConfigResponse {
+  StorefrontConfig config = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateStorefrontConfigRequest {
+  string store_name = 1;
+  string domain = 2;
+  string subdomain = 3;
+  StorefrontTheme theme = 4;
+  StorefrontSEO seo = 5;
+  bool is_published = 6;
+  bool maintenance_mode = 7;
+  string announcement_text = 8;
+}
+
+message UpdateStorefrontConfigResponse {
+  StorefrontConfig config = 1;
+}

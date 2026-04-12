@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package crm;
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Campaigns ───────────────────────────────────────────────────────
+
+message Campaign {
+  int64 id = 1;
+  string name = 2;
+  string type = 3; // email, sms, push
+  string status = 4; // draft, active, paused, completed
+  string subject = 5;
+  string body = 6;
+  string segment_id = 7;
+  int32 recipients = 8;
+  int32 delivered = 9;
+  int32 opened = 10;
+  int32 clicked = 11;
+  string scheduled_at = 12;
+  string sent_at = 13;
+  string created_at = 14;
+}
+
+message ListCampaignsRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  string type = 3;
+}
+
+message ListCampaignsResponse {
+  repeated Campaign campaigns = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetCampaignRequest {
+  int64 id = 1;
+}
+
+message GetCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message CreateCampaignRequest {
+  string name = 1;
+  string type = 2;
+  string subject = 3;
+  string body = 4;
+  string segment_id = 5;
+  string scheduled_at = 6;
+}
+
+message CreateCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message UpdateCampaignRequest {
+  int64 id = 1;
+  string name = 2;
+  string subject = 3;
+  string body = 4;
+  string segment_id = 5;
+  string scheduled_at = 6;
+}
+
+message UpdateCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message UpdateCampaignStatusRequest {
+  int64 id = 1;
+  string status = 2; // active, paused, completed
+}
+
+message UpdateCampaignStatusResponse {
+  bool success = 1;
+}

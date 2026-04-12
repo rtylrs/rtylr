@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── MemberLocation ─────────────────────────────────────────────────
+
+message MemberLocation {
+  int64 id = 1;
+  int64 member_id = 2;
+  int64 location_id = 3;
+  string location_name = 4;
+  string role = 5;
+  string assigned_at = 6;
+}
+
+// ── My Locations ───────────────────────────────────────────────────
+
+message GetMyLocationsRequest {}
+
+message GetMyLocationsResponse {
+  repeated MemberLocation locations = 1;
+}
+
+// ── Assign ─────────────────────────────────────────────────────────
+
+message AssignLocationRequest {
+  int64 member_id = 1;
+  int64 location_id = 2;
+  string role = 3;
+}
+
+message AssignLocationResponse {
+  MemberLocation assignment = 1;
+}
+
+// ── Remove ─────────────────────────────────────────────────────────
+
+message RemoveLocationRequest {
+  int64 member_id = 1;
+  int64 location_id = 2;
+}
+
+message RemoveLocationResponse {
+  bool success = 1;
+}

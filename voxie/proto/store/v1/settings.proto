@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+// ── StoreSettings ──────────────────────────────────────────────────
+
+message StoreSettings {
+  int64 id = 1;
+  int64 store_id = 2;
+  string currency = 3;
+  string timezone = 4;
+  string weight_unit = 5; // kg, lb
+  bool tax_included_in_price = 6;
+  double tax_rate = 7;
+  bool auto_fulfill = 8;
+  bool inventory_tracking = 9;
+  string order_prefix = 10;
+  int32 next_order_number = 11;
+  string notification_email = 12;
+  bool send_order_confirmation = 13;
+  bool send_shipping_confirmation = 14;
+  string created_at = 15;
+  string updated_at = 16;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetStoreSettingsRequest {}
+
+message GetStoreSettingsResponse {
+  StoreSettings settings = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateStoreSettingsRequest {
+  string currency = 1;
+  string timezone = 2;
+  string weight_unit = 3;
+  bool tax_included_in_price = 4;
+  double tax_rate = 5;
+  bool auto_fulfill = 6;
+  bool inventory_tracking = 7;
+  string order_prefix = 8;
+  string notification_email = 9;
+  bool send_order_confirmation = 10;
+  bool send_shipping_confirmation = 11;
+}
+
+message UpdateStoreSettingsResponse {
+  StoreSettings settings = 1;
+}

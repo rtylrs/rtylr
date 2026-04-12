@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Order ──────────────────────────────────────────────────────────
+
+message OrderLineItem {
+  int64 id = 1;
+  int64 product_id = 2;
+  int64 variant_id = 3;
+  string title = 4;
+  string variant_name = 5;
+  string sku = 6;
+  int32 quantity = 7;
+  double unit_price = 8;
+  double total_price = 9;
+  string image_url = 10;
+}
+
+message OrderAddress {
+  string name = 1;
+  string line1 = 2;
+  string line2 = 3;
+  string city = 4;
+  string state = 5;
+  string postal_code = 6;
+  string country = 7;
+  string phone = 8;
+}
+
+message Order {
+  int64 id = 1;
+  int64 store_id = 2;
+  string order_number = 3;
+  string status = 4; // pending, confirmed, processing, shipped, delivered, cancelled, refunded
+  string payment_status = 5; // pending, paid, refunded, failed
+  string fulfillment_status = 6; // unfulfilled, partial, fulfilled
+  repeated OrderLineItem items = 7;
+  OrderAddress shipping_address = 8;
+  OrderAddress billing_address = 9;
+  double subtotal = 10;
+  double shipping_cost = 11;
+  double tax_amount = 12;
+  double discount_amount = 13;
+  double total = 14;
+  string currency = 15;
+  string customer_name = 16;
+  string customer_email = 17;
+  string shipping_method = 18;
+  string tracking_number = 19;
+  string notes = 20;
+  string created_at = 21;
+  string updated_at = 22;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListStoreOrdersRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  string payment_status = 3;
+  string fulfillment_status = 4;
+  string date_from = 5;
+  string date_to = 6;
+  string search = 7;
+}
+
+message ListStoreOrdersResponse {
+  repeated Order orders = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetStoreOrderRequest {
+  int64 id = 1;
+}
+
+message GetStoreOrderResponse {
+  Order order = 1;
+}
+
+// ── Update Status ──────────────────────────────────────────────────
+
+message UpdateStoreOrderStatusRequest {
+  int64 id = 1;
+  string status = 2;
+  string tracking_number = 3;
+  string notes = 4;
+}
+
+message UpdateStoreOrderStatusResponse {
+  Order order = 1;
+}

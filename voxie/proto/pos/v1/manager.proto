@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── Manager ────────────────────────────────────────────────────────
+
+message VerifyManagerPinRequest {
+  string pin = 1;
+  string action = 2; // void, refund, discount, override
+}
+
+message VerifyManagerPinResponse {
+  bool valid = 1;
+  int64 manager_id = 2;
+  string manager_name = 3;
+}

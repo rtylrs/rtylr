@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+import "common/v1/pagination.proto";
+
+// ── GiftCard ───────────────────────────────────────────────────────
+
+message GiftCard {
+  int64 id = 1;
+  int64 location_id = 2;
+  string code = 3;
+  double initial_balance = 4;
+  double current_balance = 5;
+  bool is_active = 6;
+  int64 customer_id = 7;
+  string customer_name = 8;
+  string expires_at = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message GiftCardTransaction {
+  int64 id = 1;
+  int64 gift_card_id = 2;
+  string type = 3; // purchase, redeem, refund, adjustment
+  double amount = 4;
+  double balance_after = 5;
+  int64 order_id = 6;
+  string created_at = 7;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListGiftCardsRequest {
+  common.PaginationRequest pagination = 1;
+  bool active_only = 2;
+  string search = 3;
+}
+
+message ListGiftCardsResponse {
+  repeated GiftCard gift_cards = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateGiftCardRequest {
+  double initial_balance = 1;
+  int64 customer_id = 2;
+  string expires_at = 3;
+}
+
+message CreateGiftCardResponse {
+  GiftCard gift_card = 1;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetGiftCardRequest {
+  int64 id = 1;
+}
+
+message GetGiftCardResponse {
+  GiftCard gift_card = 1;
+  repeated GiftCardTransaction transactions = 2;
+}
+
+// ── Redeem ─────────────────────────────────────────────────────────
+
+message RedeemGiftCardRequest {
+  string code = 1;
+  double amount = 2;
+  int64 order_id = 3;
+}
+
+message RedeemGiftCardResponse {
+  GiftCard gift_card = 1;
+  double redeemed_amount = 2;
+}
+
+// ── Balance ────────────────────────────────────────────────────────
+
+message GetGiftCardBalanceRequest {
+  string code = 1;
+}
+
+message GetGiftCardBalanceResponse {
+  double balance = 1;
+  bool is_active = 2;
+  string expires_at = 3;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateGiftCardRequest {
+  int64 id = 1;
+  bool is_active = 2;
+  string expires_at = 3;
+}
+
+message UpdateGiftCardResponse {
+  GiftCard gift_card = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteGiftCardRequest {
+  int64 id = 1;
+}
+
+message DeleteGiftCardResponse {
+  bool success = 1;
+}

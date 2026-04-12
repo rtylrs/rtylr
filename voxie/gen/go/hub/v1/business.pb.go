@@ -401,94 +401,6 @@ func (x *UpdateBusinessResponse) GetBusiness() *Business {
 	return nil
 }
 
-type GetConfigRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetConfigRequest) Reset() {
-	*x = GetConfigRequest{}
-	mi := &file_hub_v1_business_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetConfigRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetConfigRequest) ProtoMessage() {}
-
-func (x *GetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_business_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetConfigRequest.ProtoReflect.Descriptor instead.
-func (*GetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_hub_v1_business_proto_rawDescGZIP(), []int{5}
-}
-
-type GetConfigResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Business      *Business              `protobuf:"bytes,1,opt,name=business,proto3" json:"business,omitempty"`
-	Maintenance   bool                   `protobuf:"varint,2,opt,name=maintenance,proto3" json:"maintenance,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetConfigResponse) Reset() {
-	*x = GetConfigResponse{}
-	mi := &file_hub_v1_business_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetConfigResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetConfigResponse) ProtoMessage() {}
-
-func (x *GetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_v1_business_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetConfigResponse.ProtoReflect.Descriptor instead.
-func (*GetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_hub_v1_business_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetConfigResponse) GetBusiness() *Business {
-	if x != nil {
-		return x.Business
-	}
-	return nil
-}
-
-func (x *GetConfigResponse) GetMaintenance() bool {
-	if x != nil {
-		return x.Maintenance
-	}
-	return false
-}
-
 var File_hub_v1_business_proto protoreflect.FileDescriptor
 
 const file_hub_v1_business_proto_rawDesc = "" +
@@ -527,11 +439,7 @@ const file_hub_v1_business_proto_rawDesc = "" +
 	"\btimezone\x18\b \x01(\tR\btimezone\x12\x1a\n" +
 	"\bcurrency\x18\t \x01(\tR\bcurrency\"C\n" +
 	"\x16UpdateBusinessResponse\x12)\n" +
-	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusiness\"\x12\n" +
-	"\x10GetConfigRequest\"`\n" +
-	"\x11GetConfigResponse\x12)\n" +
-	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusiness\x12 \n" +
-	"\vmaintenance\x18\x02 \x01(\bR\vmaintenanceB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusinessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_business_proto_rawDescOnce sync.Once
@@ -545,25 +453,22 @@ func file_hub_v1_business_proto_rawDescGZIP() []byte {
 	return file_hub_v1_business_proto_rawDescData
 }
 
-var file_hub_v1_business_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_hub_v1_business_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_hub_v1_business_proto_goTypes = []any{
 	(*Business)(nil),               // 0: hub.Business
 	(*GetBusinessRequest)(nil),     // 1: hub.GetBusinessRequest
 	(*GetBusinessResponse)(nil),    // 2: hub.GetBusinessResponse
 	(*UpdateBusinessRequest)(nil),  // 3: hub.UpdateBusinessRequest
 	(*UpdateBusinessResponse)(nil), // 4: hub.UpdateBusinessResponse
-	(*GetConfigRequest)(nil),       // 5: hub.GetConfigRequest
-	(*GetConfigResponse)(nil),      // 6: hub.GetConfigResponse
 }
 var file_hub_v1_business_proto_depIdxs = []int32{
 	0, // 0: hub.GetBusinessResponse.business:type_name -> hub.Business
 	0, // 1: hub.UpdateBusinessResponse.business:type_name -> hub.Business
-	0, // 2: hub.GetConfigResponse.business:type_name -> hub.Business
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_business_proto_init() }
@@ -577,7 +482,7 @@ func file_hub_v1_business_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_business_proto_rawDesc), len(file_hub_v1_business_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

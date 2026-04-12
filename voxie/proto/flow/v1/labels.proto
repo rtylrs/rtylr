@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package flow;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/v1";
+
+// ── Labels ──────────────────────────────────────────────────────────
+
+message Label {
+  int64 id = 1;
+  string name = 2;
+  string color = 3;
+  int32 task_count = 4;
+}
+
+message ListLabelsRequest {}
+
+message ListLabelsResponse {
+  repeated Label labels = 1;
+}
+
+message CreateLabelRequest {
+  string name = 1;
+  string color = 2;
+}
+
+message CreateLabelResponse {
+  Label label = 1;
+}

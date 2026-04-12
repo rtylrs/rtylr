@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package insights;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
+
+// ── Revenue Analytics ───────────────────────────────────────────────
+
+message RevenueOverview {
+  double total = 1;
+  double change = 2;
+  repeated RevenuePoint trend = 3;
+}
+
+message RevenuePoint {
+  string date = 1;
+  double amount = 2;
+}
+
+message RevenueByApp {
+  string app = 1;
+  double amount = 2;
+  double percentage = 3;
+}
+
+message RevenueComparison {
+  string period = 1;
+  double current = 2;
+  double previous = 3;
+  double change = 4;
+}
+
+message GetRevenueOverviewRequest {
+  string period = 1;
+}
+
+message GetRevenueOverviewResponse {
+  RevenueOverview overview = 1;
+}
+
+message GetRevenueByAppRequest {
+  string period = 1;
+}
+
+message GetRevenueByAppResponse {
+  repeated RevenueByApp apps = 1;
+}
+
+message GetRevenueComparisonRequest {
+  string period = 1;
+  string compare_to = 2; // previous_period, same_period_last_year
+}
+
+message GetRevenueComparisonResponse {
+  repeated RevenueComparison comparisons = 1;
+}

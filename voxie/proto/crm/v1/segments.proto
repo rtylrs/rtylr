@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package crm;
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Segments ────────────────────────────────────────────────────────
+
+message Segment {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated SegmentRule rules = 4;
+  int32 customer_count = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message SegmentRule {
+  string field = 1; // total_spent, visit_count, last_visit, source
+  string operator = 2; // eq, gt, lt, gte, lte, contains
+  string value = 3;
+}
+
+message ListSegmentsRequest {
+  common.PaginationRequest pagination = 1;
+}
+
+message ListSegmentsResponse {
+  repeated Segment segments = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetSegmentRequest {
+  int64 id = 1;
+}
+
+message GetSegmentResponse {
+  Segment segment = 1;
+}
+
+message CreateSegmentRequest {
+  string name = 1;
+  string description = 2;
+  repeated SegmentRule rules = 3;
+}
+
+message CreateSegmentResponse {
+  Segment segment = 1;
+}
+
+message UpdateSegmentRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated SegmentRule rules = 4;
+}
+
+message UpdateSegmentResponse {
+  Segment segment = 1;
+}
+
+message DeleteSegmentRequest {
+  int64 id = 1;
+}
+
+message DeleteSegmentResponse {
+  bool success = 1;
+}

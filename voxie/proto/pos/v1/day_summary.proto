@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── DaySummary ─────────────────────────────────────────────────────
+
+message PaymentBreakdown {
+  string method = 1;
+  double amount = 2;
+  int32 count = 3;
+}
+
+message TopSellingItem {
+  int64 menu_item_id = 1;
+  string name = 2;
+  int32 quantity_sold = 3;
+  double revenue = 4;
+}
+
+message HourlySales {
+  int32 hour = 1;
+  double amount = 2;
+  int32 order_count = 3;
+}
+
+message DaySummary {
+  string date = 1;
+  double total_sales = 2;
+  double total_refunds = 3;
+  double total_voids = 4;
+  double total_discounts = 5;
+  double net_sales = 6;
+  double total_tax = 7;
+  double total_tips = 8;
+  int32 total_orders = 9;
+  int32 total_customers = 10;
+  double avg_order_value = 11;
+  repeated PaymentBreakdown payment_breakdown = 12;
+  repeated TopSellingItem top_items = 13;
+  repeated HourlySales hourly_sales = 14;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetDaySummaryRequest {
+  string date = 1; // YYYY-MM-DD, defaults to today
+}
+
+message GetDaySummaryResponse {
+  DaySummary summary = 1;
+}

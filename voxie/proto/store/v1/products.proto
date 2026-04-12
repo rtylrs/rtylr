@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Product ────────────────────────────────────────────────────────
+
+message ProductVariant {
+  int64 id = 1;
+  string name = 2;
+  string sku = 3;
+  double price = 4;
+  double compare_at_price = 5;
+  int32 stock_quantity = 6;
+  bool track_inventory = 7;
+  double weight = 8;
+  string weight_unit = 9;
+}
+
+message ProductImage {
+  int64 id = 1;
+  string url = 2;
+  string alt_text = 3;
+  int32 sort_order = 4;
+  bool is_primary = 5;
+}
+
+message Product {
+  int64 id = 1;
+  int64 store_id = 2;
+  string title = 3;
+  string description = 4;
+  string slug = 5;
+  string status = 6; // draft, active, archived
+  double price = 7;
+  double compare_at_price = 8;
+  string sku = 9;
+  int32 stock_quantity = 10;
+  bool track_inventory = 11;
+  double weight = 12;
+  string weight_unit = 13;
+  int64 category_id = 14;
+  string category_name = 15;
+  repeated string tags = 16;
+  repeated ProductVariant variants = 17;
+  repeated ProductImage images = 18;
+  bool is_featured = 19;
+  string seo_title = 20;
+  string seo_description = 21;
+  string created_at = 22;
+  string updated_at = 23;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListProductsRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  int64 category_id = 3;
+  string search = 4;
+  bool featured_only = 5;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateProductRequest {
+  string title = 1;
+  string description = 2;
+  double price = 3;
+  double compare_at_price = 4;
+  string sku = 5;
+  int32 stock_quantity = 6;
+  bool track_inventory = 7;
+  double weight = 8;
+  string weight_unit = 9;
+  int64 category_id = 10;
+  repeated string tags = 11;
+  string status = 12;
+  bool is_featured = 13;
+  string seo_title = 14;
+  string seo_description = 15;
+}
+
+message CreateProductResponse {
+  Product product = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateProductRequest {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  double price = 4;
+  double compare_at_price = 5;
+  string sku = 6;
+  int32 stock_quantity = 7;
+  bool track_inventory = 8;
+  double weight = 9;
+  string weight_unit = 10;
+  int64 category_id = 11;
+  repeated string tags = 12;
+  string status = 13;
+  bool is_featured = 14;
+  string seo_title = 15;
+  string seo_description = 16;
+}
+
+message UpdateProductResponse {
+  Product product = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteProductRequest {
+  int64 id = 1;
+}
+
+message DeleteProductResponse {
+  bool success = 1;
+}

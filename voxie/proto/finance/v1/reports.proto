@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+// ── Financial Reports ───────────────────────────────────────────────
+
+message ProfitLossReport {
+  double total_revenue = 1;
+  double total_expenses = 2;
+  double net_income = 3;
+  repeated ReportLine revenue_lines = 4;
+  repeated ReportLine expense_lines = 5;
+  string from_date = 6;
+  string to_date = 7;
+}
+
+message BalanceSheetReport {
+  double total_assets = 1;
+  double total_liabilities = 2;
+  double total_equity = 3;
+  repeated ReportLine asset_lines = 4;
+  repeated ReportLine liability_lines = 5;
+  repeated ReportLine equity_lines = 6;
+  string as_of_date = 7;
+}
+
+message CashFlowReport {
+  double operating = 1;
+  double investing = 2;
+  double financing = 3;
+  double net_change = 4;
+  double opening_balance = 5;
+  double closing_balance = 6;
+  repeated ReportLine operating_lines = 7;
+  repeated ReportLine investing_lines = 8;
+  repeated ReportLine financing_lines = 9;
+  string from_date = 10;
+  string to_date = 11;
+}
+
+message TaxReport {
+  double taxable_income = 1;
+  double tax_collected = 2;
+  double tax_paid = 3;
+  double net_tax = 4;
+  repeated TaxLine lines = 5;
+  string from_date = 6;
+  string to_date = 7;
+}
+
+message ReportLine {
+  string name = 1;
+  double amount = 2;
+}
+
+message TaxLine {
+  string description = 1;
+  double rate = 2;
+  double taxable = 3;
+  double tax = 4;
+}
+
+message GetProfitLossRequest {
+  string from_date = 1;
+  string to_date = 2;
+}
+
+message GetProfitLossResponse {
+  ProfitLossReport report = 1;
+}
+
+message GetBalanceSheetRequest {
+  string as_of_date = 1;
+}
+
+message GetBalanceSheetResponse {
+  BalanceSheetReport report = 1;
+}
+
+message GetCashFlowRequest {
+  string from_date = 1;
+  string to_date = 2;
+}
+
+message GetCashFlowResponse {
+  CashFlowReport report = 1;
+}
+
+message GetTaxReportRequest {
+  string from_date = 1;
+  string to_date = 2;
+}
+
+message GetTaxReportResponse {
+  TaxReport report = 1;
+}

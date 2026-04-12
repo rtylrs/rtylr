@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package hr;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Payroll ─────────────────────────────────────────────────────────
+
+message PayrollRun {
+  int64 id = 1;
+  string period = 2; // 2024-01, 2024-02, etc.
+  string status = 3; // draft, processing, completed, paid
+  int32 staff_count = 4;
+  double total_gross = 5;
+  double total_deductions = 6;
+  double total_net = 7;
+  repeated PayrollItem items = 8;
+  string run_at = 9;
+  string paid_at = 10;
+  string created_at = 11;
+}
+
+message PayrollItem {
+  int64 staff_id = 1;
+  string staff_name = 2;
+  double hours_worked = 3;
+  double gross_pay = 4;
+  double deductions = 5;
+  double net_pay = 6;
+}
+
+message ListPayrollRunsRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+}
+
+message ListPayrollRunsResponse {
+  repeated PayrollRun runs = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetPayrollRunRequest {
+  int64 id = 1;
+}
+
+message GetPayrollRunResponse {
+  PayrollRun run = 1;
+}
+
+message RunPayrollRequest {
+  string period = 1;
+}
+
+message RunPayrollResponse {
+  PayrollRun run = 1;
+}
+
+message MarkPayrollPaidRequest {
+  int64 id = 1;
+}
+
+message MarkPayrollPaidResponse {
+  PayrollRun run = 1;
+}

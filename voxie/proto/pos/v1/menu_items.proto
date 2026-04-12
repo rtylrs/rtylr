@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+import "common/v1/pagination.proto";
+
+// ── MenuItem ───────────────────────────────────────────────────────
+
+message MenuItem {
+  int64 id = 1;
+  int64 location_id = 2;
+  int64 category_id = 3;
+  string name = 4;
+  string description = 5;
+  double price = 6;
+  string sku = 7;
+  string image_url = 8;
+  bool is_active = 9;
+  bool track_stock = 10;
+  int32 stock_quantity = 11;
+  int32 sort_order = 12;
+  string color = 13;
+  repeated int64 modifier_group_ids = 14;
+  string created_at = 15;
+  string updated_at = 16;
+}
+
+message MenuCategory {
+  int64 id = 1;
+  string name = 2;
+  string color = 3;
+  int32 sort_order = 4;
+  int32 item_count = 5;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListMenuItemsRequest {
+  common.PaginationRequest pagination = 1;
+  int64 category_id = 2;
+  bool active_only = 3;
+  string search = 4;
+}
+
+message ListMenuItemsResponse {
+  repeated MenuItem items = 1;
+  repeated MenuCategory categories = 2;
+  common.PaginationResponse pagination = 3;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateMenuItemRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  int64 category_id = 5;
+  bool is_active = 6;
+  bool track_stock = 7;
+  string image_url = 8;
+  string color = 9;
+  int32 sort_order = 10;
+  repeated int64 modifier_group_ids = 11;
+}
+
+message UpdateMenuItemResponse {
+  MenuItem item = 1;
+}

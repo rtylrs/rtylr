@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package support;
+
+option go_package = "github.com/voxire/voxie/gen/go/support/v1";
+
+// ── Support Settings ────────────────────────────────────────────────
+
+message SupportSettings {
+  bool auto_assign = 1;
+  string default_priority = 2;
+  int32 auto_close_days = 3; // Auto-close resolved tickets after N days
+  bool email_notifications = 4;
+  string business_hours_start = 5;
+  string business_hours_end = 6;
+  repeated string business_days = 7; // ["mon","tue","wed","thu","fri"]
+  string greeting_message = 8;
+  string away_message = 9;
+}
+
+message GetSupportSettingsRequest {}
+
+message GetSupportSettingsResponse {
+  SupportSettings settings = 1;
+}
+
+message UpdateSupportSettingsRequest {
+  SupportSettings settings = 1;
+}
+
+message UpdateSupportSettingsResponse {
+  SupportSettings settings = 1;
+}

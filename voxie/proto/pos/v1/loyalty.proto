@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/v1";
+
+// ── LoyaltyConfig ──────────────────────────────────────────────────
+
+message LoyaltyConfig {
+  int64 id = 1;
+  int64 location_id = 2;
+  bool is_enabled = 3;
+  double points_per_dollar = 4;
+  double redemption_rate = 5; // points per dollar of discount
+  int32 min_redeem_points = 6;
+  string program_name = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+// ── Get Config ─────────────────────────────────────────────────────
+
+message GetLoyaltyConfigRequest {}
+
+message GetLoyaltyConfigResponse {
+  LoyaltyConfig config = 1;
+}
+
+// ── Update Config ──────────────────────────────────────────────────
+
+message UpdateLoyaltyConfigRequest {
+  bool is_enabled = 1;
+  double points_per_dollar = 2;
+  double redemption_rate = 3;
+  int32 min_redeem_points = 4;
+  string program_name = 5;
+}
+
+message UpdateLoyaltyConfigResponse {
+  LoyaltyConfig config = 1;
+}
+
+// ── Earn ────────────────────────────────────────────────────────────
+
+message EarnLoyaltyPointsRequest {
+  int64 customer_id = 1;
+  int64 order_id = 2;
+  double order_total = 3;
+}
+
+message EarnLoyaltyPointsResponse {
+  int32 points_earned = 1;
+  int32 total_points = 2;
+}
+
+// ── Redeem ──────────────────────────────────────────────────────────
+
+message RedeemLoyaltyPointsRequest {
+  int64 customer_id = 1;
+  int32 points = 2;
+  int64 order_id = 3;
+}
+
+message RedeemLoyaltyPointsResponse {
+  double discount_amount = 1;
+  int32 remaining_points = 2;
+}
+
+// ── Balance ────────────────────────────────────────────────────────
+
+message GetLoyaltyBalanceRequest {
+  int64 customer_id = 1;
+}
+
+message GetLoyaltyBalanceResponse {
+  int32 points = 1;
+  double equivalent_value = 2;
+}

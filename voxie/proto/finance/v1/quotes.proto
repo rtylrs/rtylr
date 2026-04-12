@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Quotes ──────────────────────────────────────────────────────────
+
+message Quote {
+  int64 id = 1;
+  string number = 2;
+  int64 customer_id = 3;
+  string customer_name = 4;
+  string status = 5; // draft, sent, accepted, rejected, expired
+  repeated QuoteLine lines = 6;
+  double subtotal = 7;
+  double tax = 8;
+  double discount = 9;
+  double total = 10;
+  string valid_until = 11;
+  string notes = 12;
+  string created_at = 13;
+  string updated_at = 14;
+}
+
+message QuoteLine {
+  string description = 1;
+  int32 quantity = 2;
+  double unit_price = 3;
+  double tax_rate = 4;
+  double total = 5;
+}
+
+message ListQuotesRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  int64 customer_id = 3;
+}
+
+message ListQuotesResponse {
+  repeated Quote quotes = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetQuoteRequest {
+  int64 id = 1;
+}
+
+message GetQuoteResponse {
+  Quote quote = 1;
+}
+
+message CreateQuoteRequest {
+  int64 customer_id = 1;
+  repeated QuoteLine lines = 2;
+  string valid_until = 3;
+  double discount = 4;
+  string notes = 5;
+}
+
+message CreateQuoteResponse {
+  Quote quote = 1;
+}

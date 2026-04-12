@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Chart of Accounts ───────────────────────────────────────────────
+
+message Account {
+  int64 id = 1;
+  string code = 2;
+  string name = 3;
+  string type = 4; // asset, liability, equity, revenue, expense
+  string sub_type = 5;
+  double balance = 6;
+  string description = 7;
+  bool is_active = 8;
+  string created_at = 9;
+}
+
+message ListAccountsRequest {
+  common.PaginationRequest pagination = 1;
+  string type = 2;
+  string search = 3;
+}
+
+message ListAccountsResponse {
+  repeated Account accounts = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetAccountRequest {
+  int64 id = 1;
+}
+
+message GetAccountResponse {
+  Account account = 1;
+}
+
+message CreateAccountRequest {
+  string code = 1;
+  string name = 2;
+  string type = 3;
+  string sub_type = 4;
+  string description = 5;
+}
+
+message CreateAccountResponse {
+  Account account = 1;
+}

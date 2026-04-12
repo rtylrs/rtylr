@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Expenses ────────────────────────────────────────────────────────
+
+message Expense {
+  int64 id = 1;
+  string description = 2;
+  double amount = 3;
+  string category = 4;
+  int64 category_id = 5;
+  string vendor = 6;
+  string status = 7; // pending, approved, rejected, paid
+  string receipt_url = 8;
+  string date = 9;
+  string notes = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message ExpenseCategory {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double budget = 4;
+  double spent = 5;
+}
+
+message ListExpensesRequest {
+  common.PaginationRequest pagination = 1;
+  string category = 2;
+  string status = 3;
+  string from_date = 4;
+  string to_date = 5;
+}
+
+message ListExpensesResponse {
+  repeated Expense expenses = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetExpenseRequest {
+  int64 id = 1;
+}
+
+message GetExpenseResponse {
+  Expense expense = 1;
+}
+
+message CreateExpenseRequest {
+  string description = 1;
+  double amount = 2;
+  int64 category_id = 3;
+  string vendor = 4;
+  string date = 5;
+  string notes = 6;
+  string receipt_url = 7;
+}
+
+message CreateExpenseResponse {
+  Expense expense = 1;
+}
+
+message UpdateExpenseRequest {
+  int64 id = 1;
+  string description = 2;
+  double amount = 3;
+  int64 category_id = 4;
+  string vendor = 5;
+  string date = 6;
+  string notes = 7;
+  string status = 8;
+}
+
+message UpdateExpenseResponse {
+  Expense expense = 1;
+}
+
+message DeleteExpenseRequest {
+  int64 id = 1;
+}
+
+message DeleteExpenseResponse {
+  bool success = 1;
+}
+
+message ListExpenseCategoriesRequest {}
+
+message ListExpenseCategoriesResponse {
+  repeated ExpenseCategory categories = 1;
+}
+
+message CreateExpenseCategoryRequest {
+  string name = 1;
+  string description = 2;
+  double budget = 3;
+}
+
+message CreateExpenseCategoryResponse {
+  ExpenseCategory category = 1;
+}

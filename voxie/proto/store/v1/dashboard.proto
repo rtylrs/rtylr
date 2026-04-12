@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+// ── DashboardStats ─────────────────────────────────────────────────
+
+message SalesOverTime {
+  string date = 1;
+  double revenue = 2;
+  int32 order_count = 3;
+}
+
+message TopProduct {
+  int64 product_id = 1;
+  string title = 2;
+  int32 units_sold = 3;
+  double revenue = 4;
+}
+
+message DashboardStats {
+  double total_revenue = 1;
+  double revenue_change = 2;
+  int32 total_orders = 3;
+  double orders_change = 4;
+  int32 total_customers = 5;
+  double customers_change = 6;
+  double avg_order_value = 7;
+  double avg_order_value_change = 8;
+  int32 pending_orders = 9;
+  int32 low_stock_products = 10;
+  repeated SalesOverTime sales_over_time = 11;
+  repeated TopProduct top_products = 12;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetDashboardStatsRequest {
+  string period = 1; // today, week, month, year
+}
+
+message GetDashboardStatsResponse {
+  DashboardStats stats = 1;
+}

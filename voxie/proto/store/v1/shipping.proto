@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "github.com/voxire/voxie/gen/go/store/v1";
+
+// ── ShippingZone ───────────────────────────────────────────────────
+
+message ShippingZone {
+  int64 id = 1;
+  int64 store_id = 2;
+  string name = 3;
+  repeated string countries = 4;
+  repeated string states = 5;
+  repeated ShippingMethod methods = 6;
+  bool is_active = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message ShippingMethod {
+  int64 id = 1;
+  int64 zone_id = 2;
+  string name = 3;
+  string type = 4; // flat_rate, free, weight_based, price_based
+  double price = 5;
+  double min_order_amount = 6;
+  double min_weight = 7;
+  double max_weight = 8;
+  string estimated_days = 9;
+  bool is_active = 10;
+}
+
+// ── List Zones ─────────────────────────────────────────────────────
+
+message ListShippingZonesRequest {}
+
+message ListShippingZonesResponse {
+  repeated ShippingZone zones = 1;
+}
+
+// ── Create Zone ────────────────────────────────────────────────────
+
+message CreateShippingZoneRequest {
+  string name = 1;
+  repeated string countries = 2;
+  repeated string states = 3;
+}
+
+message CreateShippingZoneResponse {
+  ShippingZone zone = 1;
+}
+
+// ── Update Zone ────────────────────────────────────────────────────
+
+message UpdateShippingZoneRequest {
+  int64 id = 1;
+  string name = 2;
+  repeated string countries = 3;
+  repeated string states = 4;
+  bool is_active = 5;
+}
+
+message UpdateShippingZoneResponse {
+  ShippingZone zone = 1;
+}
+
+// ── Delete Zone ────────────────────────────────────────────────────
+
+message DeleteShippingZoneRequest {
+  int64 id = 1;
+}
+
+message DeleteShippingZoneResponse {
+  bool success = 1;
+}
+
+// ── Create Method ──────────────────────────────────────────────────
+
+message CreateShippingMethodRequest {
+  int64 zone_id = 1;
+  string name = 2;
+  string type = 3;
+  double price = 4;
+  double min_order_amount = 5;
+  double min_weight = 6;
+  double max_weight = 7;
+  string estimated_days = 8;
+}
+
+message CreateShippingMethodResponse {
+  ShippingMethod method = 1;
+}
+
+// ── Update Method ──────────────────────────────────────────────────
+
+message UpdateShippingMethodRequest {
+  int64 id = 1;
+  string name = 2;
+  string type = 3;
+  double price = 4;
+  double min_order_amount = 5;
+  double min_weight = 6;
+  double max_weight = 7;
+  string estimated_days = 8;
+  bool is_active = 9;
+}
+
+message UpdateShippingMethodResponse {
+  ShippingMethod method = 1;
+}
+
+// ── Delete Method ──────────────────────────────────────────────────
+
+message DeleteShippingMethodRequest {
+  int64 id = 1;
+}
+
+message DeleteShippingMethodResponse {
+  bool success = 1;
+}

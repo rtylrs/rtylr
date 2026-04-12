@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package support;
+
+option go_package = "github.com/voxire/voxie/gen/go/support/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Knowledge Base ──────────────────────────────────────────────────
+
+message Article {
+  int64 id = 1;
+  string title = 2;
+  string slug = 3;
+  string body = 4;
+  int64 category_id = 5;
+  string category_name = 6;
+  string status = 7; // draft, published
+  int32 view_count = 8;
+  int32 helpful_count = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message ArticleCategory {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int32 article_count = 4;
+  int32 position = 5;
+}
+
+message ListArticlesRequest {
+  common.PaginationRequest pagination = 1;
+  int64 category_id = 2;
+  string status = 3;
+  string search = 4;
+}
+
+message ListArticlesResponse {
+  repeated Article articles = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+message GetArticleRequest {
+  int64 id = 1;
+}
+
+message GetArticleResponse {
+  Article article = 1;
+}
+
+message CreateArticleRequest {
+  string title = 1;
+  string body = 2;
+  int64 category_id = 3;
+  string status = 4;
+}
+
+message CreateArticleResponse {
+  Article article = 1;
+}
+
+message UpdateArticleRequest {
+  int64 id = 1;
+  string title = 2;
+  string body = 3;
+  int64 category_id = 4;
+  string status = 5;
+}
+
+message UpdateArticleResponse {
+  Article article = 1;
+}
+
+message DeleteArticleRequest {
+  int64 id = 1;
+}
+
+message DeleteArticleResponse {
+  bool success = 1;
+}
+
+message ListArticleCategoriesRequest {}
+
+message ListArticleCategoriesResponse {
+  repeated ArticleCategory categories = 1;
+}
+
+message CreateArticleCategoryRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateArticleCategoryResponse {
+  ArticleCategory category = 1;
+}
+
+message UpdateArticleCategoryRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int32 position = 4;
+}
+
+message UpdateArticleCategoryResponse {
+  ArticleCategory category = 1;
+}
+
+message DeleteArticleCategoryRequest {
+  int64 id = 1;
+}
+
+message DeleteArticleCategoryResponse {
+  bool success = 1;
+}

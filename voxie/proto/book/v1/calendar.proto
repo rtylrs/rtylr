@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package book;
+
+option go_package = "github.com/voxire/voxie/gen/go/book/v1";
+
+// ── Calendar ───────────────────────────────────────────────────────
+
+message CalendarEntry {
+  int64 id = 1;
+  int64 appointment_id = 2;
+  string title = 3;
+  string start_time = 4;
+  string end_time = 5;
+  string status = 6;
+  string customer_name = 7;
+  string service_name = 8;
+  string resource_name = 9;
+  string color = 10;
+  bool is_blocked = 11;
+}
+
+message TimeSlot {
+  string start_time = 1;
+  string end_time = 2;
+  bool is_available = 3;
+}
+
+// ── Get Calendar ───────────────────────────────────────────────────
+
+message GetCalendarRequest {
+  string date_from = 1;
+  string date_to = 2;
+  int64 resource_id = 3;
+  string view = 4; // day, week, month
+}
+
+message GetCalendarResponse {
+  repeated CalendarEntry entries = 1;
+}
+
+// ── Get Available Slots ────────────────────────────────────────────
+
+message GetAvailableSlotsRequest {
+  string date = 1;
+  int64 service_id = 2;
+  int64 resource_id = 3;
+}
+
+message GetAvailableSlotsResponse {
+  repeated TimeSlot slots = 1;
+}

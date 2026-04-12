@@ -4,8 +4,6 @@ package hub;
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/v1";
 
-import "common/v1/pagination.proto";
-
 // ── User / Auth ─────────────────────────────────────────────────────
 
 message User {
@@ -28,85 +26,4 @@ message User {
 message GetMeRequest {}
 message GetMeResponse {
   User user = 1;
-}
-
-// ── Team ────────────────────────────────────────────────────────────
-
-message TeamMember {
-  int64 id = 1;
-  string name = 2;
-  string email = 3;
-  string role = 4;
-  string status = 5; // active, pending, suspended
-  repeated string apps = 6;
-  string avatar_url = 7;
-  string created_at = 8;
-  string last_active_at = 9;
-}
-
-message ListTeamRequest {
-  common.PaginationRequest pagination = 1;
-  string role_filter = 2;
-  string search = 3;
-}
-
-message ListTeamResponse {
-  repeated TeamMember members = 1;
-  common.PaginationResponse pagination = 2;
-}
-
-message InviteUserRequest {
-  string email = 1;
-  string name = 2;
-  string role = 3;
-  repeated string apps = 4;
-  string password = 5; // Optional: for manual password flow
-  string auth_method = 6; // "invite" or "manual"
-}
-
-message InviteUserResponse {
-  int64 id = 1;
-  string message = 2;
-}
-
-message UpdateMemberRoleRequest {
-  int64 user_id = 1;
-  string role = 2;
-  repeated string apps = 3;
-}
-
-message UpdateMemberRoleResponse {
-  bool success = 1;
-}
-
-message RemoveMemberRequest {
-  int64 user_id = 1;
-}
-
-message RemoveMemberResponse {
-  bool success = 1;
-}
-
-message GetMemberDetailRequest {
-  int64 user_id = 1;
-}
-
-message GetMemberDetailResponse {
-  TeamMember member = 1;
-  repeated AccessRequest access_requests = 2;
-}
-
-message AccessRequest {
-  int64 id = 1;
-  string app = 2;
-  string requested_at = 3;
-  string status = 4; // pending, approved, denied
-}
-
-message RequestAccessRequest {
-  string app = 1;
-}
-
-message RequestAccessResponse {
-  bool success = 1;
 }

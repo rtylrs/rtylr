@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package book;
+
+option go_package = "github.com/voxire/voxie/gen/go/book/v1";
+
+import "common/v1/pagination.proto";
+
+// ── Appointment ────────────────────────────────────────────────────
+
+message Appointment {
+  int64 id = 1;
+  int64 business_id = 2;
+  int64 location_id = 3;
+  int64 customer_id = 4;
+  string customer_name = 5;
+  string customer_email = 6;
+  string customer_phone = 7;
+  int64 service_id = 8;
+  string service_name = 9;
+  int64 resource_id = 10;
+  string resource_name = 11;
+  string status = 12; // scheduled, confirmed, in_progress, completed, cancelled, no_show
+  string start_time = 13;
+  string end_time = 14;
+  int32 duration_minutes = 15;
+  double price = 16;
+  string notes = 17;
+  string cancellation_reason = 18;
+  string created_at = 19;
+  string updated_at = 20;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListAppointmentsRequest {
+  common.PaginationRequest pagination = 1;
+  string status = 2;
+  int64 resource_id = 3;
+  int64 service_id = 4;
+  string date_from = 5;
+  string date_to = 6;
+  string search = 7;
+}
+
+message ListAppointmentsResponse {
+  repeated Appointment appointments = 1;
+  common.PaginationResponse pagination = 2;
+}
+
+// ── Get ────────────────────────────────────────────────────────────
+
+message GetAppointmentRequest {
+  int64 id = 1;
+}
+
+message GetAppointmentResponse {
+  Appointment appointment = 1;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateAppointmentRequest {
+  int64 customer_id = 1;
+  int64 service_id = 2;
+  int64 resource_id = 3;
+  string start_time = 4;
+  string notes = 5;
+  string customer_name = 6;
+  string customer_email = 7;
+  string customer_phone = 8;
+}
+
+message CreateAppointmentResponse {
+  Appointment appointment = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateAppointmentRequest {
+  int64 id = 1;
+  int64 service_id = 2;
+  int64 resource_id = 3;
+  string start_time = 4;
+  string status = 5;
+  string notes = 6;
+}
+
+message UpdateAppointmentResponse {
+  Appointment appointment = 1;
+}
+
+// ── Cancel ─────────────────────────────────────────────────────────
+
+message CancelAppointmentRequest {
+  int64 id = 1;
+  string reason = 2;
+}
+
+message CancelAppointmentResponse {
+  Appointment appointment = 1;
+}
+
+// ── Delete ─────────────────────────────────────────────────────────
+
+message DeleteAppointmentRequest {
+  int64 id = 1;
+}
+
+message DeleteAppointmentResponse {
+  bool success = 1;
+}
