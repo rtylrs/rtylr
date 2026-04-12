@@ -1,13 +1,13 @@
 version: v2
 plugins:
   # Go code generation
-  - remote: buf.build/protocolbuffers/go
+  - local: protoc-gen-go
     out: gen/go
     opt:
       - paths=source_relative
 
-  # TypeScript code generation (using ts-proto for clean TS output)
-  - remote: buf.build/community/stephenh-ts-proto
+  # TypeScript code generation
+  - local: protoc-gen-ts_proto
     out: gen/ts
     opt:
       - esModuleInterop=true
@@ -15,4 +15,3 @@ plugins:
       - env=browser
       - useExactTypes=false
       - exportCommonSymbols=false
-      - importSuffix=.js
