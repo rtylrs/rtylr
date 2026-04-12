@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-	storev1 "github.com/voxire/voxie/gen/go/store/v1"
-
 	"context"
 	"net/http"
 
@@ -13,13 +10,18 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-func toProto(s domain.ShippingMethod) *storev1.ShippingMethod {
-	return &storev1.ShippingMethod{
-		Id:            s.ID,
-		Name:          s.Name,
-		Price:         s.Price,
-		EstimatedDays: fmt.Sprintf("%d", s.EstimatedDays),
-	}
+type Payload struct {
+	ID            int64   `json:"id"`
+	OwnerID       int64   `json:"owner_id"`
+	Name          string  `json:"name"`
+	Price         float64 `json:"price"`
+	EstimatedDays int     `json:"estimated_days"`
+	IsActive      bool    `json:"is_active"`
+	CreatedAt     string  `json:"created_at"`
+}
+
+func toPayload(s domain.ShippingMethod) Payload {
+	return Payload{ID: s.ID, OwnerID: s.OwnerID, Name: s.Name, Price: s.Price, EstimatedDays: s.EstimatedDays, IsActive: s.IsActive, CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
 }
 
 func ListRoutes() []string   { return []string{"/store/shipping"} }
@@ -29,15 +31,15 @@ func DeleteRoutes() []string { return []string{"/store/shipping"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Methods []*storev1.ShippingMethod `json:"methods"` }
+type ListResponse struct{ Methods []Payload `json:"methods"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list shipping methods"} }
-	out := make([]*storev1.ShippingMethod, 0, len(items))
-	for _, i := range items { out = append(out, toProto(i)) }
+	out := make([]Payload, 0, len(items))
+	for _, i := range items { out = append(out, toPayload(i)) }
 	return ListResponse{Methods: out}, nil
 }
 

@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"errors"
 	"net/http"
@@ -14,17 +12,33 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
 )
 
-func giftCardToProto(gc domain.GiftCard) *posv1.GiftCard {
+type GiftCardPayload struct {
+	ID             int64   `json:"id"`
+	OwnerID        int64   `json:"owner_id"`
+	Code           string  `json:"code"`
+	InitialAmount  float64 `json:"initial_amount"`
+	CurrentBalance float64 `json:"current_balance"`
+	CustomerName   string  `json:"customer_name"`
+	CustomerEmail  string  `json:"customer_email"`
+	IsActive       bool    `json:"is_active"`
+	ExpiresAt      string  `json:"expires_at"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
+}
+
+func newGiftCardPayload(gc domain.GiftCard) GiftCardPayload {
 	expiresAt := ""
 	if gc.ExpiresAt != nil {
 		expiresAt = gc.ExpiresAt.Format("2006-01-02T15:04:05Z")
 	}
-	return &posv1.GiftCard{
-		Id:             gc.ID,
+	return GiftCardPayload{
+		ID:             gc.ID,
+		OwnerID:        gc.OwnerID,
 		Code:           gc.Code,
-		InitialBalance: gc.InitialAmount,
+		InitialAmount:  gc.InitialAmount,
 		CurrentBalance: gc.CurrentBalance,
 		CustomerName:   gc.CustomerName,
+		CustomerEmail:  gc.CustomerEmail,
 		IsActive:       gc.IsActive,
 		ExpiresAt:      expiresAt,
 		CreatedAt:      gc.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -39,7 +53,7 @@ func ListGiftCardsRoutes() []string { return []string{"/pos/gift-cards"} }
 type ListGiftCardsHandler struct{ Service *application.Service }
 type ListGiftCardsRequest struct{}
 type ListGiftCardsResponse struct {
-	GiftCards []*posv1.GiftCard `json:"gift_cards"`
+	GiftCards []GiftCardPayload `json:"gift_cards"`
 }
 
 func (h *ListGiftCardsHandler) Serve(ctx context.Context, _ *ListGiftCardsRequest) (ListGiftCardsResponse, *errorModels.ServerError) {
@@ -51,9 +65,9 @@ func (h *ListGiftCardsHandler) Serve(ctx context.Context, _ *ListGiftCardsReques
 	if err != nil {
 		return ListGiftCardsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list gift cards"}
 	}
-	payloads := make([]*posv1.GiftCard, len(items))
+	payloads := make([]GiftCardPayload, len(items))
 	for i, gc := range items {
-		payloads[i] = giftCardToProto(gc)
+		payloads[i] = newGiftCardPayload(gc)
 	}
 	return ListGiftCardsResponse{GiftCards: payloads}, nil
 }
@@ -117,7 +131,7 @@ type RedeemGiftCardRequest struct {
 }
 
 type RedeemGiftCardResponse struct {
-	GiftCard *posv1.GiftCard `json:"gift_card"`
+	GiftCard GiftCardPayload `json:"gift_card"`
 	Message  string          `json:"message"`
 }
 
@@ -143,7 +157,7 @@ func (h *RedeemGiftCardHandler) Serve(ctx context.Context, req *RedeemGiftCardRe
 			}
 			return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to check gift card"}
 		}
-		return RedeemGiftCardResponse{GiftCard: *giftCardToProto(*gc), Message: "Balance retrieved"}, nil
+		return RedeemGiftCardResponse{GiftCard: newGiftCardPayload(*gc), Message: "Balance retrieved"}, nil
 	}
 
 	gc, err := h.Service.Redeem(ctx, device.User.UserID, domain.RedeemInput{
@@ -165,5 +179,5 @@ func (h *RedeemGiftCardHandler) Serve(ctx context.Context, req *RedeemGiftCardRe
 		}
 		return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to redeem gift card"}
 	}
-	return RedeemGiftCardResponse{GiftCard: *giftCardToProto(*gc), Message: "Gift card redeemed successfully"}, nil
+	return RedeemGiftCardResponse{GiftCard: newGiftCardPayload(*gc), Message: "Gift card redeemed successfully"}, nil
 }

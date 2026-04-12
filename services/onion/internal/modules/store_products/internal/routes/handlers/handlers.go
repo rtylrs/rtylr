@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	storev1 "github.com/voxire/voxie/gen/go/store/v1"
-
 	"context"
 	"net/http"
 
@@ -12,19 +10,30 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-func toProto(p domain.StoreProduct) *storev1.Product {
-	status := "draft"
-	if p.IsPublished {
-		status = "active"
-	}
-	return &storev1.Product{
-		Id:             p.ID,
-		Title:          p.Title,
-		Slug:           p.Slug,
-		Description:    p.Description,
-		Price:          p.Price,
-		CompareAtPrice: p.CompareAtPrice,
-		Status:         status,
+type Payload struct {
+	ID             int64   `json:"id"`
+	OwnerID        int64   `json:"owner_id"`
+	ProductID      int64   `json:"product_id"`
+	Title          string  `json:"title"`
+	Slug           string  `json:"slug"`
+	Description    string  `json:"description"`
+	Images         string  `json:"images"`
+	Price          float64 `json:"price"`
+	CompareAtPrice float64 `json:"compare_at_price"`
+	IsPublished    bool    `json:"is_published"`
+	SortOrder      int     `json:"sort_order"`
+	CreatedAt      string  `json:"created_at"`
+	UpdatedAt      string  `json:"updated_at"`
+}
+
+func toPayload(p domain.StoreProduct) Payload {
+	return Payload{
+		ID: p.ID, OwnerID: p.OwnerID, ProductID: p.ProductID, Title: p.Title,
+		Slug: p.Slug, Description: p.Description, Images: p.Images,
+		Price: p.Price, CompareAtPrice: p.CompareAtPrice, IsPublished: p.IsPublished,
+		SortOrder: p.SortOrder,
+		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 
@@ -35,7 +44,7 @@ func DeleteRoutes() []string { return []string{"/store/products"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Products []*storev1.Product `json:"products"` }
+type ListResponse struct{ Products []Payload `json:"products"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -46,9 +55,9 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list store products"}
 	}
-	out := make([]*storev1.Product, 0, len(items))
+	out := make([]Payload, 0, len(items))
 	for _, i := range items {
-		out = append(out, toProto(i))
+		out = append(out, toPayload(i))
 	}
 	return ListResponse{Products: out}, nil
 }

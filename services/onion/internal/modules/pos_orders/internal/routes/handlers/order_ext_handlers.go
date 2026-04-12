@@ -186,7 +186,7 @@ type ListHeldOrdersHandler struct{ Service *application.Service }
 type ListHeldOrdersRequest struct{}
 
 type ListHeldOrdersResponse struct {
-	Orders []*OrderPayload `json:"orders"`
+	Orders []OrderPayload `json:"orders"`
 }
 
 func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, *errorModels.ServerError) {
@@ -200,7 +200,7 @@ func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequ
 		return ListHeldOrdersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list held orders"}
 	}
 
-	payloads := make([]*OrderPayload, 0, len(orders))
+	payloads := make([]OrderPayload, 0, len(orders))
 	for _, o := range orders {
 		payloads = append(payloads, newOrderPayload(o))
 	}

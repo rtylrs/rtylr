@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"net/http"
 
@@ -17,21 +15,14 @@ func MyLocationsRoutes() []string { return []string{"/pos/access/my-locations"} 
 
 type GetMyLocationsHandler struct{ Service *application.Service }
 type GetMyLocationsRequest struct{}
-type GetMyLocationsResponse struct{ Locations []*posv1.MemberLocation `json:"locations"` }
+type GetMyLocationsResponse struct{ Locations []infrastructure.MyLocation `json:"locations"` }
 
 func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequest) (GetMyLocationsResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return GetMyLocationsResponse{}, errorModels.PermissionDeniedServerError() }
 	locs, err := h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
 	if err != nil { return GetMyLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
-	out := make([]*posv1.MemberLocation, 0, len(locs))
-	for _, l := range locs {
-		out = append(out, &posv1.MemberLocation{
-			LocationId:   l.LocationID,
-			LocationName: l.Name,
-		})
-	}
-	return GetMyLocationsResponse{Locations: out}, nil
+	return GetMyLocationsResponse{Locations: locs}, nil
 }
 
 func AssignRoutes() []string { return []string{"/pos/access/assign"} }

@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
-
 	"context"
 	"net/http"
 
@@ -12,20 +10,20 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-func toProto(a domain.Appointment) *bookv1.Appointment {
-	return &bookv1.Appointment{
-		Id:            a.ID,
-		ServiceId:     a.ServiceID,
-		ResourceId:    a.ResourceID,
-		CustomerName:  a.CustomerName,
-		CustomerEmail: a.CustomerEmail,
-		CustomerPhone: a.CustomerPhone,
-		StartTime:     a.StartTime.Format("2006-01-02T15:04:05Z07:00"),
-		EndTime:       a.EndTime.Format("2006-01-02T15:04:05Z07:00"),
-		Status:        a.Status,
-		Notes:         a.Notes,
-		CreatedAt:     a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
+type Payload struct {
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; ServiceID int64 `json:"service_id"`
+	ResourceID int64 `json:"resource_id"`; StaffID int64 `json:"staff_id"`
+	CustomerName string `json:"customer_name"`; CustomerEmail string `json:"customer_email"`; CustomerPhone string `json:"customer_phone"`
+	StartTime string `json:"start_time"`; EndTime string `json:"end_time"`; Status string `json:"status"`
+	Notes string `json:"notes"`; CreatedAt string `json:"created_at"`; UpdatedAt string `json:"updated_at"`
+}
+
+func toPayload(a domain.Appointment) Payload {
+	return Payload{ID: a.ID, OwnerID: a.OwnerID, ServiceID: a.ServiceID, ResourceID: a.ResourceID, StaffID: a.StaffID,
+		CustomerName: a.CustomerName, CustomerEmail: a.CustomerEmail, CustomerPhone: a.CustomerPhone,
+		StartTime: a.StartTime.Format("2006-01-02T15:04:05Z07:00"), EndTime: a.EndTime.Format("2006-01-02T15:04:05Z07:00"),
+		Status: a.Status, Notes: a.Notes,
+		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"), UpdatedAt: a.UpdatedAt.Format("2006-01-02T15:04:05Z07:00")}
 }
 
 func ListRoutes() []string   { return []string{"/book/appointments"} }
@@ -36,27 +34,27 @@ func DeleteRoutes() []string { return []string{"/book/appointments"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Appointments []*bookv1.Appointment `json:"appointments"` }
+type ListResponse struct{ Appointments []Payload `json:"appointments"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list appointments"} }
-	out := make([]*bookv1.Appointment, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
+	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
 	return ListResponse{Appointments: out}, nil
 }
 
 type TodayHandler struct{ Service *application.Service }
 type TodayRequest struct{}
-type TodayResponse struct{ Appointments []*bookv1.Appointment `json:"appointments"` }
+type TodayResponse struct{ Appointments []Payload `json:"appointments"` }
 
 func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return TodayResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.ListToday(ctx, authUser.UserID)
 	if err != nil { return TodayResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list today appointments"} }
-	out := make([]*bookv1.Appointment, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
+	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
 	return TodayResponse{Appointments: out}, nil
 }
 

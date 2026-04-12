@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
-
 	"context"
 	"net/http"
 
@@ -12,14 +10,13 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-func toProto(r domain.Resource) *bookv1.Resource {
-	return &bookv1.Resource{
-		Id:        r.ID,
-		Name:      r.Name,
-		Title:     r.Type,
-		IsActive:  r.IsActive,
-		CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
+type Payload struct {
+	ID int64 `json:"id"`; OwnerID int64 `json:"owner_id"`; Name string `json:"name"`
+	Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"`; CreatedAt string `json:"created_at"`
+}
+
+func toPayload(r domain.Resource) Payload {
+	return Payload{ID: r.ID, OwnerID: r.OwnerID, Name: r.Name, Type: r.Type, Capacity: r.Capacity, IsActive: r.IsActive, CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
 }
 
 func ListRoutes() []string   { return []string{"/book/resources"} }
@@ -29,14 +26,14 @@ func DeleteRoutes() []string { return []string{"/book/resources"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Resources []*bookv1.Resource `json:"resources"` }
+type ListResponse struct{ Resources []Payload `json:"resources"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list resources"} }
-	out := make([]*bookv1.Resource, 0, len(items)); for _, i := range items { out = append(out, toProto(i)) }
+	out := make([]Payload, 0, len(items)); for _, i := range items { out = append(out, toPayload(i)) }
 	return ListResponse{Resources: out}, nil
 }
 

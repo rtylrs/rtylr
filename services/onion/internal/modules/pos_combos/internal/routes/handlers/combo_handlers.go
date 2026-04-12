@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"errors"
 	"net/http"
@@ -16,12 +14,26 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
 )
 
-func comboToProto(c domain.Combo) *posv1.Combo {
-	return &posv1.Combo{
-		Id:          c.ID,
+type ComboPayload struct {
+	ID          int64   `json:"id"`
+	OwnerID     int64   `json:"owner_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Items       string  `json:"items"`
+	IsActive    bool    `json:"is_active"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
+}
+
+func newComboPayload(c domain.Combo) ComboPayload {
+	return ComboPayload{
+		ID:          c.ID,
+		OwnerID:     c.OwnerID,
 		Name:        c.Name,
 		Description: c.Description,
 		Price:       c.Price,
+		Items:       c.Items,
 		IsActive:    c.IsActive,
 		CreatedAt:   c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
@@ -35,7 +47,7 @@ func ListCombosRoutes() []string { return []string{"/pos/menu/combos"} }
 type ListCombosHandler struct{ Service *application.Service }
 type ListCombosRequest struct{}
 type ListCombosResponse struct {
-	Combos []*posv1.Combo `json:"combos"`
+	Combos []ComboPayload `json:"combos"`
 }
 
 func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (ListCombosResponse, *errorModels.ServerError) {
@@ -47,9 +59,9 @@ func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (Li
 	if err != nil {
 		return ListCombosResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list combos"}
 	}
-	payloads := make([]*posv1.Combo, len(items))
+	payloads := make([]ComboPayload, len(items))
 	for i, c := range items {
-		payloads[i] = comboToProto(c)
+		payloads[i] = newComboPayload(c)
 	}
 	return ListCombosResponse{Combos: payloads}, nil
 }

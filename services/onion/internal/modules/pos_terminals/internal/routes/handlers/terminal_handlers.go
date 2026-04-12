@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"net/http"
 	"strconv"
@@ -15,18 +13,30 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 )
 
-func terminalToProto(t domain.Terminal) *posv1.Terminal {
-	p := &posv1.Terminal{
-		Id:       t.ID,
-		Name:     t.Name,
-		IsActive: t.IsActive,
-		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	if t.DeviceID != nil {
-		p.DeviceId = *t.DeviceID
+type TerminalPayload struct {
+	ID         int64   `json:"id"`
+	BusinessID int64   `json:"business_id"`
+	BranchID   int64   `json:"branch_id"`
+	Name       string  `json:"name"`
+	DeviceID   *string `json:"device_id"`
+	IsActive   bool    `json:"is_active"`
+	LastSeenAt *string `json:"last_seen_at"`
+	CreatedAt  string  `json:"created_at"`
+}
+
+func newTerminalPayload(t domain.Terminal) TerminalPayload {
+	p := TerminalPayload{
+		ID:         t.ID,
+		BusinessID: t.BusinessID,
+		BranchID:   t.BranchID,
+		Name:       t.Name,
+		DeviceID:   t.DeviceID,
+		IsActive:   t.IsActive,
+		CreatedAt:  t.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 	if t.LastSeenAt != nil {
-		p.LastHeartbeatAt = t.LastSeenAt.Format("2006-01-02T15:04:05Z")
+		s := t.LastSeenAt.Format("2006-01-02T15:04:05Z")
+		p.LastSeenAt = &s
 	}
 	return p
 }
@@ -38,7 +48,7 @@ func TerminalListRoutes() []string { return []string{"/pos/terminals"} }
 type ListTerminalsHandler struct{ Service *application.Service }
 type ListTerminalsRequest struct{}
 type ListTerminalsResponse struct {
-	Terminals []*posv1.Terminal `json:"terminals"`
+	Terminals []TerminalPayload `json:"terminals"`
 }
 
 func (h *ListTerminalsHandler) Serve(ctx context.Context, _ *ListTerminalsRequest) (ListTerminalsResponse, *errorModels.ServerError) {
@@ -50,9 +60,9 @@ func (h *ListTerminalsHandler) Serve(ctx context.Context, _ *ListTerminalsReques
 	if err != nil {
 		return ListTerminalsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list terminals"}
 	}
-	payloads := make([]*posv1.Terminal, len(terminals))
+	payloads := make([]TerminalPayload, len(terminals))
 	for i, t := range terminals {
-		payloads[i] = terminalToProto(t)
+		payloads[i] = newTerminalPayload(t)
 	}
 	return ListTerminalsResponse{Terminals: payloads}, nil
 }

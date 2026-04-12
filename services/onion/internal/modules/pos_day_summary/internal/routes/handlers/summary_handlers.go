@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"net/http"
 
@@ -21,7 +19,12 @@ type DaySummaryRequest struct {
 }
 
 type DaySummaryResponse struct {
-	Summary *posv1.DaySummary `json:"summary"`
+	TotalSales       float64            `json:"total_sales"`
+	TotalTax         float64            `json:"total_tax"`
+	TotalTips        float64            `json:"total_tips"`
+	TotalRefunds     float64            `json:"total_refunds"`
+	TotalOrders      int                `json:"total_orders"`
+	PaymentBreakdown map[string]float64 `json:"payment_breakdown"`
 }
 
 func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (DaySummaryResponse, *errorModels.ServerError) {
@@ -36,13 +39,11 @@ func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (
 	}
 
 	return DaySummaryResponse{
-		Summary: &posv1.DaySummary{
-			Date:         req.Date,
-			TotalSales:   summary.TotalSales,
-			TotalTax:     summary.TotalTax,
-			TotalTips:    summary.TotalTips,
-			TotalRefunds: summary.TotalRefunds,
-			TotalOrders:  int32(summary.TotalOrders),
-		},
+		TotalSales:       summary.TotalSales,
+		TotalTax:         summary.TotalTax,
+		TotalTips:        summary.TotalTips,
+		TotalRefunds:     summary.TotalRefunds,
+		TotalOrders:      summary.TotalOrders,
+		PaymentBreakdown: summary.PaymentBreakdown,
 	}, nil
 }

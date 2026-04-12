@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"net/http"
 
@@ -22,22 +20,21 @@ type ListCashMovementsRequest struct {
 	SessionID int64 `json:"session_id"`
 }
 type ListCashMovementsResponse struct {
-	Movements []*posv1.CashMovement `json:"movements"`
+	Movements []CashMovementPayload `json:"movements"`
 }
 
-func cashMovementToProto(m domain.CashMovement) *posv1.CashMovement {
-	reason := ""
-	if m.Reason != nil {
-		reason = *m.Reason
-	}
-	return &posv1.CashMovement{
-		Id:        m.ID,
-		SessionId: m.SessionID,
-		Type:      m.Type,
-		Amount:    m.Amount,
-		Reason:    reason,
-		CreatedAt: m.CreatedAt.Format("2006-01-02T15:04:05Z"),
-	}
+type CashMovementPayload struct {
+	ID         int64   `json:"id"`
+	BusinessID int64   `json:"business_id"`
+	BranchID   int64   `json:"branch_id"`
+	TerminalID *int64  `json:"terminal_id"`
+	SessionID  int64   `json:"session_id"`
+	EmployeeID int64   `json:"employee_id"`
+	Type       string  `json:"type"`
+	Amount     float64 `json:"amount"`
+	Reason     *string `json:"reason"`
+	ApprovedBy *int64  `json:"approved_by"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovementsRequest) (ListCashMovementsResponse, *errorModels.ServerError) {
@@ -52,9 +49,21 @@ func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovem
 	if err != nil {
 		return ListCashMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list cash movements"}
 	}
-	payloads := make([]*posv1.CashMovement, len(movements))
+	payloads := make([]CashMovementPayload, len(movements))
 	for i, m := range movements {
-		payloads[i] = cashMovementToProto(m)
+		payloads[i] = CashMovementPayload{
+			ID:         m.ID,
+			BusinessID: m.BusinessID,
+			BranchID:   m.BranchID,
+			TerminalID: m.TerminalID,
+			SessionID:  m.SessionID,
+			EmployeeID: m.EmployeeID,
+			Type:       m.Type,
+			Amount:     m.Amount,
+			Reason:     m.Reason,
+			ApprovedBy: m.ApprovedBy,
+			CreatedAt:  m.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		}
 	}
 	return ListCashMovementsResponse{Movements: payloads}, nil
 }

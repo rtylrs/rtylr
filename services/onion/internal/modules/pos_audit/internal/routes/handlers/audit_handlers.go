@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"encoding/json"
 	"net/http"
@@ -14,28 +12,33 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 )
 
-func auditToProto(l domain.AuditLog) *posv1.AuditEntry {
-	entityId := int64(0)
-	if l.EntityID != nil {
-		entityId = *l.EntityID
-	}
-	ipAddr := ""
-	if l.IPAddress != nil {
-		ipAddr = *l.IPAddress
-	}
-	metadata := ""
-	if l.Details != nil {
-		metadata = string(*l.Details)
-	}
-	return &posv1.AuditEntry{
-		Id:          l.ID,
-		Action:      l.Action,
-		EntityType:  l.EntityType,
-		EntityId:    entityId,
-		ActorId:     l.EmployeeID,
-		IpAddress:   ipAddr,
-		Metadata:    metadata,
-		CreatedAt:   l.CreatedAt.Format("2006-01-02T15:04:05Z"),
+type AuditLogPayload struct {
+	ID         int64            `json:"id"`
+	BusinessID int64            `json:"business_id"`
+	BranchID   int64            `json:"branch_id"`
+	TerminalID *int64           `json:"terminal_id"`
+	EmployeeID int64            `json:"employee_id"`
+	Action     string           `json:"action"`
+	EntityType string           `json:"entity_type"`
+	EntityID   *int64           `json:"entity_id"`
+	Details    *json.RawMessage `json:"details"`
+	IPAddress  *string          `json:"ip_address"`
+	CreatedAt  string           `json:"created_at"`
+}
+
+func newAuditLogPayload(l domain.AuditLog) AuditLogPayload {
+	return AuditLogPayload{
+		ID:         l.ID,
+		BusinessID: l.BusinessID,
+		BranchID:   l.BranchID,
+		TerminalID: l.TerminalID,
+		EmployeeID: l.EmployeeID,
+		Action:     l.Action,
+		EntityType: l.EntityType,
+		EntityID:   l.EntityID,
+		Details:    l.Details,
+		IPAddress:  l.IPAddress,
+		CreatedAt:  l.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -52,7 +55,7 @@ type ListAuditRequest struct {
 	EndDate    *string `json:"end_date"`
 }
 type ListAuditResponse struct {
-	Logs []*posv1.AuditEntry `json:"logs"`
+	Logs []AuditLogPayload `json:"logs"`
 }
 
 func (h *ListAuditHandler) Serve(ctx context.Context, req *ListAuditRequest) (ListAuditResponse, *errorModels.ServerError) {
@@ -71,9 +74,9 @@ func (h *ListAuditHandler) Serve(ctx context.Context, req *ListAuditRequest) (Li
 	if err != nil {
 		return ListAuditResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list audit logs"}
 	}
-	payloads := make([]*posv1.AuditEntry, len(logs))
+	payloads := make([]AuditLogPayload, len(logs))
 	for i, l := range logs {
-		payloads[i] = auditToProto(l)
+		payloads[i] = newAuditLogPayload(l)
 	}
 	return ListAuditResponse{Logs: payloads}, nil
 }

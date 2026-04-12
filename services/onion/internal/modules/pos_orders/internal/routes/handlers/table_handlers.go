@@ -3,9 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
-
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
@@ -25,20 +22,32 @@ type ListTablesRequest struct {
 	Status     string `json:"status"`
 }
 
-func tableToProto(t domain.Table) *posv1.Table {
-	return &posv1.Table{
-		Id:             t.ID,
-		LocationId:     t.LocationID,
-		Name:           t.Name,
-		Capacity:       int32(t.Capacity),
-		Status:         string(t.Status),
-		CurrentOrderId: t.CurrentSessionOrderID,
-		CreatedAt:      time.Now().Format(time.RFC3339),
-	}
+type TablePayload struct {
+	ID                    int64  `json:"id"`
+	OwnerID               int64  `json:"owner_id"`
+	LocationID            int64  `json:"location_id"`
+	Name                  string `json:"name"`
+	Capacity              int    `json:"capacity"`
+	Status                string `json:"status"`
+	CurrentSessionOrderID int64  `json:"current_session_order_id"`
+	QRCodeURL             string `json:"qr_code_url"`
 }
 
 type ListTablesResponse struct {
-	Tables []*posv1.Table `json:"tables"`
+	Tables []TablePayload `json:"tables"`
+}
+
+func newTablePayload(t domain.Table) TablePayload {
+	return TablePayload{
+		ID:                    t.ID,
+		OwnerID:               t.OwnerID,
+		LocationID:            t.LocationID,
+		Name:                  t.Name,
+		Capacity:              t.Capacity,
+		Status:                string(t.Status),
+		CurrentSessionOrderID: t.CurrentSessionOrderID,
+		QRCodeURL:             t.QRCodeURL,
+	}
 }
 
 func (h *ListTablesHandler) Serve(ctx context.Context, req *ListTablesRequest) (ListTablesResponse, *errorModels.ServerError) {
@@ -58,9 +67,9 @@ func (h *ListTablesHandler) Serve(ctx context.Context, req *ListTablesRequest) (
 		}
 	}
 
-	payloads := make([]*posv1.Table, 0, len(tables))
+	payloads := make([]TablePayload, 0, len(tables))
 	for _, t := range tables {
-		payloads = append(payloads, tableToProto(t))
+		payloads = append(payloads, newTablePayload(t))
 	}
 
 	return ListTablesResponse{Tables: payloads}, nil

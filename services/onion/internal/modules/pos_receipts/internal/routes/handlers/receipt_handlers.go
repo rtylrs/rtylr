@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"net/http"
 
@@ -13,14 +11,23 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 )
 
-func receiptToProto(r domain.Receipt) *posv1.Receipt {
-	return &posv1.Receipt{
-		Id:            r.ID,
+type ReceiptPayload struct {
+	ID            int64   `json:"id"`
+	OrderNumber   string  `json:"order_number"`
+	CustomerName  string  `json:"customer_name"`
+	Total         float64 `json:"total"`
+	PaymentMethod string  `json:"payment_method"`
+	PaidAt        string  `json:"paid_at"`
+}
+
+func newReceiptPayload(r domain.Receipt) ReceiptPayload {
+	return ReceiptPayload{
+		ID:            r.ID,
 		OrderNumber:   r.OrderNumber,
 		CustomerName:  r.CustomerName,
 		Total:         r.Total,
 		PaymentMethod: r.PaymentMethod,
-		CreatedAt:     r.PaidAt.Format("2006-01-02T15:04:05Z"),
+		PaidAt:        r.PaidAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -36,7 +43,7 @@ type ListReceiptsRequest struct {
 }
 
 type ListReceiptsResponse struct {
-	Receipts []*posv1.Receipt `json:"receipts"`
+	Receipts []ReceiptPayload `json:"receipts"`
 }
 
 func (h *ListReceiptsHandler) Serve(ctx context.Context, req *ListReceiptsRequest) (ListReceiptsResponse, *errorModels.ServerError) {
@@ -49,9 +56,9 @@ func (h *ListReceiptsHandler) Serve(ctx context.Context, req *ListReceiptsReques
 	if err != nil {
 		return ListReceiptsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list receipts"}
 	}
-	payloads := make([]*posv1.Receipt, len(receipts))
+	payloads := make([]ReceiptPayload, len(receipts))
 	for i, rc := range receipts {
-		payloads[i] = receiptToProto(rc)
+		payloads[i] = newReceiptPayload(rc)
 	}
 	return ListReceiptsResponse{Receipts: payloads}, nil
 }

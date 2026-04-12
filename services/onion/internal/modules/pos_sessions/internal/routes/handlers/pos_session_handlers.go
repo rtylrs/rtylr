@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"context"
 	"errors"
 	"net/http"
@@ -16,23 +14,36 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 )
 
-func sessionToProto(s domain.Session) *posv1.Session {
-	p := &posv1.Session{
-		Id:          s.ID,
-		Status:      s.Status,
-		OpeningCash: s.OpeningFloat,
-		ClosingCash: s.ClosingFloat,
-		TotalSales:  s.TotalSales,
-		OpenedAt:    s.OpenedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	if s.LocationID != nil {
-		p.LocationId = *s.LocationID
-	}
-	if s.StaffID != nil {
-		p.OpenedBy = *s.StaffID
+type SessionPayload struct {
+	ID           int64   `json:"id"`
+	OwnerID      int64   `json:"owner_id"`
+	LocationID   *int64  `json:"location_id"`
+	StaffID      *int64  `json:"staff_id"`
+	OpeningFloat float64 `json:"opening_float"`
+	ClosingFloat float64 `json:"closing_float"`
+	TotalSales   float64 `json:"total_sales"`
+	Status       string  `json:"status"`
+	OpenedAt     string  `json:"opened_at"`
+	ClosedAt     *string `json:"closed_at"`
+	CreatedAt    string  `json:"created_at"`
+}
+
+func newSessionPayload(s domain.Session) SessionPayload {
+	p := SessionPayload{
+		ID:           s.ID,
+		OwnerID:      s.OwnerID,
+		LocationID:   s.LocationID,
+		StaffID:      s.StaffID,
+		OpeningFloat: s.OpeningFloat,
+		ClosingFloat: s.ClosingFloat,
+		TotalSales:   s.TotalSales,
+		Status:       s.Status,
+		OpenedAt:     s.OpenedAt.Format("2006-01-02T15:04:05Z"),
+		CreatedAt:    s.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 	if s.ClosedAt != nil {
-		p.ClosedAt = s.ClosedAt.Format("2006-01-02T15:04:05Z")
+		t := s.ClosedAt.Format("2006-01-02T15:04:05Z")
+		p.ClosedAt = &t
 	}
 	return p
 }
@@ -44,7 +55,7 @@ func SessionListRoutes() []string { return []string{"/pos/sessions"} }
 type ListSessionsHandler struct{ Service *application.Service }
 type ListSessionsRequest struct{}
 type ListSessionsResponse struct {
-	Sessions []*posv1.Session `json:"sessions"`
+	Sessions []SessionPayload `json:"sessions"`
 }
 
 func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
@@ -56,9 +67,9 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest)
 	if err != nil {
 		return ListSessionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list sessions"}
 	}
-	payloads := make([]*posv1.Session, len(sessions))
+	payloads := make([]SessionPayload, len(sessions))
 	for i, s := range sessions {
-		payloads[i] = sessionToProto(s)
+		payloads[i] = newSessionPayload(s)
 	}
 	return ListSessionsResponse{Sessions: payloads}, nil
 }
