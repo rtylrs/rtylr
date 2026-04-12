@@ -15,7 +15,7 @@ interface HelmetContainerProps {
   twitterCard?: string;
   twitterSite?: string;
   twitterCreator?: string;
-  customMetaTags?: any[];
+  customMetaTags?: Record<string, string>[];
   favicon?: string;
 }
 

@@ -21,7 +21,7 @@ export const useAllMenus = (restaurantId: string) => {
       setLoading(false);
       setError(null);
     },
-    onError: (error: any) => {
+    onError: (error: { message?: string }) => {
       setAllMenus([]);
       setLoading(false);
       setError(error.message || 'Failed to fetch menus');
@@ -46,7 +46,7 @@ export const useMenuById = (menuId: string) => {
       setLoading(false);
       setError(null);
     },
-    onError: (error: any) => {
+    onError: (error: { message?: string }) => {
       setItems([]);
       setId(null);
       setLoading(false);
@@ -74,7 +74,7 @@ export const useMenu = (userId: string, disabled: boolean = false) => {
       setLoading(false);
       setError(null);
     },
-    onError: (error: any) => {
+    onError: (error: { message?: string }) => {
       setItems([]);
       setId(null);
       setLoading(false);
@@ -127,15 +127,21 @@ export const useAddMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ categoryId, item }: { categoryId: string; item: Record<string, any> }) => {
+    mutationFn: async ({
+      categoryId,
+      item,
+    }: {
+      categoryId: string;
+      item: Record<string, unknown>;
+    }) => {
       const formData = new FormData();
       Object.keys(item).forEach((key) => {
         if (Array.isArray(item[key])) {
-          item[key].forEach((subItem: any, index: number) => {
-            formData.append(`${key}[${index}]`, subItem);
+          (item[key] as unknown[]).forEach((subItem, index) => {
+            formData.append(`${key}[${index}]`, subItem as string | Blob);
           });
         } else {
-          formData.append(key, item[key]);
+          formData.append(key, item[key] as string | Blob);
         }
       });
 

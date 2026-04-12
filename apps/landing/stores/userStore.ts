@@ -9,22 +9,22 @@ interface Addons {
 }
 
 interface UserState {
-  user: any | null;
+  user: Record<string, unknown> | null;
   token: string | null;
   isAuthenticated: boolean;
   role: string | null;
   userId: string | null;
   addons: Addons;
-  visits: any[];
+  visits: unknown[];
 
   // Actions
-  setUser: (user: any) => void;
+  setUser: (user: Record<string, unknown>) => void;
   setToken: (token: string | null) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
   setRole: (role: string | null) => void;
   setUserId: (userId: string | null) => void;
   setAddons: (addons: Addons) => void;
-  setVisits: (visits: any[]) => void;
+  setVisits: (visits: unknown[]) => void;
   logout: () => void;
   reset: () => void;
 }
