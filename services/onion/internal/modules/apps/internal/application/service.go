@@ -20,3 +20,11 @@ func NewService(ctx context.Context) *Service {
 func (s *Service) ListApps() []domain.App {
 	return domain.AvailableApps()
 }
+
+func (s *Service) GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool {
+	return s.repo.GetEnabledAddons(ctx, businessID)
+}
+
+func (s *Service) GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string {
+	return s.repo.GetUserAllowedApps(ctx, businessID, userID)
+}
