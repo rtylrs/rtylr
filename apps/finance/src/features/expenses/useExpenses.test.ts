@@ -42,13 +42,23 @@ describe('useExpenses', () => {
   });
 
   it('fetches expenses on mount', async () => {
-    const data = [{ id: 'exp-1', amount: 100 }];
-    (financeApi.getExpenses as any).mockResolvedValue(data);
+    const input = [
+      {
+        id: 'exp-1',
+        amount: 100,
+        date: '2026-04-01',
+        description: 'Office supplies',
+        category: 'Supplies',
+        receipt: false,
+        approval: 'pending',
+      },
+    ];
+    (financeApi.getExpenses as any).mockResolvedValue(input);
     const { result } = renderHook(() => useExpenses(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual(input);
   });
 
   it('starts in loading state', () => {
@@ -66,13 +76,13 @@ describe('useExpenseCategories', () => {
   });
 
   it('fetches expense categories', async () => {
-    const cats = [{ id: 'cat-1', name: 'Office supplies' }];
-    (financeApi.getExpenseCategories as any).mockResolvedValue(cats);
+    const input = [{ id: 1, name: 'Office supplies', color: '#3b82f6' }];
+    (financeApi.getExpenseCategories as any).mockResolvedValue(input);
     const { result } = renderHook(() => useExpenseCategories(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(cats);
+    expect(result.current.data).toEqual(input);
   });
 });
 
