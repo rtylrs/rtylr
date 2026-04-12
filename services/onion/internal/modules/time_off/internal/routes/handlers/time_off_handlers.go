@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
@@ -11,44 +12,29 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-// ─── List Time Off ────────────────────────────────────────────────────────────
+func ListTimeOffRoutes() []string    { return []string{"/hr/time-off"} }
+func SubmitTimeOffRoutes() []string  { return []string{"/hr/time-off"} }
+func ApproveTimeOffRoutes() []string { return []string{"/hr/time-off/approve"} }
 
-func ListTimeOffRoutes() []string { return []string{"/hr/time-off"} }
-
-type ListTimeOffHandler struct {
-	Service *application.Service
-}
-
-type ListTimeOffRequest struct{}
-
-type TimeOffPayload struct {
-	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"owner_id"`
-	StaffID    int64     `json:"staff_id"`
-	Type       string    `json:"type"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
-	DaysCount  float64   `json:"days_count"`
-	Status     string    `json:"status"`
-	Reason     string    `json:"reason"`
-	ApprovedBy int64     `json:"approved_by"`
-	ApprovedAt time.Time `json:"approved_at"`
-	Notes      string    `json:"notes"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-}
-
-type ListTimeOffResponse struct {
-	Requests []TimeOffPayload `json:"requests"`
-}
-
-func newTimeOffPayload(t domain.TimeOffRequest) TimeOffPayload {
-	return TimeOffPayload{
-		ID: t.ID, OwnerID: t.OwnerID, StaffID: t.StaffID, Type: t.Type,
-		StartDate: t.StartDate, EndDate: t.EndDate, DaysCount: t.DaysCount,
-		Status: t.Status, Reason: t.Reason, ApprovedBy: t.ApprovedBy,
-		ApprovedAt: t.ApprovedAt, Notes: t.Notes, CreatedAt: t.CreatedAt, UpdatedAt: t.UpdatedAt,
+func newTimeOffPayload(t domain.TimeOffRequest) *hrv1.TimeOffRequest {
+	return &hrv1.TimeOffRequest{
+		Id: t.ID, OwnerId: t.OwnerID, StaffId: t.StaffID, Type: t.Type,
+		StartDate: t.StartDate.Format("2006-01-02"), EndDate: t.EndDate.Format("2006-01-02"),
+		DaysCount: t.DaysCount, Status: t.Status, Reason: t.Reason,
+		ApprovedBy: t.ApprovedBy,
+		ApprovedAt: t.ApprovedAt.Format("2006-01-02T15:04:05Z"),
+		Notes: t.Notes,
+		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+// ─── List ────────────────────────────────────────────────────────────────────
+
+type ListTimeOffHandler struct{ Service *application.Service }
+type ListTimeOffRequest struct{}
+type ListTimeOffResponse struct {
+	Requests []*hrv1.TimeOffRequest `json:"requests"`
 }
 
 func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (ListTimeOffResponse, *errorModels.ServerError) {
@@ -56,27 +42,20 @@ func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return ListTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	requests, err := h.Service.ListTimeOffRequests(ctx, device.User.UserID)
 	if err != nil {
 		return ListTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list time off requests"}
 	}
-
-	payloads := make([]TimeOffPayload, 0, len(requests))
+	payloads := make([]*hrv1.TimeOffRequest, 0, len(requests))
 	for _, t := range requests {
 		payloads = append(payloads, newTimeOffPayload(t))
 	}
-
 	return ListTimeOffResponse{Requests: payloads}, nil
 }
 
-// ─── Submit Time Off ──────────────────────────────────────────────────────────
+// ─── Submit ──────────────────────────────────────────────────────────────────
 
-func SubmitTimeOffRoutes() []string { return []string{"/hr/time-off"} }
-
-type SubmitTimeOffHandler struct {
-	Service *application.Service
-}
+type SubmitTimeOffHandler struct{ Service *application.Service }
 
 type SubmitTimeOffRequest struct {
 	StaffID   int64   `json:"staff_id"`
@@ -116,33 +95,21 @@ func (h *SubmitTimeOffHandler) Serve(ctx context.Context, req *SubmitTimeOffRequ
 	if device.IsAnonymous || device.User == nil {
 		return SubmitTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	input := domain.TimeOffInput{
-		OwnerID:   device.User.UserID,
-		StaffID:   req.StaffID,
-		Type:      req.Type,
-		StartDate: req.StartDate,
-		EndDate:   req.EndDate,
-		DaysCount: req.DaysCount,
-		Reason:    req.Reason,
-		Notes:     req.Notes,
+		OwnerID: device.User.UserID, StaffID: req.StaffID, Type: req.Type,
+		StartDate: req.StartDate, EndDate: req.EndDate, DaysCount: req.DaysCount,
+		Reason: req.Reason, Notes: req.Notes,
 	}
-
 	id, err := h.Service.SubmitTimeOffRequest(ctx, input)
 	if err != nil {
 		return SubmitTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to submit time off request"}
 	}
-
 	return SubmitTimeOffResponse{ID: id}, nil
 }
 
-// ─── Approve Time Off ─────────────────────────────────────────────────────────
+// ─── Approve ─────────────────────────────────────────────────────────────────
 
-func ApproveTimeOffRoutes() []string { return []string{"/hr/time-off/approve"} }
-
-type ApproveTimeOffHandler struct {
-	Service *application.Service
-}
+type ApproveTimeOffHandler struct{ Service *application.Service }
 
 type ApproveTimeOffRequest struct {
 	ID     int64  `json:"id"`
@@ -169,17 +136,11 @@ func (h *ApproveTimeOffHandler) Serve(ctx context.Context, req *ApproveTimeOffRe
 	if device.IsAnonymous || device.User == nil {
 		return ApproveTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	input := domain.TimeOffApprovalInput{
-		ID:         req.ID,
-		Status:     req.Status,
-		ApprovedBy: device.User.UserID,
-		Notes:      req.Notes,
+		ID: req.ID, Status: req.Status, ApprovedBy: device.User.UserID, Notes: req.Notes,
 	}
-
 	if err := h.Service.ApproveTimeOffRequest(ctx, device.User.UserID, input); err != nil {
 		return ApproveTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update time off request"}
 	}
-
 	return ApproveTimeOffResponse{Success: true}, nil
 }

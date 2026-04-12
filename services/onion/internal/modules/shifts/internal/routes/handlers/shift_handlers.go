@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
@@ -11,43 +12,32 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-// ─── List Shifts ──────────────────────────────────────────────────────────────
+func ListShiftsRoutes() []string  { return []string{"/hr/shifts"} }
+func CreateShiftRoutes() []string { return []string{"/hr/shifts"} }
+func UpdateShiftRoutes() []string { return []string{"/hr/shifts"} }
+func DeleteShiftRoutes() []string { return []string{"/hr/shifts"} }
 
-func ListShiftsRoutes() []string { return []string{"/hr/shifts"} }
-
-type ListShiftsHandler struct {
-	Service *application.Service
+func newShiftPayload(s domain.Shift) *hrv1.Shift {
+	return &hrv1.Shift{
+		Id: s.ID, OwnerId: s.OwnerID, StaffId: s.StaffID, Date: s.Date.Format("2006-01-02"),
+		StartTime: s.StartTime, EndTime: s.EndTime, BreakMinutes: int64(s.BreakDurationMinutes),
+		Status: s.Status, Notes: s.Notes,
+		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: s.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
 }
+
+// ─── List ────────────────────────────────────────────────────────────────────
+
+type ListShiftsHandler struct{ Service *application.Service }
 
 type ListShiftsRequest struct {
 	StaffID int64  `json:"staff_id"`
 	Date    string `json:"date"`
 }
 
-type ShiftPayload struct {
-	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"owner_id"`
-	StaffID      int64     `json:"staff_id"`
-	Date         string    `json:"date"`
-	StartTime    string    `json:"start_time"`
-	EndTime      string    `json:"end_time"`
-	BreakMinutes int       `json:"break_minutes"`
-	Status       string    `json:"status"`
-	Notes        string    `json:"notes"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-}
-
 type ListShiftsResponse struct {
-	Shifts []ShiftPayload `json:"shifts"`
-}
-
-func newShiftPayload(s domain.Shift) ShiftPayload {
-	return ShiftPayload{
-		ID: s.ID, OwnerID: s.OwnerID, StaffID: s.StaffID, Date: s.Date.Format("2006-01-02"),
-		StartTime: s.StartTime, EndTime: s.EndTime, BreakMinutes: s.BreakDurationMinutes,
-		Status: s.Status, Notes: s.Notes, CreatedAt: s.CreatedAt, UpdatedAt: s.UpdatedAt,
-	}
+	Shifts []*hrv1.Shift `json:"shifts"`
 }
 
 func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, *errorModels.ServerError) {
@@ -55,27 +45,20 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	shifts, err := h.Service.ListShifts(ctx, device.User.UserID, req.StaffID, req.Date)
 	if err != nil {
 		return ListShiftsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
 	}
-
-	payloads := make([]ShiftPayload, 0, len(shifts))
+	payloads := make([]*hrv1.Shift, 0, len(shifts))
 	for _, s := range shifts {
 		payloads = append(payloads, newShiftPayload(s))
 	}
-
 	return ListShiftsResponse{Shifts: payloads}, nil
 }
 
-// ─── Create Shift ─────────────────────────────────────────────────────────────
+// ─── Create ──────────────────────────────────────────────────────────────────
 
-func CreateShiftRoutes() []string { return []string{"/hr/shifts"} }
-
-type CreateShiftHandler struct {
-	Service *application.Service
-}
+type CreateShiftHandler struct{ Service *application.Service }
 
 type CreateShiftRequest struct {
 	StaffID      int64  `json:"staff_id"`
@@ -112,32 +95,21 @@ func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return CreateShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	input := domain.ShiftInput{
-		OwnerID:              device.User.UserID,
-		StaffID:              req.StaffID,
-		Date:                 req.Date,
-		StartTime:            req.StartTime,
-		EndTime:              req.EndTime,
-		BreakDurationMinutes: req.BreakMinutes,
-		Notes:                req.Notes,
+		OwnerID: device.User.UserID, StaffID: req.StaffID, Date: req.Date,
+		StartTime: req.StartTime, EndTime: req.EndTime,
+		BreakDurationMinutes: req.BreakMinutes, Notes: req.Notes,
 	}
-
 	id, err := h.Service.CreateShift(ctx, input)
 	if err != nil {
 		return CreateShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create shift"}
 	}
-
 	return CreateShiftResponse{ID: id}, nil
 }
 
-// ─── Update Shift ─────────────────────────────────────────────────────────────
+// ─── Update ──────────────────────────────────────────────────────────────────
 
-func UpdateShiftRoutes() []string { return []string{"/hr/shifts"} }
-
-type UpdateShiftHandler struct {
-	Service *application.Service
-}
+type UpdateShiftHandler struct{ Service *application.Service }
 
 type UpdateShiftRequest struct {
 	ID           int64  `json:"id"`
@@ -165,31 +137,19 @@ func (h *UpdateShiftHandler) Serve(ctx context.Context, req *UpdateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	input := domain.ShiftUpdateInput{
-		ID:                   req.ID,
-		Date:                 req.Date,
-		StartTime:            req.StartTime,
-		EndTime:              req.EndTime,
-		BreakDurationMinutes: req.BreakMinutes,
-		Status:               req.Status,
-		Notes:                req.Notes,
+		ID: req.ID, Date: req.Date, StartTime: req.StartTime, EndTime: req.EndTime,
+		BreakDurationMinutes: req.BreakMinutes, Status: req.Status, Notes: req.Notes,
 	}
-
 	if err := h.Service.UpdateShift(ctx, device.User.UserID, input); err != nil {
 		return UpdateShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update shift"}
 	}
-
 	return UpdateShiftResponse{Success: true}, nil
 }
 
-// ─── Delete Shift ─────────────────────────────────────────────────────────────
+// ─── Delete ──────────────────────────────────────────────────────────────────
 
-func DeleteShiftRoutes() []string { return []string{"/hr/shifts"} }
-
-type DeleteShiftHandler struct {
-	Service *application.Service
-}
+type DeleteShiftHandler struct{ Service *application.Service }
 
 type DeleteShiftRequest struct {
 	ID int64 `json:"id"`
@@ -211,10 +171,8 @@ func (h *DeleteShiftHandler) Serve(ctx context.Context, req *DeleteShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return DeleteShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	if err := h.Service.DeleteShift(ctx, device.User.UserID, req.ID); err != nil {
 		return DeleteShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete shift"}
 	}
-
 	return DeleteShiftResponse{Success: true}, nil
 }

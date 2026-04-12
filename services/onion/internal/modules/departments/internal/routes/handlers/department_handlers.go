@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/departments/internal/application"
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
@@ -11,34 +12,23 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-// ─── List Departments ─────────────────────────────────────────────────────────
+func ListDepartmentsRoutes() []string   { return []string{"/hr/departments"} }
+func CreateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
+func UpdateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
+func DeleteDepartmentRoutes() []string  { return []string{"/hr/departments"} }
 
-func ListDepartmentsRoutes() []string { return []string{"/hr/departments"} }
-
-type ListDepartmentsHandler struct {
-	Service *application.Service
-}
-
-type ListDepartmentsRequest struct{}
-
-type DepartmentPayload struct {
-	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"owner_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-type ListDepartmentsResponse struct {
-	Departments []DepartmentPayload `json:"departments"`
-}
-
-func newDepartmentPayload(d domain.Department) DepartmentPayload {
-	return DepartmentPayload{
-		ID: d.ID, OwnerID: d.OwnerID, Name: d.Name, Description: d.Description,
-		CreatedAt: d.CreatedAt, UpdatedAt: d.UpdatedAt,
+func newDepartmentPayload(d domain.Department) *hrv1.Department {
+	return &hrv1.Department{
+		Id: d.ID, OwnerId: d.OwnerID, Name: d.Name, Description: d.Description,
+		CreatedAt: d.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: d.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+type ListDepartmentsHandler struct{ Service *application.Service }
+type ListDepartmentsRequest struct{}
+type ListDepartmentsResponse struct {
+	Departments []*hrv1.Department `json:"departments"`
 }
 
 func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRequest) (ListDepartmentsResponse, *errorModels.ServerError) {
@@ -46,33 +36,22 @@ func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRe
 	if device.IsAnonymous || device.User == nil {
 		return ListDepartmentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	departments, err := h.Service.ListDepartments(ctx, device.User.UserID)
 	if err != nil {
 		return ListDepartmentsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list departments"}
 	}
-
-	payloads := make([]DepartmentPayload, 0, len(departments))
+	payloads := make([]*hrv1.Department, 0, len(departments))
 	for _, d := range departments {
 		payloads = append(payloads, newDepartmentPayload(d))
 	}
-
 	return ListDepartmentsResponse{Departments: payloads}, nil
 }
 
-// ─── Create Department ────────────────────────────────────────────────────────
-
-func CreateDepartmentRoutes() []string { return []string{"/hr/departments"} }
-
-type CreateDepartmentHandler struct {
-	Service *application.Service
-}
-
+type CreateDepartmentHandler struct{ Service *application.Service }
 type CreateDepartmentRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-
 type CreateDepartmentResponse struct {
 	ID int64 `json:"id"`
 }
@@ -89,35 +68,20 @@ func (h *CreateDepartmentHandler) Serve(ctx context.Context, req *CreateDepartme
 	if device.IsAnonymous || device.User == nil {
 		return CreateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
-	input := domain.DepartmentInput{
-		OwnerID:     device.User.UserID,
-		Name:        req.Name,
-		Description: req.Description,
-	}
-
+	input := domain.DepartmentInput{OwnerID: device.User.UserID, Name: req.Name, Description: req.Description}
 	id, err := h.Service.CreateDepartment(ctx, input)
 	if err != nil {
 		return CreateDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create department"}
 	}
-
 	return CreateDepartmentResponse{ID: id}, nil
 }
 
-// ─── Update Department ────────────────────────────────────────────────────────
-
-func UpdateDepartmentRoutes() []string { return []string{"/hr/departments"} }
-
-type UpdateDepartmentHandler struct {
-	Service *application.Service
-}
-
+type UpdateDepartmentHandler struct{ Service *application.Service }
 type UpdateDepartmentRequest struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-
 type UpdateDepartmentResponse struct {
 	Success bool `json:"success"`
 }
@@ -137,32 +101,17 @@ func (h *UpdateDepartmentHandler) Serve(ctx context.Context, req *UpdateDepartme
 	if device.IsAnonymous || device.User == nil {
 		return UpdateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
-	input := domain.DepartmentInput{
-		ID:          req.ID,
-		Name:        req.Name,
-		Description: req.Description,
-	}
-
+	input := domain.DepartmentInput{ID: req.ID, Name: req.Name, Description: req.Description}
 	if err := h.Service.UpdateDepartment(ctx, device.User.UserID, input); err != nil {
 		return UpdateDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update department"}
 	}
-
 	return UpdateDepartmentResponse{Success: true}, nil
 }
 
-// ─── Delete Department ────────────────────────────────────────────────────────
-
-func DeleteDepartmentRoutes() []string { return []string{"/hr/departments"} }
-
-type DeleteDepartmentHandler struct {
-	Service *application.Service
-}
-
+type DeleteDepartmentHandler struct{ Service *application.Service }
 type DeleteDepartmentRequest struct {
 	ID int64 `json:"id"`
 }
-
 type DeleteDepartmentResponse struct {
 	Success bool `json:"success"`
 }
@@ -179,10 +128,8 @@ func (h *DeleteDepartmentHandler) Serve(ctx context.Context, req *DeleteDepartme
 	if device.IsAnonymous || device.User == nil {
 		return DeleteDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
 	if err := h.Service.DeleteDepartment(ctx, device.User.UserID, req.ID); err != nil {
 		return DeleteDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete department"}
 	}
-
 	return DeleteDepartmentResponse{Success: true}, nil
 }
