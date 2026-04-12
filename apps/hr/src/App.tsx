@@ -26,7 +26,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     import('./shared/lib/api').then(({ default: api }) => {
       api
         .get('/user/me')
-        .then((res: any) => {
+        .then((res: { data?: { apps?: string[]; role?: string } }) => {
           const apps: string[] = res.data?.apps ?? [];
           const role: string = res.data?.role ?? '';
           if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes('hr')) {
