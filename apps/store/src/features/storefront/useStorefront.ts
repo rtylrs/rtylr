@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { storeApi, StorefrontConfig } from '../../shared/services/storeService';
+import { storefrontConfigSchema } from '../../shared/schemas/storefront';
 
 export function useStorefrontConfig() {
   return useQuery({
     queryKey: ['store-storefront'],
-    queryFn: () => unwrap(storeApi.getStorefrontConfig()),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.getStorefrontConfig());
+      return storefrontConfigSchema.parse(res);
+    },
   });
 }
 

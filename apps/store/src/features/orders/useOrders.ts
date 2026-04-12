@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { storeApi, StoreOrder } from '../../shared/services/storeService';
+import { storeOrderSchema } from '../../shared/schemas/orders';
 
 export interface OrderFilters {
   search?: string;
@@ -12,23 +14,29 @@ export interface OrderFilters {
 export function useOrders(filters?: OrderFilters) {
   return useQuery({
     queryKey: ['store-orders', filters],
-    queryFn: () =>
-      unwrap(
+    queryFn: async () => {
+      const res = await unwrap(
         storeApi.listOrders({
           search: filters?.search,
           status: filters?.status,
           limit: filters?.limit,
           offset: filters?.offset,
         })
-      ),
+      );
+      const raw = (res as any)?.orders ?? res;
+      return z.array(storeOrderSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useOrder(id: number | undefined) {
-  return useQuery<StoreOrder | null>({
+  return useQuery({
     queryKey: ['store-order', id],
     enabled: !!id,
-    queryFn: () => unwrap(storeApi.getOrder(id!)),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.getOrder(id!));
+      return storeOrderSchema.parse(res);
+    },
   });
 }
 

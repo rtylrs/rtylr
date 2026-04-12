@@ -49,6 +49,8 @@ const sampleProducts = [
     price: 29.99,
     stock: 100,
     status: 'active',
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
   },
   {
     id: 2,
@@ -58,6 +60,8 @@ const sampleProducts = [
     price: 12.99,
     stock: 50,
     status: 'draft',
+    createdAt: '2026-01-02T00:00:00Z',
+    updatedAt: '2026-01-02T00:00:00Z',
   },
 ];
 

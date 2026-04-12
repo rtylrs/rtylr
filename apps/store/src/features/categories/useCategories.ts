@@ -1,11 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { storeApi, CreateCategoryInput } from '../../shared/services/storeService';
+import { storeCategorySchema } from '../../shared/schemas/categories';
 
 export function useCategories() {
   return useQuery({
     queryKey: ['store-categories'],
-    queryFn: () => unwrap(storeApi.listCategories()),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.listCategories());
+      const raw = (res as any)?.categories ?? res;
+      return z.array(storeCategorySchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

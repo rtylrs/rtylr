@@ -1,18 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { storeApi, CreateShippingZoneInput } from '../../shared/services/storeService';
+import { shippingZoneSchema, shippingMethodSchema } from '../../shared/schemas/shipping';
 
 export function useShippingZones() {
   return useQuery({
     queryKey: ['store-shipping-zones'],
-    queryFn: () => unwrap(storeApi.listShippingZones()),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.listShippingZones());
+      const raw = (res as any)?.zones ?? res;
+      return z.array(shippingZoneSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useShippingMethods() {
   return useQuery({
     queryKey: ['store-shipping-methods'],
-    queryFn: () => unwrap(storeApi.listShippingMethods()),
+    queryFn: async () => {
+      const res = await unwrap(storeApi.listShippingMethods());
+      const raw = (res as any)?.methods ?? res;
+      return z.array(shippingMethodSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
