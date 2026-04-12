@@ -9,8 +9,21 @@ interface Addons {
   landing: boolean;
 }
 
+interface ApiError extends Error {
+  response?: { data?: { message?: string } };
+}
+
+export interface StoredUser {
+  role?: string;
+  addons?: Addons;
+  name?: string;
+  email?: string;
+  theme?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 interface UserState {
-  user: any | null;
+  user: StoredUser | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -18,16 +31,16 @@ interface UserState {
   role: string | null;
   userId: string | null;
   addons: Addons;
-  visits: any[];
+  visits: unknown[];
 }
 
 interface UserActions {
   logout: () => void;
   clearError: () => void;
   setToken: (token: string) => void;
-  setUser: (user: any) => void;
+  setUser: (user: StoredUser) => void;
   getUserInfo: () => Promise<void>;
-  setThemeAsync: (payload: { id: string; themeData: any }) => Promise<void>;
+  setThemeAsync: (payload: { id: string; themeData: Record<string, unknown> }) => Promise<void>;
 }
 
 const initialState: UserState = {
@@ -86,12 +99,13 @@ export const useUserStore = create<UserState & UserActions>()(
             addons: user.addons,
             visits,
           });
-        } catch (error: any) {
+        } catch (err) {
+          const error = err as ApiError;
           set({
             loading: false,
             error: error.response?.data?.message || 'Failed to restore session',
           });
-          throw error;
+          throw err;
         }
       },
 
@@ -107,12 +121,13 @@ export const useUserStore = create<UserState & UserActions>()(
               error: null,
             });
           }
-        } catch (error: any) {
+        } catch (err) {
+          const error = err as ApiError;
           set({
             loading: false,
             error: error.response?.data?.message || 'Failed to update theme',
           });
-          throw error;
+          throw err;
         }
       },
     }),
