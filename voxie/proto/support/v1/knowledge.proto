@@ -14,21 +14,21 @@ message Article {
   string body = 5;
   string category = 6;
   bool is_published = 7;
-  int32 views = 8;
+  int64 views = 8;
   string created_at = 9;
   string updated_at = 10;
 }
 
 message ListArticlesRequest {
-  int32 page = 1;
-  int32 page_size = 2;
+  int64 page = 1;
+  int64 page_size = 2;
 }
 
 message ListArticlesResponse {
   repeated Article articles = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 page_size = 4;
+  int64 total = 2;
+  int64 page = 3;
+  int64 page_size = 4;
 }
 
 message CreateArticleRequest {

@@ -34,12 +34,12 @@ type Task struct {
 	Priority       string                 `protobuf:"bytes,9,opt,name=priority,proto3" json:"priority,omitempty"`
 	AssigneeId     *int64                 `protobuf:"varint,10,opt,name=assignee_id,json=assigneeId,proto3,oneof" json:"assignee_id,omitempty"`
 	ReporterId     int64                  `protobuf:"varint,11,opt,name=reporter_id,json=reporterId,proto3" json:"reporter_id,omitempty"`
-	DueDate        string                 `protobuf:"bytes,12,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
-	StartDate      string                 `protobuf:"bytes,13,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	CompletedAt    string                 `protobuf:"bytes,14,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	DueDate        *string                `protobuf:"bytes,12,opt,name=due_date,json=dueDate,proto3,oneof" json:"due_date,omitempty"`
+	StartDate      *string                `protobuf:"bytes,13,opt,name=start_date,json=startDate,proto3,oneof" json:"start_date,omitempty"`
+	CompletedAt    *string                `protobuf:"bytes,14,opt,name=completed_at,json=completedAt,proto3,oneof" json:"completed_at,omitempty"`
 	EstimatedHours *float64               `protobuf:"fixed64,15,opt,name=estimated_hours,json=estimatedHours,proto3,oneof" json:"estimated_hours,omitempty"`
 	ActualHours    *float64               `protobuf:"fixed64,16,opt,name=actual_hours,json=actualHours,proto3,oneof" json:"actual_hours,omitempty"`
-	SortOrder      int32                  `protobuf:"varint,17,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	SortOrder      int64                  `protobuf:"varint,17,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	Labels         []int64                `protobuf:"varint,18,rep,packed,name=labels,proto3" json:"labels,omitempty"`
 	CreatedAt      string                 `protobuf:"bytes,19,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      string                 `protobuf:"bytes,20,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -155,22 +155,22 @@ func (x *Task) GetReporterId() int64 {
 }
 
 func (x *Task) GetDueDate() string {
-	if x != nil {
-		return x.DueDate
+	if x != nil && x.DueDate != nil {
+		return *x.DueDate
 	}
 	return ""
 }
 
 func (x *Task) GetStartDate() string {
-	if x != nil {
-		return x.StartDate
+	if x != nil && x.StartDate != nil {
+		return *x.StartDate
 	}
 	return ""
 }
 
 func (x *Task) GetCompletedAt() string {
-	if x != nil {
-		return x.CompletedAt
+	if x != nil && x.CompletedAt != nil {
+		return *x.CompletedAt
 	}
 	return ""
 }
@@ -189,7 +189,7 @@ func (x *Task) GetActualHours() float64 {
 	return 0
 }
 
-func (x *Task) GetSortOrder() int32 {
+func (x *Task) GetSortOrder() int64 {
 	if x != nil {
 		return x.SortOrder
 	}
@@ -1574,7 +1574,7 @@ type TimeLog struct {
 	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	TaskId          int64                  `protobuf:"varint,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	UserId          int64                  `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	DurationMinutes int32                  `protobuf:"varint,4,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
+	DurationMinutes int64                  `protobuf:"varint,4,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	Description     string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	LoggedAt        string                 `protobuf:"bytes,6,opt,name=logged_at,json=loggedAt,proto3" json:"logged_at,omitempty"`
 	CreatedAt       string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -1633,7 +1633,7 @@ func (x *TimeLog) GetUserId() int64 {
 	return 0
 }
 
-func (x *TimeLog) GetDurationMinutes() int32 {
+func (x *TimeLog) GetDurationMinutes() int64 {
 	if x != nil {
 		return x.DurationMinutes
 	}
@@ -2287,7 +2287,7 @@ func (x *GetTimeLogsResponse) GetTimeLogs() []*TimeLog {
 
 type CreateTimeLogRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	DurationMinutes int32                  `protobuf:"varint,1,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
+	DurationMinutes int64                  `protobuf:"varint,1,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	Description     string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -2323,7 +2323,7 @@ func (*CreateTimeLogRequest) Descriptor() ([]byte, []int) {
 	return file_flow_v1_tasks_proto_rawDescGZIP(), []int{36}
 }
 
-func (x *CreateTimeLogRequest) GetDurationMinutes() int32 {
+func (x *CreateTimeLogRequest) GetDurationMinutes() int64 {
 	if x != nil {
 		return x.DurationMinutes
 	}
@@ -2481,7 +2481,7 @@ var File_flow_v1_tasks_proto protoreflect.FileDescriptor
 
 const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\n" +
-	"\x13flow/v1/tasks.proto\x12\x04flow\"\xc1\x05\n" +
+	"\x13flow/v1/tasks.proto\x12\x04flow\"\xfd\x05\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -2497,22 +2497,25 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	" \x01(\x03H\x01R\n" +
 	"assigneeId\x88\x01\x01\x12\x1f\n" +
 	"\vreporter_id\x18\v \x01(\x03R\n" +
-	"reporterId\x12\x19\n" +
-	"\bdue_date\x18\f \x01(\tR\adueDate\x12\x1d\n" +
+	"reporterId\x12\x1e\n" +
+	"\bdue_date\x18\f \x01(\tH\x02R\adueDate\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"start_date\x18\r \x01(\tR\tstartDate\x12!\n" +
-	"\fcompleted_at\x18\x0e \x01(\tR\vcompletedAt\x12,\n" +
-	"\x0festimated_hours\x18\x0f \x01(\x01H\x02R\x0eestimatedHours\x88\x01\x01\x12&\n" +
-	"\factual_hours\x18\x10 \x01(\x01H\x03R\vactualHours\x88\x01\x01\x12\x1d\n" +
+	"start_date\x18\r \x01(\tH\x03R\tstartDate\x88\x01\x01\x12&\n" +
+	"\fcompleted_at\x18\x0e \x01(\tH\x04R\vcompletedAt\x88\x01\x01\x12,\n" +
+	"\x0festimated_hours\x18\x0f \x01(\x01H\x05R\x0eestimatedHours\x88\x01\x01\x12&\n" +
+	"\factual_hours\x18\x10 \x01(\x01H\x06R\vactualHours\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\x11 \x01(\x05R\tsortOrder\x12\x16\n" +
+	"sort_order\x18\x11 \x01(\x03R\tsortOrder\x12\x16\n" +
 	"\x06labels\x18\x12 \x03(\x03R\x06labels\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x13 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x14 \x01(\tR\tupdatedAtB\x11\n" +
 	"\x0f_parent_task_idB\x0e\n" +
-	"\f_assignee_idB\x12\n" +
+	"\f_assignee_idB\v\n" +
+	"\t_due_dateB\r\n" +
+	"\v_start_dateB\x0f\n" +
+	"\r_completed_atB\x12\n" +
 	"\x10_estimated_hoursB\x0f\n" +
 	"\r_actual_hours\"\xc4\x01\n" +
 	"\vTaskComment\x12\x0e\n" +
@@ -2636,7 +2639,7 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\atask_id\x18\x02 \x01(\x03R\x06taskId\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\x03R\x06userId\x12)\n" +
-	"\x10duration_minutes\x18\x04 \x01(\x05R\x0fdurationMinutes\x12 \n" +
+	"\x10duration_minutes\x18\x04 \x01(\x03R\x0fdurationMinutes\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1b\n" +
 	"\tlogged_at\x18\x06 \x01(\tR\bloggedAt\x12\x1d\n" +
 	"\n" +
@@ -2683,7 +2686,7 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\x13GetTimeLogsResponse\x12*\n" +
 	"\ttime_logs\x18\x01 \x03(\v2\r.flow.TimeLogR\btimeLogs\"c\n" +
 	"\x14CreateTimeLogRequest\x12)\n" +
-	"\x10duration_minutes\x18\x01 \x01(\x05R\x0fdurationMinutes\x12 \n" +
+	"\x10duration_minutes\x18\x01 \x01(\x03R\x0fdurationMinutes\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\"Q\n" +
 	"\x15CreateTimeLogResponse\x12\x1e\n" +
 	"\vtime_log_id\x18\x01 \x01(\x03R\ttimeLogId\x12\x18\n" +

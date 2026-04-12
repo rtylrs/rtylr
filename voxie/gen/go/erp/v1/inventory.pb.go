@@ -384,7 +384,7 @@ func (*GetLowStockRequest) Descriptor() ([]byte, []int) {
 type GetLowStockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*InventoryReportItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
-	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Count         int64                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -426,7 +426,7 @@ func (x *GetLowStockResponse) GetItems() []*InventoryReportItem {
 	return nil
 }
 
-func (x *GetLowStockResponse) GetCount() int32 {
+func (x *GetLowStockResponse) GetCount() int64 {
 	if x != nil {
 		return x.Count
 	}
@@ -636,7 +636,7 @@ const file_erp_v1_inventory_proto_rawDesc = "" +
 	"\x12GetLowStockRequest\"[\n" +
 	"\x13GetLowStockResponse\x12.\n" +
 	"\x05items\x18\x01 \x03(\v2\x18.erp.InventoryReportItemR\x05items\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x05R\x05count\"\xbc\x01\n" +
+	"\x05count\x18\x02 \x01(\x03R\x05count\"\xbc\x01\n" +
 	"\rValuationItem\x12#\n" +
 	"\rcategory_name\x18\x01 \x01(\tR\fcategoryName\x12%\n" +
 	"\x0ewarehouse_name\x18\x02 \x01(\tR\rwarehouseName\x12\x1f\n" +

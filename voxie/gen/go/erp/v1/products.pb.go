@@ -204,9 +204,9 @@ func (x *Product) GetUpdatedAt() string {
 type ListProductsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Search        string                 `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	CategoryId    int32                  `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32                  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	CategoryId    int64                  `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	Limit         int64                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int64                  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -248,21 +248,21 @@ func (x *ListProductsRequest) GetSearch() string {
 	return ""
 }
 
-func (x *ListProductsRequest) GetCategoryId() int32 {
+func (x *ListProductsRequest) GetCategoryId() int64 {
 	if x != nil {
 		return x.CategoryId
 	}
 	return 0
 }
 
-func (x *ListProductsRequest) GetLimit() int32 {
+func (x *ListProductsRequest) GetLimit() int64 {
 	if x != nil {
 		return x.Limit
 	}
 	return 0
 }
 
-func (x *ListProductsRequest) GetOffset() int32 {
+func (x *ListProductsRequest) GetOffset() int64 {
 	if x != nil {
 		return x.Offset
 	}
@@ -818,10 +818,10 @@ const file_erp_v1_products_proto_rawDesc = "" +
 	"updated_at\x18\x12 \x01(\tR\tupdatedAt\"|\n" +
 	"\x13ListProductsRequest\x12\x16\n" +
 	"\x06search\x18\x01 \x01(\tR\x06search\x12\x1f\n" +
-	"\vcategory_id\x18\x02 \x01(\x05R\n" +
+	"\vcategory_id\x18\x02 \x01(\x03R\n" +
 	"categoryId\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x04 \x01(\x05R\x06offset\"@\n" +
+	"\x05limit\x18\x03 \x01(\x03R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x03R\x06offset\"@\n" +
 	"\x14ListProductsResponse\x12(\n" +
 	"\bproducts\x18\x01 \x03(\v2\f.erp.ProductR\bproducts\"\xad\x03\n" +
 	"\x14CreateProductRequest\x12\x1f\n" +

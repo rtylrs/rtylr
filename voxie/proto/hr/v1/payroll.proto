@@ -42,7 +42,7 @@ message RunPayrollRequest {
 }
 
 message RunPayrollResponse {
-  int32 records_created = 1;
+  int64 records_created = 1;
 }
 
 message MarkPayrollPaidRequest {

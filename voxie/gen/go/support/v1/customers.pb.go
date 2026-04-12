@@ -28,7 +28,7 @@ type SupportCustomer struct {
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	TotalTickets  int32                  `protobuf:"varint,6,opt,name=total_tickets,json=totalTickets,proto3" json:"total_tickets,omitempty"`
+	TotalTickets  int64                  `protobuf:"varint,6,opt,name=total_tickets,json=totalTickets,proto3" json:"total_tickets,omitempty"`
 	LastTicketAt  string                 `protobuf:"bytes,7,opt,name=last_ticket_at,json=lastTicketAt,proto3" json:"last_ticket_at,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -100,7 +100,7 @@ func (x *SupportCustomer) GetPhone() string {
 	return ""
 }
 
-func (x *SupportCustomer) GetTotalTickets() int32 {
+func (x *SupportCustomer) GetTotalTickets() int64 {
 	if x != nil {
 		return x.TotalTickets
 	}
@@ -123,8 +123,8 @@ func (x *SupportCustomer) GetCreatedAt() string {
 
 type ListSupportCustomersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -159,14 +159,14 @@ func (*ListSupportCustomersRequest) Descriptor() ([]byte, []int) {
 	return file_support_v1_customers_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListSupportCustomersRequest) GetPage() int32 {
+func (x *ListSupportCustomersRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListSupportCustomersRequest) GetPageSize() int32 {
+func (x *ListSupportCustomersRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -176,9 +176,9 @@ func (x *ListSupportCustomersRequest) GetPageSize() int32 {
 type ListSupportCustomersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Customers     []*SupportCustomer     `protobuf:"bytes,1,rep,name=customers,proto3" json:"customers,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -220,21 +220,21 @@ func (x *ListSupportCustomersResponse) GetCustomers() []*SupportCustomer {
 	return nil
 }
 
-func (x *ListSupportCustomersResponse) GetTotal() int32 {
+func (x *ListSupportCustomersResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListSupportCustomersResponse) GetPage() int32 {
+func (x *ListSupportCustomersResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListSupportCustomersResponse) GetPageSize() int32 {
+func (x *ListSupportCustomersResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -341,18 +341,18 @@ const file_support_v1_customers_proto_rawDesc = "" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12#\n" +
-	"\rtotal_tickets\x18\x06 \x01(\x05R\ftotalTickets\x12$\n" +
+	"\rtotal_tickets\x18\x06 \x01(\x03R\ftotalTickets\x12$\n" +
 	"\x0elast_ticket_at\x18\a \x01(\tR\flastTicketAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\"N\n" +
 	"\x1bListSupportCustomersRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"\x9d\x01\n" +
+	"\x04page\x18\x01 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x03R\bpageSize\"\x9d\x01\n" +
 	"\x1cListSupportCustomersResponse\x126\n" +
 	"\tcustomers\x18\x01 \x03(\v2\x18.support.SupportCustomerR\tcustomers\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"+\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"+\n" +
 	"\x19GetSupportCustomerRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"R\n" +
 	"\x1aGetSupportCustomerResponse\x124\n" +

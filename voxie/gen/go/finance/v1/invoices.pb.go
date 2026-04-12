@@ -29,7 +29,7 @@ type InvoiceItem struct {
 	UnitPrice     float64                `protobuf:"fixed64,4,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
 	TaxRate       float64                `protobuf:"fixed64,5,opt,name=tax_rate,json=taxRate,proto3" json:"tax_rate,omitempty"`
 	DiscountPct   float64                `protobuf:"fixed64,6,opt,name=discount_pct,json=discountPct,proto3" json:"discount_pct,omitempty"`
-	SortOrder     int32                  `protobuf:"varint,7,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	SortOrder     int64                  `protobuf:"varint,7,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
 	Total         float64                `protobuf:"fixed64,8,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -107,7 +107,7 @@ func (x *InvoiceItem) GetDiscountPct() float64 {
 	return 0
 }
 
-func (x *InvoiceItem) GetSortOrder() int32 {
+func (x *InvoiceItem) GetSortOrder() int64 {
 	if x != nil {
 		return x.SortOrder
 	}
@@ -1615,7 +1615,7 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\btax_rate\x18\x05 \x01(\x01R\ataxRate\x12!\n" +
 	"\fdiscount_pct\x18\x06 \x01(\x01R\vdiscountPct\x12\x1d\n" +
 	"\n" +
-	"sort_order\x18\a \x01(\x05R\tsortOrder\x12\x14\n" +
+	"sort_order\x18\a \x01(\x03R\tsortOrder\x12\x14\n" +
 	"\x05total\x18\b \x01(\x01R\x05total\"\xe8\x02\n" +
 	"\x0eInvoiceSummary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12%\n" +

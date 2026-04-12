@@ -29,7 +29,7 @@ type Shift struct {
 	Date          string                 `protobuf:"bytes,4,opt,name=date,proto3" json:"date,omitempty"`
 	StartTime     string                 `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	BreakMinutes  int32                  `protobuf:"varint,7,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	BreakMinutes  int64                  `protobuf:"varint,7,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
 	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
 	Notes         string                 `protobuf:"bytes,9,opt,name=notes,proto3" json:"notes,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -110,7 +110,7 @@ func (x *Shift) GetEndTime() string {
 	return ""
 }
 
-func (x *Shift) GetBreakMinutes() int32 {
+func (x *Shift) GetBreakMinutes() int64 {
 	if x != nil {
 		return x.BreakMinutes
 	}
@@ -247,7 +247,7 @@ type CreateShiftRequest struct {
 	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	StartTime     string                 `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	BreakMinutes  int32                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	BreakMinutes  int64                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
 	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -312,7 +312,7 @@ func (x *CreateShiftRequest) GetEndTime() string {
 	return ""
 }
 
-func (x *CreateShiftRequest) GetBreakMinutes() int32 {
+func (x *CreateShiftRequest) GetBreakMinutes() int64 {
 	if x != nil {
 		return x.BreakMinutes
 	}
@@ -383,7 +383,7 @@ type UpdateShiftRequest struct {
 	Date          string                 `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	StartTime     string                 `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       string                 `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	BreakMinutes  int32                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
+	BreakMinutes  int64                  `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3" json:"break_minutes,omitempty"`
 	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	Notes         string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -448,7 +448,7 @@ func (x *UpdateShiftRequest) GetEndTime() string {
 	return ""
 }
 
-func (x *UpdateShiftRequest) GetBreakMinutes() int32 {
+func (x *UpdateShiftRequest) GetBreakMinutes() int64 {
 	if x != nil {
 		return x.BreakMinutes
 	}
@@ -614,7 +614,7 @@ const file_hr_v1_shifts_proto_rawDesc = "" +
 	"\n" +
 	"start_time\x18\x05 \x01(\tR\tstartTime\x12\x19\n" +
 	"\bend_time\x18\x06 \x01(\tR\aendTime\x12#\n" +
-	"\rbreak_minutes\x18\a \x01(\x05R\fbreakMinutes\x12\x16\n" +
+	"\rbreak_minutes\x18\a \x01(\x03R\fbreakMinutes\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x14\n" +
 	"\x05notes\x18\t \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
@@ -633,7 +633,7 @@ const file_hr_v1_shifts_proto_rawDesc = "" +
 	"\n" +
 	"start_time\x18\x03 \x01(\tR\tstartTime\x12\x19\n" +
 	"\bend_time\x18\x04 \x01(\tR\aendTime\x12#\n" +
-	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x12\x16\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x03R\fbreakMinutes\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x14\n" +
 	"\x05notes\x18\a \x01(\tR\x05notes\"%\n" +
 	"\x13CreateShiftResponse\x12\x0e\n" +
@@ -644,7 +644,7 @@ const file_hr_v1_shifts_proto_rawDesc = "" +
 	"\n" +
 	"start_time\x18\x03 \x01(\tR\tstartTime\x12\x19\n" +
 	"\bend_time\x18\x04 \x01(\tR\aendTime\x12#\n" +
-	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x12\x16\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x03R\fbreakMinutes\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x14\n" +
 	"\x05notes\x18\a \x01(\tR\x05notes\"/\n" +
 	"\x13UpdateShiftResponse\x12\x18\n" +

@@ -32,7 +32,7 @@ type InboxItem struct {
 	Channel       string                 `protobuf:"bytes,7,opt,name=channel,proto3" json:"channel,omitempty"`
 	LastMessage   string                 `protobuf:"bytes,8,opt,name=last_message,json=lastMessage,proto3" json:"last_message,omitempty"`
 	LastMessageAt string                 `protobuf:"bytes,9,opt,name=last_message_at,json=lastMessageAt,proto3" json:"last_message_at,omitempty"`
-	MessageCount  int32                  `protobuf:"varint,10,opt,name=message_count,json=messageCount,proto3" json:"message_count,omitempty"`
+	MessageCount  int64                  `protobuf:"varint,10,opt,name=message_count,json=messageCount,proto3" json:"message_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -130,7 +130,7 @@ func (x *InboxItem) GetLastMessageAt() string {
 	return ""
 }
 
-func (x *InboxItem) GetMessageCount() int32 {
+func (x *InboxItem) GetMessageCount() int64 {
 	if x != nil {
 		return x.MessageCount
 	}
@@ -139,8 +139,8 @@ func (x *InboxItem) GetMessageCount() int32 {
 
 type ListInboxRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,14 +175,14 @@ func (*ListInboxRequest) Descriptor() ([]byte, []int) {
 	return file_support_v1_conversations_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListInboxRequest) GetPage() int32 {
+func (x *ListInboxRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListInboxRequest) GetPageSize() int32 {
+func (x *ListInboxRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -192,9 +192,9 @@ func (x *ListInboxRequest) GetPageSize() int32 {
 type ListInboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Inbox         []*InboxItem           `protobuf:"bytes,1,rep,name=inbox,proto3" json:"inbox,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -236,21 +236,21 @@ func (x *ListInboxResponse) GetInbox() []*InboxItem {
 	return nil
 }
 
-func (x *ListInboxResponse) GetTotal() int32 {
+func (x *ListInboxResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListInboxResponse) GetPage() int32 {
+func (x *ListInboxResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListInboxResponse) GetPageSize() int32 {
+func (x *ListInboxResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -295,7 +295,7 @@ func (*GetUnreadCountRequest) Descriptor() ([]byte, []int) {
 
 type GetUnreadCountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Count         int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	Count         int64                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -330,7 +330,7 @@ func (*GetUnreadCountResponse) Descriptor() ([]byte, []int) {
 	return file_support_v1_conversations_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetUnreadCountResponse) GetCount() int32 {
+func (x *GetUnreadCountResponse) GetCount() int64 {
 	if x != nil {
 		return x.Count
 	}
@@ -353,18 +353,18 @@ const file_support_v1_conversations_proto_rawDesc = "" +
 	"\flast_message\x18\b \x01(\tR\vlastMessage\x12&\n" +
 	"\x0flast_message_at\x18\t \x01(\tR\rlastMessageAt\x12#\n" +
 	"\rmessage_count\x18\n" +
-	" \x01(\x05R\fmessageCount\"C\n" +
+	" \x01(\x03R\fmessageCount\"C\n" +
 	"\x10ListInboxRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"\x84\x01\n" +
+	"\x04page\x18\x01 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x03R\bpageSize\"\x84\x01\n" +
 	"\x11ListInboxResponse\x12(\n" +
 	"\x05inbox\x18\x01 \x03(\v2\x12.support.InboxItemR\x05inbox\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x17\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\x17\n" +
 	"\x15GetUnreadCountRequest\".\n" +
 	"\x16GetUnreadCountResponse\x12\x14\n" +
-	"\x05count\x18\x01 \x01(\x05R\x05countB+Z)github.com/voxire/voxie/gen/go/support/v1b\x06proto3"
+	"\x05count\x18\x01 \x01(\x03R\x05countB+Z)github.com/voxire/voxie/gen/go/support/v1b\x06proto3"
 
 var (
 	file_support_v1_conversations_proto_rawDescOnce sync.Once

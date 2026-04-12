@@ -48,7 +48,7 @@ message GetLowStockRequest {}
 
 message GetLowStockResponse {
   repeated InventoryReportItem items = 1;
-  int32 count = 2;
+  int64 count = 2;
 }
 
 // -- Valuation --

@@ -13,7 +13,7 @@ message Shift {
   string date = 4;
   string start_time = 5;
   string end_time = 6;
-  int32 break_minutes = 7;
+  int64 break_minutes = 7;
   string status = 8;
   string notes = 9;
   string created_at = 10;
@@ -34,7 +34,7 @@ message CreateShiftRequest {
   string date = 2;
   string start_time = 3;
   string end_time = 4;
-  int32 break_minutes = 5;
+  int64 break_minutes = 5;
   string status = 6;
   string notes = 7;
 }
@@ -48,7 +48,7 @@ message UpdateShiftRequest {
   string date = 2;
   string start_time = 3;
   string end_time = 4;
-  int32 break_minutes = 5;
+  int64 break_minutes = 5;
   string status = 6;
   string notes = 7;
 }

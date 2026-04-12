@@ -28,7 +28,7 @@ type TopCustomer struct {
 	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	TotalSpent    float64                `protobuf:"fixed64,5,opt,name=total_spent,json=totalSpent,proto3" json:"total_spent,omitempty"`
-	LoyaltyPoints int32                  `protobuf:"varint,6,opt,name=loyalty_points,json=loyaltyPoints,proto3" json:"loyalty_points,omitempty"`
+	LoyaltyPoints int64                  `protobuf:"varint,6,opt,name=loyalty_points,json=loyaltyPoints,proto3" json:"loyalty_points,omitempty"`
 	LoyaltyTier   string                 `protobuf:"bytes,7,opt,name=loyalty_tier,json=loyaltyTier,proto3" json:"loyalty_tier,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -99,7 +99,7 @@ func (x *TopCustomer) GetTotalSpent() float64 {
 	return 0
 }
 
-func (x *TopCustomer) GetLoyaltyPoints() int32 {
+func (x *TopCustomer) GetLoyaltyPoints() int64 {
 	if x != nil {
 		return x.LoyaltyPoints
 	}
@@ -151,9 +151,9 @@ func (*GetDashboardRequest) Descriptor() ([]byte, []int) {
 
 type GetDashboardResponse struct {
 	state                protoimpl.MessageState `protogen:"open.v1"`
-	TotalCustomers       int32                  `protobuf:"varint,1,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
-	NewThisMonth         int32                  `protobuf:"varint,2,opt,name=new_this_month,json=newThisMonth,proto3" json:"new_this_month,omitempty"`
-	ActiveLoyaltyMembers int32                  `protobuf:"varint,3,opt,name=active_loyalty_members,json=activeLoyaltyMembers,proto3" json:"active_loyalty_members,omitempty"`
+	TotalCustomers       int64                  `protobuf:"varint,1,opt,name=total_customers,json=totalCustomers,proto3" json:"total_customers,omitempty"`
+	NewThisMonth         int64                  `protobuf:"varint,2,opt,name=new_this_month,json=newThisMonth,proto3" json:"new_this_month,omitempty"`
+	ActiveLoyaltyMembers int64                  `protobuf:"varint,3,opt,name=active_loyalty_members,json=activeLoyaltyMembers,proto3" json:"active_loyalty_members,omitempty"`
 	TopCustomers         []*TopCustomer         `protobuf:"bytes,4,rep,name=top_customers,json=topCustomers,proto3" json:"top_customers,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
@@ -189,21 +189,21 @@ func (*GetDashboardResponse) Descriptor() ([]byte, []int) {
 	return file_crm_v1_dashboard_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetDashboardResponse) GetTotalCustomers() int32 {
+func (x *GetDashboardResponse) GetTotalCustomers() int64 {
 	if x != nil {
 		return x.TotalCustomers
 	}
 	return 0
 }
 
-func (x *GetDashboardResponse) GetNewThisMonth() int32 {
+func (x *GetDashboardResponse) GetNewThisMonth() int64 {
 	if x != nil {
 		return x.NewThisMonth
 	}
 	return 0
 }
 
-func (x *GetDashboardResponse) GetActiveLoyaltyMembers() int32 {
+func (x *GetDashboardResponse) GetActiveLoyaltyMembers() int64 {
 	if x != nil {
 		return x.ActiveLoyaltyMembers
 	}
@@ -230,13 +230,13 @@ const file_crm_v1_dashboard_proto_rawDesc = "" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x1f\n" +
 	"\vtotal_spent\x18\x05 \x01(\x01R\n" +
 	"totalSpent\x12%\n" +
-	"\x0eloyalty_points\x18\x06 \x01(\x05R\rloyaltyPoints\x12!\n" +
+	"\x0eloyalty_points\x18\x06 \x01(\x03R\rloyaltyPoints\x12!\n" +
 	"\floyalty_tier\x18\a \x01(\tR\vloyaltyTier\"\x15\n" +
 	"\x13GetDashboardRequest\"\xd2\x01\n" +
 	"\x14GetDashboardResponse\x12'\n" +
-	"\x0ftotal_customers\x18\x01 \x01(\x05R\x0etotalCustomers\x12$\n" +
-	"\x0enew_this_month\x18\x02 \x01(\x05R\fnewThisMonth\x124\n" +
-	"\x16active_loyalty_members\x18\x03 \x01(\x05R\x14activeLoyaltyMembers\x125\n" +
+	"\x0ftotal_customers\x18\x01 \x01(\x03R\x0etotalCustomers\x12$\n" +
+	"\x0enew_this_month\x18\x02 \x01(\x03R\fnewThisMonth\x124\n" +
+	"\x16active_loyalty_members\x18\x03 \x01(\x03R\x14activeLoyaltyMembers\x125\n" +
 	"\rtop_customers\x18\x04 \x03(\v2\x10.crm.TopCustomerR\ftopCustomersB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (

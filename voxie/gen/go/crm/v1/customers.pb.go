@@ -29,15 +29,15 @@ type Customer struct {
 	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
 	Phone         string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	DateOfBirth   string                 `protobuf:"bytes,7,opt,name=date_of_birth,json=dateOfBirth,proto3" json:"date_of_birth,omitempty"`
+	DateOfBirth   *string                `protobuf:"bytes,7,opt,name=date_of_birth,json=dateOfBirth,proto3,oneof" json:"date_of_birth,omitempty"`
 	Gender        string                 `protobuf:"bytes,8,opt,name=gender,proto3" json:"gender,omitempty"`
 	Address       string                 `protobuf:"bytes,9,opt,name=address,proto3" json:"address,omitempty"`
 	City          string                 `protobuf:"bytes,10,opt,name=city,proto3" json:"city,omitempty"`
 	Country       string                 `protobuf:"bytes,11,opt,name=country,proto3" json:"country,omitempty"`
-	LoyaltyPoints int32                  `protobuf:"varint,12,opt,name=loyalty_points,json=loyaltyPoints,proto3" json:"loyalty_points,omitempty"`
+	LoyaltyPoints int64                  `protobuf:"varint,12,opt,name=loyalty_points,json=loyaltyPoints,proto3" json:"loyalty_points,omitempty"`
 	TotalSpent    float64                `protobuf:"fixed64,13,opt,name=total_spent,json=totalSpent,proto3" json:"total_spent,omitempty"`
-	VisitCount    int32                  `protobuf:"varint,14,opt,name=visit_count,json=visitCount,proto3" json:"visit_count,omitempty"`
-	LastVisitAt   string                 `protobuf:"bytes,15,opt,name=last_visit_at,json=lastVisitAt,proto3" json:"last_visit_at,omitempty"`
+	VisitCount    int64                  `protobuf:"varint,14,opt,name=visit_count,json=visitCount,proto3" json:"visit_count,omitempty"`
+	LastVisitAt   *string                `protobuf:"bytes,15,opt,name=last_visit_at,json=lastVisitAt,proto3,oneof" json:"last_visit_at,omitempty"`
 	LoyaltyTier   string                 `protobuf:"bytes,16,opt,name=loyalty_tier,json=loyaltyTier,proto3" json:"loyalty_tier,omitempty"`
 	Tags          []string               `protobuf:"bytes,17,rep,name=tags,proto3" json:"tags,omitempty"`
 	Notes         string                 `protobuf:"bytes,18,opt,name=notes,proto3" json:"notes,omitempty"`
@@ -121,8 +121,8 @@ func (x *Customer) GetPhone() string {
 }
 
 func (x *Customer) GetDateOfBirth() string {
-	if x != nil {
-		return x.DateOfBirth
+	if x != nil && x.DateOfBirth != nil {
+		return *x.DateOfBirth
 	}
 	return ""
 }
@@ -155,7 +155,7 @@ func (x *Customer) GetCountry() string {
 	return ""
 }
 
-func (x *Customer) GetLoyaltyPoints() int32 {
+func (x *Customer) GetLoyaltyPoints() int64 {
 	if x != nil {
 		return x.LoyaltyPoints
 	}
@@ -169,7 +169,7 @@ func (x *Customer) GetTotalSpent() float64 {
 	return 0
 }
 
-func (x *Customer) GetVisitCount() int32 {
+func (x *Customer) GetVisitCount() int64 {
 	if x != nil {
 		return x.VisitCount
 	}
@@ -177,8 +177,8 @@ func (x *Customer) GetVisitCount() int32 {
 }
 
 func (x *Customer) GetLastVisitAt() string {
-	if x != nil {
-		return x.LastVisitAt
+	if x != nil && x.LastVisitAt != nil {
+		return *x.LastVisitAt
 	}
 	return ""
 }
@@ -230,8 +230,8 @@ type ListCustomersRequest struct {
 	Search        string                 `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
 	Tier          string                 `protobuf:"bytes,2,opt,name=tier,proto3" json:"tier,omitempty"`
 	Tag           string                 `protobuf:"bytes,3,opt,name=tag,proto3" json:"tag,omitempty"`
-	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -287,14 +287,14 @@ func (x *ListCustomersRequest) GetTag() string {
 	return ""
 }
 
-func (x *ListCustomersRequest) GetPage() int32 {
+func (x *ListCustomersRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListCustomersRequest) GetPageSize() int32 {
+func (x *ListCustomersRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -304,9 +304,9 @@ func (x *ListCustomersRequest) GetPageSize() int32 {
 type ListCustomersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Customers     []*Customer            `protobuf:"bytes,1,rep,name=customers,proto3" json:"customers,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -348,21 +348,21 @@ func (x *ListCustomersResponse) GetCustomers() []*Customer {
 	return nil
 }
 
-func (x *ListCustomersResponse) GetTotal() int32 {
+func (x *ListCustomersResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListCustomersResponse) GetPage() int32 {
+func (x *ListCustomersResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListCustomersResponse) GetPageSize() int32 {
+func (x *ListCustomersResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -916,8 +916,8 @@ func (x *GetSegmentDetailResponse) GetCustomers() []*Customer {
 type GetSegmentCustomersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SegmentId     int64                  `protobuf:"varint,1,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -959,14 +959,14 @@ func (x *GetSegmentCustomersRequest) GetSegmentId() int64 {
 	return 0
 }
 
-func (x *GetSegmentCustomersRequest) GetPage() int32 {
+func (x *GetSegmentCustomersRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *GetSegmentCustomersRequest) GetPageSize() int32 {
+func (x *GetSegmentCustomersRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -976,9 +976,9 @@ func (x *GetSegmentCustomersRequest) GetPageSize() int32 {
 type GetSegmentCustomersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Customers     []*Customer            `protobuf:"bytes,1,rep,name=customers,proto3" json:"customers,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1020,32 +1020,120 @@ func (x *GetSegmentCustomersResponse) GetCustomers() []*Customer {
 	return nil
 }
 
-func (x *GetSegmentCustomersResponse) GetTotal() int32 {
+func (x *GetSegmentCustomersResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *GetSegmentCustomersResponse) GetPage() int32 {
+func (x *GetSegmentCustomersResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *GetSegmentCustomersResponse) GetPageSize() int32 {
+func (x *GetSegmentCustomersResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
+type GetCustomerRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCustomerRequest) Reset() {
+	*x = GetCustomerRequest{}
+	mi := &file_crm_v1_customers_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCustomerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCustomerRequest) ProtoMessage() {}
+
+func (x *GetCustomerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_customers_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCustomerRequest.ProtoReflect.Descriptor instead.
+func (*GetCustomerRequest) Descriptor() ([]byte, []int) {
+	return file_crm_v1_customers_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetCustomerRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetCustomerResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Customer      *Customer              `protobuf:"bytes,1,opt,name=customer,proto3" json:"customer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCustomerResponse) Reset() {
+	*x = GetCustomerResponse{}
+	mi := &file_crm_v1_customers_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCustomerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCustomerResponse) ProtoMessage() {}
+
+func (x *GetCustomerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_v1_customers_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCustomerResponse.ProtoReflect.Descriptor instead.
+func (*GetCustomerResponse) Descriptor() ([]byte, []int) {
+	return file_crm_v1_customers_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetCustomerResponse) GetCustomer() *Customer {
+	if x != nil {
+		return x.Customer
+	}
+	return nil
+}
+
 var File_crm_v1_customers_proto protoreflect.FileDescriptor
 
 const file_crm_v1_customers_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/customers.proto\x12\x03crm\x1a\x15crm/v1/segments.proto\"\xd6\x04\n" +
+	"\x16crm/v1/customers.proto\x12\x03crm\x1a\x15crm/v1/segments.proto\"\x84\x05\n" +
 	"\bCustomer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
@@ -1053,19 +1141,19 @@ const file_crm_v1_customers_proto_rawDesc = "" +
 	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\"\n" +
-	"\rdate_of_birth\x18\a \x01(\tR\vdateOfBirth\x12\x16\n" +
+	"\x05phone\x18\x06 \x01(\tR\x05phone\x12'\n" +
+	"\rdate_of_birth\x18\a \x01(\tH\x00R\vdateOfBirth\x88\x01\x01\x12\x16\n" +
 	"\x06gender\x18\b \x01(\tR\x06gender\x12\x18\n" +
 	"\aaddress\x18\t \x01(\tR\aaddress\x12\x12\n" +
 	"\x04city\x18\n" +
 	" \x01(\tR\x04city\x12\x18\n" +
 	"\acountry\x18\v \x01(\tR\acountry\x12%\n" +
-	"\x0eloyalty_points\x18\f \x01(\x05R\rloyaltyPoints\x12\x1f\n" +
+	"\x0eloyalty_points\x18\f \x01(\x03R\rloyaltyPoints\x12\x1f\n" +
 	"\vtotal_spent\x18\r \x01(\x01R\n" +
 	"totalSpent\x12\x1f\n" +
-	"\vvisit_count\x18\x0e \x01(\x05R\n" +
-	"visitCount\x12\"\n" +
-	"\rlast_visit_at\x18\x0f \x01(\tR\vlastVisitAt\x12!\n" +
+	"\vvisit_count\x18\x0e \x01(\x03R\n" +
+	"visitCount\x12'\n" +
+	"\rlast_visit_at\x18\x0f \x01(\tH\x01R\vlastVisitAt\x88\x01\x01\x12!\n" +
 	"\floyalty_tier\x18\x10 \x01(\tR\vloyaltyTier\x12\x12\n" +
 	"\x04tags\x18\x11 \x03(\tR\x04tags\x12\x14\n" +
 	"\x05notes\x18\x12 \x01(\tR\x05notes\x12\x1b\n" +
@@ -1073,18 +1161,20 @@ const file_crm_v1_customers_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x14 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x15 \x01(\tR\tupdatedAt\"\x85\x01\n" +
+	"updated_at\x18\x15 \x01(\tR\tupdatedAtB\x10\n" +
+	"\x0e_date_of_birthB\x10\n" +
+	"\x0e_last_visit_at\"\x85\x01\n" +
 	"\x14ListCustomersRequest\x12\x16\n" +
 	"\x06search\x18\x01 \x01(\tR\x06search\x12\x12\n" +
 	"\x04tier\x18\x02 \x01(\tR\x04tier\x12\x10\n" +
 	"\x03tag\x18\x03 \x01(\tR\x03tag\x12\x12\n" +
-	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\"\x8b\x01\n" +
+	"\x04page\x18\x04 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x03R\bpageSize\"\x8b\x01\n" +
 	"\x15ListCustomersResponse\x12+\n" +
 	"\tcustomers\x18\x01 \x03(\v2\r.crm.CustomerR\tcustomers\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\xad\x02\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\xad\x02\n" +
 	"\x15CreateCustomerRequest\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
@@ -1135,13 +1225,17 @@ const file_crm_v1_customers_proto_rawDesc = "" +
 	"\x1aGetSegmentCustomersRequest\x12\x1d\n" +
 	"\n" +
 	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\x91\x01\n" +
+	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\x91\x01\n" +
 	"\x1bGetSegmentCustomersResponse\x12+\n" +
 	"\tcustomers\x18\x01 \x03(\v2\r.crm.CustomerR\tcustomers\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSizeB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"$\n" +
+	"\x12GetCustomerRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"@\n" +
+	"\x13GetCustomerResponse\x12)\n" +
+	"\bcustomer\x18\x01 \x01(\v2\r.crm.CustomerR\bcustomerB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_customers_proto_rawDescOnce sync.Once
@@ -1155,7 +1249,7 @@ func file_crm_v1_customers_proto_rawDescGZIP() []byte {
 	return file_crm_v1_customers_proto_rawDescData
 }
 
-var file_crm_v1_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_crm_v1_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_crm_v1_customers_proto_goTypes = []any{
 	(*Customer)(nil),                    // 0: crm.Customer
 	(*ListCustomersRequest)(nil),        // 1: crm.ListCustomersRequest
@@ -1170,18 +1264,21 @@ var file_crm_v1_customers_proto_goTypes = []any{
 	(*GetSegmentDetailResponse)(nil),    // 10: crm.GetSegmentDetailResponse
 	(*GetSegmentCustomersRequest)(nil),  // 11: crm.GetSegmentCustomersRequest
 	(*GetSegmentCustomersResponse)(nil), // 12: crm.GetSegmentCustomersResponse
-	(*Segment)(nil),                     // 13: crm.Segment
+	(*GetCustomerRequest)(nil),          // 13: crm.GetCustomerRequest
+	(*GetCustomerResponse)(nil),         // 14: crm.GetCustomerResponse
+	(*Segment)(nil),                     // 15: crm.Segment
 }
 var file_crm_v1_customers_proto_depIdxs = []int32{
 	0,  // 0: crm.ListCustomersResponse.customers:type_name -> crm.Customer
-	13, // 1: crm.GetSegmentDetailResponse.segment:type_name -> crm.Segment
+	15, // 1: crm.GetSegmentDetailResponse.segment:type_name -> crm.Segment
 	0,  // 2: crm.GetSegmentDetailResponse.customers:type_name -> crm.Customer
 	0,  // 3: crm.GetSegmentCustomersResponse.customers:type_name -> crm.Customer
-	4,  // [4:4] is the sub-list for method output_type
-	4,  // [4:4] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	0,  // 4: crm.GetCustomerResponse.customer:type_name -> crm.Customer
+	5,  // [5:5] is the sub-list for method output_type
+	5,  // [5:5] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_crm_v1_customers_proto_init() }
@@ -1190,6 +1287,7 @@ func file_crm_v1_customers_proto_init() {
 		return
 	}
 	file_crm_v1_segments_proto_init()
+	file_crm_v1_customers_proto_msgTypes[0].OneofWrappers = []any{}
 	file_crm_v1_customers_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1197,7 +1295,7 @@ func file_crm_v1_customers_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_v1_customers_proto_rawDesc), len(file_crm_v1_customers_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

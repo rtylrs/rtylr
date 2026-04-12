@@ -13,7 +13,7 @@ message InvoiceItem {
   double unit_price = 4;
   double tax_rate = 5;
   double discount_pct = 6;
-  int32 sort_order = 7;
+  int64 sort_order = 7;
   double total = 8;
 }
 

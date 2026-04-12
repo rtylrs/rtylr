@@ -11,8 +11,9 @@ export interface Segment {
   ownerId: number;
   name: string;
   description: string;
-  filters: string;
+  rules: string;
   customerCount: number;
+  lastCalculatedAt?: string | undefined;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,7 +28,7 @@ export interface ListSegmentsResponse {
 export interface CreateSegmentRequest {
   name: string;
   description: string;
-  filters: string;
+  rules: string;
 }
 
 export interface CreateSegmentResponse {
@@ -39,7 +40,7 @@ export interface UpdateSegmentRequest {
   id: number;
   name: string;
   description: string;
-  filters: string;
+  rules: string;
 }
 
 export interface UpdateSegmentResponse {

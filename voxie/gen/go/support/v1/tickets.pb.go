@@ -240,8 +240,8 @@ func (x *TicketMessage) GetCreatedAt() string {
 type ListTicketsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -283,14 +283,14 @@ func (x *ListTicketsRequest) GetStatus() string {
 	return ""
 }
 
-func (x *ListTicketsRequest) GetPage() int32 {
+func (x *ListTicketsRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListTicketsRequest) GetPageSize() int32 {
+func (x *ListTicketsRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -300,9 +300,9 @@ func (x *ListTicketsRequest) GetPageSize() int32 {
 type ListTicketsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tickets       []*Ticket              `protobuf:"bytes,1,rep,name=tickets,proto3" json:"tickets,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -344,21 +344,21 @@ func (x *ListTicketsResponse) GetTickets() []*Ticket {
 	return nil
 }
 
-func (x *ListTicketsResponse) GetTotal() int32 {
+func (x *ListTicketsResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListTicketsResponse) GetPage() int32 {
+func (x *ListTicketsResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListTicketsResponse) GetPageSize() int32 {
+func (x *ListTicketsResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -778,13 +778,13 @@ const file_support_v1_tickets_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\"]\n" +
 	"\x12ListTicketsRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\x87\x01\n" +
+	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\x87\x01\n" +
 	"\x13ListTicketsResponse\x12)\n" +
 	"\atickets\x18\x01 \x03(\v2\x0f.support.TicketR\atickets\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\"\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\"\n" +
 	"\x10GetTicketRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"p\n" +
 	"\x11GetTicketResponse\x12'\n" +

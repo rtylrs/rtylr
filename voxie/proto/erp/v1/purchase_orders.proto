@@ -25,8 +25,8 @@ message PurchaseOrder {
   double subtotal = 6;
   double tax_amount = 7;
   double total = 8;
-  string expected_delivery = 9;
-  string received_at = 10;
+  optional string expected_delivery = 9;
+  optional string received_at = 10;
   string notes = 11;
   int64 created_by = 12;
   string created_at = 13;
@@ -42,7 +42,7 @@ message ListPurchaseOrdersResponse {
   repeated PurchaseOrder purchase_orders = 1;
 }
 
-message CreatePurchaseOrderItemInput {
+message CreatePurchaseOrderItemRequest {
   int64 product_id = 1;
   double quantity_ordered = 2;
   double unit_cost = 3;
@@ -54,7 +54,7 @@ message CreatePurchaseOrderRequest {
   double tax_amount = 3;
   string expected_delivery = 4;
   string notes = 5;
-  repeated CreatePurchaseOrderItemInput items = 6;
+  repeated CreatePurchaseOrderItemRequest items = 6;
 }
 
 message CreatePurchaseOrderResponse {

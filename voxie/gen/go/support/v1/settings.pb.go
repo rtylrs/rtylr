@@ -26,7 +26,7 @@ type SupportSettings struct {
 	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	BusinessId        int64                  `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	AutoAssign        bool                   `protobuf:"varint,3,opt,name=auto_assign,json=autoAssign,proto3" json:"auto_assign,omitempty"`
-	SlaHours          int32                  `protobuf:"varint,4,opt,name=sla_hours,json=slaHours,proto3" json:"sla_hours,omitempty"`
+	SlaHours          int64                  `protobuf:"varint,4,opt,name=sla_hours,json=slaHours,proto3" json:"sla_hours,omitempty"`
 	BusinessHours     string                 `protobuf:"bytes,5,opt,name=business_hours,json=businessHours,proto3" json:"business_hours,omitempty"`
 	NotificationEmail string                 `protobuf:"bytes,6,opt,name=notification_email,json=notificationEmail,proto3" json:"notification_email,omitempty"`
 	CreatedAt         string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -86,7 +86,7 @@ func (x *SupportSettings) GetAutoAssign() bool {
 	return false
 }
 
-func (x *SupportSettings) GetSlaHours() int32 {
+func (x *SupportSettings) GetSlaHours() int64 {
 	if x != nil {
 		return x.SlaHours
 	}
@@ -204,7 +204,7 @@ func (x *GetSupportSettingsResponse) GetSettings() *SupportSettings {
 type UpdateSupportSettingsRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	AutoAssign        bool                   `protobuf:"varint,1,opt,name=auto_assign,json=autoAssign,proto3" json:"auto_assign,omitempty"`
-	SlaHours          int32                  `protobuf:"varint,2,opt,name=sla_hours,json=slaHours,proto3" json:"sla_hours,omitempty"`
+	SlaHours          int64                  `protobuf:"varint,2,opt,name=sla_hours,json=slaHours,proto3" json:"sla_hours,omitempty"`
 	BusinessHours     string                 `protobuf:"bytes,3,opt,name=business_hours,json=businessHours,proto3" json:"business_hours,omitempty"`
 	NotificationEmail string                 `protobuf:"bytes,4,opt,name=notification_email,json=notificationEmail,proto3" json:"notification_email,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -248,7 +248,7 @@ func (x *UpdateSupportSettingsRequest) GetAutoAssign() bool {
 	return false
 }
 
-func (x *UpdateSupportSettingsRequest) GetSlaHours() int32 {
+func (x *UpdateSupportSettingsRequest) GetSlaHours() int64 {
 	if x != nil {
 		return x.SlaHours
 	}
@@ -324,7 +324,7 @@ const file_support_v1_settings_proto_rawDesc = "" +
 	"businessId\x12\x1f\n" +
 	"\vauto_assign\x18\x03 \x01(\bR\n" +
 	"autoAssign\x12\x1b\n" +
-	"\tsla_hours\x18\x04 \x01(\x05R\bslaHours\x12%\n" +
+	"\tsla_hours\x18\x04 \x01(\x03R\bslaHours\x12%\n" +
 	"\x0ebusiness_hours\x18\x05 \x01(\tR\rbusinessHours\x12-\n" +
 	"\x12notification_email\x18\x06 \x01(\tR\x11notificationEmail\x12\x1d\n" +
 	"\n" +
@@ -337,7 +337,7 @@ const file_support_v1_settings_proto_rawDesc = "" +
 	"\x1cUpdateSupportSettingsRequest\x12\x1f\n" +
 	"\vauto_assign\x18\x01 \x01(\bR\n" +
 	"autoAssign\x12\x1b\n" +
-	"\tsla_hours\x18\x02 \x01(\x05R\bslaHours\x12%\n" +
+	"\tsla_hours\x18\x02 \x01(\x03R\bslaHours\x12%\n" +
 	"\x0ebusiness_hours\x18\x03 \x01(\tR\rbusinessHours\x12-\n" +
 	"\x12notification_email\x18\x04 \x01(\tR\x11notificationEmail\"9\n" +
 	"\x1dUpdateSupportSettingsResponse\x12\x18\n" +

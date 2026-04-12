@@ -351,7 +351,7 @@ func (x *RunPayrollRequest) GetPeriodLabel() string {
 
 type RunPayrollResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	RecordsCreated int32                  `protobuf:"varint,1,opt,name=records_created,json=recordsCreated,proto3" json:"records_created,omitempty"`
+	RecordsCreated int64                  `protobuf:"varint,1,opt,name=records_created,json=recordsCreated,proto3" json:"records_created,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -386,7 +386,7 @@ func (*RunPayrollResponse) Descriptor() ([]byte, []int) {
 	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *RunPayrollResponse) GetRecordsCreated() int32 {
+func (x *RunPayrollResponse) GetRecordsCreated() int64 {
 	if x != nil {
 		return x.RecordsCreated
 	}
@@ -520,7 +520,7 @@ const file_hr_v1_payroll_proto_rawDesc = "" +
 	"period_end\x18\x02 \x01(\tR\tperiodEnd\x12!\n" +
 	"\fperiod_label\x18\x03 \x01(\tR\vperiodLabel\"=\n" +
 	"\x12RunPayrollResponse\x12'\n" +
-	"\x0frecords_created\x18\x01 \x01(\x05R\x0erecordsCreated\"(\n" +
+	"\x0frecords_created\x18\x01 \x01(\x03R\x0erecordsCreated\"(\n" +
 	"\x16MarkPayrollPaidRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
 	"\x17MarkPayrollPaidResponse\x12\x18\n" +

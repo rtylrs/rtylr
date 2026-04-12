@@ -18,12 +18,12 @@ message Task {
   string priority = 9;
   optional int64 assignee_id = 10;
   int64 reporter_id = 11;
-  string due_date = 12;
-  string start_date = 13;
-  string completed_at = 14;
+  optional string due_date = 12;
+  optional string start_date = 13;
+  optional string completed_at = 14;
   optional double estimated_hours = 15;
   optional double actual_hours = 16;
-  int32 sort_order = 17;
+  int64 sort_order = 17;
   repeated int64 labels = 18;
   string created_at = 19;
   string updated_at = 20;
@@ -170,7 +170,7 @@ message TimeLog {
   int64 id = 1;
   int64 task_id = 2;
   int64 user_id = 3;
-  int32 duration_minutes = 4;
+  int64 duration_minutes = 4;
   string description = 5;
   string logged_at = 6;
   string created_at = 7;
@@ -237,7 +237,7 @@ message GetTimeLogsResponse {
 }
 
 message CreateTimeLogRequest {
-  int32 duration_minutes = 1;
+  int64 duration_minutes = 1;
   string description = 2;
 }
 

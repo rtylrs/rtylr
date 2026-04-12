@@ -22,17 +22,18 @@ const (
 )
 
 type Segment struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Filters       string                 `protobuf:"bytes,5,opt,name=filters,proto3" json:"filters,omitempty"`
-	CustomerCount int32                  `protobuf:"varint,6,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId          int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name             string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description      string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Rules            string                 `protobuf:"bytes,5,opt,name=rules,proto3" json:"rules,omitempty"`
+	CustomerCount    int64                  `protobuf:"varint,6,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
+	LastCalculatedAt *string                `protobuf:"bytes,7,opt,name=last_calculated_at,json=lastCalculatedAt,proto3,oneof" json:"last_calculated_at,omitempty"`
+	CreatedAt        string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Segment) Reset() {
@@ -93,18 +94,25 @@ func (x *Segment) GetDescription() string {
 	return ""
 }
 
-func (x *Segment) GetFilters() string {
+func (x *Segment) GetRules() string {
 	if x != nil {
-		return x.Filters
+		return x.Rules
 	}
 	return ""
 }
 
-func (x *Segment) GetCustomerCount() int32 {
+func (x *Segment) GetCustomerCount() int64 {
 	if x != nil {
 		return x.CustomerCount
 	}
 	return 0
+}
+
+func (x *Segment) GetLastCalculatedAt() string {
+	if x != nil && x.LastCalculatedAt != nil {
+		return *x.LastCalculatedAt
+	}
+	return ""
 }
 
 func (x *Segment) GetCreatedAt() string {
@@ -205,7 +213,7 @@ type CreateSegmentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Filters       string                 `protobuf:"bytes,3,opt,name=filters,proto3" json:"filters,omitempty"`
+	Rules         string                 `protobuf:"bytes,3,opt,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -254,9 +262,9 @@ func (x *CreateSegmentRequest) GetDescription() string {
 	return ""
 }
 
-func (x *CreateSegmentRequest) GetFilters() string {
+func (x *CreateSegmentRequest) GetRules() string {
 	if x != nil {
-		return x.Filters
+		return x.Rules
 	}
 	return ""
 }
@@ -318,7 +326,7 @@ type UpdateSegmentRequest struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Filters       string                 `protobuf:"bytes,4,opt,name=filters,proto3" json:"filters,omitempty"`
+	Rules         string                 `protobuf:"bytes,4,opt,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -374,9 +382,9 @@ func (x *UpdateSegmentRequest) GetDescription() string {
 	return ""
 }
 
-func (x *UpdateSegmentRequest) GetFilters() string {
+func (x *UpdateSegmentRequest) GetRules() string {
 	if x != nil {
-		return x.Filters
+		return x.Rules
 	}
 	return ""
 }
@@ -517,34 +525,36 @@ var File_crm_v1_segments_proto protoreflect.FileDescriptor
 
 const file_crm_v1_segments_proto_rawDesc = "" +
 	"\n" +
-	"\x15crm/v1/segments.proto\x12\x03crm\"\xe9\x01\n" +
+	"\x15crm/v1/segments.proto\x12\x03crm\"\xaf\x02\n" +
 	"\aSegment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x18\n" +
-	"\afilters\x18\x05 \x01(\tR\afilters\x12%\n" +
-	"\x0ecustomer_count\x18\x06 \x01(\x05R\rcustomerCount\x12\x1d\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05rules\x18\x05 \x01(\tR\x05rules\x12%\n" +
+	"\x0ecustomer_count\x18\x06 \x01(\x03R\rcustomerCount\x121\n" +
+	"\x12last_calculated_at\x18\a \x01(\tH\x00R\x10lastCalculatedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x15\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAtB\x15\n" +
+	"\x13_last_calculated_at\"\x15\n" +
 	"\x13ListSegmentsRequest\"@\n" +
 	"\x14ListSegmentsResponse\x12(\n" +
-	"\bsegments\x18\x01 \x03(\v2\f.crm.SegmentR\bsegments\"f\n" +
+	"\bsegments\x18\x01 \x03(\v2\f.crm.SegmentR\bsegments\"b\n" +
 	"\x14CreateSegmentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
-	"\afilters\x18\x03 \x01(\tR\afilters\"P\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05rules\x18\x03 \x01(\tR\x05rules\"P\n" +
 	"\x15CreateSegmentResponse\x12\x1d\n" +
 	"\n" +
 	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"v\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"r\n" +
 	"\x14UpdateSegmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x18\n" +
-	"\afilters\x18\x04 \x01(\tR\afilters\"1\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05rules\x18\x04 \x01(\tR\x05rules\"1\n" +
 	"\x15UpdateSegmentResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\x14DeleteSegmentRequest\x12\x0e\n" +
@@ -590,6 +600,7 @@ func file_crm_v1_segments_proto_init() {
 	if File_crm_v1_segments_proto != nil {
 		return
 	}
+	file_crm_v1_segments_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

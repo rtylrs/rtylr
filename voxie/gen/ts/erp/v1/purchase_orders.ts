@@ -25,8 +25,8 @@ export interface PurchaseOrder {
   subtotal: number;
   taxAmount: number;
   total: number;
-  expectedDelivery: string;
-  receivedAt: string;
+  expectedDelivery?: string | undefined;
+  receivedAt?: string | undefined;
   notes: string;
   createdBy: number;
   createdAt: string;
@@ -42,7 +42,7 @@ export interface ListPurchaseOrdersResponse {
   purchaseOrders: PurchaseOrder[];
 }
 
-export interface CreatePurchaseOrderItemInput {
+export interface CreatePurchaseOrderItemRequest {
   productId: number;
   quantityOrdered: number;
   unitCost: number;
@@ -54,7 +54,7 @@ export interface CreatePurchaseOrderRequest {
   taxAmount: number;
   expectedDelivery: string;
   notes: string;
-  items: CreatePurchaseOrderItemInput[];
+  items: CreatePurchaseOrderItemRequest[];
 }
 
 export interface CreatePurchaseOrderResponse {

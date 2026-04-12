@@ -18,9 +18,9 @@ export interface Task {
   priority: string;
   assigneeId?: number | undefined;
   reporterId: number;
-  dueDate: string;
-  startDate: string;
-  completedAt: string;
+  dueDate?: string | undefined;
+  startDate?: string | undefined;
+  completedAt?: string | undefined;
   estimatedHours?: number | undefined;
   actualHours?: number | undefined;
   sortOrder: number;

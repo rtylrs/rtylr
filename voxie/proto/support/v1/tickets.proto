@@ -32,15 +32,15 @@ message TicketMessage {
 
 message ListTicketsRequest {
   string status = 1;
-  int32 page = 2;
-  int32 page_size = 3;
+  int64 page = 2;
+  int64 page_size = 3;
 }
 
 message ListTicketsResponse {
   repeated Ticket tickets = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 page_size = 4;
+  int64 total = 2;
+  int64 page = 3;
+  int64 page_size = 4;
 }
 
 message GetTicketRequest {

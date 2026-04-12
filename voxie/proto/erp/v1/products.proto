@@ -29,9 +29,9 @@ message Product {
 
 message ListProductsRequest {
   string search = 1;
-  int32 category_id = 2;
-  int32 limit = 3;
-  int32 offset = 4;
+  int64 category_id = 2;
+  int64 limit = 3;
+  int64 offset = 4;
 }
 
 message ListProductsResponse {

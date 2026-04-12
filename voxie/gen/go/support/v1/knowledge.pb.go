@@ -30,7 +30,7 @@ type Article struct {
 	Body          string                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
 	Category      string                 `protobuf:"bytes,6,opt,name=category,proto3" json:"category,omitempty"`
 	IsPublished   bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	Views         int32                  `protobuf:"varint,8,opt,name=views,proto3" json:"views,omitempty"`
+	Views         int64                  `protobuf:"varint,8,opt,name=views,proto3" json:"views,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -116,7 +116,7 @@ func (x *Article) GetIsPublished() bool {
 	return false
 }
 
-func (x *Article) GetViews() int32 {
+func (x *Article) GetViews() int64 {
 	if x != nil {
 		return x.Views
 	}
@@ -139,8 +139,8 @@ func (x *Article) GetUpdatedAt() string {
 
 type ListArticlesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page          int64                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,14 +175,14 @@ func (*ListArticlesRequest) Descriptor() ([]byte, []int) {
 	return file_support_v1_knowledge_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListArticlesRequest) GetPage() int32 {
+func (x *ListArticlesRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListArticlesRequest) GetPageSize() int32 {
+func (x *ListArticlesRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -192,9 +192,9 @@ func (x *ListArticlesRequest) GetPageSize() int32 {
 type ListArticlesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Articles      []*Article             `protobuf:"bytes,1,rep,name=articles,proto3" json:"articles,omitempty"`
-	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -236,21 +236,21 @@ func (x *ListArticlesResponse) GetArticles() []*Article {
 	return nil
 }
 
-func (x *ListArticlesResponse) GetTotal() int32 {
+func (x *ListArticlesResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListArticlesResponse) GetPage() int32 {
+func (x *ListArticlesResponse) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListArticlesResponse) GetPageSize() int32 {
+func (x *ListArticlesResponse) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -615,20 +615,20 @@ const file_support_v1_knowledge_proto_rawDesc = "" +
 	"\x04body\x18\x05 \x01(\tR\x04body\x12\x1a\n" +
 	"\bcategory\x18\x06 \x01(\tR\bcategory\x12!\n" +
 	"\fis_published\x18\a \x01(\bR\visPublished\x12\x14\n" +
-	"\x05views\x18\b \x01(\x05R\x05views\x12\x1d\n" +
+	"\x05views\x18\b \x01(\x03R\x05views\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\n" +
 	" \x01(\tR\tupdatedAt\"F\n" +
 	"\x13ListArticlesRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"\x8b\x01\n" +
+	"\x04page\x18\x01 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x03R\bpageSize\"\x8b\x01\n" +
 	"\x14ListArticlesResponse\x12,\n" +
 	"\barticles\x18\x01 \x03(\v2\x10.support.ArticleR\barticles\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x93\x01\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\x93\x01\n" +
 	"\x14CreateArticleRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\x12\x12\n" +

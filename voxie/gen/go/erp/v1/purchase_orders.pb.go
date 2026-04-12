@@ -123,8 +123,8 @@ type PurchaseOrder struct {
 	Subtotal         float64                `protobuf:"fixed64,6,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
 	TaxAmount        float64                `protobuf:"fixed64,7,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
 	Total            float64                `protobuf:"fixed64,8,opt,name=total,proto3" json:"total,omitempty"`
-	ExpectedDelivery string                 `protobuf:"bytes,9,opt,name=expected_delivery,json=expectedDelivery,proto3" json:"expected_delivery,omitempty"`
-	ReceivedAt       string                 `protobuf:"bytes,10,opt,name=received_at,json=receivedAt,proto3" json:"received_at,omitempty"`
+	ExpectedDelivery *string                `protobuf:"bytes,9,opt,name=expected_delivery,json=expectedDelivery,proto3,oneof" json:"expected_delivery,omitempty"`
+	ReceivedAt       *string                `protobuf:"bytes,10,opt,name=received_at,json=receivedAt,proto3,oneof" json:"received_at,omitempty"`
 	Notes            string                 `protobuf:"bytes,11,opt,name=notes,proto3" json:"notes,omitempty"`
 	CreatedBy        int64                  `protobuf:"varint,12,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
 	CreatedAt        string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -221,15 +221,15 @@ func (x *PurchaseOrder) GetTotal() float64 {
 }
 
 func (x *PurchaseOrder) GetExpectedDelivery() string {
-	if x != nil {
-		return x.ExpectedDelivery
+	if x != nil && x.ExpectedDelivery != nil {
+		return *x.ExpectedDelivery
 	}
 	return ""
 }
 
 func (x *PurchaseOrder) GetReceivedAt() string {
-	if x != nil {
-		return x.ReceivedAt
+	if x != nil && x.ReceivedAt != nil {
+		return *x.ReceivedAt
 	}
 	return ""
 }
@@ -357,7 +357,7 @@ func (x *ListPurchaseOrdersResponse) GetPurchaseOrders() []*PurchaseOrder {
 	return nil
 }
 
-type CreatePurchaseOrderItemInput struct {
+type CreatePurchaseOrderItemRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	ProductId       int64                  `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
 	QuantityOrdered float64                `protobuf:"fixed64,2,opt,name=quantity_ordered,json=quantityOrdered,proto3" json:"quantity_ordered,omitempty"`
@@ -366,20 +366,20 @@ type CreatePurchaseOrderItemInput struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *CreatePurchaseOrderItemInput) Reset() {
-	*x = CreatePurchaseOrderItemInput{}
+func (x *CreatePurchaseOrderItemRequest) Reset() {
+	*x = CreatePurchaseOrderItemRequest{}
 	mi := &file_erp_v1_purchase_orders_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreatePurchaseOrderItemInput) String() string {
+func (x *CreatePurchaseOrderItemRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreatePurchaseOrderItemInput) ProtoMessage() {}
+func (*CreatePurchaseOrderItemRequest) ProtoMessage() {}
 
-func (x *CreatePurchaseOrderItemInput) ProtoReflect() protoreflect.Message {
+func (x *CreatePurchaseOrderItemRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_erp_v1_purchase_orders_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -391,26 +391,26 @@ func (x *CreatePurchaseOrderItemInput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreatePurchaseOrderItemInput.ProtoReflect.Descriptor instead.
-func (*CreatePurchaseOrderItemInput) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreatePurchaseOrderItemRequest.ProtoReflect.Descriptor instead.
+func (*CreatePurchaseOrderItemRequest) Descriptor() ([]byte, []int) {
 	return file_erp_v1_purchase_orders_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreatePurchaseOrderItemInput) GetProductId() int64 {
+func (x *CreatePurchaseOrderItemRequest) GetProductId() int64 {
 	if x != nil {
 		return x.ProductId
 	}
 	return 0
 }
 
-func (x *CreatePurchaseOrderItemInput) GetQuantityOrdered() float64 {
+func (x *CreatePurchaseOrderItemRequest) GetQuantityOrdered() float64 {
 	if x != nil {
 		return x.QuantityOrdered
 	}
 	return 0
 }
 
-func (x *CreatePurchaseOrderItemInput) GetUnitCost() float64 {
+func (x *CreatePurchaseOrderItemRequest) GetUnitCost() float64 {
 	if x != nil {
 		return x.UnitCost
 	}
@@ -418,13 +418,13 @@ func (x *CreatePurchaseOrderItemInput) GetUnitCost() float64 {
 }
 
 type CreatePurchaseOrderRequest struct {
-	state            protoimpl.MessageState          `protogen:"open.v1"`
-	SupplierId       int64                           `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
-	PoNumber         string                          `protobuf:"bytes,2,opt,name=po_number,json=poNumber,proto3" json:"po_number,omitempty"`
-	TaxAmount        float64                         `protobuf:"fixed64,3,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
-	ExpectedDelivery string                          `protobuf:"bytes,4,opt,name=expected_delivery,json=expectedDelivery,proto3" json:"expected_delivery,omitempty"`
-	Notes            string                          `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
-	Items            []*CreatePurchaseOrderItemInput `protobuf:"bytes,6,rep,name=items,proto3" json:"items,omitempty"`
+	state            protoimpl.MessageState            `protogen:"open.v1"`
+	SupplierId       int64                             `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	PoNumber         string                            `protobuf:"bytes,2,opt,name=po_number,json=poNumber,proto3" json:"po_number,omitempty"`
+	TaxAmount        float64                           `protobuf:"fixed64,3,opt,name=tax_amount,json=taxAmount,proto3" json:"tax_amount,omitempty"`
+	ExpectedDelivery string                            `protobuf:"bytes,4,opt,name=expected_delivery,json=expectedDelivery,proto3" json:"expected_delivery,omitempty"`
+	Notes            string                            `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
+	Items            []*CreatePurchaseOrderItemRequest `protobuf:"bytes,6,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -494,7 +494,7 @@ func (x *CreatePurchaseOrderRequest) GetNotes() string {
 	return ""
 }
 
-func (x *CreatePurchaseOrderRequest) GetItems() []*CreatePurchaseOrderItemInput {
+func (x *CreatePurchaseOrderRequest) GetItems() []*CreatePurchaseOrderItemRequest {
 	if x != nil {
 		return x.Items
 	}
@@ -663,7 +663,7 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\x11quantity_received\x18\x05 \x01(\x01R\x10quantityReceived\x12\x1b\n" +
 	"\tunit_cost\x18\x06 \x01(\x01R\bunitCost\x12\x1d\n" +
 	"\n" +
-	"total_cost\x18\a \x01(\x01R\ttotalCost\"\xd0\x03\n" +
+	"total_cost\x18\a \x01(\x01R\ttotalCost\"\x80\x04\n" +
 	"\rPurchaseOrder\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
@@ -674,11 +674,11 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\bsubtotal\x18\x06 \x01(\x01R\bsubtotal\x12\x1d\n" +
 	"\n" +
 	"tax_amount\x18\a \x01(\x01R\ttaxAmount\x12\x14\n" +
-	"\x05total\x18\b \x01(\x01R\x05total\x12+\n" +
-	"\x11expected_delivery\x18\t \x01(\tR\x10expectedDelivery\x12\x1f\n" +
+	"\x05total\x18\b \x01(\x01R\x05total\x120\n" +
+	"\x11expected_delivery\x18\t \x01(\tH\x00R\x10expectedDelivery\x88\x01\x01\x12$\n" +
 	"\vreceived_at\x18\n" +
-	" \x01(\tR\n" +
-	"receivedAt\x12\x14\n" +
+	" \x01(\tH\x01R\n" +
+	"receivedAt\x88\x01\x01\x12\x14\n" +
 	"\x05notes\x18\v \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
 	"created_by\x18\f \x01(\x03R\tcreatedBy\x12\x1d\n" +
@@ -686,16 +686,18 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12,\n" +
-	"\x05items\x18\x0f \x03(\v2\x16.erp.PurchaseOrderItemR\x05items\"3\n" +
+	"\x05items\x18\x0f \x03(\v2\x16.erp.PurchaseOrderItemR\x05itemsB\x14\n" +
+	"\x12_expected_deliveryB\x0e\n" +
+	"\f_received_at\"3\n" +
 	"\x19ListPurchaseOrdersRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\"Y\n" +
 	"\x1aListPurchaseOrdersResponse\x12;\n" +
-	"\x0fpurchase_orders\x18\x01 \x03(\v2\x12.erp.PurchaseOrderR\x0epurchaseOrders\"\x85\x01\n" +
-	"\x1cCreatePurchaseOrderItemInput\x12\x1d\n" +
+	"\x0fpurchase_orders\x18\x01 \x03(\v2\x12.erp.PurchaseOrderR\x0epurchaseOrders\"\x87\x01\n" +
+	"\x1eCreatePurchaseOrderItemRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03R\tproductId\x12)\n" +
 	"\x10quantity_ordered\x18\x02 \x01(\x01R\x0fquantityOrdered\x12\x1b\n" +
-	"\tunit_cost\x18\x03 \x01(\x01R\bunitCost\"\xf5\x01\n" +
+	"\tunit_cost\x18\x03 \x01(\x01R\bunitCost\"\xf7\x01\n" +
 	"\x1aCreatePurchaseOrderRequest\x12\x1f\n" +
 	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
 	"supplierId\x12\x1b\n" +
@@ -703,8 +705,8 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\n" +
 	"tax_amount\x18\x03 \x01(\x01R\ttaxAmount\x12+\n" +
 	"\x11expected_delivery\x18\x04 \x01(\tR\x10expectedDelivery\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\x127\n" +
-	"\x05items\x18\x06 \x03(\v2!.erp.CreatePurchaseOrderItemInputR\x05items\"c\n" +
+	"\x05notes\x18\x05 \x01(\tR\x05notes\x129\n" +
+	"\x05items\x18\x06 \x03(\v2#.erp.CreatePurchaseOrderItemRequestR\x05items\"c\n" +
 	"\x1bCreatePurchaseOrderResponse\x12*\n" +
 	"\x11purchase_order_id\x18\x01 \x01(\x03R\x0fpurchaseOrderId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"J\n" +
@@ -732,7 +734,7 @@ var file_erp_v1_purchase_orders_proto_goTypes = []any{
 	(*PurchaseOrder)(nil),                     // 1: erp.PurchaseOrder
 	(*ListPurchaseOrdersRequest)(nil),         // 2: erp.ListPurchaseOrdersRequest
 	(*ListPurchaseOrdersResponse)(nil),        // 3: erp.ListPurchaseOrdersResponse
-	(*CreatePurchaseOrderItemInput)(nil),      // 4: erp.CreatePurchaseOrderItemInput
+	(*CreatePurchaseOrderItemRequest)(nil),    // 4: erp.CreatePurchaseOrderItemRequest
 	(*CreatePurchaseOrderRequest)(nil),        // 5: erp.CreatePurchaseOrderRequest
 	(*CreatePurchaseOrderResponse)(nil),       // 6: erp.CreatePurchaseOrderResponse
 	(*UpdatePurchaseOrderStatusRequest)(nil),  // 7: erp.UpdatePurchaseOrderStatusRequest
@@ -741,7 +743,7 @@ var file_erp_v1_purchase_orders_proto_goTypes = []any{
 var file_erp_v1_purchase_orders_proto_depIdxs = []int32{
 	0, // 0: erp.PurchaseOrder.items:type_name -> erp.PurchaseOrderItem
 	1, // 1: erp.ListPurchaseOrdersResponse.purchase_orders:type_name -> erp.PurchaseOrder
-	4, // 2: erp.CreatePurchaseOrderRequest.items:type_name -> erp.CreatePurchaseOrderItemInput
+	4, // 2: erp.CreatePurchaseOrderRequest.items:type_name -> erp.CreatePurchaseOrderItemRequest
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -754,6 +756,7 @@ func file_erp_v1_purchase_orders_proto_init() {
 	if File_erp_v1_purchase_orders_proto != nil {
 		return
 	}
+	file_erp_v1_purchase_orders_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

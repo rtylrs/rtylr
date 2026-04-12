@@ -44,7 +44,6 @@ export interface CreateExpenseResponse {
 }
 
 export interface UpdateExpenseRequest {
-  id: number;
   categoryId?: number | undefined;
   amount: number;
   currency: string;
@@ -59,7 +58,6 @@ export interface UpdateExpenseResponse {
 }
 
 export interface DeleteExpenseRequest {
-  id: number;
 }
 
 export interface DeleteExpenseResponse {

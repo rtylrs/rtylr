@@ -23,10 +23,10 @@ const (
 
 type DashboardStats struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TotalStaff     int32                  `protobuf:"varint,1,opt,name=total_staff,json=totalStaff,proto3" json:"total_staff,omitempty"`
-	OnShiftToday   int32                  `protobuf:"varint,2,opt,name=on_shift_today,json=onShiftToday,proto3" json:"on_shift_today,omitempty"`
-	PendingTimeOff int32                  `protobuf:"varint,3,opt,name=pending_time_off,json=pendingTimeOff,proto3" json:"pending_time_off,omitempty"`
-	PayrollDraft   int32                  `protobuf:"varint,4,opt,name=payroll_draft,json=payrollDraft,proto3" json:"payroll_draft,omitempty"`
+	TotalStaff     int64                  `protobuf:"varint,1,opt,name=total_staff,json=totalStaff,proto3" json:"total_staff,omitempty"`
+	OnShiftToday   int64                  `protobuf:"varint,2,opt,name=on_shift_today,json=onShiftToday,proto3" json:"on_shift_today,omitempty"`
+	PendingTimeOff int64                  `protobuf:"varint,3,opt,name=pending_time_off,json=pendingTimeOff,proto3" json:"pending_time_off,omitempty"`
+	PayrollDraft   int64                  `protobuf:"varint,4,opt,name=payroll_draft,json=payrollDraft,proto3" json:"payroll_draft,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -61,28 +61,28 @@ func (*DashboardStats) Descriptor() ([]byte, []int) {
 	return file_hr_v1_dashboard_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DashboardStats) GetTotalStaff() int32 {
+func (x *DashboardStats) GetTotalStaff() int64 {
 	if x != nil {
 		return x.TotalStaff
 	}
 	return 0
 }
 
-func (x *DashboardStats) GetOnShiftToday() int32 {
+func (x *DashboardStats) GetOnShiftToday() int64 {
 	if x != nil {
 		return x.OnShiftToday
 	}
 	return 0
 }
 
-func (x *DashboardStats) GetPendingTimeOff() int32 {
+func (x *DashboardStats) GetPendingTimeOff() int64 {
 	if x != nil {
 		return x.PendingTimeOff
 	}
 	return 0
 }
 
-func (x *DashboardStats) GetPayrollDraft() int32 {
+func (x *DashboardStats) GetPayrollDraft() int64 {
 	if x != nil {
 		return x.PayrollDraft
 	}
@@ -175,11 +175,11 @@ const file_hr_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
 	"\x15hr/v1/dashboard.proto\x12\x02hr\"\xa6\x01\n" +
 	"\x0eDashboardStats\x12\x1f\n" +
-	"\vtotal_staff\x18\x01 \x01(\x05R\n" +
+	"\vtotal_staff\x18\x01 \x01(\x03R\n" +
 	"totalStaff\x12$\n" +
-	"\x0eon_shift_today\x18\x02 \x01(\x05R\fonShiftToday\x12(\n" +
-	"\x10pending_time_off\x18\x03 \x01(\x05R\x0ependingTimeOff\x12#\n" +
-	"\rpayroll_draft\x18\x04 \x01(\x05R\fpayrollDraft\"\x17\n" +
+	"\x0eon_shift_today\x18\x02 \x01(\x03R\fonShiftToday\x12(\n" +
+	"\x10pending_time_off\x18\x03 \x01(\x03R\x0ependingTimeOff\x12#\n" +
+	"\rpayroll_draft\x18\x04 \x01(\x03R\fpayrollDraft\"\x17\n" +
 	"\x15GetHRDashboardRequest\"B\n" +
 	"\x16GetHRDashboardResponse\x12(\n" +
 	"\x05stats\x18\x01 \x01(\v2\x12.hr.DashboardStatsR\x05statsB&Z$github.com/voxire/voxie/gen/go/hr/v1b\x06proto3"

@@ -12,21 +12,21 @@ message SupportCustomer {
   string name = 3;
   string email = 4;
   string phone = 5;
-  int32 total_tickets = 6;
+  int64 total_tickets = 6;
   string last_ticket_at = 7;
   string created_at = 8;
 }
 
 message ListSupportCustomersRequest {
-  int32 page = 1;
-  int32 page_size = 2;
+  int64 page = 1;
+  int64 page_size = 2;
 }
 
 message ListSupportCustomersResponse {
   repeated SupportCustomer customers = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 page_size = 4;
+  int64 total = 2;
+  int64 page = 3;
+  int64 page_size = 4;
 }
 
 message GetSupportCustomerRequest {

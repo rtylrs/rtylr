@@ -379,14 +379,13 @@ func (x *CreateExpenseResponse) GetMessage() string {
 
 type UpdateExpenseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	CategoryId    *int64                 `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
-	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
-	Currency      string                 `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
-	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	Vendor        string                 `protobuf:"bytes,6,opt,name=vendor,proto3" json:"vendor,omitempty"`
-	ReceiptUrl    string                 `protobuf:"bytes,7,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
-	ExpenseDate   string                 `protobuf:"bytes,8,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
+	CategoryId    *int64                 `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency      string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Vendor        string                 `protobuf:"bytes,5,opt,name=vendor,proto3" json:"vendor,omitempty"`
+	ReceiptUrl    string                 `protobuf:"bytes,6,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
+	ExpenseDate   string                 `protobuf:"bytes,7,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -419,13 +418,6 @@ func (x *UpdateExpenseRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateExpenseRequest.ProtoReflect.Descriptor instead.
 func (*UpdateExpenseRequest) Descriptor() ([]byte, []int) {
 	return file_finance_v1_expenses_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *UpdateExpenseRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
 }
 
 func (x *UpdateExpenseRequest) GetCategoryId() int64 {
@@ -523,7 +515,6 @@ func (x *UpdateExpenseResponse) GetMessage() string {
 
 type DeleteExpenseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -556,13 +547,6 @@ func (x *DeleteExpenseRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use DeleteExpenseRequest.ProtoReflect.Descriptor instead.
 func (*DeleteExpenseRequest) Descriptor() ([]byte, []int) {
 	return file_finance_v1_expenses_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *DeleteExpenseRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
 }
 
 type DeleteExpenseResponse struct {
@@ -806,23 +790,21 @@ const file_finance_v1_expenses_proto_rawDesc = "" +
 	"\x15CreateExpenseResponse\x12\x1d\n" +
 	"\n" +
 	"expense_id\x18\x01 \x01(\x03R\texpenseId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x8e\x02\n" +
-	"\x14UpdateExpenseRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12$\n" +
-	"\vcategory_id\x18\x02 \x01(\x03H\x00R\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xfe\x01\n" +
+	"\x14UpdateExpenseRequest\x12$\n" +
+	"\vcategory_id\x18\x01 \x01(\x03H\x00R\n" +
 	"categoryId\x88\x01\x01\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1a\n" +
-	"\bcurrency\x18\x04 \x01(\tR\bcurrency\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06vendor\x18\x06 \x01(\tR\x06vendor\x12\x1f\n" +
-	"\vreceipt_url\x18\a \x01(\tR\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
+	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06vendor\x18\x05 \x01(\tR\x06vendor\x12\x1f\n" +
+	"\vreceipt_url\x18\x06 \x01(\tR\n" +
 	"receiptUrl\x12!\n" +
-	"\fexpense_date\x18\b \x01(\tR\vexpenseDateB\x0e\n" +
+	"\fexpense_date\x18\a \x01(\tR\vexpenseDateB\x0e\n" +
 	"\f_category_id\"1\n" +
 	"\x15UpdateExpenseResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
-	"\x14DeleteExpenseRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x16\n" +
+	"\x14DeleteExpenseRequest\"1\n" +
 	"\x15DeleteExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\x85\x01\n" +
 	"\x0fExpenseCategory\x12\x0e\n" +

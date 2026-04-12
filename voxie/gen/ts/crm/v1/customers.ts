@@ -14,7 +14,7 @@ export interface Customer {
   lastName: string;
   email: string;
   phone: string;
-  dateOfBirth: string;
+  dateOfBirth?: string | undefined;
   gender: string;
   address: string;
   city: string;
@@ -22,7 +22,7 @@ export interface Customer {
   loyaltyPoints: number;
   totalSpent: number;
   visitCount: number;
-  lastVisitAt: string;
+  lastVisitAt?: string | undefined;
   loyaltyTier: string;
   tags: string[];
   notes: string;
@@ -113,4 +113,12 @@ export interface GetSegmentCustomersResponse {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export interface GetCustomerRequest {
+  id: number;
+}
+
+export interface GetCustomerResponse {
+  customer: Customer | undefined;
 }
