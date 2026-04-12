@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -29,100 +31,67 @@ func DeleteCommentRoutes() []string   { return []string{"/flow/tasks/comment"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-type TaskPayload struct {
-	ID             int64      `json:"id"`
-	ProjectID      int64      `json:"project_id"`
-	WorkspaceID    int64      `json:"workspace_id"`
-	OwnerID        int64      `json:"owner_id"`
-	ParentTaskID   *int64     `json:"parent_task_id,omitempty"`
-	Title          string     `json:"title"`
-	Description    string     `json:"description"`
-	Status         string     `json:"status"`
-	Priority       string     `json:"priority"`
-	AssigneeID     *int64     `json:"assignee_id,omitempty"`
-	ReporterID     int64      `json:"reporter_id"`
-	DueDate        *time.Time `json:"due_date,omitempty"`
-	StartDate      *time.Time `json:"start_date,omitempty"`
-	CompletedAt    *time.Time `json:"completed_at,omitempty"`
-	EstimatedHours *float64   `json:"estimated_hours,omitempty"`
-	ActualHours    *float64   `json:"actual_hours,omitempty"`
-	SortOrder      int        `json:"sort_order"`
-	Labels         []int64    `json:"labels"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
-}
-
-type TaskCommentPayload struct {
-	ID        int64     `json:"id"`
-	TaskID    int64     `json:"task_id"`
-	UserID    int64     `json:"user_id"`
-	Content   string    `json:"content"`
-	IsEdited  bool      `json:"is_edited"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type TaskActivityPayload struct {
-	ID        int64     `json:"id"`
-	TaskID    int64     `json:"task_id"`
-	UserID    int64     `json:"user_id"`
-	Action    string    `json:"action"`
-	OldValue  string    `json:"old_value"`
-	NewValue  string    `json:"new_value"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func toTaskPayload(t domain.Task) TaskPayload {
+func toTaskPayload(t domain.Task) *flowv1.Task {
 	labels := t.Labels
 	if labels == nil {
 		labels = []int64{}
 	}
 
-	return TaskPayload{
-		ID:             t.ID,
-		ProjectID:      t.ProjectID,
-		WorkspaceID:    t.WorkspaceID,
-		OwnerID:        t.OwnerID,
-		ParentTaskID:   t.ParentTaskID,
+	task := &flowv1.Task{
+		Id:             t.ID,
+		ProjectId:      t.ProjectID,
+		WorkspaceId:    t.WorkspaceID,
+		OwnerId:       t.OwnerID,
+		ParentTaskId:   t.ParentTaskID,
 		Title:          t.Title,
 		Description:    t.Description,
 		Status:         t.Status,
 		Priority:       t.Priority,
-		AssigneeID:     t.AssigneeID,
-		ReporterID:     t.ReporterID,
-		DueDate:        t.DueDate,
-		StartDate:      t.StartDate,
-		CompletedAt:    t.CompletedAt,
+		AssigneeId:     t.AssigneeID,
+		ReporterId:     t.ReporterID,
 		EstimatedHours: t.EstimatedHours,
 		ActualHours:    t.ActualHours,
-		SortOrder:      t.SortOrder,
+		SortOrder:      int64(t.SortOrder),
 		Labels:         labels,
-		CreatedAt:      t.CreatedAt,
-		UpdatedAt:      t.UpdatedAt,
+		CreatedAt:      t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:      t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+	if t.DueDate != nil {
+		s := t.DueDate.Format("2006-01-02T15:04:05Z")
+		task.DueDate = &s
+	}
+	if t.StartDate != nil {
+		s := t.StartDate.Format("2006-01-02T15:04:05Z")
+		task.StartDate = &s
+	}
+	if t.CompletedAt != nil {
+		s := t.CompletedAt.Format("2006-01-02T15:04:05Z")
+		task.CompletedAt = &s
+	}
+	return task
 }
 
-func toCommentPayload(c domain.TaskComment) TaskCommentPayload {
-	return TaskCommentPayload{
-		ID:        c.ID,
-		TaskID:    c.TaskID,
-		UserID:    c.UserID,
+func toCommentPayload(c domain.TaskComment) *flowv1.TaskComment {
+	return &flowv1.TaskComment{
+		Id:        c.ID,
+		TaskId:    c.TaskID,
+		UserId:    c.UserID,
 		Content:   c.Content,
 		IsEdited:  c.IsEdited,
-		CreatedAt: c.CreatedAt,
-		UpdatedAt: c.UpdatedAt,
+		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
-func toActivityPayload(a domain.TaskActivity) TaskActivityPayload {
-	return TaskActivityPayload{
-		ID:        a.ID,
-		TaskID:    a.TaskID,
-		UserID:    a.UserID,
+func toActivityPayload(a domain.TaskActivity) *flowv1.TaskActivity {
+	return &flowv1.TaskActivity{
+		Id:        a.ID,
+		TaskId:    a.TaskID,
+		UserId:    a.UserID,
 		Action:    a.Action,
 		OldValue:  a.OldValue,
 		NewValue:  a.NewValue,
-		CreatedAt: a.CreatedAt,
+		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -142,7 +111,7 @@ type ListTasksRequest struct {
 }
 
 type ListTasksResponse struct {
-	Tasks []TaskPayload `json:"tasks"`
+	Tasks []*flowv1.Task `json:"tasks"`
 }
 
 func (h *ListTasksHandler) Validate(_ context.Context, req *ListTasksRequest) *errorModels.ServerError {
@@ -174,7 +143,7 @@ func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (Li
 		}
 	}
 
-	payloads := make([]TaskPayload, 0, len(tasks))
+	payloads := make([]*flowv1.Task, 0, len(tasks))
 	for _, t := range tasks {
 		payloads = append(payloads, toTaskPayload(t))
 	}
@@ -205,7 +174,7 @@ type CreateTaskRequest struct {
 }
 
 type CreateTaskResponse struct {
-	Task TaskPayload `json:"task"`
+	Task *flowv1.Task `json:"task"`
 }
 
 func (h *CreateTaskHandler) Validate(_ context.Context, req *CreateTaskRequest) *errorModels.ServerError {
@@ -270,10 +239,10 @@ type GetTaskDetailRequest struct {
 }
 
 type GetTaskDetailResponse struct {
-	Task     TaskPayload          `json:"task"`
-	Subtasks []TaskPayload        `json:"subtasks"`
-	Comments []TaskCommentPayload `json:"comments"`
-	Activity []TaskActivityPayload `json:"activity"`
+	Task     *flowv1.Task          `json:"task"`
+	Subtasks []*flowv1.Task        `json:"subtasks"`
+	Comments []*flowv1.TaskComment `json:"comments"`
+	Activity []*flowv1.TaskActivity `json:"activity"`
 }
 
 func (h *GetTaskDetailHandler) Validate(_ context.Context, req *GetTaskDetailRequest) *errorModels.ServerError {
@@ -298,17 +267,17 @@ func (h *GetTaskDetailHandler) Serve(ctx context.Context, req *GetTaskDetailRequ
 		}
 	}
 
-	subtasks := make([]TaskPayload, 0, len(detail.Subtasks))
+	subtasks := make([]*flowv1.Task, 0, len(detail.Subtasks))
 	for _, t := range detail.Subtasks {
 		subtasks = append(subtasks, toTaskPayload(t))
 	}
 
-	comments := make([]TaskCommentPayload, 0, len(detail.Comments))
+	comments := make([]*flowv1.TaskComment, 0, len(detail.Comments))
 	for _, c := range detail.Comments {
 		comments = append(comments, toCommentPayload(c))
 	}
 
-	activity := make([]TaskActivityPayload, 0, len(detail.Activity))
+	activity := make([]*flowv1.TaskActivity, 0, len(detail.Activity))
 	for _, a := range detail.Activity {
 		activity = append(activity, toActivityPayload(a))
 	}
@@ -488,7 +457,7 @@ type GetMyTasksHandler struct {
 type GetMyTasksRequest struct{}
 
 type GetMyTasksResponse struct {
-	Tasks []TaskPayload `json:"tasks"`
+	Tasks []*flowv1.Task `json:"tasks"`
 }
 
 func (h *GetMyTasksHandler) Serve(ctx context.Context, _ *GetMyTasksRequest) (GetMyTasksResponse, *errorModels.ServerError) {
@@ -505,7 +474,7 @@ func (h *GetMyTasksHandler) Serve(ctx context.Context, _ *GetMyTasksRequest) (Ge
 		}
 	}
 
-	payloads := make([]TaskPayload, 0, len(tasks))
+	payloads := make([]*flowv1.Task, 0, len(tasks))
 	for _, t := range tasks {
 		payloads = append(payloads, toTaskPayload(t))
 	}
@@ -527,7 +496,7 @@ type AddCommentRequest struct {
 }
 
 type AddCommentResponse struct {
-	Comment TaskCommentPayload `json:"comment"`
+	Comment *flowv1.TaskComment `json:"comment"`
 }
 
 func (h *AddCommentHandler) Validate(_ context.Context, req *AddCommentRequest) *errorModels.ServerError {

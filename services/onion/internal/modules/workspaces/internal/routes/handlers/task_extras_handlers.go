@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -22,7 +24,7 @@ type GetTaskActivityHandler struct{ FlowService *application.Service }
 type GetTaskActivityRequest struct{}
 
 type GetTaskActivityResponse struct {
-	Activity []TaskActivityPayload `json:"activity"`
+	Activity []*flowv1.TaskActivity `json:"activity"`
 }
 
 func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRequest) (GetTaskActivityResponse, *errorModels.ServerError) {
@@ -39,7 +41,7 @@ func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRe
 	if err != nil {
 		return GetTaskActivityResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get task activity"}
 	}
-	payloads := make([]TaskActivityPayload, len(activities))
+	payloads := make([]*flowv1.TaskActivity, len(activities))
 	for i, a := range activities {
 		payloads[i] = toActivityPayload(a)
 	}

@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -26,31 +27,18 @@ func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/
 // Shared payload types
 // ─────────────────────────────────────────────
 
-type WorkspacePayload struct {
-	ID          int64     `json:"id"`
-	OwnerID     int64     `json:"owner_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Icon        string    `json:"icon"`
-	Color       string    `json:"color"`
-	IsDefault   bool      `json:"is_default"`
-	CreatedBy   int64     `json:"created_by"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-func toWorkspacePayload(w domain.Workspace) WorkspacePayload {
-	return WorkspacePayload{
-		ID:          w.ID,
-		OwnerID:     w.OwnerID,
+func toWorkspacePayload(w domain.Workspace) *flowv1.Workspace {
+	return &flowv1.Workspace{
+		Id:          w.ID,
+		OwnerId:    w.OwnerID,
 		Name:        w.Name,
 		Description: w.Description,
 		Icon:        w.Icon,
 		Color:       w.Color,
 		IsDefault:   w.IsDefault,
 		CreatedBy:   w.CreatedBy,
-		CreatedAt:   w.CreatedAt,
-		UpdatedAt:   w.UpdatedAt,
+		CreatedAt:   w.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   w.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -65,7 +53,7 @@ type ListWorkspacesHandler struct {
 type ListWorkspacesRequest struct{}
 
 type ListWorkspacesResponse struct {
-	Workspaces []WorkspacePayload `json:"workspaces"`
+	Workspaces []*flowv1.Workspace `json:"workspaces"`
 }
 
 func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequest) (ListWorkspacesResponse, *errorModels.ServerError) {
@@ -82,7 +70,7 @@ func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequ
 		}
 	}
 
-	payloads := make([]WorkspacePayload, 0, len(workspaces))
+	payloads := make([]*flowv1.Workspace, 0, len(workspaces))
 	for _, w := range workspaces {
 		payloads = append(payloads, toWorkspacePayload(w))
 	}
@@ -106,7 +94,7 @@ type CreateWorkspaceRequest struct {
 }
 
 type CreateWorkspaceResponse struct {
-	Workspace WorkspacePayload `json:"workspace"`
+	Workspace *flowv1.Workspace `json:"workspace"`
 }
 
 func (h *CreateWorkspaceHandler) Validate(_ context.Context, req *CreateWorkspaceRequest) *errorModels.ServerError {

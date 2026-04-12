@@ -3,7 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"time"
+
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -22,21 +23,13 @@ func CreateLabelRoutes() []string { return []string{"/flow/labels"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-type LabelPayload struct {
-	ID          int64     `json:"id"`
-	WorkspaceID int64     `json:"workspace_id"`
-	Name        string    `json:"name"`
-	Color       string    `json:"color"`
-	CreatedAt   time.Time `json:"created_at"`
-}
-
-func toLabelPayload(l domain.Label) LabelPayload {
-	return LabelPayload{
-		ID:          l.ID,
-		WorkspaceID: l.WorkspaceID,
+func toLabelPayload(l domain.Label) *flowv1.Label {
+	return &flowv1.Label{
+		Id:          l.ID,
+		WorkspaceId: l.WorkspaceID,
 		Name:        l.Name,
 		Color:       l.Color,
-		CreatedAt:   l.CreatedAt,
+		CreatedAt:   l.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -53,7 +46,7 @@ type ListLabelsRequest struct {
 }
 
 type ListLabelsResponse struct {
-	Labels []LabelPayload `json:"labels"`
+	Labels []*flowv1.Label `json:"labels"`
 }
 
 func (h *ListLabelsHandler) Validate(_ context.Context, req *ListLabelsRequest) *errorModels.ServerError {
@@ -78,7 +71,7 @@ func (h *ListLabelsHandler) Serve(ctx context.Context, req *ListLabelsRequest) (
 		}
 	}
 
-	payloads := make([]LabelPayload, 0, len(labels))
+	payloads := make([]*flowv1.Label, 0, len(labels))
 	for _, l := range labels {
 		payloads = append(payloads, toLabelPayload(l))
 	}
@@ -101,7 +94,7 @@ type CreateLabelRequest struct {
 }
 
 type CreateLabelResponse struct {
-	Label LabelPayload `json:"label"`
+	Label *flowv1.Label `json:"label"`
 }
 
 func (h *CreateLabelHandler) Validate(_ context.Context, req *CreateLabelRequest) *errorModels.ServerError {

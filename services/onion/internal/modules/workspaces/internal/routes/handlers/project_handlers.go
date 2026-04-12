@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -24,38 +26,27 @@ func DeleteProjectRoutes() []string { return []string{"/flow/projects"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-type ProjectPayload struct {
-	ID          int64      `json:"id"`
-	WorkspaceID int64      `json:"workspace_id"`
-	OwnerID     int64      `json:"owner_id"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Icon        string     `json:"icon"`
-	Color       string     `json:"color"`
-	Status      string     `json:"status"`
-	StartDate   *time.Time `json:"start_date,omitempty"`
-	DueDate     *time.Time `json:"due_date,omitempty"`
-	CreatedBy   int64      `json:"created_by"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-}
-
-func toProjectPayload(p domain.Project) ProjectPayload {
-	return ProjectPayload{
-		ID:          p.ID,
-		WorkspaceID: p.WorkspaceID,
-		OwnerID:     p.OwnerID,
+func toProjectPayload(p domain.Project) *flowv1.Project {
+	proj := &flowv1.Project{
+		Id:          p.ID,
+		WorkspaceId: p.WorkspaceID,
+		OwnerId:    p.OwnerID,
 		Name:        p.Name,
 		Description: p.Description,
 		Icon:        p.Icon,
 		Color:       p.Color,
 		Status:      p.Status,
-		StartDate:   p.StartDate,
-		DueDate:     p.DueDate,
 		CreatedBy:   p.CreatedBy,
-		CreatedAt:   p.CreatedAt,
-		UpdatedAt:   p.UpdatedAt,
+		CreatedAt:   p.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+	if p.StartDate != nil {
+		proj.StartDate = p.StartDate.Format("2006-01-02")
+	}
+	if p.DueDate != nil {
+		proj.DueDate = p.DueDate.Format("2006-01-02")
+	}
+	return proj
 }
 
 // ─────────────────────────────────────────────
@@ -71,7 +62,7 @@ type ListProjectsRequest struct {
 }
 
 type ListProjectsResponse struct {
-	Projects []ProjectPayload `json:"projects"`
+	Projects []*flowv1.Project `json:"projects"`
 }
 
 func (h *ListProjectsHandler) Validate(_ context.Context, req *ListProjectsRequest) *errorModels.ServerError {
@@ -96,7 +87,7 @@ func (h *ListProjectsHandler) Serve(ctx context.Context, req *ListProjectsReques
 		}
 	}
 
-	payloads := make([]ProjectPayload, 0, len(projects))
+	payloads := make([]*flowv1.Project, 0, len(projects))
 	for _, p := range projects {
 		payloads = append(payloads, toProjectPayload(p))
 	}
@@ -123,7 +114,7 @@ type CreateProjectRequest struct {
 }
 
 type CreateProjectResponse struct {
-	Project ProjectPayload `json:"project"`
+	Project *flowv1.Project `json:"project"`
 }
 
 func (h *CreateProjectHandler) Validate(_ context.Context, req *CreateProjectRequest) *errorModels.ServerError {
