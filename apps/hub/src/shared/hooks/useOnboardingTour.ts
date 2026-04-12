@@ -1,24 +1,24 @@
 import { useEffect, useRef } from 'react';
-import Shepherd from 'shepherd.js';
+import Shepherd, { type StepOptions, type Tour } from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
 import { useUserStore } from '../stores/userStore';
 import api from '../lib/api';
 
-const TOUR_STEPS: any[] = [
+const TOUR_STEPS: StepOptions[] = [
   {
     id: 'welcome',
     text: 'Welcome to rtylr! Let me show you around your command center.',
     buttons: [
       {
         text: 'Skip tour',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.complete();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.next();
         },
       },
@@ -31,14 +31,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.next();
         },
       },
@@ -51,14 +51,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.next();
         },
       },
@@ -71,14 +71,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.next();
         },
       },
@@ -91,14 +91,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Next',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.next();
         },
       },
@@ -111,14 +111,14 @@ const TOUR_STEPS: any[] = [
     buttons: [
       {
         text: 'Back',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.back();
         },
         secondary: true,
       },
       {
         text: 'Done',
-        action: function (this: any) {
+        action: function (this: Tour) {
           this.complete();
         },
       },
@@ -128,7 +128,7 @@ const TOUR_STEPS: any[] = [
 
 export function useOnboardingTour() {
   const { user } = useUserStore();
-  const tourRef = useRef<any>(null);
+  const tourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
     if (!user || user.onboarded) return;

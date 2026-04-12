@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 interface MenuItem {
   _id: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Category {
@@ -18,7 +18,7 @@ interface Category {
   name: string;
   type: 'category';
   menuItems: MenuItem[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Banner {
@@ -37,7 +37,7 @@ export const useGetAllMenus = (restaurantId: string | null) => {
       if (data?.message === 'No menus found') {
         return [];
       }
-      return z.array(z.any()).parse(Array.isArray(data) ? data : []);
+      return z.array(menuSchema).parse(Array.isArray(data) ? data : []);
     },
     enabled: !!restaurantId,
   });
@@ -138,7 +138,7 @@ export const useCreateMenu = () => {
       queryClient.invalidateQueries({ queryKey: ['menus', variables.restaurantId] });
       toast.success('Menu created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to create menu');
       console.error('Error creating menu:', error);
     },
@@ -161,7 +161,7 @@ export const useSetActiveMenu = () => {
       queryClient.invalidateQueries({ queryKey: ['menus'] });
       toast.success('Active menu updated');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to set active menu');
       console.error('Error setting active menu:', error);
     },
@@ -173,15 +173,21 @@ export const useAddMenuItem = () => {
   const { items, setItems } = useMenuStore();
 
   return useMutation({
-    mutationFn: async ({ categoryId, item }: { categoryId: string; item: Record<string, any> }) => {
+    mutationFn: async ({
+      categoryId,
+      item,
+    }: {
+      categoryId: string;
+      item: Record<string, unknown>;
+    }) => {
       const formData = new FormData();
       Object.keys(item).forEach((key) => {
         if (Array.isArray(item[key])) {
-          item[key].forEach((subItem: any, index: number) => {
-            formData.append(`${key}[${index}]`, subItem);
+          (item[key] as unknown[]).forEach((subItem: unknown, index: number) => {
+            formData.append(`${key}[${index}]`, subItem as string | Blob);
           });
         } else {
-          formData.append(key, item[key]);
+          formData.append(key, item[key] as string | Blob);
         }
       });
 
@@ -208,7 +214,7 @@ export const useAddMenuItem = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Item added successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to add item');
       console.error('Error adding menu item:', error);
     },
@@ -238,7 +244,7 @@ export const useEditMenuItem = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Item updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to update item');
       console.error('Error editing menu item:', error);
     },
@@ -268,7 +274,7 @@ export const useDeleteMenuItem = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Item deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to delete item');
       console.error('Error deleting menu item:', error);
     },
@@ -289,7 +295,7 @@ export const useAddCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Category added successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to add category');
       console.error('Error adding category:', error);
     },
@@ -321,7 +327,7 @@ export const useEditCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Category updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to update category');
       console.error('Error editing category:', error);
     },
@@ -345,7 +351,7 @@ export const useDeleteCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Category deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to delete category');
       console.error('Error deleting category:', error);
       throw error;
@@ -373,7 +379,7 @@ export const useRenameCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Category renamed successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to rename category');
       console.error('Error renaming category:', error);
     },
@@ -399,7 +405,7 @@ export const useAddBanner = () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       toast.success('Banner added successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to add banner');
       console.error('Error adding banner:', error);
     },

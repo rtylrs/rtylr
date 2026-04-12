@@ -43,7 +43,7 @@ function QrCode() {
   useEffect(() => {
     if (qrOptions.logoImage) {
       const img = new Image();
-      img.src = user.logo;
+      img.src = user?.logo ?? '';
       img.onload = () => setIsLogoLoaded(true);
       img.onerror = () => {
         alert('Failed to load logo image.');
@@ -70,7 +70,7 @@ function QrCode() {
                 <QrCodeTemplate
                   {...template}
                   url={qrOptions.url}
-                  logo={user.logo}
+                  logo={user?.logo ?? ''}
                   setQrOptions={() => {
                     setQrOptions({
                       ...qrOptions,
