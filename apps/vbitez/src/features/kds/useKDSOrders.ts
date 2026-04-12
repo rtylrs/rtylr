@@ -1,6 +1,8 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
+import { kdsOrderSchema } from '../../shared/schemas/kdsOrders';
 
 export interface KDSOrder {
   id: string;
@@ -23,20 +25,20 @@ export function useKDSOrders(station?: string) {
     try {
       const res = await unwrap(posService.getKDSOrders(station));
       const raw = res?.orders ?? res?.data ?? [];
-      const mapped: KDSOrder[] = (Array.isArray(raw) ? raw : []).map((o: any) => ({
-        id: String(o.id ?? Math.random().toString(36).slice(2)),
-        number: String(o.number ?? o.id ?? ''),
-        station: o.station ?? 'Kitchen',
-        items: Array.isArray(o.items)
-          ? o.items.map((it: any) => ({
-              name: it.name ?? 'Item',
-              qty: Number(it.qty ?? 1),
-              course: it.course,
-              notes: it.notes,
-            }))
-          : [],
-        status: (o.status ?? 'new') as KDSOrder['status'],
-        createdAt: o.createdAt ?? new Date().toISOString(),
+      const parsed = z.array(kdsOrderSchema).parse(Array.isArray(raw) ? raw : []);
+      const mapped: KDSOrder[] = parsed.map((o) => ({
+        id: o.id,
+        number: o.number ?? o.id,
+        station: o.station,
+        items: o.items.map((it) => ({
+          name: it.name,
+          qty: it.qty,
+          course: it.course ?? undefined,
+          notes: it.notes ?? undefined,
+        })),
+        status: o.status,
+        createdAt: o.createdAt,
+        elapsedSeconds: o.elapsedSeconds,
       }));
       setOrders(mapped);
     } catch (e: any) {
