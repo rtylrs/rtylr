@@ -14,6 +14,7 @@ import {
   Tag as TagIcon,
 } from 'lucide-react';
 import { useCustomers, useUpdateCustomer } from './useCustomers';
+import { type Customer } from '../../shared/schemas/customers';
 import { getTier, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
@@ -22,7 +23,7 @@ const ACCENT = '#3b82f6';
 
 const tierFilters: Array<Tier | 'All'> = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze'];
 
-function ExpandedDetail({ customer, onView }: { customer: any; onView: () => void }) {
+function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () => void }) {
   const tier = getTier(customer.loyaltyPoints);
   return (
     <motion.tr

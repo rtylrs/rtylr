@@ -22,7 +22,7 @@ const BankFeeds: React.FC = () => {
   const [selected, setSelected] = useState<string | undefined>();
   const { data: transactions = [] } = useBankTransactions(selected);
 
-  const total = accounts.reduce((s: any, a: any) => s + a.balance, 0);
+  const total = accounts.reduce((s: number, a) => s + (a.balance ?? 0), 0);
 
   return (
     <motion.div
@@ -58,8 +58,8 @@ const BankFeeds: React.FC = () => {
               gap: 14,
             }}
           >
-            {accounts.map((a: any) => {
-              const Icon = iconFor[a.type] ?? Building2;
+            {accounts.map((a) => {
+              const Icon = iconFor[a.type ?? ''] ?? Building2;
               return (
                 <button
                   key={a.id}
@@ -114,7 +114,7 @@ const BankFeeds: React.FC = () => {
                     style={{
                       fontSize: 20,
                       fontWeight: 700,
-                      color: a.balance < 0 ? '#ef4444' : 'var(--hub-text)',
+                      color: (a.balance ?? 0) < 0 ? '#ef4444' : 'var(--hub-text)',
                       marginTop: 6,
                     }}
                   >
@@ -158,7 +158,7 @@ const BankFeeds: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((t: any) => (
+                {transactions.map((t) => (
                   <tr key={t.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                     <td
                       style={{ padding: '10px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
@@ -179,10 +179,10 @@ const BankFeeds: React.FC = () => {
                         fontSize: 13,
                         fontWeight: 600,
                         textAlign: 'right',
-                        color: t.amount >= 0 ? ACCENT : 'var(--hub-text)',
+                        color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
                       }}
                     >
-                      <MoneyDisplay amount={t.amount} signed />
+                      <MoneyDisplay amount={t.amount ?? 0} signed />
                     </td>
                     <td style={{ padding: '10px 16px', fontSize: 11 }}>
                       <span

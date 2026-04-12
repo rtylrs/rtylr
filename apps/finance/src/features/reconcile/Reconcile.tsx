@@ -18,7 +18,7 @@ const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
   const [matches, setMatches] = useState<Record<string, string>>({});
 
-  const unmatched = transactions.filter((t: any) => !t.matched && !matches[t.id]);
+  const unmatched = transactions.filter((t) => !t.matched && !matches[t.id ?? '']);
 
   const match = (txId: string, candidateId: string) => {
     setMatches((prev) => ({ ...prev, [txId]: candidateId }));
@@ -42,7 +42,7 @@ const Reconcile: React.FC = () => {
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {unmatched.map((t: any) => (
+        {unmatched.map((t) => (
           <div key={t.id} style={{ ...cardStyle, padding: 16 }}>
             <div
               style={{
@@ -64,22 +64,22 @@ const Reconcile: React.FC = () => {
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
-                  color: t.amount >= 0 ? ACCENT : 'var(--hub-text)',
+                  color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
                 }}
               >
-                <MoneyDisplay amount={t.amount} signed />
+                <MoneyDisplay amount={t.amount ?? 0} signed />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {CANDIDATES.filter(
                 (c) =>
-                  Math.abs(c.amount) === Math.abs(t.amount) ||
-                  Math.abs(Math.abs(c.amount) - Math.abs(t.amount)) < 500
+                  Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
+                  Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
               ).map((c) => (
                 <button
                   key={c.id}
                   style={{ ...ghostBtn, padding: '6px 12px' }}
-                  onClick={() => match(t.id, c.id)}
+                  onClick={() => match(t.id ?? '', c.id)}
                 >
                   <Link2 size={12} /> {c.label}
                 </button>

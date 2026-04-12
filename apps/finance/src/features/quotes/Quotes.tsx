@@ -19,7 +19,7 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 
 const Quotes: React.FC = () => {
   const { data = [], isLoading } = useQuotes();
-  const total = data.reduce((s: any, q: any) => s + q.amount, 0);
+  const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
 
   return (
     <motion.div
@@ -76,7 +76,7 @@ const Quotes: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((q: any) => (
+              {data.map((q) => (
                 <tr key={q.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td
                     style={{
@@ -101,7 +101,7 @@ const Quotes: React.FC = () => {
                         fontWeight: 600,
                         padding: '3px 10px',
                         borderRadius: 20,
-                        ...STATUS_STYLE[q.status],
+                        ...STATUS_STYLE[q.status ?? ''],
                       }}
                     >
                       {q.status}

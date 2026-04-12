@@ -2,14 +2,14 @@ import React from 'react';
 import { motion } from 'motion/react';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import AccountTypeBadge from '../../shared/components/AccountTypeBadge';
+import AccountTypeBadge, { type AccountType } from '../../shared/components/AccountTypeBadge';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBalanceSheet } from './useBalanceSheet';
 import { cardStyle, ACCENT } from '../../shared/lib/tokens';
 
 const Section: React.FC<{
   title: string;
-  rows: { label: string; amount: number; type: any }[];
+  rows: { label: string; amount: number; type: string }[];
 }> = ({ title, rows }) => {
   const total = rows.reduce((s, r) => s + r.amount, 0);
   return (
@@ -25,7 +25,7 @@ const Section: React.FC<{
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--hub-text)' }}>
           {title}
         </h3>
-        <AccountTypeBadge type={rows[0]?.type ?? 'asset'} />
+        <AccountTypeBadge type={(rows[0]?.type ?? 'asset') as AccountType} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {rows.map((r) => (
@@ -81,9 +81,9 @@ const BalanceSheet: React.FC = () => {
     );
   }
 
-  const totalAssets = data.assets.reduce((s: any, r: any) => s + r.amount, 0);
-  const totalLiab = data.liabilities.reduce((s: any, r: any) => s + r.amount, 0);
-  const totalEquity = data.equity.reduce((s: any, r: any) => s + r.amount, 0);
+  const totalAssets = data.assets.reduce((s: number, r) => s + r.amount, 0);
+  const totalLiab = data.liabilities.reduce((s: number, r) => s + r.amount, 0);
+  const totalEquity = data.equity.reduce((s: number, r) => s + r.amount, 0);
 
   return (
     <motion.div
