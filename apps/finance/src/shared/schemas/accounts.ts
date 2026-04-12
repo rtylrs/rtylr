@@ -7,6 +7,14 @@ export const bankAccountSchema = z
     type: z.string().optional().nullable(),
     balance: z.number().optional().nullable(),
     currency: z.string().optional().nullable(),
+    institution: z.string().optional().nullable(),
+    mask: z.string().optional().nullable(),
+    // transaction fields (used when parsed as bank transactions)
+    matched: z.boolean().optional(),
+    description: z.string().optional().nullable(),
+    date: z.string().optional().nullable(),
+    category: z.string().optional().nullable(),
+    amount: z.number().optional().nullable(),
   })
   .passthrough();
 

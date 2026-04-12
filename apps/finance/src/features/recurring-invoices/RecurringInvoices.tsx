@@ -70,7 +70,7 @@ const RecurringInvoices: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((r: any) => (
+              {data.map((r) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   <td
                     style={{
@@ -85,7 +85,7 @@ const RecurringInvoices: React.FC = () => {
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
                   >
-                    {cadenceLabel[r.cadence]}
+                    {cadenceLabel[r.cadence ?? '']}
                   </td>
                   <td
                     style={{

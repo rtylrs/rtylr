@@ -468,9 +468,9 @@ const Segments: React.FC = () => {
   const [builderOpen, setBuilderOpen] = useState(false);
   const segments: Segment[] = useMemo(() => {
     if (!fetchedSegments) return [];
-    return fetchedSegments.map((s: any) => ({
+    return fetchedSegments.map((s) => ({
       ...s,
-      icon: iconMap[s.icon] ?? Users,
+      icon: iconMap[s.icon ?? ''] ?? Users,
     }));
   }, [fetchedSegments]);
 

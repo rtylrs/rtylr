@@ -40,7 +40,7 @@ const ImportCustomers: React.FC = () => {
 
   const handleImport = () => {
     const payload = rows.map((r) => {
-      const o: any = {};
+      const o: Record<string, string> = {};
       REQUIRED.forEach((req) => {
         const col = mapping[req];
         if (col) {
