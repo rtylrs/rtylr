@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { supportService } from '../../shared/services/supportService';
+import { conversationSchema } from '../../shared/schemas/conversations';
 
 export function useConversations(params?: {
   status?: string;
@@ -9,14 +11,21 @@ export function useConversations(params?: {
 }) {
   return useQuery({
     queryKey: ['conversations', params],
-    queryFn: () => unwrap(supportService.getConversations(params)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getConversations(params));
+      const raw = res ?? [];
+      return z.array(conversationSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useConversation(id: number) {
   return useQuery({
     queryKey: ['conversation', id],
-    queryFn: () => unwrap(supportService.getConversation(id)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getConversation(id));
+      return conversationSchema.parse(res);
+    },
     enabled: !!id,
   });
 }

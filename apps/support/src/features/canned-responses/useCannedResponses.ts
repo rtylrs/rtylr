@@ -1,18 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { supportService } from '../../shared/services/supportService';
+import { cannedResponseSchema } from '../../shared/schemas/cannedResponses';
 
 export function useCannedResponses(params?: { search?: string }) {
   return useQuery({
     queryKey: ['canned-responses', params],
-    queryFn: () => unwrap(supportService.getCannedResponses(params)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getCannedResponses(params));
+      const raw = res ?? [];
+      return z.array(cannedResponseSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useCannedResponse(id: number) {
   return useQuery({
     queryKey: ['canned-response', id],
-    queryFn: () => unwrap(supportService.getCannedResponse(id)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getCannedResponse(id));
+      return cannedResponseSchema.parse(res);
+    },
     enabled: !!id,
   });
 }

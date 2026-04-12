@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { supportService } from '../../shared/services/supportService';
+import { ticketSchema, ticketMessageSchema } from '../../shared/schemas/tickets';
 
 export function useTickets(params?: {
   status?: string;
@@ -11,14 +13,21 @@ export function useTickets(params?: {
 }) {
   return useQuery({
     queryKey: ['tickets', params],
-    queryFn: () => unwrap(supportService.getTickets(params)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getTickets(params));
+      const raw = res ?? [];
+      return z.array(ticketSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
 export function useTicket(id: number) {
   return useQuery({
     queryKey: ['ticket', id],
-    queryFn: () => unwrap(supportService.getTicket(id)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getTicket(id));
+      return ticketSchema.parse(res);
+    },
     enabled: !!id,
   });
 }
@@ -26,7 +35,11 @@ export function useTicket(id: number) {
 export function useTicketMessages(ticketId: number) {
   return useQuery({
     queryKey: ['ticket-messages', ticketId],
-    queryFn: () => unwrap(supportService.getTicketMessages(ticketId)),
+    queryFn: async () => {
+      const res = await unwrap(supportService.getTicketMessages(ticketId));
+      const raw = res ?? [];
+      return z.array(ticketMessageSchema).parse(Array.isArray(raw) ? raw : []);
+    },
     enabled: !!ticketId,
   });
 }

@@ -82,7 +82,7 @@ describe('useCustomerTickets', () => {
   });
 
   it('fetches tickets for a customer', async () => {
-    const tickets = [{ id: 10, subject: 'Issue' }];
+    const tickets = [{ id: 10, subject: 'Issue', status: 'open' }];
     (supportService.getCustomerTickets as any).mockResolvedValue(tickets);
     const { result } = renderHook(() => useCustomerTickets(3), {
       wrapper: createWrapper(),
