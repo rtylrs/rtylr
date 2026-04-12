@@ -55,13 +55,15 @@ describe('useTodayAppointments', () => {
   });
 
   it('fetches today appointments', async () => {
-    const appts = [{ id: 1, time: '10:00' }];
+    const appts = [{ id: 1, startTime: '10:00', endTime: '11:00' }];
     (bookService.getTodayAppointments as any).mockResolvedValue(appts);
     const { result } = renderHook(() => useTodayAppointments(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(appts);
+    expect(result.current.data).toEqual([
+      { id: '1', startTime: '10:00', endTime: '11:00', status: 'pending' },
+    ]);
   });
 
   it('starts in loading state', () => {

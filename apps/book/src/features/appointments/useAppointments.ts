@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import type {
   CreateAppointmentRequest,
   UpdateAppointmentRequest,
 } from '@voxire/contracts/book/v1/appointments';
 import { bookService } from '../../shared/services/bookService';
+import { appointmentSchema } from '../../shared/schemas/appointments';
 
 export interface AppointmentFilters {
   search?: string;
@@ -17,7 +19,11 @@ export interface AppointmentFilters {
 export function useAppointments(filters?: AppointmentFilters) {
   return useQuery({
     queryKey: ['appointments', filters],
-    queryFn: () => unwrap(bookService.getAppointments(filters)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getAppointments(filters));
+      const raw = (res as any)?.appointments ?? res;
+      return z.array(appointmentSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 
@@ -25,7 +31,10 @@ export function useAppointment(id: number | undefined) {
   return useQuery({
     queryKey: ['appointment', id],
     enabled: !!id,
-    queryFn: () => unwrap(bookService.getAppointment(id!)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getAppointment(id!));
+      return appointmentSchema.parse(res);
+    },
   });
 }
 

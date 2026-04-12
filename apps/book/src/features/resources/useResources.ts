@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import type {
   CreateResourceRequest,
   UpdateResourceRequest,
 } from '@voxire/contracts/book/v1/resources';
 import { bookService } from '../../shared/services/bookService';
+import { resourceSchema } from '../../shared/schemas/resources';
 
 export interface ResourceFilters {
   search?: string;
@@ -16,7 +18,11 @@ export interface ResourceFilters {
 export function useResources(filters?: ResourceFilters) {
   return useQuery({
     queryKey: ['resources', filters],
-    queryFn: () => unwrap(bookService.getResources(filters)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getResources(filters));
+      const raw = (res as any)?.resources ?? res;
+      return z.array(resourceSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }
 

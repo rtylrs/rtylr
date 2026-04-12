@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { bookService } from '../../shared/services/bookService';
+import { calendarEventSchema } from '../../shared/schemas/calendar';
 
 export interface CalendarFilters {
   start?: string;
@@ -11,6 +13,10 @@ export interface CalendarFilters {
 export function useCalendarEvents(filters?: CalendarFilters) {
   return useQuery({
     queryKey: ['calendar', filters],
-    queryFn: () => unwrap(bookService.getCalendarEvents(filters)),
+    queryFn: async () => {
+      const res = await unwrap(bookService.getCalendarEvents(filters));
+      const raw = (res as any)?.events ?? res;
+      return z.array(calendarEventSchema).parse(Array.isArray(raw) ? raw : []);
+    },
   });
 }

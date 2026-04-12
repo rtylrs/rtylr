@@ -37,7 +37,7 @@ describe('useCustomers', () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual([{ id: '1', name: 'Alice' }]);
   });
 
   it('passes filters to the service', async () => {
@@ -71,7 +71,7 @@ describe('useCustomer', () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(cust);
+    expect(result.current.data).toEqual({ id: '3', name: 'Bob' });
   });
 
   it('does not fetch when id is undefined', () => {
