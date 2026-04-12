@@ -1,24 +1,19 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { notificationSchema } from '../../schemas/notifications';
 
-export interface Notification {
-  id: string;
-  title: string;
-  body: string;
-  app: 'hub' | 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow';
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  createdAt: string;
-  href?: string;
-}
+export type { Notification } from '../../schemas/notifications';
+type Notification = z.infer<typeof notificationSchema>;
 
 export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/notifications'));
-      return (res?.notifications ?? res) as Notification[];
+      const raw = res?.notifications ?? res;
+      return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
     },
     staleTime: 15_000,
   });

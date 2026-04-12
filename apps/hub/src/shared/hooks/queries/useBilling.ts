@@ -1,7 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import type { BillingSummary, Invoice as InvoiceContract } from '@voxire/contracts/hub/v1/billing';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { billingSummarySchema, invoiceSchema } from '../../schemas/billing';
+
+export type { Invoice } from '../../schemas/billing';
 
 export interface BillingInfo {
   plan: string;
@@ -16,16 +19,6 @@ export interface BillingInfo {
     apiCalls: { used: number; limit: number };
     storageGb: { used: number; limit: number };
   };
-}
-
-export interface Invoice {
-  id: string;
-  number: string;
-  amount: number;
-  currency: string;
-  status: 'paid' | 'open' | 'void' | 'refunded';
-  createdAt: string;
-  pdfUrl?: string;
 }
 
 const PLAN_LIMITS: Record<
@@ -48,18 +41,18 @@ export const useBilling = () => {
     queryKey: ['billing'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/billing/summary'));
-      const raw = res as BillingSummary | undefined;
-      const plan = raw?.plan || 'free';
+      const raw = billingSummarySchema.parse(res ?? {});
+      const plan = raw.plan || 'free';
       const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 
       return {
         plan,
-        status: raw?.status || 'active',
-        renewsAt: raw?.nextBillingDate || '',
+        status: raw.status || 'active',
+        renewsAt: raw.nextBillingDate || '',
         amount: PLAN_PRICES[plan] || 0,
         currency: 'USD',
         usage: {
-          seats: { used: raw?.currentUsage || 1, limit: limits.seats },
+          seats: { used: raw.currentUsage || 1, limit: limits.seats },
           orders: { used: 0, limit: limits.orders },
           apiCalls: { used: 0, limit: limits.apiCalls },
           storageGb: { used: 0, limit: limits.storageGb },
@@ -70,11 +63,12 @@ export const useBilling = () => {
 };
 
 export const useInvoices = () => {
-  return useQuery<Invoice[]>({
+  return useQuery({
     queryKey: ['invoices'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/billing/invoices'));
-      return (res?.invoices ?? res ?? []) as Invoice[];
+      const raw = res?.invoices ?? res ?? [];
+      return z.array(invoiceSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 };

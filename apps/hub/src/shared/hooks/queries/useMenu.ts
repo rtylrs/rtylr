@@ -1,7 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { menuSchema } from '../../schemas/menu';
 import { useMenuStore } from '../../stores/menuStore';
 import { toast } from 'sonner';
 
@@ -35,7 +37,7 @@ export const useGetAllMenus = (restaurantId: string | null) => {
       if (data?.message === 'No menus found') {
         return [];
       }
-      return data;
+      return z.array(z.any()).parse(Array.isArray(data) ? data : []);
     },
     enabled: !!restaurantId,
   });
@@ -67,7 +69,7 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
           params: { disabled },
         })
       );
-      return response;
+      return menuSchema.parse(response);
     },
     enabled: !!userId,
   });
@@ -95,7 +97,8 @@ export const useGetMenuById = (menuId: string | null) => {
   const query = useQuery({
     queryKey: ['menu', menuId],
     queryFn: async () => {
-      return unwrap(safe.get(`/menu/${menuId}`));
+      const response = await unwrap(safe.get(`/menu/${menuId}`));
+      return menuSchema.parse(response);
     },
     enabled: !!menuId,
   });

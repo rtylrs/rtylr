@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
+import { businessSchema } from '../../schemas/business';
 import { useUserStore } from '../../stores/userStore';
 import { toast } from 'sonner';
 
@@ -9,7 +10,7 @@ export const useGetBusiness = (businessId: string | null) => {
     queryKey: ['business', businessId],
     queryFn: async () => {
       const response = await unwrap(safe.get(`/business/${businessId}`));
-      return response.data;
+      return businessSchema.parse(response.data);
     },
     enabled: !!businessId,
   });

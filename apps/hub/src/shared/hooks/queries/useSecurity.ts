@@ -1,40 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
+import { securityStateSchema } from '../../schemas/security';
 import { toast } from 'sonner';
 
-export interface Session {
-  id: string;
-  device: string;
-  browser: string;
-  location: string;
-  ip: string;
-  current: boolean;
-  lastActive: string;
-}
-
-export interface TrustedDevice {
-  id: string;
-  name: string;
-  lastSeen: string;
-  os: string;
-}
-
-export interface SecurityState {
-  twoFactorEnabled: boolean;
-  twoFactorMethod: 'app' | 'sms' | null;
-  sessions: Session[];
-  trustedDevices: TrustedDevice[];
-  passwordChangedAt?: string;
-  ssoEnabled: boolean;
-}
+export type { SecurityState, Session, TrustedDevice } from '../../schemas/security';
 
 export const useSecurity = () => {
-  return useQuery<SecurityState>({
+  return useQuery({
     queryKey: ['security'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/security'));
-      return res as SecurityState;
+      return securityStateSchema.parse(res);
     },
   });
 };

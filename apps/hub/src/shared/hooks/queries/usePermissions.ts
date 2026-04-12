@@ -1,30 +1,21 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { permissionMatrixSchema, customRoleSchema } from '../../schemas/permissions';
 import { toast } from 'sonner';
 
+export type { PermissionDef, PermissionMatrix, CustomRole } from '../../schemas/permissions';
 export type Role = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string;
 
-export interface PermissionDef {
-  key: string;
-  label: string;
-  group: string;
-  description?: string;
-}
-
-export interface PermissionMatrix {
-  permissions: PermissionDef[];
-  roles: Role[];
-  // role key -> permission key -> boolean
-  values: Record<Role, Record<string, boolean>>;
-}
+type PermissionMatrix = z.infer<typeof permissionMatrixSchema>;
 
 export const usePermissions = () => {
   return useQuery<PermissionMatrix>({
     queryKey: ['permissions'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/permissions'));
-      return res as PermissionMatrix;
+      return permissionMatrixSchema.parse(res);
     },
   });
 };
@@ -57,20 +48,13 @@ export const useUpdatePermission = () => {
   });
 };
 
-export interface CustomRole {
-  id: string;
-  name: string;
-  color: string;
-  permissions: string[];
-  members: number;
-}
-
 export const useCustomRoles = () => {
-  return useQuery<CustomRole[]>({
+  return useQuery({
     queryKey: ['custom-roles'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/roles'));
-      return (res?.roles ?? res) as CustomRole[];
+      const raw = res?.roles ?? res;
+      return z.array(customRoleSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 };

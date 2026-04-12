@@ -1,24 +1,20 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { safe } from '../../lib/api';
+import { apiKeySchema } from '../../schemas/apiKeys';
 import { toast } from 'sonner';
 
-export interface ApiKey {
-  id: string;
-  name: string;
-  prefix: string;
-  lastFour: string;
-  createdAt: string;
-  lastUsedAt?: string;
-  scopes: string[];
-}
+export type { ApiKey } from '../../schemas/apiKeys';
+type ApiKey = z.infer<typeof apiKeySchema>;
 
 export const useApiKeys = () => {
   return useQuery<ApiKey[]>({
     queryKey: ['api-keys'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/api-keys'));
-      return (res?.keys ?? res) as ApiKey[];
+      const raw = res?.keys ?? res;
+      return z.array(apiKeySchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 };

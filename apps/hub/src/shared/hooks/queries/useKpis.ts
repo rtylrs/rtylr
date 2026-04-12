@@ -1,28 +1,16 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
+import { hubKpisSchema } from '../../schemas/kpis';
 
-export interface HubKpis {
-  revenueToday: number;
-  revenueTrendPct: number;
-  ordersToday: number;
-  ordersTrendPct: number;
-  headcount: number;
-  activeStaff: number;
-  lowStockItems: number;
-  openInvoices: number;
-  newCustomers: number;
-  apiHealthPct: number;
-  revenueSeries: number[];
-  ordersSeries: number[];
-}
+export type { HubKpis } from '../../schemas/kpis';
 
 export const useKpis = () => {
-  return useQuery<HubKpis>({
+  return useQuery({
     queryKey: ['hub-kpis'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/hub/kpis'));
-      return res as HubKpis;
+      return hubKpisSchema.parse(res);
     },
     staleTime: 30_000,
   });
