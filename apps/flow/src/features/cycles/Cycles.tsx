@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
 import { useCycles, useCreateCycle } from './useCycles';
+import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 
@@ -195,7 +196,7 @@ const Cycles: React.FC = () => {
   );
 };
 
-const CycleSection: React.FC<{ title: string; cycles: any[] }> = ({ title, cycles }) => (
+const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, cycles }) => (
   <section>
     <h3
       className="text-[11px] font-semibold uppercase tracking-wider mb-3"

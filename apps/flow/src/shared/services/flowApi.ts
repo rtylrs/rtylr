@@ -78,7 +78,7 @@ export interface ApiView {
   id: string;
   name: string;
   icon: string;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   groupBy?: string;
   sortBy?: string;
   sortDir?: string;
@@ -113,6 +113,10 @@ export interface ApiRoadmap {
   progress: number;
   tasks: ApiTask[];
   doneCount: number;
+  workspaceId?: string;
+  description?: string;
+  memberAvatars?: string[];
+  taskCount?: number;
 }
 
 export interface ApiTaskActivity {
