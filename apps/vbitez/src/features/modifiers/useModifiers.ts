@@ -1,23 +1,18 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { posService } from '../../shared/services/posService';
 import type { ModifierGroup } from '../../shared/types/pos';
 import { modifierGroupSchema } from '../../shared/schemas/modifiers';
 
 export function useModifiers() {
-  const [groups, setGroups] = useState<ModifierGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const query = useQuery({
+    queryKey: ['pos-modifiers'],
+    queryFn: async (): Promise<ModifierGroup[]> => {
       const res = await unwrap(posService.getModifiers());
       const raw = res?.groups ?? res?.data ?? [];
       const parsed = z.array(modifierGroupSchema).parse(Array.isArray(raw) ? raw : []);
-      const mapped: ModifierGroup[] = parsed.map((g) => ({
+      return parsed.map((g) => ({
         id: g.id,
         name: g.name,
         min: g.min,
@@ -31,18 +26,14 @@ export function useModifiers() {
           defaultSelected: m.defaultSelected,
         })),
       }));
-      setGroups(mapped);
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? e?.message ?? 'Failed to load modifiers');
-      setGroups([]);
-    } finally {
-      setLoading(false);
-    }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    groups: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error ? String(query.error) : null,
+    reload: query.refetch,
   };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  return { groups, loading, error, reload: load };
 }

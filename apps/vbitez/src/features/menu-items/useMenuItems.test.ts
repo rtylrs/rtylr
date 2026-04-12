@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMenuItems } from './useMenuItems';
 
 const mockPosService = {
@@ -16,6 +18,14 @@ vi.mock('../../shared/services/posService', () => ({
   },
 }));
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
+
 describe('useMenuItems', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -28,7 +38,7 @@ describe('useMenuItems', () => {
       ],
     });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.items).toHaveLength(3);
@@ -45,7 +55,7 @@ describe('useMenuItems', () => {
       ],
     });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.categories).toEqual(['Drinks', 'Mains', 'Sides']);
@@ -54,7 +64,7 @@ describe('useMenuItems', () => {
   it('handles error state', async () => {
     mockPosService.getMenuItems.mockRejectedValue(new Error('Failed to load'));
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.error).toBe('Failed to load');
@@ -66,7 +76,7 @@ describe('useMenuItems', () => {
       data: [{ id: '1', name: 'Pizza', price: 15 }],
     });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.items).toHaveLength(1);
@@ -78,7 +88,7 @@ describe('useMenuItems', () => {
       items: [{ id: '1' }],
     });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.items[0].name).toBe('Item');
@@ -90,7 +100,7 @@ describe('useMenuItems', () => {
   it('reload function refetches data', async () => {
     mockPosService.getMenuItems.mockResolvedValue({ items: [] });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     mockPosService.getMenuItems.mockResolvedValue({
@@ -98,17 +108,17 @@ describe('useMenuItems', () => {
     });
 
     await act(async () => {
-      await result.current.reload();
+      result.current.reload();
+      await waitFor(() => expect(result.current.items).toHaveLength(1));
     });
 
-    expect(result.current.items).toHaveLength(1);
     expect(result.current.items[0].name).toBe('New Item');
   });
 
   it('handles non-array response gracefully', async () => {
     mockPosService.getMenuItems.mockResolvedValue({ items: 'invalid' });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.items).toEqual([]);
@@ -122,7 +132,7 @@ describe('useMenuItems', () => {
       ],
     });
 
-    const { result } = renderHook(() => useMenuItems());
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.items[0].available).toBe(false);
