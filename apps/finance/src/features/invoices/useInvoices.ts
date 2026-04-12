@@ -1,18 +1,27 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { financeApi, Invoice } from '../../shared/services/financeApi';
+import { invoiceSchema } from '../../shared/schemas/invoices';
 
 export function useInvoices() {
   return useQuery({
     queryKey: ['invoices'],
-    queryFn: () => unwrap(financeApi.getInvoices()),
+    queryFn: async () => {
+      const res = await unwrap(financeApi.getInvoices());
+      const raw = res ?? [];
+      return z.array(invoiceSchema).parse(Array.isArray(raw) ? raw : []) as Invoice[];
+    },
   });
 }
 
 export function useInvoiceDetail(id: string | undefined) {
   return useQuery({
     queryKey: ['invoice', id],
-    queryFn: () => unwrap(financeApi.getInvoiceDetail(id!)),
+    queryFn: async () => {
+      const res = await unwrap(financeApi.getInvoiceDetail(id!));
+      return invoiceSchema.parse(res) as Invoice;
+    },
     enabled: !!id,
   });
 }

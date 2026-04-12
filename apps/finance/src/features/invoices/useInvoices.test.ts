@@ -44,13 +44,22 @@ describe('useInvoices', () => {
   });
 
   it('fetches invoices on mount', async () => {
-    const data = [{ id: 'inv-1', amount: 500 }];
-    (financeApi.getInvoices as any).mockResolvedValue(data);
+    const input = [
+      {
+        id: 'inv-1',
+        amount: 500,
+        client: 'Acme',
+        dueDate: '2026-05-01',
+        issuedDate: '2026-04-01',
+        status: 'Draft' as const,
+      },
+    ];
+    (financeApi.getInvoices as any).mockResolvedValue(input);
     const { result } = renderHook(() => useInvoices(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual(input);
   });
 
   it('starts in loading state', () => {
@@ -68,7 +77,14 @@ describe('useInvoiceDetail', () => {
   });
 
   it('fetches invoice detail by id', async () => {
-    const inv = { id: 'inv-5', amount: 1200 };
+    const inv = {
+      id: 'inv-5',
+      amount: 1200,
+      client: 'Beta Corp',
+      dueDate: '2026-06-01',
+      issuedDate: '2026-05-01',
+      status: 'Sent' as const,
+    };
     (financeApi.getInvoiceDetail as any).mockResolvedValue(inv);
     const { result } = renderHook(() => useInvoiceDetail('inv-5'), {
       wrapper: createWrapper(),

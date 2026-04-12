@@ -30,7 +30,19 @@ describe('useFinanceDashboard', () => {
   });
 
   it('fetches finance dashboard data', async () => {
-    const data = { totalRevenue: 50000, totalExpenses: 20000 };
+    const data = {
+      totalRevenueMTD: 50000,
+      totalExpensesMTD: 20000,
+      netProfit: 30000,
+      outstandingInvoicesTotal: 5000,
+      outstandingInvoicesCount: 3,
+      totalRevenueMTDChange: '+10%',
+      totalExpensesMTDChange: '-5%',
+      netProfitChange: '+15%',
+      recentTransactions: [],
+      overdueInvoices: [],
+      barData: [],
+    };
     (financeApi.getDashboard as any).mockResolvedValue(data);
     const { result } = renderHook(() => useFinanceDashboard(), {
       wrapper: createWrapper(),

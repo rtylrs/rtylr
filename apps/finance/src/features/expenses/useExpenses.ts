@@ -1,18 +1,30 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { financeApi, Expense, ExpenseCategory } from '../../shared/services/financeApi';
+import { expenseSchema, expenseCategorySchema } from '../../shared/schemas/expenses';
 
 export function useExpenses() {
   return useQuery({
     queryKey: ['expenses'],
-    queryFn: () => unwrap(financeApi.getExpenses()),
+    queryFn: async () => {
+      const res = await unwrap(financeApi.getExpenses());
+      const raw = res ?? [];
+      return z.array(expenseSchema).parse(Array.isArray(raw) ? raw : []) as Expense[];
+    },
   });
 }
 
 export function useExpenseCategories() {
   return useQuery({
     queryKey: ['expense-categories'],
-    queryFn: () => unwrap(financeApi.getExpenseCategories()),
+    queryFn: async () => {
+      const res = await unwrap(financeApi.getExpenseCategories());
+      const raw = res ?? [];
+      return z
+        .array(expenseCategorySchema)
+        .parse(Array.isArray(raw) ? raw : []) as ExpenseCategory[];
+    },
   });
 }
 
