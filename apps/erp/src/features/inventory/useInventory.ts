@@ -1,18 +1,28 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { erpApi } from '../../shared/services/erpApi';
+import { erpApi, InventoryReportItem, LowStockItem } from '../../shared/services/erpApi';
+import { inventoryReportItemSchema, lowStockItemSchema } from '../../shared/schemas/inventory';
 
 export function useInventoryReport() {
   return useQuery({
     queryKey: ['inventory-report'],
-    queryFn: () => unwrap(erpApi.getInventoryReport()),
+    queryFn: async () => {
+      const res = await unwrap(erpApi.getInventoryReport());
+      return z
+        .array(inventoryReportItemSchema)
+        .parse(Array.isArray(res) ? res : []) as InventoryReportItem[];
+    },
   });
 }
 
 export function useLowStock() {
   return useQuery({
     queryKey: ['low-stock'],
-    queryFn: () => unwrap(erpApi.getLowStock()),
+    queryFn: async () => {
+      const res = await unwrap(erpApi.getLowStock());
+      return z.array(lowStockItemSchema).parse(Array.isArray(res) ? res : []) as LowStockItem[];
+    },
   });
 }
 

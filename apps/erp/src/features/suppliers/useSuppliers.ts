@@ -1,11 +1,21 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { erpApi, CreateSupplierInput, UpdateSupplierInput } from '../../shared/services/erpApi';
+import {
+  erpApi,
+  CreateSupplierInput,
+  UpdateSupplierInput,
+  Supplier,
+} from '../../shared/services/erpApi';
+import { supplierSchema } from '../../shared/schemas/suppliers';
 
 export function useSuppliers() {
   return useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => unwrap(erpApi.listSuppliers()),
+    queryFn: async () => {
+      const res = await unwrap(erpApi.listSuppliers());
+      return z.array(supplierSchema).parse(Array.isArray(res) ? res : []) as Supplier[];
+    },
   });
 }
 

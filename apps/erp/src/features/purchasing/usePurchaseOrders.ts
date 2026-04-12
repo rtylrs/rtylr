@@ -1,12 +1,17 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
-import { erpApi } from '../../shared/services/erpApi';
+import { erpApi, PurchaseOrder } from '../../shared/services/erpApi';
+import { purchaseOrderSchema } from '../../shared/schemas/purchaseOrders';
 
 export function usePurchaseOrders() {
   return useQuery({
     queryKey: ['purchase-orders'],
-    queryFn: () => unwrap(erpApi.listPurchaseOrders()),
+    queryFn: async () => {
+      const res = await unwrap(erpApi.listPurchaseOrders());
+      return z.array(purchaseOrderSchema).parse(Array.isArray(res) ? res : []) as PurchaseOrder[];
+    },
   });
 }
 
