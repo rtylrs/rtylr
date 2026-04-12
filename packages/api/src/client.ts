@@ -28,24 +28,75 @@ const getAuthUrl = (appId: string): string => {
   return `${base}?redirect=${appId}`;
 };
 
+// ── snake_case → camelCase converter ──────────────────────────────
+
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function convertKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) {
+    return obj.map(convertKeys);
+  }
+  if (obj !== null && typeof obj === 'object' && !(obj instanceof Date)) {
+    const converted: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      converted[snakeToCamel(key)] = convertKeys(value);
+    }
+    return converted;
+  }
+  return obj;
+}
+
+function camelToSnake(str: string): string {
+  return str.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+}
+
+function convertKeysToSnake(obj: unknown): unknown {
+  if (Array.isArray(obj)) {
+    return obj.map(convertKeysToSnake);
+  }
+  if (obj !== null && typeof obj === 'object' && !(obj instanceof Date)) {
+    const converted: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      converted[camelToSnake(key)] = convertKeysToSnake(value);
+    }
+    return converted;
+  }
+  return obj;
+}
+
+// ── Client factory ────────────────────────────────────────────────
+
 export function createApiClient(appId: string): AxiosInstance {
   const client = axios.create({
     baseURL: getBaseUrl(),
   });
 
+  // Auth header
   client.interceptors.request.use(
     (config) => {
       const token = getToken();
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
+      // Convert request body keys from camelCase to snake_case
+      if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
+        config.data = convertKeysToSnake(config.data);
+      }
       return config;
     },
     (error) => Promise.reject(error)
   );
 
+  // Response: convert snake_case keys to camelCase + handle 401
   client.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      if (response.data && typeof response.data === 'object') {
+        response.data = convertKeys(response.data);
+      }
+      return response;
+    },
     (error) => {
       if (error.response?.status === 401) {
         clearTokenCookie();
