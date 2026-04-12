@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -30,19 +32,21 @@ type GetCampaignStatsRequest struct {
 	CampaignID int64 `json:"campaign_id"`
 }
 
-type CampaignStatsPayload struct {
-	CampaignID     int64 `json:"campaign_id"`
-	AudienceCount  int   `json:"audience_count"`
-	SentCount      int   `json:"sent_count"`
-	DeliveredCount int   `json:"delivered_count"`
-	OpenedCount    int   `json:"opened_count"`
-	ClickedCount   int   `json:"clicked_count"`
-	BouncedCount   int   `json:"bounced_count"`
-	FailedCount    int   `json:"failed_count"`
+func newCampaignStatsPayload(s domain.CampaignStats) *crmv1.CampaignStats {
+	return &crmv1.CampaignStats{
+		CampaignId:     s.CampaignID,
+		AudienceCount:  int64(s.AudienceCount),
+		SentCount:      int64(s.SentCount),
+		DeliveredCount: int64(s.DeliveredCount),
+		OpenedCount:    int64(s.OpenedCount),
+		ClickedCount:   int64(s.ClickedCount),
+		BouncedCount:   int64(s.BouncedCount),
+		FailedCount:    int64(s.FailedCount),
+	}
 }
 
 type GetCampaignStatsResponse struct {
-	Stats CampaignStatsPayload `json:"stats"`
+	Stats *crmv1.CampaignStats `json:"stats"`
 }
 
 func (h *GetCampaignStatsHandler) Validate(_ context.Context, req *GetCampaignStatsRequest) *errorModels.ServerError {
@@ -78,16 +82,7 @@ func (h *GetCampaignStatsHandler) Serve(ctx context.Context, req *GetCampaignSta
 	}
 
 	return GetCampaignStatsResponse{
-		Stats: CampaignStatsPayload{
-			CampaignID:     stats.CampaignID,
-			AudienceCount:  stats.AudienceCount,
-			SentCount:      stats.SentCount,
-			DeliveredCount: stats.DeliveredCount,
-			OpenedCount:    stats.OpenedCount,
-			ClickedCount:   stats.ClickedCount,
-			BouncedCount:   stats.BouncedCount,
-			FailedCount:    stats.FailedCount,
-		},
+		Stats: newCampaignStatsPayload(stats),
 	}, nil
 }
 
@@ -102,8 +97,8 @@ type GetCampaignDetailRequest struct {
 }
 
 type GetCampaignDetailResponse struct {
-	Campaign CampaignPayload      `json:"campaign"`
-	Stats    CampaignStatsPayload `json:"stats"`
+	Campaign *crmv1.Campaign      `json:"campaign"`
+	Stats    *crmv1.CampaignStats `json:"stats"`
 }
 
 func (h *GetCampaignDetailHandler) Validate(_ context.Context, req *GetCampaignDetailRequest) *errorModels.ServerError {
@@ -140,15 +135,6 @@ func (h *GetCampaignDetailHandler) Serve(ctx context.Context, req *GetCampaignDe
 
 	return GetCampaignDetailResponse{
 		Campaign: newCampaignPayload(detail.Campaign),
-		Stats: CampaignStatsPayload{
-			CampaignID:     detail.Stats.CampaignID,
-			AudienceCount:  detail.Stats.AudienceCount,
-			SentCount:      detail.Stats.SentCount,
-			DeliveredCount: detail.Stats.DeliveredCount,
-			OpenedCount:    detail.Stats.OpenedCount,
-			ClickedCount:   detail.Stats.ClickedCount,
-			BouncedCount:   detail.Stats.BouncedCount,
-			FailedCount:    detail.Stats.FailedCount,
-		},
+		Stats:    newCampaignStatsPayload(detail.Stats),
 	}, nil
 }

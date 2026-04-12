@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -29,43 +31,22 @@ func CampaignStatusRoutes() []string {
 	return []string{"/crm/campaigns/status"}
 }
 
-type CampaignPayload struct {
-	ID             int64   `json:"id"`
-	OwnerID        int64   `json:"owner_id"`
-	Name           string  `json:"name"`
-	Description    string  `json:"description"`
-	Channel        string  `json:"channel"`
-	Status         string  `json:"status"`
-	SegmentID      *int64  `json:"segment_id"`
-	Subject        string  `json:"subject"`
-	Content        string  `json:"content"`
-	ScheduledAt    *string `json:"scheduled_at"`
-	SentAt         *string `json:"sent_at"`
-	AudienceCount  int     `json:"audience_count"`
-	SentCount      int     `json:"sent_count"`
-	DeliveredCount int     `json:"delivered_count"`
-	OpenedCount    int     `json:"opened_count"`
-	ClickedCount   int     `json:"clicked_count"`
-	CreatedAt      string  `json:"created_at"`
-	UpdatedAt      string  `json:"updated_at"`
-}
-
-func newCampaignPayload(c domain.Campaign) CampaignPayload {
-	p := CampaignPayload{
-		ID:             c.ID,
-		OwnerID:        c.OwnerID,
+func newCampaignPayload(c domain.Campaign) *crmv1.Campaign {
+	p := &crmv1.Campaign{
+		Id:             c.ID,
+		OwnerId:       c.OwnerID,
 		Name:           c.Name,
 		Description:    c.Description,
 		Channel:        c.Channel,
 		Status:         c.Status,
-		SegmentID:      c.SegmentID,
+		SegmentId:      c.SegmentID,
 		Subject:        c.Subject,
 		Content:        c.Content,
-		AudienceCount:  c.AudienceCount,
-		SentCount:      c.SentCount,
-		DeliveredCount: c.DeliveredCount,
-		OpenedCount:    c.OpenedCount,
-		ClickedCount:   c.ClickedCount,
+		AudienceCount:  int64(c.AudienceCount),
+		SentCount:      int64(c.SentCount),
+		DeliveredCount: int64(c.DeliveredCount),
+		OpenedCount:    int64(c.OpenedCount),
+		ClickedCount:   int64(c.ClickedCount),
 		CreatedAt:      c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:      c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -94,7 +75,7 @@ type ListCampaignsRequest struct {
 }
 
 type ListCampaignsResponse struct {
-	Campaigns []CampaignPayload `json:"campaigns"`
+	Campaigns []*crmv1.Campaign `json:"campaigns"`
 }
 
 func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, *errorModels.ServerError) {
@@ -111,7 +92,7 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequ
 		}
 	}
 
-	payloads := make([]CampaignPayload, len(campaigns))
+	payloads := make([]*crmv1.Campaign, len(campaigns))
 	for i, c := range campaigns {
 		payloads[i] = newCampaignPayload(c)
 	}

@@ -5,11 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ─── Get Config ──────────────────────────────────────────────────────────────
@@ -19,18 +20,7 @@ func GetConfigRoutes() []string { return []string{"/pos/loyalty/config"} }
 type GetConfigHandler struct{ Service *application.Service }
 type GetConfigRequest struct{}
 type GetConfigResponse struct {
-	Config *LoyaltyConfigPayload `json:"config"`
-}
-
-type LoyaltyConfigPayload struct {
-	ID              int64   `json:"id"`
-	BusinessID      int64   `json:"business_id"`
-	IsEnabled       bool    `json:"is_enabled"`
-	PointsPerDollar float64 `json:"points_per_dollar"`
-	RedemptionRate  float64 `json:"redemption_rate"`
-	MinRedeemPoints int32   `json:"min_redeem_points"`
-	CreatedAt       string  `json:"created_at"`
-	UpdatedAt       string  `json:"updated_at"`
+	Config *posv1.LoyaltyConfig `json:"config"`
 }
 
 func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetConfigResponse, *errorModels.ServerError) {
@@ -45,17 +35,16 @@ func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetC
 		}
 		return GetConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get loyalty config"}
 	}
-	payload := &LoyaltyConfigPayload{
-		ID:              cfg.ID,
-		BusinessID:      cfg.BusinessID,
+	return GetConfigResponse{Config: &posv1.LoyaltyConfig{
+		Id:              cfg.ID,
+		BusinessId:      cfg.BusinessID,
 		IsEnabled:       cfg.IsEnabled,
 		PointsPerDollar: cfg.PointsPerDollar,
 		RedemptionRate:  cfg.RedemptionRate,
 		MinRedeemPoints: cfg.MinRedeemPoints,
 		CreatedAt:       cfg.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:       cfg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	return GetConfigResponse{Config: payload}, nil
+	}}, nil
 }
 
 // ─── Update Config ───────────────────────────────────────────────────────────
@@ -101,19 +90,7 @@ type ListTransactionsRequest struct {
 	CustomerID int64 `json:"customer_id"`
 }
 type ListTransactionsResponse struct {
-	Transactions []LoyaltyTransactionPayload `json:"transactions"`
-}
-
-type LoyaltyTransactionPayload struct {
-	ID           int64   `json:"id"`
-	BusinessID   int64   `json:"business_id"`
-	CustomerID   int64   `json:"customer_id"`
-	OrderID      *int64  `json:"order_id"`
-	Type         string  `json:"type"`
-	Points       int32   `json:"points"`
-	BalanceAfter int32   `json:"balance_after"`
-	Note         *string `json:"note"`
-	CreatedAt    string  `json:"created_at"`
+	Transactions []*posv1.LoyaltyTransaction `json:"transactions"`
 }
 
 func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, *errorModels.ServerError) {
@@ -128,19 +105,24 @@ func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactio
 	if err != nil {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list transactions"}
 	}
-	payloads := make([]LoyaltyTransactionPayload, len(txns))
+	payloads := make([]*posv1.LoyaltyTransaction, len(txns))
 	for i, t := range txns {
-		payloads[i] = LoyaltyTransactionPayload{
-			ID:           t.ID,
-			BusinessID:   t.BusinessID,
-			CustomerID:   t.CustomerID,
-			OrderID:      t.OrderID,
+		p := &posv1.LoyaltyTransaction{
+			Id:           t.ID,
+			BusinessId:   t.BusinessID,
+			CustomerId:   t.CustomerID,
 			Type:         t.Type,
 			Points:       t.Points,
 			BalanceAfter: t.BalanceAfter,
-			Note:         t.Note,
 			CreatedAt:    t.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		}
+		if t.OrderID != nil {
+			p.OrderId = *t.OrderID
+		}
+		if t.Note != nil {
+			p.Note = *t.Note
+		}
+		payloads[i] = p
 	}
 	return ListTransactionsResponse{Transactions: payloads}, nil
 }

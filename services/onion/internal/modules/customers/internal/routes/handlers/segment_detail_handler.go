@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -31,8 +33,8 @@ type GetSegmentDetailRequest struct {
 }
 
 type GetSegmentDetailResponse struct {
-	Segment   SegmentPayload    `json:"segment"`
-	Customers []CustomerPayload `json:"customers"`
+	Segment   *crmv1.Segment    `json:"segment"`
+	Customers []*crmv1.Customer `json:"customers"`
 }
 
 func (h *GetSegmentDetailHandler) Validate(_ context.Context, req *GetSegmentDetailRequest) *errorModels.ServerError {
@@ -67,7 +69,7 @@ func (h *GetSegmentDetailHandler) Serve(ctx context.Context, req *GetSegmentDeta
 		}
 	}
 
-	custPayloads := make([]CustomerPayload, len(detail.Customers))
+	custPayloads := make([]*crmv1.Customer, len(detail.Customers))
 	for i, c := range detail.Customers {
 		custPayloads[i] = newCustomerPayload(c)
 	}
@@ -91,7 +93,7 @@ type GetSegmentCustomersRequest struct {
 }
 
 type GetSegmentCustomersResponse struct {
-	Customers []CustomerPayload `json:"customers"`
+	Customers []*crmv1.Customer `json:"customers"`
 	Total     int               `json:"total"`
 	Page      int               `json:"page"`
 	PageSize  int               `json:"page_size"`
@@ -137,7 +139,7 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 		}
 	}
 
-	payloads := make([]CustomerPayload, len(customers))
+	payloads := make([]*crmv1.Customer, len(customers))
 	for i, c := range customers {
 		payloads[i] = newCustomerPayload(c)
 	}

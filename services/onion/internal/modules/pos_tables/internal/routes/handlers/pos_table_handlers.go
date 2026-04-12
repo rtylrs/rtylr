@@ -7,35 +7,26 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
-type TablePayload struct {
-	ID         int64  `json:"id"`
-	OwnerID    int64  `json:"owner_id"`
-	LocationID *int64 `json:"location_id"`
-	Label      string `json:"label"`
-	Seats      int    `json:"seats"`
-	Status     string `json:"status"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
-}
-
-func newTablePayload(t domain.Table) TablePayload {
-	return TablePayload{
-		ID:         t.ID,
-		OwnerID:    t.OwnerID,
-		LocationID: t.LocationID,
-		Label:      t.Label,
-		Seats:      t.Seats,
-		Status:     t.Status,
-		CreatedAt:  t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:  t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+func toProtoTable(t domain.Table) *posv1.Table {
+	p := &posv1.Table{
+		Id:        t.ID,
+		OwnerId:   t.OwnerID,
+		LocationId: t.LocationID,
+		Label:     t.Label,
+		Seats:     int32(t.Seats),
+		Status:    t.Status,
+		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+	return p
 }
 
 // ─── List ─────────────────────────────────────────────────────────────────────
@@ -45,7 +36,7 @@ func TableListRoutes() []string { return []string{"/pos/tables"} }
 type ListTablesHandler struct{ Service *application.Service }
 type ListTablesRequest struct{}
 type ListTablesResponse struct {
-	Tables []TablePayload `json:"tables"`
+	Tables []*posv1.Table `json:"tables"`
 }
 
 func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (ListTablesResponse, *errorModels.ServerError) {
@@ -57,9 +48,9 @@ func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (Li
 	if err != nil {
 		return ListTablesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list tables"}
 	}
-	payloads := make([]TablePayload, len(tables))
+	payloads := make([]*posv1.Table, len(tables))
 	for i, t := range tables {
-		payloads[i] = newTablePayload(t)
+		payloads[i] = toProtoTable(t)
 	}
 	return ListTablesResponse{Tables: payloads}, nil
 }

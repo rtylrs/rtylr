@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -26,8 +28,8 @@ type ExportCustomerRequest struct {
 }
 
 type ExportCustomerResponse struct {
-	Customer     CustomerPayload             `json:"customer"`
-	Transactions []LoyaltyTransactionPayload `json:"transactions"`
+	Customer     *crmv1.Customer             `json:"customer"`
+	Transactions []*crmv1.LoyaltyTransaction `json:"transactions"`
 	Timeline     []TimelineEntryPayload      `json:"timeline"`
 }
 
@@ -63,7 +65,7 @@ func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRe
 		}
 	}
 
-	txPayloads := make([]LoyaltyTransactionPayload, len(export.Transactions))
+	txPayloads := make([]*crmv1.LoyaltyTransaction, len(export.Transactions))
 	for i, tx := range export.Transactions {
 		txPayloads[i] = newLoyaltyTransactionPayload(tx)
 	}

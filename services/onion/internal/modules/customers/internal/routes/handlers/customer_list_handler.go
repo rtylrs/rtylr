@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -27,41 +29,17 @@ type ListCustomersRequest struct {
 	PageSize int    `json:"page_size"`
 }
 
-type CustomerPayload struct {
-	ID            int64    `json:"id"`
-	OwnerID       int64    `json:"owner_id"`
-	FirstName     string   `json:"first_name"`
-	LastName      string   `json:"last_name"`
-	Email         string   `json:"email"`
-	Phone         string   `json:"phone"`
-	DateOfBirth   *string  `json:"date_of_birth"`
-	Gender        string   `json:"gender"`
-	Address       string   `json:"address"`
-	City          string   `json:"city"`
-	Country       string   `json:"country"`
-	LoyaltyPoints int      `json:"loyalty_points"`
-	TotalSpent    float64  `json:"total_spent"`
-	VisitCount    int      `json:"visit_count"`
-	LastVisitAt   *string  `json:"last_visit_at"`
-	LoyaltyTier   string   `json:"loyalty_tier"`
-	Tags          []string `json:"tags"`
-	Notes         string   `json:"notes"`
-	IsActive      bool     `json:"is_active"`
-	CreatedAt     string   `json:"created_at"`
-	UpdatedAt     string   `json:"updated_at"`
-}
-
 type ListCustomersResponse struct {
-	Customers []CustomerPayload `json:"customers"`
+	Customers []*crmv1.Customer `json:"customers"`
 	Total     int               `json:"total"`
 	Page      int               `json:"page"`
 	PageSize  int               `json:"page_size"`
 }
 
-func newCustomerPayload(c domain.Customer) CustomerPayload {
-	p := CustomerPayload{
-		ID:            c.ID,
-		OwnerID:       c.OwnerID,
+func newCustomerPayload(c domain.Customer) *crmv1.Customer {
+	p := &crmv1.Customer{
+		Id:            c.ID,
+		OwnerId:      c.OwnerID,
 		FirstName:     c.FirstName,
 		LastName:      c.LastName,
 		Email:         c.Email,
@@ -70,9 +48,9 @@ func newCustomerPayload(c domain.Customer) CustomerPayload {
 		Address:       c.Address,
 		City:          c.City,
 		Country:       c.Country,
-		LoyaltyPoints: c.LoyaltyPoints,
+		LoyaltyPoints: int64(c.LoyaltyPoints),
 		TotalSpent:    c.TotalSpent,
-		VisitCount:    c.VisitCount,
+		VisitCount:    int64(c.VisitCount),
 		LoyaltyTier:   c.LoyaltyTier,
 		Tags:          c.Tags,
 		Notes:         c.Notes,
@@ -123,7 +101,7 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 		}
 	}
 
-	payloads := make([]CustomerPayload, len(result.Customers))
+	payloads := make([]*crmv1.Customer, len(result.Customers))
 	for i, c := range result.Customers {
 		payloads[i] = newCustomerPayload(c)
 	}

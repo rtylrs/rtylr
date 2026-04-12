@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -25,7 +27,7 @@ type GetCustomerRequest struct {
 }
 
 type GetCustomerResponse struct {
-	Customer CustomerPayload `json:"customer"`
+	Customer *crmv1.Customer `json:"customer"`
 }
 
 func (h *GetCustomerHandler) Validate(_ context.Context, req *GetCustomerRequest) *errorModels.ServerError {

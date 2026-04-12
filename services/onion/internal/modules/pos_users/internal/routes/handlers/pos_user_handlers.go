@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -11,23 +13,9 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 )
 
-type POSUserPayload struct {
-	ID               int64   `json:"id"`
-	BusinessID       int64   `json:"business_id"`
-	LocationID       int64   `json:"location_id"`
-	Name             string  `json:"name"`
-	Role             string  `json:"role"`
-	IsActive         bool    `json:"is_active"`
-	MaxDiscountPct   float64 `json:"max_discount_pct"`
-	CanVoid          bool    `json:"can_void"`
-	CanRefund        bool    `json:"can_refund"`
-	CanOpenDrawer    bool    `json:"can_open_drawer"`
-	CanApplyDiscount bool    `json:"can_apply_discount"`
-}
-
-func toPayload(u domain.POSUser) POSUserPayload {
-	return POSUserPayload{
-		ID: u.ID, BusinessID: u.BusinessID, LocationID: u.LocationID,
+func toProtoPOSUser(u domain.POSUser) *posv1.POSUser {
+	return &posv1.POSUser{
+		Id: u.ID, BusinessId: u.BusinessID, LocationId: u.LocationID,
 		Name: u.Name, Role: string(u.Role), IsActive: u.IsActive,
 		MaxDiscountPct: u.MaxDiscountPct, CanVoid: u.CanVoid, CanRefund: u.CanRefund,
 		CanOpenDrawer: u.CanOpenDrawer, CanApplyDiscount: u.CanApplyDiscount,
@@ -40,7 +28,7 @@ func POSUserListRoutes() []string { return []string{"/pos/users"} }
 
 type ListPOSUsersHandler struct{ Service *application.Service }
 type ListPOSUsersRequest struct{ LocationID int64 `json:"location_id" schema:"location_id"` }
-type ListPOSUsersResponse struct{ Users []POSUserPayload `json:"users"` }
+type ListPOSUsersResponse struct{ Users []*posv1.POSUser `json:"users"` }
 
 func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersRequest) (ListPOSUsersResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -55,8 +43,8 @@ func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersReques
 	}
 	if err != nil { return ListPOSUsersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
 
-	out := make([]POSUserPayload, 0, len(users))
-	for _, u := range users { out = append(out, toPayload(u)) }
+	out := make([]*posv1.POSUser, 0, len(users))
+	for _, u := range users { out = append(out, toProtoPOSUser(u)) }
 	return ListPOSUsersResponse{Users: out}, nil
 }
 
@@ -165,7 +153,7 @@ func POSUserVerifyPINRoutes() []string { return []string{"/pos/users/verify-pin"
 
 type VerifyPINHandler struct{ Service *application.Service }
 type VerifyPINRequest struct{ PIN string `json:"pin"` }
-type VerifyPINResponse struct{ User *POSUserPayload `json:"user"` }
+type VerifyPINResponse struct{ User *posv1.POSUser `json:"user"` }
 
 func (h *VerifyPINHandler) Validate(_ context.Context, req *VerifyPINRequest) *errorModels.ServerError {
 	if req.PIN == "" { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "PIN is required"} }
@@ -178,6 +166,6 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 	user, err := h.Service.VerifyPIN(ctx, authUser.BusinessID, req.PIN)
 	if err != nil { return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
 	if user == nil { return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Invalid PIN"} }
-	p := toPayload(*user)
-	return VerifyPINResponse{User: &p}, nil
+	p := toProtoPOSUser(*user)
+	return VerifyPINResponse{User: p}, nil
 }

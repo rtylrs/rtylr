@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ─── List Cash Movements ─────────────────────────────────────────────────────
@@ -20,21 +21,7 @@ type ListCashMovementsRequest struct {
 	SessionID int64 `json:"session_id"`
 }
 type ListCashMovementsResponse struct {
-	Movements []CashMovementPayload `json:"movements"`
-}
-
-type CashMovementPayload struct {
-	ID         int64   `json:"id"`
-	BusinessID int64   `json:"business_id"`
-	BranchID   int64   `json:"branch_id"`
-	TerminalID *int64  `json:"terminal_id"`
-	SessionID  int64   `json:"session_id"`
-	EmployeeID int64   `json:"employee_id"`
-	Type       string  `json:"type"`
-	Amount     float64 `json:"amount"`
-	Reason     *string `json:"reason"`
-	ApprovedBy *int64  `json:"approved_by"`
-	CreatedAt  string  `json:"created_at"`
+	Movements []*posv1.CashMovement `json:"movements"`
 }
 
 func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovementsRequest) (ListCashMovementsResponse, *errorModels.ServerError) {
@@ -49,15 +36,15 @@ func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovem
 	if err != nil {
 		return ListCashMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list cash movements"}
 	}
-	payloads := make([]CashMovementPayload, len(movements))
+	payloads := make([]*posv1.CashMovement, len(movements))
 	for i, m := range movements {
-		payloads[i] = CashMovementPayload{
-			ID:         m.ID,
-			BusinessID: m.BusinessID,
-			BranchID:   m.BranchID,
-			TerminalID: m.TerminalID,
-			SessionID:  m.SessionID,
-			EmployeeID: m.EmployeeID,
+		payloads[i] = &posv1.CashMovement{
+			Id:         m.ID,
+			BusinessId: m.BusinessID,
+			BranchId:   m.BranchID,
+			TerminalId: m.TerminalID,
+			SessionId:  m.SessionID,
+			EmployeeId: m.EmployeeID,
 			Type:       m.Type,
 			Amount:     m.Amount,
 			Reason:     m.Reason,

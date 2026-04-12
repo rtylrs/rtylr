@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -21,31 +23,21 @@ type DashboardHandler struct {
 
 type DashboardRequest struct{}
 
-type TopCustomerPayload struct {
-	ID            int64   `json:"id"`
-	FirstName     string  `json:"first_name"`
-	LastName      string  `json:"last_name"`
-	Email         string  `json:"email"`
-	TotalSpent    float64 `json:"total_spent"`
-	LoyaltyPoints int     `json:"loyalty_points"`
-	LoyaltyTier   string  `json:"loyalty_tier"`
-}
-
 type DashboardResponse struct {
-	TotalCustomers       int                  `json:"total_customers"`
-	NewThisMonth         int                  `json:"new_this_month"`
-	ActiveLoyaltyMembers int                  `json:"active_loyalty_members"`
-	TopCustomers         []TopCustomerPayload `json:"top_customers"`
+	TotalCustomers       int                    `json:"total_customers"`
+	NewThisMonth         int                    `json:"new_this_month"`
+	ActiveLoyaltyMembers int                    `json:"active_loyalty_members"`
+	TopCustomers         []*crmv1.TopCustomer   `json:"top_customers"`
 }
 
-func newTopCustomerPayload(tc domain.TopCustomer) TopCustomerPayload {
-	return TopCustomerPayload{
-		ID:            tc.ID,
+func newTopCustomerPayload(tc domain.TopCustomer) *crmv1.TopCustomer {
+	return &crmv1.TopCustomer{
+		Id:            tc.ID,
 		FirstName:     tc.FirstName,
 		LastName:      tc.LastName,
 		Email:         tc.Email,
 		TotalSpent:    tc.TotalSpent,
-		LoyaltyPoints: tc.LoyaltyPoints,
+		LoyaltyPoints: int64(tc.LoyaltyPoints),
 		LoyaltyTier:   tc.LoyaltyTier,
 	}
 }
@@ -64,7 +56,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		}
 	}
 
-	topCustomers := make([]TopCustomerPayload, len(stats.TopCustomers))
+	topCustomers := make([]*crmv1.TopCustomer, len(stats.TopCustomers))
 	for i, tc := range stats.TopCustomers {
 		topCustomers[i] = newTopCustomerPayload(tc)
 	}

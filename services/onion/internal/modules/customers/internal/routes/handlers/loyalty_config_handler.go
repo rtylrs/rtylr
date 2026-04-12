@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -27,44 +29,26 @@ type GetLoyaltyConfigHandler struct {
 
 type GetLoyaltyConfigRequest struct{}
 
-type LoyaltyConfigPayload struct {
-	ID                    int64   `json:"id"`
-	OwnerID               int64   `json:"owner_id"`
-	IsEnabled             bool    `json:"is_enabled"`
-	PointsPerCurrencyUnit float64 `json:"points_per_currency_unit"`
-	CurrencyPerPoint      float64 `json:"currency_per_point"`
-	BronzeMin             int     `json:"bronze_min"`
-	SilverMin             int     `json:"silver_min"`
-	GoldMin               int     `json:"gold_min"`
-	PlatinumMin           int     `json:"platinum_min"`
-	BronzeDiscountPct     float64 `json:"bronze_discount_pct"`
-	SilverDiscountPct     float64 `json:"silver_discount_pct"`
-	GoldDiscountPct       float64 `json:"gold_discount_pct"`
-	PlatinumDiscountPct   float64 `json:"platinum_discount_pct"`
-	PointsExpiryDays      int     `json:"points_expiry_days"`
-	UpdatedAt             string  `json:"updated_at"`
-}
-
 type GetLoyaltyConfigResponse struct {
-	Config LoyaltyConfigPayload `json:"config"`
+	Config *crmv1.LoyaltyConfig `json:"config"`
 }
 
-func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) LoyaltyConfigPayload {
-	return LoyaltyConfigPayload{
-		ID:                    cfg.ID,
-		OwnerID:               cfg.OwnerID,
+func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) *crmv1.LoyaltyConfig {
+	return &crmv1.LoyaltyConfig{
+		Id:                    cfg.ID,
+		OwnerId:              cfg.OwnerID,
 		IsEnabled:             cfg.IsEnabled,
 		PointsPerCurrencyUnit: cfg.PointsPerCurrencyUnit,
 		CurrencyPerPoint:      cfg.CurrencyPerPoint,
-		BronzeMin:             cfg.BronzeMin,
-		SilverMin:             cfg.SilverMin,
-		GoldMin:               cfg.GoldMin,
-		PlatinumMin:           cfg.PlatinumMin,
+		BronzeMin:             int64(cfg.BronzeMin),
+		SilverMin:             int64(cfg.SilverMin),
+		GoldMin:               int64(cfg.GoldMin),
+		PlatinumMin:           int64(cfg.PlatinumMin),
 		BronzeDiscountPct:     cfg.BronzeDiscountPct,
 		SilverDiscountPct:     cfg.SilverDiscountPct,
 		GoldDiscountPct:       cfg.GoldDiscountPct,
 		PlatinumDiscountPct:   cfg.PlatinumDiscountPct,
-		PointsExpiryDays:      cfg.PointsExpiryDays,
+		PointsExpiryDays:      int64(cfg.PointsExpiryDays),
 		UpdatedAt:             cfg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }

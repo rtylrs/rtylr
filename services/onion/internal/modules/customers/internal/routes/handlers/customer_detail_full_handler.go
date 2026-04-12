@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -26,8 +28,8 @@ type GetCustomerDetailFullRequest struct {
 }
 
 type GetCustomerDetailFullResponse struct {
-	Customer            CustomerPayload             `json:"customer"`
-	LoyaltyTransactions []LoyaltyTransactionPayload `json:"loyalty_transactions"`
+	Customer            *crmv1.Customer             `json:"customer"`
+	LoyaltyTransactions []*crmv1.LoyaltyTransaction `json:"loyalty_transactions"`
 	RecentVisits        []TimelineEntryPayload      `json:"recent_visits"`
 }
 
@@ -63,7 +65,7 @@ func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustom
 		}
 	}
 
-	txPayloads := make([]LoyaltyTransactionPayload, len(detail.LoyaltyTransactions))
+	txPayloads := make([]*crmv1.LoyaltyTransaction, len(detail.LoyaltyTransactions))
 	for i, tx := range detail.LoyaltyTransactions {
 		txPayloads[i] = newLoyaltyTransactionPayload(tx)
 	}

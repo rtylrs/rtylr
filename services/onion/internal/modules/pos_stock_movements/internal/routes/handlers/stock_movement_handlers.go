@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ─── List Movements ──────────────────────────────────────────────────────────
@@ -21,21 +22,7 @@ type ListMovementsRequest struct {
 	ProductID int64 `json:"product_id"`
 }
 type ListMovementsResponse struct {
-	Movements []StockMovementPayload `json:"movements"`
-}
-
-type StockMovementPayload struct {
-	ID            int64   `json:"id"`
-	BusinessID    int64   `json:"business_id"`
-	BranchID      int64   `json:"branch_id"`
-	ProductID     int64   `json:"product_id"`
-	Type          string  `json:"type"`
-	Quantity      float64 `json:"quantity"`
-	ReferenceID   *int64  `json:"reference_id"`
-	ReferenceType *string `json:"reference_type"`
-	Note          *string `json:"note"`
-	EmployeeID    *int64  `json:"employee_id"`
-	CreatedAt     string  `json:"created_at"`
+	Movements []*posv1.StockMovement `json:"movements"`
 }
 
 func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequest) (ListMovementsResponse, *errorModels.ServerError) {
@@ -50,19 +37,19 @@ func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequ
 	if err != nil {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list stock movements"}
 	}
-	payloads := make([]StockMovementPayload, len(movements))
+	payloads := make([]*posv1.StockMovement, len(movements))
 	for i, m := range movements {
-		payloads[i] = StockMovementPayload{
-			ID:            m.ID,
-			BusinessID:    m.BusinessID,
-			BranchID:      m.BranchID,
-			ProductID:     m.ProductID,
+		payloads[i] = &posv1.StockMovement{
+			Id:            m.ID,
+			BusinessId:    m.BusinessID,
+			BranchId:      m.BranchID,
+			ProductId:     m.ProductID,
 			Type:          m.Type,
 			Quantity:      m.Quantity,
-			ReferenceID:   m.ReferenceID,
+			ReferenceId:   m.ReferenceID,
 			ReferenceType: m.ReferenceType,
 			Note:          m.Note,
-			EmployeeID:    m.EmployeeID,
+			EmployeeId:    m.EmployeeID,
 			CreatedAt:     m.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		}
 	}
@@ -97,12 +84,8 @@ func (h *ReceiveStockHandler) Serve(ctx context.Context, req *ReceiveStockReques
 		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.ReceiveStock(ctx, domain.ReceiveStockInput{
-		BusinessID: device.User.UserID,
-		BranchID:   req.BranchID,
-		ProductID:  req.ProductID,
-		Quantity:   req.Quantity,
-		Note:       req.Note,
-		EmployeeID: req.EmployeeID,
+		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
 		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to receive stock"}
@@ -138,12 +121,8 @@ func (h *AdjustStockHandler) Serve(ctx context.Context, req *AdjustStockRequest)
 		return AdjustStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId and productId are required"}
 	}
 	id, err := h.Service.AdjustStock(ctx, domain.AdjustStockInput{
-		BusinessID: device.User.UserID,
-		BranchID:   req.BranchID,
-		ProductID:  req.ProductID,
-		Quantity:   req.Quantity,
-		Note:       req.Note,
-		EmployeeID: req.EmployeeID,
+		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
 		return AdjustStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to adjust stock"}
@@ -179,12 +158,8 @@ func (h *WasteStockHandler) Serve(ctx context.Context, req *WasteStockRequest) (
 		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.RecordWaste(ctx, domain.WasteStockInput{
-		BusinessID: device.User.UserID,
-		BranchID:   req.BranchID,
-		ProductID:  req.ProductID,
-		Quantity:   req.Quantity,
-		Note:       req.Note,
-		EmployeeID: req.EmployeeID,
+		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
 		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to record waste"}
@@ -221,13 +196,8 @@ func (h *TransferStockHandler) Serve(ctx context.Context, req *TransferStockRequ
 		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "fromBranchId, toBranchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.TransferStock(ctx, domain.TransferStockInput{
-		BusinessID:   device.User.UserID,
-		FromBranchID: req.FromBranchID,
-		ToBranchID:   req.ToBranchID,
-		ProductID:    req.ProductID,
-		Quantity:     req.Quantity,
-		Note:         req.Note,
-		EmployeeID:   req.EmployeeID,
+		BusinessID: device.User.UserID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
+		ProductID: req.ProductID, Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
 		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to transfer stock"}
@@ -244,18 +214,25 @@ type ListInventoryRequest struct {
 	BranchID int64 `json:"branch_id"`
 }
 type ListInventoryResponse struct {
-	Inventory []BranchInventoryPayload `json:"inventory"`
+	Inventory []*posv1.BranchInventory `json:"inventory"`
 }
 
-type BranchInventoryPayload struct {
-	ID              int64    `json:"id"`
-	BusinessID      int64    `json:"business_id"`
-	BranchID        int64    `json:"branch_id"`
-	ProductID       int64    `json:"product_id"`
-	Quantity        float64  `json:"quantity"`
-	ReorderPoint    *float64 `json:"reorder_point"`
-	ReorderQuantity *float64 `json:"reorder_quantity"`
-	UpdatedAt       string   `json:"updated_at"`
+func toProtoBranchInventory(item domain.BranchInventory) *posv1.BranchInventory {
+	p := &posv1.BranchInventory{
+		Id:         item.ID,
+		BusinessId: item.BusinessID,
+		BranchId:   item.BranchID,
+		ProductId:  item.ProductID,
+		Quantity:   item.Quantity,
+		UpdatedAt:  item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if item.ReorderPoint != nil {
+		p.ReorderPoint = *item.ReorderPoint
+	}
+	if item.ReorderQuantity != nil {
+		p.ReorderQuantity = *item.ReorderQuantity
+	}
+	return p
 }
 
 func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequest) (ListInventoryResponse, *errorModels.ServerError) {
@@ -270,18 +247,9 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 	if err != nil {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inventory"}
 	}
-	payloads := make([]BranchInventoryPayload, len(items))
+	payloads := make([]*posv1.BranchInventory, len(items))
 	for i, item := range items {
-		payloads[i] = BranchInventoryPayload{
-			ID:              item.ID,
-			BusinessID:      item.BusinessID,
-			BranchID:        item.BranchID,
-			ProductID:       item.ProductID,
-			Quantity:        item.Quantity,
-			ReorderPoint:    item.ReorderPoint,
-			ReorderQuantity: item.ReorderQuantity,
-			UpdatedAt:       item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-		}
+		payloads[i] = toProtoBranchInventory(item)
 	}
 	return ListInventoryResponse{Inventory: payloads}, nil
 }
@@ -295,7 +263,7 @@ type LowStockRequest struct {
 	BranchID int64 `json:"branch_id"`
 }
 type LowStockResponse struct {
-	Items []BranchInventoryPayload `json:"items"`
+	Items []*posv1.BranchInventory `json:"items"`
 }
 
 func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowStockResponse, *errorModels.ServerError) {
@@ -310,18 +278,9 @@ func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowS
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list low stock items"}
 	}
-	payloads := make([]BranchInventoryPayload, len(items))
+	payloads := make([]*posv1.BranchInventory, len(items))
 	for i, item := range items {
-		payloads[i] = BranchInventoryPayload{
-			ID:              item.ID,
-			BusinessID:      item.BusinessID,
-			BranchID:        item.BranchID,
-			ProductID:       item.ProductID,
-			Quantity:        item.Quantity,
-			ReorderPoint:    item.ReorderPoint,
-			ReorderQuantity: item.ReorderQuantity,
-			UpdatedAt:       item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-		}
+		payloads[i] = toProtoBranchInventory(item)
 	}
 	return LowStockResponse{Items: payloads}, nil
 }

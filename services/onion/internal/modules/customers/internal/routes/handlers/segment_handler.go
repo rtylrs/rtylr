@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -29,26 +31,14 @@ func SegmentDeleteRoutes() []string {
 	return []string{"/crm/segments"}
 }
 
-type SegmentPayload struct {
-	ID               int64           `json:"id"`
-	OwnerID          int64           `json:"owner_id"`
-	Name             string          `json:"name"`
-	Description      string          `json:"description"`
-	Rules            json.RawMessage `json:"rules"`
-	CustomerCount    int             `json:"customer_count"`
-	LastCalculatedAt *string         `json:"last_calculated_at"`
-	CreatedAt        string          `json:"created_at"`
-	UpdatedAt        string          `json:"updated_at"`
-}
-
-func newSegmentPayload(seg domain.Segment) SegmentPayload {
-	p := SegmentPayload{
-		ID:            seg.ID,
-		OwnerID:       seg.OwnerID,
+func newSegmentPayload(seg domain.Segment) *crmv1.Segment {
+	p := &crmv1.Segment{
+		Id:            seg.ID,
+		OwnerId:      seg.OwnerID,
 		Name:          seg.Name,
 		Description:   seg.Description,
-		Rules:         json.RawMessage(seg.Rules),
-		CustomerCount: seg.CustomerCount,
+		Rules:         string(seg.Rules),
+		CustomerCount: int64(seg.CustomerCount),
 		CreatedAt:     seg.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:     seg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -70,7 +60,7 @@ type ListSegmentsHandler struct {
 type ListSegmentsRequest struct{}
 
 type ListSegmentsResponse struct {
-	Segments []SegmentPayload `json:"segments"`
+	Segments []*crmv1.Segment `json:"segments"`
 }
 
 func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest) (ListSegmentsResponse, *errorModels.ServerError) {
@@ -87,7 +77,7 @@ func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest)
 		}
 	}
 
-	payloads := make([]SegmentPayload, len(segments))
+	payloads := make([]*crmv1.Segment, len(segments))
 	for i, seg := range segments {
 		payloads[i] = newSegmentPayload(seg)
 	}

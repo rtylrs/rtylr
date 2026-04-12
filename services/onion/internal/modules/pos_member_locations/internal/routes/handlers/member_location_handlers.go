@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -11,18 +13,29 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
 )
 
+func toProtoMyLocation(l infrastructure.MyLocation) *posv1.MyLocation {
+	return &posv1.MyLocation{
+		LocationId: l.LocationID,
+		Name:       l.Name,
+		Address:    l.Address,
+		Phone:      l.Phone,
+	}
+}
+
 func MyLocationsRoutes() []string { return []string{"/pos/access/my-locations"} }
 
 type GetMyLocationsHandler struct{ Service *application.Service }
 type GetMyLocationsRequest struct{}
-type GetMyLocationsResponse struct{ Locations []infrastructure.MyLocation `json:"locations"` }
+type GetMyLocationsResponse struct{ Locations []*posv1.MyLocation `json:"locations"` }
 
 func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequest) (GetMyLocationsResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return GetMyLocationsResponse{}, errorModels.PermissionDeniedServerError() }
 	locs, err := h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
 	if err != nil { return GetMyLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
-	return GetMyLocationsResponse{Locations: locs}, nil
+	out := make([]*posv1.MyLocation, 0, len(locs))
+	for _, l := range locs { out = append(out, toProtoMyLocation(l)) }
+	return GetMyLocationsResponse{Locations: out}, nil
 }
 
 func AssignRoutes() []string { return []string{"/pos/access/assign"} }

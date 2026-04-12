@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -25,27 +27,15 @@ func LoyaltyTiersUpdateRoutes() []string {
 	return []string{"/crm/loyalty/tiers"}
 }
 
-type LoyaltyTierPayload struct {
-	ID          int64           `json:"id"`
-	OwnerID     int64           `json:"owner_id"`
-	Name        string          `json:"name"`
-	MinPoints   int             `json:"min_points"`
-	DiscountPct float64         `json:"discount_pct"`
-	Perks       json.RawMessage `json:"perks"`
-	SortOrder   int             `json:"sort_order"`
-	CreatedAt   string          `json:"created_at"`
-	UpdatedAt   string          `json:"updated_at"`
-}
-
-func newLoyaltyTierPayload(t domain.LoyaltyTier) LoyaltyTierPayload {
-	return LoyaltyTierPayload{
-		ID:          t.ID,
-		OwnerID:     t.OwnerID,
+func newLoyaltyTierPayload(t domain.LoyaltyTier) *crmv1.LoyaltyTier {
+	return &crmv1.LoyaltyTier{
+		Id:          t.ID,
+		OwnerId:    t.OwnerID,
 		Name:        t.Name,
-		MinPoints:   t.MinPoints,
+		MinPoints:   int64(t.MinPoints),
 		DiscountPct: t.DiscountPct,
-		Perks:       json.RawMessage(t.Perks),
-		SortOrder:   t.SortOrder,
+		Perks:       string(t.Perks),
+		SortOrder:   int64(t.SortOrder),
 		CreatedAt:   t.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -60,7 +50,7 @@ type ListLoyaltyTiersHandler struct {
 type ListLoyaltyTiersRequest struct{}
 
 type ListLoyaltyTiersResponse struct {
-	Tiers []LoyaltyTierPayload `json:"tiers"`
+	Tiers []*crmv1.LoyaltyTier `json:"tiers"`
 }
 
 func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, *errorModels.ServerError) {
@@ -77,7 +67,7 @@ func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiers
 		}
 	}
 
-	payloads := make([]LoyaltyTierPayload, len(tiers))
+	payloads := make([]*crmv1.LoyaltyTier, len(tiers))
 	for i, t := range tiers {
 		payloads[i] = newLoyaltyTierPayload(t)
 	}

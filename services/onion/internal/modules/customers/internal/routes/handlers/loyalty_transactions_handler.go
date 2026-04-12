@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -25,38 +27,24 @@ type ListLoyaltyTransactionsRequest struct {
 	PageSize   int   `json:"page_size"`
 }
 
-type LoyaltyTransactionPayload struct {
-	ID            int64   `json:"id"`
-	OwnerID       int64   `json:"owner_id"`
-	CustomerID    int64   `json:"customer_id"`
-	Type          string  `json:"type"`
-	Points        int     `json:"points"`
-	BalanceBefore int     `json:"balance_before"`
-	BalanceAfter  int     `json:"balance_after"`
-	Description   string  `json:"description"`
-	ReferenceID   *int64  `json:"reference_id"`
-	ReferenceType string  `json:"reference_type"`
-	CreatedAt     string  `json:"created_at"`
-}
-
 type ListLoyaltyTransactionsResponse struct {
-	Transactions []LoyaltyTransactionPayload `json:"transactions"`
+	Transactions []*crmv1.LoyaltyTransaction `json:"transactions"`
 	Total        int                         `json:"total"`
 	Page         int                         `json:"page"`
 	PageSize     int                         `json:"page_size"`
 }
 
-func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) LoyaltyTransactionPayload {
-	return LoyaltyTransactionPayload{
-		ID:            tx.ID,
-		OwnerID:       tx.OwnerID,
-		CustomerID:    tx.CustomerID,
+func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmv1.LoyaltyTransaction {
+	return &crmv1.LoyaltyTransaction{
+		Id:            tx.ID,
+		OwnerId:      tx.OwnerID,
+		CustomerId:   tx.CustomerID,
 		Type:          tx.Type,
-		Points:        tx.Points,
-		BalanceBefore: tx.BalanceBefore,
-		BalanceAfter:  tx.BalanceAfter,
+		Points:        int64(tx.Points),
+		BalanceBefore: int64(tx.BalanceBefore),
+		BalanceAfter:  int64(tx.BalanceAfter),
 		Description:   tx.Description,
-		ReferenceID:   tx.ReferenceID,
+		ReferenceId:   tx.ReferenceID,
 		ReferenceType: tx.ReferenceType,
 		CreatedAt:     tx.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -95,7 +83,7 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 		}
 	}
 
-	payloads := make([]LoyaltyTransactionPayload, len(txs))
+	payloads := make([]*crmv1.LoyaltyTransaction, len(txs))
 	for i, tx := range txs {
 		payloads[i] = newLoyaltyTransactionPayload(tx)
 	}
