@@ -1,4 +1,5 @@
 import { unwrap } from '@voxire/api';
+import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   erpApi,
@@ -6,6 +7,7 @@ import {
   UpdateProductInput,
   Product,
 } from '../../shared/services/erpApi';
+import { productSchema } from '../../shared/schemas/products';
 
 export interface ProductFilters {
   search?: string;
@@ -60,7 +62,8 @@ export function useProducts(filters?: ProductFilters) {
           offset: filters?.offset,
         })
       );
-      return applyFilters(data ?? [], filters);
+      const parsed = z.array(productSchema).parse(Array.isArray(data) ? data : []) as Product[];
+      return applyFilters(parsed, filters);
     },
   });
 }
@@ -71,7 +74,8 @@ export function useProduct(id: number | undefined) {
     enabled: !!id,
     queryFn: async () => {
       if (!id) return null;
-      return unwrap(erpApi.getProduct(id));
+      const res = await unwrap(erpApi.getProduct(id));
+      return productSchema.parse(res) as Product;
     },
   });
 }

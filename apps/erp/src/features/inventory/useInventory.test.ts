@@ -35,8 +35,8 @@ describe('useInventoryReport', () => {
 
   it('fetches inventory report', async () => {
     const report = [
-      { productId: 1, name: 'Widget A', stock: 100, value: 500 },
-      { productId: 2, name: 'Widget B', stock: 3, value: 30 },
+      { productId: 1, name: 'Widget A', sku: 'WA-001', currentStock: 100, value: 500 },
+      { productId: 2, name: 'Widget B', sku: 'WB-001', currentStock: 3, value: 30 },
     ];
     mockErpApi.getInventoryReport.mockResolvedValue(report);
 
@@ -69,7 +69,7 @@ describe('useLowStock', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches low stock items', async () => {
-    const items = [{ productId: 2, name: 'Widget B', stock: 3, lowStock: 10 }];
+    const items = [{ name: 'Widget B', sku: 'WB-001', stock: 3, minStock: 10 }];
     mockErpApi.getLowStock.mockResolvedValue(items);
 
     const { result } = renderHook(() => useLowStock(), { wrapper: createWrapper() });
