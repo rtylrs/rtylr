@@ -6,7 +6,11 @@ import type { ApiMilestone } from '../../shared/services/flowApi';
 export function useMilestones(projectId?: string) {
   return useQuery({
     queryKey: ['milestones', projectId],
-    queryFn: () => unwrap(flowApi.getMilestones(projectId)),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getMilestones(projectId));
+      // backend returns { milestones: [...] }
+      return (res as any).milestones ?? (Array.isArray(res) ? res : []);
+    },
   });
 }
 
