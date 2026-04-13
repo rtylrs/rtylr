@@ -39,7 +39,7 @@ import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
-import { useProjects } from '../features/projects/useProjects';
+import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { isTaskMine } from '../shared/lib/currentUser';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
@@ -210,7 +210,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   } = useFlowStore();
 
   // Fetch workspaces and projects from API and populate store
-  const { data: apiWorkspaces } = useWorkspaces();
+  const { data: apiWorkspaces, isLoading: workspacesLoading } = useWorkspaces();
   const currentWorkspaceId = workspaceId || activeWorkspaceId || workspaces[0]?.id || '';
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
@@ -227,9 +227,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     }
   }, [apiProjects, setProjects]);
 
+  const createProject = useCreateProject();
   const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectColor, setNewProjectColor] = useState('#64C5B9');
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -247,7 +251,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   useKeyboardShortcuts();
 
   const activeWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) ||
-    workspaces[0] || { id: '', name: 'Loading...', color: '#6b7280' };
+    workspaces[0] || { id: '', name: workspacesLoading ? '' : 'No workspace', color: '#6b7280' };
   const workspaceProjects = projects.filter(
     (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
@@ -623,6 +627,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
                           style={{ color: 'var(--flow-text-muted)' }}
                           title="New Project"
+                          onClick={() => {
+                            setNewProjectName('');
+                            setNewProjectColor('#64C5B9');
+                            setNewProjectOpen(true);
+                          }}
                         >
                           <Plus size={15} strokeWidth={2} />
                         </button>
@@ -790,6 +799,115 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </div>
         </div>
       </aside>
+
+      {/* Create project modal */}
+      <AnimatePresence>
+        {newProjectOpen && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <motion.button
+              type="button"
+              aria-label="Close"
+              className="absolute inset-0 cursor-default"
+              style={{ background: 'rgba(0,0,0,0.45)' }}
+              onClick={() => setNewProjectOpen(false)}
+            />
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              className="relative w-full max-w-sm rounded-xl p-5 shadow-2xl"
+              style={{
+                background: 'var(--flow-surface)',
+                border: '1px solid var(--flow-border)',
+              }}
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-[14px] font-semibold mb-4" style={{ color: 'var(--flow-text)' }}>
+                New project
+              </p>
+              <div className="flex flex-col gap-3">
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Project name"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (!newProjectName.trim() || !currentWorkspaceId) return;
+                      createProject.mutate(
+                        {
+                          workspaceId: currentWorkspaceId,
+                          name: newProjectName.trim(),
+                          color: newProjectColor,
+                        },
+                        { onSuccess: () => setNewProjectOpen(false) }
+                      );
+                    }
+                    if (e.key === 'Escape') setNewProjectOpen(false);
+                  }}
+                  className="w-full rounded-lg px-3 py-2.5 text-[13px] outline-none"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    Color
+                  </span>
+                  <input
+                    type="color"
+                    value={newProjectColor}
+                    onChange={(e) => setNewProjectColor(e.target.value)}
+                    className="h-7 w-7 rounded cursor-pointer border-0"
+                    style={{ background: 'none' }}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-5">
+                <button
+                  type="button"
+                  onClick={() => setNewProjectOpen(false)}
+                  className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={!newProjectName.trim() || createProject.isPending}
+                  onClick={() => {
+                    if (!newProjectName.trim() || !currentWorkspaceId) return;
+                    createProject.mutate(
+                      {
+                        workspaceId: currentWorkspaceId,
+                        name: newProjectName.trim(),
+                        color: newProjectColor,
+                      },
+                      { onSuccess: () => setNewProjectOpen(false) }
+                    );
+                  }}
+                  className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: ACCENT, color: '#0a0a0a' }}
+                >
+                  {createProject.isPending ? 'Creating…' : 'Create'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {inQuietHours && (

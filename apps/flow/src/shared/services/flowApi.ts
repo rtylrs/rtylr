@@ -190,7 +190,7 @@ export { insightsService } from './insightsService';
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
     safe.get<DashboardStats>('/flow/dashboard', {
-      params: workspaceId ? { workspaceId } : undefined,
+      params: workspaceId ? { workspace_id: workspaceId } : undefined,
     }),
   // -- Workspaces ---------------------------------------------------------
 
@@ -213,7 +213,7 @@ export const flowApi = {
   // -- Projects -----------------------------------------------------------
 
   getProjects: (workspaceId: string) =>
-    safe.get<ApiProject[]>('/flow/projects', { params: { workspaceId } }),
+    safe.get<ApiProject[]>('/flow/projects', { params: { workspace_id: workspaceId } }),
 
   createProject: (data: { workspaceId: string; name: string; color?: string }) =>
     safe.post<ApiProject>('/flow/projects', data),
@@ -225,8 +225,13 @@ export const flowApi = {
 
   // -- Tasks --------------------------------------------------------------
 
-  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
-    safe.get<ApiTask[]>('/flow/tasks', { params }),
+  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) => {
+    const q: Record<string, string> = {};
+    if (params.projectId) q.project_id = params.projectId;
+    if (params.status) q.status = params.status;
+    if (params.assigneeId) q.assignee_id = params.assigneeId;
+    return safe.get<ApiTask[]>('/flow/tasks', { params: q });
+  },
 
   getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
 
@@ -284,7 +289,9 @@ export const flowApi = {
   // -- Milestones ---------------------------------------------------------
 
   getMilestones: (projectId?: string) =>
-    safe.get<ApiMilestone[]>('/flow/milestones', { params: projectId ? { projectId } : undefined }),
+    safe.get<ApiMilestone[]>('/flow/milestones', {
+      params: projectId ? { project_id: projectId } : undefined,
+    }),
 
   createMilestone: (data: Partial<ApiMilestone>) =>
     safe.post<ApiMilestone>('/flow/milestones', data),
@@ -295,7 +302,9 @@ export const flowApi = {
   // -- Cycles -------------------------------------------------------------
 
   getCycles: (workspaceId?: string) =>
-    safe.get<ApiCycle[]>('/flow/cycles', { params: workspaceId ? { workspaceId } : undefined }),
+    safe.get<ApiCycle[]>('/flow/cycles', {
+      params: workspaceId ? { workspace_id: workspaceId } : undefined,
+    }),
 
   createCycle: (data: Partial<ApiCycle>) => safe.post<ApiCycle>('/flow/cycles', data),
 
@@ -315,7 +324,9 @@ export const flowApi = {
   // -- Insights -----------------------------------------------------------
 
   getInsights: (workspaceId?: string) =>
-    safe.get<ApiInsights>('/flow/insights', { params: workspaceId ? { workspaceId } : undefined }),
+    safe.get<ApiInsights>('/flow/insights', {
+      params: workspaceId ? { workspace_id: workspaceId } : undefined,
+    }),
 
   // -- Team workload ------------------------------------------------------
 

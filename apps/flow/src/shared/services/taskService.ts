@@ -10,8 +10,13 @@ import type {
 } from './flowApi';
 
 export const taskService = {
-  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
-    safe.get<ApiTask[]>('/flow/tasks', { params }),
+  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) => {
+    const q: Record<string, string> = {};
+    if (params.projectId) q.project_id = params.projectId;
+    if (params.status) q.status = params.status;
+    if (params.assigneeId) q.assignee_id = params.assigneeId;
+    return safe.get<ApiTask[]>('/flow/tasks', { params: q });
+  },
 
   getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
 

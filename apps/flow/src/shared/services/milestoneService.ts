@@ -4,7 +4,7 @@ import type { ApiMilestone } from './flowApi';
 export const milestoneService = {
   getMilestones: (projectId?: string) =>
     safe.get<ApiMilestone[]>('/flow/milestones', {
-      params: projectId ? { projectId } : undefined,
+      params: projectId ? { project_id: projectId } : undefined,
     }),
 
   create: (data: Partial<ApiMilestone>) => safe.post<ApiMilestone>('/flow/milestones', data),

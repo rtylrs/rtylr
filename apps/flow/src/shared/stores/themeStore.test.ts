@@ -4,14 +4,14 @@ import { useThemeStore, initTheme } from './themeStore';
 const { getState, setState } = useThemeStore;
 
 beforeEach(() => {
-  setState({ theme: 'dark' });
+  setState({ theme: 'light' });
   document.documentElement.removeAttribute('data-theme');
   localStorage.clear();
 });
 
 describe('themeStore', () => {
-  it('has dark as the default theme', () => {
-    expect(getState().theme).toBe('dark');
+  it('has light as the default theme', () => {
+    expect(getState().theme).toBe('light');
   });
 
   it('setTheme updates theme to light', () => {
@@ -47,10 +47,10 @@ describe('themeStore', () => {
     expect(getState().theme).toBe('light');
   });
 
-  it('initTheme applies dark when no stored value', () => {
+  it('initTheme applies light when no stored value', () => {
     localStorage.clear();
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 
   it('initTheme applies stored theme from localStorage', () => {
@@ -62,6 +62,6 @@ describe('themeStore', () => {
   it('initTheme handles malformed localStorage gracefully', () => {
     localStorage.setItem('flow-theme', 'not-json');
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 });
