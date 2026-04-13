@@ -195,7 +195,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/vbitez run build
+      - run: pnpm --filter vbitez run build
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy dist/vbitez --project-name=rtylr-pos
         env:
