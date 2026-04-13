@@ -33,34 +33,6 @@ const steps = [
 const HowItWorksSection: React.FC = () => {
   return (
     <section className={styles.howItWorksSection}>
-      {/* Animated background orbs */}
-      <motion.div
-        className={styles.bgOrbOne}
-        animate={{
-          x: [0, 60, 0],
-          y: [0, 40, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-      <motion.div
-        className={styles.bgOrbTwo}
-        animate={{
-          x: [0, -50, 0],
-          y: [0, -30, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-
       <div className={styles.container}>
         <motion.div
           initial="hidden"
