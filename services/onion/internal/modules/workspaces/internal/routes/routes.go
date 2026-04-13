@@ -218,4 +218,106 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		ctx, router, handlers.TransferProjectOwnershipRoutes(),
 		&handlers.TransferProjectOwnershipHandler{FlowService: flowService},
 	)
+
+	// ─── Cycles ───────────────────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListCyclesRequest, handlers.ListCyclesResponse](
+		ctx, router, handlers.ListCyclesRoutes(),
+		&handlers.ListCyclesHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateCycleRequest, handlers.CreateCycleResponse](
+		ctx, router, handlers.CreateCycleRoutes(),
+		&handlers.CreateCycleHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateCycleRequest, handlers.UpdateCycleResponse](
+		ctx, router, handlers.UpdateCycleRoutes(),
+		&handlers.UpdateCycleHandler{FlowService: flowService},
+	)
+
+	// ─── Milestones ───────────────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListMilestonesRequest, handlers.ListMilestonesResponse](
+		ctx, router, handlers.ListMilestonesRoutes(),
+		&handlers.ListMilestonesHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateMilestoneRequest, handlers.CreateMilestoneResponse](
+		ctx, router, handlers.CreateMilestoneRoutes(),
+		&handlers.CreateMilestoneHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateMilestoneRequest, handlers.UpdateMilestoneResponse](
+		ctx, router, handlers.UpdateMilestoneRoutes(),
+		&handlers.UpdateMilestoneHandler{FlowService: flowService},
+	)
+
+	// ─── Views ────────────────────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListViewsRequest, handlers.ListViewsResponse](
+		ctx, router, handlers.ListViewsRoutes(),
+		&handlers.ListViewsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateViewRequest, handlers.CreateViewResponse](
+		ctx, router, handlers.CreateViewRoutes(),
+		&handlers.CreateViewHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateViewRequest, handlers.UpdateViewResponse](
+		ctx, router, handlers.UpdateViewRoutes(),
+		&handlers.UpdateViewHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteViewRequest, handlers.DeleteViewResponse](
+		ctx, router, handlers.DeleteViewRoutes(),
+		&handlers.DeleteViewHandler{FlowService: flowService},
+	)
+
+	// ─── Insights ─────────────────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.GetInsightsRequest, handlers.GetInsightsResponse](
+		ctx, router, handlers.GetInsightsRoutes(),
+		&handlers.GetInsightsHandler{FlowService: flowService},
+	)
+
+	http.RegisterGETWithValidation[handlers.GetTeamWorkloadRequest, handlers.GetTeamWorkloadResponse](
+		ctx, router, handlers.GetTeamWorkloadRoutes(),
+		&handlers.GetTeamWorkloadHandler{FlowService: flowService},
+	)
+
+	http.RegisterGETWithValidation[handlers.GetRoadmapRequest, handlers.GetRoadmapResponse](
+		ctx, router, handlers.GetRoadmapRoutes(),
+		&handlers.GetRoadmapHandler{FlowService: flowService},
+	)
+
+	// ─── Notifications ────────────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.ListNotificationsRequest, handlers.ListNotificationsResponse](
+		ctx, router, handlers.ListNotificationsRoutes(),
+		&handlers.ListNotificationsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.MarkNotificationReadRequest, handlers.MarkNotificationReadResponse](
+		ctx, router, handlers.MarkNotificationReadRoutes(),
+		&handlers.MarkNotificationReadHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.MarkAllNotificationsReadRequest, handlers.MarkAllNotificationsReadResponse](
+		ctx, router, handlers.MarkAllNotificationsReadRoutes(),
+		&handlers.MarkAllNotificationsReadHandler{FlowService: flowService},
+	)
+
+	// ─── Settings ─────────────────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.GetUserSettingsRequest, handlers.GetUserSettingsResponse](
+		ctx, router, handlers.GetUserSettingsRoutes(),
+		&handlers.GetUserSettingsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateUserSettingsRequest, handlers.UpdateUserSettingsResponse](
+		ctx, router, handlers.UpdateUserSettingsRoutes(),
+		&handlers.UpdateUserSettingsHandler{FlowService: flowService},
+	)
 }

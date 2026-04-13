@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
@@ -381,4 +382,166 @@ func (s *Service) CreateLabel(ctx context.Context, input domain.LabelInput) (dom
 		Name:        input.Name,
 		Color:       input.Color,
 	}, nil
+}
+
+// ─────────────────────────────────────────────
+// Cycles
+// ─────────────────────────────────────────────
+
+func (s *Service) ListCycles(ctx context.Context, workspaceID int64) ([]domain.Cycle, error) {
+	return s.repo.ListCycles(ctx, workspaceID)
+}
+
+func (s *Service) CreateCycle(ctx context.Context, input domain.CycleInput) (domain.Cycle, error) {
+	id, err := s.repo.CreateCycle(ctx, input)
+	if err != nil {
+		return domain.Cycle{}, err
+	}
+	status := "upcoming"
+	now := time.Now()
+	if now.After(input.StartDate) && now.Before(input.EndDate) {
+		status = "active"
+	}
+	return domain.Cycle{
+		ID:          id,
+		WorkspaceID: input.WorkspaceID,
+		ProjectID:   input.ProjectID,
+		Name:        input.Name,
+		Description: input.Description,
+		Status:      status,
+		StartDate:   input.StartDate,
+		EndDate:     input.EndDate,
+		CreatedBy:   input.CreatedBy,
+	}, nil
+}
+
+func (s *Service) UpdateCycle(ctx context.Context, input domain.UpdateCycleInput) error {
+	return s.repo.UpdateCycle(ctx, input)
+}
+
+// ─────────────────────────────────────────────
+// Milestones
+// ─────────────────────────────────────────────
+
+func (s *Service) ListMilestones(ctx context.Context, workspaceID int64, projectID *int64) ([]domain.Milestone, error) {
+	return s.repo.ListMilestones(ctx, workspaceID, projectID)
+}
+
+func (s *Service) CreateMilestone(ctx context.Context, input domain.MilestoneInput) (domain.Milestone, error) {
+	id, err := s.repo.CreateMilestone(ctx, input)
+	if err != nil {
+		return domain.Milestone{}, err
+	}
+	return domain.Milestone{
+		ID:          id,
+		ProjectID:   input.ProjectID,
+		WorkspaceID: input.WorkspaceID,
+		Name:        input.Name,
+		Description: input.Description,
+		Status:      "planning",
+		DueDate:     input.DueDate,
+		CreatedBy:   input.CreatedBy,
+	}, nil
+}
+
+func (s *Service) UpdateMilestone(ctx context.Context, input domain.UpdateMilestoneInput) error {
+	return s.repo.UpdateMilestone(ctx, input)
+}
+
+// ─────────────────────────────────────────────
+// Views
+// ─────────────────────────────────────────────
+
+func (s *Service) ListViews(ctx context.Context, workspaceID int64) ([]domain.View, error) {
+	return s.repo.ListViews(ctx, workspaceID)
+}
+
+func (s *Service) CreateView(ctx context.Context, input domain.ViewInput) (domain.View, error) {
+	id, err := s.repo.CreateView(ctx, input)
+	if err != nil {
+		return domain.View{}, err
+	}
+	return domain.View{
+		ID:          id,
+		WorkspaceID: input.WorkspaceID,
+		Name:        input.Name,
+		Icon:        input.Icon,
+		Filters:     input.Filters,
+		GroupBy:     input.GroupBy,
+		SortBy:      input.SortBy,
+		SortDir:     input.SortDir,
+		CreatedBy:   input.CreatedBy,
+	}, nil
+}
+
+func (s *Service) UpdateView(ctx context.Context, input domain.UpdateViewInput) error {
+	return s.repo.UpdateView(ctx, input)
+}
+
+func (s *Service) DeleteView(ctx context.Context, id int64) error {
+	return s.repo.DeleteView(ctx, id)
+}
+
+// ─────────────────────────────────────────────
+// Insights
+// ─────────────────────────────────────────────
+
+func (s *Service) GetInsights(ctx context.Context, workspaceID int64) (domain.Insights, error) {
+	return s.repo.GetInsights(ctx, workspaceID)
+}
+
+// ─────────────────────────────────────────────
+// Team Workload
+// ─────────────────────────────────────────────
+
+func (s *Service) GetTeamWorkload(ctx context.Context, workspaceID int64) ([]domain.TeamMemberWorkload, error) {
+	return s.repo.GetTeamWorkload(ctx, workspaceID)
+}
+
+// ─────────────────────────────────────────────
+// Roadmap
+// ─────────────────────────────────────────────
+
+func (s *Service) GetRoadmap(ctx context.Context, workspaceID int64) ([]domain.Project, error) {
+	return s.repo.GetRoadmap(ctx, workspaceID)
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+
+func (s *Service) ListNotifications(ctx context.Context, userID int64) ([]domain.Notification, error) {
+	return s.repo.ListNotifications(ctx, userID)
+}
+
+func (s *Service) MarkNotificationRead(ctx context.Context, id, userID int64) error {
+	return s.repo.MarkNotificationRead(ctx, id, userID)
+}
+
+func (s *Service) MarkAllNotificationsRead(ctx context.Context, userID int64) error {
+	return s.repo.MarkAllNotificationsRead(ctx, userID)
+}
+
+func (s *Service) CreateNotification(ctx context.Context, input domain.CreateNotificationInput) error {
+	return s.repo.CreateNotification(ctx, input)
+}
+
+// ─────────────────────────────────────────────
+// User Settings
+// ─────────────────────────────────────────────
+
+func (s *Service) GetUserSettings(ctx context.Context, userID int64) (domain.UserSettings, error) {
+	return s.repo.GetUserSettings(ctx, userID)
+}
+
+func (s *Service) UpdateUserSettings(ctx context.Context, settings domain.UserSettings) error {
+	return s.repo.UpsertUserSettings(ctx, settings)
+}
+
+// ─────────────────────────────────────────────
+// Project task counts (for roadmap)
+// ─────────────────────────────────────────────
+
+func (s *Service) GetProjectTaskCounts(ctx context.Context, projectID int64) (total, done int) {
+	return s.repo.GetProjectTaskCounts(ctx, projectID)
 }
