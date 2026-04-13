@@ -104,10 +104,11 @@ type ListTasksHandler struct {
 }
 
 type ListTasksRequest struct {
-	ProjectID  int64  `json:"project_id"`
-	Status     string `json:"status"`
-	AssigneeID *int64 `json:"assignee_id"`
-	Priority   string `json:"priority"`
+	ProjectID   int64  `json:"project_id"`
+	WorkspaceID int64  `json:"workspace_id"`
+	Status      string `json:"status"`
+	AssigneeID  *int64 `json:"assignee_id"`
+	Priority    string `json:"priority"`
 }
 
 type ListTasksResponse struct {
@@ -115,8 +116,8 @@ type ListTasksResponse struct {
 }
 
 func (h *ListTasksHandler) Validate(_ context.Context, req *ListTasksRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	if req.ProjectID == 0 && req.WorkspaceID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id or workspace_id is required"}
 	}
 
 	return nil
@@ -129,10 +130,11 @@ func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (Li
 	}
 
 	filter := domain.ListTasksFilter{
-		ProjectID:  req.ProjectID,
-		Status:     req.Status,
-		AssigneeID: req.AssigneeID,
-		Priority:   req.Priority,
+		ProjectID:   req.ProjectID,
+		WorkspaceID: req.WorkspaceID,
+		Status:      req.Status,
+		AssigneeID:  req.AssigneeID,
+		Priority:    req.Priority,
 	}
 
 	tasks, err := h.FlowService.ListTasks(ctx, filter)

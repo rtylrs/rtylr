@@ -88,10 +88,11 @@ type UpdateTaskStatusInput struct {
 }
 
 type ListTasksFilter struct {
-	ProjectID  int64
-	Status     string
-	AssigneeID *int64
-	Priority   string
+	ProjectID   int64
+	WorkspaceID int64
+	Status      string
+	AssigneeID  *int64
+	Priority    string
 }
 
 type Label struct {

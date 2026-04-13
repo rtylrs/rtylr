@@ -337,6 +337,38 @@ func (r *Repository) getTasksByProjectFiltered(ctx context.Context, filter domai
 	return scanTasksRaw(ctx, rows)
 }
 
+func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
+	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
+	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+	          FROM flow_tasks WHERE workspace_id = ? AND parent_task_id IS NULL`
+	args := []interface{}{filter.WorkspaceID}
+
+	if filter.Status != "" {
+		query += " AND status = ?"
+		args = append(args, filter.Status)
+	}
+	if filter.AssigneeID != nil {
+		query += " AND assignee_id = ?"
+		args = append(args, *filter.AssigneeID)
+	}
+	if filter.Priority != "" {
+		query += " AND priority = ?"
+		args = append(args, filter.Priority)
+	}
+
+	query += " ORDER BY created_at DESC LIMIT 500"
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetTasksByWorkspace failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanTasksRaw(ctx, rows)
+}
+
 func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task, error) {
 	row, err := r.queries.GetTaskByID(ctx, taskID)
 	if err != nil {

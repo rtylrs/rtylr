@@ -145,6 +145,9 @@ func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.Tra
 // ─────────────────────────────────────────────
 
 func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
+	if filter.ProjectID == 0 && filter.WorkspaceID != 0 {
+		return s.repo.GetTasksByWorkspace(ctx, filter)
+	}
 	return s.repo.GetTasksByProject(ctx, filter)
 }
 
