@@ -4,7 +4,7 @@
  */
 export const theme = {
   palette: {
-    primary: { main: '#101010' },
+    primary: { main: '#151515' },
     secondary: { main: '#dc004e' },
     success: { main: '#2e7d32' },
     warning: { main: '#ed6c02' },
