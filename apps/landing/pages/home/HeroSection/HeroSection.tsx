@@ -12,22 +12,6 @@ const HeroSection = (): JSX.Element => {
       <motion.div
         style={{
           position: 'absolute',
-          width: 800,
-          height: 800,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(69,131,196,0.11) 0%, transparent 70%)',
-          top: -300,
-          left: -250,
-          pointerEvents: 'none',
-          zIndex: 0,
-          filter: 'blur(60px)',
-        }}
-        animate={{ x: [0, 80, -40, 0], y: [0, 60, 30, 0], scale: [1, 1.12, 0.95, 1] }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        style={{
-          position: 'absolute',
           width: 600,
           height: 600,
           borderRadius: '50%',
