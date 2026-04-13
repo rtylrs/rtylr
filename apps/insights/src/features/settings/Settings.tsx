@@ -9,6 +9,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
+import appConfig from '../../app.json';
 import {
   useInsightsSettings,
   useUpdateInsightsSettings,
@@ -185,6 +186,39 @@ const Settings: React.FC = () => {
           {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
           Save Settings
         </button>
+      </motion.div>
+
+      {/* About */}
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <SettingsIcon size={14} style={{ color: ACCENT }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            About
+          </h3>
+        </div>
+        <div className="space-y-1">
+          {[
+            { label: 'Application', value: appConfig.name },
+            { label: 'Version', value: `v${appConfig.version}` },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="flex justify-between items-center py-1.5 border-b"
+              style={{ borderColor: 'var(--hub-border)' }}
+            >
+              <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                {label}
+              </span>
+              <span className="text-xs font-mono" style={{ color: 'var(--hub-text)' }}>
+                {value}
+              </span>
+            </div>
+          ))}
+        </div>
       </motion.div>
 
       {/* Scheduled Reports */}

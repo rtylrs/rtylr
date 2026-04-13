@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Save } from 'lucide-react';
+import appConfig from '../../app.json';
 import { useSettings, useUpdateSettings } from './useSettings';
 import { PageHeader, Card, Input, Select, Button } from '../../shared/components/ui';
 import type { Settings } from '../../shared/services/crmApi';
@@ -127,6 +128,39 @@ const SettingsScreen: React.FC = () => {
             onChange={(e) => set('smsSenderId', e.target.value)}
           />
         </div>
+      </Card>
+
+      <Card style={{ marginBottom: '16px' }}>
+        <h4
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            margin: '0 0 14px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          About
+        </h4>
+        {[
+          { label: 'Application', value: appConfig.name },
+          { label: 'Version', value: `v${appConfig.version}` },
+        ].map(({ label, value }) => (
+          <div
+            key={label}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '6px 0',
+              borderBottom: '1px solid var(--hub-border)',
+              fontSize: '13px',
+            }}
+          >
+            <span style={{ color: 'var(--hub-text-muted)' }}>{label}</span>
+            <span style={{ fontFamily: 'monospace', color: 'var(--hub-text)' }}>{value}</span>
+          </div>
+        ))}
       </Card>
 
       <Card>
