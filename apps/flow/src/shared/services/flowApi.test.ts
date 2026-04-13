@@ -179,11 +179,11 @@ describe('flowApi', () => {
 
   it('getTeamWorkload calls GET /flow/team/workload', () => {
     flowApi.getTeamWorkload();
-    expect(safe.get).toHaveBeenCalledWith('/flow/team/workload');
+    expect(safe.get).toHaveBeenCalledWith('/flow/team/workload', { params: undefined });
   });
 
   it('getRoadmap calls GET /flow/roadmap', () => {
     flowApi.getRoadmap();
-    expect(safe.get).toHaveBeenCalledWith('/flow/roadmap');
+    expect(safe.get).toHaveBeenCalledWith('/flow/roadmap', { params: undefined });
   });
 });
