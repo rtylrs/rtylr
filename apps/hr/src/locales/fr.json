@@ -28,6 +28,7 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "employees": "Employés",
+    "staff": "Personnel",
     "departments": "Départements",
     "shifts": "Quarts",
     "payroll": "Paie",
@@ -38,12 +39,37 @@
     "timesheets": "Feuilles de temps",
     "calendar": "Calendrier",
     "reviews": "Évaluations",
+    "oneOnOnes": "Entretiens individuels",
     "onboarding": "Intégration",
     "offboarding": "Départ",
     "documents": "Documents",
     "benefits": "Avantages",
     "training": "Formation",
     "operations": "Opérations"
+  },
+  "layout": {
+    "sections": {
+      "workspace": "Espace de travail",
+      "time": "Temps",
+      "people": "Personnes",
+      "hr": "RH"
+    },
+    "appearance": "Apparence",
+    "theme": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "signOut": "Déconnexion",
+    "hr": "RH",
+    "routes": {
+      "requestTimeOff": "Demande de congé",
+      "timeOffCalendar": "Calendrier des congés",
+      "shiftSchedule": "Horaire des quarts",
+      "performanceReviews": "Évaluations de performance",
+      "newReview": "Nouvelle évaluation",
+      "employeeProfile": "Profil de l'employé"
+    }
   },
   "setup": {
     "title": "Configurez votre espace RH",
@@ -201,7 +227,16 @@
   },
   "dashboard": {
     "welcome": "Bienvenue dans les RH",
-    "subtitle": "Gérez votre équipe, horaires et paie depuis ici."
+    "subtitle": "Gérez votre équipe, horaires et paie depuis ici.",
+    "quickActions": {
+      "addStaff": "Ajouter un membre",
+      "scheduleShift": "Planifier un quart",
+      "runPayroll": "Lancer la paie"
+    }
+  },
+  "staff": {
+    "directory": "Répertoire du personnel",
+    "memberCount": "{{count}} membres de l'équipe"
   },
   "errors": {
     "generic": "Une erreur est survenue. Veuillez réessayer.",

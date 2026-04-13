@@ -28,6 +28,7 @@
   "nav": {
     "dashboard": "لوحة التحكم",
     "employees": "الموظفون",
+    "staff": "الموظفون",
     "departments": "الأقسام",
     "shifts": "المناوبات",
     "payroll": "الرواتب",
@@ -38,12 +39,37 @@
     "timesheets": "سجلات الحضور",
     "calendar": "التقويم",
     "reviews": "التقييمات",
+    "oneOnOnes": "اجتماعات فردية",
     "onboarding": "التعيين",
     "offboarding": "إنهاء الخدمة",
     "documents": "المستندات",
     "benefits": "المزايا",
     "training": "التدريب",
     "operations": "العمليات"
+  },
+  "layout": {
+    "sections": {
+      "workspace": "مساحة العمل",
+      "time": "الوقت",
+      "people": "الأشخاص",
+      "hr": "الموارد البشرية"
+    },
+    "appearance": "المظهر",
+    "theme": {
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام"
+    },
+    "signOut": "تسجيل الخروج",
+    "hr": "الموارد البشرية",
+    "routes": {
+      "requestTimeOff": "طلب إجازة",
+      "timeOffCalendar": "تقويم الإجازات",
+      "shiftSchedule": "جدول المناوبات",
+      "performanceReviews": "تقييمات الأداء",
+      "newReview": "تقييم جديد",
+      "employeeProfile": "ملف الموظف"
+    }
   },
   "setup": {
     "title": "إعداد مساحة عمل الموارد البشرية",
@@ -201,7 +227,16 @@
   },
   "dashboard": {
     "welcome": "مرحباً بك في الموارد البشرية",
-    "subtitle": "إدارة فريقك وجداولك ورواتبك من هنا."
+    "subtitle": "إدارة فريقك وجداولك ورواتبك من هنا.",
+    "quickActions": {
+      "addStaff": "إضافة موظف",
+      "scheduleShift": "جدولة مناوبة",
+      "runPayroll": "تشغيل الرواتب"
+    }
+  },
+  "staff": {
+    "directory": "دليل الموظفين",
+    "memberCount": "{{count}} أعضاء الفريق"
   },
   "errors": {
     "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",

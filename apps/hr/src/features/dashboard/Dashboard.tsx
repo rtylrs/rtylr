@@ -1,5 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import type { Variants } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -37,10 +39,25 @@ const defaultStats = {
   monthlyPayroll: 0,
 };
 
-const quickActions = [
-  { label: 'Add Staff Member', icon: UserPlus, color: ACCENT, bg: 'rgba(139,92,246,0.12)' },
-  { label: 'Schedule Shift', icon: CalendarPlus, color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  { label: 'Run Payroll', icon: Play, color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
+const quickActionDefs = [
+  {
+    i18nKey: 'dashboard.quickActions.addStaff',
+    icon: UserPlus,
+    color: ACCENT,
+    bg: 'rgba(139,92,246,0.12)',
+  },
+  {
+    i18nKey: 'dashboard.quickActions.scheduleShift',
+    icon: CalendarPlus,
+    color: '#10b981',
+    bg: 'rgba(16,185,129,0.12)',
+  },
+  {
+    i18nKey: 'dashboard.quickActions.runPayroll',
+    icon: Play,
+    color: '#3b82f6',
+    bg: 'rgba(59,130,246,0.12)',
+  },
 ];
 
 function getInitials(name: string) {
@@ -52,16 +69,17 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-const container = {
+const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.07 } },
 };
-const item: Record<string, any> = {
+const item: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const { data: dashboard, isLoading: loading } = useHRDashboard();
   const { data: staff = [] } = useStaff();
@@ -343,9 +361,9 @@ const Dashboard: React.FC = () => {
             </h2>
           </div>
           <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {quickActions.map((a) => (
+            {quickActionDefs.map((a) => (
               <button
-                key={a.label}
+                key={a.i18nKey}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -362,7 +380,9 @@ const Dashboard: React.FC = () => {
                 onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
               >
                 <a.icon size={18} style={{ color: a.color, flexShrink: 0 }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: a.color }}>{a.label}</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: a.color }}>
+                  {t(a.i18nKey)}
+                </span>
               </button>
             ))}
           </div>

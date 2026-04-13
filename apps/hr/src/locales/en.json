@@ -28,6 +28,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "employees": "Employees",
+    "staff": "Staff",
     "departments": "Departments",
     "shifts": "Shifts",
     "payroll": "Payroll",
@@ -38,12 +39,37 @@
     "timesheets": "Timesheets",
     "calendar": "Calendar",
     "reviews": "Reviews",
+    "oneOnOnes": "1-on-1s",
     "onboarding": "Onboarding",
     "offboarding": "Offboarding",
     "documents": "Documents",
     "benefits": "Benefits",
     "training": "Training",
     "operations": "Operations"
+  },
+  "layout": {
+    "sections": {
+      "workspace": "Workspace",
+      "time": "Time",
+      "people": "People",
+      "hr": "HR"
+    },
+    "appearance": "Appearance",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "signOut": "Sign out",
+    "hr": "HR",
+    "routes": {
+      "requestTimeOff": "Request Time Off",
+      "timeOffCalendar": "Time Off Calendar",
+      "shiftSchedule": "Shift Schedule",
+      "performanceReviews": "Performance Reviews",
+      "newReview": "New Review",
+      "employeeProfile": "Employee Profile"
+    }
   },
   "setup": {
     "title": "Set up your HR workspace",
@@ -201,7 +227,16 @@
   },
   "dashboard": {
     "welcome": "Welcome to HR",
-    "subtitle": "Manage your team, schedules, and payroll from here."
+    "subtitle": "Manage your team, schedules, and payroll from here.",
+    "quickActions": {
+      "addStaff": "Add Staff Member",
+      "scheduleShift": "Schedule Shift",
+      "runPayroll": "Run Payroll"
+    }
+  },
+  "staff": {
+    "directory": "Staff Directory",
+    "memberCount": "{{count}} team members"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

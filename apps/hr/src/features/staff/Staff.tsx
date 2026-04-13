@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
+import type { Variants } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { UserPlus, Mail, Search, Users } from 'lucide-react';
 import { StaffMember } from '../../shared/services/hrApi';
 import { useStaff } from './useStaff';
@@ -32,13 +34,14 @@ const avatarColors = [
   { bg: 'rgba(100,197,185,0.15)', color: '#64C5B9' },
 ];
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const cardAnim: Record<string, any> = {
+const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const cardAnim: Variants = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };
 
 const Staff: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [search, setSearch] = useState('');
@@ -74,10 +77,10 @@ const Staff: React.FC = () => {
       >
         <div>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
-            Staff Directory
+            {t('staff.directory')}
           </h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
-            {loading ? '…' : `${staffData.length} team members`}
+            {loading ? '…' : t('staff.memberCount', { count: staffData.length })}
           </p>
         </div>
         <button
