@@ -1,21 +1,22 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
 import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
-import { useFlowStore, Task } from '../stores/flowStore';
+import { useFlowStore } from '../stores/flowStore';
+import {
+  useBulkUpdateStatus,
+  useBulkUpdatePriority,
+  useBulkDelete,
+} from '../../features/tasks/useTasks';
 
 export const BulkEditBar: React.FC = () => {
-  const { selectedTaskIds, clearSelection, bulkUpdateTasks, deleteTask } = useFlowStore();
+  const { selectedTaskIds, clearSelection } = useFlowStore();
+  const bulkStatus = useBulkUpdateStatus();
+  const bulkPriority = useBulkUpdatePriority();
+  const bulkDelete = useBulkDelete();
 
   if (selectedTaskIds.length === 0) return null;
 
-  const act = (patch: Partial<Task>) => {
-    bulkUpdateTasks(selectedTaskIds, patch);
-    toast.success(
-      `Updated ${selectedTaskIds.length} task${selectedTaskIds.length !== 1 ? 's' : ''}`
-    );
-    clearSelection();
-  };
+  const isPending = bulkStatus.isPending || bulkPriority.isPending || bulkDelete.isPending;
 
   return (
     <AnimatePresence>
@@ -29,6 +30,7 @@ export const BulkEditBar: React.FC = () => {
           background: 'var(--flow-card)',
           border: '1px solid var(--flow-border)',
           boxShadow: 'var(--flow-shadow)',
+          opacity: isPending ? 0.7 : 1,
         }}
       >
         <span className="text-[11px] font-semibold px-2" style={{ color: 'var(--flow-text)' }}>
@@ -36,37 +38,45 @@ export const BulkEditBar: React.FC = () => {
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
-          onClick={() => act({ status: 'done' })}
-          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+          disabled={isPending}
+          onClick={() =>
+            bulkStatus
+              .mutateAsync({ ids: selectedTaskIds, status: 'done' })
+              .then(() => clearSelection())
+          }
+          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Check size={11} /> Mark done
         </button>
         <button
-          onClick={() => act({ priority: 'urgent' })}
-          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+          disabled={isPending}
+          onClick={() =>
+            bulkPriority
+              .mutateAsync({ ids: selectedTaskIds, priority: 'urgent' })
+              .then(() => clearSelection())
+          }
+          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Flag size={11} /> Set urgent
         </button>
         <button
-          onClick={() => {
-            selectedTaskIds.forEach((id) => useFlowStore.getState().archiveTask(id));
-            toast.success(`Archived ${selectedTaskIds.length} tasks`);
-            clearSelection();
-          }}
-          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+          disabled={isPending}
+          onClick={() =>
+            bulkStatus
+              .mutateAsync({ ids: selectedTaskIds, status: 'cancelled' })
+              .then(() => clearSelection())
+          }
+          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <Archive size={11} /> Archive
         </button>
         <button
-          onClick={() => {
-            selectedTaskIds.forEach((id) => deleteTask(id));
-            toast.success(`Deleted ${selectedTaskIds.length} tasks`);
-            clearSelection();
-          }}
-          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+          disabled={isPending}
+          onClick={() => bulkDelete.mutateAsync(selectedTaskIds).then(() => clearSelection())}
+          className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: '#ef4444' }}
         >
           <Trash2 size={11} /> Delete

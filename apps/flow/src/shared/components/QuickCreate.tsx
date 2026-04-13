@@ -11,6 +11,7 @@ import { cn, getInitials } from '../lib/utils';
 import { getCurrentUserId } from '../lib/currentUser';
 import { displayUserName } from '../lib/userDisplay';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
+import { useCreateTask } from '../../features/tasks/useTasks';
 
 const ACCENT = '#64C5B9';
 
@@ -42,9 +43,10 @@ function FieldRow({
 
 export const QuickCreate: React.FC = () => {
   const navigate = useNavigate();
-  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, createTask, sections } =
+  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, sections } =
     useFlowStore();
   const user = useUserStore((s) => s.user);
+  const createTaskMutation = useCreateTask();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -75,33 +77,28 @@ export const QuickCreate: React.FC = () => {
     }
   }, [quickCreateOpen, projects, activeWorkspaceId]);
 
-  const submit = () => {
+  const submit = async () => {
     if (!title.trim() || !projectId) return;
     const project = projects.find((p) => p.id === projectId);
     if (!project) return;
-    const projectSections = sections
-      .filter((s) => s.projectId === projectId)
-      .sort((a, b) => a.order - b.order);
 
-    const name = displayUserName(user);
     const uid = getCurrentUserId();
 
-    const task = createTask({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      projectId,
-      workspaceId: project.workspaceId,
-      priority,
-      sectionId: projectSections[0]?.id,
-      dueDate: dueDate || '',
-      assigneeId: assignToMe ? uid : '',
-      assignee: assignToMe ? name : '',
-      assigneeInitials: assignToMe ? getInitials(name) : '',
-      effortMinutes,
-    });
-    toast.success(`Created ${task.identifier}`, { description: task.title });
-    setQuickCreateOpen(false);
-    navigate(`/task/${task.id}`);
+    try {
+      const task = await createTaskMutation.mutateAsync({
+        title: title.trim(),
+        workspaceId: project.workspaceId,
+        projectId,
+        priority,
+        dueDate: dueDate || undefined,
+        assigneeId: assignToMe ? uid : undefined,
+      });
+      toast.success(`Created ${task.identifier ?? task.id}`, { description: task.title });
+      setQuickCreateOpen(false);
+      navigate(`/task/${task.id}`);
+    } catch {
+      // error toast handled by mutation onError
+    }
   };
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
@@ -352,11 +349,11 @@ export const QuickCreate: React.FC = () => {
               <button
                 type="button"
                 onClick={submit}
-                disabled={!title.trim() || !projectId}
+                disabled={!title.trim() || !projectId || createTaskMutation.isPending}
                 className="px-4 py-2 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 style={{ background: ACCENT, color: '#0a0a0a' }}
               >
-                Create task
+                {createTaskMutation.isPending ? 'Creating…' : 'Create task'}
               </button>
             </div>
           </motion.aside>

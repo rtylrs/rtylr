@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { flowApi, ApiTask } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
@@ -53,6 +54,7 @@ export function useCreateTask() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
+    onError: () => toast.error('Failed to create task'),
   });
 }
 
@@ -67,6 +69,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to update task'),
   });
 }
 
@@ -80,6 +83,7 @@ export function useDeleteTask() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
+    onError: () => toast.error('Failed to delete task'),
   });
 }
 
@@ -93,6 +97,52 @@ export function useUpdateTaskStatus() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
+    onError: () => toast.error('Failed to update status'),
+  });
+}
+
+export function useBulkUpdateStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: ApiTask['status'] }) => {
+      await Promise.all(ids.map((id) => unwrap(flowApi.updateTaskStatus(id, status))));
+    },
+    onSuccess: (_data, { ids }) => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      toast.success(`Updated ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+    },
+    onError: () => toast.error('Bulk update failed'),
+  });
+}
+
+export function useBulkUpdatePriority() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, priority }: { ids: string[]; priority: ApiTask['priority'] }) => {
+      await Promise.all(ids.map((id) => unwrap(flowApi.updateTask(id, { priority }))));
+    },
+    onSuccess: (_data, { ids }) => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      toast.success(`Updated ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+    },
+    onError: () => toast.error('Bulk update failed'),
+  });
+}
+
+export function useBulkDelete() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map((id) => unwrap(flowApi.deleteTask(id))));
+    },
+    onSuccess: (_data, ids) => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      toast.success(`Deleted ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+    },
+    onError: () => toast.error('Bulk delete failed'),
   });
 }
 
@@ -105,6 +155,7 @@ export function useAddComment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to post comment'),
   });
 }
 
@@ -117,6 +168,7 @@ export function useDeleteComment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to delete comment'),
   });
 }
 
@@ -129,6 +181,7 @@ export function useAddSubtask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to add subtask'),
   });
 }
 
@@ -143,5 +196,6 @@ export function useLogTime() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to log time'),
   });
 }

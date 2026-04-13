@@ -4,10 +4,11 @@ import type { Task } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 
 const Triage: React.FC = () => {
   const { data: apiTasks } = useTasks({});
-  const tasks = (apiTasks ?? []) as Task[];
+  const tasks: Task[] = (apiTasks ?? []).map(apiTaskToTask);
 
   const needsTriage = useMemo(() => {
     return tasks.filter(
