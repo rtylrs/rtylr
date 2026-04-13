@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Setup Wizard ───────────────────────────────────────────────────
+
+message SetupWizardStepPayload {
+  // Unique identifier for the setup step record.
+  int64 id = 1;
+  // Tenant owner this step belongs to.
+  int64 owner_id = 2;
+  // Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees).
+  string step_key = 3;
+  // Unix timestamp when this step was completed; absent if not yet completed.
+  optional int64 completed_at = 4;
+  // Unix timestamp when this step record was created.
+  int64 created_at = 5;
+  // Unix timestamp when this step record was last updated.
+  int64 updated_at = 6;
+}
+
+// ── HR Company Config ──────────────────────────────────────────────
+
+message HRCompanyConfigPayload {
+  // Unique identifier for the config record.
+  int64 id = 1;
+  // Tenant owner this config belongs to.
+  int64 owner_id = 2;
+  // How time is tracked (time_logging | attendance | both).
+  string time_tracking_model = 3;
+  // Period for timesheet submission (weekly | biweekly | monthly).
+  string timesheet_period = 4;
+  // Period for payroll runs (weekly | biweekly | monthly).
+  string payroll_period = 5;
+  // How gross pay is calculated (hourly | salary | both).
+  string payroll_gross_model = 6;
+  // Unix timestamp when the full setup wizard was completed; absent if still in progress.
+  optional int64 setup_completed_at = 7;
+  // Unix timestamp when this config was created.
+  int64 created_at = 8;
+  // Unix timestamp when this config was last updated.
+  int64 updated_at = 9;
+}
+
+// ── Get Setup Status ───────────────────────────────────────────────
+
+message GetSetupStatusResponse {
+  // All wizard steps and their completion state.
+  repeated SetupWizardStepPayload steps = 1;
+  // Current HR configuration for the tenant.
+  HRCompanyConfigPayload config = 2;
+  // Whether every setup step has been completed.
+  bool is_complete = 3;
+}
+
+// ── Complete Setup Step ────────────────────────────────────────────
+
+message CompleteSetupStepRequest {
+  // The step to mark as completed (must match a valid step_key).
+  string step_key = 1;
+}
+
+message CompleteSetupStepResponse {
+  // The step after being marked complete.
+  SetupWizardStepPayload step = 1;
+}

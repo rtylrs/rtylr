@@ -6,45 +6,72 @@
 
 /* eslint-disable */
 
-export interface Department {
+export interface DepartmentPayload {
+  /** Unique identifier for the department. */
   id: number;
+  /** Tenant owner this department belongs to. */
   ownerId: number;
+  /** Location this department operates from. */
+  locationId: number;
+  /** Parent department for org-chart hierarchy; absent if top-level. */
+  parentDepartmentId?:
+    | number
+    | undefined;
+  /** Display name of the department. */
   name: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ListDepartmentsRequest {
-}
-
-export interface ListDepartmentsResponse {
-  departments: Department[];
+  /** Work schedule applied to employees in this department by default; absent if none. */
+  defaultWorkScheduleId?:
+    | number
+    | undefined;
+  /** Unix timestamp when this department was created. */
+  createdAt: number;
+  /** Unix timestamp when this department was last updated. */
+  updatedAt: number;
 }
 
 export interface CreateDepartmentRequest {
+  /** Location this department operates from. */
+  locationId: number;
+  /** Parent department for org-chart hierarchy; absent if top-level. */
+  parentDepartmentId?:
+    | number
+    | undefined;
+  /** Display name of the department. */
   name: string;
-  description: string;
+  /** Default work schedule for employees in this department; absent if none. */
+  defaultWorkScheduleId?: number | undefined;
 }
 
 export interface CreateDepartmentResponse {
-  id: number;
+  /** The newly created department. */
+  department: DepartmentPayload | undefined;
 }
 
 export interface UpdateDepartmentRequest {
+  /** ID of the department to update. */
   id: number;
-  name: string;
-  description: string;
+  /** New location; absent to keep current. */
+  locationId?:
+    | number
+    | undefined;
+  /** New parent department; absent to keep current. */
+  parentDepartmentId?:
+    | number
+    | undefined;
+  /** New name; absent to keep current. */
+  name?:
+    | string
+    | undefined;
+  /** New default work schedule; absent to keep current. */
+  defaultWorkScheduleId?: number | undefined;
 }
 
 export interface UpdateDepartmentResponse {
-  success: boolean;
+  /** The updated department. */
+  department: DepartmentPayload | undefined;
 }
 
-export interface DeleteDepartmentRequest {
-  id: number;
-}
-
-export interface DeleteDepartmentResponse {
-  success: boolean;
+export interface ListDepartmentsResponse {
+  /** All departments for the tenant. */
+  departments: DepartmentPayload[];
 }

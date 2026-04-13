@@ -1,49 +1,71 @@
 syntax = "proto3";
 
-package hr;
+package hr.v1;
 
-option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
 
-// ── Departments ─────────────────────────────────────────────────────
+// ── Department ─────────────────────────────────────────────────────
 
-message Department {
+message DepartmentPayload {
+  // Unique identifier for the department.
   int64 id = 1;
+  // Tenant owner this department belongs to.
   int64 owner_id = 2;
-  string name = 3;
-  string description = 4;
-  string created_at = 5;
-  string updated_at = 6;
+  // Location this department operates from.
+  int64 location_id = 3;
+  // Parent department for org-chart hierarchy; absent if top-level.
+  optional int64 parent_department_id = 4;
+  // Display name of the department.
+  string name = 5;
+  // Work schedule applied to employees in this department by default; absent if none.
+  optional int64 default_work_schedule_id = 6;
+  // Unix timestamp when this department was created.
+  int64 created_at = 7;
+  // Unix timestamp when this department was last updated.
+  int64 updated_at = 8;
 }
 
-message ListDepartmentsRequest {}
-
-message ListDepartmentsResponse {
-  repeated Department departments = 1;
-}
+// ── Create ─────────────────────────────────────────────────────────
 
 message CreateDepartmentRequest {
-  string name = 1;
-  string description = 2;
+  // Location this department operates from.
+  int64 location_id = 1;
+  // Parent department for org-chart hierarchy; absent if top-level.
+  optional int64 parent_department_id = 2;
+  // Display name of the department.
+  string name = 3;
+  // Default work schedule for employees in this department; absent if none.
+  optional int64 default_work_schedule_id = 4;
 }
 
 message CreateDepartmentResponse {
-  int64 id = 1;
+  // The newly created department.
+  DepartmentPayload department = 1;
 }
 
+// ── Update ─────────────────────────────────────────────────────────
+
 message UpdateDepartmentRequest {
+  // ID of the department to update.
   int64 id = 1;
-  string name = 2;
-  string description = 3;
+  // New location; absent to keep current.
+  optional int64 location_id = 2;
+  // New parent department; absent to keep current.
+  optional int64 parent_department_id = 3;
+  // New name; absent to keep current.
+  optional string name = 4;
+  // New default work schedule; absent to keep current.
+  optional int64 default_work_schedule_id = 5;
 }
 
 message UpdateDepartmentResponse {
-  bool success = 1;
+  // The updated department.
+  DepartmentPayload department = 1;
 }
 
-message DeleteDepartmentRequest {
-  int64 id = 1;
-}
+// ── List ───────────────────────────────────────────────────────────
 
-message DeleteDepartmentResponse {
-  bool success = 1;
+message ListDepartmentsResponse {
+  // All departments for the tenant.
+  repeated DepartmentPayload departments = 1;
 }

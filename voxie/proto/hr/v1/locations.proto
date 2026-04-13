@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Location ───────────────────────────────────────────────────────
+
+message LocationPayload {
+  // Unique identifier for the location.
+  int64 id = 1;
+  // Tenant owner this location belongs to.
+  int64 owner_id = 2;
+  // Human-readable name of the location (e.g. "Downtown Office").
+  string name = 3;
+  // Full street address of the location.
+  string address = 4;
+  // IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default.
+  optional string timezone = 5;
+  // Whether this location is currently active and assignable.
+  bool is_active = 6;
+  // Unix timestamp when this location was created.
+  int64 created_at = 7;
+  // Unix timestamp when this location was last updated.
+  int64 updated_at = 8;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateLocationRequest {
+  // Human-readable name of the location.
+  string name = 1;
+  // Full street address of the location.
+  string address = 2;
+  // IANA timezone identifier; absent to use tenant default.
+  optional string timezone = 3;
+}
+
+message CreateLocationResponse {
+  // The newly created location.
+  LocationPayload location = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateLocationRequest {
+  // ID of the location to update.
+  int64 id = 1;
+  // New name; absent to keep current.
+  optional string name = 2;
+  // New address; absent to keep current.
+  optional string address = 3;
+  // New timezone; absent to keep current.
+  optional string timezone = 4;
+  // New active status; absent to keep current.
+  optional bool is_active = 5;
+}
+
+message UpdateLocationResponse {
+  // The updated location.
+  LocationPayload location = 1;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListLocationsResponse {
+  // All locations for the tenant.
+  repeated LocationPayload locations = 1;
+}
