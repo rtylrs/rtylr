@@ -2,6 +2,7 @@ import React from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import appConfig from '../../app.json';
 
 const SettingsScreen: React.FC = () => {
   const s = useSettingsStore();
@@ -135,6 +136,21 @@ const SettingsScreen: React.FC = () => {
         >
           Reset to defaults
         </button>
+
+        <Section title="About">
+          {[
+            { label: 'Application', value: appConfig.name },
+            { label: 'Version', value: `v${appConfig.version}` },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="flex justify-between items-center py-1 border-b border-pos-border"
+            >
+              <span className="text-xs text-pos-muted">{label}</span>
+              <span className="text-xs font-mono text-pos-text">{value}</span>
+            </div>
+          ))}
+        </Section>
       </div>
     </ScreenLayout>
   );

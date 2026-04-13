@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Settings as SettingsIcon, Bell, Database, Palette } from 'lucide-react';
+import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settingsStore';
 import { useWarehouses } from '../warehouses/useWarehouses';
@@ -190,6 +191,19 @@ const Settings: React.FC = () => {
           Save Settings
         </button>
       </div>
+
+      <Section title="About" icon={SettingsIcon}>
+        {[
+          { label: 'Application', value: appConfig.name },
+          { label: 'Version', value: `v${appConfig.version}` },
+        ].map(({ label, value }) => (
+          <Field key={label} label={label}>
+            <span className="text-xs font-mono" style={{ color: 'var(--hub-text)' }}>
+              {value}
+            </span>
+          </Field>
+        ))}
+      </Section>
     </motion.div>
   );
 };

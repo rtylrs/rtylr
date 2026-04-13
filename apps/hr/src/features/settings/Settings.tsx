@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
+import appConfig from '../../app.json';
 import {
   Card,
   SectionHeader,
@@ -93,6 +94,31 @@ const Settings: React.FC = () => {
           <Button variant="primary" onClick={save}>
             Save settings
           </Button>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionHeader title="About" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+          {[
+            { label: 'Application', value: appConfig.name },
+            { label: 'Version', value: `v${appConfig.version}` },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '6px 0',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
+            >
+              <Label>{label}</Label>
+              <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--hub-text)' }}>
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
       </Card>
     </div>
