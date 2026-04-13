@@ -69,7 +69,8 @@
       "performanceReviews": "Évaluations de performance",
       "newReview": "Nouvelle évaluation",
       "employeeProfile": "Profil de l'employé"
-    }
+    },
+    "hubLink": "Hub"
   },
   "setup": {
     "title": "Configurez votre espace RH",
@@ -236,7 +237,13 @@
   },
   "staff": {
     "directory": "Répertoire du personnel",
-    "memberCount": "{{count}} membres de l'équipe"
+    "memberCount": "{{count}} membres de l'équipe",
+    "inviteStaff": "Inviter du personnel",
+    "searchPlaceholder": "Rechercher le personnel… (appuyez /)",
+    "emptyState": {
+      "title": "Aucun membre du personnel",
+      "description": "Ajustez les filtres ou invitez quelqu'un dans votre équipe."
+    }
   },
   "errors": {
     "generic": "Une erreur est survenue. Veuillez réessayer.",

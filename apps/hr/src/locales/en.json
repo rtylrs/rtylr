@@ -69,7 +69,8 @@
       "performanceReviews": "Performance Reviews",
       "newReview": "New Review",
       "employeeProfile": "Employee Profile"
-    }
+    },
+    "hubLink": "Hub"
   },
   "setup": {
     "title": "Set up your HR workspace",
@@ -236,7 +237,13 @@
   },
   "staff": {
     "directory": "Staff Directory",
-    "memberCount": "{{count}} team members"
+    "memberCount": "{{count}} team members",
+    "inviteStaff": "Invite Staff",
+    "searchPlaceholder": "Search staff… (press /)",
+    "emptyState": {
+      "title": "No staff members",
+      "description": "Adjust filters or invite someone to your team."
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

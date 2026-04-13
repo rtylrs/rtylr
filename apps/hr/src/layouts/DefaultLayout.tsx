@@ -507,7 +507,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             }
           >
             <ArrowLeft size={11} />
-            Hub
+            {t('layout.hubLink')}
           </a>
         </div>
 

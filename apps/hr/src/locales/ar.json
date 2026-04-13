@@ -69,7 +69,8 @@
       "performanceReviews": "تقييمات الأداء",
       "newReview": "تقييم جديد",
       "employeeProfile": "ملف الموظف"
-    }
+    },
+    "hubLink": "Hub"
   },
   "setup": {
     "title": "إعداد مساحة عمل الموارد البشرية",
@@ -236,7 +237,13 @@
   },
   "staff": {
     "directory": "دليل الموظفين",
-    "memberCount": "{{count}} أعضاء الفريق"
+    "memberCount": "{{count}} أعضاء الفريق",
+    "inviteStaff": "دعوة موظف",
+    "searchPlaceholder": "البحث عن الموظفين… (اضغط /)",
+    "emptyState": {
+      "title": "لا يوجد موظفون",
+      "description": "عدّل الفلاتر أو ادعُ شخصاً إلى فريقك."
+    }
   },
   "errors": {
     "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",

@@ -99,7 +99,7 @@ const Staff: React.FC = () => {
           }}
         >
           <UserPlus size={15} />
-          Invite Staff
+          {t('staff.inviteStaff')}
         </button>
       </div>
 
@@ -169,7 +169,7 @@ const Staff: React.FC = () => {
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search staff... (press /)"
+            placeholder={t('staff.searchPlaceholder')}
             style={{
               width: '100%',
               padding: '8px 12px 8px 30px',
@@ -318,8 +318,8 @@ const Staff: React.FC = () => {
       {filtered.length === 0 && !loading && (
         <EmptyState
           icon={<Users size={20} />}
-          title="No staff members"
-          description="Adjust filters or invite someone to your team."
+          title={t('staff.emptyState.title')}
+          description={t('staff.emptyState.description')}
         />
       )}
     </div>
