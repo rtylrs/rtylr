@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Palette, Keyboard, Sparkles } from 'lucide-react';
+import { Bell, Palette, Keyboard, Sparkles, Info } from 'lucide-react';
+import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
@@ -18,6 +19,7 @@ const SECTIONS: SettingsSection[] = [
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'life', label: 'Life & rhythm', icon: Sparkles },
   { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
+  { id: 'about', label: 'About', icon: Info },
 ];
 
 const NotificationsSection: React.FC = () => {
@@ -333,11 +335,40 @@ const ShortcutsSection: React.FC = () => {
   );
 };
 
+const AboutSection: React.FC = () => (
+  <div className="space-y-6">
+    <div>
+      <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        About
+      </h2>
+      <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+        Application information.
+      </p>
+    </div>
+    <div className="rounded-xl divide-y" style={{ border: '1px solid var(--flow-border)' }}>
+      {[
+        { label: 'Application', value: appConfig.name },
+        { label: 'Version', value: `v${appConfig.version}` },
+      ].map(({ label, value }) => (
+        <div key={label} className="flex items-center justify-between px-4 py-3">
+          <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+            {label}
+          </span>
+          <span className="text-[13px] font-medium font-mono" style={{ color: 'var(--flow-text)' }}>
+            {value}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const SECTION_CONTENT: Record<string, React.FC> = {
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
+  about: AboutSection,
 };
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
