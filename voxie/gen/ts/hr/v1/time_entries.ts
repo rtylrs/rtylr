@@ -100,6 +100,12 @@ export interface ListTimesheetsRequest {
 export interface ListTimesheetsResponse {
   /** Page of timesheets matching the filters. */
   timesheets: TimesheetPayload[];
+  /** Total number of matching timesheets across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }
 
 export interface ListTimeEntriesRequest {
@@ -114,6 +120,12 @@ export interface ListTimeEntriesRequest {
 export interface ListTimeEntriesResponse {
   /** Time entries matching the filters. */
   entries: TimeEntryPayload[];
+  /** Total number of matching time entries across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }
 
 export interface CreateTimeEntryRequest {

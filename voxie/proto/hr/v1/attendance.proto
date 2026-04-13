@@ -87,4 +87,10 @@ message ListAttendanceRequest {
 message ListAttendanceResponse {
   // Attendance records matching the filters.
   repeated AttendanceRecordPayload records = 1;
+  // Total number of matching attendance records across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
 }

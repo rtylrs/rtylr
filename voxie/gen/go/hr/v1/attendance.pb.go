@@ -483,7 +483,13 @@ func (x *ListAttendanceRequest) GetDate() string {
 type ListAttendanceResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Attendance records matching the filters.
-	Records       []*AttendanceRecordPayload `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	Records []*AttendanceRecordPayload `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	// Total number of matching attendance records across all pages.
+	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset        int32 `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -523,6 +529,27 @@ func (x *ListAttendanceResponse) GetRecords() []*AttendanceRecordPayload {
 		return x.Records
 	}
 	return nil
+}
+
+func (x *ListAttendanceResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAttendanceResponse) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListAttendanceResponse) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
 }
 
 var File_hr_v1_attendance_proto protoreflect.FileDescriptor
@@ -582,9 +609,12 @@ const file_hr_v1_attendance_proto_rawDesc = "" +
 	"employeeId\x88\x01\x01\x12\x17\n" +
 	"\x04date\x18\x02 \x01(\tH\x01R\x04date\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\a\n" +
-	"\x05_date\"R\n" +
+	"\x05_date\"\x96\x01\n" +
 	"\x16ListAttendanceResponse\x128\n" +
-	"\arecords\x18\x01 \x03(\v2\x1e.hr.v1.AttendanceRecordPayloadR\arecordsB+Z)github.com/voxire/voxie/gen/go/hr/v1;hrv1b\x06proto3"
+	"\arecords\x18\x01 \x03(\v2\x1e.hr.v1.AttendanceRecordPayloadR\arecords\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x05R\x06offsetB+Z)github.com/voxire/voxie/gen/go/hr/v1;hrv1b\x06proto3"
 
 var (
 	file_hr_v1_attendance_proto_rawDescOnce sync.Once

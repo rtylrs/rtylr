@@ -420,7 +420,13 @@ func (x *ListTimesheetsRequest) GetStatus() string {
 type ListTimesheetsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Page of timesheets matching the filters.
-	Timesheets    []*TimesheetPayload `protobuf:"bytes,1,rep,name=timesheets,proto3" json:"timesheets,omitempty"`
+	Timesheets []*TimesheetPayload `protobuf:"bytes,1,rep,name=timesheets,proto3" json:"timesheets,omitempty"`
+	// Total number of matching timesheets across all pages.
+	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset        int32 `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -460,6 +466,27 @@ func (x *ListTimesheetsResponse) GetTimesheets() []*TimesheetPayload {
 		return x.Timesheets
 	}
 	return nil
+}
+
+func (x *ListTimesheetsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListTimesheetsResponse) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListTimesheetsResponse) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
 }
 
 type ListTimeEntriesRequest struct {
@@ -519,7 +546,13 @@ func (x *ListTimeEntriesRequest) GetDate() string {
 type ListTimeEntriesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Time entries matching the filters.
-	Entries       []*TimeEntryPayload `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	Entries []*TimeEntryPayload `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	// Total number of matching time entries across all pages.
+	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset        int32 `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -559,6 +592,27 @@ func (x *ListTimeEntriesResponse) GetEntries() []*TimeEntryPayload {
 		return x.Entries
 	}
 	return nil
+}
+
+func (x *ListTimeEntriesResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListTimeEntriesResponse) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListTimeEntriesResponse) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
 }
 
 type CreateTimeEntryRequest struct {
@@ -1004,19 +1058,25 @@ const file_hr_v1_time_entries_proto_rawDesc = "" +
 	"employeeId\x88\x01\x01\x12\x1b\n" +
 	"\x06status\x18\x02 \x01(\tH\x01R\x06status\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\t\n" +
-	"\a_status\"Q\n" +
+	"\a_status\"\x95\x01\n" +
 	"\x16ListTimesheetsResponse\x127\n" +
 	"\n" +
 	"timesheets\x18\x01 \x03(\v2\x17.hr.v1.TimesheetPayloadR\n" +
-	"timesheets\"p\n" +
+	"timesheets\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x05R\x06offset\"p\n" +
 	"\x16ListTimeEntriesRequest\x12$\n" +
 	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
 	"employeeId\x88\x01\x01\x12\x17\n" +
 	"\x04date\x18\x02 \x01(\tH\x01R\x04date\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\a\n" +
-	"\x05_date\"L\n" +
+	"\x05_date\"\x90\x01\n" +
 	"\x17ListTimeEntriesResponse\x121\n" +
-	"\aentries\x18\x01 \x03(\v2\x17.hr.v1.TimeEntryPayloadR\aentries\"\xc6\x03\n" +
+	"\aentries\x18\x01 \x03(\v2\x17.hr.v1.TimeEntryPayloadR\aentries\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x05R\x06offset\"\xc6\x03\n" +
 	"\x16CreateTimeEntryRequest\x12\x1f\n" +
 	"\vemployee_id\x18\x01 \x01(\x03R\n" +
 	"employeeId\x12\"\n" +

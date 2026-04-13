@@ -86,6 +86,12 @@ message ListTimesheetsRequest {
 message ListTimesheetsResponse {
   // Page of timesheets matching the filters.
   repeated TimesheetPayload timesheets = 1;
+  // Total number of matching timesheets across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
 }
 
 // ── List Time Entries ─────────────────────────────────────────────
@@ -100,6 +106,12 @@ message ListTimeEntriesRequest {
 message ListTimeEntriesResponse {
   // Time entries matching the filters.
   repeated TimeEntryPayload entries = 1;
+  // Total number of matching time entries across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
 }
 
 // ── Create Time Entry ─────────────────────────────────────────────

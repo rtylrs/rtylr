@@ -97,4 +97,10 @@ export interface ListAttendanceRequest {
 export interface ListAttendanceResponse {
   /** Attendance records matching the filters. */
   records: AttendanceRecordPayload[];
+  /** Total number of matching attendance records across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }
