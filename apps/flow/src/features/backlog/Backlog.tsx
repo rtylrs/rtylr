@@ -1,37 +1,36 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Inbox, Plus, Filter } from 'lucide-react';
+import { Inbox, Plus } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateTaskStatus } from '../tasks/useTasks';
+import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import StatusIcon from '../../shared/components/StatusIcon';
+import type { ApiTask } from '../../shared/services/flowApi';
 
 const ACCENT = '#64C5B9';
 
 const Backlog: React.FC = () => {
   const navigate = useNavigate();
-  const { tasks, projects, setQuickCreateOpen } = useFlowStore();
+  const { projects, setQuickCreateOpen } = useFlowStore();
+  const { data: apiTasks = [] } = useTasks({});
   const updateStatus = useUpdateTaskStatus();
   const [filter, setFilter] = useState<'all' | 'todo' | 'backlog'>('all');
 
   const backlogTasks = useMemo(() => {
-    return tasks
-      .filter(
-        (t) =>
-          !t.archived &&
-          (filter === 'all' ? t.status === 'todo' || t.status === 'backlog' : t.status === filter)
-      )
+    return apiTasks
+      .filter((t) => {
+        const s = t.status;
+        if (filter === 'all') return s === 'todo' || s === 'backlog';
+        return s === filter;
+      })
       .sort((a, b) => {
-        const pOrder = { urgent: 0, high: 1, medium: 2, low: 3, none: 4 };
-        return (
-          (pOrder[a.priority as keyof typeof pOrder] ?? 4) -
-          (pOrder[b.priority as keyof typeof pOrder] ?? 4)
-        );
+        const pOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+        return (pOrder[a.priority] ?? 4) - (pOrder[b.priority] ?? 4);
       });
-  }, [tasks, filter]);
+  }, [apiTasks, filter]);
 
   const byProject = useMemo(() => {
-    const map: Record<string, typeof backlogTasks> = {};
+    const map: Record<string, ApiTask[]> = {};
     for (const t of backlogTasks) {
       if (!map[t.projectId]) map[t.projectId] = [];
       map[t.projectId].push(t);
@@ -105,7 +104,7 @@ const Backlog: React.FC = () => {
                     style={{ background: project?.color ?? '#6b7280' }}
                   />
                   <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                    {project?.name ?? 'Unknown project'}
+                    {project?.name ?? projectTasks[0]?.projectName ?? 'Unknown project'}
                   </span>
                   <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
                     {projectTasks.length}
@@ -153,7 +152,10 @@ const Backlog: React.FC = () => {
                         value={task.status}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) =>
-                          updateStatus.mutate({ id: task.id, status: e.target.value as any })
+                          updateStatus.mutate({
+                            id: task.id,
+                            status: e.target.value as ApiTask['status'],
+                          })
                         }
                         className="text-[10px] rounded px-1 py-0.5 outline-none shrink-0"
                         style={{

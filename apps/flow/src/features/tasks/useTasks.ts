@@ -1,15 +1,22 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi, ApiTask } from '../../shared/services/flowApi';
+import { useFlowStore } from '../../shared/stores/flowStore';
 
 export function useTasks(params: {
   projectId?: string;
   status?: ApiTask['status'];
   assigneeId?: string;
 }) {
+  const { activeWorkspaceId } = useFlowStore();
+  const effectiveParams = {
+    ...params,
+    workspaceId: params.projectId ? undefined : activeWorkspaceId || undefined,
+  };
   return useQuery({
-    queryKey: ['tasks', params],
-    queryFn: () => unwrap(flowApi.getTasks(params)),
+    queryKey: ['tasks', effectiveParams],
+    queryFn: () => unwrap(flowApi.getTasks(effectiveParams)),
+    enabled: !!(effectiveParams.projectId || effectiveParams.workspaceId),
   });
 }
 

@@ -56,14 +56,30 @@ export interface ApiTask {
   projectId: string;
   workspaceId: string;
   title: string;
-  status: 'todo' | 'in_progress' | 'in_review' | 'done';
-  priority: 'urgent' | 'high' | 'medium' | 'low';
+  description?: string;
+  status: 'todo' | 'in_progress' | 'in_review' | 'done' | 'cancelled' | 'backlog';
+  priority: 'urgent' | 'high' | 'medium' | 'low' | 'no_priority';
   assignee: string;
+  assigneeId?: string;
   assigneeInitials: string;
   dueDate: string;
   subtaskCount: number;
   projectName: string;
   estimate?: number;
+  identifier?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  labels?: string[];
+  dependencies?: string[];
+  sectionId?: string;
+  cycleId?: string;
+  milestoneId?: string;
+  // UI-only fields stored in local store
+  effortMinutes?: number;
+  waitingOn?: string;
+  decisionNote?: string;
+  focusPin?: boolean;
+  customFieldValues?: Record<string, string | number>;
 }
 
 export interface ApiLabel {
@@ -293,9 +309,15 @@ export const flowApi = {
 
   // -- Tasks --------------------------------------------------------------
 
-  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) => {
+  getTasks: (params: {
+    projectId?: string;
+    workspaceId?: string;
+    status?: ApiTask['status'];
+    assigneeId?: string;
+  }) => {
     const q: Record<string, string> = {};
     if (params.projectId) q.project_id = params.projectId;
+    if (params.workspaceId) q.workspace_id = params.workspaceId;
     if (params.status) q.status = params.status;
     if (params.assigneeId) q.assignee_id = params.assigneeId;
     return safe.get<ApiTask[]>('/flow/tasks', { params: q });

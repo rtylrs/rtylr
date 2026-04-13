@@ -4,12 +4,12 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiMilestone } from '../../shared/services/flowApi';
 
 export function useMilestones(projectId?: string) {
-  return useQuery({
+  return useQuery<ApiMilestone[]>({
     queryKey: ['milestones', projectId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getMilestones(projectId));
-      // backend returns { milestones: [...] }
-      return (res as any).milestones ?? (Array.isArray(res) ? res : []);
+      const data = (res as any).milestones ?? (Array.isArray(res) ? res : []);
+      return data as ApiMilestone[];
     },
   });
 }

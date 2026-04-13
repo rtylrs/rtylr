@@ -20,6 +20,10 @@ vi.mock('../../shared/lib/currentUser', () => ({
   isTaskMine: vi.fn(() => false),
 }));
 
+vi.mock('../../shared/stores/flowStore', () => ({
+  useFlowStore: vi.fn(() => ({ activeWorkspaceId: 'ws-1' })),
+}));
+
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
 }));
@@ -60,9 +64,9 @@ describe('useTasks (remote mode)', () => {
     expect(flowApi.getTasks).toHaveBeenCalledWith(params);
   });
 
-  it('starts in loading state', () => {
+  it('starts in loading state when projectId provided', () => {
     (flowApi.getTasks as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useTasks({}), {
+    const { result } = renderHook(() => useTasks({ projectId: 'p-1' }), {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);
