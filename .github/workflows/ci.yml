@@ -10,7 +10,7 @@ on:
 jobs:
   check:
     name: Typecheck, Lint & Build
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
 
     steps:
       - name: Checkout
@@ -49,7 +49,7 @@ jobs:
   # ── Detect which apps changed ──────────────────────────────────────
   changes:
     name: Detect changed apps
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
       landing: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.landing }}
@@ -117,7 +117,7 @@ jobs:
     name: Deploy Landing
     needs: [check, changes]
     if: needs.changes.outputs.landing == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -140,7 +140,7 @@ jobs:
     name: Deploy Auth
     needs: [check, changes]
     if: needs.changes.outputs.auth == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -163,7 +163,7 @@ jobs:
     name: Deploy Hub
     needs: [check, changes]
     if: needs.changes.outputs.hub == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -186,7 +186,7 @@ jobs:
     name: Deploy POS
     needs: [check, changes]
     if: needs.changes.outputs.pos == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -209,7 +209,7 @@ jobs:
     name: Deploy ERP
     needs: [check, changes]
     if: needs.changes.outputs.erp == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -232,7 +232,7 @@ jobs:
     name: Deploy CRM
     needs: [check, changes]
     if: needs.changes.outputs.crm == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -255,7 +255,7 @@ jobs:
     name: Deploy HR
     needs: [check, changes]
     if: needs.changes.outputs.hr == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -278,7 +278,7 @@ jobs:
     name: Deploy Finance
     needs: [check, changes]
     if: needs.changes.outputs.finance == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -301,7 +301,7 @@ jobs:
     name: Deploy Flow
     needs: [check, changes]
     if: needs.changes.outputs.flow == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -324,7 +324,7 @@ jobs:
     name: Deploy Insights
     needs: [check, changes]
     if: needs.changes.outputs.insights == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -347,7 +347,7 @@ jobs:
     name: Deploy Menu
     needs: [check, changes]
     if: needs.changes.outputs.menu == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -370,7 +370,7 @@ jobs:
     name: Deploy Docs
     needs: [check, changes]
     if: needs.changes.outputs.docs == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
