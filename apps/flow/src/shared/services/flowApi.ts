@@ -119,6 +119,28 @@ export interface ApiRoadmap {
   taskCount?: number;
 }
 
+export interface ApiWorkspaceMember {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: 'manager' | 'member' | 'viewer';
+  invitedBy?: string;
+  joinedAt: string;
+}
+
+export interface ApiProjectMember {
+  id: string;
+  projectId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: 'manager' | 'member' | 'viewer';
+  addedBy?: string;
+  addedAt: string;
+}
+
 export interface ApiTaskActivity {
   id: string;
   taskId: string;
@@ -204,11 +226,19 @@ export const flowApi = {
 
   deleteWorkspace: (id: string) => safe.post(`/flow/workspaces/${id}/delete`),
 
-  addWorkspaceMember: (data: { workspaceId: string; userId: string; role?: string }) =>
+  getWorkspaceMembers: (workspaceId: string) =>
+    safe.get<ApiWorkspaceMember[]>('/flow/workspaces/members', {
+      params: { workspace_id: workspaceId },
+    }),
+
+  addWorkspaceMember: (data: { workspace_id: number; user_id: number; role?: string }) =>
     safe.post('/flow/workspaces/member', data),
 
-  removeWorkspaceMember: (userId: string, workspaceId: string) =>
-    safe.post(`/flow/workspaces/member/${userId}`, { workspaceId }),
+  removeWorkspaceMember: (data: { workspace_id: number; user_id: number }) =>
+    safe.delete('/flow/workspaces/member', { data }),
+
+  updateWorkspaceMemberRole: (data: { workspace_id: number; user_id: number; role: string }) =>
+    safe.put('/flow/workspaces/member/role', data),
 
   // -- Projects -----------------------------------------------------------
 
@@ -222,6 +252,21 @@ export const flowApi = {
     safe.post<ApiProject>(`/flow/projects/${id}`, data),
 
   deleteProject: (id: string) => safe.post(`/flow/projects/${id}/delete`),
+
+  getProjectMembers: (projectId: string) =>
+    safe.get<ApiProjectMember[]>('/flow/projects/members', { params: { project_id: projectId } }),
+
+  addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
+    safe.post('/flow/projects/member', data),
+
+  removeProjectMember: (data: { project_id: number; user_id: number }) =>
+    safe.delete('/flow/projects/member', { data }),
+
+  updateProjectMemberRole: (data: { project_id: number; user_id: number; role: string }) =>
+    safe.put('/flow/projects/member/role', data),
+
+  transferProjectOwnership: (data: { project_id: number; new_owner_id: number }) =>
+    safe.put('/flow/projects/transfer', data),
 
   // -- Tasks --------------------------------------------------------------
 
