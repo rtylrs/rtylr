@@ -5,40 +5,41 @@
 // source: hr/v1/staff.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Staff {
   id: number;
+  ownerId: number;
+  userId: number;
+  departmentId: number;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   role: string;
-  departmentId: number;
-  departmentName: string;
-  /** active, inactive, on_leave */
+  employmentType: string;
   status: string;
-  hourlyRate: number;
   salary: number;
-  hireDate: string;
-  avatarUrl: string;
-  /** clocked_in, clocked_out */
-  clockStatus: string;
-  lastClockIn: string;
+  hourlyRate: number;
+  overtimeRate: number;
+  startDate: string;
+  endDate: string;
+  address: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  apps: string;
+  notes: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ListStaffRequest {
-  pagination: PaginationRequest | undefined;
   search: string;
+  departmentId: string;
   status: string;
-  departmentId: number;
 }
 
 export interface ListStaffResponse {
   staff: Staff[];
-  pagination: PaginationResponse | undefined;
 }
 
 export interface GetStaffRequest {
@@ -50,36 +51,54 @@ export interface GetStaffResponse {
 }
 
 export interface CreateStaffRequest {
+  userId: number;
+  departmentId: number;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   role: string;
-  departmentId: number;
-  hourlyRate: number;
+  employmentType: string;
+  status: string;
   salary: number;
-  hireDate: string;
+  hourlyRate: number;
+  overtimeRate: number;
+  startDate: string;
+  endDate: string;
+  address: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  apps: string;
+  notes: string;
 }
 
 export interface CreateStaffResponse {
-  staff: Staff | undefined;
+  id: number;
 }
 
 export interface UpdateStaffRequest {
   id: number;
+  departmentId: number;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   role: string;
-  departmentId: number;
-  hourlyRate: number;
-  salary: number;
+  employmentType: string;
   status: string;
+  salary: number;
+  hourlyRate: number;
+  overtimeRate: number;
+  endDate: string;
+  address: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  apps: string;
+  notes: string;
 }
 
 export interface UpdateStaffResponse {
-  staff: Staff | undefined;
+  success: boolean;
 }
 
 export interface DeleteStaffRequest {
@@ -95,7 +114,7 @@ export interface ClockInRequest {
 }
 
 export interface ClockInResponse {
-  clockedInAt: string;
+  success: boolean;
 }
 
 export interface ClockOutRequest {
@@ -103,6 +122,5 @@ export interface ClockOutRequest {
 }
 
 export interface ClockOutResponse {
-  clockedOutAt: string;
-  hoursWorked: number;
+  success: boolean;
 }
