@@ -15,6 +15,7 @@ import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 
 const ACCENT = '#64C5B9';
 
@@ -204,7 +205,9 @@ const ProjectList: React.FC = () => {
   const { data: apiTasks } = useTasks({ projectId });
 
   const project = projects.find((p) => p.id === projectId);
-  const projectTasks = (apiTasks ?? tasks.filter((t) => t.projectId === projectId)) as Task[];
+  const projectTasks: Task[] = apiTasks
+    ? apiTasks.map(apiTaskToTask)
+    : tasks.filter((t) => t.projectId === projectId);
 
   const projectSections = useMemo(
     () => sections.filter((s) => s.projectId === projectId).sort((a, b) => a.order - b.order),

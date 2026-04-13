@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { useMyIssues } from '../tasks/useMyIssues';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { isDueToday } from '../../shared/lib/lifeRhythm';
 import { isTaskMine } from '../../shared/lib/currentUser';
 import { formatEffortMinutes } from '../../shared/lib/effortPresets';
@@ -16,7 +17,7 @@ const FocusToday: React.FC = () => {
   const storeTasks = useFlowStore((s) => s.tasks);
   const { projects, activeWorkspaceId } = useFlowStore();
   const { data: myTasks } = useMyIssues();
-  const tasks = ((myTasks as Task[] | undefined) ?? storeTasks) as Task[];
+  const tasks: Task[] = myTasks ? myTasks.map(apiTaskToTask) : storeTasks;
 
   const focusTasks = useMemo(() => {
     const list = tasks.filter(

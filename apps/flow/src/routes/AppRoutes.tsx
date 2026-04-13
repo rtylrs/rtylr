@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import FlowLayout from '../layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
+import ErrorBoundary from '../shared/components/ErrorBoundary';
 
 const WorkspaceDashboard = React.lazy(
   () => import('../features/workspace-dashboard/WorkspaceDashboard')
@@ -31,22 +32,24 @@ const Backlog = React.lazy(() => import('../features/backlog/Backlog'));
 function withLayout(element: React.ReactNode): React.ReactNode {
   return (
     <FlowLayout>
-      <Suspense
-        fallback={
-          <div
-            style={{
-              padding: '32px',
-              color: 'var(--flow-text-muted)',
-              fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-              fontSize: '13px',
-            }}
-          >
-            Loading…
-          </div>
-        }
-      >
-        {element}
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                padding: '32px',
+                color: 'var(--flow-text-muted)',
+                fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+                fontSize: '13px',
+              }}
+            >
+              Loading…
+            </div>
+          }
+        >
+          {element}
+        </Suspense>
+      </ErrorBoundary>
     </FlowLayout>
   );
 }
