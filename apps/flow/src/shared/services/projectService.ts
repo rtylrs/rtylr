@@ -3,7 +3,7 @@ import type { ApiProject } from './flowApi';
 
 export const projectService = {
   getProjects: (workspaceId: string) =>
-    safe.get<ApiProject[]>('/flow/projects', { params: { workspaceId } }),
+    safe.get<ApiProject[]>('/flow/projects', { params: { workspace_id: workspaceId } }),
 
   create: (data: { workspaceId: string; name: string; color?: string }) =>
     safe.post<ApiProject>('/flow/projects', data),

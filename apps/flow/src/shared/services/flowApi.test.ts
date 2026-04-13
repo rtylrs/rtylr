@@ -21,7 +21,9 @@ describe('flowApi', () => {
   // Dashboard
   it('getDashboard calls GET /flow/dashboard with optional workspaceId', () => {
     flowApi.getDashboard('ws-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/dashboard', { params: { workspaceId: 'ws-1' } });
+    expect(safe.get).toHaveBeenCalledWith('/flow/dashboard', {
+      params: { workspace_id: 'ws-1' },
+    });
   });
 
   it('getDashboard without workspaceId passes undefined params', () => {
@@ -60,7 +62,9 @@ describe('flowApi', () => {
   // Projects
   it('getProjects calls GET /flow/projects with workspaceId', () => {
     flowApi.getProjects('ws-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/projects', { params: { workspaceId: 'ws-1' } });
+    expect(safe.get).toHaveBeenCalledWith('/flow/projects', {
+      params: { workspace_id: 'ws-1' },
+    });
   });
 
   it('createProject calls POST /flow/projects', () => {
@@ -75,10 +79,12 @@ describe('flowApi', () => {
   });
 
   // Tasks
-  it('getTasks calls GET /flow/tasks with params', () => {
+  it('getTasks calls GET /flow/tasks with snake_case params', () => {
     const params = { projectId: 'p-1', status: 'todo' as const };
     flowApi.getTasks(params);
-    expect(safe.get).toHaveBeenCalledWith('/flow/tasks', { params });
+    expect(safe.get).toHaveBeenCalledWith('/flow/tasks', {
+      params: { project_id: 'p-1', status: 'todo' },
+    });
   });
 
   it('getMyTasks calls GET /flow/tasks/my', () => {
@@ -133,7 +139,9 @@ describe('flowApi', () => {
   // Milestones
   it('getMilestones calls GET /flow/milestones', () => {
     flowApi.getMilestones('p-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/milestones', { params: { projectId: 'p-1' } });
+    expect(safe.get).toHaveBeenCalledWith('/flow/milestones', {
+      params: { project_id: 'p-1' },
+    });
   });
 
   it('updateMilestone calls PUT /flow/milestones/:id', () => {

@@ -21,7 +21,7 @@ function applyTheme(theme: Theme) {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: 'dark',
+      theme: 'light',
       setTheme: (theme) => {
         applyTheme(theme);
         set({ theme });
@@ -42,5 +42,5 @@ export function initTheme() {
       }
     } catch {}
   }
-  applyTheme('dark');
+  applyTheme('light');
 }
