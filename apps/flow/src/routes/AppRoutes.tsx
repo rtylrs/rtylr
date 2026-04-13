@@ -25,6 +25,8 @@ const Team = React.lazy(() => import('../features/team/Team'));
 const Triage = React.lazy(() => import('../features/triage/Triage'));
 const FocusToday = React.lazy(() => import('../features/focus-today/FocusToday'));
 const Archive = React.lazy(() => import('../features/archive/Archive'));
+const WorkspaceManager = React.lazy(() => import('../features/workspace-manager/WorkspaceManager'));
+const Backlog = React.lazy(() => import('../features/backlog/Backlog'));
 
 function withLayout(element: React.ReactNode): React.ReactNode {
   return (
@@ -52,6 +54,7 @@ function withLayout(element: React.ReactNode): React.ReactNode {
 const appRoutes: RouteObject[] = [
   { path: '/', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
   { path: '/w/:workspaceId', element: withLayout(<WorkspaceDashboard />) },
+  { path: '/w/:workspaceId/members', element: withLayout(<WorkspaceManager />) },
   { path: '/w/:workspaceId/p/:projectId', element: withLayout(<ProjectBoard />) },
   { path: '/w/:workspaceId/p/:projectId/list', element: withLayout(<ProjectList />) },
   { path: '/w/:workspaceId/p/:projectId/overview', element: withLayout(<ProjectOverview />) },
@@ -69,6 +72,7 @@ const appRoutes: RouteObject[] = [
   { path: '/team', element: withLayout(<Team />) },
   { path: '/triage', element: withLayout(<Triage />) },
   { path: '/archive', element: withLayout(<Archive />) },
+  { path: '/backlog', element: withLayout(<Backlog />) },
   { path: '/inbox', element: withLayout(<Inbox />) },
   { path: '/settings', element: withLayout(<FlowSettings />) },
   { path: '*', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },

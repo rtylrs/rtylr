@@ -28,6 +28,7 @@ import {
   ArrowDown,
   Menu,
   X,
+  Shield,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { useUserStore } from '../shared/stores/userStore';
@@ -523,6 +524,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 exact
               />
               <SidebarLink to="/triage" icon={Eye} label="Triage" />
+              <SidebarLink to="/backlog" icon={Inbox} label="Backlog" />
             </nav>
 
             <div className="flex flex-col gap-2">
@@ -608,6 +610,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
                         <nav className="flex flex-col gap-px pt-px">
                           <SidebarLink to="/team" icon={Users} label="Workload" />
+                          <SidebarLink
+                            to={`/w/${currentWorkspaceId}/members`}
+                            icon={Shield}
+                            label="Members"
+                          />
                           <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
                           <SidebarLink to="/archive" icon={Archive} label="Archive" />
                         </nav>

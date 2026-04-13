@@ -1,20 +1,57 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { MessageSquare, GitBranch, Mail, Trash2, Save } from 'lucide-react';
+import {
+  MessageSquare,
+  GitBranch,
+  Mail,
+  Trash2,
+  Save,
+  Plus,
+  Crown,
+  Shield,
+  Eye,
+  ArrowRightLeft,
+} from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useUpdateProject, useDeleteProject } from './useProjects';
+import {
+  useProjectMembers,
+  useAddProjectMember,
+  useRemoveProjectMember,
+  useUpdateProjectMemberRole,
+  useTransferProjectOwnership,
+} from './useProjectMembers';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import type { ApiProjectMember } from '../../shared/services/flowApi';
+
+const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
+  manager: { icon: <Crown size={10} />, color: '#f59e0b' },
+  member: { icon: <Shield size={10} />, color: '#64C5B9' },
+  viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
+};
 
 const ProjectSettings: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
   const navigate = useNavigate();
-  const { projects, members } = useFlowStore();
+  const { projects } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
+
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
+  const [tab, setTab] = useState<'general' | 'members' | 'integrations' | 'danger'>('general');
+
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
+  const addMember = useAddProjectMember(projectId ?? '');
+  const removeMember = useRemoveProjectMember(projectId ?? '');
+  const updateRole = useUpdateProjectMemberRole(projectId ?? '');
+  const transferOwnership = useTransferProjectOwnership();
+
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newUserId, setNewUserId] = useState('');
+  const [newRole, setNewRole] = useState<'manager' | 'member' | 'viewer'>('member');
 
   if (!project) {
     return (
@@ -23,6 +60,13 @@ const ProjectSettings: React.FC = () => {
       </div>
     );
   }
+
+  const tabs = [
+    { id: 'general', label: 'General' },
+    { id: 'members', label: 'Members' },
+    { id: 'integrations', label: 'Integrations' },
+    { id: 'danger', label: 'Danger Zone' },
+  ] as const;
 
   return (
     <div className="flex flex-col h-full overflow-auto">
@@ -36,116 +80,354 @@ const ProjectSettings: React.FC = () => {
         <h1 className="text-[17px] font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           Settings
         </h1>
+        <div className="flex gap-4 mt-3">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className="text-[12px] pb-1 border-b-2 transition-colors"
+              style={{
+                color: tab === t.id ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                borderColor: tab === t.id ? '#64C5B9' : 'transparent',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="p-6 max-w-2xl space-y-6">
-        <Section title="General">
-          <Field label="Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
-              }}
-            />
-          </Field>
-          <Field label="Description">
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
-              }}
-            />
-          </Field>
-          <button
-            onClick={() =>
-              updateProject.mutate(
-                { id: projectId!, data: { name } },
-                {
-                  onSuccess: () => toast.success('Project updated'),
-                  onError: () => toast.error('Failed to update project'),
-                }
-              )
-            }
-            disabled={updateProject.isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-            style={{ background: '#64C5B9', color: '#0a0a0a' }}
-          >
-            <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
-          </button>
-        </Section>
+        {/* ── General ── */}
+        {tab === 'general' && (
+          <>
+            <Field label="Name">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text)',
+                }}
+              />
+            </Field>
+            <Field label="Description">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text)',
+                }}
+              />
+            </Field>
+            <button
+              onClick={() =>
+                updateProject.mutate(
+                  { id: projectId!, data: { name, description } },
+                  {
+                    onSuccess: () => toast.success('Project updated'),
+                    onError: () => toast.error('Failed to update project'),
+                  }
+                )
+              }
+              disabled={updateProject.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+            >
+              <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
+            </button>
+          </>
+        )}
 
-        <Section title="Members">
-          <div className="space-y-2">
-            {members.map((m) => (
+        {/* ── Members ── */}
+        {tab === 'members' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p
+                className="text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                {members.length} member{members.length !== 1 ? 's' : ''}
+              </p>
+              <button
+                onClick={() => setShowAddMember((v) => !v)}
+                className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
+                style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+              >
+                <Plus size={10} /> Add
+              </button>
+            </div>
+
+            {showAddMember && (
               <div
-                key={m.id}
-                className="flex items-center gap-3 rounded-md px-3 py-2"
+                className="flex gap-2 p-3 rounded-lg"
+                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+              >
+                <input
+                  type="number"
+                  placeholder="User ID"
+                  value={newUserId}
+                  onChange={(e) => setNewUserId(e.target.value)}
+                  className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                />
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value as 'manager' | 'member' | 'viewer')}
+                  className="rounded px-2 py-1.5 text-[11px] outline-none"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                >
+                  <option value="manager">Manager</option>
+                  <option value="member">Member</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <button
+                  onClick={() => {
+                    const uid = Number(newUserId);
+                    if (!uid) return toast.error('Enter a valid user ID');
+                    addMember.mutate(
+                      { project_id: Number(projectId), user_id: uid, role: newRole },
+                      {
+                        onSuccess: () => {
+                          toast.success('Member added');
+                          setNewUserId('');
+                          setShowAddMember(false);
+                        },
+                        onError: () => toast.error('Failed to add member'),
+                      }
+                    );
+                  }}
+                  disabled={addMember.isPending}
+                  className="px-3 py-1.5 rounded text-[11px] font-semibold"
+                  style={{ background: '#64C5B9', color: '#0a0a0a' }}
+                >
+                  Add
+                </button>
+              </div>
+            )}
+
+            {membersLoading ? (
+              <div className="space-y-2">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-12 rounded-lg animate-pulse"
+                    style={{ background: 'var(--flow-hover)' }}
+                  />
+                ))}
+              </div>
+            ) : members.length === 0 ? (
+              <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+                No members yet.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {members.map((m) => {
+                  const roleMeta = ROLE_META[m.role] ?? ROLE_META.member;
+                  const initials = m.name
+                    ? m.name
+                        .split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : m.email.slice(0, 2).toUpperCase();
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex items-center gap-3 rounded-md px-3 py-2"
+                      style={{
+                        background: 'var(--flow-input-bg)',
+                        border: '1px solid var(--flow-border)',
+                      }}
+                    >
+                      <span
+                        className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                        style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+                      >
+                        {initials}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-[12px] font-medium truncate"
+                          style={{ color: 'var(--flow-text)' }}
+                        >
+                          {m.name || m.email}
+                        </p>
+                        {m.name && (
+                          <p
+                            className="text-[10px] truncate"
+                            style={{ color: 'var(--flow-text-dim)' }}
+                          >
+                            {m.email}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1" style={{ color: roleMeta.color }}>
+                        {roleMeta.icon}
+                        <select
+                          value={m.role}
+                          onChange={(e) =>
+                            updateRole.mutate(
+                              {
+                                project_id: Number(projectId),
+                                user_id: Number(m.userId),
+                                role: e.target.value,
+                              },
+                              {
+                                onSuccess: () => toast.success('Role updated'),
+                                onError: () => toast.error('Failed'),
+                              }
+                            )
+                          }
+                          className="text-[11px] outline-none bg-transparent cursor-pointer"
+                          style={{ color: roleMeta.color }}
+                        >
+                          <option value="manager">Manager</option>
+                          <option value="member">Member</option>
+                          <option value="viewer">Viewer</option>
+                        </select>
+                      </div>
+                      <button
+                        onClick={() =>
+                          removeMember.mutate(
+                            { project_id: Number(projectId), user_id: Number(m.userId) },
+                            {
+                              onSuccess: () => toast.success('Member removed'),
+                              onError: () => toast.error('Failed'),
+                            }
+                          )
+                        }
+                        className="h-6 w-6 rounded flex items-center justify-center shrink-0"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
+                        title="Remove"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {members.length > 0 && (
+              <div className="pt-4" style={{ borderTop: '1px solid var(--flow-border)' }}>
+                <p
+                  className="text-[11px] font-semibold mb-2"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  Transfer Ownership
+                </p>
+                <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
+                  Transfer ownership to another project member. You'll remain a member.
+                </p>
+                <div className="flex gap-2">
+                  <select
+                    id="transfer-select"
+                    className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
+                    style={{
+                      background: 'var(--flow-input-bg)',
+                      border: '1px solid var(--flow-border)',
+                      color: 'var(--flow-text)',
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select new owner…
+                    </option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.userId}>
+                        {m.name || m.email}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      const sel = document.getElementById('transfer-select') as HTMLSelectElement;
+                      const newOwnerId = Number(sel?.value);
+                      if (!newOwnerId) return toast.error('Select a member');
+                      if (!window.confirm('Transfer ownership? This cannot be undone.')) return;
+                      transferOwnership.mutate(
+                        { project_id: Number(projectId), new_owner_id: newOwnerId },
+                        {
+                          onSuccess: () => toast.success('Ownership transferred'),
+                          onError: () => toast.error('Failed'),
+                        }
+                      );
+                    }}
+                    disabled={transferOwnership.isPending}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+                  >
+                    <ArrowRightLeft size={10} /> Transfer
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Integrations ── */}
+        {tab === 'integrations' && (
+          <div className="space-y-2">
+            {[
+              {
+                icon: MessageSquare,
+                name: 'Slack',
+                description: 'Post project updates to #flow-updates',
+              },
+              { icon: GitBranch, name: 'GitHub', description: 'Link PRs to tasks automatically' },
+              { icon: Mail, name: 'Email', description: 'Send daily digests to members' },
+            ].map(({ icon: Icon, name, description }) => (
+              <div
+                key={name}
+                className="flex items-center gap-3 rounded-md px-3 py-2.5"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
                 }}
               >
-                <span
-                  className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold"
-                  style={{ background: 'rgba(100,197,185,0.22)', color: '#64C5B9' }}
-                >
-                  {m.initials}
-                </span>
+                <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
                 <div className="flex-1">
                   <p className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
-                    {m.name}
+                    {name}
                   </p>
                   <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-                    {m.email}
+                    {description}
                   </p>
                 </div>
-                <select
-                  defaultValue={m.role}
-                  className="bg-transparent text-[11px] outline-none"
+                <button
+                  className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  <option style={{ background: 'var(--flow-card)' }}>owner</option>
-                  <option style={{ background: 'var(--flow-card)' }}>admin</option>
-                  <option style={{ background: 'var(--flow-card)' }}>member</option>
-                  <option style={{ background: 'var(--flow-card)' }}>viewer</option>
-                </select>
+                  Connect
+                </button>
               </div>
             ))}
           </div>
-        </Section>
+        )}
 
-        <Section title="Integrations">
-          <div className="space-y-2">
-            <Integration
-              icon={MessageSquare}
-              name="Slack"
-              description="Post project updates to #flow-updates"
-            />
-            <Integration
-              icon={GitBranch}
-              name="GitHub"
-              description="Link PRs to tasks automatically"
-            />
-            <Integration icon={Mail} name="Email" description="Send daily digests to members" />
-          </div>
-        </Section>
-
-        <Section title="Danger Zone">
+        {/* ── Danger Zone ── */}
+        {tab === 'danger' && (
           <div
             className="rounded-md p-4 flex items-start gap-3"
-            style={{
-              background: 'rgba(239,68,68,0.06)',
-              border: '1px solid rgba(239,68,68,0.25)',
-            }}
+            style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)' }}
           >
             <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
             <div className="flex-1">
@@ -161,12 +443,7 @@ const ProjectSettings: React.FC = () => {
               style={{ background: '#ef4444', color: '#fff' }}
               disabled={deleteProject.isPending}
               onClick={() => {
-                if (
-                  !window.confirm(
-                    'Are you sure you want to delete this project? This cannot be undone.'
-                  )
-                )
-                  return;
+                if (!window.confirm('Delete this project? This cannot be undone.')) return;
                 deleteProject.mutate(projectId!, {
                   onSuccess: () => {
                     toast.success('Project deleted');
@@ -179,23 +456,11 @@ const ProjectSettings: React.FC = () => {
               {deleteProject.isPending ? 'Deleting...' : 'Delete'}
             </button>
           </div>
-        </Section>
+        )}
       </div>
     </div>
   );
 };
-
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section>
-    <h3
-      className="text-[11px] font-semibold uppercase tracking-wider mb-2"
-      style={{ color: 'var(--flow-text-muted)' }}
-    >
-      {title}
-    </h3>
-    <div className="space-y-3">{children}</div>
-  </section>
-);
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div>
@@ -203,36 +468,6 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
       {label}
     </label>
     {children}
-  </div>
-);
-
-const Integration: React.FC<{
-  icon: React.ComponentType<{ size?: number }>;
-  name: string;
-  description: string;
-}> = ({ icon: Icon, name, description }) => (
-  <div
-    className="flex items-center gap-3 rounded-md px-3 py-2.5"
-    style={{
-      background: 'var(--flow-input-bg)',
-      border: '1px solid var(--flow-border)',
-    }}
-  >
-    <Icon size={14} />
-    <div className="flex-1">
-      <p className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
-        {name}
-      </p>
-      <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-        {description}
-      </p>
-    </div>
-    <button
-      className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
-      style={{ color: 'var(--flow-text-muted)' }}
-    >
-      Connect
-    </button>
   </div>
 );
 

@@ -25,7 +25,13 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<{ name: string; color: string }> }) => {
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<{ name: string; color: string; description: string }>;
+    }) => {
       return unwrap(flowApi.updateProject(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
