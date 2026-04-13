@@ -137,24 +137,13 @@ const AuthShowcase: React.FC = () => {
           </span>
         </h1>
         <p className="mt-6 text-base xl:text-lg text-white/65 max-w-lg leading-relaxed">
-          POS, ERP, HR, CRM, Finance, Flow, Store, Book, Support, and Insights. Everything you need
-          to run your operation, unified in a single beautiful workspace.
+          POS, ERP, HR, CRM, Finance, Flow, and Insights. Everything you need to run your operation,
+          unified in a single beautiful workspace.
         </p>
 
         {/* Product chips */}
         <div className="mt-8 flex flex-wrap gap-2">
-          {[
-            'POS',
-            'ERP',
-            'HR',
-            'CRM',
-            'Finance',
-            'Flow',
-            'Store',
-            'Book',
-            'Support',
-            'Insights',
-          ].map((p, i) => (
+          {['POS', 'ERP', 'HR', 'CRM', 'Finance', 'Flow', 'Insights'].map((p, i) => (
             <motion.span
               key={p}
               initial={{ opacity: 0, y: 8 }}

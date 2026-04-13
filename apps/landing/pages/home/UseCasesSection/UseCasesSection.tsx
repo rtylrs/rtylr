@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { fadeInUp, staggerContainer, scaleIn, viewportOnce } from '../../../lib/animations';
+import { fadeInUp, staggerBlur, blurFadeIn, viewportOnce } from '../../../lib/animations';
 import styles from './UseCasesSection.module.scss';
 
 const useCases = [
@@ -46,10 +46,10 @@ const UseCasesSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          variants={staggerContainer}
+          variants={staggerBlur}
         >
           {useCases.map((useCase, index) => (
-            <motion.div key={index} variants={scaleIn}>
+            <motion.div key={index} variants={blurFadeIn}>
               <Link href={useCase.href} className={styles.useCaseCard}>
                 <h3 className={styles.useCaseTitle}>{useCase.title}</h3>
                 <p className={styles.useCaseDescription}>{useCase.description}</p>

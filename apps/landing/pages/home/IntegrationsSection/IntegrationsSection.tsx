@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { fadeInUp, staggerContainer, scaleIn, viewportOnce } from '../../../lib/animations';
+import { fadeInUp, staggerBlur, blurFadeIn, viewportOnce } from '../../../lib/animations';
 import styles from './IntegrationsSection.module.scss';
 
 interface Integration {
@@ -112,13 +112,13 @@ const IntegrationsSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          variants={staggerContainer}
+          variants={staggerBlur}
         >
           {integrations.map((integration, index) => (
             <motion.div
               key={index}
               className={styles.integrationCard}
-              variants={scaleIn}
+              variants={blurFadeIn}
               whileHover={{
                 y: -6,
                 transition: { duration: 0.25, ease: 'easeOut' },
@@ -146,7 +146,7 @@ const IntegrationsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          And many more. New integrations added every month.
+          And many more.
         </motion.p>
       </div>
     </section>
