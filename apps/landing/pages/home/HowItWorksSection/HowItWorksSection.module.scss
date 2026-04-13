@@ -69,10 +69,10 @@
   width: 2px;
   background: linear-gradient(
     to bottom,
-    rgba(69, 131, 196, 0.05) 0%,
-    rgba(69, 131, 196, 0.4) 20%,
-    rgba(100, 197, 185, 0.4) 80%,
-    rgba(100, 197, 185, 0.05) 100%
+    rgba(233, 235, 223, 0.05) 0%,
+    rgba(233, 235, 223, 0.4) 20%,
+    rgba(233, 235, 223, 0.4) 80%,
+    rgba(233, 235, 223, 0.05) 100%
   );
   z-index: 0;
 }
@@ -100,13 +100,13 @@
   height: 80px;
   border-radius: 50%;
   background: var(--app-background);
-  border: 2px solid rgba(69, 131, 196, 0.5);
+  border: 2px solid rgba(233, 235, 223, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 0 40px rgba(69, 131, 196, 0.15);
+  box-shadow: 0 0 30px rgba(233, 235, 223, 0.06);
 }
 
 .stepNumber {
