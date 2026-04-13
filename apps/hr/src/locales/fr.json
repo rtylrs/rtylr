@@ -1,0 +1,216 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "back": "Retour",
+    "next": "Suivant",
+    "skip": "Passer",
+    "complete": "Terminer",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "loading": "Chargement…",
+    "noResults": "Aucun résultat trouvé",
+    "required": "Ce champ est obligatoire",
+    "actions": "Actions",
+    "status": "Statut",
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "yes": "Oui",
+    "no": "Non",
+    "confirm": "Confirmer",
+    "close": "Fermer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "employees": "Employés",
+    "departments": "Départements",
+    "shifts": "Quarts",
+    "payroll": "Paie",
+    "timeOff": "Congés",
+    "settings": "Paramètres",
+    "orgChart": "Organigramme",
+    "schedule": "Horaire",
+    "timesheets": "Feuilles de temps",
+    "calendar": "Calendrier",
+    "reviews": "Évaluations",
+    "onboarding": "Intégration",
+    "offboarding": "Départ",
+    "documents": "Documents",
+    "benefits": "Avantages",
+    "training": "Formation",
+    "operations": "Opérations"
+  },
+  "setup": {
+    "title": "Configurez votre espace RH",
+    "subtitle": "Complétez ces étapes pour configurer les RH de votre organisation.",
+    "configSaved": "Configuration enregistrée",
+    "stepCompleted": "Étape terminée",
+    "finishSetup": "Terminer la configuration",
+    "steps": {
+      "companyProfile": "Profil de l'entreprise",
+      "workSchedule": "Horaire de travail",
+      "orgStructure": "Structure organisationnelle",
+      "locations": "Emplacements",
+      "rolesPermissions": "Rôles et permissions",
+      "payrollConfig": "Configuration de la paie",
+      "notifications": "Notifications",
+      "employees": "Employés"
+    },
+    "companyProfile": {
+      "title": "Profil de l'entreprise",
+      "description": "Parlez-nous de votre entreprise pour personnaliser l'expérience RH.",
+      "name": "Nom de l'entreprise",
+      "industry": "Secteur",
+      "country": "Pays",
+      "timezone": "Fuseau horaire",
+      "currency": "Devise"
+    },
+    "workSchedule": {
+      "title": "Horaire de travail par défaut",
+      "description": "Définissez les heures de travail standard de votre organisation.",
+      "scheduleName": "Nom de l'horaire",
+      "workingDays": "Jours ouvrables",
+      "startTime": "Heure de début",
+      "endTime": "Heure de fin",
+      "breakMinutes": "Durée de la pause (minutes)",
+      "weeklyHours": "Heures hebdomadaires contractuelles",
+      "dailyOt": "Seuil d'heures sup. quotidien (minutes)",
+      "weeklyOt": "Seuil d'heures sup. hebdomadaire (minutes)",
+      "days": {
+        "monday": "Lundi",
+        "tuesday": "Mardi",
+        "wednesday": "Mercredi",
+        "thursday": "Jeudi",
+        "friday": "Vendredi",
+        "saturday": "Samedi",
+        "sunday": "Dimanche"
+      }
+    },
+    "orgStructure": {
+      "title": "Structure organisationnelle",
+      "description": "Créez des départements pour organiser votre équipe.",
+      "addDepartment": "Ajouter un département",
+      "departmentName": "Nom du département",
+      "parentDepartment": "Département parent",
+      "noDepartments": "Aucun département ajouté"
+    },
+    "locations": {
+      "title": "Emplacements",
+      "description": "Ajoutez vos bureaux ou succursales.",
+      "singleLocation": "Nous avons un seul emplacement",
+      "addLocation": "Ajouter un emplacement",
+      "locationName": "Nom de l'emplacement",
+      "locationAddress": "Adresse",
+      "locationTimezone": "Fuseau horaire",
+      "noLocations": "Aucun emplacement ajouté"
+    },
+    "rolesPermissions": {
+      "title": "Rôles et permissions",
+      "description": "Configurez les rôles par défaut et ce que chaque rôle peut faire.",
+      "roleName": "Nom du rôle",
+      "permissions": "Permissions"
+    },
+    "payrollConfig": {
+      "title": "Configuration de la paie",
+      "description": "Configurez le fonctionnement de la paie pour votre organisation.",
+      "grossModel": "Modèle de salaire brut",
+      "hourly": "Horaire",
+      "salary": "Salaire",
+      "both": "Les deux",
+      "period": "Période de paie",
+      "weekly": "Hebdomadaire",
+      "biweekly": "Bimensuel",
+      "monthly": "Mensuel",
+      "enableOvertime": "Activer le suivi des heures supplémentaires",
+      "enableDeductions": "Activer les déductions",
+      "enableBonuses": "Activer les primes"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choisissez comment votre équipe reçoit les notifications.",
+      "emailEnabled": "Notifications par e-mail",
+      "smsEnabled": "Notifications SMS / WhatsApp",
+      "channelNote": "Les identifiants de canal peuvent être configurés plus tard dans les Paramètres."
+    },
+    "employees": {
+      "title": "Ajouter des employés",
+      "description": "Ajoutez vos premiers employés pour commencer. Vous pouvez aussi importer depuis un CSV.",
+      "addEmployee": "Ajouter un employé",
+      "importCsv": "Importer CSV",
+      "csvComingSoon": "Import CSV bientôt disponible",
+      "noEmployees": "Aucun employé ajouté. Ajoutez votre premier employé pour continuer."
+    }
+  },
+  "employees": {
+    "title": "Employés",
+    "newEmployee": "Nouvel employé",
+    "created": "Employé créé avec succès",
+    "updated": "Employé mis à jour avec succès",
+    "inviteSent": "Invitation envoyée avec succès",
+    "directory": "Répertoire des employés",
+    "addNew": "Ajouter un nouvel employé",
+    "search": "Rechercher des employés…",
+    "filterByDepartment": "Département",
+    "filterByLocation": "Emplacement",
+    "filterByStatus": "Statut",
+    "jobTitle": "Poste",
+    "department": "Département",
+    "location": "Emplacement",
+    "hireDate": "Date d'embauche",
+    "contractType": "Type de contrat",
+    "salary": "Salaire",
+    "noEmployees": "Aucun employé trouvé",
+    "personalInfo": "Informations personnelles",
+    "employmentInfo": "Informations d'emploi",
+    "contractTypes": {
+      "full_time": "Temps plein",
+      "part_time": "Temps partiel",
+      "freelancer": "Freelance"
+    },
+    "statuses": {
+      "active": "Actif",
+      "probation": "Période d'essai",
+      "inactive": "Inactif",
+      "terminated": "Licencié"
+    },
+    "form": {
+      "title": "Nouvel employé",
+      "userId": "ID utilisateur",
+      "departmentId": "Département",
+      "locationId": "Emplacement",
+      "managerId": "Responsable",
+      "contractType": "Type de contrat",
+      "status": "Statut",
+      "hireDate": "Date d'embauche",
+      "probationEndDate": "Fin de période d'essai",
+      "hourlyRate": "Taux horaire",
+      "monthlySalary": "Salaire mensuel",
+      "currency": "Devise",
+      "workScheduleId": "Horaire de travail",
+      "accountCreationMode": "Création du compte",
+      "jobTitle": "Poste",
+      "hrCreated": "Créé par les RH",
+      "inviteLink": "Lien d'invitation",
+      "submit": "Créer l'employé"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenue dans les RH",
+    "subtitle": "Gérez votre équipe, horaires et paie depuis ici."
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "notFound": "Non trouvé",
+    "unauthorized": "Vous n'avez pas accès à cette ressource."
+  },
+  "configRequired": {
+    "title": "Configuration requise",
+    "message": "Complétez la configuration RH pour accéder à cette fonctionnalité.",
+    "goToSetup": "Aller à la configuration"
+  }
+}

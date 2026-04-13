@@ -1,102 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { APP_URLS } from '@voxire/config';
-import AppRoutes from './routes/AppRoutes';
+import React, { Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from '@voxire/auth';
+import ErrorBoundary from './shared/components/ErrorBoundary';
+import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
+import DefaultLayout from './layouts/DefaultLayout';
+import WizardLayout from './layouts/WizardLayout';
 
-/** Read a cookie by name */
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const nameEQ = `${name}=`;
-  for (const part of document.cookie.split('; ')) {
-    if (part.startsWith(nameEQ)) return decodeURIComponent(part.slice(nameEQ.length));
-  }
-  return null;
-}
-
-function AuthGuard({ children }: { children: React.ReactNode }) {
-  const [allowed, setAllowed] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const token = getCookie('token');
-    if (!token) {
-      window.location.href = `${APP_URLS.auth}?redirect=hr`;
-      return;
-    }
-
-    import('./shared/lib/api').then(({ default: api }) => {
-      api
-        .get('/user/me')
-        .then((res: { data?: { apps?: string[]; role?: string } }) => {
-          const apps: string[] = res.data?.apps ?? [];
-          const role: string = res.data?.role ?? '';
-          if (role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes('hr')) {
-            setAllowed(true);
-          } else {
-            setAllowed(false);
-          }
-        })
-        .catch(() => setAllowed(true));
-    });
-  }, []);
-
-  if (allowed === null) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: '#fff',
-        }}
-      >
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            border: '2px solid #e5e5e5',
-            borderTopColor: '#4583C4',
-            borderRadius: '50%',
-            animation: 'spin 0.6s linear infinite',
-          }}
-        />
-        <style>{'@keyframes spin { to { transform: rotate(360deg) } }'}</style>
-      </div>
-    );
-  }
-
-  if (!allowed) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: '#fff',
-          color: '#111',
-          gap: '12px',
-          fontSize: '14px',
-        }}
-      >
-        <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
-        <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
-        <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>
-          Go to Hub
-        </a>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
-const App: React.FC = () => {
+function PageLoader(): React.JSX.Element {
   return (
-    <AuthGuard>
-      <AppRoutes />
-    </AuthGuard>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'var(--hr-bg)' }}
+    >
+      <div
+        className="h-8 w-8 rounded-full border-2 animate-spin"
+        style={{ borderColor: 'var(--hr-border)', borderTopColor: 'var(--accent)' }}
+      />
+    </div>
+  );
+}
+
+const SetupWizard = React.lazy(() => import('./features/setup-wizard/SetupWizard'));
+const Dashboard = React.lazy(() => import('./features/dashboard/Dashboard'));
+const Employees = React.lazy(() => import('./features/employees/Employees'));
+const EmployeeDetail = React.lazy(() => import('./features/employees/EmployeeDetail'));
+const NewEmployee = React.lazy(() => import('./features/employees/NewEmployee'));
+const Staff = React.lazy(() => import('./features/staff/Staff'));
+const Shifts = React.lazy(() => import('./features/shifts/Shifts'));
+const Payroll = React.lazy(() => import('./features/payroll/Payroll'));
+const Departments = React.lazy(() => import('./features/departments/Departments'));
+const EmployeeProfile = React.lazy(() => import('./features/staff/EmployeeProfile'));
+const TimeOff = React.lazy(() => import('./features/time-off/TimeOff'));
+const TimeOffNew = React.lazy(() => import('./features/time-off/TimeOffNew'));
+const CalendarScreen = React.lazy(() => import('./features/calendar/Calendar'));
+const Schedule = React.lazy(() => import('./features/shifts/Schedule'));
+const Timesheets = React.lazy(() => import('./features/shifts/Timesheets'));
+const Reviews = React.lazy(() => import('./features/reviews/Reviews'));
+const ReviewForm = React.lazy(() => import('./features/reviews/ReviewForm'));
+const OneOnOnes = React.lazy(() => import('./features/reviews/OneOnOnes'));
+const Onboarding = React.lazy(() => import('./features/onboarding/Onboarding'));
+const Offboarding = React.lazy(() => import('./features/onboarding/Offboarding'));
+const Documents = React.lazy(() => import('./features/documents/Documents'));
+const Benefits = React.lazy(() => import('./features/benefits/Benefits'));
+const Training = React.lazy(() => import('./features/training/Training'));
+const OrgChart = React.lazy(() => import('./features/departments/OrgChart'));
+const SettingsScreen = React.lazy(() => import('./features/settings/Settings'));
+const Operations = React.lazy(() => import('./features/operations/Operations'));
+
+function wrap(screen: React.ReactNode): React.JSX.Element {
+  return <DefaultLayout>{screen}</DefaultLayout>;
+}
+
+const App = (): React.JSX.Element => {
+  return (
+    <ErrorBoundary>
+      <ProtectedRoute appId="hr">
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Setup wizard — outside HRConfigRoute */}
+            <Route
+              path="/setup"
+              element={
+                <WizardLayout>
+                  <SetupWizard />
+                </WizardLayout>
+              }
+            />
+
+            {/* All feature routes — inside HRConfigRoute */}
+            <Route element={<HRConfigRoute />}>
+              <Route path="/" element={wrap(<Dashboard />)} />
+              <Route path="/employees" element={wrap(<Employees />)} />
+              <Route path="/employees/new" element={wrap(<NewEmployee />)} />
+              <Route path="/employees/:id" element={wrap(<EmployeeDetail />)} />
+              <Route path="/staff" element={wrap(<Staff />)} />
+              <Route path="/staff/:id" element={wrap(<EmployeeProfile />)} />
+              <Route path="/shifts" element={wrap(<Shifts />)} />
+              <Route path="/schedule" element={wrap(<Schedule />)} />
+              <Route path="/timesheets" element={wrap(<Timesheets />)} />
+              <Route path="/time-off" element={wrap(<TimeOff />)} />
+              <Route path="/time-off/new" element={wrap(<TimeOffNew />)} />
+              <Route path="/calendar" element={wrap(<CalendarScreen />)} />
+              <Route path="/payroll" element={wrap(<Payroll />)} />
+              <Route path="/departments" element={wrap(<Departments />)} />
+              <Route path="/reviews" element={wrap(<Reviews />)} />
+              <Route path="/reviews/new" element={wrap(<ReviewForm />)} />
+              <Route path="/one-on-ones" element={wrap(<OneOnOnes />)} />
+              <Route path="/onboarding" element={wrap(<Onboarding />)} />
+              <Route path="/offboarding" element={wrap(<Offboarding />)} />
+              <Route path="/documents" element={wrap(<Documents />)} />
+              <Route path="/benefits" element={wrap(<Benefits />)} />
+              <Route path="/training" element={wrap(<Training />)} />
+              <Route path="/org-chart" element={wrap(<OrgChart />)} />
+              <Route path="/operations" element={wrap(<Operations />)} />
+              <Route path="/settings" element={wrap(<SettingsScreen />)} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ProtectedRoute>
+    </ErrorBoundary>
   );
 };
 

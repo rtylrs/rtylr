@@ -1,0 +1,216 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "complete": "Complete",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading…",
+    "noResults": "No results found",
+    "required": "This field is required",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "departments": "Departments",
+    "shifts": "Shifts",
+    "payroll": "Payroll",
+    "timeOff": "Time Off",
+    "settings": "Settings",
+    "orgChart": "Org Chart",
+    "schedule": "Schedule",
+    "timesheets": "Timesheets",
+    "calendar": "Calendar",
+    "reviews": "Reviews",
+    "onboarding": "Onboarding",
+    "offboarding": "Offboarding",
+    "documents": "Documents",
+    "benefits": "Benefits",
+    "training": "Training",
+    "operations": "Operations"
+  },
+  "setup": {
+    "title": "Set up your HR workspace",
+    "subtitle": "Complete these steps to configure HR for your organization.",
+    "configSaved": "Configuration saved",
+    "stepCompleted": "Step completed",
+    "finishSetup": "Finish setup",
+    "steps": {
+      "companyProfile": "Company Profile",
+      "workSchedule": "Work Schedule",
+      "orgStructure": "Org Structure",
+      "locations": "Locations",
+      "rolesPermissions": "Roles & Permissions",
+      "payrollConfig": "Payroll Config",
+      "notifications": "Notifications",
+      "employees": "Employees"
+    },
+    "companyProfile": {
+      "title": "Company Profile",
+      "description": "Tell us about your company so we can tailor the HR experience.",
+      "name": "Company name",
+      "industry": "Industry",
+      "country": "Country",
+      "timezone": "Timezone",
+      "currency": "Currency"
+    },
+    "workSchedule": {
+      "title": "Default Work Schedule",
+      "description": "Set the standard working hours for your organization.",
+      "scheduleName": "Schedule name",
+      "workingDays": "Working days",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "breakMinutes": "Break duration (minutes)",
+      "weeklyHours": "Weekly contracted hours",
+      "dailyOt": "Daily OT threshold (minutes)",
+      "weeklyOt": "Weekly OT threshold (minutes)",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    },
+    "orgStructure": {
+      "title": "Organization Structure",
+      "description": "Create departments to organize your team.",
+      "addDepartment": "Add department",
+      "departmentName": "Department name",
+      "parentDepartment": "Parent department",
+      "noDepartments": "No departments added yet"
+    },
+    "locations": {
+      "title": "Locations",
+      "description": "Add your office or branch locations.",
+      "singleLocation": "We have a single location",
+      "addLocation": "Add location",
+      "locationName": "Location name",
+      "locationAddress": "Address",
+      "locationTimezone": "Timezone",
+      "noLocations": "No locations added yet"
+    },
+    "rolesPermissions": {
+      "title": "Roles & Permissions",
+      "description": "Configure the default roles and what each role can do.",
+      "roleName": "Role name",
+      "permissions": "Permissions"
+    },
+    "payrollConfig": {
+      "title": "Payroll Configuration",
+      "description": "Set up how payroll works for your organization.",
+      "grossModel": "Gross pay model",
+      "hourly": "Hourly",
+      "salary": "Salary",
+      "both": "Both",
+      "period": "Pay period",
+      "weekly": "Weekly",
+      "biweekly": "Bi-weekly",
+      "monthly": "Monthly",
+      "enableOvertime": "Enable overtime tracking",
+      "enableDeductions": "Enable deductions",
+      "enableBonuses": "Enable bonuses"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose how your team receives notifications.",
+      "emailEnabled": "Email notifications",
+      "smsEnabled": "SMS / WhatsApp notifications",
+      "channelNote": "Channel credentials can be configured later in Settings."
+    },
+    "employees": {
+      "title": "Add Employees",
+      "description": "Add your first employees to get started. You can also import from CSV.",
+      "addEmployee": "Add employee",
+      "importCsv": "Import CSV",
+      "csvComingSoon": "CSV import coming soon",
+      "noEmployees": "No employees added yet. Add your first employee to continue."
+    }
+  },
+  "employees": {
+    "title": "Employees",
+    "newEmployee": "New Employee",
+    "created": "Employee created successfully",
+    "updated": "Employee updated successfully",
+    "inviteSent": "Invite sent successfully",
+    "directory": "Employee Directory",
+    "addNew": "Add new employee",
+    "search": "Search employees…",
+    "filterByDepartment": "Department",
+    "filterByLocation": "Location",
+    "filterByStatus": "Status",
+    "jobTitle": "Job Title",
+    "department": "Department",
+    "location": "Location",
+    "hireDate": "Hire Date",
+    "contractType": "Contract Type",
+    "salary": "Salary",
+    "noEmployees": "No employees found",
+    "personalInfo": "Personal Info",
+    "employmentInfo": "Employment Info",
+    "contractTypes": {
+      "full_time": "Full-time",
+      "part_time": "Part-time",
+      "freelancer": "Freelancer"
+    },
+    "statuses": {
+      "active": "Active",
+      "probation": "Probation",
+      "inactive": "Inactive",
+      "terminated": "Terminated"
+    },
+    "form": {
+      "title": "New Employee",
+      "userId": "User ID",
+      "departmentId": "Department",
+      "locationId": "Location",
+      "managerId": "Manager",
+      "contractType": "Contract type",
+      "status": "Status",
+      "hireDate": "Hire date",
+      "probationEndDate": "Probation end date",
+      "hourlyRate": "Hourly rate",
+      "monthlySalary": "Monthly salary",
+      "currency": "Currency",
+      "workScheduleId": "Work schedule",
+      "accountCreationMode": "Account creation",
+      "jobTitle": "Job title",
+      "hrCreated": "Created by HR",
+      "inviteLink": "Invite link",
+      "submit": "Create employee"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome to HR",
+    "subtitle": "Manage your team, schedules, and payroll from here."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Not found",
+    "unauthorized": "You don't have access to this resource."
+  },
+  "configRequired": {
+    "title": "Setup required",
+    "message": "Complete your HR setup to access this feature.",
+    "goToSetup": "Go to setup"
+  }
+}
