@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { fadeInUp, viewportOnce } from '../../../lib/animations';
+import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import styles from './HowItWorksSection.module.scss';
 
 const steps = [
@@ -26,7 +26,7 @@ const steps = [
     number: '04',
     title: 'Launch',
     description:
-      'Go live across every department at once. All 10 apps running together from day one.',
+      'Go live across every department at once. All 7 apps running together from day one.',
   },
 ];
 
@@ -66,7 +66,7 @@ const HowItWorksSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          variants={fadeInUp}
+          variants={blurFadeInSlow}
         >
           <h2 className={styles.sectionTitle}>How It Works</h2>
           <p className={styles.sectionDescription}>
@@ -74,21 +74,16 @@ const HowItWorksSection: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className={styles.timeline}>
+        <motion.div
+          className={styles.timeline}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={staggerBlur}
+        >
           <div className={styles.timelineLine} />
           {steps.map((step, index) => (
-            <motion.div
-              key={index}
-              className={styles.timelineItem}
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{
-                duration: 0.6,
-                delay: 0.1,
-                ease: [0.25, 0.46, 0.45, 0.94],
-              }}
-            >
+            <motion.div key={index} className={styles.timelineItem} variants={blurFadeIn}>
               <motion.div
                 className={styles.stepNumberWrap}
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -96,7 +91,7 @@ const HowItWorksSection: React.FC = () => {
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{
                   duration: 0.5,
-                  delay: 0.2,
+                  delay: index * 0.12 + 0.1,
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
               >
@@ -108,7 +103,7 @@ const HowItWorksSection: React.FC = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { HiCheck } from 'react-icons/hi';
 import { useRouter } from 'next/router';
-import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
+import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import styles from './PricingSection.module.scss';
 
 interface Plan {
@@ -24,7 +24,7 @@ const plans: Plan[] = [
     description: 'Trying rtylr with a small team',
     features: [
       'Up to 5 team members',
-      'All 11 apps included',
+      'All 7 apps included',
       'Basic support',
       'No credit card required',
     ],
@@ -38,7 +38,7 @@ const plans: Plan[] = [
     description: 'Small businesses getting started',
     features: [
       'Up to 20 team members',
-      'All 11 apps with advanced features',
+      'All 7 apps with advanced features',
       'Priority support',
       'AI assistant',
     ],
@@ -53,7 +53,7 @@ const plans: Plan[] = [
     description: 'Growing teams that outgrew Pro',
     features: [
       'For teams of 20+ members',
-      'All 11 apps + advanced analytics',
+      'All 7 apps + advanced analytics',
       'Dedicated support',
       'AI assistant',
       'SSO + audit logs',
@@ -61,15 +61,6 @@ const plans: Plan[] = [
     ctaText: 'Contact Sales',
   },
 ];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
-  },
-};
 
 const PricingSection = (): JSX.Element => {
   const router = useRouter();
@@ -86,7 +77,7 @@ const PricingSection = (): JSX.Element => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          variants={fadeInUp}
+          variants={blurFadeInSlow}
         >
           <span className={styles.badge}>Pricing</span>
           <h2 className={styles.sectionTitle}>
@@ -104,13 +95,13 @@ const PricingSection = (): JSX.Element => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          variants={staggerContainer}
+          variants={staggerBlur}
         >
           {plans.map((plan) => (
             <motion.div
               key={plan.name}
               className={`${styles.pricingCard} ${plan.featured ? styles.featured : ''}`}
-              variants={cardVariants}
+              variants={blurFadeIn}
               whileHover={{
                 y: -8,
                 transition: { duration: 0.25, ease: 'easeOut' },

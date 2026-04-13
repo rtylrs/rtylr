@@ -252,33 +252,6 @@ const HeaderDesktop: React.FC = () => {
                 </div>
                 <div
                   className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/store')}
-                >
-                  <div className={styles['dropdown-item-title']}>Store</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Online storefront, products, orders, and checkout.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/book')}
-                >
-                  <div className={styles['dropdown-item-title']}>Book</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Appointments, scheduling, and resource management.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/support')}
-                >
-                  <div className={styles['dropdown-item-title']}>Support</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Help desk, tickets, shared inbox, and knowledge base.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
                   onClick={() => handleNavigation('/features/insights')}
                 >
                   <div className={styles['dropdown-item-title']}>Insights</div>

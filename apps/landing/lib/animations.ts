@@ -77,6 +77,39 @@ export const staggerContainerSlow: Variants = {
   },
 };
 
+// Blur + fade — more cinematic than plain fadeInUp
+export const blurFadeIn: Variants = {
+  hidden: { opacity: 0, y: 28, filter: 'blur(10px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
+
+export const blurFadeInSlow: Variants = {
+  hidden: { opacity: 0, y: 40, filter: 'blur(14px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+// Stagger container that works with blurFadeIn children
+export const staggerBlur: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.05,
+    },
+  },
+};
+
 // Default viewport trigger settings
 export const viewportOnce = {
   once: true,
