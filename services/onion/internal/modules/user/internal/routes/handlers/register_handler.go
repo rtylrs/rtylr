@@ -24,6 +24,9 @@ func RegisterRoutes() []string {
 type RegisterHandler struct {
 	UserService         *application.Service
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
+	// OnUserCreated is called non-fatally after a user is successfully registered.
+	// Used to create a personal workspace, provision initial data, etc.
+	OnUserCreated func(ctx context.Context, userID int64)
 }
 
 type RegisterRequest struct {
@@ -109,6 +112,11 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		// Non-fatal: user is created but business creation failed
 		// Log it but don't block registration
 		_ = bizErr
+	}
+
+	// Create personal workspace for the new user (non-fatal)
+	if h.OnUserCreated != nil {
+		h.OnUserCreated(ctx, userId)
 	}
 
 	var platformClaims *application.PlatformClaims

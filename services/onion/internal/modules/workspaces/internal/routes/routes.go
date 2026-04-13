@@ -179,4 +179,43 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		ctx, router, handlers.CreateLabelRoutes(),
 		&handlers.CreateLabelHandler{FlowService: flowService},
 	)
+
+	// ─── Workspace Members (extended) ─────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListWorkspaceMembersRequest, handlers.ListWorkspaceMembersResponse](
+		ctx, router, handlers.ListWorkspaceMembersRoutes(),
+		&handlers.ListWorkspaceMembersHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateWorkspaceMemberRoleRequest, handlers.UpdateWorkspaceMemberRoleResponse](
+		ctx, router, handlers.UpdateWorkspaceMemberRoleRoutes(),
+		&handlers.UpdateWorkspaceMemberRoleHandler{FlowService: flowService},
+	)
+
+	// ─── Project Members ──────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListProjectMembersRequest, handlers.ListProjectMembersResponse](
+		ctx, router, handlers.ListProjectMembersRoutes(),
+		&handlers.ListProjectMembersHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.AddProjectMemberRequest, handlers.AddProjectMemberResponse](
+		ctx, router, handlers.AddProjectMemberRoutes(),
+		&handlers.AddProjectMemberHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.RemoveProjectMemberRequest, handlers.RemoveProjectMemberResponse](
+		ctx, router, handlers.RemoveProjectMemberRoutes(),
+		&handlers.RemoveProjectMemberHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateProjectMemberRoleRequest, handlers.UpdateProjectMemberRoleResponse](
+		ctx, router, handlers.UpdateProjectMemberRoleRoutes(),
+		&handlers.UpdateProjectMemberRoleHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.TransferProjectOwnershipRequest, handlers.TransferProjectOwnershipResponse](
+		ctx, router, handlers.TransferProjectOwnershipRoutes(),
+		&handlers.TransferProjectOwnershipHandler{FlowService: flowService},
+	)
 }

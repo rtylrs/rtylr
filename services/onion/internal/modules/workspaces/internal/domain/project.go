@@ -22,8 +22,11 @@ type ProjectMember struct {
 	ID        int64
 	ProjectID int64
 	UserID    int64
-	Role      string
-	JoinedAt  time.Time
+	Name      string
+	Email     string
+	Role      string // manager | member | viewer
+	AddedBy   *int64
+	AddedAt   time.Time
 }
 
 type ProjectInput struct {
@@ -48,4 +51,28 @@ type UpdateProjectInput struct {
 	Status      string
 	StartDate   *time.Time
 	DueDate     *time.Time
+}
+
+type AddProjectMemberInput struct {
+	ProjectID int64
+	UserID    int64
+	Role      string
+	AddedBy   int64
+}
+
+type RemoveProjectMemberInput struct {
+	ProjectID int64
+	UserID    int64
+}
+
+type UpdateProjectMemberRoleInput struct {
+	ProjectID int64
+	UserID    int64
+	Role      string
+}
+
+type TransferProjectOwnershipInput struct {
+	ProjectID  int64
+	NewOwnerID int64
+	CallerID   int64
 }

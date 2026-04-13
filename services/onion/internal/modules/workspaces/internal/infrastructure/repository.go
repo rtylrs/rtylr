@@ -811,3 +811,176 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 	}
 	return tasks, rows.Err()
 }
+
+// ─────────────────────────────────────────────
+// Workspace Members (extended)
+// ─────────────────────────────────────────────
+
+func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
+	q := `
+		SELECT wm.id, wm.workspace_id, wm.user_id, wm.role, wm.invited_by, wm.joined_at,
+		       COALESCE(u.full_name, '') AS name, COALESCE(u.email, '') AS email
+		FROM flow_workspace_members wm
+		LEFT JOIN users u ON u.id = wm.user_id
+		WHERE wm.workspace_id = ?
+		ORDER BY wm.joined_at ASC`
+
+	rows, err := r.pool.QueryContext(ctx, q, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("ListWorkspaceMembers failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var members []domain.WorkspaceMember
+	for rows.Next() {
+		var m domain.WorkspaceMember
+		var invitedBy sql.NullInt64
+		if err := rows.Scan(&m.ID, &m.WorkspaceID, &m.UserID, &m.Role, &invitedBy, &m.JoinedAt, &m.Name, &m.Email); err != nil {
+			return nil, err
+		}
+		if invitedBy.Valid {
+			m.InvitedBy = &invitedBy.Int64
+		}
+		members = append(members, m)
+	}
+	return members, rows.Err()
+}
+
+func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_workspace_members SET role = ? WHERE workspace_id = ? AND user_id = ?`,
+		input.Role, input.WorkspaceID, input.UserID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateWorkspaceMemberRole failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
+	// Idempotent: do nothing if personal workspace already exists for this user
+	var existing int64
+	_ = r.pool.QueryRowContext(ctx,
+		`SELECT id FROM flow_workspaces WHERE owner_id = ? AND is_personal = TRUE LIMIT 1`, userID,
+	).Scan(&existing)
+	if existing > 0 {
+		return existing, nil
+	}
+
+	res, err := r.pool.ExecContext(ctx,
+		`INSERT INTO flow_workspaces (owner_id, name, icon, color, is_default, is_personal, created_by)
+		 VALUES (?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?)`,
+		userID, userID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace failed", logger.Error(err))
+		return 0, err
+	}
+	id, _ := res.LastInsertId()
+
+	// Add creator as manager
+	_, _ = r.pool.ExecContext(ctx,
+		`INSERT INTO flow_workspace_members (workspace_id, user_id, role) VALUES (?, ?, 'manager')
+		 ON DUPLICATE KEY UPDATE role = VALUES(role)`,
+		id, userID,
+	)
+	return id, nil
+}
+
+// ─────────────────────────────────────────────
+// Project Members
+// ─────────────────────────────────────────────
+
+func (r *Repository) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
+	q := `
+		SELECT pm.id, pm.project_id, pm.user_id, pm.role, pm.added_by, pm.joined_at,
+		       COALESCE(u.full_name, '') AS name, COALESCE(u.email, '') AS email
+		FROM flow_project_members pm
+		LEFT JOIN users u ON u.id = pm.user_id
+		WHERE pm.project_id = ?
+		ORDER BY pm.joined_at ASC`
+
+	rows, err := r.pool.QueryContext(ctx, q, projectID)
+	if err != nil {
+		logger.Ctx(ctx).Error("ListProjectMembers failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var members []domain.ProjectMember
+	for rows.Next() {
+		var m domain.ProjectMember
+		var addedBy sql.NullInt64
+		if err := rows.Scan(&m.ID, &m.ProjectID, &m.UserID, &m.Role, &addedBy, &m.AddedAt, &m.Name, &m.Email); err != nil {
+			return nil, err
+		}
+		if addedBy.Valid {
+			m.AddedBy = &addedBy.Int64
+		}
+		members = append(members, m)
+	}
+	return members, rows.Err()
+}
+
+func (r *Repository) AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error {
+	role := input.Role
+	if role == "" {
+		role = "member"
+	}
+	_, err := r.pool.ExecContext(ctx,
+		`INSERT INTO flow_project_members (project_id, user_id, role, added_by)
+		 VALUES (?, ?, ?, ?)
+		 ON DUPLICATE KEY UPDATE role = VALUES(role), added_by = VALUES(added_by)`,
+		input.ProjectID, input.UserID, role, input.AddedBy,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("AddProjectMember failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) RemoveProjectMember(ctx context.Context, input domain.RemoveProjectMemberInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`DELETE FROM flow_project_members WHERE project_id = ? AND user_id = ?`,
+		input.ProjectID, input.UserID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("RemoveProjectMember failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_project_members SET role = ? WHERE project_id = ? AND user_id = ?`,
+		input.Role, input.ProjectID, input.UserID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateProjectMemberRole failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_projects SET owner_id = ? WHERE id = ? AND owner_id = ?`,
+		input.NewOwnerID, input.ProjectID, input.CallerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("TransferProjectOwnership failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error) {
+	var role string
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT role FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?`,
+		workspaceID, userID,
+	).Scan(&role)
+	if err != nil {
+		return "", err
+	}
+	return role, nil
+}

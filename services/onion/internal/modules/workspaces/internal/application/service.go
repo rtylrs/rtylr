@@ -70,6 +70,18 @@ func (s *Service) RemoveWorkspaceMember(ctx context.Context, input domain.Remove
 	return s.repo.RemoveWorkspaceMember(ctx, input)
 }
 
+func (s *Service) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
+	return s.repo.ListWorkspaceMembers(ctx, workspaceID)
+}
+
+func (s *Service) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
+	return s.repo.UpdateWorkspaceMemberRole(ctx, input)
+}
+
+func (s *Service) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
+	return s.repo.CreatePersonalWorkspace(ctx, userID)
+}
+
 // ─────────────────────────────────────────────
 // Projects
 // ─────────────────────────────────────────────
@@ -105,6 +117,26 @@ func (s *Service) UpdateProject(ctx context.Context, input domain.UpdateProjectI
 
 func (s *Service) DeleteProject(ctx context.Context, id, ownerID int64) error {
 	return s.repo.ArchiveProject(ctx, id, ownerID)
+}
+
+func (s *Service) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
+	return s.repo.ListProjectMembers(ctx, projectID)
+}
+
+func (s *Service) AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error {
+	return s.repo.AddProjectMember(ctx, input)
+}
+
+func (s *Service) RemoveProjectMember(ctx context.Context, input domain.RemoveProjectMemberInput) error {
+	return s.repo.RemoveProjectMember(ctx, input)
+}
+
+func (s *Service) UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error {
+	return s.repo.UpdateProjectMemberRole(ctx, input)
+}
+
+func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error {
+	return s.repo.TransferProjectOwnership(ctx, input)
 }
 
 // ─────────────────────────────────────────────

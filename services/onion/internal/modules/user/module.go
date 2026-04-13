@@ -71,8 +71,12 @@ func (m *Module) GetTokenValidator() authPkg.TokenValidator {
 	return m.tokenValidator
 }
 
+// OnUserCreated is an optional hook called after each successful user registration.
+// Set it before RegisterRoutes is called (e.g., from main to create personal workspaces).
+var OnUserCreated func(ctx context.Context, userID int64)
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...any) {
-	routes.RegisterRoutes(ctx, router, m.UserService, m.ProvisionerResolver)
+	routes.RegisterRoutes(ctx, router, m.UserService, m.ProvisionerResolver, OnUserCreated)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

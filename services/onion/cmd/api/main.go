@@ -455,6 +455,11 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	)
 	modules.User.ProvisionerResolver = provisionerResolver
 
+	// Wire personal workspace creation into user registration
+	user.OnUserCreated = func(ctx context.Context, userID int64) {
+		modules.Workspaces.CreatePersonalWorkspace(ctx, userID)
+	}
+
 	http.AutoRegisterAnonymousRoutes(ctx, modules, accessPolicy)
 	http.AutoConfigureAccessPolicy(ctx, modules, accessPolicy)
 

@@ -25,3 +25,12 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
 }
+
+// CreatePersonalWorkspace creates a personal workspace for a newly registered user.
+// Safe to call multiple times — idempotent.
+func (m *Module) CreatePersonalWorkspace(ctx context.Context, userID int64) {
+	if _, err := m.service.CreatePersonalWorkspace(ctx, userID); err != nil {
+		// Non-fatal; log but don't block registration
+		_ = err
+	}
+}
