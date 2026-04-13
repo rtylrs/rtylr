@@ -32,7 +32,7 @@ const TopBanner: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <span className={styles.alphaBadge}>ALPHA</span>
+            <span className={styles.alphaBadge}>BETA</span>
             <span className={styles.badgeText}>The all-in-one platform for your business</span>
           </motion.div>
           <motion.h3
@@ -76,7 +76,7 @@ const TopBanner: React.FC = () => {
       {/* Mobile Layout */}
       <div className={styles.mobileBanner}>
         <div className={styles.badgeLine}>
-          <span className={styles.alphaBadge}>ALPHA</span>
+          <span className={styles.alphaBadge}>BETA</span>
           <div className={styles.badgeTextContainer}>
             <div className={styles.badgeText}>
               <span className={styles.badgeTextContent}>
