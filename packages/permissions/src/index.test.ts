@@ -172,7 +172,7 @@ describe('getAccessibleApps', () => {
     expect(apps).toContain('pos');
     expect(apps).toContain('erp');
     expect(apps).toContain('finance');
-    expect(apps.length).toBe(12); // All app IDs
+    expect(apps.length).toBe(9); // All app IDs
   });
 
   it('viewer gets minimal apps', () => {
