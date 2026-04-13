@@ -16,9 +16,6 @@ voxie/
     crm/             # Customer relations
     finance/         # Invoicing & accounting
     flow/            # Project management
-    store/           # E-commerce
-    book/            # Scheduling
-    support/         # Help desk
     insights/        # Analytics
   gen/
     go/              # Generated Go types
