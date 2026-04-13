@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   check:
@@ -49,20 +50,20 @@ jobs:
   changes:
     name: Detect changed apps
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
-      landing: ${{ steps.filter.outputs.landing }}
-      auth: ${{ steps.filter.outputs.auth }}
-      hub: ${{ steps.filter.outputs.hub }}
-      pos: ${{ steps.filter.outputs.pos }}
-      erp: ${{ steps.filter.outputs.erp }}
-      crm: ${{ steps.filter.outputs.crm }}
-      hr: ${{ steps.filter.outputs.hr }}
-      finance: ${{ steps.filter.outputs.finance }}
-      flow: ${{ steps.filter.outputs.flow }}
-      insights: ${{ steps.filter.outputs.insights }}
-      menu: ${{ steps.filter.outputs.menu }}
-      docs: ${{ steps.filter.outputs.docs }}
+      landing: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.landing }}
+      auth: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.auth }}
+      hub: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.hub }}
+      pos: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.pos }}
+      erp: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.erp }}
+      crm: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.crm }}
+      hr: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.hr }}
+      finance: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.finance }}
+      flow: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.flow }}
+      insights: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.insights }}
+      menu: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.menu }}
+      docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
