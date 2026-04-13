@@ -7,7 +7,11 @@ import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/f
 export function useViews() {
   return useQuery<SavedView[]>({
     queryKey: ['views'],
-    queryFn: () => unwrap(flowApi.getViews()) as Promise<SavedView[]>,
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getViews());
+      // backend returns { views: [...] }
+      return ((res as any).views ?? (Array.isArray(res) ? res : [])) as SavedView[];
+    },
   });
 }
 

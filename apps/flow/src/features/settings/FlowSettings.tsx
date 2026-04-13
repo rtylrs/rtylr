@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Bell, Palette, Keyboard, Sparkles, Info } from 'lucide-react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
+import { flowApi } from '../../shared/services/flowApi';
+import type { ApiUserSettings } from '../../shared/services/flowApi';
 
 const ACCENT = '#64C5B9';
 
@@ -23,7 +27,16 @@ const SECTIONS: SettingsSection[] = [
 ];
 
 const NotificationsSection: React.FC = () => {
-  const [settings, setSettings] = useState({
+  const { data: remote } = useQuery({
+    queryKey: ['flow-settings'],
+    queryFn: () => unwrap(flowApi.getUserSettings()),
+  });
+
+  const save = useMutation({
+    mutationFn: (data: ApiUserSettings) => unwrap(flowApi.updateUserSettings(data)),
+  });
+
+  const [settings, setSettings] = useState<ApiUserSettings>({
     taskAssigned: true,
     taskComments: true,
     mentions: true,
@@ -32,8 +45,14 @@ const NotificationsSection: React.FC = () => {
     emailNotifications: false,
   });
 
-  const toggle = (key: keyof typeof settings) => {
-    setSettings((s) => ({ ...s, [key]: !s[key] }));
+  useEffect(() => {
+    if (remote) setSettings(remote);
+  }, [remote]);
+
+  const toggle = (key: keyof ApiUserSettings) => {
+    const next = { ...settings, [key]: !settings[key] };
+    setSettings(next);
+    save.mutate(next);
   };
 
   const items = [

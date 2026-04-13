@@ -2,6 +2,29 @@ import { safe } from '../lib/api';
 
 // -- Types ----------------------------------------------------------------
 
+export interface ApiNotification {
+  id: string;
+  type: 'assigned' | 'mention' | 'comment' | 'status_change' | 'due_soon';
+  title: string;
+  description: string;
+  taskId?: string;
+  taskTitle: string;
+  actorInitials: string;
+  project: string;
+  projectColor: string;
+  read: boolean;
+  timestamp: string;
+}
+
+export interface ApiUserSettings {
+  taskAssigned: boolean;
+  taskComments: boolean;
+  mentions: boolean;
+  statusChanges: boolean;
+  weeklyDigest: boolean;
+  emailNotifications: boolean;
+}
+
 export interface DashboardStats {
   openTasks: number;
   inProgress: number;
@@ -375,9 +398,29 @@ export const flowApi = {
 
   // -- Team workload ------------------------------------------------------
 
-  getTeamWorkload: () => safe.get<ApiTeamWorkload[]>('/flow/team/workload'),
+  getTeamWorkload: (workspaceId?: string) =>
+    safe.get<{ members: ApiTeamWorkload[] }>('/flow/team/workload', {
+      params: workspaceId ? { workspace_id: workspaceId } : undefined,
+    }),
 
   // -- Roadmap ------------------------------------------------------------
 
-  getRoadmap: () => safe.get<ApiRoadmap[]>('/flow/roadmap'),
+  getRoadmap: (workspaceId?: string) =>
+    safe.get<{ projects: ApiRoadmap[] }>('/flow/roadmap', {
+      params: workspaceId ? { workspace_id: workspaceId } : undefined,
+    }),
+
+  // -- Notifications ------------------------------------------------------
+
+  getNotifications: () => safe.get<{ notifications: ApiNotification[] }>('/flow/notifications'),
+
+  markNotificationRead: (id: string) => safe.put(`/flow/notifications/${id}/read`, {}),
+
+  markAllNotificationsRead: () => safe.put('/flow/notifications/read-all', {}),
+
+  // -- User Settings ------------------------------------------------------
+
+  getUserSettings: () => safe.get<ApiUserSettings>('/flow/settings'),
+
+  updateUserSettings: (data: ApiUserSettings) => safe.put('/flow/settings', data),
 };
