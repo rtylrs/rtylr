@@ -8,7 +8,7 @@
 
 .voxire-spinner-ring {
   border: 3px solid rgba(16, 16, 16, 0.1);
-  border-top: 3px solid #101010;
+  border-top: 3px solid #151515;
   border-radius: 50%;
   animation: voxire-spin-animation 1s linear infinite;
 }
@@ -60,7 +60,7 @@
 
 /* Color variants */
 .voxire-loading-spinner--primary .voxire-spinner-ring {
-  border-top-color: #101010;
+  border-top-color: #151515;
 }
 
 .voxire-loading-spinner--secondary .voxire-spinner-ring {
