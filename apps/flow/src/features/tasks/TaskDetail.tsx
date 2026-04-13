@@ -26,7 +26,9 @@ import {
 } from 'lucide-react';
 import { useTask } from './useTask';
 import { useUpdateTask, useDeleteTask, useAddComment, useAddSubtask, useLogTime } from './useTasks';
+import { useLabels } from './useLabels';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
+import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import CommentList from '../../shared/components/CommentList';
@@ -52,16 +54,13 @@ const TaskDetail: React.FC = () => {
   const addCommentMut = useAddComment();
   const addSubtaskMut = useAddSubtask();
   const logTimeMut = useLogTime();
+  const { data: allLabels = [] } = useLabels();
   const {
     toggleSubtask,
-    labels,
     members,
     cycles,
     milestones,
     archiveTask,
-    comments,
-    activity,
-    subtasks,
     attachments,
     timelogs,
     projects,
@@ -69,9 +68,10 @@ const TaskDetail: React.FC = () => {
     sections,
     customFieldDefinitions,
   } = useFlowStore();
+  const [labelPickerOpen, setLabelPickerOpen] = useState(false);
 
   const updateTask = (id: string, patch: Partial<Task>) => {
-    updateTaskMut.mutate({ id, data: patch as any });
+    updateTaskMut.mutate({ id, data: patch as Partial<ApiTask> });
   };
   const deleteTask = (id: string) => {
     deleteTaskMut.mutate(id);
@@ -101,7 +101,36 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  if (!taskData) {
+  const detail = taskData as ApiTaskDetail | undefined;
+  const task = detail?.task;
+  const taskComments = (detail?.comments ?? []).map((c) => ({
+    id: c.id,
+    taskId: c.taskId,
+    authorId: c.userId,
+    author: c.userId,
+    authorInitials: c.userId.slice(0, 2).toUpperCase(),
+    body: c.content,
+    createdAt: c.createdAt,
+  }));
+  const taskActivity = (detail?.activity ?? []).map((a) => ({
+    id: a.id,
+    taskId: a.taskId,
+    type: 'status_change' as const,
+    actor: a.userId,
+    actorInitials: a.userId.slice(0, 2).toUpperCase(),
+    from: a.oldValue,
+    to: a.newValue,
+    createdAt: a.createdAt,
+    detail: a.action,
+  }));
+  const taskSubtasks = (detail?.subtasks ?? []).map((s) => ({
+    id: s.id,
+    taskId: task?.id ?? '',
+    title: s.title,
+    completed: s.status === 'done',
+  }));
+
+  if (!task) {
     return (
       <div className="p-10 text-center">
         <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
@@ -111,7 +140,6 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const task = taskData as unknown as Task;
   const project = projects.find((p) => p.id === task.projectId);
   const projectSections = sections
     .filter((s) => s.projectId === task.projectId)
@@ -119,23 +147,18 @@ const TaskDetail: React.FC = () => {
   const fieldDefs = customFieldDefinitions
     .filter((f) => f.projectId === task.projectId)
     .sort((a, b) => a.order - b.order);
-  const dependencyTasks = (task.dependencies ?? [])
-    .map((tid) => allTasks.find((ot) => ot.id === tid))
-    .filter((ot): ot is Task => !!ot);
+  const dependencyTasks = allTasks.filter((ot) => (task as any).dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
     (ot) =>
       ot.workspaceId === task.workspaceId &&
       ot.id !== task.id &&
-      !(task.dependencies ?? []).includes(ot.id)
+      !(task as any).dependencies?.includes(ot.id)
   );
-  const taskComments = comments.filter((c) => c.taskId === task.id);
-  const taskActivity = activity.filter((a) => a.taskId === task.id);
-  const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);
   const taskAttachments = attachments.filter((a) => a.taskId === task.id);
   const taskTimelogs = timelogs.filter((tl) => tl.taskId === task.id);
-  const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
-  const cycle = cycles.find((c) => c.id === task.cycleId);
-  const milestone = milestones.find((m) => m.id === task.milestoneId);
+  const taskLabels = allLabels.filter((l) => (task as any).labels?.includes(l.id));
+  const cycle = cycles.find((c) => c.id === (task as any).cycleId);
+  const milestone = milestones.find((m) => m.id === (task as any).milestoneId);
   const totalMinutes = taskTimelogs.reduce((s, t) => s + t.minutes, 0);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
@@ -170,15 +193,15 @@ const TaskDetail: React.FC = () => {
                   label: project?.name || 'Project',
                   to: `/w/${task.workspaceId}/p/${task.projectId}`,
                 },
-                { label: task.identifier },
+                { label: task.identifier ?? task.id },
               ]}
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <button
               onClick={() => {
-                navigator.clipboard?.writeText(task.identifier);
-                toast.success(`Copied ${task.identifier}`);
+                navigator.clipboard?.writeText(task.identifier ?? task.id);
+                toast.success(`Copied ${task.identifier ?? task.id}`);
               }}
               className="flex h-8 items-center gap-1 rounded px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -653,16 +676,75 @@ const TaskDetail: React.FC = () => {
         </DetailField>
 
         <DetailField icon={Tag} label="Labels">
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 relative">
             {taskLabels.map((l) => (
-              <LabelChip key={l.id} label={l} small />
+              <LabelChip
+                key={l.id}
+                label={l}
+                small
+                onRemove={() =>
+                  updateTask(task.id, {
+                    labels: ((task as any).labels ?? []).filter((lid: string) => lid !== l.id),
+                  })
+                }
+              />
             ))}
             <button
+              onClick={() => setLabelPickerOpen((v) => !v)}
               className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-dim)' }}
             >
-              +
+              + Add
             </button>
+            {labelPickerOpen && (
+              <div
+                className="absolute top-6 left-0 z-50 rounded-lg shadow-lg p-2 min-w-[160px] space-y-0.5"
+                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+              >
+                {allLabels.length === 0 && (
+                  <p className="text-[11px] px-2 py-1" style={{ color: 'var(--flow-text-dim)' }}>
+                    No labels yet
+                  </p>
+                )}
+                {allLabels.map((l) => {
+                  const active = ((task as any).labels ?? []).includes(l.id);
+                  return (
+                    <button
+                      key={l.id}
+                      onClick={() => {
+                        const current: string[] = (task as any).labels ?? [];
+                        updateTask(task.id, {
+                          labels: active
+                            ? current.filter((lid) => lid !== l.id)
+                            : [...current, l.id],
+                        });
+                        setLabelPickerOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-2 py-1 rounded text-left hover:bg-[var(--flow-hover)]"
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full shrink-0"
+                        style={{ background: l.color }}
+                      />
+                      <span
+                        className="text-[11px] flex-1"
+                        style={{
+                          color: active ? l.color : 'var(--flow-text)',
+                          fontWeight: active ? 600 : 400,
+                        }}
+                      >
+                        {l.name}
+                      </span>
+                      {active && (
+                        <span className="text-[10px]" style={{ color: l.color }}>
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </DetailField>
       </aside>

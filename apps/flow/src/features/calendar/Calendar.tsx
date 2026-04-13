@@ -1,20 +1,33 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'motion/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Task } from '../../shared/stores/flowStore';
-import { useTasks } from '../tasks/useTasks';
+import { toast } from 'sonner';
+import { useTasks, useCreateTask } from '../tasks/useTasks';
+import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
+import type { ApiTask } from '../../shared/services/flowApi';
+
+const ACCENT = '#64C5B9';
+
+interface CreateModal {
+  date: string;
+}
 
 const Calendar: React.FC = () => {
-  const { data: apiTasks } = useTasks({});
-  const tasks = (apiTasks ?? []) as Task[];
+  const { data: apiTasks = [] } = useTasks({});
+  const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
+  const { activeWorkspaceId, projects } = useFlowStore();
+  const createTask = useCreateTask();
   const [cursor, setCursor] = useState(() => new Date());
+  const [createModal, setCreateModal] = useState<CreateModal | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newProjectId, setNewProjectId] = useState('');
 
   const { days, monthLabel } = useMemo(() => {
     const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-    const startDay = first.getDay(); // Sun=0
+    const startDay = first.getDay();
     const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
     const cells: { date: Date; inMonth: boolean }[] = [];
     for (let i = startDay - 1; i >= 0; i--) {
@@ -37,16 +50,49 @@ const Calendar: React.FC = () => {
   }, [cursor]);
 
   const tasksByDate = useMemo(() => {
-    const map: Record<string, Task[]> = {};
+    const map: Record<string, ApiTask[]> = {};
     tasks.forEach((t) => {
       if (!t.dueDate) return;
-      if (!map[t.dueDate]) map[t.dueDate] = [];
-      map[t.dueDate].push(t);
+      const key = t.dueDate.split('T')[0];
+      if (!map[key]) map[key] = [];
+      map[key].push(t);
     });
     return map;
   }, [tasks]);
 
   const today = new Date().toISOString().split('T')[0];
+
+  const openCreate = (date: Date, inMonth: boolean) => {
+    if (!inMonth) return;
+    const iso = date.toISOString().split('T')[0];
+    setCreateModal({ date: iso });
+    setNewTitle('');
+    setNewProjectId(projects[0]?.id ?? '');
+  };
+
+  const submitCreate = () => {
+    if (!newTitle.trim()) return;
+    const projectId = newProjectId || projects[0]?.id;
+    if (!projectId || !activeWorkspaceId) {
+      toast.error('Select a project first');
+      return;
+    }
+    createTask.mutate(
+      {
+        projectId,
+        workspaceId: activeWorkspaceId,
+        title: newTitle.trim(),
+        dueDate: createModal!.date,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Task created');
+          setCreateModal(null);
+        },
+        onError: () => toast.error('Failed to create task'),
+      }
+    );
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -59,7 +105,7 @@ const Calendar: React.FC = () => {
             Calendar
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            Tasks organized by due date
+            Tasks organized by due date · Click a day to add a task
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -114,7 +160,8 @@ const Calendar: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.1, delay: i * 0.002 }}
-                className="min-h-[100px] p-1.5"
+                onClick={() => openCreate(c.date, c.inMonth)}
+                className="min-h-[100px] p-1.5 cursor-pointer group"
                 style={{
                   background: 'var(--flow-bg)',
                   opacity: c.inMonth ? 1 : 0.4,
@@ -124,18 +171,29 @@ const Calendar: React.FC = () => {
                   <span
                     className="text-[10px] font-semibold h-5 w-5 flex items-center justify-center rounded-full"
                     style={{
-                      background: isToday ? '#64C5B9' : 'transparent',
+                      background: isToday ? ACCENT : 'transparent',
                       color: isToday ? '#0a0a0a' : 'var(--flow-text-muted)',
                     }}
                   >
                     {c.date.getDate()}
                   </span>
+                  {c.inMonth && (
+                    <span
+                      className="text-[9px] opacity-0 group-hover:opacity-60 transition-opacity"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      + add
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-0.5">
                   {dayTasks.slice(0, 3).map((t) => (
                     <button
                       key={t.id}
-                      onClick={() => navigate(`/task/${t.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/task/${t.id}`);
+                      }}
                       className="w-full text-left px-1.5 py-0.5 rounded text-[10px] truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                       style={{
                         background: 'var(--flow-card)',
@@ -147,9 +205,13 @@ const Calendar: React.FC = () => {
                     </button>
                   ))}
                   {dayTasks.length > 3 && (
-                    <span className="text-[9px] px-1" style={{ color: 'var(--flow-text-dim)' }}>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-[9px] px-1 hover:underline"
+                      style={{ color: ACCENT }}
+                    >
                       +{dayTasks.length - 3} more
-                    </span>
+                    </button>
                   )}
                 </div>
               </motion.div>
@@ -157,6 +219,100 @@ const Calendar: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Create task modal */}
+      <AnimatePresence>
+        {createModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.4)' }}
+              onClick={() => setCreateModal(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-2xl p-5 w-[360px]"
+              style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                  New task for{' '}
+                  <span style={{ color: ACCENT }}>
+                    {new Date(createModal.date + 'T00:00:00').toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </h2>
+                <button
+                  onClick={() => setCreateModal(null)}
+                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  style={{ color: 'var(--flow-text-dim)' }}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+
+              <input
+                autoFocus
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
+                placeholder="Task title…"
+                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mb-3"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text)',
+                }}
+              />
+
+              {projects.length > 0 && (
+                <select
+                  value={newProjectId}
+                  onChange={(e) => setNewProjectId(e.target.value)}
+                  className="w-full rounded-lg px-3 py-2 text-[12px] outline-none mb-4"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setCreateModal(null)}
+                  className="px-3 py-1.5 rounded text-[12px]"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitCreate}
+                  disabled={!newTitle.trim() || createTask.isPending}
+                  className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"
+                  style={{ background: ACCENT, color: '#0a0a0a' }}
+                >
+                  {createTask.isPending ? 'Creating…' : 'Create'}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

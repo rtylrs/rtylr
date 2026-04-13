@@ -87,6 +87,13 @@ describe('flowApi', () => {
     });
   });
 
+  it('getTasks with workspaceId sends workspace_id param', () => {
+    flowApi.getTasks({ workspaceId: 'ws-1' });
+    expect(safe.get).toHaveBeenCalledWith('/flow/tasks', {
+      params: { workspace_id: 'ws-1' },
+    });
+  });
+
   it('getMyTasks calls GET /flow/tasks/my', () => {
     flowApi.getMyTasks();
     expect(safe.get).toHaveBeenCalledWith('/flow/tasks/my');

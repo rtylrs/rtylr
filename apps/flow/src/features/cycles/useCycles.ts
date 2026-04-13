@@ -7,12 +7,12 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 export function useCycles(workspaceId?: string) {
   const { activeWorkspaceId } = useFlowStore();
   const wsId = workspaceId ?? activeWorkspaceId;
-  return useQuery({
+  return useQuery<ApiCycle[]>({
     queryKey: ['cycles', wsId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getCycles(wsId));
-      // backend returns { cycles: [...] }
-      return (res as any).cycles ?? (Array.isArray(res) ? res : []);
+      const data = (res as any).cycles ?? (Array.isArray(res) ? res : []);
+      return data as ApiCycle[];
     },
   });
 }
