@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -40,6 +40,8 @@ import BulkEditBar from '../shared/components/BulkEditBar';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
+import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
+import type { Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
@@ -209,12 +211,31 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     setQuickCreateOpen,
   } = useFlowStore();
 
-  // Fetch workspaces and projects from API and populate store
+  // Fetch workspaces from API.
+  // IMPORTANT: use React Query data directly for display — never wait for the
+  // Zustand store to hydrate, because the store is populated via useEffect which
+  // fires *after* render, causing a flash of "No workspace".
   const { data: apiWorkspaces, isLoading: workspacesLoading } = useWorkspaces();
-  const currentWorkspaceId = workspaceId || activeWorkspaceId || workspaces[0]?.id || '';
+
+  const PERSONAL_FALLBACK: Workspace = {
+    id: PERSONAL_WORKSPACE_ID,
+    name: 'Personal',
+    color: ACCENT,
+  };
+
+  // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
+  const liveWorkspaces = useMemo<Workspace[]>(() => {
+    const list =
+      apiWorkspaces && apiWorkspaces.length > 0 ? (apiWorkspaces as Workspace[]) : workspaces;
+    if (list.length === 0) return workspacesLoading ? [] : [PERSONAL_FALLBACK];
+    return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiWorkspaces, workspaces, workspacesLoading]);
+
+  const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
-  // Hydrate the store from React Query so sidebar and other consumers see fresh data.
+  // Hydrate the store so other consumers (tasks, etc.) see fresh data.
   useEffect(() => {
     if (apiWorkspaces && apiWorkspaces.length > 0) {
       setWorkspaces(apiWorkspaces as any);
@@ -233,6 +254,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDescription, setNewProjectDescription] = useState('');
   const [newProjectColor, setNewProjectColor] = useState('#64C5B9');
 
   useEffect(() => {
@@ -250,8 +272,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   useKeyboardShortcuts();
 
-  const activeWorkspace = workspaces.find((w) => w.id === currentWorkspaceId) ||
-    workspaces[0] || { id: '', name: workspacesLoading ? '' : 'No workspace', color: '#6b7280' };
+  const activeWorkspace =
+    liveWorkspaces.find((w) => w.id === currentWorkspaceId) ||
+    liveWorkspaces[0] ||
+    (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
   const workspaceProjects = projects.filter(
     (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
@@ -428,7 +452,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   boxShadow: 'var(--flow-shadow)',
                 }}
               >
-                {workspaces.map((ws) => (
+                {liveWorkspaces.map((ws) => (
                   <button
                     key={ws.id}
                     onClick={() => {
@@ -629,6 +653,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           title="New Project"
                           onClick={() => {
                             setNewProjectName('');
+                            setNewProjectDescription('');
                             setNewProjectColor('#64C5B9');
                             setNewProjectOpen(true);
                           }}
@@ -834,46 +859,59 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 New project
               </p>
               <div className="flex flex-col gap-3">
-                <input
-                  autoFocus
-                  type="text"
-                  placeholder="Project name"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (!newProjectName.trim() || !currentWorkspaceId) return;
-                      createProject.mutate(
-                        {
-                          workspaceId: currentWorkspaceId,
-                          name: newProjectName.trim(),
-                          color: newProjectColor,
-                        },
-                        { onSuccess: () => setNewProjectOpen(false) }
-                      );
-                    }
-                    if (e.key === 'Escape') setNewProjectOpen(false);
-                  }}
-                  className="w-full rounded-lg px-3 py-2.5 text-[13px] outline-none"
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={newProjectColor}
+                    onChange={(e) => setNewProjectColor(e.target.value)}
+                    title="Pick a color"
+                    className="h-8 w-8 shrink-0 rounded-md cursor-pointer border-0 p-0.5"
+                    style={{
+                      background: 'var(--flow-input-bg)',
+                      border: '1px solid var(--flow-border)',
+                    }}
+                  />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Project name"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (!newProjectName.trim() || !currentWorkspaceId) return;
+                        createProject.mutate(
+                          {
+                            workspaceId: currentWorkspaceId,
+                            name: newProjectName.trim(),
+                            color: newProjectColor,
+                          },
+                          { onSuccess: () => setNewProjectOpen(false) }
+                        );
+                      }
+                      if (e.key === 'Escape') setNewProjectOpen(false);
+                    }}
+                    className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none"
+                    style={{
+                      background: 'var(--flow-input-bg)',
+                      border: '1px solid var(--flow-border)',
+                      color: 'var(--flow-text)',
+                    }}
+                  />
+                </div>
+                <textarea
+                  placeholder="Description (optional)"
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg px-3 py-2.5 text-[13px] outline-none resize-none placeholder:opacity-45"
                   style={{
                     background: 'var(--flow-input-bg)',
                     border: '1px solid var(--flow-border)',
                     color: 'var(--flow-text)',
                   }}
                 />
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                    Color
-                  </span>
-                  <input
-                    type="color"
-                    value={newProjectColor}
-                    onChange={(e) => setNewProjectColor(e.target.value)}
-                    className="h-7 w-7 rounded cursor-pointer border-0"
-                    style={{ background: 'none' }}
-                  />
-                </div>
               </div>
               <div className="flex justify-end gap-2 mt-5">
                 <button
