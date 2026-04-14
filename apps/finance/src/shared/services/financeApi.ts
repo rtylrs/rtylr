@@ -1,5 +1,5 @@
 import { safe } from '../lib/api';
-import type { InvoiceLine } from '@voxire/contracts/finance/v1/invoices';
+import type { InvoiceItem } from '@voxire/contracts/finance/v1/invoices';
 import type { CreateRecurringInvoiceRequest } from '@voxire/contracts/finance/v1/recurring_invoices';
 import type { CreateQuoteRequest } from '@voxire/contracts/finance/v1/quotes';
 import type { CreateBillRequest } from '@voxire/contracts/finance/v1/bills';
@@ -53,7 +53,7 @@ export interface Invoice {
   status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
   dueDate: string;
   issuedDate: string;
-  items?: InvoiceLine[];
+  items?: InvoiceItem[];
   notes?: string;
   discount?: number;
   tax?: number;
