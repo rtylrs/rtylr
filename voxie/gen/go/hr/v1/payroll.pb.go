@@ -21,44 +21,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type PayrollRecord struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	StaffId       int64                  `protobuf:"varint,3,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
-	PeriodStart   string                 `protobuf:"bytes,4,opt,name=period_start,json=periodStart,proto3" json:"period_start,omitempty"`
-	PeriodEnd     string                 `protobuf:"bytes,5,opt,name=period_end,json=periodEnd,proto3" json:"period_end,omitempty"`
-	PeriodLabel   string                 `protobuf:"bytes,6,opt,name=period_label,json=periodLabel,proto3" json:"period_label,omitempty"`
-	RegularHours  float64                `protobuf:"fixed64,7,opt,name=regular_hours,json=regularHours,proto3" json:"regular_hours,omitempty"`
-	OvertimeHours float64                `protobuf:"fixed64,8,opt,name=overtime_hours,json=overtimeHours,proto3" json:"overtime_hours,omitempty"`
-	BasePay       float64                `protobuf:"fixed64,9,opt,name=base_pay,json=basePay,proto3" json:"base_pay,omitempty"`
-	OvertimePay   float64                `protobuf:"fixed64,10,opt,name=overtime_pay,json=overtimePay,proto3" json:"overtime_pay,omitempty"`
-	Bonuses       float64                `protobuf:"fixed64,11,opt,name=bonuses,proto3" json:"bonuses,omitempty"`
-	Deductions    float64                `protobuf:"fixed64,12,opt,name=deductions,proto3" json:"deductions,omitempty"`
-	TaxWithheld   float64                `protobuf:"fixed64,13,opt,name=tax_withheld,json=taxWithheld,proto3" json:"tax_withheld,omitempty"`
-	NetPay        float64                `protobuf:"fixed64,14,opt,name=net_pay,json=netPay,proto3" json:"net_pay,omitempty"`
-	Status        string                 `protobuf:"bytes,15,opt,name=status,proto3" json:"status,omitempty"`
-	PaidAt        string                 `protobuf:"bytes,16,opt,name=paid_at,json=paidAt,proto3" json:"paid_at,omitempty"`
-	Notes         string                 `protobuf:"bytes,17,opt,name=notes,proto3" json:"notes,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,18,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+type PayrollEntryPayload struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for the payroll entry.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Tenant owner this entry belongs to.
+	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	// Payroll run this entry is part of.
+	PayrollRunId int64 `protobuf:"varint,3,opt,name=payroll_run_id,json=payrollRunId,proto3" json:"payroll_run_id,omitempty"`
+	// Employee this entry compensates.
+	EmployeeId int64 `protobuf:"varint,4,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	// Gross base pay for the period.
+	BasePay float64 `protobuf:"fixed64,5,opt,name=base_pay,json=basePay,proto3" json:"base_pay,omitempty"`
+	// Compensation for overtime hours worked.
+	OvertimePay float64 `protobuf:"fixed64,6,opt,name=overtime_pay,json=overtimePay,proto3" json:"overtime_pay,omitempty"`
+	// Total deductions applied (tax, insurance, etc.).
+	Deductions float64 `protobuf:"fixed64,7,opt,name=deductions,proto3" json:"deductions,omitempty"`
+	// Additional bonuses awarded in this period.
+	Bonuses float64 `protobuf:"fixed64,8,opt,name=bonuses,proto3" json:"bonuses,omitempty"`
+	// Final take-home pay after deductions and bonuses.
+	NetPay float64 `protobuf:"fixed64,9,opt,name=net_pay,json=netPay,proto3" json:"net_pay,omitempty"`
+	// Total regular hours worked in the period.
+	HoursWorked float64 `protobuf:"fixed64,10,opt,name=hours_worked,json=hoursWorked,proto3" json:"hours_worked,omitempty"`
+	// Total overtime hours worked in the period.
+	OvertimeHours float64 `protobuf:"fixed64,11,opt,name=overtime_hours,json=overtimeHours,proto3" json:"overtime_hours,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `protobuf:"varint,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt     int64 `protobuf:"varint,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PayrollRecord) Reset() {
-	*x = PayrollRecord{}
+func (x *PayrollEntryPayload) Reset() {
+	*x = PayrollEntryPayload{}
 	mi := &file_hr_v1_payroll_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PayrollRecord) String() string {
+func (x *PayrollEntryPayload) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PayrollRecord) ProtoMessage() {}
+func (*PayrollEntryPayload) ProtoMessage() {}
 
-func (x *PayrollRecord) ProtoReflect() protoreflect.Message {
+func (x *PayrollEntryPayload) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_v1_payroll_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -70,351 +78,149 @@ func (x *PayrollRecord) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PayrollRecord.ProtoReflect.Descriptor instead.
-func (*PayrollRecord) Descriptor() ([]byte, []int) {
+// Deprecated: Use PayrollEntryPayload.ProtoReflect.Descriptor instead.
+func (*PayrollEntryPayload) Descriptor() ([]byte, []int) {
 	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PayrollRecord) GetId() int64 {
+func (x *PayrollEntryPayload) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetOwnerId() int64 {
+func (x *PayrollEntryPayload) GetOwnerId() int64 {
 	if x != nil {
 		return x.OwnerId
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetStaffId() int64 {
+func (x *PayrollEntryPayload) GetPayrollRunId() int64 {
 	if x != nil {
-		return x.StaffId
+		return x.PayrollRunId
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetPeriodStart() string {
+func (x *PayrollEntryPayload) GetEmployeeId() int64 {
 	if x != nil {
-		return x.PeriodStart
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetPeriodEnd() string {
-	if x != nil {
-		return x.PeriodEnd
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetPeriodLabel() string {
-	if x != nil {
-		return x.PeriodLabel
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetRegularHours() float64 {
-	if x != nil {
-		return x.RegularHours
+		return x.EmployeeId
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetOvertimeHours() float64 {
-	if x != nil {
-		return x.OvertimeHours
-	}
-	return 0
-}
-
-func (x *PayrollRecord) GetBasePay() float64 {
+func (x *PayrollEntryPayload) GetBasePay() float64 {
 	if x != nil {
 		return x.BasePay
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetOvertimePay() float64 {
+func (x *PayrollEntryPayload) GetOvertimePay() float64 {
 	if x != nil {
 		return x.OvertimePay
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetBonuses() float64 {
-	if x != nil {
-		return x.Bonuses
-	}
-	return 0
-}
-
-func (x *PayrollRecord) GetDeductions() float64 {
+func (x *PayrollEntryPayload) GetDeductions() float64 {
 	if x != nil {
 		return x.Deductions
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetTaxWithheld() float64 {
+func (x *PayrollEntryPayload) GetBonuses() float64 {
 	if x != nil {
-		return x.TaxWithheld
+		return x.Bonuses
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetNetPay() float64 {
+func (x *PayrollEntryPayload) GetNetPay() float64 {
 	if x != nil {
 		return x.NetPay
 	}
 	return 0
 }
 
-func (x *PayrollRecord) GetStatus() string {
+func (x *PayrollEntryPayload) GetHoursWorked() float64 {
 	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetPaidAt() string {
-	if x != nil {
-		return x.PaidAt
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetNotes() string {
-	if x != nil {
-		return x.Notes
-	}
-	return ""
-}
-
-func (x *PayrollRecord) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-type ListPayrollRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PeriodLabel   string                 `protobuf:"bytes,1,opt,name=period_label,json=periodLabel,proto3" json:"period_label,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListPayrollRequest) Reset() {
-	*x = ListPayrollRequest{}
-	mi := &file_hr_v1_payroll_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListPayrollRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListPayrollRequest) ProtoMessage() {}
-
-func (x *ListPayrollRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_payroll_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListPayrollRequest.ProtoReflect.Descriptor instead.
-func (*ListPayrollRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ListPayrollRequest) GetPeriodLabel() string {
-	if x != nil {
-		return x.PeriodLabel
-	}
-	return ""
-}
-
-type ListPayrollResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Records       []*PayrollRecord       `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListPayrollResponse) Reset() {
-	*x = ListPayrollResponse{}
-	mi := &file_hr_v1_payroll_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListPayrollResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListPayrollResponse) ProtoMessage() {}
-
-func (x *ListPayrollResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_payroll_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListPayrollResponse.ProtoReflect.Descriptor instead.
-func (*ListPayrollResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ListPayrollResponse) GetRecords() []*PayrollRecord {
-	if x != nil {
-		return x.Records
-	}
-	return nil
-}
-
-type RunPayrollRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PeriodStart   string                 `protobuf:"bytes,1,opt,name=period_start,json=periodStart,proto3" json:"period_start,omitempty"`
-	PeriodEnd     string                 `protobuf:"bytes,2,opt,name=period_end,json=periodEnd,proto3" json:"period_end,omitempty"`
-	PeriodLabel   string                 `protobuf:"bytes,3,opt,name=period_label,json=periodLabel,proto3" json:"period_label,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RunPayrollRequest) Reset() {
-	*x = RunPayrollRequest{}
-	mi := &file_hr_v1_payroll_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RunPayrollRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RunPayrollRequest) ProtoMessage() {}
-
-func (x *RunPayrollRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_payroll_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RunPayrollRequest.ProtoReflect.Descriptor instead.
-func (*RunPayrollRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *RunPayrollRequest) GetPeriodStart() string {
-	if x != nil {
-		return x.PeriodStart
-	}
-	return ""
-}
-
-func (x *RunPayrollRequest) GetPeriodEnd() string {
-	if x != nil {
-		return x.PeriodEnd
-	}
-	return ""
-}
-
-func (x *RunPayrollRequest) GetPeriodLabel() string {
-	if x != nil {
-		return x.PeriodLabel
-	}
-	return ""
-}
-
-type RunPayrollResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	RecordsCreated int64                  `protobuf:"varint,1,opt,name=records_created,json=recordsCreated,proto3" json:"records_created,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *RunPayrollResponse) Reset() {
-	*x = RunPayrollResponse{}
-	mi := &file_hr_v1_payroll_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RunPayrollResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RunPayrollResponse) ProtoMessage() {}
-
-func (x *RunPayrollResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_payroll_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RunPayrollResponse.ProtoReflect.Descriptor instead.
-func (*RunPayrollResponse) Descriptor() ([]byte, []int) {
-	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *RunPayrollResponse) GetRecordsCreated() int64 {
-	if x != nil {
-		return x.RecordsCreated
+		return x.HoursWorked
 	}
 	return 0
 }
 
-type MarkPayrollPaidRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+func (x *PayrollEntryPayload) GetOvertimeHours() float64 {
+	if x != nil {
+		return x.OvertimeHours
+	}
+	return 0
+}
+
+func (x *PayrollEntryPayload) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *PayrollEntryPayload) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+type PayrollRunPayload struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for the payroll run.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Tenant owner this run belongs to.
+	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	// Start of the pay period (ISO-8601 date).
+	PeriodStart string `protobuf:"bytes,3,opt,name=period_start,json=periodStart,proto3" json:"period_start,omitempty"`
+	// End of the pay period (ISO-8601 date).
+	PeriodEnd string `protobuf:"bytes,4,opt,name=period_end,json=periodEnd,proto3" json:"period_end,omitempty"`
+	// Workflow status (draft | in_review | approved | exported).
+	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	// Employee who initiated the payroll run.
+	CreatedBy int64 `protobuf:"varint,6,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	// Employee who approved the run; absent if not yet approved.
+	ApprovedBy *int64 `protobuf:"varint,7,opt,name=approved_by,json=approvedBy,proto3,oneof" json:"approved_by,omitempty"`
+	// Unix timestamp when the run was exported; absent if not yet exported.
+	ExportedAt *int64 `protobuf:"varint,8,opt,name=exported_at,json=exportedAt,proto3,oneof" json:"exported_at,omitempty"`
+	// Sum of all entry gross pay amounts in this run.
+	TotalGross float64 `protobuf:"fixed64,9,opt,name=total_gross,json=totalGross,proto3" json:"total_gross,omitempty"`
+	// Sum of all entry net pay amounts in this run.
+	TotalNet float64 `protobuf:"fixed64,10,opt,name=total_net,json=totalNet,proto3" json:"total_net,omitempty"`
+	// Individual payroll entries included in this run.
+	Entries []*PayrollEntryPayload `protobuf:"bytes,11,rep,name=entries,proto3" json:"entries,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `protobuf:"varint,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt     int64 `protobuf:"varint,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MarkPayrollPaidRequest) Reset() {
-	*x = MarkPayrollPaidRequest{}
-	mi := &file_hr_v1_payroll_proto_msgTypes[5]
+func (x *PayrollRunPayload) Reset() {
+	*x = PayrollRunPayload{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MarkPayrollPaidRequest) String() string {
+func (x *PayrollRunPayload) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MarkPayrollPaidRequest) ProtoMessage() {}
+func (*PayrollRunPayload) ProtoMessage() {}
 
-func (x *MarkPayrollPaidRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_v1_payroll_proto_msgTypes[5]
+func (x *PayrollRunPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -425,39 +231,313 @@ func (x *MarkPayrollPaidRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MarkPayrollPaidRequest.ProtoReflect.Descriptor instead.
-func (*MarkPayrollPaidRequest) Descriptor() ([]byte, []int) {
-	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use PayrollRunPayload.ProtoReflect.Descriptor instead.
+func (*PayrollRunPayload) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MarkPayrollPaidRequest) GetId() int64 {
+func (x *PayrollRunPayload) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type MarkPayrollPaidResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+func (x *PayrollRunPayload) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetPeriodStart() string {
+	if x != nil {
+		return x.PeriodStart
+	}
+	return ""
+}
+
+func (x *PayrollRunPayload) GetPeriodEnd() string {
+	if x != nil {
+		return x.PeriodEnd
+	}
+	return ""
+}
+
+func (x *PayrollRunPayload) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *PayrollRunPayload) GetCreatedBy() int64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetApprovedBy() int64 {
+	if x != nil && x.ApprovedBy != nil {
+		return *x.ApprovedBy
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetExportedAt() int64 {
+	if x != nil && x.ExportedAt != nil {
+		return *x.ExportedAt
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetTotalGross() float64 {
+	if x != nil {
+		return x.TotalGross
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetTotalNet() float64 {
+	if x != nil {
+		return x.TotalNet
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetEntries() []*PayrollEntryPayload {
+	if x != nil {
+		return x.Entries
+	}
+	return nil
+}
+
+func (x *PayrollRunPayload) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *PayrollRunPayload) GetUpdatedAt() int64 {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return 0
+}
+
+type TriggerPayrollRunRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Start of the pay period to process (ISO-8601 date).
+	PeriodStart string `protobuf:"bytes,1,opt,name=period_start,json=periodStart,proto3" json:"period_start,omitempty"`
+	// End of the pay period to process (ISO-8601 date).
+	PeriodEnd     string `protobuf:"bytes,2,opt,name=period_end,json=periodEnd,proto3" json:"period_end,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MarkPayrollPaidResponse) Reset() {
-	*x = MarkPayrollPaidResponse{}
+func (x *TriggerPayrollRunRequest) Reset() {
+	*x = TriggerPayrollRunRequest{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerPayrollRunRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerPayrollRunRequest) ProtoMessage() {}
+
+func (x *TriggerPayrollRunRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerPayrollRunRequest.ProtoReflect.Descriptor instead.
+func (*TriggerPayrollRunRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *TriggerPayrollRunRequest) GetPeriodStart() string {
+	if x != nil {
+		return x.PeriodStart
+	}
+	return ""
+}
+
+func (x *TriggerPayrollRunRequest) GetPeriodEnd() string {
+	if x != nil {
+		return x.PeriodEnd
+	}
+	return ""
+}
+
+type TriggerPayrollRunResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The newly created payroll run with computed entries.
+	Run           *PayrollRunPayload `protobuf:"bytes,1,opt,name=run,proto3" json:"run,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerPayrollRunResponse) Reset() {
+	*x = TriggerPayrollRunResponse{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerPayrollRunResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerPayrollRunResponse) ProtoMessage() {}
+
+func (x *TriggerPayrollRunResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerPayrollRunResponse.ProtoReflect.Descriptor instead.
+func (*TriggerPayrollRunResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TriggerPayrollRunResponse) GetRun() *PayrollRunPayload {
+	if x != nil {
+		return x.Run
+	}
+	return nil
+}
+
+type ApprovePayrollRunRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the payroll run to approve.
+	RunId         int64 `protobuf:"varint,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApprovePayrollRunRequest) Reset() {
+	*x = ApprovePayrollRunRequest{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApprovePayrollRunRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApprovePayrollRunRequest) ProtoMessage() {}
+
+func (x *ApprovePayrollRunRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApprovePayrollRunRequest.ProtoReflect.Descriptor instead.
+func (*ApprovePayrollRunRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ApprovePayrollRunRequest) GetRunId() int64 {
+	if x != nil {
+		return x.RunId
+	}
+	return 0
+}
+
+type ApprovePayrollRunResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The approved payroll run.
+	Run           *PayrollRunPayload `protobuf:"bytes,1,opt,name=run,proto3" json:"run,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApprovePayrollRunResponse) Reset() {
+	*x = ApprovePayrollRunResponse{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApprovePayrollRunResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApprovePayrollRunResponse) ProtoMessage() {}
+
+func (x *ApprovePayrollRunResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApprovePayrollRunResponse.ProtoReflect.Descriptor instead.
+func (*ApprovePayrollRunResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ApprovePayrollRunResponse) GetRun() *PayrollRunPayload {
+	if x != nil {
+		return x.Run
+	}
+	return nil
+}
+
+type ExportPayrollRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the payroll run to export.
+	RunId         int64 `protobuf:"varint,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportPayrollRequest) Reset() {
+	*x = ExportPayrollRequest{}
 	mi := &file_hr_v1_payroll_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MarkPayrollPaidResponse) String() string {
+func (x *ExportPayrollRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MarkPayrollPaidResponse) ProtoMessage() {}
+func (*ExportPayrollRequest) ProtoMessage() {}
 
-func (x *MarkPayrollPaidResponse) ProtoReflect() protoreflect.Message {
+func (x *ExportPayrollRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_v1_payroll_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -469,62 +549,240 @@ func (x *MarkPayrollPaidResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MarkPayrollPaidResponse.ProtoReflect.Descriptor instead.
-func (*MarkPayrollPaidResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ExportPayrollRequest.ProtoReflect.Descriptor instead.
+func (*ExportPayrollRequest) Descriptor() ([]byte, []int) {
 	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *MarkPayrollPaidResponse) GetSuccess() bool {
+func (x *ExportPayrollRequest) GetRunId() int64 {
 	if x != nil {
-		return x.Success
+		return x.RunId
 	}
-	return false
+	return 0
+}
+
+type ExportPayrollResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for the generated export batch.
+	BatchId       string `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportPayrollResponse) Reset() {
+	*x = ExportPayrollResponse{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportPayrollResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportPayrollResponse) ProtoMessage() {}
+
+func (x *ExportPayrollResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportPayrollResponse.ProtoReflect.Descriptor instead.
+func (*ExportPayrollResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ExportPayrollResponse) GetBatchId() string {
+	if x != nil {
+		return x.BatchId
+	}
+	return ""
+}
+
+type ListPayrollRunsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPayrollRunsRequest) Reset() {
+	*x = ListPayrollRunsRequest{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPayrollRunsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPayrollRunsRequest) ProtoMessage() {}
+
+func (x *ListPayrollRunsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPayrollRunsRequest.ProtoReflect.Descriptor instead.
+func (*ListPayrollRunsRequest) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{8}
+}
+
+type ListPayrollRunsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Page of payroll runs.
+	Runs []*PayrollRunPayload `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
+	// Total number of payroll runs across all pages.
+	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset        int32 `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPayrollRunsResponse) Reset() {
+	*x = ListPayrollRunsResponse{}
+	mi := &file_hr_v1_payroll_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPayrollRunsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPayrollRunsResponse) ProtoMessage() {}
+
+func (x *ListPayrollRunsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_v1_payroll_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPayrollRunsResponse.ProtoReflect.Descriptor instead.
+func (*ListPayrollRunsResponse) Descriptor() ([]byte, []int) {
+	return file_hr_v1_payroll_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListPayrollRunsResponse) GetRuns() []*PayrollRunPayload {
+	if x != nil {
+		return x.Runs
+	}
+	return nil
+}
+
+func (x *ListPayrollRunsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListPayrollRunsResponse) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListPayrollRunsResponse) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
 }
 
 var File_hr_v1_payroll_proto protoreflect.FileDescriptor
 
 const file_hr_v1_payroll_proto_rawDesc = "" +
 	"\n" +
-	"\x13hr/v1/payroll.proto\x12\x05hr.v1\"\xa0\x04\n" +
-	"\rPayrollRecord\x12\x0e\n" +
+	"\x13hr/v1/payroll.proto\x12\x05hr.v1\"\xa0\x03\n" +
+	"\x13PayrollEntryPayload\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x19\n" +
-	"\bstaff_id\x18\x03 \x01(\x03R\astaffId\x12!\n" +
-	"\fperiod_start\x18\x04 \x01(\tR\vperiodStart\x12\x1d\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
+	"\x0epayroll_run_id\x18\x03 \x01(\x03R\fpayrollRunId\x12\x1f\n" +
+	"\vemployee_id\x18\x04 \x01(\x03R\n" +
+	"employeeId\x12\x19\n" +
+	"\bbase_pay\x18\x05 \x01(\x01R\abasePay\x12!\n" +
+	"\fovertime_pay\x18\x06 \x01(\x01R\vovertimePay\x12\x1e\n" +
 	"\n" +
-	"period_end\x18\x05 \x01(\tR\tperiodEnd\x12!\n" +
-	"\fperiod_label\x18\x06 \x01(\tR\vperiodLabel\x12#\n" +
-	"\rregular_hours\x18\a \x01(\x01R\fregularHours\x12%\n" +
-	"\x0eovertime_hours\x18\b \x01(\x01R\rovertimeHours\x12\x19\n" +
-	"\bbase_pay\x18\t \x01(\x01R\abasePay\x12!\n" +
-	"\fovertime_pay\x18\n" +
-	" \x01(\x01R\vovertimePay\x12\x18\n" +
-	"\abonuses\x18\v \x01(\x01R\abonuses\x12\x1e\n" +
+	"deductions\x18\a \x01(\x01R\n" +
+	"deductions\x12\x18\n" +
+	"\abonuses\x18\b \x01(\x01R\abonuses\x12\x17\n" +
+	"\anet_pay\x18\t \x01(\x01R\x06netPay\x12!\n" +
+	"\fhours_worked\x18\n" +
+	" \x01(\x01R\vhoursWorked\x12%\n" +
+	"\x0eovertime_hours\x18\v \x01(\x01R\rovertimeHours\x12\x1d\n" +
 	"\n" +
-	"deductions\x18\f \x01(\x01R\n" +
-	"deductions\x12!\n" +
-	"\ftax_withheld\x18\r \x01(\x01R\vtaxWithheld\x12\x17\n" +
-	"\anet_pay\x18\x0e \x01(\x01R\x06netPay\x12\x16\n" +
-	"\x06status\x18\x0f \x01(\tR\x06status\x12\x17\n" +
-	"\apaid_at\x18\x10 \x01(\tR\x06paidAt\x12\x14\n" +
-	"\x05notes\x18\x11 \x01(\tR\x05notes\x12\x1d\n" +
+	"created_at\x18\f \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x12 \x01(\tR\tcreatedAt\"7\n" +
-	"\x12ListPayrollRequest\x12!\n" +
-	"\fperiod_label\x18\x01 \x01(\tR\vperiodLabel\"E\n" +
-	"\x13ListPayrollResponse\x12.\n" +
-	"\arecords\x18\x01 \x03(\v2\x14.hr.v1.PayrollRecordR\arecords\"x\n" +
-	"\x11RunPayrollRequest\x12!\n" +
+	"updated_at\x18\r \x01(\x03R\tupdatedAt\"\xd5\x03\n" +
+	"\x11PayrollRunPayload\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12!\n" +
+	"\fperiod_start\x18\x03 \x01(\tR\vperiodStart\x12\x1d\n" +
+	"\n" +
+	"period_end\x18\x04 \x01(\tR\tperiodEnd\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x06 \x01(\x03R\tcreatedBy\x12$\n" +
+	"\vapproved_by\x18\a \x01(\x03H\x00R\n" +
+	"approvedBy\x88\x01\x01\x12$\n" +
+	"\vexported_at\x18\b \x01(\x03H\x01R\n" +
+	"exportedAt\x88\x01\x01\x12\x1f\n" +
+	"\vtotal_gross\x18\t \x01(\x01R\n" +
+	"totalGross\x12\x1b\n" +
+	"\ttotal_net\x18\n" +
+	" \x01(\x01R\btotalNet\x124\n" +
+	"\aentries\x18\v \x03(\v2\x1a.hr.v1.PayrollEntryPayloadR\aentries\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\f \x01(\x03R\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\r \x01(\x03R\tupdatedAtB\x0e\n" +
+	"\f_approved_byB\x0e\n" +
+	"\f_exported_at\"\\\n" +
+	"\x18TriggerPayrollRunRequest\x12!\n" +
 	"\fperiod_start\x18\x01 \x01(\tR\vperiodStart\x12\x1d\n" +
 	"\n" +
-	"period_end\x18\x02 \x01(\tR\tperiodEnd\x12!\n" +
-	"\fperiod_label\x18\x03 \x01(\tR\vperiodLabel\"=\n" +
-	"\x12RunPayrollResponse\x12'\n" +
-	"\x0frecords_created\x18\x01 \x01(\x03R\x0erecordsCreated\"(\n" +
-	"\x16MarkPayrollPaidRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
-	"\x17MarkPayrollPaidResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB+Z)github.com/voxire/voxie/gen/go/hr/v1;hrv1b\x06proto3"
+	"period_end\x18\x02 \x01(\tR\tperiodEnd\"G\n" +
+	"\x19TriggerPayrollRunResponse\x12*\n" +
+	"\x03run\x18\x01 \x01(\v2\x18.hr.v1.PayrollRunPayloadR\x03run\"1\n" +
+	"\x18ApprovePayrollRunRequest\x12\x15\n" +
+	"\x06run_id\x18\x01 \x01(\x03R\x05runId\"G\n" +
+	"\x19ApprovePayrollRunResponse\x12*\n" +
+	"\x03run\x18\x01 \x01(\v2\x18.hr.v1.PayrollRunPayloadR\x03run\"-\n" +
+	"\x14ExportPayrollRequest\x12\x15\n" +
+	"\x06run_id\x18\x01 \x01(\x03R\x05runId\"2\n" +
+	"\x15ExportPayrollResponse\x12\x19\n" +
+	"\bbatch_id\x18\x01 \x01(\tR\abatchId\"\x18\n" +
+	"\x16ListPayrollRunsRequest\"\x8b\x01\n" +
+	"\x17ListPayrollRunsResponse\x12,\n" +
+	"\x04runs\x18\x01 \x03(\v2\x18.hr.v1.PayrollRunPayloadR\x04runs\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x05R\x06offsetB+Z)github.com/voxire/voxie/gen/go/hr/v1;hrv1b\x06proto3"
 
 var (
 	file_hr_v1_payroll_proto_rawDescOnce sync.Once
@@ -538,23 +796,29 @@ func file_hr_v1_payroll_proto_rawDescGZIP() []byte {
 	return file_hr_v1_payroll_proto_rawDescData
 }
 
-var file_hr_v1_payroll_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_hr_v1_payroll_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_hr_v1_payroll_proto_goTypes = []any{
-	(*PayrollRecord)(nil),           // 0: hr.v1.PayrollRecord
-	(*ListPayrollRequest)(nil),      // 1: hr.v1.ListPayrollRequest
-	(*ListPayrollResponse)(nil),     // 2: hr.v1.ListPayrollResponse
-	(*RunPayrollRequest)(nil),       // 3: hr.v1.RunPayrollRequest
-	(*RunPayrollResponse)(nil),      // 4: hr.v1.RunPayrollResponse
-	(*MarkPayrollPaidRequest)(nil),  // 5: hr.v1.MarkPayrollPaidRequest
-	(*MarkPayrollPaidResponse)(nil), // 6: hr.v1.MarkPayrollPaidResponse
+	(*PayrollEntryPayload)(nil),       // 0: hr.v1.PayrollEntryPayload
+	(*PayrollRunPayload)(nil),         // 1: hr.v1.PayrollRunPayload
+	(*TriggerPayrollRunRequest)(nil),  // 2: hr.v1.TriggerPayrollRunRequest
+	(*TriggerPayrollRunResponse)(nil), // 3: hr.v1.TriggerPayrollRunResponse
+	(*ApprovePayrollRunRequest)(nil),  // 4: hr.v1.ApprovePayrollRunRequest
+	(*ApprovePayrollRunResponse)(nil), // 5: hr.v1.ApprovePayrollRunResponse
+	(*ExportPayrollRequest)(nil),      // 6: hr.v1.ExportPayrollRequest
+	(*ExportPayrollResponse)(nil),     // 7: hr.v1.ExportPayrollResponse
+	(*ListPayrollRunsRequest)(nil),    // 8: hr.v1.ListPayrollRunsRequest
+	(*ListPayrollRunsResponse)(nil),   // 9: hr.v1.ListPayrollRunsResponse
 }
 var file_hr_v1_payroll_proto_depIdxs = []int32{
-	0, // 0: hr.v1.ListPayrollResponse.records:type_name -> hr.v1.PayrollRecord
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: hr.v1.PayrollRunPayload.entries:type_name -> hr.v1.PayrollEntryPayload
+	1, // 1: hr.v1.TriggerPayrollRunResponse.run:type_name -> hr.v1.PayrollRunPayload
+	1, // 2: hr.v1.ApprovePayrollRunResponse.run:type_name -> hr.v1.PayrollRunPayload
+	1, // 3: hr.v1.ListPayrollRunsResponse.runs:type_name -> hr.v1.PayrollRunPayload
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_hr_v1_payroll_proto_init() }
@@ -562,13 +826,14 @@ func file_hr_v1_payroll_proto_init() {
 	if File_hr_v1_payroll_proto != nil {
 		return
 	}
+	file_hr_v1_payroll_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_v1_payroll_proto_rawDesc), len(file_hr_v1_payroll_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
