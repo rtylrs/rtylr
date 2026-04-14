@@ -1,66 +1,37 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  LeaveTypePayload,
+  LeaveRequestPayload,
+  LeaveBalancePayload,
+  LeaveCalendarEntryPayload,
+  ListLeaveTypesResponse,
+  ListLeaveRequestsRequest,
+  ListLeaveRequestsResponse,
+  CreateLeaveRequestRequest,
+  ApproveLeaveRequestRequest,
+  ListLeaveBalancesResponse,
+  GetLeaveCalendarRequest,
+  GetLeaveCalendarResponse,
+} from '@voxire/contracts/hr/v1/leave';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { LeaveType, LeaveRequest, LeaveBalance, LeaveCalendarEntry } from '../../schemas';
-
-interface ListLeaveTypesResponse {
-  leaveTypes: LeaveType[];
-}
-
-interface ListLeaveRequestsParams {
-  status?: string;
-  staffId?: number;
-}
-
-interface ListLeaveRequestsResponse {
-  requests: LeaveRequest[];
-}
-
-interface CreateLeaveRequestPayload {
-  leaveTypeId: number;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  notes?: string;
-}
-
-interface ApproveLeavePayload {
-  id: number;
-  status: string;
-  notes?: string;
-}
-
-interface ListLeaveBalancesResponse {
-  balances: LeaveBalance[];
-}
-
-interface LeaveCalendarParams {
-  month: number;
-  year: number;
-  departmentId?: number;
-  locationId?: number;
-}
-
-interface LeaveCalendarResponse {
-  entries: LeaveCalendarEntry[];
-}
 
 export const useListLeaveTypes = () => {
-  return useQuery<LeaveType[]>({
+  return useQuery<LeaveTypePayload[]>({
     queryKey: ['leave-types'],
-    queryFn: async (): Promise<LeaveType[]> => {
+    queryFn: async (): Promise<LeaveTypePayload[]> => {
       const res = await unwrap(safe.get<ListLeaveTypesResponse>('/hr/leave/types'));
       return (res as ListLeaveTypesResponse).leaveTypes;
     },
   });
 };
 
-export const useListLeaveRequests = (params?: ListLeaveRequestsParams) => {
-  return useQuery<LeaveRequest[]>({
+export const useListLeaveRequests = (params?: ListLeaveRequestsRequest) => {
+  return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-requests', params],
-    queryFn: async (): Promise<LeaveRequest[]> => {
+    queryFn: async (): Promise<LeaveRequestPayload[]> => {
       const res = await unwrap(
         safe.get<ListLeaveRequestsResponse>('/hr/leave/requests', { params })
       );
@@ -74,7 +45,7 @@ export const useCreateLeaveRequest = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateLeaveRequestPayload): Promise<void> => {
+    mutationFn: async (data: CreateLeaveRequestRequest): Promise<void> => {
       await unwrap(safe.post('/hr/leave/requests', data));
     },
     onSuccess: () => {
@@ -93,7 +64,7 @@ export const useApproveLeave = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ApproveLeavePayload): Promise<void> => {
+    mutationFn: async (data: ApproveLeaveRequestRequest): Promise<void> => {
       await unwrap(safe.put(`/hr/leave/requests/${data.id}/approve`, data));
     },
     onSuccess: () => {
@@ -109,21 +80,23 @@ export const useApproveLeave = () => {
 };
 
 export const useListLeaveBalances = () => {
-  return useQuery<LeaveBalance[]>({
+  return useQuery<LeaveBalancePayload[]>({
     queryKey: ['leave-balances'],
-    queryFn: async (): Promise<LeaveBalance[]> => {
+    queryFn: async (): Promise<LeaveBalancePayload[]> => {
       const res = await unwrap(safe.get<ListLeaveBalancesResponse>('/hr/leave/balances'));
       return (res as ListLeaveBalancesResponse).balances;
     },
   });
 };
 
-export const useGetLeaveCalendar = (params: LeaveCalendarParams) => {
-  return useQuery<LeaveCalendarEntry[]>({
+export const useGetLeaveCalendar = (params: GetLeaveCalendarRequest) => {
+  return useQuery<LeaveCalendarEntryPayload[]>({
     queryKey: ['leave-calendar', params],
-    queryFn: async (): Promise<LeaveCalendarEntry[]> => {
-      const res = await unwrap(safe.get<LeaveCalendarResponse>('/hr/leave/calendar', { params }));
-      return (res as LeaveCalendarResponse).entries;
+    queryFn: async (): Promise<LeaveCalendarEntryPayload[]> => {
+      const res = await unwrap(
+        safe.get<GetLeaveCalendarResponse>('/hr/leave/calendar', { params })
+      );
+      return (res as GetLeaveCalendarResponse).entries;
     },
   });
 };
