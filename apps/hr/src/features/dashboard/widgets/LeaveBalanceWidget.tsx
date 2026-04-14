@@ -58,7 +58,7 @@ const LeaveBalanceWidget = ({ data, isLoading }: LeaveBalanceWidgetProps): React
                       height: '100%',
                       width: `${Math.min(pct, 100)}%`,
                       borderRadius: 2,
-                      background: pct > 80 ? '#f59e0b' : '#8b5cf6',
+                      background: pct > 80 ? 'var(--hr-status-pending)' : 'var(--hr-accent)',
                       transition: 'width 0.3s ease',
                     }}
                   />

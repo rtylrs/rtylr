@@ -36,17 +36,17 @@ const TeamAttendanceTodayWidget = ({
               {
                 label: t('dashboard.widgets.present'),
                 value: data.present,
-                color: '#10b981',
+                color: 'var(--hr-status-approved)',
               },
               {
                 label: t('dashboard.widgets.absent'),
                 value: data.absent,
-                color: '#ef4444',
+                color: 'var(--hr-error)',
               },
               {
                 label: t('dashboard.widgets.late'),
                 value: data.late,
-                color: '#f59e0b',
+                color: 'var(--hr-status-pending)',
               },
             ].map((s) => (
               <div key={s.label} style={{ flex: 1, minWidth: 60, textAlign: 'center' }}>
@@ -70,19 +70,19 @@ const TeamAttendanceTodayWidget = ({
               <div
                 style={{
                   width: `${(data.present / data.total) * 100}%`,
-                  background: '#10b981',
+                  background: 'var(--hr-status-approved)',
                 }}
               />
               <div
                 style={{
                   width: `${(data.late / data.total) * 100}%`,
-                  background: '#f59e0b',
+                  background: 'var(--hr-status-pending)',
                 }}
               />
               <div
                 style={{
                   width: `${(data.absent / data.total) * 100}%`,
-                  background: '#ef4444',
+                  background: 'var(--hr-error)',
                 }}
               />
             </div>

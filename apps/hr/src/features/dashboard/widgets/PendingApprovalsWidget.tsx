@@ -61,8 +61,8 @@ const PendingApprovalsWidget = ({
                     minWidth: 20,
                     height: 20,
                     borderRadius: 10,
-                    background: '#8b5cf622',
-                    color: '#8b5cf6',
+                    background: 'color-mix(in srgb, var(--hr-accent) 13%, transparent)',
+                    color: 'var(--hr-accent)',
                     fontSize: 11,
                     fontWeight: 700,
                   }}

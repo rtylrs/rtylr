@@ -314,7 +314,8 @@
       "setupCompletion": "Avancement de la configuration",
       "stepsCompleted": "étapes terminées",
       "noData": "Aucune donnée disponible.",
-      "dragToReorder": "Glisser pour réorganiser"
+      "dragToReorder": "Glisser pour réorganiser",
+      "errorFallback": "Widget indisponible"
     }
   },
   "staff": {

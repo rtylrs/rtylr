@@ -60,7 +60,7 @@ const SetupCompletionWidget = ({
                 height: '100%',
                 width: `${pct}%`,
                 borderRadius: 3,
-                background: '#8b5cf6',
+                background: 'var(--hr-accent)',
                 transition: 'width 0.3s ease',
               }}
             />

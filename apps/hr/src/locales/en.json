@@ -314,7 +314,8 @@
       "setupCompletion": "Setup Completion",
       "stepsCompleted": "steps completed",
       "noData": "No data available.",
-      "dragToReorder": "Drag to reorder"
+      "dragToReorder": "Drag to reorder",
+      "errorFallback": "Widget unavailable"
     }
   },
   "staff": {

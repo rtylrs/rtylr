@@ -25,6 +25,7 @@ import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
 import { useExpiringDocuments, useOvertimeAlerts } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
+import ErrorBoundary from '../../shared/components/ErrorBoundary';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
 import { Card, StatCard, useIsMobile, Skeleton } from '../../shared/components/ui';
@@ -38,7 +39,7 @@ import PayrollCostWidget from './widgets/PayrollCostWidget';
 import SetupCompletionWidget from './widgets/SetupCompletionWidget';
 import type { DashboardWidget } from '../../shared/schemas/dashboard';
 
-const ACCENT = '#8b5cf6';
+const ACCENT = 'var(--hr-accent)';
 
 const DEFAULT_WIDGETS: DashboardWidget[] = [
   {
@@ -178,21 +179,21 @@ const quickActionDefs = [
     i18nKey: 'dashboard.quickActions.addStaff',
     icon: UserPlus,
     color: ACCENT,
-    bg: 'rgba(139,92,246,0.12)',
+    bg: 'var(--accent-muted)',
     path: '/employees/new',
   },
   {
     i18nKey: 'dashboard.quickActions.scheduleShift',
     icon: CalendarPlus,
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.12)',
+    color: 'var(--hr-status-approved)',
+    bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
     path: '/shifts/roster',
   },
   {
     i18nKey: 'dashboard.quickActions.runPayroll',
     icon: Play,
-    color: '#3b82f6',
-    bg: 'rgba(59,130,246,0.12)',
+    color: 'var(--hr-shift-blue)',
+    bg: 'color-mix(in srgb, var(--hr-shift-blue) 12%, transparent)',
     path: '/payroll',
   },
 ];
@@ -281,7 +282,7 @@ const Dashboard: React.FC = () => {
       change: t('dashboard.stats.thisMonth'),
       trend: 'up' as const,
       icon: Users,
-      color: '#8b5cf6',
+      color: 'var(--hr-accent)',
     },
     {
       label: t('dashboard.stats.onShift'),
@@ -292,7 +293,7 @@ const Dashboard: React.FC = () => {
           : '-',
       trend: 'neutral' as const,
       icon: Clock,
-      color: '#10b981',
+      color: 'var(--hr-status-approved)',
     },
     {
       label: t('dashboard.stats.openPositions'),
@@ -300,7 +301,7 @@ const Dashboard: React.FC = () => {
       trend: 'down' as const,
       change: '',
       icon: Briefcase,
-      color: '#f59e0b',
+      color: 'var(--hr-status-pending)',
     },
     {
       label: t('dashboard.stats.monthlyPayroll'),
@@ -308,7 +309,7 @@ const Dashboard: React.FC = () => {
       change: '',
       trend: 'up' as const,
       icon: DollarSign,
-      color: '#3b82f6',
+      color: 'var(--hr-shift-blue)',
     },
   ];
 
@@ -431,9 +432,9 @@ const Dashboard: React.FC = () => {
                     fontSize: 11,
                     color:
                       s.trend === 'up'
-                        ? '#10b981'
+                        ? 'var(--hr-status-approved)'
                         : s.trend === 'down'
-                          ? '#ef4444'
+                          ? 'var(--hr-error)'
                           : 'var(--hr-text-muted)',
                     margin: '4px 0 0',
                     display: 'flex',
@@ -489,7 +490,29 @@ const Dashboard: React.FC = () => {
               >
                 <GripVertical size={12} />
               </span>
-              {renderWidget(w)}
+              <ErrorBoundary
+                fallback={
+                  <div
+                    style={{
+                      background: 'var(--hr-card)',
+                      border: '1px solid var(--hr-border)',
+                      borderRadius: 12,
+                      padding: 16,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      color: 'var(--hr-error)',
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {t('dashboard.widgets.errorFallback')}
+                  </div>
+                }
+              >
+                {renderWidget(w)}
+              </ErrorBoundary>
             </motion.div>
           ))}
       </div>
@@ -589,7 +612,7 @@ const Dashboard: React.FC = () => {
                     height: 34,
                     width: 34,
                     borderRadius: '50%',
-                    background: 'rgba(139,92,246,0.12)',
+                    background: 'var(--accent-muted)',
                     color: ACCENT,
                     fontSize: 12,
                     fontWeight: 700,
@@ -629,7 +652,8 @@ const Dashboard: React.FC = () => {
                       gap: 4,
                       fontSize: 11,
                       fontWeight: 500,
-                      color: a.type === 'in' ? '#10b981' : '#f59e0b',
+                      color:
+                        a.type === 'in' ? 'var(--hr-status-approved)' : 'var(--hr-status-pending)',
                     }}
                   >
                     {a.type === 'in' ? <LogIn size={11} /> : <LogOut size={11} />}
@@ -759,14 +783,14 @@ const Dashboard: React.FC = () => {
           }
           sub={t('dashboard.metrics.allStaff')}
           icon={<Clock size={14} />}
-          color="#10b981"
+          color="var(--hr-status-approved)"
         />
         <StatCard
           label={t('dashboard.metrics.openPositions')}
           value={legacyDashboard?.openPositions ?? 0}
           sub={t('dashboard.metrics.beingFilled')}
           icon={<Briefcase size={14} />}
-          color="#f59e0b"
+          color="var(--hr-status-pending)"
         />
       </div>
 
@@ -786,8 +810,8 @@ const Dashboard: React.FC = () => {
               style={{
                 padding: 6,
                 borderRadius: 8,
-                background: 'rgba(16,185,129,0.15)',
-                color: '#10b981',
+                background: 'color-mix(in srgb, var(--hr-status-approved) 15%, transparent)',
+                color: 'var(--hr-status-approved)',
               }}
             >
               <Sparkles size={14} />
@@ -838,10 +862,13 @@ const Dashboard: React.FC = () => {
         >
           {expiring.length > 0 && (
             <Card
-              style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }}
+              style={{
+                borderColor: 'color-mix(in srgb, var(--hr-status-pending) 40%, transparent)',
+                background: 'color-mix(in srgb, var(--hr-status-pending) 6%, transparent)',
+              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
+                <AlertTriangle size={14} style={{ color: 'var(--hr-status-pending)' }} />
                 <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                   {t('dashboard.alerts.expiringDocuments')}
                 </h3>
@@ -853,10 +880,13 @@ const Dashboard: React.FC = () => {
           )}
           {overtimeAlerts.length > 0 && (
             <Card
-              style={{ borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.06)' }}
+              style={{
+                borderColor: 'color-mix(in srgb, var(--hr-error) 40%, transparent)',
+                background: 'color-mix(in srgb, var(--hr-error) 6%, transparent)',
+              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <Timer size={14} style={{ color: '#ef4444' }} />
+                <Timer size={14} style={{ color: 'var(--hr-error)' }} />
                 <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                   {t('dashboard.alerts.overtimeAlerts')}
                 </h3>

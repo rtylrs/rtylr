@@ -38,7 +38,7 @@ const HeadcountWidget = ({ data, isLoading }: HeadcountWidgetProps): React.JSX.E
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: data.trend > 0 ? '#10b981' : '#ef4444',
+                  color: data.trend > 0 ? 'var(--hr-status-approved)' : 'var(--hr-error)',
                 }}
               >
                 {data.trend > 0 ? '+' : ''}

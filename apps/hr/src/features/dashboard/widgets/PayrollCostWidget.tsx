@@ -59,7 +59,7 @@ const PayrollCostWidget = ({ data, isLoading }: PayrollCostWidgetProps): React.J
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                color: Number(changePercent) > 0 ? '#ef4444' : '#10b981',
+                color: Number(changePercent) > 0 ? 'var(--hr-error)' : 'var(--hr-status-approved)',
               }}
             >
               {Number(changePercent) > 0 ? '+' : ''}
