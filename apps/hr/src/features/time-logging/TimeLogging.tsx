@@ -264,7 +264,7 @@ const TimeLogging = (): React.JSX.Element => {
           height: 48,
           borderRadius: '50%',
           background: ACCENT,
-          color: '#fff',
+          color: 'var(--hr-on-accent, #fff)',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
