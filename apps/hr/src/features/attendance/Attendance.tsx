@@ -35,14 +35,6 @@ const STATUS_COLORS: Record<string, string> = {
   partial: 'var(--hr-status-submitted)',
 };
 
-const METHOD_LABELS: Record<string, string> = {
-  app: 'App',
-  qr: 'QR',
-  gps: 'GPS',
-  pin: 'PIN',
-  facial: 'Face',
-};
-
 const Attendance = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading } = useGetMyAttendance({});
@@ -150,7 +142,7 @@ const Attendance = (): React.JSX.Element => {
                     {record.durationMinutes ? formatDuration(record.durationMinutes) : '—'}
                   </td>
                   <td style={{ padding: '12px', color: 'var(--hr-text-muted)' }}>
-                    {METHOD_LABELS[record.clockInMethod] ?? record.clockInMethod}
+                    {t(`attendance.methods.${record.clockInMethod}`)}
                   </td>
                   <td style={{ padding: '12px' }}>
                     <Pill color={STATUS_COLORS[record.status] ?? 'var(--hr-status-draft)'}>

@@ -353,6 +353,13 @@
     "emptyDescription": "Your attendance records will appear here after you clock in.",
     "qrComingSoon": "QR scanning is coming soon!",
     "late": "{{minutes}}m late",
+    "methods": {
+      "app": "App",
+      "qr": "QR Code",
+      "gps": "GPS",
+      "pin": "PIN",
+      "facial": "Face"
+    },
     "statuses": {
       "present": "Present",
       "absent": "Absent",

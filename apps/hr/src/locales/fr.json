@@ -353,6 +353,13 @@
     "emptyDescription": "Vos enregistrements de présence apparaîtront ici après le pointage.",
     "qrComingSoon": "Le scan QR arrive bientôt !",
     "late": "{{minutes}}m de retard",
+    "methods": {
+      "app": "App",
+      "qr": "Code QR",
+      "gps": "GPS",
+      "pin": "Code PIN",
+      "facial": "Visage"
+    },
     "statuses": {
       "present": "Présent",
       "absent": "Absent",

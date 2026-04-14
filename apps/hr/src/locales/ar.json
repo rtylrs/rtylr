@@ -353,6 +353,13 @@
     "emptyDescription": "ستظهر سجلات حضورك هنا بعد تسجيل الحضور.",
     "qrComingSoon": "مسح رمز QR قريباً!",
     "late": "{{minutes}}د متأخر",
+    "methods": {
+      "app": "تطبيق",
+      "qr": "رمز QR",
+      "gps": "GPS",
+      "pin": "رمز PIN",
+      "facial": "الوجه"
+    },
     "statuses": {
       "present": "حاضر",
       "absent": "غائب",
