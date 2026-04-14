@@ -38,6 +38,8 @@ import {
   ClockArrowUp,
   CalendarRange,
   Receipt,
+  Package,
+  HardDrive,
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
@@ -134,6 +136,8 @@ const navSections: NavSection[] = [
         configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
       },
       { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
+      { i18nKey: 'nav.equipment', path: '/equipment', icon: Package },
+      { i18nKey: 'nav.assets', path: '/equipment/assets', icon: HardDrive },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
       { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
       { i18nKey: 'nav.settings', path: '/settings', icon: Settings },
@@ -161,8 +165,11 @@ const routeLabelKeys: Record<string, string> = {
   '/reviews/new': 'layout.routes.newReview',
   '/one-on-ones': 'nav.oneOnOnes',
   '/onboarding': 'nav.onboarding',
+  '/onboarding/templates': 'layout.routes.checklistTemplates',
   '/offboarding': 'nav.offboarding',
   '/documents': 'nav.documents',
+  '/equipment': 'nav.equipment',
+  '/equipment/assets': 'nav.assets',
   '/benefits': 'nav.benefits',
   '/training': 'nav.training',
   '/org-chart': 'nav.orgChart',
@@ -483,6 +490,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
     if (pathname.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
     if (pathname.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
+    if (pathname.startsWith('/equipment/')) return t('nav.assets');
+    if (pathname.startsWith('/onboarding/')) return t('layout.routes.checklistTemplates');
     return t('layout.hr');
   };
   const pageTitle = getPageTitle(location.pathname);

@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { useGetEmployee } from '../../shared/hooks/queries/useEmployees';
+import DocumentVault from '../documents/DocumentVault';
 
-type Tab = 'personal' | 'employment';
+type Tab = 'personal' | 'employment' | 'documents';
 
 const EmployeeDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -105,6 +106,13 @@ const EmployeeDetail = (): React.JSX.Element => {
         >
           {t('employees.employmentInfo')}
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('documents')}
+          style={tabStyle('documents')}
+        >
+          {t('employees.documentsTab')}
+        </button>
       </div>
 
       <div
@@ -137,6 +145,10 @@ const EmployeeDetail = (): React.JSX.Element => {
             )}
             {infoRow(t('employees.form.accountCreationMode'), employee.accountCreationMode)}
           </div>
+        )}
+
+        {activeTab === 'documents' && employeeId != null && (
+          <DocumentVault employeeId={employeeId} />
         )}
       </div>
     </div>

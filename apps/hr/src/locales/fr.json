@@ -53,7 +53,9 @@
     "overtime": "Heures supplémentaires",
     "rosterBuilder": "Planificateur",
     "myPaySlips": "Mes fiches de paie",
-    "payrollConfig": "Config. paie"
+    "payrollConfig": "Config. paie",
+    "equipment": "Équipement",
+    "assets": "Registre des actifs"
   },
   "layout": {
     "sections": {
@@ -80,7 +82,8 @@
       "timesheetDetail": "Détail de la feuille de temps",
       "newLeaveRequest": "Nouvelle demande de congé",
       "payrollConfig": "Configuration de la paie",
-      "payrollRunDetail": "Exécution de la paie"
+      "payrollRunDetail": "Exécution de la paie",
+      "checklistTemplates": "Modèles de listes"
     },
     "hubLink": "Hub"
   },
@@ -206,6 +209,7 @@
     "noEmployees": "Aucun employé trouvé",
     "personalInfo": "Informations personnelles",
     "employmentInfo": "Informations d'emploi",
+    "documentsTab": "Documents",
     "contractTypes": {
       "full_time": "Temps plein",
       "part_time": "Temps partiel",
@@ -588,6 +592,152 @@
       "conflictsWarning": "Certaines attributions ont des conflits d'horaire.",
       "emptyTitle": "Aucune donnée de planning",
       "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning."
+    }
+  },
+  "equipment": {
+    "title": "Équipement",
+    "subtitle": "Demander du matériel et gérer les approbations",
+    "newRequest": "Nouvelle demande",
+    "requestCreated": "Demande d'équipement soumise",
+    "requestUpdated": "Demande d'équipement mise à jour",
+    "neededBy": "Nécessaire avant le {{date}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "emptyTitle": "Aucune demande d'équipement",
+    "emptyDescription": "Les demandes d'équipement apparaîtront ici.",
+    "tabs": {
+      "myRequests": "Mes demandes",
+      "pendingApprovals": "Approbations en attente"
+    },
+    "urgencies": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé"
+    },
+    "statuses": {
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "ordered": "Commandé",
+      "delivered": "Livré",
+      "rejected": "Rejeté"
+    },
+    "form": {
+      "title": "Nouvelle demande d'équipement",
+      "type": "Type d'équipement",
+      "typePlaceholder": "ex. Ordinateur portable, Écran, Bureau",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez ce dont vous avez besoin et pourquoi",
+      "urgency": "Urgence",
+      "neededBy": "Nécessaire avant",
+      "submit": "Soumettre la demande"
+    },
+    "assets": {
+      "title": "Registre des actifs",
+      "subtitle": "Inventaire des équipements et actifs de l'entreprise",
+      "emptyTitle": "Aucun actif enregistré",
+      "emptyDescription": "Les actifs apparaîtront ici une fois l'équipement attribué.",
+      "table": {
+        "name": "Nom de l'actif",
+        "serialNumber": "Numéro de série",
+        "assignedDate": "Date d'attribution",
+        "condition": "État",
+        "returnedDate": "Date de retour"
+      },
+      "conditions": {
+        "new": "Neuf",
+        "good": "Bon",
+        "fair": "Correct",
+        "damaged": "Endommagé"
+      }
+    }
+  },
+  "documents": {
+    "uploaded": "Document téléchargé avec succès",
+    "vault": {
+      "title": "Documents",
+      "upload": "Télécharger",
+      "uploadTitle": "Télécharger un document",
+      "expiryWarning": "{{count}} document(s) expiré(s) ou en cours d'expiration",
+      "emptyTitle": "Aucun document",
+      "emptyDescription": "Téléchargez des documents pour les organiser.",
+      "table": {
+        "name": "Document",
+        "type": "Type",
+        "storageMode": "Stockage",
+        "expiryDate": "Date d'expiration"
+      },
+      "types": {
+        "id_card": "Carte d'identité",
+        "contract": "Contrat",
+        "certificate": "Certificat",
+        "visa": "Visa",
+        "other": "Autre"
+      },
+      "storageModes": {
+        "stored": "Stocké",
+        "linked": "Lié"
+      },
+      "form": {
+        "name": "Nom du document",
+        "namePlaceholder": "ex. Passeport, Contrat de travail",
+        "type": "Type de document",
+        "expiryDate": "Date d'expiration"
+      }
+    }
+  },
+  "onboardingMgmt": {
+    "templateCreated": "Modèle créé avec succès",
+    "itemCompleted": "Élément de la liste complété",
+    "checklist": {
+      "title": "Ma liste d'intégration",
+      "subtitle": "Complétez vos tâches d'intégration",
+      "progress": "Progression",
+      "completedOf": "{{completed}} sur {{total}} éléments complétés",
+      "emptyTitle": "Aucune liste active",
+      "emptyDescription": "Votre liste d'intégration apparaîtra ici quand elle sera assignée.",
+      "dueDate": "Échéance {{date}}",
+      "overdue": "En retard",
+      "completeItem": "Compléter l'élément",
+      "attachmentRequired": "Cet élément nécessite une pièce jointe. Téléchargez un fichier ou complétez sans.",
+      "completeWithout": "Compléter sans pièce jointe",
+      "statuses": {
+        "incomplete": "À faire",
+        "in_progress": "En cours",
+        "complete": "Terminé"
+      }
+    },
+    "management": {
+      "title": "Intégration",
+      "subtitle": "Listes d'intégration actives des employés",
+      "manageTemplates": "Gérer les modèles",
+      "emptyTitle": "Aucune intégration active",
+      "emptyDescription": "Les listes d'intégration actives apparaîtront ici.",
+      "employeeId": "Employé #{{id}}",
+      "table": {
+        "employee": "Employé",
+        "progress": "Progression",
+        "overdue": "Éléments en retard",
+        "triggeredAt": "Démarré"
+      }
+    },
+    "templates": {
+      "title": "Modèles de listes",
+      "subtitle": "Créer et gérer les listes d'intégration/départ",
+      "create": "Nouveau modèle",
+      "emptyTitle": "Aucun modèle",
+      "emptyDescription": "Créez votre premier modèle de liste pour commencer.",
+      "itemCount": "{{count}} éléments",
+      "triggers": {
+        "onboarding": "Intégration",
+        "offboarding": "Départ"
+      },
+      "form": {
+        "title": "Nouveau modèle de liste",
+        "name": "Nom du modèle",
+        "namePlaceholder": "ex. Intégration Ingénierie",
+        "triggerType": "Type de déclencheur",
+        "submit": "Créer le modèle"
+      }
     }
   },
   "configRequired": {

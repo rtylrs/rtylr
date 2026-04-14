@@ -51,8 +51,12 @@ const Reviews = React.lazy(() => import('./features/reviews/Reviews'));
 const ReviewForm = React.lazy(() => import('./features/reviews/ReviewForm'));
 const OneOnOnes = React.lazy(() => import('./features/reviews/OneOnOnes'));
 const Onboarding = React.lazy(() => import('./features/onboarding/Onboarding'));
+const OnboardingManagement = React.lazy(() => import('./features/onboarding/OnboardingManagement'));
+const ChecklistTemplates = React.lazy(() => import('./features/onboarding/ChecklistTemplates'));
 const Offboarding = React.lazy(() => import('./features/onboarding/Offboarding'));
 const Documents = React.lazy(() => import('./features/documents/Documents'));
+const EquipmentScreen = React.lazy(() => import('./features/equipment/Equipment'));
+const AssetRegister = React.lazy(() => import('./features/equipment/AssetRegister'));
 const Benefits = React.lazy(() => import('./features/benefits/Benefits'));
 const Training = React.lazy(() => import('./features/training/Training'));
 const OrgChart = React.lazy(() => import('./features/departments/OrgChart'));
@@ -110,9 +114,12 @@ const App = (): React.JSX.Element => {
               <Route path="/reviews" element={wrap(<Reviews />)} />
               <Route path="/reviews/new" element={wrap(<ReviewForm />)} />
               <Route path="/one-on-ones" element={wrap(<OneOnOnes />)} />
-              <Route path="/onboarding" element={wrap(<Onboarding />)} />
+              <Route path="/onboarding" element={wrap(<OnboardingManagement />)} />
+              <Route path="/onboarding/templates" element={wrap(<ChecklistTemplates />)} />
               <Route path="/offboarding" element={wrap(<Offboarding />)} />
               <Route path="/documents" element={wrap(<Documents />)} />
+              <Route path="/equipment" element={wrap(<EquipmentScreen />)} />
+              <Route path="/equipment/assets" element={wrap(<AssetRegister />)} />
               <Route path="/benefits" element={wrap(<Benefits />)} />
               <Route path="/training" element={wrap(<Training />)} />
               <Route path="/org-chart" element={wrap(<OrgChart />)} />
