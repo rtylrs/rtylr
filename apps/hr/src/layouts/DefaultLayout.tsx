@@ -31,7 +31,11 @@ import {
   Command,
   Menu,
   X,
+  PlayCircle,
+  CalendarCheck,
+  CheckSquare,
 } from 'lucide-react';
+import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
@@ -41,6 +45,8 @@ interface NavItem {
   i18nKey: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  /** Optional guard: item is only shown when this returns true for the current config */
+  configGuard?: (timeTrackingModel: string) => boolean;
 }
 
 /* ── Nav config ── */
@@ -66,7 +72,24 @@ const navSections: NavSection[] = [
     items: [
       { i18nKey: 'nav.shifts', path: '/shifts', icon: Clock },
       { i18nKey: 'nav.schedule', path: '/schedule', icon: CalendarDays },
+      {
+        i18nKey: 'nav.timeLogging',
+        path: '/time',
+        icon: PlayCircle,
+        configGuard: (m) => m === 'time_logging' || m === 'both',
+      },
       { i18nKey: 'nav.timesheets', path: '/timesheets', icon: Timer },
+      {
+        i18nKey: 'nav.attendance',
+        path: '/attendance',
+        icon: CalendarCheck,
+        configGuard: (m) => m === 'attendance' || m === 'both',
+      },
+      {
+        i18nKey: 'nav.approvals',
+        path: '/timesheets/approvals',
+        icon: CheckSquare,
+      },
       { i18nKey: 'nav.timeOff', path: '/time-off', icon: Calendar },
       { i18nKey: 'nav.calendar', path: '/calendar', icon: Calendar },
     ],
@@ -99,11 +122,14 @@ const routeLabelKeys: Record<string, string> = {
   '/shifts': 'nav.shifts',
   '/payroll': 'nav.payroll',
   '/departments': 'nav.departments',
+  '/time': 'nav.timeLogging',
   '/time-off': 'nav.timeOff',
   '/time-off/new': 'layout.routes.requestTimeOff',
   '/calendar': 'layout.routes.timeOffCalendar',
   '/schedule': 'layout.routes.shiftSchedule',
   '/timesheets': 'nav.timesheets',
+  '/timesheets/approvals': 'nav.approvals',
+  '/attendance': 'nav.attendance',
   '/reviews': 'layout.routes.performanceReviews',
   '/reviews/new': 'layout.routes.newReview',
   '/one-on-ones': 'nav.oneOnOnes',
@@ -415,11 +441,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const [theme, setTheme] = useTheme();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const config = useHRConfigStore((s) => s.config);
+  const timeTrackingModel = config?.timeTrackingModel ?? 'both';
 
   const getPageTitle = (pathname: string): string => {
     if (routeLabelKeys[pathname]) return t(routeLabelKeys[pathname]);
     if (pathname.startsWith('/staff/')) return t('layout.routes.employeeProfile');
     if (pathname.startsWith('/reviews/')) return t('layout.routes.performanceReviews');
+    if (pathname.startsWith('/timesheets/')) return t('layout.routes.timesheetDetail');
     if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
     return t('layout.hr');
   };
@@ -522,29 +551,35 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             gap: '2px',
           }}
         >
-          {navSections.map((section) => (
-            <div
-              key={section.i18nKey}
-              style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
-            >
-              <p
-                style={{
-                  padding: '6px 12px 4px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hr-text-dim)',
-                  margin: 0,
-                }}
+          {navSections.map((section) => {
+            const visibleItems = section.items.filter(
+              (item) => !item.configGuard || item.configGuard(timeTrackingModel)
+            );
+            if (visibleItems.length === 0) return null;
+            return (
+              <div
+                key={section.i18nKey}
+                style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
               >
-                {t(section.i18nKey)}
-              </p>
-              {section.items.map((item) => (
-                <SidebarNavItem key={item.path} {...item} />
-              ))}
-            </div>
-          ))}
+                <p
+                  style={{
+                    padding: '6px 12px 4px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--hr-text-dim)',
+                    margin: 0,
+                  }}
+                >
+                  {t(section.i18nKey)}
+                </p>
+                {visibleItems.map((item) => (
+                  <SidebarNavItem key={item.path} {...item} />
+                ))}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Footer */}

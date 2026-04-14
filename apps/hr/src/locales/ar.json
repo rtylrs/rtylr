@@ -45,7 +45,10 @@
     "documents": "المستندات",
     "benefits": "المزايا",
     "training": "التدريب",
-    "operations": "العمليات"
+    "operations": "العمليات",
+    "timeLogging": "تسجيل الوقت",
+    "attendance": "الحضور",
+    "approvals": "الموافقات"
   },
   "layout": {
     "sections": {
@@ -68,7 +71,8 @@
       "shiftSchedule": "جدول المناوبات",
       "performanceReviews": "تقييمات الأداء",
       "newReview": "تقييم جديد",
-      "employeeProfile": "ملف الموظف"
+      "employeeProfile": "ملف الموظف",
+      "timesheetDetail": "تفاصيل سجل الحضور"
     },
     "hubLink": "Hub"
   },
@@ -249,6 +253,134 @@
     "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "notFound": "غير موجود",
     "unauthorized": "ليس لديك صلاحية الوصول إلى هذا المورد."
+  },
+  "timeLogging": {
+    "title": "تسجيل الوقت",
+    "subtitle": "أسبوع {{start}} – {{end}} · {{total}} مسجّل",
+    "addEntry": "إضافة إدخال",
+    "created": "تم إنشاء إدخال الوقت",
+    "updated": "تم تحديث إدخال الوقت",
+    "deleted": "تم حذف إدخال الوقت",
+    "noDescription": "بدون وصف",
+    "billable": "قابل للفوترة",
+    "emptyTitle": "لا توجد إدخالات وقت هذا الأسبوع",
+    "emptyDescription": "سجّل أول إدخال وقت للبدء.",
+    "startTimer": "بدء",
+    "stopTimer": "إيقاف",
+    "timerDescription": "ما الذي تعمل عليه؟",
+    "importFromFlow": "استيراد من Flow",
+    "flowImportComingSoon": "استيراد Flow قريباً!",
+    "statuses": {
+      "draft": "مسودة",
+      "submitted": "مُرسَل",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "form": {
+      "title": "إدخال وقت جديد",
+      "date": "التاريخ",
+      "hours": "الساعات",
+      "minutes": "الدقائق",
+      "startTime": "وقت البدء",
+      "endTime": "وقت الانتهاء",
+      "useStartEnd": "استخدام وقت البدء/الانتهاء بدلاً من ذلك",
+      "description": "الوصف",
+      "descriptionPlaceholder": "ما الذي عملت عليه؟",
+      "billable": "قابل للفوترة",
+      "durationRequired": "يجب أن تكون المدة دقيقة واحدة على الأقل",
+      "invalidTimeRange": "يجب أن يكون وقت الانتهاء بعد وقت البدء"
+    }
+  },
+  "timesheets": {
+    "title": "سجلات الدوام",
+    "subtitle": "عرض وتقديم فترات سجل الدوام.",
+    "entries": "إدخالات",
+    "total": "الإجمالي",
+    "submit": "تقديم سجل الدوام",
+    "submitted": "تم تقديم سجل الدوام للموافقة",
+    "approved": "تمت الموافقة على سجل الدوام",
+    "rejected": "تم رفض سجل الدوام",
+    "rejectionReason": "سبب الرفض",
+    "noReasonProvided": "لم يُقدَّم سبب",
+    "entriesTitle": "إدخالات الوقت",
+    "noEntries": "لا توجد إدخالات وقت في هذه الفترة.",
+    "emptyTitle": "لا توجد سجلات دوام بعد",
+    "emptyDescription": "ستظهر فترات سجل الدوام هنا.",
+    "filters": {
+      "all": "الكل",
+      "draft": "مسودة",
+      "submitted": "مُرسَل",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "statuses": {
+      "draft": "مسودة",
+      "submitted": "مُرسَل",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "locked": "مقفل"
+    },
+    "days": {
+      "mon": "إثن",
+      "tue": "ثلا",
+      "wed": "أرب",
+      "thu": "خمي",
+      "fri": "جمع",
+      "sat": "سبت",
+      "sun": "أحد"
+    },
+    "approvals": {
+      "title": "موافقات سجلات الدوام",
+      "subtitle": "{{count}} سجلات دوام في انتظار مراجعتك",
+      "emptyTitle": "لا شيء معلق",
+      "emptyDescription": "لا توجد سجلات دوام في انتظار الموافقة.",
+      "employeeId": "الموظف #{{id}}",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "rejectTitle": "رفض سجل الدوام",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "اشرح سبب رفض سجل الدوام…",
+      "confirmReject": "رفض سجل الدوام"
+    }
+  },
+  "attendance": {
+    "title": "الحضور",
+    "subtitle": "تتبع أوقات الحضور والانصراف.",
+    "history": "سجل الحضور",
+    "clockedIn": "تم تسجيل الحضور بنجاح",
+    "clockedOut": "تم تسجيل الانصراف بنجاح",
+    "emptyTitle": "لا توجد سجلات حضور",
+    "emptyDescription": "ستظهر سجلات حضورك هنا بعد تسجيل الحضور.",
+    "qrComingSoon": "مسح رمز QR قريباً!",
+    "late": "{{minutes}}د متأخر",
+    "statuses": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "partial": "جزئي"
+    },
+    "table": {
+      "date": "التاريخ",
+      "clockIn": "الحضور",
+      "clockOut": "الانصراف",
+      "duration": "المدة",
+      "method": "الطريقة",
+      "status": "الحالة"
+    },
+    "clockWidget": {
+      "title": "حالة الحضور",
+      "clockedIn": "مسجّل الحضور",
+      "clockedOut": "غير مسجّل",
+      "since": "منذ {{time}}",
+      "clockOutBtn": "تسجيل الانصراف",
+      "clockInApp": "تسجيل الحضور (التطبيق)",
+      "clockInQR": "مسح رمز QR"
+    },
+    "qrScanner": {
+      "title": "ماسح رمز QR",
+      "description": "امسح رمز QR في محطة عملك لتسجيل الحضور أو الانصراف.",
+      "scanButton": "مسح رمز QR",
+      "cameraPlaceholder": "يتطلب إذن الكاميرا. هذه الميزة قادمة في المرحلة الثانية."
+    }
   },
   "configRequired": {
     "title": "الإعداد مطلوب",

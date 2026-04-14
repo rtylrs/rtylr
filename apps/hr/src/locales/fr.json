@@ -45,7 +45,10 @@
     "documents": "Documents",
     "benefits": "Avantages",
     "training": "Formation",
-    "operations": "Opérations"
+    "operations": "Opérations",
+    "timeLogging": "Saisie du temps",
+    "attendance": "Présence",
+    "approvals": "Approbations"
   },
   "layout": {
     "sections": {
@@ -68,7 +71,8 @@
       "shiftSchedule": "Horaire des quarts",
       "performanceReviews": "Évaluations de performance",
       "newReview": "Nouvelle évaluation",
-      "employeeProfile": "Profil de l'employé"
+      "employeeProfile": "Profil de l'employé",
+      "timesheetDetail": "Détail de la feuille de temps"
     },
     "hubLink": "Hub"
   },
@@ -249,6 +253,134 @@
     "generic": "Une erreur est survenue. Veuillez réessayer.",
     "notFound": "Non trouvé",
     "unauthorized": "Vous n'avez pas accès à cette ressource."
+  },
+  "timeLogging": {
+    "title": "Saisie du temps",
+    "subtitle": "Semaine du {{start}} – {{end}} · {{total}} enregistré",
+    "addEntry": "Ajouter une entrée",
+    "created": "Entrée de temps créée",
+    "updated": "Entrée de temps mise à jour",
+    "deleted": "Entrée de temps supprimée",
+    "noDescription": "Pas de description",
+    "billable": "Facturable",
+    "emptyTitle": "Aucune entrée de temps cette semaine",
+    "emptyDescription": "Enregistrez votre première entrée pour commencer.",
+    "startTimer": "Démarrer",
+    "stopTimer": "Arrêter",
+    "timerDescription": "Sur quoi travaillez-vous ?",
+    "importFromFlow": "Importer de Flow",
+    "flowImportComingSoon": "L'import Flow arrive bientôt !",
+    "statuses": {
+      "draft": "Brouillon",
+      "submitted": "Soumis",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "form": {
+      "title": "Nouvelle entrée de temps",
+      "date": "Date",
+      "hours": "Heures",
+      "minutes": "Minutes",
+      "startTime": "Heure de début",
+      "endTime": "Heure de fin",
+      "useStartEnd": "Utiliser l'heure de début/fin",
+      "description": "Description",
+      "descriptionPlaceholder": "Sur quoi avez-vous travaillé ?",
+      "billable": "Facturable",
+      "durationRequired": "La durée doit être d'au moins 1 minute",
+      "invalidTimeRange": "L'heure de fin doit être après l'heure de début"
+    }
+  },
+  "timesheets": {
+    "title": "Feuilles de temps",
+    "subtitle": "Visualisez et soumettez vos périodes de feuilles de temps.",
+    "entries": "entrées",
+    "total": "Total",
+    "submit": "Soumettre la feuille",
+    "submitted": "Feuille de temps soumise pour approbation",
+    "approved": "Feuille de temps approuvée",
+    "rejected": "Feuille de temps rejetée",
+    "rejectionReason": "Motif du rejet",
+    "noReasonProvided": "Aucun motif fourni",
+    "entriesTitle": "Entrées de temps",
+    "noEntries": "Aucune entrée de temps pour cette période.",
+    "emptyTitle": "Pas encore de feuilles de temps",
+    "emptyDescription": "Vos périodes de feuilles de temps apparaîtront ici.",
+    "filters": {
+      "all": "Toutes",
+      "draft": "Brouillon",
+      "submitted": "Soumises",
+      "approved": "Approuvées",
+      "rejected": "Rejetées"
+    },
+    "statuses": {
+      "draft": "Brouillon",
+      "submitted": "Soumis",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "locked": "Verrouillé"
+    },
+    "days": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "approvals": {
+      "title": "Approbations des feuilles de temps",
+      "subtitle": "{{count}} feuilles de temps en attente",
+      "emptyTitle": "Tout est à jour",
+      "emptyDescription": "Aucune feuille de temps en attente d'approbation.",
+      "employeeId": "Employé #{{id}}",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "rejectTitle": "Rejeter la feuille de temps",
+      "reasonLabel": "Motif du rejet",
+      "reasonPlaceholder": "Expliquez pourquoi cette feuille est rejetée…",
+      "confirmReject": "Rejeter la feuille"
+    }
+  },
+  "attendance": {
+    "title": "Présence",
+    "subtitle": "Suivez vos heures d'arrivée et de départ.",
+    "history": "Historique de présence",
+    "clockedIn": "Pointage d'entrée effectué",
+    "clockedOut": "Pointage de sortie effectué",
+    "emptyTitle": "Aucun enregistrement de présence",
+    "emptyDescription": "Vos enregistrements de présence apparaîtront ici après le pointage.",
+    "qrComingSoon": "Le scan QR arrive bientôt !",
+    "late": "{{minutes}}m de retard",
+    "statuses": {
+      "present": "Présent",
+      "absent": "Absent",
+      "partial": "Partiel"
+    },
+    "table": {
+      "date": "Date",
+      "clockIn": "Entrée",
+      "clockOut": "Sortie",
+      "duration": "Durée",
+      "method": "Méthode",
+      "status": "Statut"
+    },
+    "clockWidget": {
+      "title": "Statut de présence",
+      "clockedIn": "Pointé",
+      "clockedOut": "Non pointé",
+      "since": "Depuis {{time}}",
+      "clockOutBtn": "Pointer la sortie",
+      "clockInApp": "Pointer (App)",
+      "clockInQR": "Scanner QR Code"
+    },
+    "qrScanner": {
+      "title": "Scanner QR Code",
+      "description": "Scannez un QR code à votre terminal pour pointer l'entrée ou la sortie.",
+      "scanButton": "Scanner QR Code",
+      "cameraPlaceholder": "Permission caméra requise. Cette fonctionnalité arrive en Phase 2."
+    }
   },
   "configRequired": {
     "title": "Configuration requise",

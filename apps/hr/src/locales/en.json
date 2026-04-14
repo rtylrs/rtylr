@@ -45,7 +45,10 @@
     "documents": "Documents",
     "benefits": "Benefits",
     "training": "Training",
-    "operations": "Operations"
+    "operations": "Operations",
+    "timeLogging": "Time Logging",
+    "attendance": "Attendance",
+    "approvals": "Approvals"
   },
   "layout": {
     "sections": {
@@ -68,7 +71,8 @@
       "shiftSchedule": "Shift Schedule",
       "performanceReviews": "Performance Reviews",
       "newReview": "New Review",
-      "employeeProfile": "Employee Profile"
+      "employeeProfile": "Employee Profile",
+      "timesheetDetail": "Timesheet Detail"
     },
     "hubLink": "Hub"
   },
@@ -249,6 +253,134 @@
     "generic": "Something went wrong. Please try again.",
     "notFound": "Not found",
     "unauthorized": "You don't have access to this resource."
+  },
+  "timeLogging": {
+    "title": "Time Logging",
+    "subtitle": "Week of {{start}} – {{end}} · {{total}} logged",
+    "addEntry": "Add Entry",
+    "created": "Time entry created",
+    "updated": "Time entry updated",
+    "deleted": "Time entry deleted",
+    "noDescription": "No description",
+    "billable": "Billable",
+    "emptyTitle": "No time entries this week",
+    "emptyDescription": "Log your first time entry to get started.",
+    "startTimer": "Start",
+    "stopTimer": "Stop",
+    "timerDescription": "What are you working on?",
+    "importFromFlow": "Import from Flow",
+    "flowImportComingSoon": "Flow import is coming soon!",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "form": {
+      "title": "New Time Entry",
+      "date": "Date",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "useStartEnd": "Use start/end time instead",
+      "description": "Description",
+      "descriptionPlaceholder": "What did you work on?",
+      "billable": "Billable",
+      "durationRequired": "Duration must be at least 1 minute",
+      "invalidTimeRange": "End time must be after start time"
+    }
+  },
+  "timesheets": {
+    "title": "Timesheets",
+    "subtitle": "View and submit your timesheet periods.",
+    "entries": "entries",
+    "total": "Total",
+    "submit": "Submit Timesheet",
+    "submitted": "Timesheet submitted for approval",
+    "approved": "Timesheet approved",
+    "rejected": "Timesheet rejected",
+    "rejectionReason": "Rejection reason",
+    "noReasonProvided": "No reason provided",
+    "entriesTitle": "Time Entries",
+    "noEntries": "No time entries in this period.",
+    "emptyTitle": "No timesheets yet",
+    "emptyDescription": "Your timesheet periods will appear here.",
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "locked": "Locked"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "approvals": {
+      "title": "Timesheet Approvals",
+      "subtitle": "{{count}} timesheets pending your review",
+      "emptyTitle": "All caught up",
+      "emptyDescription": "No timesheets are pending approval.",
+      "employeeId": "Employee #{{id}}",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectTitle": "Reject Timesheet",
+      "reasonLabel": "Reason for rejection",
+      "reasonPlaceholder": "Explain why this timesheet is being rejected…",
+      "confirmReject": "Reject Timesheet"
+    }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "subtitle": "Track your clock-in and clock-out times.",
+    "history": "Attendance History",
+    "clockedIn": "Clocked in successfully",
+    "clockedOut": "Clocked out successfully",
+    "emptyTitle": "No attendance records",
+    "emptyDescription": "Your attendance records will appear here after you clock in.",
+    "qrComingSoon": "QR scanning is coming soon!",
+    "late": "{{minutes}}m late",
+    "statuses": {
+      "present": "Present",
+      "absent": "Absent",
+      "partial": "Partial"
+    },
+    "table": {
+      "date": "Date",
+      "clockIn": "Clock In",
+      "clockOut": "Clock Out",
+      "duration": "Duration",
+      "method": "Method",
+      "status": "Status"
+    },
+    "clockWidget": {
+      "title": "Clock Status",
+      "clockedIn": "Clocked In",
+      "clockedOut": "Not Clocked In",
+      "since": "Since {{time}}",
+      "clockOutBtn": "Clock Out",
+      "clockInApp": "Clock In (App)",
+      "clockInQR": "Scan QR Code"
+    },
+    "qrScanner": {
+      "title": "QR Code Scanner",
+      "description": "Scan a QR code at your workplace terminal to clock in or out.",
+      "scanButton": "Scan QR Code",
+      "cameraPlaceholder": "Camera permission required. This feature is coming in Phase 2."
+    }
   },
   "configRequired": {
     "title": "Setup required",

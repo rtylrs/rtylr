@@ -34,7 +34,13 @@ const TimeOff = React.lazy(() => import('./features/time-off/TimeOff'));
 const TimeOffNew = React.lazy(() => import('./features/time-off/TimeOffNew'));
 const CalendarScreen = React.lazy(() => import('./features/calendar/Calendar'));
 const Schedule = React.lazy(() => import('./features/shifts/Schedule'));
-const Timesheets = React.lazy(() => import('./features/shifts/Timesheets'));
+const TimesheetsList = React.lazy(() => import('./features/timesheets/TimesheetsList'));
+const TimesheetDetail = React.lazy(() => import('./features/timesheets/TimesheetDetail'));
+const TimesheetApprovals = React.lazy(
+  () => import('./features/timesheets/approvals/TimesheetApprovals')
+);
+const TimeLogging = React.lazy(() => import('./features/time-logging/TimeLogging'));
+const AttendanceScreen = React.lazy(() => import('./features/attendance/Attendance'));
 const Reviews = React.lazy(() => import('./features/reviews/Reviews'));
 const ReviewForm = React.lazy(() => import('./features/reviews/ReviewForm'));
 const OneOnOnes = React.lazy(() => import('./features/reviews/OneOnOnes'));
@@ -77,7 +83,11 @@ const App = (): React.JSX.Element => {
               <Route path="/staff/:id" element={wrap(<EmployeeProfile />)} />
               <Route path="/shifts" element={wrap(<Shifts />)} />
               <Route path="/schedule" element={wrap(<Schedule />)} />
-              <Route path="/timesheets" element={wrap(<Timesheets />)} />
+              <Route path="/time" element={wrap(<TimeLogging />)} />
+              <Route path="/timesheets" element={wrap(<TimesheetsList />)} />
+              <Route path="/timesheets/approvals" element={wrap(<TimesheetApprovals />)} />
+              <Route path="/timesheets/:id" element={wrap(<TimesheetDetail />)} />
+              <Route path="/attendance" element={wrap(<AttendanceScreen />)} />
               <Route path="/time-off" element={wrap(<TimeOff />)} />
               <Route path="/time-off/new" element={wrap(<TimeOffNew />)} />
               <Route path="/calendar" element={wrap(<CalendarScreen />)} />

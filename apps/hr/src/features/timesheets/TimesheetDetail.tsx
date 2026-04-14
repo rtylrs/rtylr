@@ -1,0 +1,262 @@
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
+import { useGetTimesheet, useSubmitTimesheet } from '../../shared/hooks/queries/useTimesheets';
+import type { TimeEntryPayload } from '@voxire/contracts/hr/v1/time_entries';
+import {
+  SectionHeader,
+  Card,
+  Button,
+  Pill,
+  Skeleton,
+  Breadcrumbs,
+  ACCENT,
+} from '../../shared/components/ui';
+
+const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+function getDayOfWeek(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return WEEKDAYS[d.getDay() === 0 ? 6 : d.getDay() - 1];
+}
+
+function groupByDay(entries: TimeEntryPayload[]): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const day of WEEKDAYS) {
+    result[day] = 0;
+  }
+  for (const entry of entries) {
+    const day = getDayOfWeek(entry.date);
+    result[day] = (result[day] ?? 0) + entry.durationMinutes;
+  }
+  return result;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  draft: '#6b7280',
+  submitted: '#f59e0b',
+  approved: '#10b981',
+  rejected: '#ef4444',
+  locked: '#6366f1',
+};
+
+const TimesheetDetail = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const timesheetId = id ? parseInt(id, 10) : undefined;
+  const { data: timesheet, isLoading } = useGetTimesheet(timesheetId);
+  const submitTimesheet = useSubmitTimesheet();
+
+  const dayTotals = useMemo(() => (timesheet ? groupByDay(timesheet.entries) : null), [timesheet]);
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <Skeleton height={32} width={200} />
+        <Skeleton height={80} />
+        <Skeleton height={200} />
+      </div>
+    );
+  }
+
+  if (!timesheet) {
+    return (
+      <div style={{ textAlign: 'center', padding: 40 }}>
+        <p style={{ color: 'var(--hr-text-muted)' }}>{t('errors.notFound')}</p>
+        <Button variant="ghost" onClick={() => navigate('/timesheets')}>
+          {t('common.back')}
+        </Button>
+      </div>
+    );
+  }
+
+  const periodLabel = `${new Date(timesheet.periodStart + 'T00:00:00').toLocaleDateString(
+    undefined,
+    {
+      month: 'short',
+      day: 'numeric',
+    }
+  )} – ${new Date(timesheet.periodEnd + 'T00:00:00').toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })}`;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Breadcrumbs
+        items={[{ label: t('timesheets.title'), href: '/timesheets' }, { label: periodLabel }]}
+      />
+
+      <SectionHeader
+        title={periodLabel}
+        right={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Pill color={STATUS_COLORS[timesheet.status] ?? '#6b7280'}>
+              {t(`timesheets.statuses.${timesheet.status}`)}
+            </Pill>
+            {timesheet.status === 'draft' && (
+              <Button
+                variant="primary"
+                onClick={() => submitTimesheet.mutate({ timesheetId: timesheet.id })}
+                disabled={submitTimesheet.isPending}
+                icon={<Send size={13} />}
+              >
+                {t('timesheets.submit')}
+              </Button>
+            )}
+          </div>
+        }
+      />
+
+      {/* Rejection reason */}
+      {timesheet.status === 'rejected' && (
+        <Card
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 10,
+            padding: '12px 14px',
+            border: '1px solid rgba(239,68,68,0.3)',
+            background: 'rgba(239,68,68,0.06)',
+          }}
+        >
+          <AlertCircle size={16} style={{ color: '#ef4444', flexShrink: 0, marginTop: 1 }} />
+          <div style={{ fontSize: 12, color: 'var(--hr-text)' }}>
+            <span style={{ fontWeight: 600 }}>{t('timesheets.rejectionReason')}:</span>{' '}
+            {t('timesheets.noReasonProvided')}
+          </div>
+        </Card>
+      )}
+
+      {/* Weekly grid */}
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            borderBottom: '1px solid var(--hr-border)',
+          }}
+        >
+          {WEEKDAYS.map((day) => (
+            <div
+              key={day}
+              style={{
+                padding: '10px 8px',
+                textAlign: 'center',
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                color: 'var(--hr-text-muted)',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {t(`timesheets.days.${day}`)}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+          {WEEKDAYS.map((day) => {
+            const mins = dayTotals?.[day] ?? 0;
+            return (
+              <div
+                key={day}
+                style={{
+                  padding: '16px 8px',
+                  textAlign: 'center',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: mins > 0 ? 'var(--hr-text)' : 'var(--hr-text-dim)',
+                }}
+              >
+                {mins > 0 ? formatDuration(mins) : '—'}
+              </div>
+            );
+          })}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            padding: '10px 14px',
+            borderTop: '1px solid var(--hr-border)',
+            fontSize: 13,
+            fontWeight: 700,
+            color: ACCENT,
+          }}
+        >
+          {t('timesheets.total')}: {formatDuration(timesheet.totalMinutes)}
+        </div>
+      </Card>
+
+      {/* Time entries list */}
+      <h3
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: 'var(--hr-text)',
+          margin: '8px 0 0',
+        }}
+      >
+        {t('timesheets.entriesTitle')} ({timesheet.entries.length})
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {timesheet.entries.length === 0 ? (
+          <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', padding: '8px 0' }}>
+            {t('timesheets.noEntries')}
+          </p>
+        ) : (
+          timesheet.entries.map((entry, idx) => (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.02 }}
+            >
+              <Card
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--hr-text)' }}>
+                    {entry.description || t('timeLogging.noDescription')}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 2 }}>
+                    {new Date(entry.date + 'T00:00:00').toLocaleDateString(undefined, {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    {entry.startTime && entry.endTime && ` · ${entry.startTime} – ${entry.endTime}`}
+                  </div>
+                </div>
+                <span
+                  style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)', flexShrink: 0 }}
+                >
+                  {formatDuration(entry.durationMinutes)}
+                </span>
+              </Card>
+            </motion.div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TimesheetDetail;
