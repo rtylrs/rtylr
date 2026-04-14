@@ -65,6 +65,45 @@ export const useUpdateTimeEntry = () => {
   });
 };
 
+interface FlowImportResponse {
+  imported: number;
+  skipped: number;
+}
+
+export const useImportFromFlow = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (): Promise<FlowImportResponse> => {
+      const res = await unwrap(
+        safe.post<FlowImportResponse>('/hr/time-entries/import-from-flow', {})
+      );
+      return res as FlowImportResponse;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+
+      if (data.imported === 0 && data.skipped === 0) {
+        toast.info(t('timeLogging.flowImport.noEntries'));
+      } else if (data.skipped > 0) {
+        toast.success(
+          t('timeLogging.flowImport.successWithSkipped', {
+            imported: data.imported,
+            skipped: data.skipped,
+          })
+        );
+      } else {
+        toast.success(t('timeLogging.flowImport.success', { imported: data.imported }));
+      }
+    },
+    onError: () => {
+      toast.error(t('timeLogging.flowImport.error'));
+    },
+  });
+};
+
 export const useDeleteTimeEntry = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();

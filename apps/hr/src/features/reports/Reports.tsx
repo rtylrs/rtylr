@@ -286,7 +286,9 @@ const Reports: React.FC = () => {
           )}
 
           {/* Results */}
-          {report && !generateMutation.isPending && <ReportTable report={report} />}
+          {report && !generateMutation.isPending && (
+            <ReportTable report={report} dateFrom={dateFrom} dateTo={dateTo} />
+          )}
 
           {/* Empty state */}
           {!report && !generateMutation.isPending && (

@@ -43,6 +43,23 @@ export const useClockIn = () => {
   });
 };
 
+export const useSetPin = () => {
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (pin: string): Promise<{ success: boolean }> => {
+      const res = await unwrap(safe.post<{ success: boolean }>('/hr/attendance/set-pin', { pin }));
+      return res as { success: boolean };
+    },
+    onSuccess: () => {
+      toast.success(t('attendance.pinModal.pinSaved'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
 export const useClockOut = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();

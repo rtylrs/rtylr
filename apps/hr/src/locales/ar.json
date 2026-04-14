@@ -349,7 +349,13 @@
     "stopTimer": "إيقاف",
     "timerDescription": "ما الذي تعمل عليه؟",
     "importFromFlow": "استيراد من Flow",
-    "flowImportComingSoon": "استيراد Flow قريباً!",
+    "flowImport": {
+      "importing": "جاري الاستيراد من Flow…",
+      "success": "تم استيراد {{imported}} إدخالات",
+      "successWithSkipped": "تم استيراد {{imported}} إدخالات ({{skipped}} تم تخطيها — مستوردة مسبقاً)",
+      "noEntries": "لا توجد إدخالات جديدة للاستيراد من Flow",
+      "error": "فشل الاستيراد من Flow"
+    },
     "statuses": {
       "draft": "مسودة",
       "submitted": "مُرسَل",
@@ -460,7 +466,31 @@
       "since": "منذ {{time}}",
       "clockOutBtn": "تسجيل الانصراف",
       "clockInApp": "تسجيل الحضور (التطبيق)",
-      "clockInQR": "مسح رمز QR"
+      "clockInQR": "مسح رمز QR",
+      "clockInPin": "تسجيل الحضور (PIN)",
+      "clockInGps": "تسجيل الحضور (GPS)"
+    },
+    "pinModal": {
+      "title": "تسجيل حضور برمز PIN",
+      "subtitle": "أدخل رمز PIN لتسجيل الحضور",
+      "setTitle": "تعيين رمز PIN",
+      "setSubtitle": "أنشئ رمز PIN من 4–6 أرقام لتسجيل الحضور",
+      "confirmTitle": "تأكيد رمز PIN",
+      "confirmSubtitle": "أعد إدخال رمز PIN للتأكيد",
+      "submit": "تسجيل الحضور",
+      "savePin": "حفظ رمز PIN",
+      "pinRequired": "يرجى إدخال رمز PIN",
+      "pinLength": "يجب أن يكون رمز PIN من 4–6 أرقام",
+      "pinMismatch": "رموز PIN غير متطابقة",
+      "pinSaved": "تم حفظ رمز PIN بنجاح",
+      "setPin": "تعيين رمز PIN",
+      "changePin": "تغيير رمز PIN"
+    },
+    "gps": {
+      "acquiring": "جاري تحديد الموقع…",
+      "permissionDenied": "تم رفض إذن الموقع. يرجى تمكين الوصول إلى الموقع في إعدادات المتصفح أو استخدام طريقة أخرى لتسجيل الحضور.",
+      "locationUnavailable": "تعذر تحديد موقعك. يرجى المحاولة مرة أخرى.",
+      "locationTimeout": "انتهت مهلة طلب الموقع. يرجى المحاولة مرة أخرى."
     },
     "qrScanner": {
       "title": "ماسح رمز QR",
@@ -950,7 +980,10 @@
     "noResults": "لا توجد بيانات مطابقة للتصفيات.",
     "rowCount": "{{count}} صف",
     "exportCsv": "تصدير CSV",
-    "exportPdf": "تصدير PDF (قريباً)",
+    "exportPdf": "تصدير PDF",
+    "pdfCompany": "تقرير الشركة",
+    "pdfDateRange": "النطاق الزمني: {{from}} – {{to}}",
+    "pdfGenerated": "تم الإنشاء في {{date}}",
     "emptyTitle": "اختر نوع التقرير",
     "emptyDescription": "اختر نوع التقرير وحدد التصفيات، ثم انقر إنشاء.",
     "reportTypes": {

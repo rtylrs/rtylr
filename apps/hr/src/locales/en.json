@@ -349,7 +349,13 @@
     "stopTimer": "Stop",
     "timerDescription": "What are you working on?",
     "importFromFlow": "Import from Flow",
-    "flowImportComingSoon": "Flow import is coming soon!",
+    "flowImport": {
+      "importing": "Importing from Flow…",
+      "success": "Imported {{imported}} entries",
+      "successWithSkipped": "Imported {{imported}} entries ({{skipped}} skipped — already imported)",
+      "noEntries": "No new entries to import from Flow",
+      "error": "Failed to import from Flow"
+    },
     "statuses": {
       "draft": "Draft",
       "submitted": "Submitted",
@@ -460,7 +466,31 @@
       "since": "Since {{time}}",
       "clockOutBtn": "Clock Out",
       "clockInApp": "Clock In (App)",
-      "clockInQR": "Scan QR Code"
+      "clockInQR": "Scan QR Code",
+      "clockInPin": "Clock In (PIN)",
+      "clockInGps": "Clock In (GPS)"
+    },
+    "pinModal": {
+      "title": "PIN Clock-In",
+      "subtitle": "Enter your PIN to clock in",
+      "setTitle": "Set Your PIN",
+      "setSubtitle": "Create a 4–6 digit PIN for clock-in",
+      "confirmTitle": "Confirm PIN",
+      "confirmSubtitle": "Re-enter your PIN to confirm",
+      "submit": "Clock In",
+      "savePin": "Save PIN",
+      "pinRequired": "Please enter your PIN",
+      "pinLength": "PIN must be 4–6 digits",
+      "pinMismatch": "PINs do not match",
+      "pinSaved": "PIN saved successfully",
+      "setPin": "Set My PIN",
+      "changePin": "Change PIN"
+    },
+    "gps": {
+      "acquiring": "Acquiring location…",
+      "permissionDenied": "Location permission denied. Please enable location access in your browser settings or use another clock-in method.",
+      "locationUnavailable": "Unable to determine your location. Please try again.",
+      "locationTimeout": "Location request timed out. Please try again."
     },
     "qrScanner": {
       "title": "QR Code Scanner",
@@ -950,7 +980,10 @@
     "noResults": "No data matched your filters.",
     "rowCount": "{{count}} rows",
     "exportCsv": "Export CSV",
-    "exportPdf": "Export PDF (coming soon)",
+    "exportPdf": "Export PDF",
+    "pdfCompany": "Company Report",
+    "pdfDateRange": "Date Range: {{from}} – {{to}}",
+    "pdfGenerated": "Generated on {{date}}",
     "emptyTitle": "Select a report type",
     "emptyDescription": "Choose a report type and set your filters, then click Generate.",
     "reportTypes": {

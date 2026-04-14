@@ -349,7 +349,13 @@
     "stopTimer": "Arrêter",
     "timerDescription": "Sur quoi travaillez-vous ?",
     "importFromFlow": "Importer de Flow",
-    "flowImportComingSoon": "L'import Flow arrive bientôt !",
+    "flowImport": {
+      "importing": "Importation depuis Flow…",
+      "success": "{{imported}} entrées importées",
+      "successWithSkipped": "{{imported}} entrées importées ({{skipped}} ignorées — déjà importées)",
+      "noEntries": "Aucune nouvelle entrée à importer depuis Flow",
+      "error": "Échec de l'importation depuis Flow"
+    },
     "statuses": {
       "draft": "Brouillon",
       "submitted": "Soumis",
@@ -460,7 +466,31 @@
       "since": "Depuis {{time}}",
       "clockOutBtn": "Pointer la sortie",
       "clockInApp": "Pointer (App)",
-      "clockInQR": "Scanner QR Code"
+      "clockInQR": "Scanner QR Code",
+      "clockInPin": "Pointer (PIN)",
+      "clockInGps": "Pointer (GPS)"
+    },
+    "pinModal": {
+      "title": "Pointage par PIN",
+      "subtitle": "Entrez votre PIN pour pointer",
+      "setTitle": "Définir votre PIN",
+      "setSubtitle": "Créez un PIN de 4–6 chiffres pour le pointage",
+      "confirmTitle": "Confirmer le PIN",
+      "confirmSubtitle": "Saisissez à nouveau votre PIN pour confirmer",
+      "submit": "Pointer",
+      "savePin": "Enregistrer le PIN",
+      "pinRequired": "Veuillez saisir votre PIN",
+      "pinLength": "Le PIN doit comporter 4–6 chiffres",
+      "pinMismatch": "Les PIN ne correspondent pas",
+      "pinSaved": "PIN enregistré avec succès",
+      "setPin": "Définir mon PIN",
+      "changePin": "Modifier le PIN"
+    },
+    "gps": {
+      "acquiring": "Acquisition de la position…",
+      "permissionDenied": "Autorisation de localisation refusée. Activez l'accès à la localisation dans les paramètres de votre navigateur ou utilisez une autre méthode de pointage.",
+      "locationUnavailable": "Impossible de déterminer votre position. Veuillez réessayer.",
+      "locationTimeout": "Délai de localisation expiré. Veuillez réessayer."
     },
     "qrScanner": {
       "title": "Scanner QR Code",
@@ -950,7 +980,10 @@
     "noResults": "Aucune donnée ne correspond aux filtres.",
     "rowCount": "{{count}} lignes",
     "exportCsv": "Exporter CSV",
-    "exportPdf": "Exporter PDF (bientôt)",
+    "exportPdf": "Exporter PDF",
+    "pdfCompany": "Rapport d'entreprise",
+    "pdfDateRange": "Période : {{from}} – {{to}}",
+    "pdfGenerated": "Généré le {{date}}",
     "emptyTitle": "Sélectionnez un type de rapport",
     "emptyDescription": "Choisissez un type de rapport et définissez vos filtres, puis cliquez Générer.",
     "reportTypes": {

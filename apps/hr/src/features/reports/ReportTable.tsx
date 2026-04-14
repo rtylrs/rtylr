@@ -1,13 +1,19 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Download, FileDown } from 'lucide-react';
+import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import { Button } from '../../shared/components/ui';
+import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { ReportPayload } from '../../shared/schemas/reports';
 
 interface ReportTableProps {
   report: ReportPayload;
+  dateFrom?: string;
+  dateTo?: string;
 }
+
+/* ── CSV helpers ──────────────────────────────────────────────── */
 
 function escapeCsvValue(val: unknown): string {
   const str = val == null ? '' : String(val);
@@ -32,12 +38,134 @@ function downloadCsv(columns: string[], rows: Record<string, unknown>[], filenam
   URL.revokeObjectURL(url);
 }
 
+/* ── PDF Document ─────────────────────────────────────────────── */
+
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontSize: 9,
+    fontFamily: 'Helvetica',
+    color: '#1a1a1a',
+  },
+  header: {
+    marginBottom: 20,
+  },
+  companyName: {
+    fontSize: 16,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 4,
+  },
+  reportTitle: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+    color: '#6b7280',
+    marginBottom: 2,
+  },
+  dateRange: {
+    fontSize: 9,
+    color: '#9ca3af',
+    marginBottom: 2,
+  },
+  generatedAt: {
+    fontSize: 8,
+    color: '#9ca3af',
+  },
+  table: {
+    marginTop: 10,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingBottom: 4,
+    marginBottom: 4,
+  },
+  headerCell: {
+    flex: 1,
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 3,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#f3f4f6',
+  },
+  cell: {
+    flex: 1,
+    fontSize: 8,
+    color: '#374151',
+  },
+  footer: {
+    marginTop: 20,
+    fontSize: 7,
+    color: '#9ca3af',
+    textAlign: 'center',
+  },
+});
+
+interface ReportPDFProps {
+  report: ReportPayload;
+  companyName: string;
+  reportTypeLabel: string;
+  dateRangeLabel: string;
+  generatedLabel: string;
+}
+
+const ReportPDF = ({
+  report,
+  companyName,
+  reportTypeLabel,
+  dateRangeLabel,
+  generatedLabel,
+}: ReportPDFProps): React.JSX.Element => (
+  <Document>
+    <Page size="A4" style={pdfStyles.page}>
+      <View style={pdfStyles.header}>
+        <Text style={pdfStyles.companyName}>{companyName}</Text>
+        <Text style={pdfStyles.reportTitle}>{reportTypeLabel}</Text>
+        <Text style={pdfStyles.dateRange}>{dateRangeLabel}</Text>
+        <Text style={pdfStyles.generatedAt}>{generatedLabel}</Text>
+      </View>
+
+      <View style={pdfStyles.table}>
+        <View style={pdfStyles.headerRow}>
+          {report.columns.map((col) => (
+            <Text key={col} style={pdfStyles.headerCell}>
+              {col}
+            </Text>
+          ))}
+        </View>
+        {report.rows.map((row, i) => (
+          <View key={i} style={pdfStyles.row}>
+            {report.columns.map((col) => (
+              <Text key={col} style={pdfStyles.cell}>
+                {row[col] == null ? '' : String(row[col])}
+              </Text>
+            ))}
+          </View>
+        ))}
+      </View>
+
+      <Text style={pdfStyles.footer}>{generatedLabel}</Text>
+    </Page>
+  </Document>
+);
+
+/* ── Table constants ──────────────────────────────────────────── */
+
 const ROW_HEIGHT = 36;
 const HEADER_HEIGHT = 40;
 
-const ReportTable = ({ report }: ReportTableProps): React.JSX.Element => {
+/* ── ReportTable ──────────────────────────────────────────────── */
+
+const ReportTable = ({ report, dateFrom, dateTo }: ReportTableProps): React.JSX.Element => {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
+  const config = useHRConfigStore((s) => s.config);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const rowVirtualizer = useVirtualizer({
     count: report.rows.length,
@@ -50,6 +178,38 @@ const ReportTable = ({ report }: ReportTableProps): React.JSX.Element => {
     const filename = `${report.reportType}_${new Date(report.generatedAt * 1000).toISOString().slice(0, 10)}.csv`;
     downloadCsv(report.columns, report.rows, filename);
   }, [report]);
+
+  const handleExportPdf = useCallback(async (): Promise<void> => {
+    setPdfLoading(true);
+    try {
+      const reportTypeLabel = t(`reports.reportTypes.${report.reportType}`, report.reportType);
+      const companyName = t('reports.pdfCompany');
+      const dateRangeLabel =
+        dateFrom && dateTo ? t('reports.pdfDateRange', { from: dateFrom, to: dateTo }) : '';
+      const generatedLabel = t('reports.pdfGenerated', {
+        date: new Date().toLocaleDateString(),
+      });
+
+      const blob = await pdf(
+        <ReportPDF
+          report={report}
+          companyName={companyName}
+          reportTypeLabel={reportTypeLabel}
+          dateRangeLabel={dateRangeLabel}
+          generatedLabel={generatedLabel}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${report.reportType}_${new Date(report.generatedAt * 1000).toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [report, dateFrom, dateTo, t]);
 
   if (report.rows.length === 0) {
     return (
@@ -80,8 +240,13 @@ const ReportTable = ({ report }: ReportTableProps): React.JSX.Element => {
           <Button variant="secondary" icon={<Download size={12} />} onClick={handleExportCsv}>
             {t('reports.exportCsv')}
           </Button>
-          <Button variant="ghost" disabled>
-            {t('reports.exportPdf')}
+          <Button
+            variant="secondary"
+            icon={<FileDown size={12} />}
+            onClick={handleExportPdf}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? t('common.loading') : t('reports.exportPdf')}
           </Button>
         </div>
       </div>
