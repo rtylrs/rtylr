@@ -8,6 +8,7 @@ type Task struct {
 	WorkspaceID    int64
 	OwnerID        int64
 	ParentTaskID   *int64
+	SectionID      *int64
 	Title          string
 	Description    string
 	Status         string
@@ -23,6 +24,35 @@ type Task struct {
 	Labels         []int64
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+}
+
+type ProjectColumn struct {
+	ID          int64
+	ProjectID   int64
+	WorkspaceID int64
+	Name        string
+	Color       string
+	SortOrder   int
+	CreatedBy   int64
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type ProjectColumnInput struct {
+	ProjectID   int64
+	WorkspaceID int64
+	Name        string
+	Color       string
+	SortOrder   int
+	CreatedBy   int64
+}
+
+type UpdateProjectColumnInput struct {
+	ID        int64
+	OwnerID   int64
+	Name      string
+	Color     string
+	SortOrder int
 }
 
 type TaskComment struct {
@@ -57,6 +87,7 @@ type TaskInput struct {
 	WorkspaceID    int64
 	OwnerID        int64
 	ParentTaskID   *int64
+	SectionID      *int64
 	Title          string
 	Description    string
 	Priority       string
@@ -71,6 +102,7 @@ type TaskInput struct {
 type UpdateTaskInput struct {
 	ID          int64
 	OwnerID     int64
+	SectionID   *int64
 	Title       string
 	Description string
 	Status      string

@@ -97,6 +97,9 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 		return domain.Project{}, err
 	}
 
+	// Seed default columns for every new project
+	_ = s.repo.SeedDefaultColumns(ctx, id, input.WorkspaceID, input.CreatedBy)
+
 	return domain.Project{
 		ID:          id,
 		WorkspaceID: input.WorkspaceID,
@@ -547,4 +550,46 @@ func (s *Service) UpdateUserSettings(ctx context.Context, settings domain.UserSe
 
 func (s *Service) GetProjectTaskCounts(ctx context.Context, projectID int64) (total, done int) {
 	return s.repo.GetProjectTaskCounts(ctx, projectID)
+}
+
+// ─────────────────────────────────────────────
+// Project Columns
+// ─────────────────────────────────────────────
+
+func (s *Service) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
+	return s.repo.GetColumnsByProject(ctx, projectID)
+}
+
+func (s *Service) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (domain.ProjectColumn, error) {
+	id, err := s.repo.CreateColumn(ctx, input)
+	if err != nil {
+		return domain.ProjectColumn{}, err
+	}
+	cols, err := s.repo.GetColumnsByProject(ctx, input.ProjectID)
+	if err != nil {
+		return domain.ProjectColumn{}, err
+	}
+	for _, c := range cols {
+		if c.ID == id {
+			return c, nil
+		}
+	}
+	return domain.ProjectColumn{ID: id, ProjectID: input.ProjectID, WorkspaceID: input.WorkspaceID,
+		Name: input.Name, Color: input.Color, SortOrder: input.SortOrder}, nil
+}
+
+func (s *Service) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
+	return s.repo.UpdateColumn(ctx, input)
+}
+
+func (s *Service) DeleteColumn(ctx context.Context, id int64) error {
+	return s.repo.DeleteColumn(ctx, id)
+}
+
+func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) error {
+	return s.repo.MoveTaskToColumn(ctx, taskID, columnID)
+}
+
+func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
+	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
 }

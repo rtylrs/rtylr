@@ -306,7 +306,7 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 }
 
 func (r *Repository) getTasksByProjectFiltered(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
 	          FROM flow_tasks WHERE project_id = ? AND parent_task_id IS NULL`
@@ -338,7 +338,7 @@ func (r *Repository) getTasksByProjectFiltered(ctx context.Context, filter domai
 }
 
 func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
+	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
 	          FROM flow_tasks WHERE workspace_id = ? AND parent_task_id IS NULL`
@@ -796,13 +796,13 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 	for rows.Next() {
 		var t domain.Task
 		var desc sql.NullString
-		var parentID, assigneeID sql.NullInt64
+		var parentID, sectionID, assigneeID sql.NullInt64
 		var dueDate, startDate, completedAt sql.NullTime
 		var estHours, actHours sql.NullFloat64
 		var labelsRaw []byte
 
 		err := rows.Scan(
-			&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID,
+			&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID, &sectionID,
 			&t.Title, &desc, &t.Status, &t.Priority,
 			&assigneeID, &t.ReporterID,
 			&dueDate, &startDate, &completedAt,
@@ -817,6 +817,9 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 		t.Description = desc.String
 		if parentID.Valid {
 			t.ParentTaskID = &parentID.Int64
+		}
+		if sectionID.Valid {
+			t.SectionID = &sectionID.Int64
 		}
 		if assigneeID.Valid {
 			t.AssigneeID = &assigneeID.Int64
@@ -1015,4 +1018,111 @@ func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, user
 		return "", err
 	}
 	return role, nil
+}
+
+// ─── Project Columns ─────────────────────────────────────────────────────────
+
+func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, project_id, workspace_id, name, color, sort_order, created_by, created_at, updated_at
+		 FROM flow_project_columns WHERE project_id = ? ORDER BY sort_order ASC`,
+		projectID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("GetColumnsByProject failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cols []domain.ProjectColumn
+	for rows.Next() {
+		var c domain.ProjectColumn
+		if err := rows.Scan(&c.ID, &c.ProjectID, &c.WorkspaceID, &c.Name, &c.Color,
+			&c.SortOrder, &c.CreatedBy, &c.CreatedAt, &c.UpdatedAt); err != nil {
+			return nil, err
+		}
+		cols = append(cols, c)
+	}
+	return cols, rows.Err()
+}
+
+func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error) {
+	res, err := r.pool.ExecContext(ctx,
+		`INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		input.ProjectID, input.WorkspaceID, input.Name, input.Color, input.SortOrder, input.CreatedBy,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateColumn failed", logger.Error(err))
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_project_columns SET name = ?, color = ?, sort_order = ?, updated_at = NOW()
+		 WHERE id = ?`,
+		input.Name, input.Color, input.SortOrder, input.ID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) DeleteColumn(ctx context.Context, id int64) error {
+	// Null out section_id for tasks in this column before deleting
+	if _, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_tasks SET section_id = NULL WHERE section_id = ?`, id,
+	); err != nil {
+		return err
+	}
+	_, err := r.pool.ExecContext(ctx,
+		`DELETE FROM flow_project_columns WHERE id = ?`, id,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) error {
+	var sectionVal interface{}
+	if columnID == 0 {
+		sectionVal = nil
+	} else {
+		sectionVal = columnID
+	}
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_tasks SET section_id = ?, updated_at = NOW() WHERE id = ?`,
+		sectionVal, taskID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
+	defaults := []struct {
+		name      string
+		color     string
+		sortOrder int
+	}{
+		{"To Do", "#9ca3af", 0},
+		{"In Progress", "#3b82f6", 1},
+		{"In Review", "#f59e0b", 2},
+		{"Done", "#22c55e", 3},
+	}
+	for _, d := range defaults {
+		if _, err := r.pool.ExecContext(ctx,
+			`INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
+			 VALUES (?, ?, ?, ?, ?, ?)`,
+			projectID, workspaceID, d.name, d.color, d.sortOrder, createdBy,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
 }

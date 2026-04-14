@@ -1,0 +1,247 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ─────────────────────────────────────────────
+// Shared payload
+// ─────────────────────────────────────────────
+
+type ColumnPayload struct {
+	ID          int64  `json:"id"`
+	ProjectID   int64  `json:"projectId"`
+	WorkspaceID int64  `json:"workspaceId"`
+	Name        string `json:"name"`
+	Color       string `json:"color"`
+	SortOrder   int    `json:"sortOrder"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+func toColumnPayload(c domain.ProjectColumn) ColumnPayload {
+	return ColumnPayload{
+		ID:          c.ID,
+		ProjectID:   c.ProjectID,
+		WorkspaceID: c.WorkspaceID,
+		Name:        c.Name,
+		Color:       c.Color,
+		SortOrder:   c.SortOrder,
+		CreatedAt:   c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+}
+
+// ─────────────────────────────────────────────
+// GET /flow/projects/columns
+// ─────────────────────────────────────────────
+
+func ListColumnsRoutes() []string  { return []string{"/flow/projects/columns"} }
+
+type ListColumnsHandler struct{ FlowService *application.Service }
+
+type ListColumnsRequest struct {
+	ProjectID int64 `json:"project_id"`
+}
+
+type ListColumnsResponse struct {
+	Columns []ColumnPayload `json:"columns"`
+}
+
+func (h *ListColumnsHandler) Validate(_ context.Context, req *ListColumnsRequest) *errorModels.ServerError {
+	if req.ProjectID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	}
+	return nil
+}
+
+func (h *ListColumnsHandler) Serve(ctx context.Context, req *ListColumnsRequest) (ListColumnsResponse, *errorModels.ServerError) {
+	cols, err := h.FlowService.GetColumnsByProject(ctx, req.ProjectID)
+	if err != nil {
+		return ListColumnsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list columns"}
+	}
+	payloads := make([]ColumnPayload, 0, len(cols))
+	for _, c := range cols {
+		payloads = append(payloads, toColumnPayload(c))
+	}
+	return ListColumnsResponse{Columns: payloads}, nil
+}
+
+// ─────────────────────────────────────────────
+// POST /flow/projects/columns
+// ─────────────────────────────────────────────
+
+func CreateColumnRoutes() []string { return []string{"/flow/projects/columns"} }
+
+type CreateColumnHandler struct{ FlowService *application.Service }
+
+type CreateColumnRequest struct {
+	ProjectID   int64  `json:"project_id"`
+	WorkspaceID int64  `json:"workspace_id"`
+	Name        string `json:"name"`
+	Color       string `json:"color"`
+	SortOrder   int    `json:"sort_order"`
+}
+
+type CreateColumnResponse struct {
+	Column ColumnPayload `json:"column"`
+}
+
+func (h *CreateColumnHandler) Validate(_ context.Context, req *CreateColumnRequest) *errorModels.ServerError {
+	if req.ProjectID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	}
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+	}
+	return nil
+}
+
+func (h *CreateColumnHandler) Serve(ctx context.Context, req *CreateColumnRequest) (CreateColumnResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return CreateColumnResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	color := req.Color
+	if color == "" {
+		color = "#6b7280"
+	}
+
+	col, err := h.FlowService.CreateColumn(ctx, domain.ProjectColumnInput{
+		ProjectID:   req.ProjectID,
+		WorkspaceID: req.WorkspaceID,
+		Name:        req.Name,
+		Color:       color,
+		SortOrder:   req.SortOrder,
+		CreatedBy:   authUser.UserID,
+	})
+	if err != nil {
+		return CreateColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create column"}
+	}
+	return CreateColumnResponse{Column: toColumnPayload(col)}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/projects/columns
+// ─────────────────────────────────────────────
+
+func UpdateColumnRoutes() []string { return []string{"/flow/projects/columns"} }
+
+type UpdateColumnHandler struct{ FlowService *application.Service }
+
+type UpdateColumnRequest struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Color     string `json:"color"`
+	SortOrder int    `json:"sort_order"`
+}
+
+type UpdateColumnResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateColumnHandler) Validate(_ context.Context, req *UpdateColumnRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+	}
+	return nil
+}
+
+func (h *UpdateColumnHandler) Serve(ctx context.Context, req *UpdateColumnRequest) (UpdateColumnResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateColumnResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	err := h.FlowService.UpdateColumn(ctx, domain.UpdateProjectColumnInput{
+		ID:        req.ID,
+		Name:      req.Name,
+		Color:     req.Color,
+		SortOrder: req.SortOrder,
+	})
+	if err != nil {
+		return UpdateColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update column"}
+	}
+	return UpdateColumnResponse{Message: "Column updated"}, nil
+}
+
+// ─────────────────────────────────────────────
+// DELETE /flow/projects/columns
+// ─────────────────────────────────────────────
+
+func DeleteColumnRoutes() []string { return []string{"/flow/projects/columns"} }
+
+type DeleteColumnHandler struct{ FlowService *application.Service }
+
+type DeleteColumnRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeleteColumnResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteColumnHandler) Validate(_ context.Context, req *DeleteColumnRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	return nil
+}
+
+func (h *DeleteColumnHandler) Serve(ctx context.Context, req *DeleteColumnRequest) (DeleteColumnResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return DeleteColumnResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.DeleteColumn(ctx, req.ID); err != nil {
+		return DeleteColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete column"}
+	}
+	return DeleteColumnResponse{Message: "Column deleted"}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/projects/columns/move
+// ─────────────────────────────────────────────
+
+func MoveTaskToColumnRoutes() []string { return []string{"/flow/projects/columns/move"} }
+
+type MoveTaskToColumnHandler struct{ FlowService *application.Service }
+
+type MoveTaskToColumnRequest struct {
+	TaskID   int64 `json:"task_id"`
+	ColumnID int64 `json:"column_id"`
+}
+
+type MoveTaskToColumnResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *MoveTaskToColumnHandler) Validate(_ context.Context, req *MoveTaskToColumnRequest) *errorModels.ServerError {
+	if req.TaskID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
+	}
+	return nil
+}
+
+func (h *MoveTaskToColumnHandler) Serve(ctx context.Context, req *MoveTaskToColumnRequest) (MoveTaskToColumnResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return MoveTaskToColumnResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID, req.ColumnID); err != nil {
+		return MoveTaskToColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to move task"}
+	}
+	return MoveTaskToColumnResponse{Message: "Task moved"}, nil
+}

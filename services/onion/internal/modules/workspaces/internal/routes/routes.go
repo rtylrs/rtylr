@@ -219,6 +219,33 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.TransferProjectOwnershipHandler{FlowService: flowService},
 	)
 
+	// ─── Project Columns ──────────────────────────────────────────────────────────
+
+	http.RegisterGETWithValidation[handlers.ListColumnsRequest, handlers.ListColumnsResponse](
+		ctx, router, handlers.ListColumnsRoutes(),
+		&handlers.ListColumnsHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateColumnRequest, handlers.CreateColumnResponse](
+		ctx, router, handlers.CreateColumnRoutes(),
+		&handlers.CreateColumnHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateColumnRequest, handlers.UpdateColumnResponse](
+		ctx, router, handlers.UpdateColumnRoutes(),
+		&handlers.UpdateColumnHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteColumnRequest, handlers.DeleteColumnResponse](
+		ctx, router, handlers.DeleteColumnRoutes(),
+		&handlers.DeleteColumnHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.MoveTaskToColumnRequest, handlers.MoveTaskToColumnResponse](
+		ctx, router, handlers.MoveTaskToColumnRoutes(),
+		&handlers.MoveTaskToColumnHandler{FlowService: flowService},
+	)
+
 	// ─── Cycles ───────────────────────────────────────────────────────────────────
 
 	http.RegisterGETWithValidation[handlers.ListCyclesRequest, handlers.ListCyclesResponse](
