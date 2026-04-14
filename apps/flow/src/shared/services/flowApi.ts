@@ -113,6 +113,17 @@ export interface ApiCycle {
   completed: number;
 }
 
+export interface ApiProjectColumn {
+  id: string;
+  projectId: string;
+  workspaceId: string;
+  name: string;
+  color: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApiView {
   id: string;
   name: string;
@@ -283,6 +294,33 @@ export const flowApi = {
 
   getProjects: (workspaceId: string) =>
     safe.get<ApiProject[]>('/flow/projects', { params: { workspace_id: workspaceId } }),
+
+  // -- Project Columns ----------------------------------------------------
+
+  getProjectColumns: (projectId: string) =>
+    safe.get<{ columns: ApiProjectColumn[] }>('/flow/projects/columns', {
+      params: { project_id: projectId },
+    }),
+
+  createProjectColumn: (data: {
+    project_id: string;
+    workspace_id: string;
+    name: string;
+    color?: string;
+    sort_order?: number;
+  }) => safe.post<{ column: ApiProjectColumn }>('/flow/projects/columns', data),
+
+  updateProjectColumn: (data: { id: string; name: string; color?: string; sort_order?: number }) =>
+    safe.put<{ message: string }>('/flow/projects/columns', data),
+
+  deleteProjectColumn: (id: string) =>
+    safe.delete<{ message: string }>('/flow/projects/columns', { data: { id } }),
+
+  moveTaskToColumn: (taskId: string, columnId: string) =>
+    safe.put<{ message: string }>('/flow/projects/columns/move', {
+      task_id: taskId,
+      column_id: columnId,
+    }),
 
   createProject: (data: { workspaceId: string; name: string; color?: string }) =>
     safe.post<ApiProject>('/flow/projects', data),

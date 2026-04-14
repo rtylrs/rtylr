@@ -1,84 +1,52 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Plus, List, LayoutGrid, Activity, Settings as SettingsIcon, Rows3 } from 'lucide-react';
-import { useFlowStore, Task } from '../../shared/stores/flowStore';
-import { useUpdateTaskStatus, useCreateTask } from '../tasks/useTasks';
+import {
+  Plus,
+  List,
+  LayoutGrid,
+  Activity,
+  Settings as SettingsIcon,
+  Trash2,
+  Check,
+} from 'lucide-react';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { useUpdateTaskStatus, useCreateTask, useTasks } from '../tasks/useTasks';
+import {
+  useProjectColumns,
+  useCreateColumn,
+  useUpdateColumn,
+  useDeleteColumn,
+  useMoveTaskToColumn,
+} from './useColumns';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskCard from '../../shared/components/TaskCard';
+import type { ApiProjectColumn, ApiTask } from '../../shared/services/flowApi';
+import type { Task } from '../../shared/stores/flowStore';
 
 const ACCENT = '#64C5B9';
 
-const COLUMNS: { id: Task['status']; label: string; color: string; bgColor: string }[] = [
-  { id: 'backlog', label: 'Backlog', color: '#6b7280', bgColor: 'rgba(107,114,128,0.08)' },
-  { id: 'todo', label: 'Todo', color: '#9ca3af', bgColor: 'rgba(156,163,175,0.08)' },
-  { id: 'in_progress', label: 'In Progress', color: '#3b82f6', bgColor: 'rgba(59,130,246,0.08)' },
-  { id: 'in_review', label: 'In Review', color: '#f59e0b', bgColor: 'rgba(245,158,11,0.08)' },
-  { id: 'done', label: 'Done', color: '#22c55e', bgColor: 'rgba(34,197,94,0.08)' },
-];
-
-const PRIORITY_COLORS: Record<string, string> = {
-  urgent: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#22c55e',
-  none: '#6b7280',
-};
-
-type GroupBy = 'none' | 'assignee' | 'priority';
-
-function groupTasks(
-  tasks: Task[],
-  groupBy: GroupBy
-): { key: string; label: string; tasks: Task[] }[] {
-  if (groupBy === 'none') return [{ key: '__all__', label: '', tasks }];
-
-  if (groupBy === 'priority') {
-    const order = ['urgent', 'high', 'medium', 'low', 'none'];
-    const map: Record<string, Task[]> = {};
-    for (const t of tasks) {
-      const k = t.priority || 'none';
-      if (!map[k]) map[k] = [];
-      map[k].push(t);
-    }
-    return order
-      .filter((k) => map[k]?.length)
-      .map((k) => ({
-        key: k,
-        label: k.charAt(0).toUpperCase() + k.slice(1),
-        tasks: map[k],
-      }));
-  }
-
-  if (groupBy === 'assignee') {
-    const map: Record<string, { key: string; label: string; tasks: Task[] }> = {};
-    for (const t of tasks) {
-      const k = t.assignee || 'Unassigned';
-      if (!map[k]) map[k] = { key: k, label: k, tasks: [] };
-      map[k].tasks.push(t);
-    }
-    return Object.values(map);
-  }
-
-  return [{ key: '__all__', label: '', tasks }];
-}
-
 const ProjectBoard: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams<{
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
     workspaceId: string;
     projectId: string;
   }>();
 
-  const { projects, tasks, setQuickCreateOpen, selectedTaskIds, toggleSelectTask } = useFlowStore();
+  const { projects, selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
   const updateTaskStatus = useUpdateTaskStatus();
-  const [dragOver, setDragOver] = useState<{ colId: Task['status']; groupKey: string } | null>(
-    null
-  );
-  const [groupBy, setGroupBy] = useState<GroupBy>('none');
-  const [showGroupMenu, setShowGroupMenu] = useState(false);
+  const moveTask = useMoveTaskToColumn();
+
+  const { data: apiTasks = [] } = useTasks({ projectId });
+  const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
+  const createColumn = useCreateColumn(projectId);
+  const updateColumn = useUpdateColumn(projectId);
+  const deleteColumn = useDeleteColumn(projectId);
+
+  const [dragOver, setDragOver] = useState<string | null>(null); // column id
+  const [addingColumn, setAddingColumn] = useState(false);
+  const [newColumnName, setNewColumnName] = useState('');
 
   const project = projects.find((p) => p.id === projectId);
-  const projectTasks = tasks.filter((t) => t.projectId === projectId && !t.archived);
-  const groups = useMemo(() => groupTasks(projectTasks, groupBy), [projectTasks, groupBy]);
 
   if (!project) {
     return (
@@ -88,236 +56,296 @@ const ProjectBoard: React.FC = () => {
     );
   }
 
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    e.dataTransfer.setData('text/plain', id);
+  // Tasks mapped to Task shape for TaskCard
+  const tasks: Task[] = apiTasks.map(apiTaskToTask);
+
+  // Bucket tasks by column. Tasks with no sectionId go into first column.
+  function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
+    return tasks.filter((t) => {
+      if (t.sectionId === col.id) return true;
+      // Unsectioned tasks go into first column
+      if (colIndex === 0 && !t.sectionId) return true;
+      return false;
+    });
+  }
+
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    e.dataTransfer.setData('text/plain', taskId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, status: Task['status'], _groupKey: string) => {
+  const handleDrop = (e: React.DragEvent, colId: string) => {
     e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain');
-    if (!id) return;
-    const t = projectTasks.find((x) => x.id === id);
-    if (t && t.status !== status) {
-      updateTaskStatus.mutate({ id, status: status as any });
-    }
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (!taskId) return;
+    moveTask.mutate({ taskId, columnId: colId });
     setDragOver(null);
   };
 
-  const groupLabel = groupBy === 'none' ? 'Group by' : `Grouped by ${groupBy}`;
+  const handleAddColumn = () => {
+    const name = newColumnName.trim();
+    if (!name) return;
+    createColumn.mutate({
+      workspaceId: activeWorkspaceId || project.workspaceId,
+      name,
+      color: '#6b7280',
+      sortOrder: columns.length,
+    });
+    setNewColumnName('');
+    setAddingColumn(false);
+  };
+
+  if (columnsLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <BoardHeader
+          project={project}
+          workspaceId={workspaceId}
+          projectId={projectId}
+          taskCount={tasks.length}
+          onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+            Loading board…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Header ── */}
-      <div
-        className="flex flex-col gap-3 px-4 py-3 shrink-0 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
-          <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {project.name}
-          </h1>
-          <span
-            className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
-            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
-          >
-            {projectTasks.length}
-          </span>
-        </div>
+      <BoardHeader
+        project={project}
+        workspaceId={workspaceId}
+        projectId={projectId}
+        taskCount={tasks.length}
+        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Group by picker */}
-          <div className="relative">
-            <button
-              onClick={() => setShowGroupMenu((v) => !v)}
-              className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px]"
-              style={{
-                background: groupBy !== 'none' ? `${ACCENT}18` : 'var(--flow-hover)',
-                color: groupBy !== 'none' ? ACCENT : 'var(--flow-text-muted)',
-                border: '1px solid var(--flow-border)',
-              }}
-            >
-              <Rows3 size={10} />
-              {groupLabel}
-            </button>
-            {showGroupMenu && (
+      <div className="min-h-0 flex-1 overflow-auto">
+        <div className="flex h-full min-w-max gap-3 p-4 sm:gap-4 sm:p-6">
+          {columns.map((col, i) => (
+            <KanbanColumn
+              key={col.id}
+              col={col}
+              colTasks={tasksForColumn(col, i)}
+              isOver={dragOver === col.id}
+              selectedTaskIds={selectedTaskIds}
+              onDragOver={() => setDragOver(col.id)}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={(e) => handleDrop(e, col.id)}
+              onDragStart={handleDragStart}
+              onSelect={toggleSelectTask}
+              onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+              onRename={(name) =>
+                updateColumn.mutate({
+                  id: col.id,
+                  name,
+                  color: col.color,
+                  sortOrder: col.sortOrder,
+                })
+              }
+              onDelete={() => deleteColumn.mutate(col.id)}
+            />
+          ))}
+
+          {/* Add column */}
+          <div className="w-[260px] shrink-0">
+            {addingColumn ? (
               <div
-                className="absolute right-0 top-8 z-20 rounded-lg py-1 shadow-xl min-w-[140px]"
+                className="rounded-lg p-3"
                 style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
               >
-                {(['none', 'assignee', 'priority'] as GroupBy[]).map((g) => (
+                <input
+                  autoFocus
+                  value={newColumnName}
+                  onChange={(e) => setNewColumnName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddColumn();
+                    if (e.key === 'Escape') setAddingColumn(false);
+                  }}
+                  placeholder="Column name"
+                  className="w-full bg-transparent outline-none text-[13px] font-medium mb-2"
+                  style={{ color: 'var(--flow-text)' }}
+                />
+                <div className="flex items-center gap-2">
                   <button
-                    key={g}
-                    onClick={() => {
-                      setGroupBy(g);
-                      setShowGroupMenu(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-[var(--flow-hover)]"
-                    style={{ color: groupBy === g ? ACCENT : 'var(--flow-text)' }}
+                    onClick={handleAddColumn}
+                    disabled={!newColumnName.trim() || createColumn.isPending}
+                    className="h-6 px-3 rounded text-[11px] font-semibold disabled:opacity-40"
+                    style={{ background: ACCENT, color: '#0a0a0a' }}
                   >
-                    {g === 'none' ? 'No grouping' : `By ${g}`}
+                    Add
                   </button>
-                ))}
+                  <button
+                    onClick={() => setAddingColumn(false)}
+                    className="h-6 px-2 rounded text-[11px] hover:bg-[var(--flow-hover)]"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
+            ) : (
+              <button
+                onClick={() => setAddingColumn(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-[var(--flow-hover)]"
+                style={{
+                  color: 'var(--flow-text-dim)',
+                  border: '1px dashed var(--flow-border)',
+                }}
+              >
+                <Plus size={13} />
+                Add column
+              </button>
             )}
-          </div>
-
-          <button
-            onClick={() => setQuickCreateOpen(true)}
-            className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold"
-            style={{ background: ACCENT, color: '#0a0a0a' }}
-          >
-            <Plus size={11} /> New task
-          </button>
-
-          <div
-            className="flex items-center rounded-lg p-0.5"
-            style={{ background: 'var(--flow-surface)', border: '1px solid var(--flow-border)' }}
-          >
-            <Link
-              to={`/w/${workspaceId}/p/${projectId}/overview`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <Activity size={11} /> Overview
-            </Link>
-            <button
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium"
-              style={{ background: `${ACCENT}18`, color: ACCENT }}
-            >
-              <LayoutGrid size={11} /> Board
-            </button>
-            <Link
-              to={`/w/${workspaceId}/p/${projectId}/list`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <List size={11} /> List
-            </Link>
-            <Link
-              to={`/w/${workspaceId}/p/${projectId}/settings`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <SettingsIcon size={11} />
-            </Link>
           </div>
         </div>
       </div>
+    </div>
+  );
+};
 
-      {/* ── Board body ── */}
-      <div className="min-h-0 flex-1 overflow-auto">
-        {groupBy === 'none' ? (
-          // Flat kanban (original layout)
-          <div className="flex h-full min-w-max gap-3 p-4 sm:gap-4 sm:p-6">
-            {COLUMNS.map((col) => {
-              const colTasks = projectTasks.filter((t) => t.status === col.id);
-              const isOver = dragOver?.colId === col.id && dragOver?.groupKey === '__all__';
-              return (
-                <KanbanColumn
-                  key={col.id}
-                  col={col}
-                  colTasks={colTasks}
-                  isOver={isOver}
-                  onDragOver={() => setDragOver({ colId: col.id, groupKey: '__all__' })}
-                  onDragLeave={() => setDragOver(null)}
-                  onDrop={(e) => handleDrop(e, col.id, '__all__')}
-                  onAdd={() => setQuickCreateOpen(true)}
-                  selectedTaskIds={selectedTaskIds}
-                  onSelect={toggleSelectTask}
-                  onDragStart={handleDragStart}
-                />
-              );
-            })}
-          </div>
+// ── Column component ────────────────────────────────────────────────────────
+
+const KanbanColumn: React.FC<{
+  col: ApiProjectColumn;
+  colTasks: Task[];
+  isOver: boolean;
+  selectedTaskIds: string[];
+  onDragOver: () => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent) => void;
+  onDragStart: (e: React.DragEvent, id: string) => void;
+  onSelect: (id: string) => void;
+  onAddTask: () => void;
+  onRename: (name: string) => void;
+  onDelete: () => void;
+}> = ({
+  col,
+  colTasks,
+  isOver,
+  selectedTaskIds,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragStart,
+  onSelect,
+  onAddTask,
+  onRename,
+  onDelete,
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(col.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const commitRename = () => {
+    const name = editName.trim();
+    if (name && name !== col.name) onRename(name);
+    setEditing(false);
+  };
+
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragOver();
+      }}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      className="flex w-[min(260px,calc(100vw-2rem))] min-w-[min(260px,calc(100vw-2rem))] flex-col rounded-lg p-2 sm:w-[260px] sm:min-w-[260px]"
+      style={{
+        background: isOver ? `${col.color}12` : 'transparent',
+        border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
+        transition: 'background 0.15s, border 0.15s',
+      }}
+    >
+      {/* Column header */}
+      <div className="flex items-center gap-2 px-2 py-2 mb-2 group/header">
+        <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: col.color }} />
+
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitRename();
+              if (e.key === 'Escape') {
+                setEditName(col.name);
+                setEditing(false);
+              }
+            }}
+            className="flex-1 bg-transparent outline-none text-[12px] font-semibold min-w-0"
+            style={{ color: 'var(--flow-text)' }}
+          />
         ) : (
-          // Swimlane layout
-          <div className="min-w-max p-4 sm:p-6 space-y-6">
-            {/* Column headers (sticky-ish) */}
-            <div className="flex gap-3 sm:gap-4">
-              <div className="w-[140px] shrink-0" /> {/* swimlane label gutter */}
-              {COLUMNS.map((col) => (
-                <div key={col.id} className="w-[220px] shrink-0 flex items-center gap-2 px-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: col.color }} />
-                  <span className="text-[11px] font-semibold" style={{ color: col.color }}>
-                    {col.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <button
+            onClick={() => setEditing(true)}
+            className="flex-1 text-left text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--flow-text)' }}
+          >
+            {col.name}
+          </button>
+        )}
 
-            {groups.map((group) => (
-              <div key={group.key}>
-                {/* Swimlane label row */}
-                <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg mb-2"
-                  style={{ background: 'var(--flow-hover)' }}
-                >
-                  {groupBy === 'priority' && (
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: PRIORITY_COLORS[group.key] ?? '#6b7280' }}
-                    />
-                  )}
-                  <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                    {group.label}
-                  </span>
-                  <span
-                    className="text-[10px] px-1.5 py-0.5 rounded-full"
-                    style={{ background: 'rgba(0,0,0,0.08)', color: 'var(--flow-text-dim)' }}
-                  >
-                    {group.tasks.length}
-                  </span>
-                </div>
+        <span
+          className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
+          style={{ background: `${col.color}22`, color: col.color }}
+        >
+          {colTasks.length}
+        </span>
 
-                <div className="flex gap-3 sm:gap-4">
-                  {COLUMNS.map((col) => {
-                    const colTasks = group.tasks.filter((t) => t.status === col.id);
-                    const isOver = dragOver?.colId === col.id && dragOver?.groupKey === group.key;
-                    return (
-                      <div
-                        key={col.id}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          setDragOver({ colId: col.id, groupKey: group.key });
-                        }}
-                        onDragLeave={() => setDragOver(null)}
-                        onDrop={(e) => handleDrop(e, col.id, group.key)}
-                        className="flex w-[220px] shrink-0 flex-col rounded-lg p-2 min-h-[120px]"
-                        style={{
-                          background: isOver ? col.bgColor : 'var(--flow-card)',
-                          border: isOver
-                            ? `1px dashed ${col.color}`
-                            : '1px solid var(--flow-border)',
-                        }}
-                      >
-                        <div className="flex flex-col gap-2">
-                          {colTasks.map((task) => (
-                            <TaskCard
-                              key={task.id}
-                              task={task}
-                              draggable
-                              onDragStart={(e) => handleDragStart(e, task.id)}
-                              selected={selectedTaskIds.includes(task.id)}
-                              onSelect={() => toggleSelectTask(task.id)}
-                            />
-                          ))}
-                          {colTasks.length === 0 && (
-                            <div
-                              className="text-center py-4 text-[10px]"
-                              style={{ color: 'var(--flow-text-dim)' }}
-                            >
-                              Drop here
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+        {/* Actions (visible on header hover) */}
+        <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
+          <button
+            onClick={onAddTask}
+            className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-dim)' }}
+            title="Add task"
+          >
+            <Plus size={11} />
+          </button>
+          <button
+            onClick={onDelete}
+            className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
+            style={{ color: 'var(--flow-text-dim)' }}
+            title="Delete column"
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <div className="flex flex-col gap-2 flex-1 min-h-[120px] overflow-y-auto">
+        {colTasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            draggable
+            onDragStart={(e) => onDragStart(e, task.id)}
+            selected={selectedTaskIds.includes(task.id)}
+            onSelect={() => onSelect(task.id)}
+          />
+        ))}
+
+        {colTasks.length === 0 && (
+          <div
+            className="flex-1 flex items-center justify-center rounded-md text-[11px] min-h-[60px]"
+            style={{
+              color: 'var(--flow-text-dim)',
+              border: '1px dashed var(--flow-border)',
+            }}
+          >
+            Drop here
           </div>
         )}
       </div>
@@ -325,73 +353,73 @@ const ProjectBoard: React.FC = () => {
   );
 };
 
-// Extracted KanbanColumn for flat mode
-const KanbanColumn: React.FC<{
-  col: { id: Task['status']; label: string; color: string; bgColor: string };
-  colTasks: Task[];
-  isOver: boolean;
-  onDragOver: () => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent) => void;
-  onAdd: () => void;
-  selectedTaskIds: string[];
-  onSelect: (id: string) => void;
-  onDragStart: (e: React.DragEvent, id: string) => void;
-}> = ({
-  col,
-  colTasks,
-  isOver,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onAdd,
-  selectedTaskIds,
-  onSelect,
-  onDragStart,
-}) => (
+// ── Shared board header ─────────────────────────────────────────────────────
+
+const BoardHeader: React.FC<{
+  project: { name: string; color: string };
+  workspaceId: string;
+  projectId: string;
+  taskCount: number;
+  onNewTask: () => void;
+}> = ({ project, workspaceId, projectId, taskCount, onNewTask }) => (
   <div
-    onDragOver={(e) => {
-      e.preventDefault();
-      onDragOver();
-    }}
-    onDragLeave={onDragLeave}
-    onDrop={onDrop}
-    className="flex w-[min(260px,calc(100vw-2rem))] min-w-[min(260px,calc(100vw-2rem))] flex-col rounded-lg p-2 sm:w-[260px] sm:min-w-[260px]"
-    style={{
-      background: isOver ? col.bgColor : 'transparent',
-      border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
-    }}
+    className="flex flex-col gap-3 px-4 py-3 shrink-0 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4"
+    style={{ borderBottom: '1px solid var(--flow-border)' }}
   >
-    <div className="flex items-center gap-2 px-2 py-2 mb-2">
-      <span className="h-2 w-2 rounded-full" style={{ background: col.color }} />
-      <span className="text-[12px] font-semibold flex-1" style={{ color: col.color }}>
-        {col.label}
-      </span>
+    <div className="flex min-w-0 items-center gap-3">
+      <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
+      <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+        {project.name}
+      </h1>
       <span
-        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-        style={{ background: `${col.color}22`, color: col.color }}
+        className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+        style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
       >
-        {colTasks.length}
+        {taskCount}
       </span>
-      <button
-        onClick={onAdd}
-        className="h-4 w-4 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
-        style={{ color: 'var(--flow-text-dim)' }}
-      >
-        <Plus size={11} />
-      </button>
     </div>
-    <div className="flex flex-col gap-2 flex-1 min-h-[200px] overflow-y-auto">
-      {colTasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          draggable
-          onDragStart={(e) => onDragStart(e, task.id)}
-          selected={selectedTaskIds.includes(task.id)}
-          onSelect={() => onSelect(task.id)}
-        />
-      ))}
+
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        onClick={onNewTask}
+        className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold"
+        style={{ background: ACCENT, color: '#0a0a0a' }}
+      >
+        <Plus size={11} /> New task
+      </button>
+
+      <div
+        className="flex items-center rounded-lg p-0.5"
+        style={{ background: 'var(--flow-surface)', border: '1px solid var(--flow-border)' }}
+      >
+        <Link
+          to={`/w/${workspaceId}/p/${projectId}/overview`}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <Activity size={11} /> Overview
+        </Link>
+        <button
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium"
+          style={{ background: `${ACCENT}18`, color: ACCENT }}
+        >
+          <LayoutGrid size={11} /> Board
+        </button>
+        <Link
+          to={`/w/${workspaceId}/p/${projectId}/list`}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <List size={11} /> List
+        </Link>
+        <Link
+          to={`/w/${workspaceId}/p/${projectId}/settings`}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <SettingsIcon size={11} />
+        </Link>
+      </div>
     </div>
   </div>
 );
