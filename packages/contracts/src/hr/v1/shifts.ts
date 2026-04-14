@@ -6,61 +6,116 @@
 
 /* eslint-disable */
 
-export interface Shift {
+export interface ShiftPayload {
+  /** Unique identifier for the shift template. */
   id: number;
+  /** Tenant owner this shift belongs to. */
   ownerId: number;
-  staffId: number;
-  date: string;
+  /** Location where this shift takes place. */
+  locationId: number;
+  /** Human-readable shift name (e.g. "Morning", "Night"). */
+  name: string;
+  /** Shift start time (HH:MM 24-hour format). */
   startTime: string;
+  /** Shift end time (HH:MM 24-hour format). */
   endTime: string;
-  breakMinutes: number;
-  status: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
+  /** Hex colour code used to render this shift on the roster (e.g. "#4CAF50"). */
+  color: string;
+  /** Unix timestamp when this record was created. */
+  createdAt: number;
+  /** Unix timestamp when this record was last updated. */
+  updatedAt: number;
 }
 
-export interface ListShiftsRequest {
-  staffId: number;
+export interface ShiftAssignmentPayload {
+  /** Unique identifier for the assignment. */
+  id: number;
+  /** Tenant owner this assignment belongs to. */
+  ownerId: number;
+  /** Employee assigned to the shift. */
+  employeeId: number;
+  /** Shift template being assigned. */
+  shiftId: number;
+  /** Date the assignment is for (ISO-8601 date). */
   date: string;
-}
-
-export interface ListShiftsResponse {
-  shifts: Shift[];
+  /** Assignment status (scheduled | worked | missed | swapped). */
+  status: string;
+  /** Unix timestamp when this record was created. */
+  createdAt: number;
+  /** Unix timestamp when this record was last updated. */
+  updatedAt: number;
 }
 
 export interface CreateShiftRequest {
-  staffId: number;
-  date: string;
+  /** Location where this shift takes place. */
+  locationId: number;
+  /** Human-readable shift name. */
+  name: string;
+  /** Shift start time (HH:MM 24-hour format). */
   startTime: string;
+  /** Shift end time (HH:MM 24-hour format). */
   endTime: string;
-  breakMinutes: number;
-  status: string;
-  notes: string;
+  /** Hex colour code for roster display. */
+  color: string;
 }
 
 export interface CreateShiftResponse {
-  id: number;
+  /** The newly created shift. */
+  shift: ShiftPayload | undefined;
 }
 
-export interface UpdateShiftRequest {
-  id: number;
+export interface CreateShiftAssignmentRequest {
+  /** Employee to assign. */
+  employeeId: number;
+  /** Shift template to assign. */
+  shiftId: number;
+  /** Date of the assignment (ISO-8601 date). */
   date: string;
-  startTime: string;
-  endTime: string;
-  breakMinutes: number;
-  status: string;
-  notes: string;
 }
 
-export interface UpdateShiftResponse {
+export interface CreateShiftAssignmentResponse {
+  /** The newly created assignment. */
+  assignment: ShiftAssignmentPayload | undefined;
+}
+
+export interface PublishRosterRequest {
+  /** Location to publish the roster for. */
+  locationId: number;
+  /** Monday of the week being published (ISO-8601 date). */
+  weekStart: string;
+}
+
+export interface PublishRosterResponse {
+  /** Whether the roster was successfully published. */
   success: boolean;
 }
 
-export interface DeleteShiftRequest {
-  id: number;
+export interface ListShiftsRequest {
+  /** Filter by location; absent to include all locations. */
+  locationId?: number | undefined;
 }
 
-export interface DeleteShiftResponse {
-  success: boolean;
+export interface ListShiftsResponse {
+  /** Shift templates matching the filter. */
+  shifts: ShiftPayload[];
+  /** Total number of matching shifts across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
+}
+
+export interface GetRosterRequest {
+  /** Location to fetch the roster for. */
+  locationId: number;
+  /** Monday of the week to retrieve (ISO-8601 date). */
+  weekStart: string;
+}
+
+export interface GetRosterResponse {
+  /** All shift assignments for the requested week and location. */
+  assignments: ShiftAssignmentPayload[];
+  /** Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15"). */
+  conflicts: string[];
 }
