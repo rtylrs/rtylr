@@ -37,6 +37,7 @@ import {
   Palmtree,
   ClockArrowUp,
   CalendarRange,
+  Receipt,
 } from 'lucide-react';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
@@ -114,6 +115,7 @@ const navSections: NavSection[] = [
     i18nKey: 'layout.sections.hr',
     items: [
       { i18nKey: 'nav.payroll', path: '/payroll', icon: DollarSign },
+      { i18nKey: 'nav.myPaySlips', path: '/payroll/my-payslips', icon: Receipt },
       { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
       { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
@@ -127,6 +129,8 @@ const routeLabelKeys: Record<string, string> = {
   '/staff': 'nav.staff',
   '/shifts': 'nav.shifts',
   '/payroll': 'nav.payroll',
+  '/payroll/my-payslips': 'nav.myPaySlips',
+  '/settings/payroll-config': 'layout.routes.payrollConfig',
   '/departments': 'nav.departments',
   '/time': 'nav.timeLogging',
   '/time-off': 'nav.timeOff',
@@ -460,6 +464,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     if (pathname.startsWith('/reviews/')) return t('layout.routes.performanceReviews');
     if (pathname.startsWith('/timesheets/')) return t('layout.routes.timesheetDetail');
     if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
+    if (pathname.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
+    if (pathname.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
     return t('layout.hr');
   };
   const pageTitle = getPageTitle(location.pathname);

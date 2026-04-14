@@ -51,7 +51,8 @@
     "approvals": "Approbations",
     "leave": "Congés",
     "overtime": "Heures supplémentaires",
-    "rosterBuilder": "Planificateur"
+    "rosterBuilder": "Planificateur",
+    "myPaySlips": "Mes fiches de paie"
   },
   "layout": {
     "sections": {
@@ -76,7 +77,9 @@
       "newReview": "Nouvelle évaluation",
       "employeeProfile": "Profil de l'employé",
       "timesheetDetail": "Détail de la feuille de temps",
-      "newLeaveRequest": "Nouvelle demande de congé"
+      "newLeaveRequest": "Nouvelle demande de congé",
+      "payrollConfig": "Configuration de la paie",
+      "payrollRunDetail": "Exécution de la paie"
     },
     "hubLink": "Hub"
   },
@@ -474,6 +477,84 @@
       "reason": "Motif",
       "reasonPlaceholder": "Pourquoi les heures supplémentaires sont-elles nécessaires ?",
       "submit": "Soumettre la demande"
+    }
+  },
+  "payroll": {
+    "title": "Paie",
+    "subtitle": "Gérer les cycles de paie et la rémunération des employés",
+    "triggerRun": "Lancer un cycle",
+    "configRequired": "Configurez la paie d'abord",
+    "configRequiredDescription": "Configurez votre paie avant de lancer un cycle.",
+    "goToConfig": "Aller à la configuration de la paie",
+    "configSaved": "Configuration de la paie enregistrée",
+    "runTriggered": "Cycle de paie lancé",
+    "runApproved": "Cycle de paie approuvé",
+    "exported": "Paie exportée avec succès",
+    "backToRuns": "Retour aux cycles de paie",
+    "emptyTitle": "Aucun cycle de paie",
+    "emptyDescription": "Lancez un nouveau cycle de paie pour commencer.",
+    "employeeCount": "{{count}} employés",
+    "netTotal": "Total net",
+    "statuses": {
+      "all": "Tous",
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "paid": "Payé"
+    },
+    "stats": {
+      "totalBase": "Salaire de base total",
+      "totalOvertime": "Heures sup. totales",
+      "totalDeductions": "Déductions totales",
+      "totalNet": "Paie nette",
+      "pendingRuns": "Cycles en attente"
+    },
+    "table": {
+      "employee": "Employé",
+      "hours": "Heures",
+      "basePay": "Salaire de base",
+      "overtimePay": "Heures supplémentaires",
+      "deductions": "Déductions",
+      "bonuses": "Primes",
+      "netPay": "Salaire net"
+    },
+    "runDetail": {
+      "subtitle": "{{count}} entrées dans ce cycle",
+      "approve": "Approuver le cycle",
+      "exportCsv": "Exporter CSV"
+    },
+    "paySlip": {
+      "title": "Fiche de paie",
+      "myPaySlips": "Mes fiches de paie",
+      "myPaySlipsSubtitle": "Consultez vos fiches de paie complétées",
+      "period": "Période de paie",
+      "earnings": "Revenus",
+      "grossPay": "Salaire brut",
+      "deductionsSection": "Déductions",
+      "notFound": "Fiche de paie introuvable",
+      "notFoundDescription": "Cette fiche de paie n'a pas pu être chargée.",
+      "backToSlips": "Retour aux fiches de paie",
+      "emptyTitle": "Aucune fiche de paie",
+      "emptyDescription": "Vos fiches de paie apparaîtront ici après le traitement de la paie."
+    },
+    "config": {
+      "title": "Configuration de la paie",
+      "subtitle": "Configurez le fonctionnement de la paie pour votre organisation",
+      "grossModel": "Modèle de salaire brut",
+      "grossModels": {
+        "hourly": "Horaire",
+        "salary": "Salaire",
+        "both": "Les deux"
+      },
+      "period": "Période de paie",
+      "periods": {
+        "weekly": "Hebdomadaire",
+        "biweekly": "Bimensuel",
+        "monthly": "Mensuel"
+      },
+      "enableOvertime": "Activer le suivi des heures supplémentaires",
+      "enableDeductions": "Activer les déductions",
+      "enableBonuses": "Activer les primes"
     }
   },
   "shifts": {

@@ -28,6 +28,12 @@ const NewEmployee = React.lazy(() => import('./features/employees/NewEmployee'))
 const Staff = React.lazy(() => import('./features/staff/Staff'));
 const Shifts = React.lazy(() => import('./features/shifts/Shifts'));
 const Payroll = React.lazy(() => import('./features/payroll/Payroll'));
+const PayrollRunDetail = React.lazy(() => import('./features/payroll/PayrollRunDetail'));
+const MyPaySlips = React.lazy(() => import('./features/payroll/MyPaySlips'));
+const PaySlip = React.lazy(() => import('./features/payroll/PaySlip'));
+const PayrollConfigSettings = React.lazy(
+  () => import('./features/settings/payroll-config/PayrollConfigSettings')
+);
 const Departments = React.lazy(() => import('./features/departments/Departments'));
 const EmployeeProfile = React.lazy(() => import('./features/staff/EmployeeProfile'));
 const TimeOff = React.lazy(() => import('./features/time-off/TimeOff'));
@@ -96,6 +102,10 @@ const App = (): React.JSX.Element => {
               <Route path="/time-off/new" element={wrap(<TimeOffNew />)} />
               <Route path="/calendar" element={wrap(<CalendarScreen />)} />
               <Route path="/payroll" element={wrap(<Payroll />)} />
+              <Route path="/payroll/my-payslips" element={wrap(<MyPaySlips />)} />
+              <Route path="/payroll/my-payslips/view" element={wrap(<PaySlip />)} />
+              <Route path="/payroll/:id" element={wrap(<PayrollRunDetail />)} />
+              <Route path="/settings/payroll-config" element={wrap(<PayrollConfigSettings />)} />
               <Route path="/departments" element={wrap(<Departments />)} />
               <Route path="/reviews" element={wrap(<Reviews />)} />
               <Route path="/reviews/new" element={wrap(<ReviewForm />)} />
