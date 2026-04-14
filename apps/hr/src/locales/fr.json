@@ -48,7 +48,10 @@
     "operations": "Opérations",
     "timeLogging": "Saisie du temps",
     "attendance": "Présence",
-    "approvals": "Approbations"
+    "approvals": "Approbations",
+    "leave": "Congés",
+    "overtime": "Heures supplémentaires",
+    "rosterBuilder": "Planificateur"
   },
   "layout": {
     "sections": {
@@ -72,7 +75,8 @@
       "performanceReviews": "Évaluations de performance",
       "newReview": "Nouvelle évaluation",
       "employeeProfile": "Profil de l'employé",
-      "timesheetDetail": "Détail de la feuille de temps"
+      "timesheetDetail": "Détail de la feuille de temps",
+      "newLeaveRequest": "Nouvelle demande de congé"
     },
     "hubLink": "Hub"
   },
@@ -387,6 +391,116 @@
       "description": "Scannez un QR code à votre terminal pour pointer l'entrée ou la sortie.",
       "scanButton": "Scanner QR Code",
       "cameraPlaceholder": "Permission caméra requise. Cette fonctionnalité arrive en Phase 2."
+    }
+  },
+  "leave": {
+    "title": "Congés",
+    "subtitle": "Gérer les demandes de congé et les soldes",
+    "newRequest": "Nouvelle demande",
+    "requestCreated": "Demande de congé soumise",
+    "requestUpdated": "Demande de congé mise à jour",
+    "days": "jours",
+    "emptyTitle": "Aucune demande de congé",
+    "emptyDescription": "Les demandes de congé apparaîtront ici une fois soumises.",
+    "noLeaveTypes": "Aucun type de congé configuré",
+    "configureLeaveTypes": "Configurez les politiques de congé avant de soumettre des demandes.",
+    "goToSettings": "Aller aux Paramètres",
+    "tabs": {
+      "myLeave": "Mes Congés",
+      "teamCalendar": "Calendrier de l'équipe"
+    },
+    "statuses": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "balances": {
+      "emptyTitle": "Aucun solde de congé",
+      "emptyDescription": "Vos soldes de congé apparaîtront une fois les types configurés.",
+      "daysLeft": "jours restants",
+      "entitled": "Droit",
+      "used": "Utilisé",
+      "pending": "En attente"
+    },
+    "form": {
+      "title": "Nouvelle demande de congé",
+      "subtitle": "Soumettre une demande de congé pour approbation",
+      "leaveType": "Type de congé",
+      "selectType": "Sélectionner un type de congé",
+      "remainingBalance": "Solde restant",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "reason": "Motif",
+      "reasonPlaceholder": "Pourquoi demandez-vous un congé ?",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes supplémentaires (facultatif)",
+      "submit": "Soumettre la demande"
+    },
+    "calendar": {
+      "prevMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "department": "Département",
+      "location": "Emplacement",
+      "emptyTitle": "Aucun congé planifié",
+      "emptyDescription": "Les congés approuvés apparaîtront sur le calendrier."
+    }
+  },
+  "overtime": {
+    "title": "Heures supplémentaires",
+    "subtitle": "Suivre et gérer les demandes d'heures supplémentaires",
+    "newRequest": "Nouvelle pré-approbation",
+    "requestCreated": "Demande d'heures supplémentaires soumise",
+    "requestUpdated": "Demande d'heures supplémentaires mise à jour",
+    "configUpdated": "Configuration des heures supplémentaires mise à jour",
+    "planned": "planifié",
+    "actual": "réel",
+    "emptyTitle": "Aucune demande d'heures supplémentaires",
+    "emptyDescription": "Les demandes d'heures supplémentaires apparaîtront ici.",
+    "statuses": {
+      "all": "Toutes",
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée"
+    },
+    "form": {
+      "title": "Nouvelle demande d'heures supplémentaires",
+      "date": "Date",
+      "plannedMinutes": "Minutes supplémentaires prévues",
+      "minutesPlaceholder": "ex. 90",
+      "reason": "Motif",
+      "reasonPlaceholder": "Pourquoi les heures supplémentaires sont-elles nécessaires ?",
+      "submit": "Soumettre la demande"
+    }
+  },
+  "shifts": {
+    "title": "Quarts",
+    "weekOf": "Semaine du {{start}} – {{end}}",
+    "prevWeek": "Semaine précédente",
+    "nextWeek": "Semaine suivante",
+    "today": "aujourd'hui",
+    "shiftsCount": "quart",
+    "shiftCreated": "Quart créé",
+    "assignmentCreated": "Quart attribué",
+    "rosterPublished": "Planning publié",
+    "emptyDay": "Aucun quart planifié",
+    "emptyDayDescription": "Aucun quart n'est planifié pour ce jour.",
+    "statuses": {
+      "scheduled": "Planifié",
+      "inProgress": "En cours",
+      "completed": "Terminé"
+    },
+    "roster": {
+      "title": "Planificateur de planning",
+      "publish": "Publier le planning",
+      "employee": "Employé",
+      "assignShift": "Attribuer un quart",
+      "selectShift": "Modèle de quart",
+      "choosePlaceholder": "Choisir un quart…",
+      "assign": "Attribuer",
+      "conflictsWarning": "Certaines attributions ont des conflits d'horaire.",
+      "emptyTitle": "Aucune donnée de planning",
+      "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning."
     }
   },
   "configRequired": {

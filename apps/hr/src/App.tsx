@@ -52,6 +52,10 @@ const Training = React.lazy(() => import('./features/training/Training'));
 const OrgChart = React.lazy(() => import('./features/departments/OrgChart'));
 const SettingsScreen = React.lazy(() => import('./features/settings/Settings'));
 const Operations = React.lazy(() => import('./features/operations/Operations'));
+const LeaveScreen = React.lazy(() => import('./features/leave/Leave'));
+const LeaveRequestFormScreen = React.lazy(() => import('./features/leave/LeaveRequestForm'));
+const OvertimeScreen = React.lazy(() => import('./features/overtime/Overtime'));
+const RosterBuilder = React.lazy(() => import('./features/shifts/RosterBuilder'));
 
 function wrap(screen: React.ReactNode): React.JSX.Element {
   return <DefaultLayout>{screen}</DefaultLayout>;
@@ -102,6 +106,10 @@ const App = (): React.JSX.Element => {
               <Route path="/benefits" element={wrap(<Benefits />)} />
               <Route path="/training" element={wrap(<Training />)} />
               <Route path="/org-chart" element={wrap(<OrgChart />)} />
+              <Route path="/leave" element={wrap(<LeaveScreen />)} />
+              <Route path="/leave/new" element={wrap(<LeaveRequestFormScreen />)} />
+              <Route path="/overtime" element={wrap(<OvertimeScreen />)} />
+              <Route path="/shifts/roster" element={wrap(<RosterBuilder />)} />
               <Route path="/operations" element={wrap(<Operations />)} />
               <Route path="/settings" element={wrap(<SettingsScreen />)} />
             </Route>

@@ -1,0 +1,216 @@
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
+import {
+  useListLeaveTypes,
+  useCreateLeaveRequest,
+  useListLeaveBalances,
+} from '../../shared/hooks/queries/useLeave';
+import {
+  Card,
+  SectionHeader,
+  Button,
+  Label,
+  Input,
+  Select,
+  Textarea,
+  Skeleton,
+} from '../../shared/components/ui';
+
+const leaveFormSchema = z.object({
+  leaveTypeId: z.number().min(1),
+  startDate: z.string().min(1),
+  endDate: z.string().min(1),
+  reason: z.string().min(1),
+  notes: z.string().optional(),
+});
+
+const LeaveRequestForm = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
+  const { data: balances } = useListLeaveBalances();
+  const createRequest = useCreateLeaveRequest();
+
+  const [form, setForm] = useState({
+    leaveTypeId: 0,
+    startDate: '',
+    endDate: '',
+    reason: '',
+    notes: '',
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const selectedBalance = useMemo(() => {
+    if (!balances || form.leaveTypeId === 0) return null;
+    return balances.find((b) => b.leaveTypeId === form.leaveTypeId) ?? null;
+  }, [balances, form.leaveTypeId]);
+
+  const handleSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    const result = leaveFormSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        fieldErrors[field] = t('common.required');
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+    setErrors({});
+    createRequest.mutate(result.data, {
+      onSuccess: () => navigate('/leave'),
+    });
+  };
+
+  const update = (field: string, value: string | number): void => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  if (typesLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <Skeleton height={32} width={200} />
+        <Skeleton height={200} />
+      </div>
+    );
+  }
+
+  if (!leaveTypes || leaveTypes.length === 0) {
+    return (
+      <Card style={{ textAlign: 'center', padding: 32 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-text)', margin: '0 0 8px' }}>
+          {t('leave.noLeaveTypes')}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
+          {t('leave.configureLeaveTypes')}
+        </p>
+        <Button variant="primary" onClick={() => navigate('/settings')}>
+          {t('leave.goToSettings')}
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
+      <SectionHeader title={t('leave.form.title')} subtitle={t('leave.form.subtitle')} />
+
+      <form onSubmit={handleSubmit}>
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <Label>{t('leave.form.leaveType')}</Label>
+            <Select
+              value={form.leaveTypeId}
+              onChange={(e) => update('leaveTypeId', Number(e.target.value))}
+              style={errors.leaveTypeId ? { borderColor: '#ef4444' } : undefined}
+            >
+              <option value={0}>{t('leave.form.selectType')}</option>
+              {leaveTypes.map((lt) => (
+                <option key={lt.id} value={lt.id}>
+                  {lt.name}
+                </option>
+              ))}
+            </Select>
+            {errors.leaveTypeId && (
+              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                {errors.leaveTypeId}
+              </p>
+            )}
+          </div>
+
+          {selectedBalance && (
+            <div
+              style={{
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: 'var(--hr-hover)',
+                fontSize: 12,
+              }}
+            >
+              <span style={{ color: 'var(--hr-text-muted)' }}>
+                {t('leave.form.remainingBalance')}:{' '}
+              </span>
+              <span style={{ fontWeight: 700, color: 'var(--hr-text)' }}>
+                {selectedBalance.remaining} {t('leave.balances.daysLeft')}
+              </span>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <Label>{t('leave.form.startDate')}</Label>
+              <Input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => update('startDate', e.target.value)}
+                style={errors.startDate ? { borderColor: '#ef4444' } : undefined}
+              />
+              {errors.startDate && (
+                <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                  {errors.startDate}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label>{t('leave.form.endDate')}</Label>
+              <Input
+                type="date"
+                value={form.endDate}
+                onChange={(e) => update('endDate', e.target.value)}
+                min={form.startDate || undefined}
+                style={errors.endDate ? { borderColor: '#ef4444' } : undefined}
+              />
+              {errors.endDate && (
+                <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                  {errors.endDate}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label>{t('leave.form.reason')}</Label>
+            <Textarea
+              value={form.reason}
+              onChange={(e) => update('reason', e.target.value)}
+              placeholder={t('leave.form.reasonPlaceholder')}
+              style={{ minHeight: 60, ...(errors.reason ? { borderColor: '#ef4444' } : {}) }}
+            />
+            {errors.reason && (
+              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors.reason}</p>
+            )}
+          </div>
+
+          <div>
+            <Label>{t('leave.form.notes')}</Label>
+            <Textarea
+              value={form.notes}
+              onChange={(e) => update('notes', e.target.value)}
+              placeholder={t('leave.form.notesPlaceholder')}
+              style={{ minHeight: 60 }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Button type="button" variant="ghost" onClick={() => navigate('/leave')}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" variant="primary" disabled={createRequest.isPending}>
+              {createRequest.isPending ? t('common.loading') : t('leave.form.submit')}
+            </Button>
+          </div>
+        </Card>
+      </form>
+    </div>
+  );
+};
+
+export default LeaveRequestForm;

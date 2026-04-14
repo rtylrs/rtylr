@@ -48,7 +48,10 @@
     "operations": "Operations",
     "timeLogging": "Time Logging",
     "attendance": "Attendance",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "leave": "Leave",
+    "overtime": "Overtime",
+    "rosterBuilder": "Roster Builder"
   },
   "layout": {
     "sections": {
@@ -72,7 +75,8 @@
       "performanceReviews": "Performance Reviews",
       "newReview": "New Review",
       "employeeProfile": "Employee Profile",
-      "timesheetDetail": "Timesheet Detail"
+      "timesheetDetail": "Timesheet Detail",
+      "newLeaveRequest": "New Leave Request"
     },
     "hubLink": "Hub"
   },
@@ -387,6 +391,116 @@
       "description": "Scan a QR code at your workplace terminal to clock in or out.",
       "scanButton": "Scan QR Code",
       "cameraPlaceholder": "Camera permission required. This feature is coming in Phase 2."
+    }
+  },
+  "leave": {
+    "title": "Leave",
+    "subtitle": "Manage leave requests and balances",
+    "newRequest": "New Request",
+    "requestCreated": "Leave request submitted",
+    "requestUpdated": "Leave request updated",
+    "days": "days",
+    "emptyTitle": "No leave requests",
+    "emptyDescription": "Leave requests will appear here once submitted.",
+    "noLeaveTypes": "No leave types configured",
+    "configureLeaveTypes": "Set up leave policies before submitting requests.",
+    "goToSettings": "Go to Settings",
+    "tabs": {
+      "myLeave": "My Leave",
+      "teamCalendar": "Team Calendar"
+    },
+    "statuses": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "balances": {
+      "emptyTitle": "No leave balances",
+      "emptyDescription": "Your leave balances will appear once leave types are configured.",
+      "daysLeft": "days left",
+      "entitled": "Entitled",
+      "used": "Used",
+      "pending": "Pending"
+    },
+    "form": {
+      "title": "New Leave Request",
+      "subtitle": "Submit a leave request for approval",
+      "leaveType": "Leave Type",
+      "selectType": "Select a leave type",
+      "remainingBalance": "Remaining balance",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why are you requesting leave?",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes (optional)",
+      "submit": "Submit Request"
+    },
+    "calendar": {
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "department": "Department",
+      "location": "Location",
+      "emptyTitle": "No leave scheduled",
+      "emptyDescription": "Approved leave will appear on the calendar."
+    }
+  },
+  "overtime": {
+    "title": "Overtime",
+    "subtitle": "Track and manage overtime requests",
+    "newRequest": "New Pre-Approval",
+    "requestCreated": "Overtime request submitted",
+    "requestUpdated": "Overtime request updated",
+    "configUpdated": "Overtime configuration updated",
+    "planned": "planned",
+    "actual": "actual",
+    "emptyTitle": "No overtime requests",
+    "emptyDescription": "Overtime requests will appear here.",
+    "statuses": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "form": {
+      "title": "New Overtime Request",
+      "date": "Date",
+      "plannedMinutes": "Planned Extra Minutes",
+      "minutesPlaceholder": "e.g. 90",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why is overtime needed?",
+      "submit": "Submit Request"
+    }
+  },
+  "shifts": {
+    "title": "Shifts",
+    "weekOf": "Week of {{start}} – {{end}}",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "today",
+    "shiftsCount": "shift",
+    "shiftCreated": "Shift created",
+    "assignmentCreated": "Shift assigned",
+    "rosterPublished": "Roster published",
+    "emptyDay": "No shifts scheduled",
+    "emptyDayDescription": "No shifts are scheduled for this day.",
+    "statuses": {
+      "scheduled": "Scheduled",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "roster": {
+      "title": "Roster Builder",
+      "publish": "Publish Roster",
+      "employee": "Employee",
+      "assignShift": "Assign Shift",
+      "selectShift": "Shift Template",
+      "choosePlaceholder": "Choose a shift…",
+      "assign": "Assign",
+      "conflictsWarning": "Some assignments have scheduling conflicts.",
+      "emptyTitle": "No roster data",
+      "emptyDescription": "Add employees to this location to build the roster."
     }
   },
   "configRequired": {

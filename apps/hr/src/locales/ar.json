@@ -48,7 +48,10 @@
     "operations": "العمليات",
     "timeLogging": "تسجيل الوقت",
     "attendance": "الحضور",
-    "approvals": "الموافقات"
+    "approvals": "الموافقات",
+    "leave": "الإجازات",
+    "overtime": "العمل الإضافي",
+    "rosterBuilder": "جدول المناوبات"
   },
   "layout": {
     "sections": {
@@ -72,7 +75,8 @@
       "performanceReviews": "تقييمات الأداء",
       "newReview": "تقييم جديد",
       "employeeProfile": "ملف الموظف",
-      "timesheetDetail": "تفاصيل سجل الحضور"
+      "timesheetDetail": "تفاصيل سجل الحضور",
+      "newLeaveRequest": "طلب إجازة جديد"
     },
     "hubLink": "Hub"
   },
@@ -387,6 +391,116 @@
       "description": "امسح رمز QR في محطة عملك لتسجيل الحضور أو الانصراف.",
       "scanButton": "مسح رمز QR",
       "cameraPlaceholder": "يتطلب إذن الكاميرا. هذه الميزة قادمة في المرحلة الثانية."
+    }
+  },
+  "leave": {
+    "title": "الإجازات",
+    "subtitle": "إدارة طلبات الإجازات والأرصدة",
+    "newRequest": "طلب جديد",
+    "requestCreated": "تم تقديم طلب الإجازة",
+    "requestUpdated": "تم تحديث طلب الإجازة",
+    "days": "أيام",
+    "emptyTitle": "لا توجد طلبات إجازة",
+    "emptyDescription": "ستظهر طلبات الإجازة هنا بعد تقديمها.",
+    "noLeaveTypes": "لم يتم تهيئة أنواع الإجازات",
+    "configureLeaveTypes": "قم بإعداد سياسات الإجازات قبل تقديم الطلبات.",
+    "goToSettings": "الذهاب إلى الإعدادات",
+    "tabs": {
+      "myLeave": "إجازاتي",
+      "teamCalendar": "تقويم الفريق"
+    },
+    "statuses": {
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "balances": {
+      "emptyTitle": "لا توجد أرصدة إجازات",
+      "emptyDescription": "ستظهر أرصدة إجازاتك بعد تهيئة أنواع الإجازات.",
+      "daysLeft": "أيام متبقية",
+      "entitled": "المستحق",
+      "used": "المستخدم",
+      "pending": "قيد الانتظار"
+    },
+    "form": {
+      "title": "طلب إجازة جديد",
+      "subtitle": "تقديم طلب إجازة للموافقة",
+      "leaveType": "نوع الإجازة",
+      "selectType": "اختر نوع الإجازة",
+      "remainingBalance": "الرصيد المتبقي",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "reason": "السبب",
+      "reasonPlaceholder": "لماذا تطلب إجازة؟",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "ملاحظات إضافية (اختياري)",
+      "submit": "تقديم الطلب"
+    },
+    "calendar": {
+      "prevMonth": "الشهر السابق",
+      "nextMonth": "الشهر التالي",
+      "department": "القسم",
+      "location": "الموقع",
+      "emptyTitle": "لا توجد إجازات مجدولة",
+      "emptyDescription": "ستظهر الإجازات الموافق عليها في التقويم."
+    }
+  },
+  "overtime": {
+    "title": "العمل الإضافي",
+    "subtitle": "تتبع وإدارة طلبات العمل الإضافي",
+    "newRequest": "طلب موافقة مسبقة",
+    "requestCreated": "تم تقديم طلب العمل الإضافي",
+    "requestUpdated": "تم تحديث طلب العمل الإضافي",
+    "configUpdated": "تم تحديث تهيئة العمل الإضافي",
+    "planned": "مخطط",
+    "actual": "فعلي",
+    "emptyTitle": "لا توجد طلبات عمل إضافي",
+    "emptyDescription": "ستظهر طلبات العمل الإضافي هنا.",
+    "statuses": {
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "form": {
+      "title": "طلب عمل إضافي جديد",
+      "date": "التاريخ",
+      "plannedMinutes": "الدقائق الإضافية المخططة",
+      "minutesPlaceholder": "مثال: 90",
+      "reason": "السبب",
+      "reasonPlaceholder": "لماذا يُحتاج العمل الإضافي؟",
+      "submit": "تقديم الطلب"
+    }
+  },
+  "shifts": {
+    "title": "المناوبات",
+    "weekOf": "أسبوع {{start}} – {{end}}",
+    "prevWeek": "الأسبوع السابق",
+    "nextWeek": "الأسبوع التالي",
+    "today": "اليوم",
+    "shiftsCount": "مناوبة",
+    "shiftCreated": "تم إنشاء المناوبة",
+    "assignmentCreated": "تم تعيين المناوبة",
+    "rosterPublished": "تم نشر جدول المناوبات",
+    "emptyDay": "لا توجد مناوبات مجدولة",
+    "emptyDayDescription": "لا توجد مناوبات مجدولة لهذا اليوم.",
+    "statuses": {
+      "scheduled": "مجدولة",
+      "inProgress": "قيد التنفيذ",
+      "completed": "مكتملة"
+    },
+    "roster": {
+      "title": "بناء جدول المناوبات",
+      "publish": "نشر الجدول",
+      "employee": "الموظف",
+      "assignShift": "تعيين مناوبة",
+      "selectShift": "قالب المناوبة",
+      "choosePlaceholder": "اختر مناوبة…",
+      "assign": "تعيين",
+      "conflictsWarning": "بعض التعيينات بها تعارضات في الجدولة.",
+      "emptyTitle": "لا توجد بيانات جدول",
+      "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول."
     }
   },
   "configRequired": {

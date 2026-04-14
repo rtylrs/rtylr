@@ -55,3 +55,14 @@ export type { TrainingCourse, TrainingProgress } from './training';
 
 export { hrSettingsSchema } from './settings';
 export type { HrSettings } from './settings';
+
+export {
+  leaveTypeSchema,
+  leaveRequestSchema,
+  leaveBalanceSchema,
+  leaveCalendarEntrySchema,
+} from './leave';
+export type { LeaveType, LeaveRequest, LeaveBalance, LeaveCalendarEntry } from './leave';
+
+export { overtimeRequestSchema, overtimeConfigSchema } from './overtime';
+export type { OvertimeRequest, OvertimeConfig } from './overtime';

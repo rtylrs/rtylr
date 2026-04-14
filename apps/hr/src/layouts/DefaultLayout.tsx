@@ -34,6 +34,9 @@ import {
   PlayCircle,
   CalendarCheck,
   CheckSquare,
+  Palmtree,
+  ClockArrowUp,
+  CalendarRange,
 } from 'lucide-react';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
@@ -72,6 +75,7 @@ const navSections: NavSection[] = [
     items: [
       { i18nKey: 'nav.shifts', path: '/shifts', icon: Clock },
       { i18nKey: 'nav.schedule', path: '/schedule', icon: CalendarDays },
+      { i18nKey: 'nav.rosterBuilder', path: '/shifts/roster', icon: CalendarRange },
       {
         i18nKey: 'nav.timeLogging',
         path: '/time',
@@ -91,6 +95,8 @@ const navSections: NavSection[] = [
         icon: CheckSquare,
       },
       { i18nKey: 'nav.timeOff', path: '/time-off', icon: Calendar },
+      { i18nKey: 'nav.leave', path: '/leave', icon: Palmtree },
+      { i18nKey: 'nav.overtime', path: '/overtime', icon: ClockArrowUp },
       { i18nKey: 'nav.calendar', path: '/calendar', icon: Calendar },
     ],
   },
@@ -141,6 +147,10 @@ const routeLabelKeys: Record<string, string> = {
   '/org-chart': 'nav.orgChart',
   '/operations': 'nav.operations',
   '/settings': 'nav.settings',
+  '/leave': 'nav.leave',
+  '/leave/new': 'layout.routes.newLeaveRequest',
+  '/overtime': 'nav.overtime',
+  '/shifts/roster': 'nav.rosterBuilder',
 };
 
 /* ── Theme helpers ── */
