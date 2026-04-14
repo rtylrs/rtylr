@@ -50,10 +50,10 @@ function groupByDate(entries: TimeEntryPayload[]): Map<string, TimeEntryPayload[
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#6b7280',
-  submitted: '#f59e0b',
-  approved: '#10b981',
-  rejected: '#ef4444',
+  draft: 'var(--hr-status-draft)',
+  submitted: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
 };
 
 const TimeLogging = (): React.JSX.Element => {
@@ -201,12 +201,12 @@ const TimeLogging = (): React.JSX.Element => {
                             </span>
                           )}
                           {entry.isBillable && (
-                            <Pill color="#10b981" style={{ fontSize: 9 }}>
+                            <Pill color="var(--hr-status-approved)" style={{ fontSize: 9 }}>
                               {t('timeLogging.billable')}
                             </Pill>
                           )}
                           <Pill
-                            color={STATUS_COLORS[entry.status] ?? '#6b7280'}
+                            color={STATUS_COLORS[entry.status] ?? 'var(--hr-status-draft)'}
                             style={{ fontSize: 9 }}
                           >
                             {t(`timeLogging.statuses.${entry.status}`)}
@@ -270,7 +270,7 @@ const TimeLogging = (): React.JSX.Element => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(139,92,246,0.35)',
+          boxShadow: '0 4px 12px var(--accent-border)',
           zIndex: 40,
         }}
         aria-label={t('timeLogging.addEntry')}

@@ -135,7 +135,9 @@ const TimeEntryForm = ({
                 style={{ fontSize: 16 }}
               />
               {errors.endTime && (
-                <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{errors.endTime}</p>
+                <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                  {errors.endTime}
+                </p>
               )}
             </div>
           </div>
@@ -191,7 +193,9 @@ const TimeEntryForm = ({
 
         {/* Validation errors */}
         {errors.durationMinutes && (
-          <p style={{ color: '#ef4444', fontSize: 12 }}>{t('timeLogging.form.durationRequired')}</p>
+          <p style={{ color: 'var(--hr-error)', fontSize: 12 }}>
+            {t('timeLogging.form.durationRequired')}
+          </p>
         )}
 
         {/* Actions */}

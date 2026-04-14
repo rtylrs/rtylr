@@ -23,11 +23,11 @@ function formatDuration(minutes: number): string {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#6b7280',
-  submitted: '#f59e0b',
-  approved: '#10b981',
-  rejected: '#ef4444',
-  locked: '#6366f1',
+  draft: 'var(--hr-status-draft)',
+  submitted: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
+  locked: 'var(--hr-status-locked)',
 };
 
 const STATUS_TABS = ['all', 'draft', 'submitted', 'approved', 'rejected'] as const;
@@ -127,7 +127,7 @@ const TimesheetsList = (): React.JSX.Element => {
                     </span>
                   </div>
                 </div>
-                <Pill color={STATUS_COLORS[ts.status] ?? '#6b7280'}>
+                <Pill color={STATUS_COLORS[ts.status] ?? 'var(--hr-status-draft)'}>
                   {t(`timesheets.statuses.${ts.status}`)}
                 </Pill>
                 <ChevronRight size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />

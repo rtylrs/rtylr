@@ -90,7 +90,7 @@ const ActiveTimer = ({ onStop }: ActiveTimerProps): React.JSX.Element => {
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#ef4444',
+            background: 'var(--hr-error)',
             animation: 'hr-shimmer 1.5s ease-in-out infinite',
             flexShrink: 0,
           }}

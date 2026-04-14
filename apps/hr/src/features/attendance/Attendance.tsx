@@ -30,9 +30,9 @@ function formatDuration(minutes: number): string {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  present: '#10b981',
-  absent: '#ef4444',
-  partial: '#f59e0b',
+  present: 'var(--hr-status-approved)',
+  absent: 'var(--hr-status-rejected)',
+  partial: 'var(--hr-status-submitted)',
 };
 
 const METHOD_LABELS: Record<string, string> = {
@@ -132,7 +132,7 @@ const Attendance = (): React.JSX.Element => {
                   <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
                     {formatTime(record.clockInAt)}
                     {record.isLate && (
-                      <Pill color="#ef4444" style={{ marginLeft: 6, fontSize: 9 }}>
+                      <Pill color="var(--hr-error)" style={{ marginLeft: 6, fontSize: 9 }}>
                         {t('attendance.late', { minutes: record.lateMinutes })}
                       </Pill>
                     )}
@@ -153,7 +153,7 @@ const Attendance = (): React.JSX.Element => {
                     {METHOD_LABELS[record.clockInMethod] ?? record.clockInMethod}
                   </td>
                   <td style={{ padding: '12px' }}>
-                    <Pill color={STATUS_COLORS[record.status] ?? '#6b7280'}>
+                    <Pill color={STATUS_COLORS[record.status] ?? 'var(--hr-status-draft)'}>
                       {t(`attendance.statuses.${record.status}`)}
                     </Pill>
                   </td>

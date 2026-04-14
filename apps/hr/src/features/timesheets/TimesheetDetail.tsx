@@ -43,11 +43,11 @@ function groupByDay(entries: TimeEntryPayload[]): Record<string, number> {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#6b7280',
-  submitted: '#f59e0b',
-  approved: '#10b981',
-  rejected: '#ef4444',
-  locked: '#6366f1',
+  draft: 'var(--hr-status-draft)',
+  submitted: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
+  locked: 'var(--hr-status-locked)',
 };
 
 const TimesheetDetail = (): React.JSX.Element => {
@@ -103,7 +103,7 @@ const TimesheetDetail = (): React.JSX.Element => {
         title={periodLabel}
         right={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Pill color={STATUS_COLORS[timesheet.status] ?? '#6b7280'}>
+            <Pill color={STATUS_COLORS[timesheet.status] ?? 'var(--hr-status-draft)'}>
               {t(`timesheets.statuses.${timesheet.status}`)}
             </Pill>
             {timesheet.status === 'draft' && (
@@ -128,11 +128,14 @@ const TimesheetDetail = (): React.JSX.Element => {
             alignItems: 'flex-start',
             gap: 10,
             padding: '12px 14px',
-            border: '1px solid rgba(239,68,68,0.3)',
-            background: 'rgba(239,68,68,0.06)',
+            border: '1px solid color-mix(in srgb, var(--hr-error) 30%, transparent)',
+            background: 'color-mix(in srgb, var(--hr-error) 6%, transparent)',
           }}
         >
-          <AlertCircle size={16} style={{ color: '#ef4444', flexShrink: 0, marginTop: 1 }} />
+          <AlertCircle
+            size={16}
+            style={{ color: 'var(--hr-error)', flexShrink: 0, marginTop: 1 }}
+          />
           <div style={{ fontSize: 12, color: 'var(--hr-text)' }}>
             <span style={{ fontWeight: 600 }}>{t('timesheets.rejectionReason')}:</span>{' '}
             {t('timesheets.noReasonProvided')}

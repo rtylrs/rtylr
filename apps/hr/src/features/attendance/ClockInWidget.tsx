@@ -48,7 +48,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
           {t('attendance.clockWidget.title')}
         </span>
-        <Pill color={isClockedIn ? '#10b981' : '#6b7280'}>
+        <Pill color={isClockedIn ? 'var(--hr-status-active)' : 'var(--hr-status-inactive)'}>
           {isClockedIn
             ? t('attendance.clockWidget.clockedIn')
             : t('attendance.clockWidget.clockedOut')}
@@ -60,7 +60,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
           <div style={{ fontSize: 12, color: 'var(--hr-text-muted)' }}>
             {t('attendance.clockWidget.since', { time: formatTime(activeRecord.clockInAt) })}
             {activeRecord.isLate && (
-              <Pill color="#ef4444" style={{ marginLeft: 8, fontSize: 9 }}>
+              <Pill color="var(--hr-error)" style={{ marginLeft: 8, fontSize: 9 }}>
                 {t('attendance.late', { minutes: activeRecord.lateMinutes })}
               </Pill>
             )}

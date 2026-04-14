@@ -143,7 +143,9 @@ const TimesheetApprovals = (): React.JSX.Element => {
                       </span>
                     </div>
                   </div>
-                  <Pill color="#f59e0b">{t('timesheets.statuses.submitted')}</Pill>
+                  <Pill color="var(--hr-status-submitted)">
+                    {t('timesheets.statuses.submitted')}
+                  </Pill>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <Button
                       variant="primary"
