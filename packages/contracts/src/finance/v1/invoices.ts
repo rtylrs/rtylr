@@ -5,114 +5,131 @@
 // source: finance/v1/invoices.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
-export interface Invoice {
-  id: number;
-  number: string;
-  customerId: number;
-  customerName: string;
-  /** draft, sent, paid, overdue, cancelled */
-  status: string;
-  lines: InvoiceLine[];
-  subtotal: number;
-  tax: number;
-  discount: number;
-  total: number;
-  amountPaid: number;
-  balanceDue: number;
-  currency: string;
-  issueDate: string;
-  dueDate: string;
-  paidAt: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface InvoiceLine {
+export interface InvoiceItem {
   description: string;
   quantity: number;
+  unit: string;
   unitPrice: number;
   taxRate: number;
+  discountPct: number;
+  sortOrder: number;
   total: number;
+}
+
+export interface InvoiceSummary {
+  id: number;
+  invoiceNumber: string;
+  clientName: string;
+  status: string;
+  issueDate: string;
+  dueDate: string;
+  paidDate: string;
+  currency: string;
+  total: number;
+  amountPaid: number;
+  amountDue: number;
+  createdAt: string;
+}
+
+export interface InvoiceDetail {
+  id: number;
+  ownerId: number;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  clientAddress: string;
+  clientTaxId: string;
+  status: string;
+  issueDate: string;
+  dueDate: string;
+  paidDate: string;
+  currency: string;
+  subtotal: number;
+  discountType: string;
+  discountValue: number;
+  discountAmount: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  amountPaid: number;
+  amountDue: number;
+  notes: string;
+  terms: string;
+  createdAt: string;
+  updatedAt: string;
+  items: InvoiceItem[];
 }
 
 export interface ListInvoicesRequest {
-  pagination: PaginationRequest | undefined;
   status: string;
-  customerId: number;
-  fromDate: string;
-  toDate: string;
+  search: string;
+  dateFrom: string;
+  dateTo: string;
 }
 
 export interface ListInvoicesResponse {
-  invoices: Invoice[];
-  pagination: PaginationResponse | undefined;
+  invoices: InvoiceSummary[];
 }
 
 export interface GetInvoiceRequest {
   id: number;
 }
 
+export interface Payment {
+  id: number;
+  amount: number;
+  currency: string;
+  paymentDate: string;
+  method: string;
+  reference: string;
+  notes: string;
+}
+
 export interface GetInvoiceResponse {
-  invoice: Invoice | undefined;
+  invoice: InvoiceDetail | undefined;
+  payments: Payment[];
 }
 
 export interface CreateInvoiceRequest {
-  customerId: number;
-  lines: InvoiceLine[];
+  clientName: string;
+  clientEmail: string;
+  clientAddress: string;
+  clientTaxId: string;
+  issueDate: string;
   dueDate: string;
-  discount: number;
-  notes: string;
   currency: string;
+  discountType: string;
+  discountValue: number;
+  taxRate: number;
+  notes: string;
+  terms: string;
+  items: InvoiceItem[];
 }
 
 export interface CreateInvoiceResponse {
-  invoice: Invoice | undefined;
+  invoice: InvoiceDetail | undefined;
 }
 
 export interface UpdateInvoiceRequest {
   id: number;
-  customerId: number;
-  lines: InvoiceLine[];
+  clientName: string;
+  clientEmail: string;
+  clientAddress: string;
+  clientTaxId: string;
+  issueDate: string;
   dueDate: string;
-  discount: number;
+  currency: string;
+  discountType: string;
+  discountValue: number;
+  taxRate: number;
   notes: string;
+  terms: string;
+  items: InvoiceItem[];
 }
 
 export interface UpdateInvoiceResponse {
-  invoice: Invoice | undefined;
-}
-
-export interface DeleteInvoiceRequest {
-  id: number;
-}
-
-export interface DeleteInvoiceResponse {
-  success: boolean;
-}
-
-export interface SendInvoiceRequest {
-  id: number;
-  recipientEmail: string;
-}
-
-export interface SendInvoiceResponse {
-  success: boolean;
-}
-
-export interface RecordPaymentRequest {
-  invoiceId: number;
-  amount: number;
-  /** cash, card, bank_transfer, check */
-  method: string;
-  reference: string;
-  paidAt: string;
-}
-
-export interface RecordPaymentResponse {
-  invoice: Invoice | undefined;
+  invoice: InvoiceDetail | undefined;
 }
 
 export interface UpdateInvoiceStatusRequest {
@@ -121,5 +138,39 @@ export interface UpdateInvoiceStatusRequest {
 }
 
 export interface UpdateInvoiceStatusResponse {
-  invoice: Invoice | undefined;
+  message: string;
+}
+
+export interface DeleteInvoiceRequest {
+  id: number;
+}
+
+export interface DeleteInvoiceResponse {
+  message: string;
+}
+
+export interface RecordPaymentRequest {
+  invoiceId: number;
+  amount: number;
+  currency: string;
+  paymentDate: string;
+  method: string;
+  reference: string;
+  notes: string;
+}
+
+export interface RecordPaymentResponsePayload {
+  id: number;
+  invoiceId: number;
+  amount: number;
+  currency: string;
+  paymentDate: string;
+  method: string;
+  reference: string;
+  notes: string;
+}
+
+export interface RecordPaymentResponse {
+  payment: RecordPaymentResponsePayload | undefined;
+  message: string;
 }

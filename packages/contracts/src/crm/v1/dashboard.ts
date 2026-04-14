@@ -6,27 +6,21 @@
 
 /* eslint-disable */
 
-export interface DashboardStats {
-  totalCustomers: number;
-  customersChange: number;
-  activeCustomers: number;
-  newCustomersThisMonth: number;
-  avgLifetimeValue: number;
-  totalLoyaltyPoints: number;
-  activeCampaigns: number;
-  totalSegments: number;
-  topCustomers: TopCustomer[];
-}
-
 export interface TopCustomer {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   totalSpent: number;
-  visitCount: number;
+  loyaltyPoints: number;
+  loyaltyTier: string;
 }
 
-export interface GetDashboardStatsRequest {}
+export interface GetDashboardRequest {}
 
-export interface GetDashboardStatsResponse {
-  stats: DashboardStats | undefined;
+export interface GetDashboardResponse {
+  totalCustomers: number;
+  newThisMonth: number;
+  activeLoyaltyMembers: number;
+  topCustomers: TopCustomer[];
 }

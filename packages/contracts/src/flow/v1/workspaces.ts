@@ -5,52 +5,55 @@
 // source: flow/v1/workspaces.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Workspace {
   id: number;
+  ownerId: number;
   name: string;
   description: string;
+  icon: string;
   color: string;
-  projectCount: number;
-  memberCount: number;
-  members: WorkspaceMember[];
+  isDefault: boolean;
+  createdBy: number;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface WorkspaceMember {
-  userId: number;
-  name: string;
-  /** owner, member */
-  role: string;
-  avatarUrl: string;
-}
-
-export interface ListWorkspacesRequest {
-  pagination: PaginationRequest | undefined;
-}
+export interface ListWorkspacesRequest {}
 
 export interface ListWorkspacesResponse {
   workspaces: Workspace[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetWorkspaceRequest {
-  id: number;
-}
-
-export interface GetWorkspaceResponse {
-  workspace: Workspace | undefined;
 }
 
 export interface CreateWorkspaceRequest {
   name: string;
   description: string;
+  icon: string;
   color: string;
 }
 
 export interface CreateWorkspaceResponse {
   workspace: Workspace | undefined;
+}
+
+export interface UpdateWorkspaceRequest {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface UpdateWorkspaceResponse {
+  message: string;
+}
+
+export interface DeleteWorkspaceRequest {
+  id: number;
+}
+
+export interface DeleteWorkspaceResponse {
+  message: string;
 }
 
 export interface AddWorkspaceMemberRequest {
@@ -60,5 +63,14 @@ export interface AddWorkspaceMemberRequest {
 }
 
 export interface AddWorkspaceMemberResponse {
-  success: boolean;
+  message: string;
+}
+
+export interface RemoveWorkspaceMemberRequest {
+  workspaceId: number;
+  userId: number;
+}
+
+export interface RemoveWorkspaceMemberResponse {
+  message: string;
 }

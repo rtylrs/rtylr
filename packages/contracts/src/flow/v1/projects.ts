@@ -5,49 +5,39 @@
 // source: flow/v1/projects.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Project {
   id: number;
+  workspaceId: number;
+  ownerId: number;
   name: string;
   description: string;
-  /** active, archived, completed */
-  status: string;
+  icon: string;
   color: string;
-  workspaceId: number;
-  workspaceName: string;
-  taskCount: number;
-  completedTasks: number;
-  progress: number;
+  status: string;
+  startDate: string;
+  dueDate: string;
+  createdBy: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ListProjectsRequest {
-  pagination: PaginationRequest | undefined;
   workspaceId: number;
-  status: string;
-  search: string;
 }
 
 export interface ListProjectsResponse {
   projects: Project[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetProjectRequest {
-  id: number;
-}
-
-export interface GetProjectResponse {
-  project: Project | undefined;
 }
 
 export interface CreateProjectRequest {
+  workspaceId: number;
   name: string;
   description: string;
-  workspaceId: number;
+  icon: string;
   color: string;
+  startDate: string;
+  dueDate: string;
 }
 
 export interface CreateProjectResponse {
@@ -58,12 +48,15 @@ export interface UpdateProjectRequest {
   id: number;
   name: string;
   description: string;
-  status: string;
+  icon: string;
   color: string;
+  status: string;
+  startDate: string;
+  dueDate: string;
 }
 
 export interface UpdateProjectResponse {
-  project: Project | undefined;
+  message: string;
 }
 
 export interface DeleteProjectRequest {
@@ -71,5 +64,5 @@ export interface DeleteProjectRequest {
 }
 
 export interface DeleteProjectResponse {
-  success: boolean;
+  message: string;
 }

@@ -5,15 +5,23 @@
 // source: crm/v1/loyalty.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface LoyaltyConfig {
-  enabled: boolean;
-  pointsPerDollar: number;
-  /** points per $1 discount */
-  redemptionRate: number;
-  minRedeemPoints: number;
-  autoEnroll: boolean;
+  id: number;
+  ownerId: number;
+  isEnabled: boolean;
+  pointsPerCurrencyUnit: number;
+  currencyPerPoint: number;
+  bronzeMin: number;
+  silverMin: number;
+  goldMin: number;
+  platinumMin: number;
+  bronzeDiscountPct: number;
+  silverDiscountPct: number;
+  goldDiscountPct: number;
+  platinumDiscountPct: number;
+  pointsExpiryDays: number;
+  updatedAt: string;
 }
 
 export interface GetLoyaltyConfigRequest {}
@@ -23,51 +31,115 @@ export interface GetLoyaltyConfigResponse {
 }
 
 export interface UpdateLoyaltyConfigRequest {
-  config: LoyaltyConfig | undefined;
+  isEnabled: boolean;
+  pointsPerCurrencyUnit: number;
+  currencyPerPoint: number;
+  bronzeMin: number;
+  silverMin: number;
+  goldMin: number;
+  platinumMin: number;
+  bronzeDiscountPct: number;
+  silverDiscountPct: number;
+  goldDiscountPct: number;
+  platinumDiscountPct: number;
+  pointsExpiryDays: number;
 }
 
 export interface UpdateLoyaltyConfigResponse {
-  config: LoyaltyConfig | undefined;
+  message: string;
 }
 
 export interface LoyaltyTransaction {
   id: number;
+  ownerId: number;
   customerId: number;
-  /** earn, redeem, adjust */
   type: string;
   points: number;
+  balanceBefore: number;
   balanceAfter: number;
   description: string;
+  referenceId?: number | undefined;
+  referenceType: string;
   createdAt: string;
 }
 
 export interface ListLoyaltyTransactionsRequest {
   customerId: number;
-  pagination: PaginationRequest | undefined;
+  page: number;
+  pageSize: number;
 }
 
 export interface ListLoyaltyTransactionsResponse {
   transactions: LoyaltyTransaction[];
-  pagination: PaginationResponse | undefined;
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface AwardPointsRequest {
   customerId: number;
   points: number;
   description: string;
+  referenceId?: number | undefined;
+  referenceType: string;
 }
 
 export interface AwardPointsResponse {
-  newBalance: number;
+  message: string;
 }
 
 export interface RedeemPointsRequest {
   customerId: number;
   points: number;
   description: string;
+  referenceId?: number | undefined;
+  referenceType: string;
 }
 
 export interface RedeemPointsResponse {
-  newBalance: number;
-  discountAmount: number;
+  message: string;
+}
+
+export interface LoyaltyTier {
+  id: number;
+  ownerId: number;
+  name: string;
+  minPoints: number;
+  discountPct: number;
+  perks: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListLoyaltyTiersRequest {}
+
+export interface ListLoyaltyTiersResponse {
+  tiers: LoyaltyTier[];
+}
+
+export interface CreateLoyaltyTierRequest {
+  name: string;
+  minPoints: number;
+  discountPct: number;
+  perks: string;
+  sortOrder: number;
+}
+
+export interface CreateLoyaltyTierResponse {
+  tierId: number;
+  message: string;
+}
+
+export interface UpdateLoyaltyTierRequest {
+  id: number;
+  name: string;
+  minPoints: number;
+  discountPct: number;
+  perks: string;
+  sortOrder: number;
+}
+
+export interface UpdateLoyaltyTierResponse {
+  message: string;
 }

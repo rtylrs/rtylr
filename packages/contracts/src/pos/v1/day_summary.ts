@@ -6,47 +6,20 @@
 
 /* eslint-disable */
 
-export interface PaymentBreakdown {
-  method: string;
-  amount: number;
-  count: number;
-}
-
-export interface TopSellingItem {
-  menuItemId: number;
-  name: string;
-  quantitySold: number;
-  revenue: number;
-}
-
-export interface HourlySales {
-  hour: number;
-  amount: number;
-  orderCount: number;
-}
-
-export interface DaySummary {
+export interface DaySummaryRequest {
   date: string;
+}
+
+export interface DaySummaryResponse {
   totalSales: number;
-  totalRefunds: number;
-  totalVoids: number;
-  totalDiscounts: number;
-  netSales: number;
   totalTax: number;
   totalTips: number;
+  totalRefunds: number;
   totalOrders: number;
-  totalCustomers: number;
-  avgOrderValue: number;
-  paymentBreakdown: PaymentBreakdown[];
-  topItems: TopSellingItem[];
-  hourlySales: HourlySales[];
+  paymentBreakdown: { [key: string]: number };
 }
 
-export interface GetDaySummaryRequest {
-  /** YYYY-MM-DD, defaults to today */
-  date: string;
-}
-
-export interface GetDaySummaryResponse {
-  summary: DaySummary | undefined;
+export interface DaySummaryResponse_PaymentBreakdownEntry {
+  key: string;
+  value: number;
 }

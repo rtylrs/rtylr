@@ -8,13 +8,11 @@
 
 export interface LoyaltyConfig {
   id: number;
-  locationId: number;
+  businessId: number;
   isEnabled: boolean;
   pointsPerDollar: number;
-  /** points per dollar of discount */
   redemptionRate: number;
   minRedeemPoints: number;
-  programName: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,33 +28,51 @@ export interface UpdateLoyaltyConfigRequest {
   pointsPerDollar: number;
   redemptionRate: number;
   minRedeemPoints: number;
-  programName: string;
 }
 
 export interface UpdateLoyaltyConfigResponse {
-  config: LoyaltyConfig | undefined;
+  message: string;
 }
 
-export interface EarnLoyaltyPointsRequest {
+export interface LoyaltyTransaction {
+  id: number;
+  businessId: number;
   customerId: number;
   orderId: number;
-  orderTotal: number;
+  type: string;
+  points: number;
+  balanceAfter: number;
+  note: string;
+  createdAt: string;
 }
 
-export interface EarnLoyaltyPointsResponse {
-  pointsEarned: number;
-  totalPoints: number;
+export interface ListLoyaltyTransactionsRequest {
+  customerId: number;
 }
 
-export interface RedeemLoyaltyPointsRequest {
+export interface ListLoyaltyTransactionsResponse {
+  transactions: LoyaltyTransaction[];
+}
+
+export interface EarnPointsRequest {
+  customerId: number;
+  orderId: number;
+  points: number;
+}
+
+export interface EarnPointsResponse {
+  transactionId: number;
+  message: string;
+}
+
+export interface RedeemPointsRequest {
   customerId: number;
   points: number;
-  orderId: number;
 }
 
-export interface RedeemLoyaltyPointsResponse {
-  discountAmount: number;
-  remainingPoints: number;
+export interface RedeemPointsResponse {
+  transactionId: number;
+  message: string;
 }
 
 export interface GetLoyaltyBalanceRequest {
@@ -64,6 +80,6 @@ export interface GetLoyaltyBalanceRequest {
 }
 
 export interface GetLoyaltyBalanceResponse {
-  points: number;
-  equivalentValue: number;
+  customerId: number;
+  balance: number;
 }

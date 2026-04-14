@@ -8,61 +8,45 @@
 
 export interface Table {
   id: number;
-  locationId: number;
-  floorId: number;
-  name: string;
-  capacity: number;
-  /** available, occupied, reserved, dirty */
+  ownerId: number;
+  locationId?: number | undefined;
+  label: string;
+  seats: number;
   status: string;
-  currentOrderId: number;
-  positionX: number;
-  positionY: number;
-  /** square, round, rectangle */
-  shape: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ListTablesRequest {
-  floorId: number;
-  status: string;
-}
+export interface ListTablesRequest {}
 
 export interface ListTablesResponse {
   tables: Table[];
 }
 
 export interface CreateTableRequest {
-  floorId: number;
-  name: string;
-  capacity: number;
-  positionX: number;
-  positionY: number;
-  shape: string;
+  locationId?: number | undefined;
+  label: string;
+  seats: number;
 }
 
 export interface CreateTableResponse {
-  table: Table | undefined;
+  tableId: number;
+  message: string;
 }
 
 export interface UpdateTableRequest {
-  id: number;
-  name: string;
-  capacity: number;
-  positionX: number;
-  positionY: number;
-  shape: string;
-}
-
-export interface UpdateTableResponse {
-  table: Table | undefined;
-}
-
-export interface UpdateTableStatusRequest {
-  id: number;
+  locationId?: number | undefined;
+  label: string;
+  seats: number;
   status: string;
 }
 
-export interface UpdateTableStatusResponse {
-  table: Table | undefined;
+export interface UpdateTableResponse {
+  message: string;
+}
+
+export interface DeleteTableRequest {}
+
+export interface DeleteTableResponse {
+  message: string;
 }

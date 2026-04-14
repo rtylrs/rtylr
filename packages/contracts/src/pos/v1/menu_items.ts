@@ -5,62 +5,32 @@
 // source: pos/v1/menu_items.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface MenuItem {
   id: number;
-  locationId: number;
+  ownerId: number;
   categoryId: number;
   name: string;
-  description: string;
-  price: number;
   sku: string;
-  imageUrl: string;
+  salePrice: number;
   isActive: boolean;
-  trackStock: boolean;
-  stockQuantity: number;
-  sortOrder: number;
-  color: string;
-  modifierGroupIds: number[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface MenuCategory {
-  id: number;
-  name: string;
-  color: string;
-  sortOrder: number;
-  itemCount: number;
-}
-
-export interface ListMenuItemsRequest {
-  pagination: PaginationRequest | undefined;
-  categoryId: number;
-  activeOnly: boolean;
-  search: string;
-}
+export interface ListMenuItemsRequest {}
 
 export interface ListMenuItemsResponse {
   items: MenuItem[];
-  categories: MenuCategory[];
-  pagination: PaginationResponse | undefined;
 }
 
-export interface UpdateMenuItemRequest {
-  id: number;
+export interface CreateMenuItemRequest {
   name: string;
-  description: string;
-  price: number;
-  categoryId: number;
-  isActive: boolean;
-  trackStock: boolean;
-  imageUrl: string;
-  color: string;
-  sortOrder: number;
-  modifierGroupIds: number[];
+  sku: string;
+  salePrice: number;
 }
 
-export interface UpdateMenuItemResponse {
-  item: MenuItem | undefined;
+export interface CreateMenuItemResponse {
+  itemId: number;
+  message: string;
 }

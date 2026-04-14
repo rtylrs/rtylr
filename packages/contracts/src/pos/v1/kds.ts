@@ -6,48 +6,37 @@
 
 /* eslint-disable */
 
-export interface KDSOrderItem {
+export interface KDSItem {
   id: number;
-  orderItemId: number;
+  orderId: number;
   name: string;
   quantity: number;
   notes: string;
-  modifiers: string[];
-  /** pending, preparing, ready */
   status: string;
-  startedAt: string;
-  completedAt: string;
 }
 
 export interface KDSOrder {
   id: number;
-  orderId: number;
   orderNumber: string;
-  orderType: string;
-  tableName: string;
-  serverName: string;
-  items: KDSOrderItem[];
-  /** pending, in_progress, completed */
+  type: string;
   status: string;
-  elapsedSeconds: number;
+  tableId: number;
+  customerName: string;
+  kitchenNotes: string;
   createdAt: string;
+  items: KDSItem[];
 }
 
-export interface ListKDSOrdersRequest {
-  status: string;
-  station: string;
-}
+export interface ListKDSOrdersRequest {}
 
 export interface ListKDSOrdersResponse {
   orders: KDSOrder[];
 }
 
 export interface UpdateKDSItemStatusRequest {
-  orderId: number;
-  itemId: number;
   status: string;
 }
 
 export interface UpdateKDSItemStatusResponse {
-  order: KDSOrder | undefined;
+  message: string;
 }

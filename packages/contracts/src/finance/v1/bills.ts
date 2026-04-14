@@ -5,58 +5,50 @@
 // source: finance/v1/bills.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Bill {
   id: number;
-  number: string;
-  vendor: string;
-  /** draft, pending, paid, overdue */
-  status: string;
-  lines: BillLine[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  issueDate: string;
-  dueDate: string;
-  paidAt: string;
-  notes: string;
-  createdAt: string;
-}
-
-export interface BillLine {
-  description: string;
+  ownerId: number;
+  supplierId: number;
   amount: number;
-  accountId: number;
+  currency: string;
+  dueDate: string;
+  status: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface ListBillsRequest {
-  pagination: PaginationRequest | undefined;
-  status: string;
-  fromDate: string;
-  toDate: string;
-}
+export interface ListBillsRequest {}
 
 export interface ListBillsResponse {
   bills: Bill[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetBillRequest {
-  id: number;
-}
-
-export interface GetBillResponse {
-  bill: Bill | undefined;
 }
 
 export interface CreateBillRequest {
-  vendor: string;
-  lines: BillLine[];
+  supplierId: number;
+  amount: number;
+  currency: string;
   dueDate: string;
-  notes: string;
+  status: string;
+  description: string;
 }
 
 export interface CreateBillResponse {
-  bill: Bill | undefined;
+  id: number;
+  message: string;
+}
+
+export interface UpdateBillRequest {
+  id: number;
+  supplierId: number;
+  amount: number;
+  currency: string;
+  dueDate: string;
+  status: string;
+  description: string;
+}
+
+export interface UpdateBillResponse {
+  message: string;
 }

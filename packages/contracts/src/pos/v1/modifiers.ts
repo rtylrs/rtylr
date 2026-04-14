@@ -6,69 +6,48 @@
 
 /* eslint-disable */
 
-export interface ModifierGroup {
-  id: number;
-  locationId: number;
-  name: string;
-  isRequired: boolean;
-  minSelect: number;
-  maxSelect: number;
-  modifiers: Modifier[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface Modifier {
   id: number;
-  groupId: number;
+  ownerId: number;
   name: string;
-  price: number;
-  isDefault: boolean;
-  sortOrder: number;
+  priceDelta: number;
+  groupName: string;
+  isRequired: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListModifiersRequest {}
 
 export interface ListModifiersResponse {
-  groups: ModifierGroup[];
+  modifiers: Modifier[];
 }
 
-export interface CreateModifierGroupRequest {
+export interface CreateModifierRequest {
   name: string;
+  priceDelta: number;
+  groupName: string;
   isRequired: boolean;
-  minSelect: number;
-  maxSelect: number;
-  modifiers: CreateModifierInput[];
 }
 
-export interface CreateModifierInput {
+export interface CreateModifierResponse {
+  modifierId: number;
+  message: string;
+}
+
+export interface UpdateModifierRequest {
   name: string;
-  price: number;
-  isDefault: boolean;
-  sortOrder: number;
-}
-
-export interface CreateModifierGroupResponse {
-  group: ModifierGroup | undefined;
-}
-
-export interface UpdateModifierGroupRequest {
-  id: number;
-  name: string;
+  priceDelta: number;
+  groupName: string;
   isRequired: boolean;
-  minSelect: number;
-  maxSelect: number;
-  modifiers: CreateModifierInput[];
 }
 
-export interface UpdateModifierGroupResponse {
-  group: ModifierGroup | undefined;
+export interface UpdateModifierResponse {
+  message: string;
 }
 
-export interface DeleteModifierGroupRequest {
-  id: number;
-}
+export interface DeleteModifierRequest {}
 
-export interface DeleteModifierGroupResponse {
-  success: boolean;
+export interface DeleteModifierResponse {
+  message: string;
 }
