@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   useGetRoster,
   useListShifts,
@@ -40,7 +41,7 @@ function formatWeekLabel(weekStart: string): string {
   return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
-const VISIBLE_ROWS = 20;
+const ROW_HEIGHT = 56;
 
 interface AssignModalState {
   open: boolean;
@@ -64,29 +65,16 @@ const RosterBuilderInner = (): React.JSX.Element => {
   });
   const [selectedShiftId, setSelectedShiftId] = useState<number>(0);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleStart, setVisibleStart] = useState(0);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const entries: RosterEntry[] = roster ?? [];
-  const needsVirtualisation = entries.length > VISIBLE_ROWS;
-  const visibleEntries = needsVirtualisation
-    ? entries.slice(visibleStart, visibleStart + VISIBLE_ROWS)
-    : entries;
 
-  const handleScroll = useCallback((): void => {
-    if (!containerRef.current || !needsVirtualisation) return;
-    const { scrollTop } = containerRef.current;
-    const rowHeight = 56;
-    const newStart = Math.floor(scrollTop / rowHeight);
-    setVisibleStart(Math.min(newStart, Math.max(0, entries.length - VISIBLE_ROWS)));
-  }, [needsVirtualisation, entries.length]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return undefined;
-    el.addEventListener('scroll', handleScroll, { passive: true });
-    return () => el.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+  const rowVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
 
   const weekDates = useMemo((): string[] => {
     const start = new Date(weekStart);
@@ -235,72 +223,76 @@ const RosterBuilderInner = (): React.JSX.Element => {
 
           {/* Body with virtualisation */}
           <div
-            ref={containerRef}
+            ref={parentRef}
             style={{
-              maxHeight: needsVirtualisation ? VISIBLE_ROWS * 56 : undefined,
-              overflowY: needsVirtualisation ? 'auto' : undefined,
+              maxHeight: 20 * ROW_HEIGHT,
+              overflowY: 'auto',
               position: 'relative',
             }}
           >
-            {needsVirtualisation && <div style={{ height: visibleStart * 56 }} />}
-            {visibleEntries.map((entry) => (
-              <div
-                key={entry.staffId}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '160px repeat(7, 1fr)',
-                  borderBottom: '1px solid var(--hr-border)',
-                  minHeight: 56,
-                }}
-              >
-                <div
-                  style={{
-                    padding: '10px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: 'var(--hr-text)',
-                  }}
-                >
-                  {entry.staffName}
-                </div>
-                {weekDates.map((date) => {
-                  const cellAssignments = entry.assignments.filter((a) => a.date === date);
-                  return (
+            <div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = entries[virtualRow.index];
+                return (
+                  <div
+                    key={entry.staffId}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                      display: 'grid',
+                      gridTemplateColumns: '160px repeat(7, 1fr)',
+                      borderBottom: '1px solid var(--hr-border)',
+                    }}
+                  >
                     <div
-                      key={date}
-                      onClick={() => openAssignModal(entry.staffId, date)}
                       style={{
-                        padding: 4,
-                        borderLeft: '1px solid var(--hr-border)',
-                        cursor: 'pointer',
+                        padding: '10px 14px',
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                        minHeight: 48,
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={t('shifts.roster.assignShift')}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ')
-                          openAssignModal(entry.staffId, date);
+                        alignItems: 'center',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'var(--hr-text)',
                       }}
                     >
-                      {cellAssignments.map((a) => (
-                        <ShiftChip key={a.id} assignment={a} />
-                      ))}
+                      {entry.staffName}
                     </div>
-                  );
-                })}
-              </div>
-            ))}
-            {needsVirtualisation && (
-              <div
-                style={{ height: Math.max(0, entries.length - visibleStart - VISIBLE_ROWS) * 56 }}
-              />
-            )}
+                    {weekDates.map((date) => {
+                      const cellAssignments = entry.assignments.filter((a) => a.date === date);
+                      return (
+                        <div
+                          key={date}
+                          onClick={() => openAssignModal(entry.staffId, date)}
+                          style={{
+                            padding: 4,
+                            borderLeft: '1px solid var(--hr-border)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                            minHeight: 48,
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={t('shifts.roster.assignShift')}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ')
+                              openAssignModal(entry.staffId, date);
+                          }}
+                        >
+                          {cellAssignments.map((a) => (
+                            <ShiftChip key={a.id} assignment={a} />
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Card>
       )}
