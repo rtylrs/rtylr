@@ -62,10 +62,12 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
               type="date"
               value={form.date}
               onChange={(e) => update('date', e.target.value)}
-              style={errors.date ? { borderColor: '#ef4444' } : undefined}
+              style={errors.date ? { borderColor: 'var(--hr-error)' } : undefined}
             />
             {errors.date && (
-              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors.date}</p>
+              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                {errors.date}
+              </p>
             )}
           </div>
 
@@ -77,10 +79,10 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
               value={form.plannedMinutes || ''}
               onChange={(e) => update('plannedMinutes', Number(e.target.value))}
               placeholder={t('overtime.form.minutesPlaceholder')}
-              style={errors.plannedMinutes ? { borderColor: '#ef4444' } : undefined}
+              style={errors.plannedMinutes ? { borderColor: 'var(--hr-error)' } : undefined}
             />
             {errors.plannedMinutes && (
-              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
                 {errors.plannedMinutes}
               </p>
             )}
@@ -92,10 +94,15 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
               value={form.reason}
               onChange={(e) => update('reason', e.target.value)}
               placeholder={t('overtime.form.reasonPlaceholder')}
-              style={{ minHeight: 60, ...(errors.reason ? { borderColor: '#ef4444' } : {}) }}
+              style={{
+                minHeight: 60,
+                ...(errors.reason ? { borderColor: 'var(--hr-error)' } : {}),
+              }}
             />
             {errors.reason && (
-              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors.reason}</p>
+              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                {errors.reason}
+              </p>
             )}
           </div>
 

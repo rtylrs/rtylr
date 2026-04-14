@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from 'lucide-react';
 import { useListLeaveBalances } from '../../shared/hooks/queries/useLeave';
-import { Card, Skeleton, EmptyState, ACCENT } from '../../shared/components/ui';
+import { Card, Skeleton, EmptyState } from '../../shared/components/ui';
 
 const LeaveBalances = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -73,13 +73,17 @@ const LeaveBalances = (): React.JSX.Element => {
             <BalanceRow
               label={t('leave.balances.entitled')}
               value={balance.entitled}
-              color={ACCENT}
+              color="var(--hr-accent)"
             />
-            <BalanceRow label={t('leave.balances.used')} value={balance.used} color="#ef4444" />
+            <BalanceRow
+              label={t('leave.balances.used')}
+              value={balance.used}
+              color="var(--hr-status-rejected)"
+            />
             <BalanceRow
               label={t('leave.balances.pending')}
               value={balance.pending}
-              color="#f59e0b"
+              color="var(--hr-status-submitted)"
             />
           </div>
         </Card>

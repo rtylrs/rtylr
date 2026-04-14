@@ -16,9 +16,9 @@ import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import LeaveBalances from './LeaveBalances';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: '#f59e0b',
-  Approved: '#10b981',
-  Rejected: '#ef4444',
+  Pending: 'var(--hr-status-submitted)',
+  Approved: 'var(--hr-status-approved)',
+  Rejected: 'var(--hr-status-rejected)',
 };
 
 const TAB_KEYS = ['myLeave', 'teamCalendar'] as const;
@@ -93,7 +93,7 @@ const Leave = (): React.JSX.Element => {
               action={
                 <Link
                   to="/leave/new"
-                  style={{ color: '#8b5cf6', textDecoration: 'none', fontSize: 12 }}
+                  style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
                 >
                   {t('leave.newRequest')}
                 </Link>

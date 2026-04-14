@@ -19,6 +19,16 @@
   --hr-status-inactive: #6b7280;
   --hr-error: #ef4444;
   --hr-on-accent: #ffffff;
+
+  /* Shift / roster palette */
+  --hr-shift-purple: #8b5cf6;
+  --hr-shift-green: #10b981;
+  --hr-shift-amber: #f59e0b;
+  --hr-shift-red: #ef4444;
+  --hr-shift-blue: #3b82f6;
+  --hr-shift-pink: #ec4899;
+  --hr-shift-teal: #14b8a6;
+  --hr-accent: #8b5cf6;
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */

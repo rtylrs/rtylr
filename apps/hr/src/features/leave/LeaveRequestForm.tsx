@@ -110,7 +110,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
             <Select
               value={form.leaveTypeId}
               onChange={(e) => update('leaveTypeId', Number(e.target.value))}
-              style={errors.leaveTypeId ? { borderColor: '#ef4444' } : undefined}
+              style={errors.leaveTypeId ? { borderColor: 'var(--hr-error)' } : undefined}
             >
               <option value={0}>{t('leave.form.selectType')}</option>
               {leaveTypes.map((lt) => (
@@ -120,7 +120,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
               ))}
             </Select>
             {errors.leaveTypeId && (
-              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
                 {errors.leaveTypeId}
               </p>
             )}
@@ -151,10 +151,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 type="date"
                 value={form.startDate}
                 onChange={(e) => update('startDate', e.target.value)}
-                style={errors.startDate ? { borderColor: '#ef4444' } : undefined}
+                style={errors.startDate ? { borderColor: 'var(--hr-error)' } : undefined}
               />
               {errors.startDate && (
-                <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
                   {errors.startDate}
                 </p>
               )}
@@ -166,10 +166,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 value={form.endDate}
                 onChange={(e) => update('endDate', e.target.value)}
                 min={form.startDate || undefined}
-                style={errors.endDate ? { borderColor: '#ef4444' } : undefined}
+                style={errors.endDate ? { borderColor: 'var(--hr-error)' } : undefined}
               />
               {errors.endDate && (
-                <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
                   {errors.endDate}
                 </p>
               )}
@@ -182,10 +182,15 @@ const LeaveRequestForm = (): React.JSX.Element => {
               value={form.reason}
               onChange={(e) => update('reason', e.target.value)}
               placeholder={t('leave.form.reasonPlaceholder')}
-              style={{ minHeight: 60, ...(errors.reason ? { borderColor: '#ef4444' } : {}) }}
+              style={{
+                minHeight: 60,
+                ...(errors.reason ? { borderColor: 'var(--hr-error)' } : {}),
+              }}
             />
             {errors.reason && (
-              <p style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>{errors.reason}</p>
+              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                {errors.reason}
+              </p>
             )}
           </div>
 

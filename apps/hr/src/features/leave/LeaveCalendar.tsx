@@ -2,15 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useGetLeaveCalendar } from '../../shared/hooks/queries/useLeave';
-import {
-  Card,
-  Button,
-  Skeleton,
-  EmptyState,
-  Select,
-  Label,
-  ACCENT,
-} from '../../shared/components/ui';
+import { Card, Button, Skeleton, EmptyState, Select, Label } from '../../shared/components/ui';
+import ErrorBoundary from '../../shared/components/ErrorBoundary';
 
 const DAYS_OF_WEEK_KEYS = [
   'timesheets.days.mon',
@@ -22,7 +15,7 @@ const DAYS_OF_WEEK_KEYS = [
   'timesheets.days.sun',
 ] as const;
 
-const LeaveCalendar = (): React.JSX.Element => {
+const LeaveCalendarInner = (): React.JSX.Element => {
   const { t } = useTranslation();
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -178,14 +171,16 @@ const LeaveCalendar = (): React.JSX.Element => {
                     borderBottom: '1px solid var(--hr-border)',
                     borderRight: (idx + 1) % 7 !== 0 ? '1px solid var(--hr-border)' : undefined,
                     opacity: isCurrentMonth ? 1 : 0.35,
-                    background: isToday ? `${ACCENT}08` : undefined,
+                    background: isToday
+                      ? 'color-mix(in srgb, var(--hr-accent) 3%, transparent)'
+                      : undefined,
                   }}
                 >
                   <div
                     style={{
                       fontSize: 11,
                       fontWeight: isToday ? 700 : 500,
-                      color: isToday ? ACCENT : 'var(--hr-text)',
+                      color: isToday ? 'var(--hr-accent)' : 'var(--hr-text)',
                       marginBottom: 2,
                       textAlign: 'right',
                       padding: '2px 4px',
@@ -201,8 +196,8 @@ const LeaveCalendar = (): React.JSX.Element => {
                           fontSize: 9,
                           padding: '1px 4px',
                           borderRadius: 4,
-                          background: `${entry.color ?? ACCENT}22`,
-                          color: entry.color ?? ACCENT,
+                          background: `color-mix(in srgb, ${entry.color || 'var(--hr-accent)'} 13%, transparent)`,
+                          color: entry.color || 'var(--hr-accent)',
                           fontWeight: 600,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -235,6 +230,22 @@ const LeaveCalendar = (): React.JSX.Element => {
         />
       )}
     </div>
+  );
+};
+
+const LeaveCalendar = (): React.JSX.Element => {
+  const { t } = useTranslation();
+
+  return (
+    <ErrorBoundary
+      fallback={
+        <div style={{ padding: 24, textAlign: 'center', color: 'var(--hr-text-muted)' }}>
+          {t('errors.calendarFailed')}
+        </div>
+      }
+    >
+      <LeaveCalendarInner />
+    </ErrorBoundary>
   );
 };
 

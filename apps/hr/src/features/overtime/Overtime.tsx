@@ -18,9 +18,9 @@ import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import OvertimeRequestForm from './OvertimeRequestForm';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: '#f59e0b',
-  Approved: '#10b981',
-  Rejected: '#ef4444',
+  Pending: 'var(--hr-status-submitted)',
+  Approved: 'var(--hr-status-approved)',
+  Rejected: 'var(--hr-status-rejected)',
 };
 
 const FILTER_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
@@ -82,7 +82,7 @@ const Overtime = (): React.JSX.Element => {
             <button
               onClick={() => setFormOpen(true)}
               style={{
-                color: '#8b5cf6',
+                color: 'var(--hr-accent)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',

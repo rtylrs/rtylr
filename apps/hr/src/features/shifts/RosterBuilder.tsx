@@ -18,13 +18,20 @@ import {
   Modal,
   Select,
   Label,
-  ACCENT,
 } from '../../shared/components/ui';
 import ErrorBoundary from '../../shared/components/ErrorBoundary';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
-const SHIFT_COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#14b8a6'];
+const SHIFT_COLORS = [
+  'var(--hr-shift-purple)',
+  'var(--hr-shift-green)',
+  'var(--hr-shift-amber)',
+  'var(--hr-shift-red)',
+  'var(--hr-shift-blue)',
+  'var(--hr-shift-pink)',
+  'var(--hr-shift-teal)',
+];
 
 function getWeekStart(offset: number): string {
   const now = new Date();
@@ -154,9 +161,9 @@ const RosterBuilderInner = (): React.JSX.Element => {
             gap: 8,
             padding: '10px 14px',
             borderRadius: 8,
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.2)',
-            color: '#ef4444',
+            background: 'color-mix(in srgb, var(--hr-shift-red) 8%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--hr-shift-red) 20%, transparent)',
+            color: 'var(--hr-shift-red)',
             fontSize: 12,
             fontWeight: 600,
           }}
@@ -349,9 +356,13 @@ const ShiftChip = ({ assignment }: { assignment: ShiftAssignment }): React.JSX.E
         borderRadius: 4,
         fontSize: 9,
         fontWeight: 600,
-        background: assignment.conflict ? 'rgba(239,68,68,0.15)' : `${color}22`,
-        color: assignment.conflict ? '#ef4444' : color,
-        border: assignment.conflict ? '1px solid rgba(239,68,68,0.3)' : `1px solid ${color}33`,
+        background: assignment.conflict
+          ? 'color-mix(in srgb, var(--hr-shift-red) 15%, transparent)'
+          : `${color}22`,
+        color: assignment.conflict ? 'var(--hr-shift-red)' : color,
+        border: assignment.conflict
+          ? '1px solid color-mix(in srgb, var(--hr-shift-red) 30%, transparent)'
+          : `1px solid ${color}33`,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',

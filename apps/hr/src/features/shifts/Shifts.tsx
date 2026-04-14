@@ -13,15 +13,23 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 
-const ACCENT = '#8b5cf6';
+const ACCENT = 'var(--hr-accent)';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
 const statusConfig: Record<string, { color: string; bg: string; icon: typeof Clock }> = {
-  Scheduled: { color: ACCENT, bg: 'rgba(139,92,246,0.12)', icon: Calendar },
-  'In Progress': { color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: Play },
-  Completed: { color: '#6b7280', bg: 'rgba(107,114,128,0.12)', icon: CheckCircle2 },
+  Scheduled: { color: ACCENT, bg: 'var(--accent-muted)', icon: Calendar },
+  'In Progress': {
+    color: 'var(--hr-shift-green)',
+    bg: 'color-mix(in srgb, var(--hr-shift-green) 12%, transparent)',
+    icon: Play,
+  },
+  Completed: {
+    color: 'var(--hr-status-draft)',
+    bg: 'color-mix(in srgb, var(--hr-status-draft) 12%, transparent)',
+    icon: CheckCircle2,
+  },
 };
 
 function getInitials(name: string): string {
@@ -127,14 +135,14 @@ const Shifts = (): React.JSX.Element => {
           {
             label: t('shifts.statuses.inProgress'),
             value: inProgress,
-            color: '#10b981',
-            bg: 'rgba(16,185,129,0.12)',
+            color: 'var(--hr-shift-green)',
+            bg: 'color-mix(in srgb, var(--hr-shift-green) 12%, transparent)',
           },
           {
             label: t('shifts.statuses.completed'),
             value: completed,
-            color: '#6b7280',
-            bg: 'rgba(107,114,128,0.12)',
+            color: 'var(--hr-status-draft)',
+            bg: 'color-mix(in srgb, var(--hr-status-draft) 12%, transparent)',
           },
         ].map((s) => (
           <div
@@ -176,7 +184,7 @@ const Shifts = (): React.JSX.Element => {
                 padding: '10px 6px',
                 borderRadius: 10,
                 border: isSelected ? `1px solid ${ACCENT}` : '1px solid var(--hr-border)',
-                background: isSelected ? 'rgba(139,92,246,0.12)' : 'var(--hr-card)',
+                background: isSelected ? 'var(--accent-muted)' : 'var(--hr-card)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
@@ -269,7 +277,7 @@ const Shifts = (): React.JSX.Element => {
                     height: 36,
                     width: 36,
                     borderRadius: '50%',
-                    background: 'rgba(139,92,246,0.12)',
+                    background: 'var(--accent-muted)',
                     color: ACCENT,
                     fontSize: 12,
                     fontWeight: 700,
