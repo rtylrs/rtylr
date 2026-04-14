@@ -66,6 +66,10 @@ const LeaveScreen = React.lazy(() => import('./features/leave/Leave'));
 const LeaveRequestFormScreen = React.lazy(() => import('./features/leave/LeaveRequestForm'));
 const OvertimeScreen = React.lazy(() => import('./features/overtime/Overtime'));
 const RosterBuilder = React.lazy(() => import('./features/shifts/RosterBuilder'));
+const Performance = React.lazy(() => import('./features/performance/Performance'));
+const ReviewCycleDetail = React.lazy(() => import('./features/performance/ReviewCycleDetail'));
+const MyReview = React.lazy(() => import('./features/performance/MyReview'));
+const GoalsList = React.lazy(() => import('./features/performance/GoalsList'));
 
 function wrap(screen: React.ReactNode): React.JSX.Element {
   return <DefaultLayout>{screen}</DefaultLayout>;
@@ -127,6 +131,10 @@ const App = (): React.JSX.Element => {
               <Route path="/leave/new" element={wrap(<LeaveRequestFormScreen />)} />
               <Route path="/overtime" element={wrap(<OvertimeScreen />)} />
               <Route path="/shifts/roster" element={wrap(<RosterBuilder />)} />
+              <Route path="/performance" element={wrap(<Performance />)} />
+              <Route path="/performance/cycles/:id" element={wrap(<ReviewCycleDetail />)} />
+              <Route path="/performance/my-review" element={wrap(<MyReview />)} />
+              <Route path="/performance/goals" element={wrap(<GoalsList />)} />
               <Route path="/operations" element={wrap(<Operations />)} />
               <Route path="/settings" element={wrap(<SettingsScreen />)} />
             </Route>

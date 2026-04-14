@@ -1,0 +1,150 @@
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { BarChart3 } from 'lucide-react';
+import ErrorBoundary from '../../shared/components/ErrorBoundary';
+import {
+  SectionHeader,
+  Button,
+  Card,
+  Pill,
+  EmptyState,
+  Skeleton,
+  ConfirmDialog,
+  ACCENT,
+} from '../../shared/components/ui';
+import { useListReviewCycles, useOpenReviewCycle } from '../../shared/hooks/queries/usePerformance';
+import CreateCycleForm from './CreateCycleForm';
+import type { ReviewCyclePayload } from '@voxire/contracts/hr/v1/performance';
+
+const STATUS_COLORS: Record<string, string> = {
+  draft: '#6b7280',
+  open: '#10b981',
+  in_review: '#f59e0b',
+  completed: ACCENT,
+};
+
+function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const openCycle = useOpenReviewCycle();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleOpen = (): void => {
+    openCycle.mutate({ cycleId: cycle.id }, { onSuccess: () => setConfirmOpen(false) });
+  };
+
+  return (
+    <>
+      <Card
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate(`/performance/cycles/${cycle.id}`)}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
+            {cycle.name}
+          </h3>
+          <Pill color={STATUS_COLORS[cycle.status] ?? '#6b7280'}>{cycle.status}</Pill>
+        </div>
+
+        <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
+          {cycle.periodStart} — {cycle.periodEnd}
+        </p>
+
+        {cycle.status === 'draft' && (
+          <Button
+            variant="primary"
+            style={{ marginTop: 12 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmOpen(true);
+            }}
+          >
+            {t('performance.openCycle')}
+          </Button>
+        )}
+      </Card>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t('performance.confirmOpen.title')}
+        description={t('performance.confirmOpen.description')}
+        confirmLabel={t('performance.confirmOpen.confirm')}
+        variant="danger"
+        onConfirm={handleOpen}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
+  );
+}
+
+const PerformanceInner = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const [createOpen, setCreateOpen] = useState(false);
+  const { data, isLoading } = useListReviewCycles();
+
+  const cycles = data?.cycles ?? [];
+
+  return (
+    <div>
+      <SectionHeader
+        title={t('performance.title')}
+        subtitle={t('performance.subtitle')}
+        right={
+          <Button variant="primary" onClick={() => setCreateOpen(true)}>
+            {t('performance.newCycle')}
+          </Button>
+        }
+      />
+
+      {isLoading ? (
+        <div
+          style={{
+            display: 'grid',
+            gap: 12,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            marginTop: 16,
+          }}
+        >
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} height={120} />
+          ))}
+        </div>
+      ) : cycles.length === 0 ? (
+        <EmptyState
+          icon={<BarChart3 size={24} />}
+          title={t('performance.emptyTitle')}
+          description={t('performance.emptyDescription')}
+          action={
+            <Button variant="primary" onClick={() => setCreateOpen(true)}>
+              {t('performance.newCycle')}
+            </Button>
+          }
+        />
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gap: 12,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            marginTop: 16,
+          }}
+        >
+          {cycles.map((cycle) => (
+            <CycleCard key={cycle.id} cycle={cycle} />
+          ))}
+        </div>
+      )}
+
+      <CreateCycleForm open={createOpen} onClose={() => setCreateOpen(false)} />
+    </div>
+  );
+};
+
+const Performance = (): React.JSX.Element => (
+  <ErrorBoundary>
+    <PerformanceInner />
+  </ErrorBoundary>
+);
+
+export default Performance;

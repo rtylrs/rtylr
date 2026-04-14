@@ -40,6 +40,9 @@ import {
   Receipt,
   Package,
   HardDrive,
+  BarChart3,
+  Star,
+  Target,
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
@@ -109,6 +112,9 @@ const navSections: NavSection[] = [
     items: [
       { i18nKey: 'nav.reviews', path: '/reviews', icon: ClipboardList },
       { i18nKey: 'nav.oneOnOnes', path: '/one-on-ones', icon: MessageSquare },
+      { i18nKey: 'nav.performance', path: '/performance', icon: BarChart3 },
+      { i18nKey: 'nav.myReview', path: '/performance/my-review', icon: Star },
+      { i18nKey: 'nav.goals', path: '/performance/goals', icon: Target },
       { i18nKey: 'nav.onboarding', path: '/onboarding', icon: Rocket },
       { i18nKey: 'nav.offboarding', path: '/offboarding', icon: LogOut },
       { i18nKey: 'nav.training', path: '/training', icon: GraduationCap },
@@ -189,6 +195,9 @@ const routeLabelKeys: Record<string, string> = {
   '/leave/new': 'layout.routes.newLeaveRequest',
   '/overtime': 'nav.overtime',
   '/shifts/roster': 'nav.rosterBuilder',
+  '/performance': 'nav.performance',
+  '/performance/my-review': 'nav.myReview',
+  '/performance/goals': 'nav.goals',
 };
 
 /* ── Theme helpers ── */
@@ -500,6 +509,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
     if (pathname.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
     if (pathname.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
+    if (pathname.startsWith('/performance/cycles/')) return t('layout.routes.reviewCycleDetail');
     if (pathname.startsWith('/equipment/')) return t('nav.assets');
     if (pathname.startsWith('/onboarding/')) return t('layout.routes.checklistTemplates');
     return t('layout.hr');
