@@ -39,6 +39,7 @@ import {
   CalendarRange,
   Receipt,
 } from 'lucide-react';
+import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
@@ -50,7 +51,7 @@ interface NavItem {
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   /** Optional guard: item is only shown when this returns true for the current config */
-  configGuard?: (timeTrackingModel: string) => boolean;
+  configGuard?: (timeTrackingModel: string, config: HRCompanyConfigPayload | null) => boolean;
 }
 
 /* ── Nav config ── */
@@ -114,8 +115,24 @@ const navSections: NavSection[] = [
   {
     i18nKey: 'layout.sections.hr',
     items: [
-      { i18nKey: 'nav.payroll', path: '/payroll', icon: DollarSign },
-      { i18nKey: 'nav.myPaySlips', path: '/payroll/my-payslips', icon: Receipt },
+      {
+        i18nKey: 'nav.payroll',
+        path: '/payroll',
+        icon: DollarSign,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
+      {
+        i18nKey: 'nav.myPaySlips',
+        path: '/payroll/my-payslips',
+        icon: Receipt,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
+      {
+        i18nKey: 'nav.payrollConfig',
+        path: '/settings/payroll-config',
+        icon: Settings,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
       { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
       { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
@@ -569,7 +586,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           {navSections.map((section) => {
             const visibleItems = section.items.filter(
-              (item) => !item.configGuard || item.configGuard(timeTrackingModel)
+              (item) => !item.configGuard || item.configGuard(timeTrackingModel, config)
             );
             if (visibleItems.length === 0) return null;
             return (

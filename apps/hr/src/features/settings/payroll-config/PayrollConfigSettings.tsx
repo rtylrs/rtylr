@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { z } from 'zod';
 import {
   useGetPayrollConfig,
   useUpsertPayrollConfig,
 } from '../../../shared/hooks/queries/usePayroll';
-import type { PayrollConfigData } from '../../../shared/hooks/queries/usePayroll';
 import { payrollConfigSchema } from '../../../shared/schemas/payroll';
 import {
   Card,
@@ -28,6 +28,7 @@ const PayrollConfigSettings = (): React.JSX.Element => {
   const upsertConfig = useUpsertPayrollConfig();
   const [form, setForm] = useState<FormData | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [configNotice, setConfigNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (data && !form) {
@@ -49,7 +50,7 @@ const PayrollConfigSettings = (): React.JSX.Element => {
     const result = payrollConfigSchema.safeParse(form);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
+      result.error.issues.forEach((issue: z.ZodIssue) => {
         const key = issue.path.join('.');
         fieldErrors[key] = issue.message;
       });
@@ -57,7 +58,20 @@ const PayrollConfigSettings = (): React.JSX.Element => {
       return;
     }
     setErrors({});
-    upsertConfig.mutate(result.data);
+    upsertConfig.mutate(result.data, {
+      onSuccess: () => {
+        setConfigNotice(null);
+        toast.success(t('payroll.config.saved'));
+      },
+      onError: (error: unknown) => {
+        const status = (error as { status?: number })?.status;
+        if (status === 422) {
+          setConfigNotice(t('payroll.config.notConfiguredNotice'));
+        } else {
+          toast.error(t('errors.generic'));
+        }
+      },
+    });
   };
 
   return (
@@ -79,12 +93,12 @@ const PayrollConfigSettings = (): React.JSX.Element => {
                     gap: 8,
                     padding: '10px 16px',
                     borderRadius: 8,
-                    border: `1px solid ${form.grossModel === model ? '#8b5cf6' : 'var(--hr-border)'}`,
-                    background: form.grossModel === model ? 'rgba(139,92,246,0.08)' : 'transparent',
+                    border: `1px solid ${form.grossModel === model ? 'var(--accent)' : 'var(--hr-border)'}`,
+                    background: form.grossModel === model ? 'var(--accent-muted)' : 'transparent',
                     cursor: 'pointer',
                     fontSize: 13,
                     fontWeight: 500,
-                    color: form.grossModel === model ? '#8b5cf6' : 'var(--hr-text)',
+                    color: form.grossModel === model ? 'var(--accent)' : 'var(--hr-text)',
                     minHeight: 44,
                   }}
                 >
@@ -101,7 +115,7 @@ const PayrollConfigSettings = (): React.JSX.Element => {
               ))}
             </div>
             {errors.grossModel && (
-              <span style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>
+              <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
                 {errors.grossModel}
               </span>
             )}
@@ -123,7 +137,9 @@ const PayrollConfigSettings = (): React.JSX.Element => {
               ))}
             </Select>
             {errors.period && (
-              <span style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.period}</span>
+              <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
+                {errors.period}
+              </span>
             )}
           </div>
 
@@ -146,6 +162,12 @@ const PayrollConfigSettings = (): React.JSX.Element => {
             />
           </div>
         </div>
+
+        {configNotice && (
+          <p style={{ color: 'var(--hr-status-draft)', marginBottom: 8, fontSize: 13 }}>
+            {configNotice}
+          </p>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
           <Button variant="primary" onClick={handleSave} disabled={upsertConfig.isPending}>

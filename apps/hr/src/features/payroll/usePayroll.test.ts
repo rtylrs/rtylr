@@ -23,20 +23,14 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('../../shared/stores/hrConfigStore', () => ({
-  useHRConfigStore: vi.fn((selector: (state: Record<string, unknown>) => unknown) =>
-    selector({ config: null, setConfig: vi.fn(), clearConfig: vi.fn() })
-  ),
-}));
-
 import { useListPayrollRuns, useTriggerPayrollRun } from './usePayroll';
 import { safe } from '../../shared/lib/api';
 
-const createWrapper = () => {
+const createWrapper = (): React.FC<{ children: React.ReactNode }> => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
+  return ({ children }: { children: React.ReactNode }): React.JSX.Element =>
     React.createElement(QueryClientProvider, { client }, children);
 };
 
@@ -46,7 +40,7 @@ describe('useListPayrollRuns', () => {
   });
 
   it('fetches payroll runs on mount', async () => {
-    const data = { runs: [], total: 0 };
+    const data = { runs: [], total: 0, limit: 50, offset: 0 };
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(data);
     const { result } = renderHook(() => useListPayrollRuns(), {
       wrapper: createWrapper(),

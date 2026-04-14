@@ -1,10 +1,18 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  PayrollRunPayload,
+  PayrollEntryPayload,
+  TriggerPayrollRunRequest,
+  ApprovePayrollRunRequest,
+  ExportPayrollRequest,
+  ListPayrollRunsResponse,
+} from '@voxire/contracts/hr/v1/payroll';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-/* ── Types ── */
+/* ── Local config type (no contract exists) ── */
 
 interface PayrollConfigData {
   grossModel: 'hourly' | 'salary' | 'both';
@@ -22,63 +30,13 @@ interface UpsertPayrollConfigRequest {
   bonusesEnabled?: boolean;
 }
 
-interface PayrollRunEntry {
-  id: number;
-  employeeId: number;
-  employeeName: string;
-  hoursWorked: number;
-  basePay: number;
-  overtimePay: number;
-  deductions: number;
-  bonuses: number;
-  netPay: number;
-}
-
-interface PayrollRunPayload {
-  id: number;
-  periodStart: string;
-  periodEnd: string;
-  status: 'Draft' | 'Pending' | 'Approved' | 'Paid';
-  totalNetPay: number;
-  totalBasePay: number;
-  totalOvertimePay: number;
-  totalDeductions: number;
-  employeeCount: number;
-  createdAt: string;
-  entries?: PayrollRunEntry[];
-}
-
 interface ListPayrollRunsParams {
   status?: string;
   limit?: number;
   offset?: number;
 }
 
-interface ListPayrollRunsResponse {
-  runs: PayrollRunPayload[];
-  total: number;
-}
-
-interface GetPayrollRunResponse {
-  run: PayrollRunPayload;
-}
-
-interface TriggerPayrollRunRequest {
-  periodStart: string;
-  periodEnd: string;
-}
-
-interface ApprovePayrollRunRequest {
-  runId: number;
-  approved: boolean;
-}
-
-interface ExportPayrollRunRequest {
-  runId: number;
-  format: 'csv' | 'pdf';
-}
-
-export type { PayrollConfigData, PayrollRunPayload, PayrollRunEntry, ListPayrollRunsParams };
+export type { PayrollConfigData, PayrollRunPayload, PayrollEntryPayload, ListPayrollRunsParams };
 
 /* ── Config hooks ── */
 
@@ -128,8 +86,8 @@ export const useGetPayrollRun = (id: number | undefined) => {
   return useQuery<PayrollRunPayload>({
     queryKey: ['payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
-      const res = await unwrap(safe.get<GetPayrollRunResponse>(`/hr/payroll/runs/${id}`));
-      return (res as GetPayrollRunResponse).run;
+      const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/runs/${id}`));
+      return (res as { run: PayrollRunPayload }).run;
     },
     enabled: !!id,
   });
@@ -165,25 +123,6 @@ export const useApprovePayrollRun = () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-run', variables.runId] });
       toast.success(t('payroll.runApproved'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useExportPayrollRun = () => {
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (data: ExportPayrollRunRequest): Promise<Blob> => {
-      const res = await unwrap(
-        safe.post<Blob>(`/hr/payroll/runs/${data.runId}/export`, { format: data.format })
-      );
-      return res as Blob;
-    },
-    onSuccess: () => {
-      toast.success(t('payroll.exported'));
     },
     onError: () => {
       toast.error(t('errors.generic'));

@@ -52,7 +52,8 @@
     "leave": "Leave",
     "overtime": "Overtime",
     "rosterBuilder": "Roster Builder",
-    "myPaySlips": "My Pay Slips"
+    "myPaySlips": "My Pay Slips",
+    "payrollConfig": "Payroll Config"
   },
   "layout": {
     "sections": {
@@ -498,19 +499,19 @@
     "statuses": {
       "all": "All",
       "draft": "Draft",
-      "pending": "Pending",
+      "in_review": "In Review",
       "approved": "Approved",
-      "paid": "Paid"
+      "exported": "Exported"
     },
     "stats": {
-      "totalBase": "Total Base Pay",
-      "totalOvertime": "Total Overtime",
+      "totalGross": "Total Gross",
       "totalDeductions": "Total Deductions",
       "totalNet": "Net Payroll",
       "pendingRuns": "Pending Runs"
     },
     "table": {
       "employee": "Employee",
+      "employeeId": "Employee #{{id}}",
       "hours": "Hours",
       "basePay": "Base Pay",
       "overtimePay": "Overtime Pay",
@@ -554,7 +555,9 @@
       },
       "enableOvertime": "Enable overtime tracking",
       "enableDeductions": "Enable deductions",
-      "enableBonuses": "Enable bonuses"
+      "enableBonuses": "Enable bonuses",
+      "saved": "Payroll configuration saved",
+      "notConfiguredNotice": "Payroll is not yet configured — fill in the form to get started"
     }
   },
   "shifts": {

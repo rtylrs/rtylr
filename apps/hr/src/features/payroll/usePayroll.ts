@@ -15,7 +15,9 @@ const payrollRowSchema = z.object({
 });
 
 /** Legacy hook used by Operations screen — reads from old payroll endpoint */
-export function usePayroll(params?: { period?: string }) {
+export function usePayroll(params?: {
+  period?: string;
+}): ReturnType<typeof useQuery<PayrollRow[]>> {
   return useQuery<PayrollRow[]>({
     queryKey: ['payroll-legacy', params],
     queryFn: async (): Promise<PayrollRow[]> => {
@@ -31,7 +33,6 @@ export {
   useGetPayrollRun,
   useTriggerPayrollRun,
   useApprovePayrollRun,
-  useExportPayrollRun,
   useGetPayrollConfig,
   useUpsertPayrollConfig,
 } from '../../shared/hooks/queries/usePayroll';
@@ -39,6 +40,6 @@ export {
 export type {
   PayrollConfigData,
   PayrollRunPayload,
-  PayrollRunEntry,
+  PayrollEntryPayload,
   ListPayrollRunsParams,
 } from '../../shared/hooks/queries/usePayroll';

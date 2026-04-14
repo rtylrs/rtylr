@@ -52,7 +52,8 @@
     "leave": "الإجازات",
     "overtime": "العمل الإضافي",
     "rosterBuilder": "جدول المناوبات",
-    "myPaySlips": "كشوف رواتبي"
+    "myPaySlips": "كشوف رواتبي",
+    "payrollConfig": "تهيئة الرواتب"
   },
   "layout": {
     "sections": {
@@ -498,19 +499,19 @@
     "statuses": {
       "all": "الكل",
       "draft": "مسودة",
-      "pending": "قيد الانتظار",
+      "in_review": "قيد المراجعة",
       "approved": "موافق عليه",
-      "paid": "مدفوع"
+      "exported": "تم التصدير"
     },
     "stats": {
-      "totalBase": "إجمالي الراتب الأساسي",
-      "totalOvertime": "إجمالي العمل الإضافي",
+      "totalGross": "إجمالي الراتب",
       "totalDeductions": "إجمالي الخصومات",
       "totalNet": "صافي الرواتب",
       "pendingRuns": "الدورات المعلقة"
     },
     "table": {
       "employee": "الموظف",
+      "employeeId": "الموظف #{{id}}",
       "hours": "الساعات",
       "basePay": "الراتب الأساسي",
       "overtimePay": "العمل الإضافي",
@@ -554,7 +555,9 @@
       },
       "enableOvertime": "تفعيل تتبع العمل الإضافي",
       "enableDeductions": "تفعيل الخصومات",
-      "enableBonuses": "تفعيل المكافآت"
+      "enableBonuses": "تفعيل المكافآت",
+      "saved": "تم حفظ تهيئة الرواتب",
+      "notConfiguredNotice": "لم يتم تكوين الرواتب بعد — أكمل النموذج للبدء"
     }
   },
   "shifts": {

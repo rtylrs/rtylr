@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { useGetPayrollRun } from '../../shared/hooks/queries/usePayroll';
-import type { PayrollRunEntry } from '../../shared/hooks/queries/usePayroll';
+import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import {
   Card,
   SectionHeader,
@@ -79,8 +79,8 @@ const PaySlip = (): React.JSX.Element => {
     );
   }
 
-  const entry: PayrollRunEntry | undefined = run?.entries?.find(
-    (e: PayrollRunEntry) => e.employeeId === employeeId
+  const entry: PayrollEntryPayload | undefined = run?.entries?.find(
+    (e: PayrollEntryPayload) => e.employeeId === employeeId
   );
 
   if (!run || !entry) {
@@ -120,13 +120,13 @@ const PaySlip = (): React.JSX.Element => {
       <Card>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
-            {entry.employeeName}
+            {t('payroll.table.employeeId', { id: entry.employeeId })}
           </div>
           <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 2 }}>
             {t('payroll.paySlip.period')}: {run.periodStart} — {run.periodEnd}
           </div>
-          <Pill color="#10b981" style={{ marginTop: 8 }}>
-            {t(`payroll.statuses.${run.status.toLowerCase()}`)}
+          <Pill color="var(--hr-status-approved)" style={{ marginTop: 8 }}>
+            {t(`payroll.statuses.${run.status}`)}
           </Pill>
         </div>
 
@@ -148,12 +148,12 @@ const PaySlip = (): React.JSX.Element => {
           <BreakdownRow
             label={t('payroll.table.overtimePay')}
             value={fmt(entry.overtimePay)}
-            color={entry.overtimePay > 0 ? '#f59e0b' : undefined}
+            color={entry.overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
           />
           <BreakdownRow
             label={t('payroll.table.bonuses')}
             value={fmt(entry.bonuses)}
-            color={entry.bonuses > 0 ? '#10b981' : undefined}
+            color={entry.bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
           />
           <BreakdownRow label={t('payroll.paySlip.grossPay')} value={fmt(gross)} bold />
         </div>
@@ -175,7 +175,7 @@ const PaySlip = (): React.JSX.Element => {
           <BreakdownRow
             label={t('payroll.table.deductions')}
             value={`-${fmt(entry.deductions)}`}
-            color="#ef4444"
+            color="var(--hr-error)"
           />
         </div>
 
@@ -196,7 +196,7 @@ const PaySlip = (): React.JSX.Element => {
             style={{
               fontSize: 18,
               fontWeight: 800,
-              color: '#10b981',
+              color: 'var(--hr-status-approved)',
               fontVariantNumeric: 'tabular-nums',
             }}
           >

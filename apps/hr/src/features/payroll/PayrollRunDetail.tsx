@@ -3,22 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
-import {
-  useGetPayrollRun,
-  useApprovePayrollRun,
-  useExportPayrollRun,
-} from '../../shared/hooks/queries/usePayroll';
-import type { PayrollRunEntry } from '../../shared/hooks/queries/usePayroll';
+import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
+import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import ErrorBoundary from '../../shared/components/ErrorBoundary';
 import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
 
-const ACCENT = '#8b5cf6';
-
 const STATUS_COLORS: Record<string, string> = {
-  Draft: 'var(--hr-text-muted)',
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Paid: '#10b981',
+  draft: 'var(--hr-text-muted)',
+  in_review: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  exported: 'var(--hr-status-paid)',
 };
 
 function fmt(n: number): string {
@@ -27,15 +21,6 @@ function fmt(n: number): string {
     currency: 'USD',
     minimumFractionDigits: 0,
   });
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 const ROW_HEIGHT = 56;
@@ -49,7 +34,6 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: run, isLoading } = useGetPayrollRun(runId);
   const approveRun = useApprovePayrollRun();
-  const exportRun = useExportPayrollRun();
   const parentRef = useRef<HTMLDivElement>(null);
 
   const entries = run?.entries ?? [];
@@ -62,15 +46,38 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   });
 
   const handleApprove = useCallback((): void => {
-    if (runId) approveRun.mutate({ runId, approved: true });
+    if (runId) approveRun.mutate({ runId });
   }, [runId, approveRun]);
 
-  const handleExport = useCallback(
-    (format: 'csv' | 'pdf'): void => {
-      if (runId) exportRun.mutate({ runId, format });
-    },
-    [runId, exportRun]
-  );
+  const handleExport = useCallback((): void => {
+    if (!run) return;
+    const headers = [
+      'Employee ID',
+      'Hours Worked',
+      'Base Pay',
+      'Overtime Pay',
+      'Deductions',
+      'Bonuses',
+      'Net Pay',
+    ];
+    const rows = run.entries.map((e: PayrollEntryPayload) => [
+      e.employeeId,
+      e.hoursWorked,
+      e.basePay,
+      e.overtimePay,
+      e.deductions,
+      e.bonuses,
+      e.netPay,
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payroll-run-${run.id}-${run.periodStart}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [run]);
 
   if (isLoading || !run) {
     return (
@@ -80,6 +87,11 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
       </div>
     );
   }
+
+  const totalDeductions = entries.reduce(
+    (s: number, e: PayrollEntryPayload) => s + e.deductions,
+    0
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -95,10 +107,8 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         subtitle={t('payroll.runDetail.subtitle', { count: entries.length })}
         right={
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Pill color={STATUS_COLORS[run.status]}>
-              {t(`payroll.statuses.${run.status.toLowerCase()}`)}
-            </Pill>
-            {run.status === 'Pending' && (
+            <Pill color={STATUS_COLORS[run.status]}>{t(`payroll.statuses.${run.status}`)}</Pill>
+            {run.status === 'in_review' && (
               <Button
                 variant="primary"
                 icon={<CheckCircle size={13} />}
@@ -108,12 +118,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                 {t('payroll.runDetail.approve')}
               </Button>
             )}
-            <Button
-              variant="secondary"
-              icon={<Download size={13} />}
-              onClick={() => handleExport('csv')}
-              disabled={exportRun.isPending}
-            >
+            <Button variant="secondary" icon={<Download size={13} />} onClick={handleExport}>
               {t('payroll.runDetail.exportCsv')}
             </Button>
           </div>
@@ -129,24 +134,27 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         }}
       >
         {[
-          { label: t('payroll.stats.totalBase'), value: fmt(run.totalBasePay), color: ACCENT },
           {
-            label: t('payroll.stats.totalOvertime'),
-            value: fmt(run.totalOvertimePay),
-            color: '#f59e0b',
+            label: t('payroll.stats.totalGross'),
+            value: fmt(run.totalGross),
+            color: 'var(--accent)',
           },
           {
             label: t('payroll.stats.totalDeductions'),
-            value: fmt(run.totalDeductions),
-            color: '#ef4444',
+            value: fmt(totalDeductions),
+            color: 'var(--hr-error)',
           },
-          { label: t('payroll.stats.totalNet'), value: fmt(run.totalNetPay), color: '#10b981' },
+          {
+            label: t('payroll.stats.totalNet'),
+            value: fmt(run.totalNet),
+            color: 'var(--hr-status-approved)',
+          },
         ].map((stat) => (
           <div
             key={stat.label}
             style={{
-              background: `${stat.color}12`,
-              border: `1px solid ${stat.color}30`,
+              background: `color-mix(in srgb, ${stat.color} 12%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${stat.color} 30%, transparent)`,
               borderRadius: 10,
               padding: '12px 14px',
             }}
@@ -229,7 +237,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
             }}
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
-              const entry: PayrollRunEntry = entries[virtualRow.index];
+              const entry: PayrollEntryPayload = entries[virtualRow.index];
               return (
                 <div
                   key={entry.id}
@@ -247,29 +255,10 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                     borderBottom: '1px solid var(--hr-border)',
                   }}
                 >
-                  {/* Employee name */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: 32,
-                        width: 32,
-                        borderRadius: '50%',
-                        background: 'rgba(139,92,246,0.12)',
-                        color: ACCENT,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {getInitials(entry.employeeName)}
-                    </span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                      {entry.employeeName}
-                    </span>
-                  </div>
+                  {/* Employee ID */}
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                    {t('payroll.table.employeeId', { id: entry.employeeId })}
+                  </span>
                   <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
                     {entry.hoursWorked}h
                   </span>
@@ -279,7 +268,10 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span
                     style={{
                       fontSize: 13,
-                      color: entry.overtimePay > 0 ? '#f59e0b' : 'var(--hr-text-muted)',
+                      color:
+                        entry.overtimePay > 0
+                          ? 'var(--hr-status-submitted)'
+                          : 'var(--hr-text-muted)',
                     }}
                   >
                     {entry.overtimePay > 0 ? fmt(entry.overtimePay) : '-'}
@@ -287,7 +279,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span
                     style={{
                       fontSize: 13,
-                      color: entry.deductions > 0 ? '#ef4444' : 'var(--hr-text-muted)',
+                      color: entry.deductions > 0 ? 'var(--hr-error)' : 'var(--hr-text-muted)',
                     }}
                   >
                     {entry.deductions > 0 ? fmt(entry.deductions) : '-'}
@@ -295,12 +287,19 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span
                     style={{
                       fontSize: 13,
-                      color: entry.bonuses > 0 ? '#10b981' : 'var(--hr-text-muted)',
+                      color:
+                        entry.bonuses > 0 ? 'var(--hr-status-approved)' : 'var(--hr-text-muted)',
                     }}
                   >
                     {entry.bonuses > 0 ? fmt(entry.bonuses) : '-'}
                   </span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981' }}>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: 'var(--hr-status-approved)',
+                    }}
+                  >
                     {fmt(entry.netPay)}
                   </span>
                 </div>

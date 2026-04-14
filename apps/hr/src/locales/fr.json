@@ -52,7 +52,8 @@
     "leave": "Congés",
     "overtime": "Heures supplémentaires",
     "rosterBuilder": "Planificateur",
-    "myPaySlips": "Mes fiches de paie"
+    "myPaySlips": "Mes fiches de paie",
+    "payrollConfig": "Config. paie"
   },
   "layout": {
     "sections": {
@@ -498,19 +499,19 @@
     "statuses": {
       "all": "Tous",
       "draft": "Brouillon",
-      "pending": "En attente",
+      "in_review": "En revue",
       "approved": "Approuvé",
-      "paid": "Payé"
+      "exported": "Exporté"
     },
     "stats": {
-      "totalBase": "Salaire de base total",
-      "totalOvertime": "Heures sup. totales",
+      "totalGross": "Brut total",
       "totalDeductions": "Déductions totales",
       "totalNet": "Paie nette",
       "pendingRuns": "Cycles en attente"
     },
     "table": {
       "employee": "Employé",
+      "employeeId": "Employé #{{id}}",
       "hours": "Heures",
       "basePay": "Salaire de base",
       "overtimePay": "Heures supplémentaires",
@@ -554,7 +555,9 @@
       },
       "enableOvertime": "Activer le suivi des heures supplémentaires",
       "enableDeductions": "Activer les déductions",
-      "enableBonuses": "Activer les primes"
+      "enableBonuses": "Activer les primes",
+      "saved": "Configuration de la paie enregistrée",
+      "notConfiguredNotice": "La paie n'est pas encore configurée — remplissez le formulaire pour commencer"
     }
   },
   "shifts": {

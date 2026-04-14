@@ -1,6 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Shift, CreateShiftRequest, ListShiftsResponse } from '@voxire/contracts/hr/v1/shifts';
+import type {
+  ShiftPayload,
+  CreateShiftRequest,
+  ListShiftsResponse,
+} from '@voxire/contracts/hr/v1/shifts';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -38,9 +42,9 @@ interface CreateShiftAssignmentPayload {
 }
 
 export const useListShifts = () => {
-  return useQuery<Shift[]>({
+  return useQuery<ShiftPayload[]>({
     queryKey: ['shifts'],
-    queryFn: async (): Promise<Shift[]> => {
+    queryFn: async (): Promise<ShiftPayload[]> => {
       const res = await unwrap(safe.get<ListShiftsResponse>('/hr/shifts'));
       return (res as ListShiftsResponse).shifts;
     },

@@ -321,7 +321,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
               <option value={0}>{t('shifts.roster.choosePlaceholder')}</option>
               {(shifts ?? []).map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.startTime} – {s.endTime} ({s.status})
+                  {s.startTime} – {s.endTime} ({s.name})
                 </option>
               ))}
             </Select>

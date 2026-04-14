@@ -16,7 +16,7 @@ function fmt(n: number): string {
 
 const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useListPayrollRuns({ status: 'Paid', limit: 50, offset: 0 });
+  const { data, isLoading } = useListPayrollRuns({ status: 'exported', limit: 50, offset: 0 });
   const runs = data?.runs ?? [];
 
   return (
@@ -62,8 +62,8 @@ const MyPaySlips = (): React.JSX.Element => {
                     height: 36,
                     width: 36,
                     borderRadius: 10,
-                    background: 'rgba(16,185,129,0.12)',
-                    color: '#10b981',
+                    background: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
+                    color: 'var(--hr-status-approved)',
                     flexShrink: 0,
                   }}
                 >
@@ -74,10 +74,12 @@ const MyPaySlips = (): React.JSX.Element => {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                       {run.periodStart} — {run.periodEnd}
                     </span>
-                    <Pill color="#10b981">{t(`payroll.statuses.${run.status.toLowerCase()}`)}</Pill>
+                    <Pill color="var(--hr-status-approved)">
+                      {t(`payroll.statuses.${run.status}`)}
+                    </Pill>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                    {t('payroll.netTotal')}: {fmt(run.totalNetPay)}
+                    {t('payroll.netTotal')}: {fmt(run.totalNet)}
                   </div>
                 </div>
               </Card>

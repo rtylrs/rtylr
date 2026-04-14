@@ -20,13 +20,13 @@ import {
 } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
-  Draft: 'var(--hr-text-muted)',
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Paid: '#10b981',
+  draft: 'var(--hr-text-muted)',
+  in_review: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  exported: 'var(--hr-status-paid)',
 };
 
-const FILTER_STATUSES = ['All', 'Draft', 'Pending', 'Approved', 'Paid'] as const;
+const FILTER_STATUSES = ['all', 'draft', 'in_review', 'approved', 'exported'] as const;
 type StatusFilter = (typeof FILTER_STATUSES)[number];
 
 function fmt(n: number): string {
@@ -40,7 +40,7 @@ function fmt(n: number): string {
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
   const config = useHRConfigStore((s) => s.config);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
 
   const { data, isLoading } = useListPayrollRuns(params);
@@ -69,13 +69,12 @@ const Payroll = (): React.JSX.Element => {
 
   const runs = data?.runs ?? [];
   const filteredRuns = runs.filter((r: PayrollRunPayload) =>
-    statusFilter === 'All' ? true : r.status === statusFilter
+    statusFilter === 'all' ? true : r.status === statusFilter
   );
 
-  const totalNet = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalNetPay, 0);
-  const totalBase = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalBasePay, 0);
-  const totalOt = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalOvertimePay, 0);
-  const pendingCount = runs.filter((r: PayrollRunPayload) => r.status === 'Pending').length;
+  const totalNet = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalNet, 0);
+  const totalGross = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalGross, 0);
+  const pendingCount = runs.filter((r: PayrollRunPayload) => r.status === 'in_review').length;
 
   const handleTriggerRun = (): void => {
     const now = new Date();
@@ -111,32 +110,25 @@ const Payroll = (): React.JSX.Element => {
       >
         {[
           {
-            label: t('payroll.stats.totalBase'),
-            value: fmt(totalBase),
+            label: t('payroll.stats.totalGross'),
+            value: fmt(totalGross),
             icon: DollarSign,
-            color: '#8b5cf6',
-            bg: 'rgba(139,92,246,0.12)',
-          },
-          {
-            label: t('payroll.stats.totalOvertime'),
-            value: fmt(totalOt),
-            icon: TrendingUp,
-            color: '#f59e0b',
-            bg: 'rgba(245,158,11,0.12)',
+            color: 'var(--accent)',
+            bg: 'var(--accent-muted)',
           },
           {
             label: t('payroll.stats.totalNet'),
             value: fmt(totalNet),
-            icon: DollarSign,
-            color: '#10b981',
-            bg: 'rgba(16,185,129,0.12)',
+            icon: TrendingUp,
+            color: 'var(--hr-status-approved)',
+            bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
           },
           {
             label: t('payroll.stats.pendingRuns'),
             value: String(pendingCount),
             icon: Clock,
-            color: '#f59e0b',
-            bg: 'rgba(245,158,11,0.12)',
+            color: 'var(--hr-status-submitted)',
+            bg: 'color-mix(in srgb, var(--hr-status-submitted) 12%, transparent)',
           },
         ].map((card) => (
           <motion.div
@@ -146,7 +138,7 @@ const Payroll = (): React.JSX.Element => {
             transition={{ duration: 0.2 }}
             style={{
               background: card.bg,
-              border: `1px solid ${card.color}30`,
+              border: `1px solid color-mix(in srgb, ${card.color} 30%, transparent)`,
               borderRadius: 12,
               padding: '16px 18px',
               display: 'flex',
@@ -167,12 +159,10 @@ const Payroll = (): React.JSX.Element => {
 
       {/* Status filter tabs */}
       <Tabs
-        tabs={FILTER_STATUSES.map((s) => t(`payroll.statuses.${s.toLowerCase()}`))}
-        active={t(`payroll.statuses.${statusFilter.toLowerCase()}`)}
+        tabs={FILTER_STATUSES.map((s) => t(`payroll.statuses.${s}`))}
+        active={t(`payroll.statuses.${statusFilter}`)}
         onChange={(label) => {
-          const idx = FILTER_STATUSES.findIndex(
-            (s) => t(`payroll.statuses.${s.toLowerCase()}`) === label
-          );
+          const idx = FILTER_STATUSES.findIndex((s) => t(`payroll.statuses.${s}`) === label);
           if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
         }}
       />
@@ -213,13 +203,13 @@ const Payroll = (): React.JSX.Element => {
                       {run.periodStart} — {run.periodEnd}
                     </span>
                     <Pill color={STATUS_COLORS[run.status]}>
-                      {t(`payroll.statuses.${run.status.toLowerCase()}`)}
+                      {t(`payroll.statuses.${run.status}`)}
                     </Pill>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
                     <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                    {t('payroll.employeeCount', { count: run.employeeCount })} ·{' '}
-                    {t('payroll.netTotal')}: {fmt(run.totalNetPay)}
+                    {t('payroll.employeeCount', { count: run.entries.length })} ·{' '}
+                    {t('payroll.netTotal')}: {fmt(run.totalNet)}
                   </div>
                 </div>
               </Card>
