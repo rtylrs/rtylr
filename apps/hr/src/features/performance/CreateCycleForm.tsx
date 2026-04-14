@@ -74,7 +74,9 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
             placeholder={t('performance.createCycle.namePlaceholder')}
           />
           {errors.name && (
-            <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{t('common.required')}</p>
+            <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+              {t('common.required')}
+            </p>
           )}
         </div>
 
@@ -88,7 +90,9 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
               onChange={(e) => setPeriodStart(e.target.value)}
             />
             {errors.periodStart && (
-              <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{t('common.required')}</p>
+              <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                {t('common.required')}
+              </p>
             )}
           </div>
           <div>
@@ -100,7 +104,9 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
               onChange={(e) => setPeriodEnd(e.target.value)}
             />
             {errors.periodEnd && (
-              <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{t('common.required')}</p>
+              <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                {t('common.required')}
+              </p>
             )}
           </div>
         </div>
@@ -118,7 +124,7 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
             ))}
           </div>
           {errors.reviewTypes && (
-            <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>
+            <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
               {t('performance.createCycle.reviewTypesRequired')}
             </p>
           )}

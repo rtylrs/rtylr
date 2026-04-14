@@ -21,23 +21,22 @@ import {
   Card,
   Skeleton,
   EmptyState,
-  ACCENT,
 } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#6b7280',
-  submitted: '#f59e0b',
-  completed: '#10b981',
-  shared: ACCENT,
-  active: '#10b981',
-  achieved: ACCENT,
-  missed: '#ef4444',
+  draft: 'var(--hr-status-draft)',
+  submitted: 'var(--hr-status-submitted)',
+  completed: 'var(--hr-status-approved)',
+  shared: 'var(--hr-accent)',
+  active: 'var(--hr-status-approved)',
+  achieved: 'var(--hr-accent)',
+  missed: 'var(--hr-error)',
 };
 
 const REVIEW_TYPE_COLORS: Record<string, string> = {
-  self: '#3b82f6',
-  manager: '#f59e0b',
-  peer: '#10b981',
+  self: 'var(--hr-shift-blue)',
+  manager: 'var(--hr-status-submitted)',
+  peer: 'var(--hr-status-approved)',
 };
 
 /* ── Virtualised reviews table ── */
@@ -170,10 +169,10 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
                 >
                   <span>#{review.employeeId}</span>
                   <span>#{review.reviewerEmployeeId}</span>
-                  <Pill color={REVIEW_TYPE_COLORS[review.reviewType] ?? '#6b7280'}>
+                  <Pill color={REVIEW_TYPE_COLORS[review.reviewType] ?? 'var(--hr-status-draft)'}>
                     {t(`performance.reviewTypes.${review.reviewType}`)}
                   </Pill>
-                  <Pill color={STATUS_COLORS[review.status] ?? '#6b7280'}>
+                  <Pill color={STATUS_COLORS[review.status] ?? 'var(--hr-status-draft)'}>
                     {t(`performance.statuses.${review.status}`)}
                   </Pill>
                   <span style={{ color: 'var(--hr-text-muted)' }}>
@@ -235,7 +234,9 @@ function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
             <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
               {goal.title}
             </h4>
-            <Pill color={STATUS_COLORS[goal.status] ?? '#6b7280'}>{goal.status}</Pill>
+            <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
+              {goal.status}
+            </Pill>
           </div>
           {goal.description && (
             <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
@@ -280,7 +281,11 @@ const ReviewCycleDetail = (): React.JSX.Element => {
       <SectionHeader
         title={cycle.name}
         subtitle={`${cycle.periodStart} — ${cycle.periodEnd}`}
-        right={<Pill color={STATUS_COLORS[cycle.status] ?? '#6b7280'}>{cycle.status}</Pill>}
+        right={
+          <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
+            {cycle.status}
+          </Pill>
+        }
       />
 
       <Tabs tabs={[reviewsLabel, goalsLabel]} active={activeTab} onChange={setActiveTab} />

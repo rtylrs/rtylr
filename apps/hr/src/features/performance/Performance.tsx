@@ -11,17 +11,16 @@ import {
   EmptyState,
   Skeleton,
   ConfirmDialog,
-  ACCENT,
 } from '../../shared/components/ui';
 import { useListReviewCycles, useOpenReviewCycle } from '../../shared/hooks/queries/usePerformance';
 import CreateCycleForm from './CreateCycleForm';
 import type { ReviewCyclePayload } from '@voxire/contracts/hr/v1/performance';
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: '#6b7280',
-  open: '#10b981',
-  in_review: '#f59e0b',
-  completed: ACCENT,
+  draft: 'var(--hr-status-draft)',
+  open: 'var(--hr-status-approved)',
+  in_review: 'var(--hr-status-submitted)',
+  completed: 'var(--hr-accent)',
 };
 
 function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element {
@@ -44,7 +43,9 @@ function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element 
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
             {cycle.name}
           </h3>
-          <Pill color={STATUS_COLORS[cycle.status] ?? '#6b7280'}>{cycle.status}</Pill>
+          <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
+            {cycle.status}
+          </Pill>
         </div>
 
         <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>

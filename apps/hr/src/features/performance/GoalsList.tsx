@@ -14,13 +14,12 @@ import {
   Label,
   EmptyState,
   Skeleton,
-  ACCENT,
 } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#10b981',
-  achieved: ACCENT,
-  missed: '#ef4444',
+  active: 'var(--hr-status-approved)',
+  achieved: 'var(--hr-accent)',
+  missed: 'var(--hr-error)',
 };
 
 function InlineGoalForm({
@@ -92,7 +91,9 @@ function InlineGoalForm({
             placeholder={t('performance.goals.form.titlePlaceholder')}
           />
           {errors.title && (
-            <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{t('common.required')}</p>
+            <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+              {t('common.required')}
+            </p>
           )}
         </div>
 
@@ -119,7 +120,7 @@ function InlineGoalForm({
             placeholder={t('performance.goals.form.weightPlaceholder')}
           />
           {errors.weight && (
-            <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{errors.weight}</p>
+            <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>{errors.weight}</p>
           )}
         </div>
 
@@ -192,7 +193,9 @@ const GoalsList = (): React.JSX.Element => {
                 <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
                   {goal.title}
                 </h4>
-                <Pill color={STATUS_COLORS[goal.status] ?? '#6b7280'}>{goal.status}</Pill>
+                <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
+                  {goal.status}
+                </Pill>
               </div>
               {goal.description && (
                 <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>

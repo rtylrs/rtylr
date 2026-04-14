@@ -20,13 +20,12 @@ import {
   Textarea,
   Skeleton,
   EmptyState,
-  ACCENT,
 } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#10b981',
-  achieved: ACCENT,
-  missed: '#ef4444',
+  active: 'var(--hr-status-approved)',
+  achieved: 'var(--hr-accent)',
+  missed: 'var(--hr-error)',
 };
 
 function GoalContext({ goals }: { goals: ReviewGoalPayload[] }): React.JSX.Element {
@@ -46,7 +45,7 @@ function GoalContext({ goals }: { goals: ReviewGoalPayload[] }): React.JSX.Eleme
               <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--hr-text)' }}>
                 {g.title}
               </span>
-              <Pill color={STATUS_COLORS[g.status] ?? '#6b7280'}>{g.status}</Pill>
+              <Pill color={STATUS_COLORS[g.status] ?? 'var(--hr-status-draft)'}>{g.status}</Pill>
             </div>
           </Card>
         ))}
@@ -183,7 +182,7 @@ const MyReview = (): React.JSX.Element => {
                 ))}
               </Select>
               {errors.overallRating && (
-                <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>
+                <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
                   {t('common.required')}
                 </p>
               )}
@@ -199,7 +198,9 @@ const MyReview = (): React.JSX.Element => {
                 style={{ minHeight: 140 }}
               />
               {errors.narrative && (
-                <p style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>{errors.narrative}</p>
+                <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                  {errors.narrative}
+                </p>
               )}
             </div>
 
