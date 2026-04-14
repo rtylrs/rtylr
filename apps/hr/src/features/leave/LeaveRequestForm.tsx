@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { useUserStore } from '@voxire/auth';
 import {
   useListLeaveTypes,
   useCreateLeaveRequest,
@@ -22,13 +23,20 @@ const leaveFormSchema = z.object({
   leaveTypeId: z.number().min(1),
   startDate: z.string().min(1),
   endDate: z.string().min(1),
-  reason: z.string().min(1),
   notes: z.string().optional(),
 });
+
+function daysBetween(start: string, end: string): number {
+  const s = new Date(start);
+  const e = new Date(end);
+  const diff = e.getTime() - s.getTime();
+  return Math.max(1, Math.round(diff / 86400000) + 1);
+}
 
 const LeaveRequestForm = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const userId = useUserStore((s) => s.userId);
   const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
   const { data: balances } = useListLeaveBalances();
   const createRequest = useCreateLeaveRequest();
@@ -37,7 +45,6 @@ const LeaveRequestForm = (): React.JSX.Element => {
     leaveTypeId: 0,
     startDate: '',
     endDate: '',
-    reason: '',
     notes: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -60,9 +67,18 @@ const LeaveRequestForm = (): React.JSX.Element => {
       return;
     }
     setErrors({});
-    createRequest.mutate(result.data, {
-      onSuccess: () => navigate('/leave'),
-    });
+    const { leaveTypeId, startDate, endDate, notes } = result.data;
+    createRequest.mutate(
+      {
+        employeeId: Number(userId),
+        leaveTypeId,
+        startDate,
+        endDate,
+        totalDays: daysBetween(startDate, endDate),
+        notes,
+      },
+      { onSuccess: () => navigate('/leave') }
+    );
   };
 
   const update = (field: string, value: string | number): void => {
@@ -139,7 +155,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 {t('leave.form.remainingBalance')}:{' '}
               </span>
               <span style={{ fontWeight: 700, color: 'var(--hr-text)' }}>
-                {selectedBalance.remaining} {t('leave.balances.daysLeft')}
+                {selectedBalance.remainingDays} {t('leave.balances.daysLeft')}
               </span>
             </div>
           )}
@@ -174,24 +190,6 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 </p>
               )}
             </div>
-          </div>
-
-          <div>
-            <Label>{t('leave.form.reason')}</Label>
-            <Textarea
-              value={form.reason}
-              onChange={(e) => update('reason', e.target.value)}
-              placeholder={t('leave.form.reasonPlaceholder')}
-              style={{
-                minHeight: 60,
-                ...(errors.reason ? { borderColor: 'var(--hr-error)' } : {}),
-              }}
-            />
-            {errors.reason && (
-              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
-                {errors.reason}
-              </p>
-            )}
           </div>
 
           <div>

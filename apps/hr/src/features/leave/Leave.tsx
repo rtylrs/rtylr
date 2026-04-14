@@ -108,28 +108,32 @@ const Leave = (): React.JSX.Element => {
                       style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
                     >
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                        {req.staffName}
+                        {t('leave.employee')} #{req.employeeId}
                       </span>
                       <Pill color={STATUS_COLORS[req.status]}>
                         {t(`leave.statuses.${req.status.toLowerCase()}`)}
                       </Pill>
                       <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
-                        {req.leaveTypeName}
+                        #{req.leaveTypeId}
                       </span>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {req.startDate} — {req.endDate} · {req.daysCount} {t('leave.days')}
+                      {req.startDate} — {req.endDate} · {req.totalDays} {t('leave.days')}
                     </div>
-                    {req.reason && (
+                    {req.notes && (
                       <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
-                        {req.reason}
+                        {req.notes}
                       </div>
                     )}
                   </div>
                   {req.status === 'Pending' && (
                     <ApprovalButtons
-                      onApprove={() => approveLeave.mutate({ id: req.id, status: 'Approved' })}
-                      onReject={() => approveLeave.mutate({ id: req.id, status: 'Rejected' })}
+                      onApprove={() =>
+                        approveLeave.mutate({ leaveRequestId: req.id, approved: true })
+                      }
+                      onReject={() =>
+                        approveLeave.mutate({ leaveRequestId: req.id, approved: false })
+                      }
                     />
                   )}
                 </Card>

@@ -2,17 +2,26 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   OvertimeRequestPayload,
-  OvertimeConfigPayload,
   ListOvertimeRequestsRequest,
   ListOvertimeRequestsResponse,
   CreateOvertimeRequestRequest,
-  ApproveOvertimeRequestRequest,
-  GetOvertimeConfigResponse,
-  UpdateOvertimeConfigRequest,
+  ApproveOvertimeRequest,
 } from '@voxire/contracts/hr/v1/overtime';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+interface OvertimeConfigData {
+  dailyOtThresholdMinutes: number;
+  weeklyOtThresholdMinutes: number;
+  defaultMultiplier: number;
+}
+
+interface UpdateOvertimeConfigData {
+  dailyOtThresholdMinutes?: number;
+  weeklyOtThresholdMinutes?: number;
+  defaultMultiplier?: number;
+}
 
 export const useListOvertimeRequests = (params?: ListOvertimeRequestsRequest) => {
   return useQuery<OvertimeRequestPayload[]>({
@@ -49,8 +58,8 @@ export const useApproveOvertime = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ApproveOvertimeRequestRequest): Promise<void> => {
-      await unwrap(safe.put(`/hr/overtime/requests/${data.id}/approve`, data));
+    mutationFn: async (data: ApproveOvertimeRequest): Promise<void> => {
+      await unwrap(safe.put(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-requests'] });
@@ -63,11 +72,11 @@ export const useApproveOvertime = () => {
 };
 
 export const useGetOvertimeConfig = () => {
-  return useQuery<OvertimeConfigPayload>({
+  return useQuery<OvertimeConfigData>({
     queryKey: ['overtime-config'],
-    queryFn: async (): Promise<OvertimeConfigPayload> => {
-      const res = await unwrap(safe.get<GetOvertimeConfigResponse>('/hr/overtime/config'));
-      return (res as GetOvertimeConfigResponse).config!;
+    queryFn: async (): Promise<OvertimeConfigData> => {
+      const res = await unwrap(safe.get<{ config: OvertimeConfigData }>('/hr/overtime/config'));
+      return (res as { config: OvertimeConfigData }).config;
     },
   });
 };
@@ -77,7 +86,7 @@ export const useUpdateOvertimeConfig = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: UpdateOvertimeConfigRequest): Promise<void> => {
+    mutationFn: async (data: UpdateOvertimeConfigData): Promise<void> => {
       await unwrap(safe.put('/hr/overtime/config', data));
     },
     onSuccess: () => {

@@ -4,19 +4,27 @@ import type {
   LeaveTypePayload,
   LeaveRequestPayload,
   LeaveBalancePayload,
-  LeaveCalendarEntryPayload,
   ListLeaveTypesResponse,
   ListLeaveRequestsRequest,
   ListLeaveRequestsResponse,
   CreateLeaveRequestRequest,
-  ApproveLeaveRequestRequest,
+  ApproveLeaveRequest,
   ListLeaveBalancesResponse,
-  GetLeaveCalendarRequest,
-  GetLeaveCalendarResponse,
 } from '@voxire/contracts/hr/v1/leave';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+interface LeaveCalendarParams {
+  month: number;
+  year: number;
+  departmentId?: number;
+  locationId?: number;
+}
+
+interface LeaveCalendarResponse {
+  requests: LeaveRequestPayload[];
+}
 
 export const useListLeaveTypes = () => {
   return useQuery<LeaveTypePayload[]>({
@@ -64,8 +72,8 @@ export const useApproveLeave = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ApproveLeaveRequestRequest): Promise<void> => {
-      await unwrap(safe.put(`/hr/leave/requests/${data.id}/approve`, data));
+    mutationFn: async (data: ApproveLeaveRequest): Promise<void> => {
+      await unwrap(safe.put(`/hr/leave/requests/${data.leaveRequestId}/approve`, data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
@@ -89,14 +97,12 @@ export const useListLeaveBalances = () => {
   });
 };
 
-export const useGetLeaveCalendar = (params: GetLeaveCalendarRequest) => {
-  return useQuery<LeaveCalendarEntryPayload[]>({
+export const useGetLeaveCalendar = (params: LeaveCalendarParams) => {
+  return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-calendar', params],
-    queryFn: async (): Promise<LeaveCalendarEntryPayload[]> => {
-      const res = await unwrap(
-        safe.get<GetLeaveCalendarResponse>('/hr/leave/calendar', { params })
-      );
-      return (res as GetLeaveCalendarResponse).entries;
+    queryFn: async (): Promise<LeaveRequestPayload[]> => {
+      const res = await unwrap(safe.get<LeaveCalendarResponse>('/hr/leave/calendar', { params }));
+      return (res as LeaveCalendarResponse).requests;
     },
   });
 };

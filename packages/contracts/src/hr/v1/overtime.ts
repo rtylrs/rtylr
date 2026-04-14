@@ -11,104 +11,74 @@ export interface OvertimeRequestPayload {
   id: number;
   /** Tenant owner this request belongs to. */
   ownerId: number;
-  /** Employee who submitted the overtime request. */
-  staffId: number;
-  /** Display name of the requesting employee. */
-  staffName: string;
-  /** Date the overtime is planned for (ISO-8601 format). */
+  /** Employee requesting overtime. */
+  employeeId: number;
+  /** Date the overtime is planned for (ISO-8601 date). */
   date: string;
-  /** Planned extra minutes beyond the regular shift. */
-  plannedMinutes: number;
-  /** Actual extra minutes worked; absent if not yet recorded. */
-  actualMinutes?: number | undefined;
-  /** Reason for the overtime request. */
+  /** Number of extra minutes planned beyond the regular shift. */
+  plannedExtraMinutes: number;
+  /** Justification for the overtime work. */
   reason: string;
-  /** Request status (Pending | Approved | Rejected). */
+  /** Workflow status (pending | approved | rejected | cancelled). */
   status: string;
-  /** Employee ID who approved/rejected; absent if still pending. */
+  /** Current step in a multi-level approval chain. */
+  currentApprovalLevel: number;
+  /** Employee ID of the approver; absent if not yet approved. */
   approvedBy?: number | undefined;
-  /** Unix timestamp of approval/rejection; absent if still pending. */
-  approvedAt?: number | undefined;
-  /** Unix timestamp when this request was created. */
+  /** Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated. */
+  multiplierApplied?: number | undefined;
+  /** Unix timestamp when this record was created. */
   createdAt: number;
-  /** Unix timestamp when this request was last updated. */
+  /** Unix timestamp when this record was last updated. */
   updatedAt: number;
 }
 
-export interface OvertimeConfigPayload {
-  /** Whether overtime tracking is enabled for this tenant. */
-  enabled: boolean;
-  /** Minutes per day after which overtime begins. */
-  dailyThresholdMinutes: number;
-  /** Minutes per week after which overtime begins. */
-  weeklyThresholdMinutes: number;
-  /** Whether overtime must be pre-approved before it is worked. */
-  requiresPreApproval: boolean;
-  /** Pay multiplier for overtime hours (e.g. 1.5). */
-  multiplier: number;
-}
-
-export interface ListOvertimeRequestsRequest {
-  /** Filter by request status; absent to include all. */
-  status?: string | undefined;
-  /** Filter by employee; absent to include all. */
-  staffId?: number | undefined;
-}
-
-export interface ListOvertimeRequestsResponse {
-  /** Overtime requests matching the filters. */
-  requests: OvertimeRequestPayload[];
-}
-
 export interface CreateOvertimeRequestRequest {
-  /** Date the overtime is planned for (ISO-8601 format). */
+  /** Employee requesting overtime. */
+  employeeId: number;
+  /** Date the overtime is planned for (ISO-8601 date). */
   date: string;
-  /** Planned extra minutes. */
-  plannedMinutes: number;
-  /** Reason for the overtime request. */
+  /** Number of extra minutes planned beyond the regular shift. */
+  plannedExtraMinutes: number;
+  /** Justification for the overtime work. */
   reason: string;
 }
 
 export interface CreateOvertimeRequestResponse {
-  /** ID of the created overtime request. */
-  id: number;
+  /** The newly created overtime request. */
+  request: OvertimeRequestPayload | undefined;
 }
 
-export interface ApproveOvertimeRequestRequest {
-  /** ID of the overtime request to approve or reject. */
-  id: number;
-  /** New status (Approved | Rejected). */
-  status: string;
-  /** Optional notes from the approver. */
-  notes?: string | undefined;
+export interface ApproveOvertimeRequest {
+  /** ID of the overtime request being reviewed. */
+  overtimeRequestId: number;
+  /** True to approve, false to reject. */
+  approved: boolean;
+  /** Pay multiplier to apply (e.g. 1.5); absent to use the default rate. */
+  multiplierApplied?: number | undefined;
+  /** Reason for rejection; absent if approving. */
+  rejectionReason?: string | undefined;
 }
 
-export interface ApproveOvertimeRequestResponse {
-  /** Whether the operation succeeded. */
+export interface ApproveOvertimeResponse {
+  /** Whether the approval action was processed. */
   success: boolean;
 }
 
-export interface GetOvertimeConfigRequest {}
-
-export interface GetOvertimeConfigResponse {
-  /** Overtime configuration for this tenant. */
-  config: OvertimeConfigPayload | undefined;
+export interface ListOvertimeRequestsRequest {
+  /** Filter by employee; absent to include all employees. */
+  employeeId?: number | undefined;
+  /** Filter by status; absent to include all statuses. */
+  status?: string | undefined;
 }
 
-export interface UpdateOvertimeConfigRequest {
-  /** Whether overtime tracking is enabled. */
-  enabled?: boolean | undefined;
-  /** Minutes per day after which overtime begins. */
-  dailyThresholdMinutes?: number | undefined;
-  /** Minutes per week after which overtime begins. */
-  weeklyThresholdMinutes?: number | undefined;
-  /** Whether overtime must be pre-approved. */
-  requiresPreApproval?: boolean | undefined;
-  /** Pay multiplier for overtime hours. */
-  multiplier?: number | undefined;
-}
-
-export interface UpdateOvertimeConfigResponse {
-  /** Whether the operation succeeded. */
-  success: boolean;
+export interface ListOvertimeRequestsResponse {
+  /** Page of overtime requests matching the filters. */
+  requests: OvertimeRequestPayload[];
+  /** Total number of matching overtime requests across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }

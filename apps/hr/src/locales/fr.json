@@ -400,6 +400,7 @@
     "newRequest": "Nouvelle demande",
     "requestCreated": "Demande de congé soumise",
     "requestUpdated": "Demande de congé mise à jour",
+    "employee": "Employé",
     "days": "jours",
     "emptyTitle": "Aucune demande de congé",
     "emptyDescription": "Les demandes de congé apparaîtront ici une fois soumises.",
@@ -450,6 +451,7 @@
   "overtime": {
     "title": "Heures supplémentaires",
     "subtitle": "Suivre et gérer les demandes d'heures supplémentaires",
+    "employee": "Employé",
     "newRequest": "Nouvelle pré-approbation",
     "requestCreated": "Demande d'heures supplémentaires soumise",
     "requestUpdated": "Demande d'heures supplémentaires mise à jour",

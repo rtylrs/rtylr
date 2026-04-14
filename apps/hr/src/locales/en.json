@@ -400,6 +400,7 @@
     "newRequest": "New Request",
     "requestCreated": "Leave request submitted",
     "requestUpdated": "Leave request updated",
+    "employee": "Employee",
     "days": "days",
     "emptyTitle": "No leave requests",
     "emptyDescription": "Leave requests will appear here once submitted.",
@@ -450,6 +451,7 @@
   "overtime": {
     "title": "Overtime",
     "subtitle": "Track and manage overtime requests",
+    "employee": "Employee",
     "newRequest": "New Pre-Approval",
     "requestCreated": "Overtime request submitted",
     "requestUpdated": "Overtime request updated",

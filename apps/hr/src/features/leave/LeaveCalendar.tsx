@@ -196,15 +196,15 @@ const LeaveCalendarInner = (): React.JSX.Element => {
                           fontSize: 9,
                           padding: '1px 4px',
                           borderRadius: 4,
-                          background: `color-mix(in srgb, ${entry.color || 'var(--hr-accent)'} 13%, transparent)`,
-                          color: entry.color || 'var(--hr-accent)',
+                          background: 'color-mix(in srgb, var(--hr-accent) 13%, transparent)',
+                          color: 'var(--hr-accent)',
                           fontWeight: 600,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {entry.staffName}
+                        #{entry.employeeId}
                       </div>
                     ))}
                     {dayEntries.length > 3 && (

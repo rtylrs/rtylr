@@ -11,17 +11,25 @@ export interface LeaveTypePayload {
   id: number;
   /** Tenant owner this leave type belongs to. */
   ownerId: number;
-  /** Display name of the leave type (e.g. Annual, Sick). */
+  /** Human-readable name (e.g. "Annual Leave", "Sick Leave"). */
   name: string;
-  /** Hex color used to display this leave type in calendars. */
-  color: string;
-  /** Default number of entitled days per year. */
-  defaultDays: number;
-  /** Whether requests of this type require manager approval. */
+  /** Whether days taken under this type are paid. */
+  isPaid: boolean;
+  /** Whether leave requests of this type require manager approval. */
   requiresApproval: boolean;
-  /** Unix timestamp when this leave type was created. */
+  /** Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed. */
+  accrualRule?: string | undefined;
+  /** Maximum unused days that may carry over to the next year. */
+  maxCarryoverDays: number;
+  /** Minimum calendar days of notice required before the leave starts. */
+  minNoticeDays: number;
+  /** Number of consecutive days after which supporting documentation is required; absent if never required. */
+  requiresDocumentationAfterDays?: number | undefined;
+  /** Whether this leave type is currently available for new requests. */
+  isActive: boolean;
+  /** Unix timestamp when this record was created. */
   createdAt: number;
-  /** Unix timestamp when this leave type was last updated. */
+  /** Unix timestamp when this record was last updated. */
   updatedAt: number;
 }
 
@@ -30,138 +38,182 @@ export interface LeaveRequestPayload {
   id: number;
   /** Tenant owner this request belongs to. */
   ownerId: number;
-  /** Employee who submitted the leave request. */
-  staffId: number;
-  /** Display name of the requesting employee. */
-  staffName: string;
-  /** Leave type ID this request is for. */
+  /** Employee who is requesting leave. */
+  employeeId: number;
+  /** Leave type being requested. */
   leaveTypeId: number;
-  /** Display name of the leave type. */
-  leaveTypeName: string;
-  /** Start date of leave (ISO-8601 format). */
+  /** First day of leave (ISO-8601 date). */
   startDate: string;
-  /** End date of leave (ISO-8601 format). */
+  /** Last day of leave (ISO-8601 date). */
   endDate: string;
-  /** Number of working days requested. */
-  daysCount: number;
-  /** Request status (Pending | Approved | Rejected). */
+  /** Total number of working days requested (may be fractional for half-days). */
+  totalDays: number;
+  /** Additional context from the employee; absent if none provided. */
+  notes?: string | undefined;
+  /** Workflow status (pending | approved | rejected | cancelled). */
   status: string;
-  /** Reason provided by the employee. */
-  reason: string;
-  /** Optional additional notes. */
-  notes: string;
-  /** Employee ID who approved/rejected; absent if still pending. */
-  approvedBy?: number | undefined;
-  /** Unix timestamp of approval/rejection; absent if still pending. */
-  approvedAt?: number | undefined;
-  /** Unix timestamp when this request was created. */
+  /** Current step in a multi-level approval chain. */
+  currentApprovalLevel: number;
+  /** Reason the request was rejected; absent unless status is rejected. */
+  rejectionReason?: string | undefined;
+  /** Unix timestamp when this record was created. */
   createdAt: number;
-  /** Unix timestamp when this request was last updated. */
+  /** Unix timestamp when this record was last updated. */
   updatedAt: number;
 }
 
 export interface LeaveBalancePayload {
-  /** Leave type ID this balance is for. */
+  /** Unique identifier for the balance record. */
+  id: number;
+  /** Tenant owner this balance belongs to. */
+  ownerId: number;
+  /** Employee this balance is for. */
+  employeeId: number;
+  /** Leave type this balance tracks. */
   leaveTypeId: number;
-  /** Display name of the leave type. */
-  leaveTypeName: string;
-  /** Total entitled days for the current period. */
-  entitled: number;
-  /** Days already used. */
-  used: number;
-  /** Days in pending requests. */
-  pending: number;
-  /** Remaining available days. */
-  remaining: number;
+  /** Calendar year this balance applies to. */
+  year: number;
+  /** Total entitled days for the year (including carryover). */
+  entitledDays: number;
+  /** Days already consumed by approved requests. */
+  usedDays: number;
+  /** Days reserved by pending (not yet approved) requests. */
+  pendingDays: number;
+  /** Days still available (entitled - used - pending). */
+  remainingDays: number;
+  /** Unix timestamp when this record was created. */
+  createdAt: number;
+  /** Unix timestamp when this record was last updated. */
+  updatedAt: number;
 }
 
-export interface LeaveCalendarEntryPayload {
-  /** Unique identifier for the calendar entry. */
-  id: number;
-  /** Employee this entry belongs to. */
-  staffId: number;
-  /** Display name of the employee. */
-  staffName: string;
-  /** Display name of the leave type. */
-  leaveTypeName: string;
-  /** Hex color for calendar display. */
-  color: string;
-  /** Start date of the leave (ISO-8601 format). */
+export interface CreateLeaveRequestRequest {
+  /** Employee requesting leave. */
+  employeeId: number;
+  /** Leave type being requested. */
+  leaveTypeId: number;
+  /** First day of leave (ISO-8601 date). */
   startDate: string;
-  /** End date of the leave (ISO-8601 format). */
+  /** Last day of leave (ISO-8601 date). */
   endDate: string;
+  /** Total number of working days requested. */
+  totalDays: number;
+  /** Additional context from the employee; absent if none provided. */
+  notes?: string | undefined;
+}
+
+export interface CreateLeaveRequestResponse {
+  /** The newly created leave request. */
+  request: LeaveRequestPayload | undefined;
+}
+
+export interface ApproveLeaveRequest {
+  /** ID of the leave request being reviewed. */
+  leaveRequestId: number;
+  /** True to approve, false to reject. */
+  approved: boolean;
+  /** Reason for rejection; absent if approving. */
+  rejectionReason?: string | undefined;
+}
+
+export interface ApproveLeaveResponse {
+  /** Whether the approval action was processed. */
+  success: boolean;
+}
+
+export interface ListLeaveRequestsRequest {
+  /** Filter by employee; absent to include all employees. */
+  employeeId?: number | undefined;
+  /** Filter by status; absent to include all statuses. */
+  status?: string | undefined;
+}
+
+export interface ListLeaveRequestsResponse {
+  /** Page of leave requests matching the filters. */
+  requests: LeaveRequestPayload[];
+  /** Total number of matching leave requests across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
+}
+
+export interface ListLeaveBalancesRequest {
+  /** Filter by employee; absent to include all employees. */
+  employeeId?: number | undefined;
+  /** Filter by year; absent to return current year. */
+  year?: number | undefined;
+}
+
+export interface ListLeaveBalancesResponse {
+  /** Leave balances matching the filters. */
+  balances: LeaveBalancePayload[];
+  /** Total number of matching balances across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }
 
 export interface ListLeaveTypesRequest {}
 
 export interface ListLeaveTypesResponse {
-  /** Available leave types for this tenant. */
+  /** All leave types configured for the tenant. */
   leaveTypes: LeaveTypePayload[];
+  /** Total number of leave types. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }
 
-export interface ListLeaveRequestsRequest {
-  /** Filter by request status; absent to include all. */
-  status?: string | undefined;
-  /** Filter by employee; absent to include all. */
-  staffId?: number | undefined;
+export interface CreateLeaveTypeRequest {
+  /** Human-readable name (e.g. "Annual Leave", "Sick Leave"). */
+  name: string;
+  /** Whether days taken under this type are paid. */
+  isPaid: boolean;
+  /** Whether leave requests of this type require manager approval. */
+  requiresApproval: boolean;
+  /** Accrual rule; absent if entitlement is fixed. */
+  accrualRule?: string | undefined;
+  /** Maximum unused days that may carry over to the next year. */
+  maxCarryoverDays: number;
+  /** Minimum calendar days of notice required. */
+  minNoticeDays: number;
+  /** Consecutive days after which documentation is required; absent if never. */
+  requiresDocumentationAfterDays?: number | undefined;
 }
 
-export interface ListLeaveRequestsResponse {
-  /** Leave requests matching the filters. */
-  requests: LeaveRequestPayload[];
+export interface CreateLeaveTypeResponse {
+  /** The newly created leave type. */
+  leaveType: LeaveTypePayload | undefined;
 }
 
-export interface CreateLeaveRequestRequest {
-  /** Leave type to request. */
-  leaveTypeId: number;
-  /** Start date of leave (ISO-8601 format). */
-  startDate: string;
-  /** End date of leave (ISO-8601 format). */
-  endDate: string;
-  /** Reason for the leave request. */
-  reason: string;
-  /** Optional additional notes. */
-  notes?: string | undefined;
-}
-
-export interface CreateLeaveRequestResponse {
-  /** ID of the created leave request. */
+export interface UpdateLeaveTypeRequest {
+  /** ID of the leave type to update. */
   id: number;
+  /** Updated name; absent to keep current value. */
+  name?: string | undefined;
+  /** Updated paid status; absent to keep current value. */
+  isPaid?: boolean | undefined;
+  /** Updated approval requirement; absent to keep current value. */
+  requiresApproval?: boolean | undefined;
+  /** Updated accrual rule; absent to keep current value. */
+  accrualRule?: string | undefined;
+  /** Updated max carryover days; absent to keep current value. */
+  maxCarryoverDays?: number | undefined;
+  /** Updated min notice days; absent to keep current value. */
+  minNoticeDays?: number | undefined;
+  /** Updated documentation threshold; absent to keep current value. */
+  requiresDocumentationAfterDays?: number | undefined;
+  /** Updated active status; absent to keep current value. */
+  isActive?: boolean | undefined;
 }
 
-export interface ApproveLeaveRequestRequest {
-  /** ID of the leave request to approve or reject. */
-  id: number;
-  /** New status (Approved | Rejected). */
-  status: string;
-  /** Optional notes from the approver. */
-  notes?: string | undefined;
-}
-
-export interface ApproveLeaveRequestResponse {
-  /** Whether the operation succeeded. */
-  success: boolean;
-}
-
-export interface ListLeaveBalancesRequest {}
-
-export interface ListLeaveBalancesResponse {
-  /** Leave balances for the requesting employee. */
-  balances: LeaveBalancePayload[];
-}
-
-export interface GetLeaveCalendarRequest {
-  /** Month (1-12). */
-  month: number;
-  /** Year. */
-  year: number;
-  /** Filter by department; absent to include all. */
-  departmentId?: number | undefined;
-  /** Filter by location; absent to include all. */
-  locationId?: number | undefined;
-}
-
-export interface GetLeaveCalendarResponse {
-  /** Calendar entries for the requested period. */
-  entries: LeaveCalendarEntryPayload[];
+export interface UpdateLeaveTypeResponse {
+  /** The updated leave type. */
+  leaveType: LeaveTypePayload | undefined;
 }

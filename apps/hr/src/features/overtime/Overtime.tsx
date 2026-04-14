@@ -100,20 +100,14 @@ const Overtime = (): React.JSX.Element => {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                    {req.staffName}
+                    {t('overtime.employee')} #{req.employeeId}
                   </span>
                   <Pill color={STATUS_COLORS[req.status]}>
                     {t(`overtime.statuses.${req.status.toLowerCase()}`)}
                   </Pill>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                  {req.date} · {formatMinutes(req.plannedMinutes)} {t('overtime.planned')}
-                  {req.actualMinutes != null && (
-                    <>
-                      {' '}
-                      · {formatMinutes(req.actualMinutes)} {t('overtime.actual')}
-                    </>
-                  )}
+                  {req.date} · {formatMinutes(req.plannedExtraMinutes)} {t('overtime.planned')}
                 </div>
                 {req.reason && (
                   <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
@@ -123,8 +117,12 @@ const Overtime = (): React.JSX.Element => {
               </div>
               {req.status === 'Pending' && (
                 <ApprovalButtons
-                  onApprove={() => approveOvertime.mutate({ id: req.id, status: 'Approved' })}
-                  onReject={() => approveOvertime.mutate({ id: req.id, status: 'Rejected' })}
+                  onApprove={() =>
+                    approveOvertime.mutate({ overtimeRequestId: req.id, approved: true })
+                  }
+                  onReject={() =>
+                    approveOvertime.mutate({ overtimeRequestId: req.id, approved: false })
+                  }
                 />
               )}
             </Card>

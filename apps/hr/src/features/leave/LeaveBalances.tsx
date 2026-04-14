@@ -54,10 +54,10 @@ const LeaveBalances = (): React.JSX.Element => {
               letterSpacing: '0.05em',
             }}
           >
-            {balance.leaveTypeName}
+            #{balance.leaveTypeId}
           </div>
           <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--hr-text)', marginBottom: 12 }}>
-            {balance.remaining}
+            {balance.remainingDays}
             <span
               style={{
                 fontSize: 12,
@@ -72,17 +72,17 @@ const LeaveBalances = (): React.JSX.Element => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <BalanceRow
               label={t('leave.balances.entitled')}
-              value={balance.entitled}
+              value={balance.entitledDays}
               color="var(--hr-accent)"
             />
             <BalanceRow
               label={t('leave.balances.used')}
-              value={balance.used}
+              value={balance.usedDays}
               color="var(--hr-status-rejected)"
             />
             <BalanceRow
               label={t('leave.balances.pending')}
-              value={balance.pending}
+              value={balance.pendingDays}
               color="var(--hr-status-submitted)"
             />
           </div>

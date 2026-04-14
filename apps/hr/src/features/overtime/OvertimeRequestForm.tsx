@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { useUserStore } from '@voxire/auth';
 import { useCreateOvertimeRequest } from '../../shared/hooks/queries/useOvertime';
-import { Card, Button, Label, Input, Textarea, Modal } from '../../shared/components/ui';
+import { Button, Label, Input, Textarea, Modal } from '../../shared/components/ui';
 
 const overtimeFormSchema = z.object({
   date: z.string().min(1),
-  plannedMinutes: z.number().min(1),
+  plannedExtraMinutes: z.number().min(1),
   reason: z.string().min(1),
 });
 
@@ -17,9 +18,10 @@ interface Props {
 
 const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
   const { t } = useTranslation();
+  const userId = useUserStore((s) => s.userId);
   const createRequest = useCreateOvertimeRequest();
 
-  const [form, setForm] = useState({ date: '', plannedMinutes: 0, reason: '' });
+  const [form, setForm] = useState({ date: '', plannedExtraMinutes: 0, reason: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent): void => {
@@ -35,12 +37,15 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
       return;
     }
     setErrors({});
-    createRequest.mutate(result.data, {
-      onSuccess: () => {
-        setForm({ date: '', plannedMinutes: 0, reason: '' });
-        onClose();
-      },
-    });
+    createRequest.mutate(
+      { employeeId: Number(userId), ...result.data },
+      {
+        onSuccess: () => {
+          setForm({ date: '', plannedExtraMinutes: 0, reason: '' });
+          onClose();
+        },
+      }
+    );
   };
 
   const update = (field: string, value: string | number): void => {
@@ -76,14 +81,14 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
             <Input
               type="number"
               min={1}
-              value={form.plannedMinutes || ''}
-              onChange={(e) => update('plannedMinutes', Number(e.target.value))}
+              value={form.plannedExtraMinutes || ''}
+              onChange={(e) => update('plannedExtraMinutes', Number(e.target.value))}
               placeholder={t('overtime.form.minutesPlaceholder')}
-              style={errors.plannedMinutes ? { borderColor: 'var(--hr-error)' } : undefined}
+              style={errors.plannedExtraMinutes ? { borderColor: 'var(--hr-error)' } : undefined}
             />
-            {errors.plannedMinutes && (
+            {errors.plannedExtraMinutes && (
               <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
-                {errors.plannedMinutes}
+                {errors.plannedExtraMinutes}
               </p>
             )}
           </div>

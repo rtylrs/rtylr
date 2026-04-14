@@ -400,6 +400,7 @@
     "newRequest": "طلب جديد",
     "requestCreated": "تم تقديم طلب الإجازة",
     "requestUpdated": "تم تحديث طلب الإجازة",
+    "employee": "الموظف",
     "days": "أيام",
     "emptyTitle": "لا توجد طلبات إجازة",
     "emptyDescription": "ستظهر طلبات الإجازة هنا بعد تقديمها.",
@@ -450,6 +451,7 @@
   "overtime": {
     "title": "العمل الإضافي",
     "subtitle": "تتبع وإدارة طلبات العمل الإضافي",
+    "employee": "الموظف",
     "newRequest": "طلب موافقة مسبقة",
     "requestCreated": "تم تقديم طلب العمل الإضافي",
     "requestUpdated": "تم تحديث طلب العمل الإضافي",
