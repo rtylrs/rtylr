@@ -40,12 +40,23 @@ function downloadCsv(columns: string[], rows: Record<string, unknown>[], filenam
 
 /* ── PDF Document ─────────────────────────────────────────────── */
 
+// PDF-specific color palette — CSS variables cannot be used in @react-pdf/renderer StyleSheet
+// because the PDF renderer runs outside the browser CSS engine.
+const PDF_COLORS = {
+  text: '#1a1a1a',
+  muted: '#6b7280',
+  faint: '#9ca3af',
+  border: '#e5e7eb',
+  rowBorder: '#f3f4f6',
+  cell: '#374151',
+} as const;
+
 const pdfStyles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 9,
     fontFamily: 'Helvetica',
-    color: '#1a1a1a',
+    color: PDF_COLORS.text,
   },
   header: {
     marginBottom: 20,
@@ -58,17 +69,17 @@ const pdfStyles = StyleSheet.create({
   reportTitle: {
     fontSize: 12,
     fontFamily: 'Helvetica-Bold',
-    color: '#6b7280',
+    color: PDF_COLORS.muted,
     marginBottom: 2,
   },
   dateRange: {
     fontSize: 9,
-    color: '#9ca3af',
+    color: PDF_COLORS.faint,
     marginBottom: 2,
   },
   generatedAt: {
     fontSize: 8,
-    color: '#9ca3af',
+    color: PDF_COLORS.faint,
   },
   table: {
     marginTop: 10,
@@ -76,7 +87,7 @@ const pdfStyles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: PDF_COLORS.border,
     paddingBottom: 4,
     marginBottom: 4,
   },
@@ -84,24 +95,24 @@ const pdfStyles = StyleSheet.create({
     flex: 1,
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    color: '#6b7280',
+    color: PDF_COLORS.muted,
     textTransform: 'uppercase',
   },
   row: {
     flexDirection: 'row',
     paddingVertical: 3,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: PDF_COLORS.rowBorder,
   },
   cell: {
     flex: 1,
     fontSize: 8,
-    color: '#374151',
+    color: PDF_COLORS.cell,
   },
   footer: {
     marginTop: 20,
     fontSize: 7,
-    color: '#9ca3af',
+    color: PDF_COLORS.faint,
     textAlign: 'center',
   },
 });
