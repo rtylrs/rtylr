@@ -43,6 +43,7 @@ import {
   BarChart3,
   Star,
   Target,
+  FileBarChart,
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
@@ -155,6 +156,7 @@ const navSections: NavSection[] = [
         configGuard: (_m, cfg) => !!cfg,
       },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
+      { i18nKey: 'nav.reports', path: '/reports', icon: FileBarChart },
       { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
       { i18nKey: 'nav.settings', path: '/settings', icon: Settings },
     ],
@@ -198,6 +200,7 @@ const routeLabelKeys: Record<string, string> = {
   '/performance': 'nav.performance',
   '/performance/my-review': 'nav.myReview',
   '/performance/goals': 'nav.goals',
+  '/reports': 'nav.reports',
 };
 
 /* ── Theme helpers ── */

@@ -145,4 +145,10 @@ export const hrApi = {
 
   // Dashboard
   getDashboard: () => safe.get<HRDashboardStats>('/hr/dashboard'),
+  getDashboardWidgets: () => safe.get<unknown>('/hr/dashboard/widgets'),
+  updateWidgetLayout: (widgets: unknown[]) =>
+    safe.put<{ success: boolean }>('/hr/dashboard/widgets', { widgets }),
+
+  // Reports
+  generateReport: (request: unknown) => safe.post<unknown>('/hr/reports/generate', { request }),
 };

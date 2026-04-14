@@ -70,6 +70,7 @@ const Performance = React.lazy(() => import('./features/performance/Performance'
 const ReviewCycleDetail = React.lazy(() => import('./features/performance/ReviewCycleDetail'));
 const MyReview = React.lazy(() => import('./features/performance/MyReview'));
 const GoalsList = React.lazy(() => import('./features/performance/GoalsList'));
+const Reports = React.lazy(() => import('./features/reports/Reports'));
 
 function wrap(screen: React.ReactNode): React.JSX.Element {
   return <DefaultLayout>{screen}</DefaultLayout>;
@@ -135,6 +136,7 @@ const App = (): React.JSX.Element => {
               <Route path="/performance/cycles/:id" element={wrap(<ReviewCycleDetail />)} />
               <Route path="/performance/my-review" element={wrap(<MyReview />)} />
               <Route path="/performance/goals" element={wrap(<GoalsList />)} />
+              <Route path="/reports" element={wrap(<Reports />)} />
               <Route path="/operations" element={wrap(<Operations />)} />
               <Route path="/settings" element={wrap(<SettingsScreen />)} />
             </Route>

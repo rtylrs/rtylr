@@ -58,7 +58,8 @@
     "assets": "سجل الأصول",
     "performance": "الأداء",
     "myReview": "تقييمي",
-    "goals": "الأهداف"
+    "goals": "الأهداف",
+    "reports": "التقارير"
   },
   "layout": {
     "sections": {
@@ -253,6 +254,67 @@
       "addStaff": "إضافة موظف",
       "scheduleShift": "جدولة مناوبة",
       "runPayroll": "تشغيل الرواتب"
+    },
+    "quickActionsTitle": "إجراءات سريعة",
+    "recentActivity": "النشاط الأخير",
+    "viewAll": "عرض الكل",
+    "noActivity": "لا يوجد نشاط حديث.",
+    "todayAtGlance": "نظرة على اليوم",
+    "recentHires": "التعيينات الأخيرة",
+    "noRecentHires": "لا توجد تعيينات حديثة.",
+    "stats": {
+      "totalStaff": "إجمالي الموظفين",
+      "onShift": "في المناوبة اليوم",
+      "openPositions": "الوظائف الشاغرة",
+      "monthlyPayroll": "رواتب هذا الشهر",
+      "thisMonth": "هذا الشهر"
+    },
+    "glance": {
+      "shiftsScheduled": "المناوبات المجدولة",
+      "newApplications": "الطلبات الجديدة",
+      "pendingApprovals": "الموافقات المعلقة"
+    },
+    "metrics": {
+      "headcount": "عدد الموظفين",
+      "totalActive": "الإجمالي النشط",
+      "avgTenure": "متوسط مدة الخدمة",
+      "years": "سنوات",
+      "allStaff": "عبر جميع الموظفين",
+      "openPositions": "الوظائف الشاغرة",
+      "beingFilled": "قيد التوظيف"
+    },
+    "alerts": {
+      "expiringDocuments": "مستندات تنتهي قريباً",
+      "expiringCount": "{{count}} مستند تنتهي صلاحيته خلال 30 يوماً.",
+      "overtimeAlerts": "تنبيهات العمل الإضافي",
+      "overtimeCount": "{{count}} موظف تجاوزوا ساعات العمل الأسبوعية."
+    },
+    "widgets": {
+      "hoursThisWeek": "ساعات هذا الأسبوع",
+      "hours": "ساعات",
+      "leaveBalance": "رصيد الإجازات",
+      "noLeaveTypes": "لم يتم تكوين أنواع الإجازات.",
+      "daysLeft": "أيام متبقية",
+      "upcomingShifts": "المناوبات القادمة",
+      "noShifts": "لا توجد مناوبات قادمة.",
+      "pendingApprovals": "الموافقات المعلقة",
+      "noApprovals": "لا توجد موافقات معلقة!",
+      "teamAttendance": "حضور الفريق اليوم",
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "headcount": "عدد الموظفين",
+      "thisMonth": "هذا الشهر",
+      "fullTime": "دوام كامل",
+      "partTime": "دوام جزئي",
+      "contractors": "متعاقدون",
+      "payrollCost": "تكلفة الرواتب",
+      "payrollNotConfigured": "لم يتم تهيئة الرواتب بعد.",
+      "vsLastMonth": "مقارنة بالشهر الماضي",
+      "setupCompletion": "إكمال الإعداد",
+      "stepsCompleted": "خطوات مكتملة",
+      "noData": "لا تتوفر بيانات.",
+      "dragToReorder": "اسحب لإعادة الترتيب"
     }
   },
   "staff": {
@@ -869,6 +931,38 @@
       "submittedTitle": "تم تقديم التقييم",
       "emptyTitle": "لا يوجد تقييم نشط",
       "emptyDescription": "ليس لديك تقييم ذاتي معيّن في الدورة الحالية."
+    }
+  },
+  "reports": {
+    "title": "التقارير",
+    "subtitle": "إنشاء وتصدير تقارير الموارد البشرية.",
+    "types": "أنواع التقارير",
+    "filters": "التصفيات",
+    "dateFrom": "من",
+    "dateTo": "إلى",
+    "department": "القسم",
+    "location": "الموقع",
+    "allDepartments": "جميع الأقسام",
+    "allLocations": "جميع المواقع",
+    "generate": "إنشاء تقرير",
+    "generated": "تم إنشاء التقرير",
+    "noResults": "لا توجد بيانات مطابقة للتصفيات.",
+    "rowCount": "{{count}} صف",
+    "exportCsv": "تصدير CSV",
+    "exportPdf": "تصدير PDF (قريباً)",
+    "emptyTitle": "اختر نوع التقرير",
+    "emptyDescription": "اختر نوع التقرير وحدد التصفيات، ثم انقر إنشاء.",
+    "reportTypes": {
+      "attendance_summary": "ملخص الحضور",
+      "leave_balance": "رصيد الإجازات",
+      "payroll_summary": "ملخص الرواتب",
+      "overtime_report": "تقرير العمل الإضافي",
+      "headcount": "عدد الموظفين",
+      "turnover": "معدل الدوران",
+      "timesheet_summary": "ملخص سجلات الحضور",
+      "shift_coverage": "تغطية المناوبات",
+      "department_cost": "تكلفة الأقسام",
+      "employee_directory": "دليل الموظفين"
     }
   },
   "configRequired": {

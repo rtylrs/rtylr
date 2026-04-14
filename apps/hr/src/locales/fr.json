@@ -58,7 +58,8 @@
     "assets": "Registre des actifs",
     "performance": "Performance",
     "myReview": "Mon évaluation",
-    "goals": "Objectifs"
+    "goals": "Objectifs",
+    "reports": "Rapports"
   },
   "layout": {
     "sections": {
@@ -253,6 +254,67 @@
       "addStaff": "Ajouter un membre",
       "scheduleShift": "Planifier un quart",
       "runPayroll": "Lancer la paie"
+    },
+    "quickActionsTitle": "Actions rapides",
+    "recentActivity": "Activité récente",
+    "viewAll": "Tout voir",
+    "noActivity": "Aucune activité récente.",
+    "todayAtGlance": "Aperçu du jour",
+    "recentHires": "Recrutements récents",
+    "noRecentHires": "Aucun recrutement récent.",
+    "stats": {
+      "totalStaff": "Effectif total",
+      "onShift": "En service aujourd'hui",
+      "openPositions": "Postes ouverts",
+      "monthlyPayroll": "Paie ce mois",
+      "thisMonth": "ce mois"
+    },
+    "glance": {
+      "shiftsScheduled": "Quarts planifiés",
+      "newApplications": "Nouvelles candidatures",
+      "pendingApprovals": "Approbations en attente"
+    },
+    "metrics": {
+      "headcount": "Effectif",
+      "totalActive": "Total actif",
+      "avgTenure": "Ancienneté moy.",
+      "years": "ans",
+      "allStaff": "Tout le personnel",
+      "openPositions": "Postes ouverts",
+      "beingFilled": "En cours de recrutement"
+    },
+    "alerts": {
+      "expiringDocuments": "Documents expirant bientôt",
+      "expiringCount": "{{count}} documents expirent dans les 30 prochains jours.",
+      "overtimeAlerts": "Alertes heures supplémentaires",
+      "overtimeCount": "{{count}} employés ont dépassé les heures hebdomadaires."
+    },
+    "widgets": {
+      "hoursThisWeek": "Heures cette semaine",
+      "hours": "heures",
+      "leaveBalance": "Solde de congés",
+      "noLeaveTypes": "Aucun type de congé configuré.",
+      "daysLeft": "jours restants",
+      "upcomingShifts": "Quarts à venir",
+      "noShifts": "Aucun quart à venir.",
+      "pendingApprovals": "Approbations en attente",
+      "noApprovals": "Tout est à jour !",
+      "teamAttendance": "Présence de l'équipe",
+      "present": "Présent",
+      "absent": "Absent",
+      "late": "En retard",
+      "headcount": "Effectif",
+      "thisMonth": "ce mois",
+      "fullTime": "Temps plein",
+      "partTime": "Temps partiel",
+      "contractors": "Contractuels",
+      "payrollCost": "Coût salarial",
+      "payrollNotConfigured": "Paie non configurée.",
+      "vsLastMonth": "vs mois dernier",
+      "setupCompletion": "Avancement de la configuration",
+      "stepsCompleted": "étapes terminées",
+      "noData": "Aucune donnée disponible.",
+      "dragToReorder": "Glisser pour réorganiser"
     }
   },
   "staff": {
@@ -869,6 +931,38 @@
       "submittedTitle": "Évaluation soumise",
       "emptyTitle": "Aucune évaluation active",
       "emptyDescription": "Vous n'avez pas d'auto-évaluation assignée dans le cycle en cours."
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "subtitle": "Générer et exporter des rapports RH.",
+    "types": "Types de rapports",
+    "filters": "Filtres",
+    "dateFrom": "Du",
+    "dateTo": "Au",
+    "department": "Département",
+    "location": "Lieu",
+    "allDepartments": "Tous les départements",
+    "allLocations": "Tous les lieux",
+    "generate": "Générer le rapport",
+    "generated": "Rapport généré",
+    "noResults": "Aucune donnée ne correspond aux filtres.",
+    "rowCount": "{{count}} lignes",
+    "exportCsv": "Exporter CSV",
+    "exportPdf": "Exporter PDF (bientôt)",
+    "emptyTitle": "Sélectionnez un type de rapport",
+    "emptyDescription": "Choisissez un type de rapport et définissez vos filtres, puis cliquez Générer.",
+    "reportTypes": {
+      "attendance_summary": "Résumé de présence",
+      "leave_balance": "Solde de congés",
+      "payroll_summary": "Résumé de paie",
+      "overtime_report": "Rapport heures supplémentaires",
+      "headcount": "Effectif",
+      "turnover": "Taux de rotation",
+      "timesheet_summary": "Résumé des feuilles de temps",
+      "shift_coverage": "Couverture des quarts",
+      "department_cost": "Coût par département",
+      "employee_directory": "Répertoire des employés"
     }
   },
   "configRequired": {

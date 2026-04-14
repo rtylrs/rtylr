@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -18,49 +18,144 @@ import {
   Sparkles,
   AlertTriangle,
   Timer,
+  GripVertical,
 } from 'lucide-react';
+import { useGetDashboard, useUpdateWidgetLayout } from './useDashboard';
 import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
-import {
-  useExpiringDocuments,
-  useOvertimeAlerts,
-  useEmployeeProfile,
-} from '../../shared/hooks/useHrExtras';
+import { useExpiringDocuments, useOvertimeAlerts } from '../../shared/hooks/useHrExtras';
+import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
-import { Card, StatCard, useIsMobile } from '../../shared/components/ui';
+import { Card, StatCard, useIsMobile, Skeleton } from '../../shared/components/ui';
+import HoursThisWeekWidget from './widgets/HoursThisWeekWidget';
+import LeaveBalanceWidget from './widgets/LeaveBalanceWidget';
+import UpcomingShiftsWidget from './widgets/UpcomingShiftsWidget';
+import PendingApprovalsWidget from './widgets/PendingApprovalsWidget';
+import TeamAttendanceTodayWidget from './widgets/TeamAttendanceTodayWidget';
+import HeadcountWidget from './widgets/HeadcountWidget';
+import PayrollCostWidget from './widgets/PayrollCostWidget';
+import SetupCompletionWidget from './widgets/SetupCompletionWidget';
+import type { DashboardWidget } from '../../shared/schemas/dashboard';
 
 const ACCENT = '#8b5cf6';
 
-const defaultStats = {
-  totalStaff: 0,
-  onShiftToday: 0,
-  openPositions: 0,
-  monthlyPayroll: 0,
-};
-
-const quickActionDefs = [
+const DEFAULT_WIDGETS: DashboardWidget[] = [
   {
-    i18nKey: 'dashboard.quickActions.addStaff',
-    icon: UserPlus,
-    color: ACCENT,
-    bg: 'rgba(139,92,246,0.12)',
+    id: 1,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'headcount',
+    positionX: 0,
+    positionY: 0,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
   },
   {
-    i18nKey: 'dashboard.quickActions.scheduleShift',
-    icon: CalendarPlus,
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.12)',
+    id: 2,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'team_attendance',
+    positionX: 4,
+    positionY: 0,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
   },
   {
-    i18nKey: 'dashboard.quickActions.runPayroll',
-    icon: Play,
-    color: '#3b82f6',
-    bg: 'rgba(59,130,246,0.12)',
+    id: 3,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'hours_this_week',
+    positionX: 8,
+    positionY: 0,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  {
+    id: 4,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'pending_approvals',
+    positionX: 0,
+    positionY: 1,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  {
+    id: 5,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'leave_balance',
+    positionX: 4,
+    positionY: 1,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  {
+    id: 6,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'upcoming_shifts',
+    positionX: 8,
+    positionY: 1,
+    width: 4,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  {
+    id: 7,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'payroll_cost',
+    positionX: 0,
+    positionY: 2,
+    width: 6,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  {
+    id: 8,
+    ownerId: 0,
+    roleId: 0,
+    widgetType: 'setup_completion',
+    positionX: 6,
+    positionY: 2,
+    width: 6,
+    height: 1,
+    config: {},
+    createdAt: 0,
+    updatedAt: 0,
   },
 ];
 
-function getInitials(name: string) {
+function parseWidgetData<T>(data: Record<string, unknown>, widgetType: string): T | null {
+  const entry = data[widgetType];
+  if (!entry || typeof entry !== 'object') return null;
+  const payload = (entry as { data?: unknown }).data;
+  if (!payload) return null;
+  return payload as T;
+}
+
+function getInitials(name: string): string {
   return name
     .split(' ')
     .map((n) => n[0])
@@ -78,82 +173,211 @@ const item: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
+const quickActionDefs = [
+  {
+    i18nKey: 'dashboard.quickActions.addStaff',
+    icon: UserPlus,
+    color: ACCENT,
+    bg: 'rgba(139,92,246,0.12)',
+    path: '/employees/new',
+  },
+  {
+    i18nKey: 'dashboard.quickActions.scheduleShift',
+    icon: CalendarPlus,
+    color: '#10b981',
+    bg: 'rgba(16,185,129,0.12)',
+    path: '/shifts/roster',
+  },
+  {
+    i18nKey: 'dashboard.quickActions.runPayroll',
+    icon: Play,
+    color: '#3b82f6',
+    bg: 'rgba(59,130,246,0.12)',
+    path: '/payroll',
+  },
+];
+
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const { data: dashboard, isLoading: loading } = useHRDashboard();
+  const config = useHRConfigStore((s) => s.config);
+
+  const { data: dashboardResponse, isLoading: widgetsLoading } = useGetDashboard();
+  const { data: legacyDashboard, isLoading: statsLoading } = useHRDashboard();
   const { data: staff = [] } = useStaff();
   const { data: expiring = [] } = useExpiringDocuments(30);
   const { data: overtimeAlerts = [] } = useOvertimeAlerts();
-  useEmployeeProfile(staff[0]?.id);
-  const recentHires = staff.slice(-3);
-  const avgTenureYears = staff.length > 0 ? Math.round(staff.length * 0.8) / staff.length : 0;
-  const turnoverRate = 0;
+  const updateLayout = useUpdateWidgetLayout();
+
+  const loading = widgetsLoading || statsLoading;
+
+  const widgets = useMemo((): DashboardWidget[] => {
+    if (dashboardResponse?.widgets && dashboardResponse.widgets.length > 0) {
+      return dashboardResponse.widgets;
+    }
+    return DEFAULT_WIDGETS;
+  }, [dashboardResponse]);
+
+  const widgetData = useMemo((): Record<string, unknown> => {
+    return (dashboardResponse?.data ?? {}) as Record<string, unknown>;
+  }, [dashboardResponse]);
+
+  const [draggedId, setDraggedId] = useState<number | null>(null);
+
+  const handleDragStart = useCallback((e: React.DragEvent, widgetId: number): void => {
+    setDraggedId(widgetId);
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent, targetId: number): void => {
+      e.preventDefault();
+      if (draggedId === null || draggedId === targetId) return;
+      const newWidgets = [...widgets];
+      const dragIdx = newWidgets.findIndex((w) => w.id === draggedId);
+      const targetIdx = newWidgets.findIndex((w) => w.id === targetId);
+      if (dragIdx === -1 || targetIdx === -1) return;
+
+      const dragWidget = newWidgets[dragIdx];
+      const targetWidget = newWidgets[targetIdx];
+      const tmpX = dragWidget.positionX;
+      const tmpY = dragWidget.positionY;
+      newWidgets[dragIdx] = {
+        ...dragWidget,
+        positionX: targetWidget.positionX,
+        positionY: targetWidget.positionY,
+      };
+      newWidgets[targetIdx] = { ...targetWidget, positionX: tmpX, positionY: tmpY };
+
+      updateLayout.mutate(newWidgets);
+      setDraggedId(null);
+    },
+    [draggedId, widgets, updateLayout]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent): void => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }, []);
 
   const dashData = {
-    totalStaff: dashboard?.totalStaff ?? defaultStats.totalStaff,
-    onShiftToday: dashboard?.onShiftToday ?? defaultStats.onShiftToday,
-    openPositions: dashboard?.openPositions ?? defaultStats.openPositions,
-    monthlyPayroll: dashboard?.monthlyPayroll ?? defaultStats.monthlyPayroll,
+    totalStaff: legacyDashboard?.totalStaff ?? 0,
+    onShiftToday: legacyDashboard?.onShiftToday ?? 0,
+    openPositions: legacyDashboard?.openPositions ?? 0,
+    monthlyPayroll: legacyDashboard?.monthlyPayroll ?? 0,
   };
-  const recentActivity = dashboard?.recentActivity || [];
-  const todayAtGlance = dashboard?.todayAtGlance || {
+  const recentActivity = legacyDashboard?.recentActivity || [];
+  const todayAtGlance = legacyDashboard?.todayAtGlance || {
     shiftsScheduled: 0,
     newApplications: 0,
     pendingApprovals: 0,
   };
+  const recentHires = staff.slice(-3);
 
   const stats = [
     {
-      label: 'Total Staff',
+      label: t('dashboard.stats.totalStaff'),
       value: loading ? '…' : String(dashData.totalStaff),
-      change: '+3 this month',
-      trend: 'up',
+      change: t('dashboard.stats.thisMonth'),
+      trend: 'up' as const,
       icon: Users,
       color: '#8b5cf6',
     },
     {
-      label: 'On Shift Today',
+      label: t('dashboard.stats.onShift'),
       value: loading ? '…' : String(dashData.onShiftToday),
       change:
         dashData.totalStaff > 0
-          ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}% of team`
+          ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}%`
           : '-',
-      trend: 'neutral',
+      trend: 'neutral' as const,
       icon: Clock,
       color: '#10b981',
     },
     {
-      label: 'Open Positions',
+      label: t('dashboard.stats.openPositions'),
       value: loading ? '…' : String(dashData.openPositions),
-      change: '2 urgent',
-      trend: 'down',
+      trend: 'down' as const,
+      change: '',
       icon: Briefcase,
       color: '#f59e0b',
     },
     {
-      label: 'This Month Payroll',
+      label: t('dashboard.stats.monthlyPayroll'),
       value: loading ? '…' : `$${dashData.monthlyPayroll.toLocaleString()}`,
-      change: '+2.4% vs last month',
-      trend: 'up',
+      change: '',
+      trend: 'up' as const,
       icon: DollarSign,
       color: '#3b82f6',
     },
   ];
+
+  const renderWidget = (w: DashboardWidget): React.ReactNode => {
+    const wData = widgetData;
+    switch (w.widgetType) {
+      case 'headcount':
+        return <HeadcountWidget data={parseWidgetData(wData, 'headcount')} isLoading={loading} />;
+      case 'team_attendance':
+        return (
+          <TeamAttendanceTodayWidget
+            data={parseWidgetData(wData, 'team_attendance')}
+            isLoading={loading}
+          />
+        );
+      case 'hours_this_week':
+        return (
+          <HoursThisWeekWidget
+            data={parseWidgetData(wData, 'hours_this_week')}
+            isLoading={loading}
+          />
+        );
+      case 'pending_approvals':
+        return (
+          <PendingApprovalsWidget
+            data={parseWidgetData(wData, 'pending_approvals')}
+            isLoading={loading}
+          />
+        );
+      case 'leave_balance':
+        return (
+          <LeaveBalanceWidget data={parseWidgetData(wData, 'leave_balance')} isLoading={loading} />
+        );
+      case 'upcoming_shifts':
+        return (
+          <UpcomingShiftsWidget
+            data={parseWidgetData(wData, 'upcoming_shifts')}
+            isLoading={loading}
+          />
+        );
+      case 'payroll_cost':
+        return (
+          <PayrollCostWidget data={parseWidgetData(wData, 'payroll_cost')} isLoading={loading} />
+        );
+      case 'setup_completion':
+        return (
+          <SetupCompletionWidget
+            data={parseWidgetData(wData, 'setup_completion')}
+            isLoading={loading}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="show"
-      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
     >
-      {/* Stats */}
+      {/* Stat cards */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '16px',
+          gap: 16,
         }}
       >
         {stats.map((s) => (
@@ -163,15 +387,15 @@ const Dashboard: React.FC = () => {
             style={{
               background: 'var(--hr-card)',
               border: '1px solid var(--hr-border)',
-              borderRadius: '12px',
-              padding: '18px',
+              borderRadius: 12,
+              padding: 18,
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px',
+              gap: 12,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)', fontWeight: 500 }}>
+              <span style={{ fontSize: 12, color: 'var(--hr-text-muted)', fontWeight: 500 }}>
                 {s.label}
               </span>
               <span
@@ -179,9 +403,9 @@ const Dashboard: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '32px',
-                  width: '32px',
-                  borderRadius: '8px',
+                  height: 32,
+                  width: 32,
+                  borderRadius: 8,
                   background: `${s.color}18`,
                   color: s.color,
                 }}
@@ -192,7 +416,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p
                 style={{
-                  fontSize: '26px',
+                  fontSize: 26,
                   fontWeight: 700,
                   color: 'var(--hr-text)',
                   margin: 0,
@@ -201,35 +425,81 @@ const Dashboard: React.FC = () => {
               >
                 {s.value}
               </p>
-              <p
-                style={{
-                  fontSize: '11px',
-                  color:
-                    s.trend === 'up'
-                      ? '#10b981'
-                      : s.trend === 'down'
-                        ? '#ef4444'
-                        : 'var(--hr-text-muted)',
-                  margin: '4px 0 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                }}
-              >
-                {s.trend === 'up' && <TrendingUp size={11} />}
-                {s.change}
-              </p>
+              {s.change && (
+                <p
+                  style={{
+                    fontSize: 11,
+                    color:
+                      s.trend === 'up'
+                        ? '#10b981'
+                        : s.trend === 'down'
+                          ? '#ef4444'
+                          : 'var(--hr-text-muted)',
+                    margin: '4px 0 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
+                  }}
+                >
+                  {s.trend === 'up' && <TrendingUp size={11} />}
+                  {s.change}
+                </p>
+              )}
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Bottom grid */}
+      {/* Draggable widget grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
+          gap: 16,
+        }}
+      >
+        {widgets
+          .slice()
+          .sort((a, b) => a.positionY - b.positionY || a.positionX - b.positionX)
+          .map((w) => (
+            <motion.div
+              key={w.id}
+              variants={item}
+              draggable
+              onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, w.id)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e as unknown as React.DragEvent, w.id)}
+              style={{
+                gridColumn: isMobile ? 'span 1' : `span ${Math.min(w.width, 12)}`,
+                cursor: 'grab',
+                position: 'relative',
+                opacity: draggedId === w.id ? 0.5 : 1,
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  color: 'var(--hr-text-dim)',
+                  zIndex: 1,
+                  opacity: 0.5,
+                }}
+                aria-label={t('dashboard.widgets.dragToReorder')}
+              >
+                <GripVertical size={12} />
+              </span>
+              {renderWidget(w)}
+            </motion.div>
+          ))}
+      </div>
+
+      {/* Activity + Quick actions */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px',
-          gap: '16px',
+          gap: 16,
         }}
       >
         {/* Recent activity */}
@@ -238,7 +508,7 @@ const Dashboard: React.FC = () => {
           style={{
             background: 'var(--hr-card)',
             border: '1px solid var(--hr-border)',
-            borderRadius: '12px',
+            borderRadius: 12,
             overflow: 'hidden',
           }}
         >
@@ -253,23 +523,51 @@ const Dashboard: React.FC = () => {
               flexWrap: 'wrap',
             }}
           >
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
-              Recent Activity
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+              {t('dashboard.recentActivity')}
             </h2>
             <span
               style={{
-                fontSize: '11px',
+                fontSize: 11,
                 color: ACCENT,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '3px',
+                gap: 3,
               }}
             >
-              View all <ArrowUpRight size={11} />
+              {t('dashboard.viewAll')} <ArrowUpRight size={11} />
             </span>
           </div>
           <div>
+            {recentActivity.length === 0 && !loading && (
+              <p
+                style={{
+                  padding: '24px 20px',
+                  margin: 0,
+                  fontSize: 12,
+                  color: 'var(--hr-text-muted)',
+                  textAlign: 'center',
+                }}
+              >
+                {t('dashboard.noActivity')}
+              </p>
+            )}
+            {loading && (
+              <div
+                style={{ padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}
+              >
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Skeleton height={34} width={34} style={{ borderRadius: '50%' }} />
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <Skeleton height={13} width="60%" />
+                      <Skeleton height={10} width="40%" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {recentActivity.map((a, i) => (
               <div
                 key={i}
@@ -277,13 +575,12 @@ const Dashboard: React.FC = () => {
                   display: 'flex',
                   alignItems: isMobile ? 'flex-start' : 'center',
                   flexDirection: isMobile ? 'column' : 'row',
-                  gap: '12px',
+                  gap: 12,
                   padding: '12px 20px',
                   borderBottom:
                     i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
                 }}
               >
-                {/* Avatar */}
                 <span
                   style={{
                     display: 'flex',
@@ -294,7 +591,7 @@ const Dashboard: React.FC = () => {
                     borderRadius: '50%',
                     background: 'rgba(139,92,246,0.12)',
                     color: ACCENT,
-                    fontSize: '12px',
+                    fontSize: 12,
                     fontWeight: 700,
                     flexShrink: 0,
                   }}
@@ -305,14 +602,14 @@ const Dashboard: React.FC = () => {
                   <p
                     style={{
                       margin: 0,
-                      fontSize: '13px',
+                      fontSize: 13,
                       fontWeight: 600,
                       color: 'var(--hr-text)',
                     }}
                   >
                     {a.name}
                   </p>
-                  <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--hr-text-muted)' }}>
+                  <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--hr-text-muted)' }}>
                     {a.role}
                   </p>
                 </div>
@@ -320,7 +617,7 @@ const Dashboard: React.FC = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
+                    gap: 6,
                     flexShrink: 0,
                     flexWrap: 'wrap',
                   }}
@@ -329,8 +626,8 @@ const Dashboard: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '11px',
+                      gap: 4,
+                      fontSize: 11,
                       fontWeight: 500,
                       color: a.type === 'in' ? '#10b981' : '#f59e0b',
                     }}
@@ -338,61 +635,58 @@ const Dashboard: React.FC = () => {
                     {a.type === 'in' ? <LogIn size={11} /> : <LogOut size={11} />}
                     {a.action}
                   </span>
-                  <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>{a.time}</span>
+                  <span style={{ fontSize: 11, color: 'var(--hr-text-dim)' }}>{a.time}</span>
                 </div>
               </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Quick actions */}
+        {/* Quick actions + today at a glance */}
         <motion.div
           variants={item}
           style={{
             background: 'var(--hr-card)',
             border: '1px solid var(--hr-border)',
-            borderRadius: '12px',
+            borderRadius: 12,
             overflow: 'hidden',
           }}
         >
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
-              Quick Actions
+            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+              {t('dashboard.quickActionsTitle')}
             </h2>
           </div>
-          <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {quickActionDefs.map((a) => (
-              <button
+              <Link
                 key={a.i18nKey}
+                to={a.path}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
+                  gap: 12,
                   padding: '14px 16px',
-                  borderRadius: '10px',
+                  borderRadius: 10,
                   background: a.bg,
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
+                  textDecoration: 'none',
                   transition: 'opacity 0.15s',
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
               >
                 <a.icon size={18} style={{ color: a.color, flexShrink: 0 }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: a.color }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: a.color }}>
                   {t(a.i18nKey)}
                 </span>
-              </button>
+              </Link>
             ))}
           </div>
 
-          {/* Summary */}
+          {/* Today at a glance */}
           <div
             style={{
               margin: '0 12px 12px',
               padding: '14px 16px',
-              borderRadius: '10px',
+              borderRadius: 10,
               background: 'var(--hr-hover)',
               border: '1px solid var(--hr-border)',
             }}
@@ -400,26 +694,26 @@ const Dashboard: React.FC = () => {
             <p
               style={{
                 margin: '0 0 8px',
-                fontSize: '11px',
+                fontSize: 11,
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 color: 'var(--hr-text-dim)',
               }}
             >
-              Today at a Glance
+              {t('dashboard.todayAtGlance')}
             </p>
             {[
               {
-                label: 'Shifts scheduled',
+                label: t('dashboard.glance.shiftsScheduled'),
                 value: loading ? '…' : String(todayAtGlance.shiftsScheduled),
               },
               {
-                label: 'New applications',
+                label: t('dashboard.glance.newApplications'),
                 value: loading ? '…' : String(todayAtGlance.newApplications),
               },
               {
-                label: 'Pending approvals',
+                label: t('dashboard.glance.pendingApprovals'),
                 value: loading ? '…' : String(todayAtGlance.pendingApprovals),
               },
             ].map((row) => (
@@ -429,11 +723,11 @@ const Dashboard: React.FC = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginTop: '6px',
+                  marginTop: 6,
                 }}
               >
-                <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)' }}>{row.label}</span>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hr-text)' }}>
+                <span style={{ fontSize: 12, color: 'var(--hr-text-muted)' }}>{row.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
                   {row.value}
                 </span>
               </div>
@@ -442,7 +736,7 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* HR metrics dashboard */}
+      {/* HR metrics */}
       <div
         style={{
           display: 'grid',
@@ -451,35 +745,32 @@ const Dashboard: React.FC = () => {
         }}
       >
         <StatCard
-          label="Headcount"
+          label={t('dashboard.metrics.headcount')}
           value={staff.length}
-          sub="Total active"
+          sub={t('dashboard.metrics.totalActive')}
           icon={<Users size={14} />}
         />
         <StatCard
-          label="Avg tenure"
-          value={`${avgTenureYears} yrs`}
-          sub="Across all staff"
+          label={t('dashboard.metrics.avgTenure')}
+          value={
+            staff.length > 0
+              ? `${(Math.round(staff.length * 0.8) / staff.length).toFixed(1)} ${t('dashboard.metrics.years')}`
+              : '-'
+          }
+          sub={t('dashboard.metrics.allStaff')}
           icon={<Clock size={14} />}
           color="#10b981"
         />
         <StatCard
-          label="Turnover"
-          value={`${turnoverRate}%`}
-          sub="Last 12 months"
-          icon={<TrendingUp size={14} />}
-          color="#f59e0b"
-        />
-        <StatCard
-          label="Open positions"
-          value={dashboard?.openPositions ?? 0}
-          sub="Being filled"
+          label={t('dashboard.metrics.openPositions')}
+          value={legacyDashboard?.openPositions ?? 0}
+          sub={t('dashboard.metrics.beingFilled')}
           icon={<Briefcase size={14} />}
-          color="#ef4444"
+          color="#f59e0b"
         />
       </div>
 
-      {/* Widgets row */}
+      {/* Shared widgets row */}
       <div
         style={{
           display: 'grid',
@@ -502,11 +793,13 @@ const Dashboard: React.FC = () => {
               <Sparkles size={14} />
             </span>
             <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-              Recent hires
+              {t('dashboard.recentHires')}
             </h3>
           </div>
           {recentHires.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>None yet.</p>
+            <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+              {t('dashboard.noRecentHires')}
+            </p>
           ) : (
             <ul
               style={{
@@ -550,11 +843,11 @@ const Dashboard: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
                 <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  Documents expiring soon
+                  {t('dashboard.alerts.expiringDocuments')}
                 </h3>
               </div>
               <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                {expiring.length} documents expire in the next 30 days.
+                {t('dashboard.alerts.expiringCount', { count: expiring.length })}
               </p>
             </Card>
           )}
@@ -565,11 +858,11 @@ const Dashboard: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Timer size={14} style={{ color: '#ef4444' }} />
                 <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  Overtime alerts
+                  {t('dashboard.alerts.overtimeAlerts')}
                 </h3>
               </div>
               <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                {overtimeAlerts.length} employees exceeded weekly hours.
+                {t('dashboard.alerts.overtimeCount', { count: overtimeAlerts.length })}
               </p>
             </Card>
           )}
