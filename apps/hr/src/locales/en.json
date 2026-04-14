@@ -652,7 +652,26 @@
     }
   },
   "documents": {
+    "title": "Documents",
+    "subtitle": "Employee document vault",
     "uploaded": "Document uploaded successfully",
+    "deleted": "Document deleted",
+    "selectEmployeeFirst": "Select an employee first",
+    "expiringSoon": "{{count}} document(s) expiring soon",
+    "filterEmployee": "Employee",
+    "filterSelect": "Select",
+    "filterType": "Type",
+    "emptyTitle": "No documents yet",
+    "emptyDescription": "Upload I-9, W4, contracts, and other files.",
+    "table": {
+      "document": "Document",
+      "employee": "Employee",
+      "type": "Type",
+      "uploaded": "Uploaded"
+    },
+    "deleteTitle": "Delete document?",
+    "deleteConfirm": "This action cannot be undone.",
+    "deleteButton": "Delete",
     "vault": {
       "title": "Documents",
       "upload": "Upload",
@@ -684,6 +703,24 @@
         "expiryDate": "Expiry Date"
       }
     }
+  },
+  "onboarding": {
+    "title": "Onboarding",
+    "subtitle": "New hire workflow checklist",
+    "emptyTitle": "No onboarding in progress",
+    "emptyDescription": "When a new hire starts, their tasks will show up here.",
+    "tasksDone": "{{done}} of {{total}} tasks done",
+    "markedComplete": "Marked complete",
+    "markedIncomplete": "Marked incomplete",
+    "due": "Due {{date}}"
+  },
+  "offboarding": {
+    "title": "Offboarding",
+    "subtitle": "Exit checklist for departing employees",
+    "emptyTitle": "No offboarding in progress",
+    "emptyDescription": "Departing employees' checklists will show here.",
+    "tasksComplete": "{{done}} of {{total}} complete",
+    "updated": "Updated"
   },
   "onboardingMgmt": {
     "templateCreated": "Template created successfully",

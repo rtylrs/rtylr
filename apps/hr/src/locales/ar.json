@@ -652,7 +652,26 @@
     }
   },
   "documents": {
+    "title": "المستندات",
+    "subtitle": "خزنة مستندات الموظفين",
     "uploaded": "تم رفع المستند بنجاح",
+    "deleted": "تم حذف المستند",
+    "selectEmployeeFirst": "اختر موظفاً أولاً",
+    "expiringSoon": "{{count}} مستند(ات) على وشك الانتهاء",
+    "filterEmployee": "الموظف",
+    "filterSelect": "اختر",
+    "filterType": "النوع",
+    "emptyTitle": "لا توجد مستندات بعد",
+    "emptyDescription": "ارفع مستندات I-9 و W4 والعقود وغيرها.",
+    "table": {
+      "document": "المستند",
+      "employee": "الموظف",
+      "type": "النوع",
+      "uploaded": "تاريخ الرفع"
+    },
+    "deleteTitle": "حذف المستند؟",
+    "deleteConfirm": "لا يمكن التراجع عن هذا الإجراء.",
+    "deleteButton": "حذف",
     "vault": {
       "title": "المستندات",
       "upload": "رفع",
@@ -684,6 +703,24 @@
         "expiryDate": "تاريخ الانتهاء"
       }
     }
+  },
+  "onboarding": {
+    "title": "التعيين",
+    "subtitle": "قائمة مراجعة التعيين الجديد",
+    "emptyTitle": "لا يوجد تعيين جارٍ",
+    "emptyDescription": "عندما يبدأ موظف جديد، ستظهر مهامه هنا.",
+    "tasksDone": "{{done}} من {{total}} مهمة مكتملة",
+    "markedComplete": "تم التحديد كمكتمل",
+    "markedIncomplete": "تم التحديد كغير مكتمل",
+    "due": "الاستحقاق {{date}}"
+  },
+  "offboarding": {
+    "title": "إنهاء الخدمة",
+    "subtitle": "قائمة مراجعة إنهاء خدمة الموظفين",
+    "emptyTitle": "لا يوجد إنهاء خدمة جارٍ",
+    "emptyDescription": "ستظهر قوائم مراجعة الموظفين المغادرين هنا.",
+    "tasksComplete": "{{done}} من {{total}} مكتمل",
+    "updated": "تم التحديث"
   },
   "onboardingMgmt": {
     "templateCreated": "تم إنشاء القالب بنجاح",

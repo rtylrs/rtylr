@@ -66,7 +66,7 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
             style={{ fontSize: 16 }}
           />
           {errors.equipmentType && (
-            <span style={{ fontSize: 11, color: '#ef4444', marginTop: 2 }}>
+            <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 2 }}>
               {errors.equipmentType}
             </span>
           )}
@@ -81,7 +81,7 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
             style={{ fontSize: 16 }}
           />
           {errors.description && (
-            <span style={{ fontSize: 11, color: '#ef4444', marginTop: 2 }}>
+            <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 2 }}>
               {errors.description}
             </span>
           )}

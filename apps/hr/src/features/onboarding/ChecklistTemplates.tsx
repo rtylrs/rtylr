@@ -106,7 +106,24 @@ const ChecklistTemplates = (): React.JSX.Element => {
                   {t('onboardingMgmt.templates.itemCount', { count: tmpl.items.length })}
                 </div>
               </div>
-              <Pill color={tmpl.triggerType === 'onboarding' ? '#10b981' : '#f59e0b'}>
+              <Pill
+                style={
+                  tmpl.triggerType === 'onboarding'
+                    ? {
+                        background:
+                          'color-mix(in srgb, var(--hr-onboarding-complete) 13%, transparent)',
+                        color: 'var(--hr-onboarding-complete)',
+                        border:
+                          '1px solid color-mix(in srgb, var(--hr-onboarding-complete) 20%, transparent)',
+                      }
+                    : {
+                        background: 'color-mix(in srgb, var(--hr-status-pending) 13%, transparent)',
+                        color: 'var(--hr-status-pending)',
+                        border:
+                          '1px solid color-mix(in srgb, var(--hr-status-pending) 20%, transparent)',
+                      }
+                }
+              >
                 {t(`onboardingMgmt.templates.triggers.${tmpl.triggerType}` as const)}
               </Pill>
             </Card>

@@ -74,8 +74,9 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
   };
 
   const expiryStyle = (doc: EmployeeDocumentPayload): React.CSSProperties => {
-    if (isExpired(doc.expiryDate)) return { color: '#ef4444', fontWeight: 600 };
-    if (isExpiringSoon(doc.expiryDate)) return { color: '#f59e0b', fontWeight: 600 };
+    if (isExpired(doc.expiryDate)) return { color: 'var(--hr-error)', fontWeight: 600 };
+    if (isExpiringSoon(doc.expiryDate))
+      return { color: 'var(--hr-status-pending)', fontWeight: 600 };
     return { color: 'var(--hr-text-muted)' };
   };
 
@@ -101,8 +102,8 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
             display: 'flex',
             alignItems: 'center',
             gap: 12,
-            borderColor: 'rgba(245,158,11,0.4)',
-            background: 'rgba(245,158,11,0.06)',
+            borderColor: 'color-mix(in srgb, var(--hr-status-pending) 40%, transparent)',
+            background: 'color-mix(in srgb, var(--hr-status-pending) 6%, transparent)',
             padding: 12,
           }}
         >
@@ -110,8 +111,8 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
             style={{
               padding: 6,
               borderRadius: 8,
-              background: 'rgba(245,158,11,0.15)',
-              color: '#f59e0b',
+              background: 'color-mix(in srgb, var(--hr-status-pending) 15%, transparent)',
+              color: 'var(--hr-status-pending)',
             }}
           >
             <AlertTriangle size={14} />

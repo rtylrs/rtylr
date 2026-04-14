@@ -124,7 +124,15 @@ const OnboardingManagement = (): React.JSX.Element => {
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         {overdue > 0 ? (
-                          <Pill color="#ef4444">
+                          <Pill
+                            style={{
+                              background:
+                                'color-mix(in srgb, var(--hr-status-overdue) 13%, transparent)',
+                              color: 'var(--hr-status-overdue)',
+                              border:
+                                '1px solid color-mix(in srgb, var(--hr-status-overdue) 20%, transparent)',
+                            }}
+                          >
                             <AlertTriangle size={10} style={{ marginRight: 4 }} />
                             {overdue}
                           </Pill>

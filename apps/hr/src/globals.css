@@ -30,6 +30,11 @@
   --hr-shift-teal: #14b8a6;
   --hr-accent: #8b5cf6;
   --hr-status-paid: #10b981;
+  --hr-status-pending: #f59e0b;
+  --hr-status-overdue: #ef4444;
+  --hr-onboarding-complete: #10b981;
+  --hr-onboarding-in-progress: #8b5cf6;
+  --hr-onboarding-not-started: #6b7280;
   --hr-payroll-accent: #8b5cf6;
 }
 

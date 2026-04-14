@@ -652,7 +652,26 @@
     }
   },
   "documents": {
+    "title": "Documents",
+    "subtitle": "Coffre-fort des documents employés",
     "uploaded": "Document téléchargé avec succès",
+    "deleted": "Document supprimé",
+    "selectEmployeeFirst": "Sélectionnez d'abord un employé",
+    "expiringSoon": "{{count}} document(s) bientôt expirés",
+    "filterEmployee": "Employé",
+    "filterSelect": "Sélectionner",
+    "filterType": "Type",
+    "emptyTitle": "Aucun document",
+    "emptyDescription": "Téléchargez I-9, W4, contrats et autres fichiers.",
+    "table": {
+      "document": "Document",
+      "employee": "Employé",
+      "type": "Type",
+      "uploaded": "Téléchargé"
+    },
+    "deleteTitle": "Supprimer le document ?",
+    "deleteConfirm": "Cette action est irréversible.",
+    "deleteButton": "Supprimer",
     "vault": {
       "title": "Documents",
       "upload": "Télécharger",
@@ -684,6 +703,24 @@
         "expiryDate": "Date d'expiration"
       }
     }
+  },
+  "onboarding": {
+    "title": "Intégration",
+    "subtitle": "Liste de contrôle pour les nouvelles recrues",
+    "emptyTitle": "Aucune intégration en cours",
+    "emptyDescription": "Quand un nouvel employé commence, ses tâches apparaîtront ici.",
+    "tasksDone": "{{done}} sur {{total}} tâches terminées",
+    "markedComplete": "Marqué comme terminé",
+    "markedIncomplete": "Marqué comme non terminé",
+    "due": "Échéance {{date}}"
+  },
+  "offboarding": {
+    "title": "Départ",
+    "subtitle": "Liste de contrôle pour les employés partants",
+    "emptyTitle": "Aucun départ en cours",
+    "emptyDescription": "Les listes des employés partants apparaîtront ici.",
+    "tasksComplete": "{{done}} sur {{total}} terminés",
+    "updated": "Mis à jour"
   },
   "onboardingMgmt": {
     "templateCreated": "Modèle créé avec succès",

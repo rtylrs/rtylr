@@ -4,11 +4,17 @@ import { HardDrive } from 'lucide-react';
 import { useListAssets } from '../../shared/hooks/queries/useEquipment';
 import { SectionHeader, Card, EmptyState, Skeleton, Pill } from '../../shared/components/ui';
 
+const pillStyle = (cssVar: string): React.CSSProperties => ({
+  background: `color-mix(in srgb, ${cssVar} 13%, transparent)`,
+  color: cssVar,
+  border: `1px solid color-mix(in srgb, ${cssVar} 20%, transparent)`,
+});
+
 const CONDITION_COLORS: Record<string, string> = {
-  new: '#10b981',
-  good: '#3b82f6',
-  fair: '#f59e0b',
-  damaged: '#ef4444',
+  new: 'var(--hr-status-approved)',
+  good: 'var(--hr-shift-blue)',
+  fair: 'var(--hr-status-pending)',
+  damaged: 'var(--hr-error)',
 };
 
 const AssetRegister = (): React.JSX.Element => {
@@ -75,7 +81,11 @@ const AssetRegister = (): React.JSX.Element => {
                       {asset.assignedDate}
                     </td>
                     <td style={{ padding: '10px 12px' }}>
-                      <Pill color={CONDITION_COLORS[asset.condition] ?? '#a1a1aa'}>
+                      <Pill
+                        style={pillStyle(
+                          CONDITION_COLORS[asset.condition] ?? 'var(--hr-status-draft)'
+                        )}
+                      >
                         {t(`equipment.assets.conditions.${asset.condition}` as const)}
                       </Pill>
                     </td>

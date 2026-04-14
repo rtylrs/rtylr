@@ -19,10 +19,16 @@ import {
 import DocumentUpload from '../../shared/components/DocumentUpload';
 
 const STATUS_COLORS: Record<string, string> = {
-  incomplete: '#f59e0b',
-  in_progress: '#3b82f6',
-  complete: '#10b981',
+  incomplete: 'var(--hr-status-pending)',
+  in_progress: 'var(--hr-shift-blue)',
+  complete: 'var(--hr-onboarding-complete)',
 };
+
+const pillStyle = (cssVar: string): React.CSSProperties => ({
+  background: `color-mix(in srgb, ${cssVar} 13%, transparent)`,
+  color: cssVar,
+  border: `1px solid color-mix(in srgb, ${cssVar} 20%, transparent)`,
+});
 
 interface Props {
   employeeId: number;
@@ -148,7 +154,9 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                       alignItems: 'center',
                       gap: 12,
                       flexWrap: 'wrap',
-                      borderColor: isOverdue(item) ? 'rgba(239,68,68,0.4)' : undefined,
+                      borderColor: isOverdue(item)
+                        ? 'color-mix(in srgb, var(--hr-status-overdue) 40%, transparent)'
+                        : undefined,
                     }}
                   >
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -167,11 +175,13 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                         {t('onboardingMgmt.checklist.dueDate', { date: item.dueDate })}
                       </div>
                     </div>
-                    <Pill color={STATUS_COLORS[item.status] ?? '#a1a1aa'}>
+                    <Pill style={pillStyle(STATUS_COLORS[item.status] ?? 'var(--hr-status-draft)')}>
                       {t(`onboardingMgmt.checklist.statuses.${item.status}` as const)}
                     </Pill>
                     {isOverdue(item) && (
-                      <Pill color="#ef4444">{t('onboardingMgmt.checklist.overdue')}</Pill>
+                      <Pill style={pillStyle('var(--hr-status-overdue)')}>
+                        {t('onboardingMgmt.checklist.overdue')}
+                      </Pill>
                     )}
                     {item.status !== 'complete' && (
                       <Button
