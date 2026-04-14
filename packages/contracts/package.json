@@ -59,6 +59,7 @@
     "./hr/v1/onboarding": "./src/hr/v1/onboarding.ts",
     "./hr/v1/overtime": "./src/hr/v1/overtime.ts",
     "./hr/v1/payroll": "./src/hr/v1/payroll.ts",
+    "./hr/v1/performance": "./src/hr/v1/performance.ts",
     "./hr/v1/roles": "./src/hr/v1/roles.ts",
     "./hr/v1/setup": "./src/hr/v1/setup.ts",
     "./hr/v1/shifts": "./src/hr/v1/shifts.ts",
