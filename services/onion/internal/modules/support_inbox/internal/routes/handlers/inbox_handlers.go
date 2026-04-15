@@ -40,7 +40,7 @@ func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (Li
 	if req.PageSize < 1 {
 		req.PageSize = 20
 	}
-	items, total, err := h.Service.ListInbox(ctx, device.User.UserID, req.Page, req.PageSize)
+	items, total, err := h.Service.ListInbox(ctx, device.User.BusinessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListInboxResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inbox"}
 	}
@@ -74,7 +74,7 @@ func (h *UnreadCountHandler) Serve(ctx context.Context, _ *UnreadCountRequest) (
 	if device.User == nil {
 		return UnreadCountResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	count, err := h.Service.UnreadCount(ctx, device.User.UserID)
+	count, err := h.Service.UnreadCount(ctx, device.User.BusinessID)
 	if err != nil {
 		return UnreadCountResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get unread count"}
 	}

@@ -15,7 +15,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 
 ## 📋 Prerequisites
 
-- **Go 1.25.0+**
+- **Go 1.26+**
 - **MySQL 8+**
 - `**mysql` and `mysqladmin` available locally**
 
@@ -76,7 +76,7 @@ make load-tables
 # Build the project
 make build
 
-# The binary will be at ./bin/onionexec
+# The binary will be at ./bin/api
 ```
 
 ### Code Quality
@@ -96,21 +96,20 @@ make sql-check
 
 ```
 onion/
-├── cmd/server/          # Application entry point
+├── cmd/api/             # API entry point
 ├── internal/            # Private application code
-│   ├── app/            # Application setup and configuration
-│   ├── modules/        # Feature modules (AI, Memory, User, Config)
-│   └── platform/       # Shared platform code
-├── db/                 # Database schemas and migrations
+│   ├── modules/        # Feature modules
+│   └── platform/       # Shared platform code, server, database, auth, cache
 ├── scripts/            # Build and setup scripts
-└── test/               # Test files and examples
+├── docs/               # Project documentation
+└── voxie/              # Local proto dependency and generated code
 ```
 
 ## 🚀 Deployment
 
-### Render (Automatic)
+### GitHub Actions
 
-Every push to `main` triggers an automatic build and deployment on Render.
+Pushes to `main` or `master` trigger the repository's Docker image build workflow.
 
 ### Manual Deployment
 
@@ -119,6 +118,5 @@ Every push to `main` triggers an automatic build and deployment on Render.
 make build
 
 # Run the binary
-./bin/onionexec
+./bin/api
 ```
-

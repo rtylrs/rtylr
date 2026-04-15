@@ -33,7 +33,7 @@ func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequ
 	if req.BranchID == 0 || req.ProductID == 0 {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id and product_id are required"}
 	}
-	movements, err := h.Service.ListMovements(ctx, device.User.UserID, req.BranchID, req.ProductID)
+	movements, err := h.Service.ListMovements(ctx, device.User.BusinessID, req.BranchID, req.ProductID)
 	if err != nil {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list stock movements"}
 	}
@@ -84,7 +84,7 @@ func (h *ReceiveStockHandler) Serve(ctx context.Context, req *ReceiveStockReques
 		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.ReceiveStock(ctx, domain.ReceiveStockInput{
-		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -121,7 +121,7 @@ func (h *AdjustStockHandler) Serve(ctx context.Context, req *AdjustStockRequest)
 		return AdjustStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId and productId are required"}
 	}
 	id, err := h.Service.AdjustStock(ctx, domain.AdjustStockInput{
-		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -158,7 +158,7 @@ func (h *WasteStockHandler) Serve(ctx context.Context, req *WasteStockRequest) (
 		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.RecordWaste(ctx, domain.WasteStockInput{
-		BusinessID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -196,7 +196,7 @@ func (h *TransferStockHandler) Serve(ctx context.Context, req *TransferStockRequ
 		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "fromBranchId, toBranchId, productId, and positive quantity are required"}
 	}
 	id, err := h.Service.TransferStock(ctx, domain.TransferStockInput{
-		BusinessID: device.User.UserID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
+		BusinessID: device.User.BusinessID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
 		ProductID: req.ProductID, Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -243,7 +243,7 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 	if req.BranchID == 0 {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	items, err := h.Service.ListBranchInventory(ctx, device.User.UserID, req.BranchID)
+	items, err := h.Service.ListBranchInventory(ctx, device.User.BusinessID, req.BranchID)
 	if err != nil {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inventory"}
 	}
@@ -274,7 +274,7 @@ func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowS
 	if req.BranchID == 0 {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	items, err := h.Service.ListLowStockItems(ctx, device.User.UserID, req.BranchID)
+	items, err := h.Service.ListLowStockItems(ctx, device.User.BusinessID, req.BranchID)
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list low stock items"}
 	}

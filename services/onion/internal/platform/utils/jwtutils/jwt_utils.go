@@ -119,10 +119,10 @@ const (
 	JWTDurationKey CtxKey = "jwt_duration"
 )
 
-func InitializeJWT(ctx context.Context) context.Context {
+func InitializeJWT(ctx context.Context) (context.Context, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		logger.Ctx(ctx).Fatal("JWT_SECRET environment variable is not set")
+		return ctx, errors.New("JWT_SECRET environment variable is not set")
 	}
 
 	jwtDuration := time.Duration(0)
@@ -136,5 +136,5 @@ func InitializeJWT(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, JWTSecretKey, jwtSecret)
 	ctx = context.WithValue(ctx, JWTDurationKey, jwtDuration)
 
-	return ctx
+	return ctx, nil
 }

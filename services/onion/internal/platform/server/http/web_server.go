@@ -13,7 +13,7 @@ import (
 
 const serverShutdownTimeoutSeconds = 5
 
-func Start(ctx context.Context, runMode ChiRunMode, port string) {
+func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -58,22 +58,36 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) {
 		MaxHeaderBytes:    1 << 20, // 1 MB
 	}
 
+	listenErr := make(chan error, 1)
+
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Ctx(ctx).Fatal("Failed to start web server",
-				logger.Error(err),
-			)
-		}
+		listenErr <- srv.ListenAndServe()
 	}()
 
-	<-ctx.Done()
+	select {
+	case err := <-listenErr:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
 
-	shutdownCtx, cancel := context.WithTimeout(ctx, serverShutdownTimeoutSeconds*time.Second)
+		return nil
+	case <-ctx.Done():
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), serverShutdownTimeoutSeconds*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Ctx(ctx).Error("Failed to shutdown server gracefully",
 			logger.Error(err),
 		)
+
+		return err
 	}
+
+	if err := <-listenErr; err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+
+	return nil
 }

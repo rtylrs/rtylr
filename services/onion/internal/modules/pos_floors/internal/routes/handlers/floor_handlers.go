@@ -47,7 +47,7 @@ func (h *ListFloorsHandler) Serve(ctx context.Context, req *ListFloorsRequest) (
 	if req.BranchID == 0 {
 		return ListFloorsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	floors, err := h.Service.List(ctx, device.User.UserID, req.BranchID)
+	floors, err := h.Service.List(ctx, device.User.BusinessID, req.BranchID)
 	if err != nil {
 		return ListFloorsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list floors"}
 	}
@@ -91,7 +91,7 @@ func (h *CreateFloorHandler) Serve(ctx context.Context, req *CreateFloorRequest)
 		return CreateFloorResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Create(ctx, domain.FloorInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		Name:       req.Name,
 		SortOrder:  req.SortOrder,
@@ -136,7 +136,7 @@ func (h *UpdateFloorHandler) Serve(ctx context.Context, req *UpdateFloorRequest)
 	}
 	if updateErr := h.Service.Update(ctx, domain.FloorUpdateInput{
 		ID:         id,
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		Name:       req.Name,
 		SortOrder:  req.SortOrder,
 	}); updateErr != nil {
@@ -165,7 +165,7 @@ func (h *DeleteFloorHandler) Serve(ctx context.Context, _ *DeleteFloorRequest) (
 	if err != nil {
 		return DeleteFloorResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid floor ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, device.User.BusinessID, id); deleteErr != nil {
 		return DeleteFloorResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete floor"}
 	}
 	return DeleteFloorResponse{Message: "Floor deleted successfully"}, nil

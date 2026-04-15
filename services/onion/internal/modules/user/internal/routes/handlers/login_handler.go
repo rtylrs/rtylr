@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 
@@ -93,11 +94,14 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 	// Record login in history (non-blocking, through service -> repo)
 	go func() {
+		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+
 		ip := ""
 		if device := authPkg.DeviceCtx(ctx); device.User != nil {
 			ip = device.User.IP
 		}
-		_ = h.UserService.RecordLogin(context.Background(), userId, req.Email, "email", ip, true)
+		_ = h.UserService.RecordLogin(taskCtx, userId, req.Email, "email", ip, true)
 	}()
 
 	return LoginResponse{

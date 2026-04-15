@@ -46,7 +46,7 @@ func (h *ListTerminalsHandler) Serve(ctx context.Context, _ *ListTerminalsReques
 	if device.User == nil {
 		return ListTerminalsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	terminals, err := h.Service.List(ctx, device.User.UserID)
+	terminals, err := h.Service.List(ctx, device.User.BusinessID)
 	if err != nil {
 		return ListTerminalsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list terminals"}
 	}
@@ -90,7 +90,7 @@ func (h *CreateTerminalHandler) Serve(ctx context.Context, req *CreateTerminalRe
 		return CreateTerminalResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Create(ctx, domain.TerminalInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		Name:       req.Name,
 		DeviceID:   req.DeviceID,
@@ -137,7 +137,7 @@ func (h *UpdateTerminalHandler) Serve(ctx context.Context, req *UpdateTerminalRe
 	}
 	if updateErr := h.Service.Update(ctx, domain.TerminalUpdateInput{
 		ID:         id,
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		Name:       req.Name,
 		DeviceID:   req.DeviceID,
@@ -174,7 +174,7 @@ func (h *HeartbeatTerminalHandler) Serve(ctx context.Context, req *HeartbeatTerm
 	if device.User == nil {
 		return HeartbeatTerminalResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.Service.Heartbeat(ctx, req.TerminalID, device.User.UserID); err != nil {
+	if err := h.Service.Heartbeat(ctx, req.TerminalID, device.User.BusinessID); err != nil {
 		return HeartbeatTerminalResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update heartbeat"}
 	}
 	return HeartbeatTerminalResponse{Message: "Heartbeat updated successfully"}, nil

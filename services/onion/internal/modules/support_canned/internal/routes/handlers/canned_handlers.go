@@ -28,7 +28,7 @@ func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (Li
 	if device.User == nil {
 		return ListCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	items, err := h.Service.List(ctx, device.User.BusinessID)
 	if err != nil {
 		return ListCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list canned responses"}
 	}
@@ -71,7 +71,7 @@ func (h *CreateCannedHandler) Serve(ctx context.Context, req *CreateCannedReques
 		return CreateCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Create(ctx, domain.CannedResponseInput{
-		BusinessID: device.User.UserID, Name: req.Name, Body: req.Body,
+		BusinessID: device.User.BusinessID, Name: req.Name, Body: req.Body,
 		Category: req.Category, Shortcut: req.Shortcut,
 	})
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *UpdateCannedHandler) Serve(ctx context.Context, req *UpdateCannedReques
 	if device.User == nil {
 		return UpdateCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	err := h.Service.Update(ctx, device.User.UserID, req.ID, domain.CannedResponseInput{
+	err := h.Service.Update(ctx, device.User.BusinessID, req.ID, domain.CannedResponseInput{
 		Name: req.Name, Body: req.Body, Category: req.Category, Shortcut: req.Shortcut,
 	})
 	if err != nil {
@@ -133,7 +133,7 @@ func (h *DeleteCannedHandler) Serve(ctx context.Context, req *DeleteCannedReques
 	if device.User == nil {
 		return DeleteCannedResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	err := h.Service.Delete(ctx, device.User.UserID, req.ID)
+	err := h.Service.Delete(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return DeleteCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete canned response"}
 	}

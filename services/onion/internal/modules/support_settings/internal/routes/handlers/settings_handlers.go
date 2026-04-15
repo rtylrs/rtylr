@@ -26,7 +26,7 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	if device.User == nil {
 		return GetSettingsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	s, err := h.Service.Get(ctx, device.User.UserID)
+	s, err := h.Service.Get(ctx, device.User.BusinessID)
 	if err != nil {
 		return GetSettingsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support settings"}
 	}
@@ -56,7 +56,7 @@ func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRe
 		return UpdateSettingsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	err := h.Service.Upsert(ctx, domain.SettingsInput{
-		BusinessID: device.User.UserID, AutoAssign: req.AutoAssign,
+		BusinessID: device.User.BusinessID, AutoAssign: req.AutoAssign,
 		SLAHours: req.SLAHours, BusinessHours: req.BusinessHours,
 		NotificationEmail: req.NotificationEmail,
 	})

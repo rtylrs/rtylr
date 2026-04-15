@@ -28,7 +28,7 @@ func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetC
 	if device.User == nil {
 		return GetConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	cfg, err := h.Service.GetConfig(ctx, device.User.UserID)
+	cfg, err := h.Service.GetConfig(ctx, device.User.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrConfigNotFound) {
 			return GetConfigResponse{Config: nil}, nil
@@ -70,7 +70,7 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 		return UpdateConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	if err := h.Service.UpdateConfig(ctx, domain.UpdateLoyaltyConfigInput{
-		BusinessID:      device.User.UserID,
+		BusinessID:      device.User.BusinessID,
 		IsEnabled:       req.IsEnabled,
 		PointsPerDollar: req.PointsPerDollar,
 		RedemptionRate:  req.RedemptionRate,
@@ -101,7 +101,7 @@ func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactio
 	if req.CustomerID == 0 {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customer_id is required"}
 	}
-	txns, err := h.Service.ListTransactions(ctx, device.User.UserID, req.CustomerID)
+	txns, err := h.Service.ListTransactions(ctx, device.User.BusinessID, req.CustomerID)
 	if err != nil {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list transactions"}
 	}
@@ -153,7 +153,7 @@ func (h *EarnPointsHandler) Serve(ctx context.Context, req *EarnPointsRequest) (
 		return EarnPointsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerId and positive points are required"}
 	}
 	id, err := h.Service.EarnPoints(ctx, domain.EarnPointsInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		CustomerID: req.CustomerID,
 		OrderID:    req.OrderID,
 		Points:     req.Points,
@@ -189,7 +189,7 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 		return RedeemPointsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerId and positive points are required"}
 	}
 	id, err := h.Service.RedeemPoints(ctx, domain.RedeemPointsInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		CustomerID: req.CustomerID,
 		Points:     req.Points,
 	})
@@ -223,7 +223,7 @@ func (h *GetBalanceHandler) Serve(ctx context.Context, req *GetBalanceRequest) (
 	if req.CustomerID == 0 {
 		return GetBalanceResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customer_id is required"}
 	}
-	balance, err := h.Service.GetBalance(ctx, device.User.UserID, req.CustomerID)
+	balance, err := h.Service.GetBalance(ctx, device.User.BusinessID, req.CustomerID)
 	if err != nil {
 		return GetBalanceResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get balance"}
 	}

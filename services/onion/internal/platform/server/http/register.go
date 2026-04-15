@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -91,8 +90,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			parseQueryParams(r, &req)
 		}
 
-		reqCtx := authPkg.CopyRequestValues(ctx, r.Context())                              //nolint:contextcheck // merging startup + request contexts
-		reqCtx = context.WithValue(reqCtx, chi.RouteCtxKey, chi.RouteContext(r.Context())) //nolint:contextcheck // copying chi route params
+		reqCtx := r.Context()
 
 		if validate {
 			if vErr := validateRequest(reqCtx, handler, &req); vErr != nil {

@@ -49,7 +49,7 @@ func (h *ListArticlesHandler) Serve(ctx context.Context, req *ListArticlesReques
 	if req.PageSize < 1 {
 		req.PageSize = 20
 	}
-	items, total, err := h.Service.List(ctx, device.User.UserID, req.Page, req.PageSize)
+	items, total, err := h.Service.List(ctx, device.User.BusinessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListArticlesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list articles"}
 	}
@@ -89,7 +89,7 @@ func (h *CreateArticleHandler) Serve(ctx context.Context, req *CreateArticleRequ
 		return CreateArticleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Create(ctx, domain.ArticleInput{
-		BusinessID: device.User.UserID, Title: req.Title, Slug: req.Slug,
+		BusinessID: device.User.BusinessID, Title: req.Title, Slug: req.Slug,
 		Body: req.Body, Category: req.Category, IsPublished: req.IsPublished,
 	})
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *UpdateArticleHandler) Serve(ctx context.Context, req *UpdateArticleRequ
 	if device.User == nil {
 		return UpdateArticleResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	err := h.Service.Update(ctx, device.User.UserID, req.ID, domain.ArticleInput{
+	err := h.Service.Update(ctx, device.User.BusinessID, req.ID, domain.ArticleInput{
 		Title: req.Title, Slug: req.Slug, Body: req.Body,
 		Category: req.Category, IsPublished: req.IsPublished,
 	})
@@ -153,7 +153,7 @@ func (h *DeleteArticleHandler) Serve(ctx context.Context, req *DeleteArticleRequ
 	if device.User == nil {
 		return DeleteArticleResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	err := h.Service.Delete(ctx, device.User.UserID, req.ID)
+	err := h.Service.Delete(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return DeleteArticleResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete article"}
 	}

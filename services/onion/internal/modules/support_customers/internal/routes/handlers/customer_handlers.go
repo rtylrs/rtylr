@@ -53,7 +53,7 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 	if req.PageSize < 1 {
 		req.PageSize = 20
 	}
-	items, total, err := h.Service.List(ctx, device.User.UserID, req.Page, req.PageSize)
+	items, total, err := h.Service.List(ctx, device.User.BusinessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListCustomersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support customers"}
 	}
@@ -90,7 +90,7 @@ func (h *GetCustomerHandler) Serve(ctx context.Context, req *GetCustomerRequest)
 	if device.User == nil {
 		return GetCustomerResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	c, err := h.Service.GetByID(ctx, device.User.UserID, req.ID)
+	c, err := h.Service.GetByID(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return GetCustomerResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support customer"}
 	}

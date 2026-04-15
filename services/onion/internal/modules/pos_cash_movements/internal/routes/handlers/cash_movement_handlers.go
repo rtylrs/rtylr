@@ -32,7 +32,7 @@ func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovem
 	if req.SessionID == 0 {
 		return ListCashMovementsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "session_id is required"}
 	}
-	movements, err := h.Service.ListBySession(ctx, device.User.UserID, req.SessionID)
+	movements, err := h.Service.ListBySession(ctx, device.User.BusinessID, req.SessionID)
 	if err != nil {
 		return ListCashMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list cash movements"}
 	}
@@ -84,7 +84,7 @@ func (h *CashDropHandler) Serve(ctx context.Context, req *CashDropRequest) (Cash
 		return CashDropResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "sessionId, branchId, and positive amount are required"}
 	}
 	id, err := h.Service.CashDrop(ctx, domain.CreateCashMovementInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		TerminalID: req.TerminalID,
 		SessionID:  req.SessionID,
@@ -127,7 +127,7 @@ func (h *CashPickupHandler) Serve(ctx context.Context, req *CashPickupRequest) (
 		return CashPickupResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "sessionId, branchId, and positive amount are required"}
 	}
 	id, err := h.Service.CashPickup(ctx, domain.CreateCashMovementInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		TerminalID: req.TerminalID,
 		SessionID:  req.SessionID,
@@ -173,7 +173,7 @@ func (h *CashAdjustHandler) Serve(ctx context.Context, req *CashAdjustRequest) (
 		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "reason is required for adjustments"}
 	}
 	id, err := h.Service.CashAdjust(ctx, domain.CreateCashMovementInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		BranchID:   req.BranchID,
 		TerminalID: req.TerminalID,
 		SessionID:  req.SessionID,

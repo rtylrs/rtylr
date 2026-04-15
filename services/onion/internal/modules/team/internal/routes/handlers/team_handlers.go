@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
@@ -184,8 +185,11 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
 		go func() {
+			taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+			defer cancel()
+
 			inviteLink := "https://auth.rtylr.com/invite/" + token
-			emailPkg.SendInvitation(ctx, req.Email, "Your team", "rtylr", inviteLink)
+			emailPkg.SendInvitation(taskCtx, req.Email, "Your team", "rtylr", inviteLink)
 		}()
 		return InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
 	}
@@ -209,8 +213,8 @@ type VerifyInviteResponse struct {
 	Valid    bool   `json:"valid"`
 }
 
-func (h *VerifyInviteHandler) Serve(_ context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {
-	_, email, fullName, err := h.Service.VerifyInviteToken(context.Background(), req.Token)
+func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {
+	_, email, fullName, err := h.Service.VerifyInviteToken(ctx, req.Token)
 	if err != nil {
 		return VerifyInviteResponse{Valid: false}, nil
 	}
@@ -243,8 +247,8 @@ func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteReque
 	return nil
 }
 
-func (h *AcceptInviteHandler) Serve(_ context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, *errorModels.ServerError) {
-	_, err := h.Service.AcceptInvite(context.Background(), req.Token, req.Password)
+func (h *AcceptInviteHandler) Serve(ctx context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, *errorModels.ServerError) {
+	_, err := h.Service.AcceptInvite(ctx, req.Token, req.Password)
 	if err != nil {
 		msg := "Invalid or expired invitation"
 		if errors.Is(err, domain.ErrTokenAlreadyUsed) {
@@ -506,10 +510,13 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 
 	// Send email to business owner (non-blocking)
 	go func() {
-		ownerEmail := h.Service.GetBusinessOwnerEmail(context.Background(), device.User.BusinessID)
+		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+
+		ownerEmail := h.Service.GetBusinessOwnerEmail(taskCtx, device.User.BusinessID)
 		if ownerEmail != "" {
 			appUpper := strings.ToUpper(req.App)
-			emailPkg.Send(context.Background(), emailPkg.SendParams{
+			emailPkg.Send(taskCtx, emailPkg.SendParams{
 				To:      []string{ownerEmail},
 				Subject: requesterName + " requested access to " + appUpper,
 				HTML: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">

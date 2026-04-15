@@ -52,7 +52,7 @@ func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest)
 	if req.PageSize < 1 {
 		req.PageSize = 20
 	}
-	items, total, err := h.Service.List(ctx, device.User.UserID, req.Status, req.Page, req.PageSize)
+	items, total, err := h.Service.List(ctx, device.User.BusinessID, req.Status, req.Page, req.PageSize)
 	if err != nil {
 		return ListTicketsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support tickets"}
 	}
@@ -90,7 +90,7 @@ func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (Ge
 	if device.User == nil {
 		return GetTicketResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ticket, err := h.Service.GetByID(ctx, device.User.UserID, req.ID)
+	ticket, err := h.Service.GetByID(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support ticket"}
 	}
@@ -147,7 +147,7 @@ func (h *CreateTicketHandler) Serve(ctx context.Context, req *CreateTicketReques
 		return CreateTicketResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	ticketID, err := h.Service.Create(ctx, domain.TicketInput{
-		BusinessID:    device.User.UserID,
+		BusinessID:    device.User.BusinessID,
 		CustomerName:  req.CustomerName,
 		CustomerEmail: req.CustomerEmail,
 		Subject:       req.Subject,
@@ -205,7 +205,7 @@ func (h *UpdateTicketHandler) Serve(ctx context.Context, req *UpdateTicketReques
 		return UpdateTicketResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	err := h.Service.Update(ctx, domain.TicketUpdateInput{
-		BusinessID: device.User.UserID,
+		BusinessID: device.User.BusinessID,
 		ID:         req.ID,
 		Subject:    req.Subject,
 		Status:     req.Status,
