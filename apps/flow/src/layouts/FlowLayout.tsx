@@ -236,6 +236,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
+  // Once real workspaces load, redirect away from the "personal" sentinel to the
+  // actual first workspace ID so all downstream API calls use a real numeric ID.
+  useEffect(() => {
+    if (workspaceId === PERSONAL_WORKSPACE_ID && apiWorkspaces && apiWorkspaces.length > 0) {
+      navigate(`/w/${apiWorkspaces[0].id}`, { replace: true });
+    }
+  }, [workspaceId, apiWorkspaces, navigate]);
+
   // Hydrate the store so other consumers (tasks, etc.) see fresh data.
   useEffect(() => {
     if (apiWorkspaces && apiWorkspaces.length > 0) {
