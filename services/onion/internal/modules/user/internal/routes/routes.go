@@ -10,10 +10,14 @@ import (
 	"github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *application.Service, provisionerResolver authPkg.PlatformProvisionerResolver, onUserCreated ...func(ctx context.Context, userID int64)) {
+func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *application.Service, provisionerResolver authPkg.PlatformProvisionerResolver, callbacks ...func(ctx context.Context, userID int64)) {
 	var userCreatedCb func(ctx context.Context, userID int64)
-	if len(onUserCreated) > 0 {
-		userCreatedCb = onUserCreated[0]
+	var userLoginCb func(ctx context.Context, userID int64)
+	if len(callbacks) > 0 {
+		userCreatedCb = callbacks[0]
+	}
+	if len(callbacks) > 1 {
+		userLoginCb = callbacks[1]
 	}
 
 	http.RegisterPOSTWithValidation[handlers.RegisterRequest, handlers.RegisterResponse](
@@ -26,7 +30,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		ctx,
 		router,
 		handlers.LoginRoutes(),
-		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver},
+		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver, OnUserLogin: userLoginCb},
 	)
 
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](

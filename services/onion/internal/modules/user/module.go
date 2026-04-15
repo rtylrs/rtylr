@@ -75,8 +75,12 @@ func (m *Module) GetTokenValidator() authPkg.TokenValidator {
 // Set it before RegisterRoutes is called (e.g., from main to create personal workspaces).
 var OnUserCreated func(ctx context.Context, userID int64)
 
+// OnUserLogin is an optional hook called after each successful login.
+// Idempotent operations (e.g. ensure personal workspace exists) should be wired here.
+var OnUserLogin func(ctx context.Context, userID int64)
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...any) {
-	routes.RegisterRoutes(ctx, router, m.UserService, m.ProvisionerResolver, OnUserCreated)
+	routes.RegisterRoutes(ctx, router, m.UserService, m.ProvisionerResolver, OnUserCreated, OnUserLogin)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
