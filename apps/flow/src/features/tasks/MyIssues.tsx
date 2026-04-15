@@ -10,7 +10,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { useMyIssues } from './useMyIssues';
-import { Task, STATUS_LABELS, PRIORITY_ORDER } from '../../shared/stores/flowStore';
+import { Task, STATUS_LABELS, PRIORITY_ORDER, useFlowStore } from '../../shared/stores/flowStore';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
@@ -35,6 +35,7 @@ const BUCKET_ICONS: Record<MyTaskBucket, React.ReactNode> = {
 const MyIssues: React.FC = () => {
   const { data: rawTasks = [], isLoading } = useMyIssues();
   const tasks = rawTasks.map(apiTaskToTask);
+  const { selectedTaskIds } = useFlowStore();
   const [groupBy, setGroupBy] = useState<GroupBy>('schedule');
   const [sortBy, setSortBy] = useState<SortBy>('priority');
 
@@ -167,7 +168,12 @@ const MyIssues: React.FC = () => {
                 )}
               </div>
               {taskList.map((t) => (
-                <TaskRow key={t.id} task={t} showProject />
+                <TaskRow
+                  key={t.id}
+                  task={t}
+                  showProject
+                  selected={selectedTaskIds.includes(t.id)}
+                />
               ))}
             </motion.div>
           ))
