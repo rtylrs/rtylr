@@ -23,6 +23,8 @@ func LoginRoutes() []string {
 type LoginHandler struct {
 	UserService         *application.Service
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
+	// OnUserLogin is called non-fatally after a successful login (idempotent ops like ensuring personal workspace).
+	OnUserLogin func(ctx context.Context, userID int64)
 }
 
 type LoginRequest struct {
@@ -92,7 +94,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 		}
 	}
 
-	// Record login in history (non-blocking, through service -> repo)
+	// Record login + run idempotent post-login hooks (non-blocking).
 	go func() {
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
@@ -102,6 +104,10 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 			ip = device.User.IP
 		}
 		_ = h.UserService.RecordLogin(taskCtx, userId, req.Email, "email", ip, true)
+
+		if h.OnUserLogin != nil {
+			h.OnUserLogin(taskCtx, userId)
+		}
 	}()
 
 	return LoginResponse{
