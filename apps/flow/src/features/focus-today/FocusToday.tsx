@@ -14,10 +14,9 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 const ACCENT = '#64C5B9';
 
 const FocusToday: React.FC = () => {
-  const storeTasks = useFlowStore((s) => s.tasks);
   const { projects, activeWorkspaceId } = useFlowStore();
   const { data: myTasks } = useMyIssues();
-  const tasks: Task[] = myTasks ? myTasks.map(apiTaskToTask) : storeTasks;
+  const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
 
   const focusTasks = useMemo(() => {
     const list = tasks.filter(

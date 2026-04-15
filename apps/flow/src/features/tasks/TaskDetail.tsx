@@ -25,7 +25,14 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import { useTask } from './useTask';
-import { useUpdateTask, useDeleteTask, useAddComment, useAddSubtask, useLogTime } from './useTasks';
+import {
+  useUpdateTask,
+  useDeleteTask,
+  useAddComment,
+  useAddSubtask,
+  useLogTime,
+  useToggleSubtask,
+} from './useTasks';
 import { useLabels } from './useLabels';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
@@ -54,9 +61,9 @@ const TaskDetail: React.FC = () => {
   const addCommentMut = useAddComment();
   const addSubtaskMut = useAddSubtask();
   const logTimeMut = useLogTime();
+  const toggleSubtaskMut = useToggleSubtask();
   const { data: allLabels = [] } = useLabels();
   const {
-    toggleSubtask,
     members,
     cycles,
     milestones,
@@ -129,6 +136,11 @@ const TaskDetail: React.FC = () => {
     title: s.title,
     completed: s.status === 'done',
   }));
+
+  const toggleSubtask = (subtaskId: string) => {
+    const raw = detail?.subtasks?.find((s) => s.id === subtaskId);
+    toggleSubtaskMut.mutate({ id: subtaskId, completed: raw?.status === 'done' });
+  };
 
   if (!task) {
     return (
