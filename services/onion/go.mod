@@ -21,7 +21,7 @@ require (
 	google.golang.org/grpc v1.77.0
 )
 
-require github.com/voxire/voxie v0.0.0-00010101000000-000000000000 // indirect
+require github.com/voxire/voxie v0.0.0-00010101000000-000000000000
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
