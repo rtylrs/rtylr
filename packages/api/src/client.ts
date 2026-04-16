@@ -98,6 +98,9 @@ export function createApiClient(appId: string): AxiosInstance {
       return response;
     },
     (error) => {
+      if (error.response?.data && typeof error.response.data === 'object') {
+        error.response.data = convertKeys(error.response.data);
+      }
       if (error.response?.status === 401) {
         clearTokenCookie();
         window.location.href = getAuthUrl(appId);
