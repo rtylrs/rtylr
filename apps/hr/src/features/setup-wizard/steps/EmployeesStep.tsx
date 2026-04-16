@@ -65,7 +65,7 @@ const EmployeesStep = ({
 
         {employees.length === 0 ? (
           <p className="py-8 text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-            {t('setup.employees.noEmployees')}
+            {t('setup.employees.noEmployeesHint')}
           </p>
         ) : (
           <div

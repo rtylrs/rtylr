@@ -23,7 +23,8 @@
     "yes": "Oui",
     "no": "Non",
     "confirm": "Confirmer",
-    "close": "Fermer"
+    "close": "Fermer",
+    "retry": "Réessayer"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -98,6 +99,7 @@
     "configSaved": "Configuration enregistrée",
     "stepCompleted": "Étape terminée",
     "finishSetup": "Terminer la configuration",
+    "statusError": "Impossible de charger le statut de configuration. Veuillez réessayer.",
     "steps": {
       "companyProfile": "Profil de l'entreprise",
       "workSchedule": "Horaire de travail",
@@ -190,7 +192,8 @@
       "addEmployee": "Ajouter un employé",
       "importCsv": "Importer CSV",
       "csvComingSoon": "Import CSV bientôt disponible",
-      "noEmployees": "Aucun employé ajouté. Ajoutez votre premier employé pour continuer."
+      "noEmployees": "Aucun employé ajouté. Ajoutez votre premier employé pour continuer.",
+      "noEmployeesHint": "Aucun employé ajouté pour l'instant. Vous pouvez les ajouter ici ou depuis la section Personnel après la configuration."
     }
   },
   "employees": {

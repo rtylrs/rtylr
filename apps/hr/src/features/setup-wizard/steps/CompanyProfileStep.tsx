@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { COUNTRIES, TIMEZONES, INDUSTRIES } from '@voxire/config';
 import {
   companyProfileSchema,
   type CompanyProfileFormData,
@@ -74,7 +75,10 @@ const CompanyProfileStep = ({
           <input
             type="text"
             value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, name: e.target.value }));
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }}
             style={inputStyle}
           />
           {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
@@ -86,19 +90,18 @@ const CompanyProfileStep = ({
           </label>
           <select
             value={form.industry}
-            onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, industry: e.target.value }));
+              setErrors((prev) => ({ ...prev, industry: '' }));
+            }}
             style={inputStyle}
           >
             <option value="">—</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="retail">Retail</option>
-            <option value="technology">Technology</option>
-            <option value="healthcare">Healthcare</option>
-            <option value="education">Education</option>
-            <option value="legal">Legal</option>
-            <option value="finance">Finance</option>
-            <option value="construction">Construction</option>
-            <option value="other">Other</option>
+            {INDUSTRIES.map((i) => (
+              <option key={i.value} value={i.value}>
+                {i.label}
+              </option>
+            ))}
           </select>
           {errors.industry && <p className="mt-1 text-xs text-red-500">{errors.industry}</p>}
         </div>
@@ -108,12 +111,21 @@ const CompanyProfileStep = ({
             <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
               {t('setup.companyProfile.country')}
             </label>
-            <input
-              type="text"
+            <select
               value={form.country}
-              onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, country: e.target.value }));
+                setErrors((prev) => ({ ...prev, country: '' }));
+              }}
               style={inputStyle}
-            />
+            >
+              <option value="">—</option>
+              {COUNTRIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
             {errors.country && <p className="mt-1 text-xs text-red-500">{errors.country}</p>}
           </div>
           <div>
@@ -122,22 +134,18 @@ const CompanyProfileStep = ({
             </label>
             <select
               value={form.timezone}
-              onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, timezone: e.target.value }));
+                setErrors((prev) => ({ ...prev, timezone: '' }));
+              }}
               style={inputStyle}
             >
               <option value="">—</option>
-              <option value="America/New_York">Eastern (US)</option>
-              <option value="America/Chicago">Central (US)</option>
-              <option value="America/Denver">Mountain (US)</option>
-              <option value="America/Los_Angeles">Pacific (US)</option>
-              <option value="Europe/London">London</option>
-              <option value="Europe/Paris">Paris</option>
-              <option value="Europe/Berlin">Berlin</option>
-              <option value="Asia/Dubai">Dubai</option>
-              <option value="Asia/Beirut">Beirut</option>
-              <option value="Asia/Riyadh">Riyadh</option>
-              <option value="Asia/Tokyo">Tokyo</option>
-              <option value="Australia/Sydney">Sydney</option>
+              {TIMEZONES.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
             </select>
             {errors.timezone && <p className="mt-1 text-xs text-red-500">{errors.timezone}</p>}
           </div>
@@ -149,7 +157,10 @@ const CompanyProfileStep = ({
           </label>
           <select
             value={form.currency}
-            onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, currency: e.target.value }));
+              setErrors((prev) => ({ ...prev, currency: '' }));
+            }}
             style={inputStyle}
           >
             <option value="USD">USD — US Dollar</option>

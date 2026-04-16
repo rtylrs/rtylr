@@ -16,13 +16,18 @@ export const useGetSetupStatus = () => {
   });
 };
 
+export type CompleteStepInput = {
+  stepKey: string;
+  data?: Record<string, unknown>;
+};
+
 export const useCompleteSetupStep = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (stepKey: string): Promise<void> => {
-      await unwrap(safe.post(`/hr/setup/steps/${stepKey}/complete`));
+    mutationFn: async ({ stepKey, data }: CompleteStepInput): Promise<void> => {
+      await unwrap(safe.post(`/hr/setup/steps/${stepKey}/complete`, data ?? {}));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr-setup-status'] });

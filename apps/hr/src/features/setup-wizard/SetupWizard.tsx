@@ -19,6 +19,9 @@ import EmployeesStep from './steps/EmployeesStep';
 import type {
   CompanyProfileFormData,
   WorkScheduleFormData,
+  OrgStructureFormData,
+  LocationsFormData,
+  RolesPermissionsFormData,
   PayrollConfigFormData,
   NotificationsFormData,
 } from '../../shared/schemas/wizardSchemas';
@@ -37,7 +40,7 @@ function PageLoader(): React.JSX.Element {
 const SetupWizard = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isLoading } = useGetSetupStatus();
+  const { data, isLoading, isError, refetch } = useGetSetupStatus();
   const completeStep = useCompleteSetupStep();
   const upsertConfig = useUpsertHRConfig();
   const { currentStepIndex, setCurrentStepIndex } = useHRSetupStore();
@@ -58,6 +61,26 @@ const SetupWizard = (): React.JSX.Element => {
 
   if (isLoading) {
     return <PageLoader />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-sm" style={{ color: 'var(--hr-text)' }}>
+          {t('setup.statusError')}
+        </p>
+        <button
+          type="button"
+          className="min-h-[44px] rounded-lg px-4 py-2 text-sm font-medium"
+          style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-card-bg)' }}
+          onClick={(): void => {
+            refetch();
+          }}
+        >
+          {t('common.retry')}
+        </button>
+      </div>
+    );
   }
 
   if (data?.isComplete) {
@@ -88,40 +111,43 @@ const SetupWizard = (): React.JSX.Element => {
     }
   };
 
-  const handleStepComplete = (stepKey: string): void => {
-    completeStep.mutate(stepKey, {
-      onSuccess: () => {
-        advanceAfterComplete();
-      },
-    });
+  const handleStepComplete = (stepKey: string, data?: Record<string, unknown>): void => {
+    completeStep.mutate(
+      { stepKey, data },
+      {
+        onSuccess: () => {
+          advanceAfterComplete();
+        },
+      }
+    );
   };
 
-  const handleCompanyProfile = (_data: CompanyProfileFormData): void => {
-    handleStepComplete('company_profile');
+  const handleCompanyProfile = (data: CompanyProfileFormData): void => {
+    handleStepComplete('company_profile', data as Record<string, unknown>);
   };
 
-  const handleWorkSchedule = (_data: WorkScheduleFormData): void => {
-    handleStepComplete('work_schedule');
+  const handleWorkSchedule = (data: WorkScheduleFormData): void => {
+    handleStepComplete('work_schedule', data as Record<string, unknown>);
   };
 
-  const handleOrgStructure = (): void => {
-    handleStepComplete('org_structure');
+  const handleOrgStructure = (departments: OrgStructureFormData['departments']): void => {
+    handleStepComplete('org_structure', { departments });
   };
 
-  const handleLocations = (): void => {
-    handleStepComplete('locations');
+  const handleLocations = (data: LocationsFormData): void => {
+    handleStepComplete('locations', data as Record<string, unknown>);
   };
 
-  const handleRolesPermissions = (): void => {
-    handleStepComplete('roles_permissions');
+  const handleRolesPermissions = (roles: RolesPermissionsFormData['roles']): void => {
+    handleStepComplete('roles_permissions', { roles });
   };
 
-  const handlePayrollConfig = (_data: PayrollConfigFormData): void => {
-    handleStepComplete('payroll');
+  const handlePayrollConfig = (data: PayrollConfigFormData): void => {
+    handleStepComplete('payroll', data as Record<string, unknown>);
   };
 
-  const handleNotifications = (_data: NotificationsFormData): void => {
-    handleStepComplete('notifications');
+  const handleNotifications = (data: NotificationsFormData): void => {
+    handleStepComplete('notifications', data as Record<string, unknown>);
   };
 
   const handleEmployees = (): void => {

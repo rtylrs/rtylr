@@ -23,7 +23,8 @@
     "yes": "Yes",
     "no": "No",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Retry"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -98,6 +99,7 @@
     "configSaved": "Configuration saved",
     "stepCompleted": "Step completed",
     "finishSetup": "Finish setup",
+    "statusError": "Unable to load setup status. Please try again.",
     "steps": {
       "companyProfile": "Company Profile",
       "workSchedule": "Work Schedule",
@@ -190,7 +192,8 @@
       "addEmployee": "Add employee",
       "importCsv": "Import CSV",
       "csvComingSoon": "CSV import coming soon",
-      "noEmployees": "No employees added yet. Add your first employee to continue."
+      "noEmployees": "No employees added yet. Add your first employee to continue.",
+      "noEmployeesHint": "No employees added yet. You can add them here or from the Staff section after setup."
     }
   },
   "employees": {

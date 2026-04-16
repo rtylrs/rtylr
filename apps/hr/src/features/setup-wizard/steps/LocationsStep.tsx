@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
+import { TIMEZONES } from '@voxire/config';
 import StepContainer from '../components/StepContainer';
 
 interface LocationRow {
@@ -15,20 +16,29 @@ interface LocationsStepProps {
   isSubmitting?: boolean;
 }
 
+const inputStyle: React.CSSProperties = {
+  border: '1px solid var(--hr-border)',
+  background: 'var(--hr-input-bg)',
+  color: 'var(--hr-text)',
+  fontSize: '16px',
+};
+
 const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): React.JSX.Element => {
   const { t } = useTranslation();
   const [singleLocation, setSingleLocation] = useState(false);
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
+  const [newTimezone, setNewTimezone] = useState('');
 
   const addLocation = (): void => {
     const name = newName.trim();
     const address = newAddress.trim();
     if (!name || !address) return;
-    setLocations((prev) => [...prev, { name, address }]);
+    setLocations((prev) => [...prev, { name, address, timezone: newTimezone || undefined }]);
     setNewName('');
     setNewAddress('');
+    setNewTimezone('');
   };
 
   const removeLocation = (index: number): void => {
@@ -36,18 +46,14 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
   };
 
   const handleSubmit = (): void => {
-    onNext({ singleLocation, locations });
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid var(--hr-border)',
-    background: 'var(--hr-input-bg)',
-    color: 'var(--hr-text)',
-    fontSize: '14px',
-    outline: 'none',
+    if (singleLocation) {
+      const name = newName.trim();
+      const address = newAddress.trim();
+      const singleLoc = name && address ? [{ name, address }] : [];
+      onNext({ singleLocation: true, locations: singleLoc });
+    } else {
+      onNext({ singleLocation: false, locations });
+    }
   };
 
   return (
@@ -59,7 +65,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
       isSubmitting={isSubmitting}
     >
       <div className="flex flex-col gap-4">
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
             checked={singleLocation}
@@ -71,33 +77,79 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
           </span>
         </label>
 
-        {!singleLocation && (
+        {singleLocation ? (
+          <div className="flex flex-col gap-3">
+            <input
+              type="text"
+              placeholder={t('setup.locations.locationName')}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="w-full rounded-lg px-3 py-2.5 outline-none"
+              style={inputStyle}
+            />
+            <input
+              type="text"
+              placeholder={t('setup.locations.locationAddress')}
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+              className="w-full rounded-lg px-3 py-2.5 outline-none"
+              style={inputStyle}
+            />
+          </div>
+        ) : (
           <>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                type="text"
-                placeholder={t('setup.locations.locationName')}
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                style={inputStyle}
-              />
-              <input
-                type="text"
-                placeholder={t('setup.locations.locationAddress')}
-                value={newAddress}
-                onChange={(e) => setNewAddress(e.target.value)}
-                style={inputStyle}
-              />
-              <button
-                type="button"
-                onClick={addLocation}
-                className="flex shrink-0 items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium"
-                style={{ background: 'var(--accent)', color: '#fff' }}
-                aria-label={t('setup.locations.addLocation')}
-              >
-                <Plus size={14} />
-                {t('common.add')}
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  placeholder={t('setup.locations.locationName')}
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="flex-1 rounded-lg px-3 py-2.5 outline-none"
+                  style={inputStyle}
+                />
+                <input
+                  type="text"
+                  placeholder={t('setup.locations.locationAddress')}
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  className="flex-1 rounded-lg px-3 py-2.5 outline-none"
+                  style={inputStyle}
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label
+                    className="mb-1 block text-xs font-medium"
+                    style={{ color: 'var(--hr-text-muted)' }}
+                  >
+                    {t('setup.locations.locationTimezone')}
+                  </label>
+                  <select
+                    value={newTimezone}
+                    onChange={(e) => setNewTimezone(e.target.value)}
+                    className="w-full rounded-lg px-3 py-2.5 outline-none"
+                    style={inputStyle}
+                  >
+                    <option value="">—</option>
+                    {TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={addLocation}
+                  className="mt-6 flex shrink-0 items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-medium"
+                  style={{ background: 'var(--accent)', color: '#fff' }}
+                  aria-label={t('setup.locations.addLocation')}
+                >
+                  <Plus size={14} />
+                  {t('common.add')}
+                </button>
+              </div>
             </div>
 
             {locations.length === 0 ? (
@@ -119,6 +171,11 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
                       <span className="ml-2 text-xs" style={{ color: 'var(--hr-text-muted)' }}>
                         {loc.address}
                       </span>
+                      {loc.timezone && (
+                        <span className="ml-2 text-xs" style={{ color: 'var(--hr-text-muted)' }}>
+                          ({loc.timezone})
+                        </span>
+                      )}
                     </div>
                     <button
                       type="button"

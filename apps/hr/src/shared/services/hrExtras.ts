@@ -222,6 +222,7 @@ export interface HrSettings {
   ptoPolicyDays: number;
   currency: 'USD' | 'EUR' | 'GBP';
   weeklyHours: number;
+  industry?: string;
 }
 
 // ─── API service ────────────────────────────────────────────────────────────
@@ -284,7 +285,7 @@ export const hrExtras = {
   deleteDocument: (id: number) =>
     safe.post<{ success: boolean }>('/hr/documents', { id, _action: 'delete' }),
   expiringDocuments: (daysAhead = 30) =>
-    safe.get<DocumentItem[]>('/hr/documents', { params: { expiring: daysAhead } }),
+    safe.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
 
   // Benefits
   listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits'),

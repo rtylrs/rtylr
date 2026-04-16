@@ -54,6 +54,7 @@ const WizardProgress = ({
               <button
                 type="button"
                 onClick={() => onStepClick(index)}
+                disabled={!completed && !isCurrent}
                 className="flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
                 style={{
                   background: isCurrent
@@ -63,6 +64,8 @@ const WizardProgress = ({
                       : 'var(--hr-hover)',
                   color: isCurrent ? '#fff' : completed ? '#22c55e' : 'var(--hr-text-muted)',
                   border: isCurrent ? '1px solid var(--accent)' : '1px solid var(--hr-border)',
+                  cursor: !completed && !isCurrent ? 'not-allowed' : 'pointer',
+                  opacity: !completed && !isCurrent ? 0.5 : 1,
                 }}
                 aria-current={isCurrent ? 'step' : undefined}
               >
