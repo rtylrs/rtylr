@@ -683,6 +683,77 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 	return labels, nil
 }
 
+func (r *Repository) UpdateLabel(ctx context.Context, id int64, input domain.LabelInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_labels SET name = ?, color = ? WHERE id = ?`,
+		input.Name, input.Color, id,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateLabel failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) DeleteLabel(ctx context.Context, id int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`DELETE FROM flow_labels WHERE id = ?`, id,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteLabel failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) SetTaskLabels(ctx context.Context, taskID int64, labelIDs []int64) error {
+	b, err := json.Marshal(labelIDs)
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.ExecContext(ctx,
+		`UPDATE flow_tasks SET labels = ? WHERE id = ?`, b, taskID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("SetTaskLabels failed", logger.Error(err))
+	}
+	return err
+}
+
+// ─────────────────────────────────────────────
+// Time Logs (extended)
+// ─────────────────────────────────────────────
+
+func (r *Repository) GetTimeLogTaskID(ctx context.Context, id int64) (int64, error) {
+	var taskID int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT task_id FROM flow_time_logs WHERE id = ?`, id,
+	).Scan(&taskID)
+	return taskID, err
+}
+
+func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`DELETE FROM flow_time_logs WHERE id = ? AND user_id = ?`, id, userID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteTimeLog failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) RecalcActualHours(ctx context.Context, taskID int64) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_tasks
+		 SET actual_hours = (SELECT COALESCE(SUM(duration_minutes), 0) / 60.0
+		                     FROM flow_time_logs WHERE task_id = ?)
+		 WHERE id = ?`,
+		taskID, taskID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))
+	}
+	return err
+}
+
 // ─────────────────────────────────────────────
 // Dashboard
 // ─────────────────────────────────────────────

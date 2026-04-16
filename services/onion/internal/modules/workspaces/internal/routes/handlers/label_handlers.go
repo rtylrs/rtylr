@@ -16,8 +16,11 @@ import (
 // Route declarations
 // ─────────────────────────────────────────────
 
-func ListLabelsRoutes() []string  { return []string{"/flow/labels"} }
-func CreateLabelRoutes() []string { return []string{"/flow/labels"} }
+func ListLabelsRoutes() []string     { return []string{"/flow/labels"} }
+func CreateLabelRoutes() []string    { return []string{"/flow/labels"} }
+func UpdateLabelRoutes() []string    { return []string{"/flow/labels"} }
+func DeleteLabelRoutes() []string    { return []string{"/flow/labels"} }
+func SetTaskLabelsRoutes() []string  { return []string{"/flow/tasks/labels"} }
 
 // ─────────────────────────────────────────────
 // Shared payload types
@@ -130,4 +133,137 @@ func (h *CreateLabelHandler) Serve(ctx context.Context, req *CreateLabelRequest)
 	}
 
 	return CreateLabelResponse{Label: toLabelPayload(label)}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/labels
+// ─────────────────────────────────────────────
+
+type UpdateLabelHandler struct {
+	FlowService *application.Service
+}
+
+type UpdateLabelRequest struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+type UpdateLabelResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateLabelHandler) Validate(_ context.Context, req *UpdateLabelRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+	}
+	return nil
+}
+
+func (h *UpdateLabelHandler) Serve(ctx context.Context, req *UpdateLabelRequest) (UpdateLabelResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateLabelResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	input := domain.LabelInput{
+		Name:  req.Name,
+		Color: req.Color,
+	}
+
+	if err := h.FlowService.UpdateLabel(ctx, req.ID, input); err != nil {
+		return UpdateLabelResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update label",
+		}
+	}
+
+	return UpdateLabelResponse{Message: "Label updated"}, nil
+}
+
+// ─────────────────────────────────────────────
+// DELETE /flow/labels
+// ─────────────────────────────────────────────
+
+type DeleteLabelHandler struct {
+	FlowService *application.Service
+}
+
+type DeleteLabelRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeleteLabelResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteLabelHandler) Validate(_ context.Context, req *DeleteLabelRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	return nil
+}
+
+func (h *DeleteLabelHandler) Serve(ctx context.Context, req *DeleteLabelRequest) (DeleteLabelResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return DeleteLabelResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.DeleteLabel(ctx, req.ID); err != nil {
+		return DeleteLabelResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete label",
+		}
+	}
+
+	return DeleteLabelResponse{Message: "Label deleted"}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/tasks/labels
+// ─────────────────────────────────────────────
+
+type SetTaskLabelsHandler struct {
+	FlowService *application.Service
+}
+
+type SetTaskLabelsRequest struct {
+	TaskID   int64   `json:"task_id"`
+	LabelIDs []int64 `json:"label_ids"`
+}
+
+type SetTaskLabelsResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *SetTaskLabelsHandler) Validate(_ context.Context, req *SetTaskLabelsRequest) *errorModels.ServerError {
+	if req.TaskID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
+	}
+	return nil
+}
+
+func (h *SetTaskLabelsHandler) Serve(ctx context.Context, req *SetTaskLabelsRequest) (SetTaskLabelsResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return SetTaskLabelsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	labelIDs := req.LabelIDs
+	if labelIDs == nil {
+		labelIDs = []int64{}
+	}
+
+	if err := h.FlowService.SetTaskLabels(ctx, req.TaskID, labelIDs); err != nil {
+		return SetTaskLabelsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to set task labels",
+		}
+	}
+
+	return SetTaskLabelsResponse{Message: "Task labels updated"}, nil
 }

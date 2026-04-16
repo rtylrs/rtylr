@@ -18,7 +18,8 @@ import (
 
 // --- Task Activity ---
 
-func GetTaskActivityRoutes() []string { return []string{"/flow/tasks/{id}/activity"} }
+func GetTaskActivityRoutes() []string       { return []string{"/flow/tasks/{id}/activity"} }
+func GetTaskActivityByQPRoutes() []string   { return []string{"/flow/tasks/activity"} }
 
 type GetTaskActivityHandler struct{ FlowService *application.Service }
 type GetTaskActivityRequest struct{}
@@ -46,6 +47,38 @@ func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRe
 		payloads[i] = toActivityPayload(a)
 	}
 	return GetTaskActivityResponse{Activity: payloads}, nil
+}
+
+// GetTaskActivityByQPHandler handles GET /flow/tasks/activity?task_id=
+type GetTaskActivityByQPHandler struct{ FlowService *application.Service }
+
+type GetTaskActivityByQPRequest struct {
+	TaskID int64 `json:"task_id"`
+}
+
+type GetTaskActivityByQPResponse = GetTaskActivityResponse
+
+func (h *GetTaskActivityByQPHandler) Validate(_ context.Context, req *GetTaskActivityByQPRequest) *errorModels.ServerError {
+	if req.TaskID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
+	}
+	return nil
+}
+
+func (h *GetTaskActivityByQPHandler) Serve(ctx context.Context, req *GetTaskActivityByQPRequest) (GetTaskActivityByQPResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetTaskActivityByQPResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	activities, err := h.FlowService.GetTaskActivity(ctx, req.TaskID)
+	if err != nil {
+		return GetTaskActivityByQPResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get task activity"}
+	}
+	payloads := make([]*flowv1.TaskActivity, len(activities))
+	for i, a := range activities {
+		payloads[i] = toActivityPayload(a)
+	}
+	return GetTaskActivityByQPResponse{Activity: payloads}, nil
 }
 
 // --- Task Subtasks ---
@@ -382,4 +415,156 @@ func (h *CreateTimeLogHandler) Serve(ctx context.Context, req *CreateTimeLogRequ
 		return CreateTimeLogResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create time log"}
 	}
 	return CreateTimeLogResponse{TimeLogID: id, Message: "Time log created successfully"}, nil
+}
+
+// --- Delete Time Log ---
+
+func DeleteTimeLogRoutes() []string { return []string{"/flow/tasks/{taskId}/time/{id}"} }
+
+type DeleteTimeLogHandler struct{ FlowService *application.Service }
+type DeleteTimeLogRequest struct{}
+type DeleteTimeLogResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteTimeLogHandler) Serve(ctx context.Context, _ *DeleteTimeLogRequest) (DeleteTimeLogResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeleteTimeLogResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return DeleteTimeLogResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid time log ID"}
+	}
+
+	taskIdStr := chi.URLParamFromCtx(ctx, "taskId")
+	taskID, err := strconv.ParseInt(taskIdStr, 10, 64)
+	if err != nil {
+		return DeleteTimeLogResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid task ID"}
+	}
+
+	if deleteErr := h.FlowService.DeleteTimeLog(ctx, id, device.User.UserID, taskID); deleteErr != nil {
+		return DeleteTimeLogResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete time log"}
+	}
+
+	return DeleteTimeLogResponse{Message: "Time log deleted successfully"}, nil
+}
+
+// --- Flat-URL Time Log endpoints (spec-style: query params / body task_id) ---
+
+func GetTimeLogsFlatRoutes() []string    { return []string{"/flow/tasks/time"} }
+func CreateTimeLogFlatRoutes() []string  { return []string{"/flow/tasks/time"} }
+func DeleteTimeLogFlatRoutes() []string  { return []string{"/flow/tasks/time"} }
+
+// GET /flow/tasks/time?task_id=
+
+type GetTimeLogsFlatHandler struct{ FlowService *application.Service }
+
+type GetTimeLogsFlatRequest struct {
+	TaskID int64 `json:"task_id"`
+}
+
+type GetTimeLogsFlatResponse = GetTimeLogsResponse
+
+func (h *GetTimeLogsFlatHandler) Validate(_ context.Context, req *GetTimeLogsFlatRequest) *errorModels.ServerError {
+	if req.TaskID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
+	}
+	return nil
+}
+
+func (h *GetTimeLogsFlatHandler) Serve(ctx context.Context, req *GetTimeLogsFlatRequest) (GetTimeLogsFlatResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetTimeLogsFlatResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	logs, err := h.FlowService.GetTimeLogs(ctx, req.TaskID)
+	if err != nil {
+		return GetTimeLogsFlatResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get time logs"}
+	}
+	payloads := make([]TimeLogPayload, len(logs))
+	for i, l := range logs {
+		payloads[i] = TimeLogPayload{
+			ID:              l.ID,
+			TaskID:          l.TaskID,
+			UserID:          l.UserID,
+			DurationMinutes: l.DurationMinutes,
+			Description:     l.Description,
+			LoggedAt:        l.LoggedAt.Format("2006-01-02T15:04:05Z"),
+			CreatedAt:       l.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		}
+	}
+	return GetTimeLogsFlatResponse{TimeLogs: payloads}, nil
+}
+
+// POST /flow/tasks/time
+
+type CreateTimeLogFlatHandler struct{ FlowService *application.Service }
+
+type CreateTimeLogFlatRequest struct {
+	TaskID          int64      `json:"task_id"`
+	DurationMinutes int        `json:"duration_minutes"`
+	Description     string     `json:"description"`
+	LoggedAt        *time.Time `json:"logged_at"`
+}
+
+type CreateTimeLogFlatResponse = CreateTimeLogResponse
+
+func (h *CreateTimeLogFlatHandler) Validate(_ context.Context, req *CreateTimeLogFlatRequest) *errorModels.ServerError {
+	if req.TaskID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
+	}
+	if req.DurationMinutes <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
+	}
+	return nil
+}
+
+func (h *CreateTimeLogFlatHandler) Serve(ctx context.Context, req *CreateTimeLogFlatRequest) (CreateTimeLogFlatResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CreateTimeLogFlatResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	input := domain.TimeLogInput{
+		OwnerID:         device.User.UserID,
+		TaskID:          req.TaskID,
+		UserID:          device.User.UserID,
+		DurationMinutes: req.DurationMinutes,
+		Description:     req.Description,
+	}
+	id, createErr := h.FlowService.CreateTimeLog(ctx, input)
+	if createErr != nil {
+		return CreateTimeLogFlatResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create time log"}
+	}
+	return CreateTimeLogFlatResponse{TimeLogID: id, Message: "Time log created successfully"}, nil
+}
+
+// DELETE /flow/tasks/time?id=
+
+type DeleteTimeLogFlatHandler struct{ FlowService *application.Service }
+
+type DeleteTimeLogFlatRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeleteTimeLogFlatResponse = DeleteTimeLogResponse
+
+func (h *DeleteTimeLogFlatHandler) Validate(_ context.Context, req *DeleteTimeLogFlatRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	return nil
+}
+
+func (h *DeleteTimeLogFlatHandler) Serve(ctx context.Context, req *DeleteTimeLogFlatRequest) (DeleteTimeLogFlatResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeleteTimeLogFlatResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if deleteErr := h.FlowService.DeleteTimeLogFlat(ctx, req.ID, device.User.UserID); deleteErr != nil {
+		return DeleteTimeLogFlatResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete time log"}
+	}
+	return DeleteTimeLogFlatResponse{Message: "Time log deleted successfully"}, nil
 }

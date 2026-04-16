@@ -125,6 +125,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.GetTaskActivityHandler{FlowService: flowService},
 	)
 
+	http.RegisterGETWithValidation[handlers.GetTaskActivityByQPRequest, handlers.GetTaskActivityByQPResponse](
+		ctx, router, handlers.GetTaskActivityByQPRoutes(),
+		&handlers.GetTaskActivityByQPHandler{FlowService: flowService},
+	)
+
 	// ─── Task Subtasks ───────────────────────────────────────────────────────
 
 	http.RegisterGET[handlers.GetSubtasksRequest, handlers.GetSubtasksResponse](
@@ -166,6 +171,26 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.CreateTimeLogHandler{FlowService: flowService},
 	)
 
+	http.RegisterDELETE[handlers.DeleteTimeLogRequest, handlers.DeleteTimeLogResponse](
+		ctx, router, handlers.DeleteTimeLogRoutes(),
+		&handlers.DeleteTimeLogHandler{FlowService: flowService},
+	)
+
+	http.RegisterGETWithValidation[handlers.GetTimeLogsFlatRequest, handlers.GetTimeLogsFlatResponse](
+		ctx, router, handlers.GetTimeLogsFlatRoutes(),
+		&handlers.GetTimeLogsFlatHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateTimeLogFlatRequest, handlers.CreateTimeLogFlatResponse](
+		ctx, router, handlers.CreateTimeLogFlatRoutes(),
+		&handlers.CreateTimeLogFlatHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteTimeLogFlatRequest, handlers.DeleteTimeLogFlatResponse](
+		ctx, router, handlers.DeleteTimeLogFlatRoutes(),
+		&handlers.DeleteTimeLogFlatHandler{FlowService: flowService},
+	)
+
 	// ─── Dashboard ────────────────────────────────────────────────────────────
 
 	http.RegisterGETWithValidation[handlers.GetDashboardRequest, handlers.GetDashboardResponse](
@@ -183,6 +208,21 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 	http.RegisterPOSTWithValidation[handlers.CreateLabelRequest, handlers.CreateLabelResponse](
 		ctx, router, handlers.CreateLabelRoutes(),
 		&handlers.CreateLabelHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateLabelRequest, handlers.UpdateLabelResponse](
+		ctx, router, handlers.UpdateLabelRoutes(),
+		&handlers.UpdateLabelHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteLabelRequest, handlers.DeleteLabelResponse](
+		ctx, router, handlers.DeleteLabelRoutes(),
+		&handlers.DeleteLabelHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.SetTaskLabelsRequest, handlers.SetTaskLabelsResponse](
+		ctx, router, handlers.SetTaskLabelsRoutes(),
+		&handlers.SetTaskLabelsHandler{FlowService: flowService},
 	)
 
 	// ─── Workspace Members (extended) ─────────────────────────────────────────

@@ -385,7 +385,33 @@ func (s *Service) GetTimeLogs(ctx context.Context, taskID int64) ([]domain.TimeL
 }
 
 func (s *Service) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) (int64, error) {
-	return s.repo.CreateTimeLog(ctx, input)
+	id, err := s.repo.CreateTimeLog(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	if recalcErr := s.repo.RecalcActualHours(ctx, input.TaskID); recalcErr != nil {
+		logger.Ctx(ctx).Error("CreateTimeLog: failed to recalc actual_hours", logger.Error(recalcErr))
+	}
+	return id, nil
+}
+
+func (s *Service) DeleteTimeLog(ctx context.Context, id, userID, taskID int64) error {
+	if err := s.repo.DeleteTimeLog(ctx, id, userID); err != nil {
+		return err
+	}
+	if recalcErr := s.repo.RecalcActualHours(ctx, taskID); recalcErr != nil {
+		logger.Ctx(ctx).Error("DeleteTimeLog: failed to recalc actual_hours", logger.Error(recalcErr))
+	}
+	return nil
+}
+
+// DeleteTimeLogFlat deletes a time log by ID, looking up the task_id automatically.
+func (s *Service) DeleteTimeLogFlat(ctx context.Context, id, userID int64) error {
+	taskID, err := s.repo.GetTimeLogTaskID(ctx, id)
+	if err != nil {
+		return err
+	}
+	return s.DeleteTimeLog(ctx, id, userID, taskID)
 }
 
 // ─────────────────────────────────────────────
@@ -408,6 +434,18 @@ func (s *Service) CreateLabel(ctx context.Context, input domain.LabelInput) (dom
 		Name:        input.Name,
 		Color:       input.Color,
 	}, nil
+}
+
+func (s *Service) UpdateLabel(ctx context.Context, id int64, input domain.LabelInput) error {
+	return s.repo.UpdateLabel(ctx, id, input)
+}
+
+func (s *Service) DeleteLabel(ctx context.Context, id int64) error {
+	return s.repo.DeleteLabel(ctx, id)
+}
+
+func (s *Service) SetTaskLabels(ctx context.Context, taskID int64, labelIDs []int64) error {
+	return s.repo.SetTaskLabels(ctx, taskID, labelIDs)
 }
 
 // ─────────────────────────────────────────────
