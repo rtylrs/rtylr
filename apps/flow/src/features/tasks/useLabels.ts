@@ -3,17 +3,54 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
 
-export function useLabels() {
+export function useLabels(workspaceId?: string) {
   return useQuery<ApiLabel[]>({
-    queryKey: ['labels'],
-    queryFn: () => unwrap(flowApi.getLabels()),
+    queryKey: ['labels', workspaceId],
+    queryFn: async () => {
+      if (workspaceId) {
+        const res = await unwrap(flowApi.listLabels(workspaceId));
+        return res.labels;
+      }
+      return unwrap(flowApi.getLabels());
+    },
   });
 }
 
 export function useCreateLabel() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; color: string }) => unwrap(flowApi.createLabel(data)),
+    mutationFn: (data: { workspace_id: number; name: string; color: string }) =>
+      unwrap(flowApi.createLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+  });
+}
+
+export function useUpdateLabel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: number; name: string; color: string }) =>
+      unwrap(flowApi.updateLabel(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+  });
+}
+
+export function useDeleteLabel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(flowApi.deleteLabel(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+  });
+}
+
+export function useSetTaskLabels() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { task_id: number; label_ids: number[] }) =>
+      unwrap(flowApi.setTaskLabels(data)),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['task-detail', String(variables.task_id)] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
   });
 }

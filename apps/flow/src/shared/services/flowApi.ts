@@ -83,9 +83,11 @@ export interface ApiTask {
 }
 
 export interface ApiLabel {
-  id: string;
+  id: number;
+  workspace_id: number;
   name: string;
   color: string;
+  created_at: string;
 }
 
 export interface ApiMilestone {
@@ -192,13 +194,13 @@ export interface ApiProjectMember {
 }
 
 export interface ApiTaskActivity {
-  id: string;
-  taskId: string;
-  userId: string;
+  id: number;
+  task_id: number;
+  user_id: number;
   action: string;
-  oldValue: string;
-  newValue: string;
-  createdAt: string;
+  old_value: string;
+  new_value: string;
+  created_at: string;
 }
 
 export interface ApiTaskComment {
@@ -229,12 +231,13 @@ export interface ApiAttachment {
 }
 
 export interface ApiTimeLog {
-  id: string;
-  taskId: string;
-  userId: string;
-  durationMinutes: number;
+  id: number;
+  task_id: number;
+  user_id: number;
+  duration_minutes: number;
   description: string;
-  loggedAt: string;
+  logged_at: string;
+  created_at: string;
 }
 
 export interface ApiTaskDetail {
@@ -242,6 +245,9 @@ export interface ApiTaskDetail {
   subtasks: ApiSubtask[];
   comments: ApiTaskComment[];
   activity: ApiTaskActivity[];
+  labels?: ApiLabel[];
+  estimated_hours?: number | null;
+  actual_hours?: number | null;
 }
 
 // -- API ------------------------------------------------------------------
@@ -396,7 +402,10 @@ export const flowApi = {
 
   // -- Task Activity ------------------------------------------------------
 
-  getTaskActivity: (id: string) => safe.get<ApiTaskActivity[]>(`/flow/tasks/${id}/activity`),
+  getTaskActivity: (taskId: string) =>
+    safe.get<{ activity: ApiTaskActivity[] }>('/flow/tasks/activity', {
+      params: { task_id: taskId },
+    }),
 
   // -- Subtasks -----------------------------------------------------------
 
@@ -411,16 +420,35 @@ export const flowApi = {
 
   // -- Time Logs ----------------------------------------------------------
 
-  getTimeLogs: (id: string) => safe.get<ApiTimeLog[]>(`/flow/tasks/${id}/time`),
+  getTimeLogs: (taskId: string) =>
+    safe.get<{ logs: ApiTimeLog[]; estimated_hours: number | null; actual_hours: number | null }>(
+      '/flow/tasks/time',
+      { params: { task_id: taskId } }
+    ),
 
-  logTime: (id: string, data: { durationMinutes: number; description?: string }) =>
-    safe.post<ApiTimeLog>(`/flow/tasks/${id}/time`, data),
+  logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
+    safe.post<ApiTimeLog>('/flow/tasks/time', data),
+
+  deleteTimeLog: (id: number) => safe.delete('/flow/tasks/time', { params: { id } }),
 
   // -- Labels -------------------------------------------------------------
 
-  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
+  listLabels: (workspaceId: string) =>
+    safe.get<{ labels: ApiLabel[] }>('/flow/labels', { params: { workspace_id: workspaceId } }),
 
-  createLabel: (data: { name: string; color: string }) => safe.post<ApiLabel>('/flow/labels', data),
+  createLabel: (data: { workspace_id: number; name: string; color: string }) =>
+    safe.post<ApiLabel>('/flow/labels', data),
+
+  updateLabel: (data: { id: number; name: string; color: string }) =>
+    safe.put('/flow/labels', data),
+
+  deleteLabel: (id: number) => safe.delete('/flow/labels', { params: { id } }),
+
+  setTaskLabels: (data: { task_id: number; label_ids: number[] }) =>
+    safe.put('/flow/tasks/labels', data),
+
+  /** @deprecated use listLabels(workspaceId) */
+  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
 
   // -- Milestones ---------------------------------------------------------
 

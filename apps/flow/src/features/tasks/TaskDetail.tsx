@@ -23,6 +23,9 @@ import {
   Hourglass,
   Pin,
   Lightbulb,
+  Activity,
+  Type,
+  Plus,
 } from 'lucide-react';
 import { useTask } from './useTask';
 import {
@@ -30,18 +33,18 @@ import {
   useDeleteTask,
   useAddComment,
   useAddSubtask,
-  useLogTime,
   useToggleSubtask,
 } from './useTasks';
-import { useLabels } from './useLabels';
+import { useLabels, useSetTaskLabels } from './useLabels';
+import { useTaskActivity } from './useTaskActivity';
+import { useTimeLogs, useLogTime, useDeleteTimeLog } from './useTimeLogs';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
-import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
+import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import CommentList from '../../shared/components/CommentList';
 import CommentInput from '../../shared/components/CommentInput';
 import SubtaskList from '../../shared/components/SubtaskList';
-import ActivityFeed from '../../shared/components/ActivityFeed';
 import AttachmentUpload from '../../shared/components/AttachmentUpload';
 import AssigneeAvatar from '../../shared/components/AssigneeAvatar';
 import LabelChip from '../../shared/components/LabelChip';
@@ -50,6 +53,121 @@ import { getInitials } from '../../shared/lib/utils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 
 const ACCENT = '#64C5B9';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatRelative(dateStr: string): string {
+  const d = new Date(dateStr);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function humanizeValue(action: string, value: string): string {
+  if (!value) return '—';
+  if (action.includes('status') || action === 'status_changed' || action === 'status_change') {
+    return value
+      .split('_')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+  if (
+    action.includes('priority') ||
+    action === 'priority_changed' ||
+    action === 'priority_change'
+  ) {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+  return value;
+}
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+function parseDurationInput(raw: string): number | null {
+  const trimmed = raw.trim().toLowerCase();
+  // e.g. "1.5h" or "1h"
+  const hoursMatch = trimmed.match(/^(\d+(?:\.\d+)?)h$/);
+  if (hoursMatch) return Math.round(parseFloat(hoursMatch[1]) * 60);
+  // e.g. "90m" or "90"
+  const minsMatch = trimmed.match(/^(\d+)m?$/);
+  if (minsMatch) return parseInt(minsMatch[1], 10);
+  return null;
+}
+
+function describeActivity(a: ApiTaskActivity): React.ReactNode {
+  const action = a.action;
+  const oldVal = humanizeValue(action, a.old_value);
+  const newVal = humanizeValue(action, a.new_value);
+
+  if (action === 'status_changed' || action === 'status_change') {
+    return (
+      <>
+        status changed from <strong>{oldVal}</strong> to <strong>{newVal}</strong>
+      </>
+    );
+  }
+  if (action === 'priority_changed' || action === 'priority_change') {
+    return (
+      <>
+        priority changed from <strong>{oldVal}</strong> to <strong>{newVal}</strong>
+      </>
+    );
+  }
+  if (action === 'assignee_changed' || action === 'assignee_change') {
+    return (
+      <>
+        assigned to <strong>{newVal}</strong>
+      </>
+    );
+  }
+  if (action === 'title_changed' || action === 'title_change') {
+    return <>title updated</>;
+  }
+  if (action === 'due_date_changed' || action === 'due_date_change') {
+    return (
+      <>
+        due date set to <strong>{newVal}</strong>
+      </>
+    );
+  }
+  // generic
+  const label = action
+    .replace(/_/g, ' ')
+    .replace(/\bchanged\b/, 'changed')
+    .trim();
+  if (a.new_value) {
+    return (
+      <>
+        {label} → <strong>{newVal}</strong>
+      </>
+    );
+  }
+  return <>{label}</>;
+}
+
+function activityIcon(action: string): React.ComponentType<{ size?: number }> {
+  if (action.includes('status')) return CircleDot;
+  if (action.includes('priority')) return Flag;
+  if (action.includes('assignee')) return UserIcon;
+  if (action.includes('title')) return Type;
+  if (action.includes('due_date')) return CalendarIcon;
+  if (action.includes('label')) return Tag;
+  return Activity;
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,8 +178,14 @@ const TaskDetail: React.FC = () => {
   const deleteTaskMut = useDeleteTask();
   const addCommentMut = useAddComment();
   const addSubtaskMut = useAddSubtask();
-  const logTimeMut = useLogTime();
   const toggleSubtaskMut = useToggleSubtask();
+  const setTaskLabelsMut = useSetTaskLabels();
+
+  const { data: taskActivityData = [] } = useTaskActivity(id ?? '');
+  const { data: timeLogsData } = useTimeLogs(id ?? '');
+  const logTimeMut = useLogTime();
+  const deleteTimeLogMut = useDeleteTimeLog();
+
   const { data: allLabels = [] } = useLabels();
   const {
     members,
@@ -69,7 +193,7 @@ const TaskDetail: React.FC = () => {
     milestones,
     archiveTask,
     attachments,
-    timelogs,
+    timelogs: storeTimelogs,
     projects,
     tasks: allTasks,
     sections,
@@ -77,11 +201,16 @@ const TaskDetail: React.FC = () => {
   } = useFlowStore();
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
 
-  const updateTask = (id: string, patch: Partial<Task>) => {
-    updateTaskMut.mutate({ id, data: patch as Partial<ApiTask> });
+  // Time log form state
+  const [logFormOpen, setLogFormOpen] = useState(false);
+  const [logDurationInput, setLogDurationInput] = useState('');
+  const [logDescription, setLogDescription] = useState('');
+
+  const updateTask = (taskId: string, patch: Partial<Task>) => {
+    updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
   };
-  const deleteTask = (id: string) => {
-    deleteTaskMut.mutate(id);
+  const deleteTask = (taskId: string) => {
+    deleteTaskMut.mutate(taskId);
   };
   const addComment = (
     taskId: string,
@@ -92,9 +221,6 @@ const TaskDetail: React.FC = () => {
   };
   const addSubtask = (taskId: string, title: string) => {
     addSubtaskMut.mutate({ taskId, title });
-  };
-  const logTime = (taskId: string, minutes: number, note?: string) => {
-    logTimeMut.mutate({ taskId, minutes, note });
   };
 
   const [tab, setTab] = useState<'activity' | 'comments'>('comments');
@@ -119,17 +245,7 @@ const TaskDetail: React.FC = () => {
     body: c.content,
     createdAt: c.createdAt,
   }));
-  const taskActivity = (detail?.activity ?? []).map((a) => ({
-    id: a.id,
-    taskId: a.taskId,
-    type: 'status_change' as const,
-    actor: a.userId,
-    actorInitials: a.userId.slice(0, 2).toUpperCase(),
-    from: a.oldValue,
-    to: a.newValue,
-    createdAt: a.createdAt,
-    detail: a.action,
-  }));
+
   const taskSubtasks = (detail?.subtasks ?? []).map((s) => ({
     id: s.id,
     taskId: task?.id ?? '',
@@ -167,11 +283,26 @@ const TaskDetail: React.FC = () => {
       !(task as any).dependencies?.includes(ot.id)
   );
   const taskAttachments = attachments.filter((a) => a.taskId === task.id);
-  const taskTimelogs = timelogs.filter((tl) => tl.taskId === task.id);
-  const taskLabels = allLabels.filter((l) => (task as any).labels?.includes(l.id));
+
+  // Labels: prefer API labels from listLabels, fall back to store labels
+  const taskLabelIds: number[] = (task as any).label_ids ?? (task as any).labels ?? [];
+  const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
+
   const cycle = cycles.find((c) => c.id === (task as any).cycleId);
   const milestone = milestones.find((m) => m.id === (task as any).milestoneId);
-  const totalMinutes = taskTimelogs.reduce((s, t) => s + t.minutes, 0);
+
+  // Time logs from API (preferred) or store fallback
+  const apiLogs = timeLogsData?.logs ?? [];
+  const storeLogs = storeTimelogs.filter((tl) => tl.taskId === task.id);
+  const hasApiLogs = apiLogs.length > 0 || timeLogsData !== undefined;
+  const totalMinutes = hasApiLogs
+    ? apiLogs.reduce((s, l) => s + l.duration_minutes, 0)
+    : storeLogs.reduce((s, t) => s + t.minutes, 0);
+
+  const estimatedHours = timeLogsData?.estimated_hours ?? task.estimate ?? null;
+  const actualHours =
+    timeLogsData?.actual_hours ??
+    (totalMinutes > 0 ? Math.round((totalMinutes / 60) * 10) / 10 : null);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
   const statuses: Task['status'][] = [
@@ -182,6 +313,32 @@ const TaskDetail: React.FC = () => {
     'done',
     'cancelled',
   ];
+
+  // Handle set labels via new API
+  const handleToggleLabel = (labelId: number) => {
+    const current: number[] = taskLabelIds.map((id) => Number(id));
+    const next = current.includes(labelId)
+      ? current.filter((id) => id !== labelId)
+      : [...current, labelId];
+    setTaskLabelsMut.mutate({ task_id: Number(task.id), label_ids: next });
+    setLabelPickerOpen(false);
+  };
+
+  const handleSubmitTimeLog = () => {
+    const mins = parseDurationInput(logDurationInput);
+    if (!mins || mins <= 0) {
+      toast.error('Enter a valid duration, e.g. "90m" or "1.5h"');
+      return;
+    }
+    logTimeMut.mutate({
+      task_id: Number(task.id),
+      duration_minutes: mins,
+      description: logDescription.trim() || undefined,
+    });
+    setLogDurationInput('');
+    setLogDescription('');
+    setLogFormOpen(false);
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
@@ -274,7 +431,7 @@ const TaskDetail: React.FC = () => {
               style={{ color: 'var(--flow-text-muted)' }}
             />
 
-            {/* Attachments */}
+            {/* Subtasks */}
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-3">
                 <GitBranch size={12} style={{ color: 'var(--flow-text-muted)' }} />
@@ -351,7 +508,8 @@ const TaskDetail: React.FC = () => {
                 />
               </div>
             )}
-            {tab === 'activity' && <ActivityFeed entries={taskActivity} />}
+
+            {tab === 'activity' && <ActivitySection entries={taskActivityData} />}
           </div>
         </motion.div>
       </div>
@@ -446,6 +604,132 @@ const TaskDetail: React.FC = () => {
           />
         </DetailField>
 
+        {/* Time Tracking */}
+        <DetailField icon={Timer} label="Time">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[12px]">
+              <span style={{ color: 'var(--flow-text-muted)' }}>Estimated</span>
+              <span style={{ color: 'var(--flow-text)' }}>
+                {estimatedHours != null ? `${estimatedHours}h` : '—'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[12px]">
+              <span style={{ color: 'var(--flow-text-muted)' }}>Actual</span>
+              <span style={{ color: 'var(--flow-text)' }}>
+                {actualHours != null ? `${actualHours}h` : '—'}
+              </span>
+            </div>
+
+            {/* Log list */}
+            {apiLogs.length > 0 && (
+              <div className="space-y-1 pt-1">
+                {apiLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className="flex items-start justify-between gap-1 rounded px-2 py-1"
+                    style={{ background: 'var(--flow-hover)' }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[11px] font-semibold" style={{ color: ACCENT }}>
+                        {formatDuration(log.duration_minutes)}
+                      </span>
+                      {log.description && (
+                        <p
+                          className="text-[10px] truncate mt-0.5"
+                          style={{ color: 'var(--flow-text-muted)' }}
+                        >
+                          {log.description}
+                        </p>
+                      )}
+                      <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
+                        {formatRelative(log.logged_at || log.created_at)}
+                      </p>
+                    </div>
+                    {(user == null || String(log.user_id) === user.id) && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          deleteTimeLogMut.mutate({ id: log.id, task_id: log.task_id })
+                        }
+                        className="shrink-0 hover:opacity-70 mt-0.5"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                        title="Delete log"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Log time form */}
+            {logFormOpen ? (
+              <div className="space-y-1.5 pt-1">
+                <input
+                  autoFocus
+                  placeholder="Duration: 90m or 1.5h"
+                  value={logDurationInput}
+                  onChange={(e) => setLogDurationInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSubmitTimeLog();
+                    if (e.key === 'Escape') setLogFormOpen(false);
+                  }}
+                  className="w-full rounded px-2 py-1 text-[11px] outline-none"
+                  style={{
+                    background: 'var(--flow-hover)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                />
+                <input
+                  placeholder="Description (optional)"
+                  value={logDescription}
+                  onChange={(e) => setLogDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSubmitTimeLog();
+                    if (e.key === 'Escape') setLogFormOpen(false);
+                  }}
+                  className="w-full rounded px-2 py-1 text-[11px] outline-none"
+                  style={{
+                    background: 'var(--flow-hover)',
+                    border: '1px solid var(--flow-border)',
+                    color: 'var(--flow-text)',
+                  }}
+                />
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={handleSubmitTimeLog}
+                    disabled={logTimeMut.isPending}
+                    className="flex-1 py-1 rounded text-[10px] font-semibold disabled:opacity-40"
+                    style={{ background: ACCENT, color: '#0a0a0a' }}
+                  >
+                    {logTimeMut.isPending ? 'Logging…' : 'Log'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogFormOpen(false)}
+                    className="px-2 py-1 rounded text-[10px]"
+                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setLogFormOpen(true)}
+                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                <Plus size={9} /> Log time
+              </button>
+            )}
+          </div>
+        </DetailField>
+
         <DetailField icon={Gauge} label="Effort">
           <div className="flex flex-wrap gap-1">
             <button
@@ -516,24 +800,6 @@ const TaskDetail: React.FC = () => {
           >
             {task.focusPin ? 'Pinned to Today view' : 'Pin to Today view'}
           </button>
-        </DetailField>
-
-        <DetailField icon={Timer} label="Time tracked">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
-              {Math.round((totalMinutes / 60) * 10) / 10}h
-            </span>
-            <button
-              onClick={() => {
-                logTime(task.id, 30, 'Quick log');
-                toast.success('Logged 30m');
-              }}
-              className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              +30m
-            </button>
-          </div>
         </DetailField>
 
         {cycle && (
@@ -689,25 +955,32 @@ const TaskDetail: React.FC = () => {
 
         <DetailField icon={Tag} label="Labels">
           <div className="flex flex-wrap gap-1 relative">
+            {taskLabels.length === 0 && (
+              <button
+                onClick={() => setLabelPickerOpen((v) => !v)}
+                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                + Add label
+              </button>
+            )}
             {taskLabels.map((l) => (
               <LabelChip
                 key={l.id}
-                label={l}
+                label={{ id: String(l.id), name: l.name, color: l.color }}
                 small
-                onRemove={() =>
-                  updateTask(task.id, {
-                    labels: ((task as any).labels ?? []).filter((lid: string) => lid !== l.id),
-                  })
-                }
+                onRemove={() => handleToggleLabel(l.id)}
               />
             ))}
-            <button
-              onClick={() => setLabelPickerOpen((v) => !v)}
-              className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              + Add
-            </button>
+            {taskLabels.length > 0 && (
+              <button
+                onClick={() => setLabelPickerOpen((v) => !v)}
+                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                + Add
+              </button>
+            )}
             {labelPickerOpen && (
               <div
                 className="absolute top-6 left-0 z-50 rounded-lg shadow-lg p-2 min-w-[160px] space-y-0.5"
@@ -719,19 +992,11 @@ const TaskDetail: React.FC = () => {
                   </p>
                 )}
                 {allLabels.map((l) => {
-                  const active = ((task as any).labels ?? []).includes(l.id);
+                  const active = taskLabelIds.includes(l.id);
                   return (
                     <button
                       key={l.id}
-                      onClick={() => {
-                        const current: string[] = (task as any).labels ?? [];
-                        updateTask(task.id, {
-                          labels: active
-                            ? current.filter((lid) => lid !== l.id)
-                            : [...current, l.id],
-                        });
-                        setLabelPickerOpen(false);
-                      }}
+                      onClick={() => handleToggleLabel(l.id)}
                       className="w-full flex items-center gap-2 px-2 py-1 rounded text-left hover:bg-[var(--flow-hover)]"
                     >
                       <span
@@ -763,6 +1028,43 @@ const TaskDetail: React.FC = () => {
     </div>
   );
 };
+
+// ── Activity Section ──────────────────────────────────────────────────────────
+
+const ActivitySection: React.FC<{ entries: ApiTaskActivity[] }> = ({ entries }) => {
+  if (entries.length === 0) {
+    return (
+      <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
+        No activity yet.
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {entries.map((a) => {
+        const Icon = activityIcon(a.action);
+        return (
+          <div key={a.id} className="flex items-start gap-2.5">
+            <span
+              className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+              style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+            >
+              <Icon size={10} />
+            </span>
+            <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+              {describeActivity(a)}
+              <span className="ml-2" style={{ color: 'var(--flow-text-dim)' }}>
+                {formatRelative(a.created_at)}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ── DetailField ───────────────────────────────────────────────────────────────
 
 const DetailField: React.FC<{
   icon: React.ComponentType<{ size?: number }>;

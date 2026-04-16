@@ -5,7 +5,6 @@ import { formatDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
-import LabelChip from './LabelChip';
 import { Check } from 'lucide-react';
 
 interface TaskRowProps {
@@ -92,10 +91,31 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           {project.name}
         </span>
       )}
-      <div className="flex items-center gap-1 shrink-0 max-w-[180px] overflow-hidden">
-        {taskLabels.slice(0, 2).map((l) => (
-          <LabelChip key={l.id} label={l} small />
+      <div className="flex items-center gap-1 shrink-0 max-w-[200px] overflow-hidden">
+        {taskLabels.slice(0, 3).map((l) => (
+          <span
+            key={l.id}
+            className="inline-flex items-center gap-0.5 rounded-full"
+            style={{
+              background: `${l.color}1a`,
+              color: l.color,
+              border: `1px solid ${l.color}33`,
+              padding: '1px 5px',
+              fontSize: 10,
+            }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: l.color }} />
+            {l.name}
+          </span>
         ))}
+        {taskLabels.length > 3 && (
+          <span
+            className="text-[10px] px-1 rounded-full shrink-0"
+            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
+          >
+            +{taskLabels.length - 3}
+          </span>
+        )}
       </div>
       {task.dueDate && (
         <span
