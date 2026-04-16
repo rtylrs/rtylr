@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Palette, Keyboard, Sparkles, Info } from 'lucide-react';
+import { Bell, Palette, Keyboard, Sparkles, Info, User, Save } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
+import { useUserStore } from '../../shared/stores/userStore';
 
 const ACCENT = '#64C5B9';
 
@@ -19,12 +21,158 @@ interface SettingsSection {
 }
 
 const SECTIONS: SettingsSection[] = [
+  { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'life', label: 'Life & rhythm', icon: Sparkles },
   { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
   { id: 'about', label: 'About', icon: Info },
 ];
+
+const ProfileSection: React.FC = () => {
+  const user = useUserStore((s) => s.user);
+
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
+
+  const updateProfile = useMutation({
+    mutationFn: (data: { name?: string; email?: string }) => unwrap(flowApi.updateProfile(data)),
+    onSuccess: () => toast.success('Profile updated'),
+    onError: () => toast.error('Failed to update profile'),
+  });
+
+  const changePassword = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      unwrap(flowApi.changePassword(data)),
+    onSuccess: () => {
+      toast.success('Password changed');
+      setCurrentPassword('');
+      setNewPassword('');
+    },
+    onError: () => toast.error('Failed to change password'),
+  });
+
+  const inputStyle = {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    color: 'var(--flow-text)',
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Profile
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Update your name and email address.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={inputStyle}
+          />
+        </div>
+        <button
+          type="button"
+          disabled={updateProfile.isPending}
+          onClick={() => updateProfile.mutate({ name, email })}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          style={{ background: ACCENT, color: '#0a0a0a' }}
+        >
+          <Save size={12} />
+          {updateProfile.isPending ? 'Saving…' : 'Save profile'}
+        </button>
+      </div>
+
+      <div className="pt-6" style={{ borderTop: '1px solid var(--flow-border)' }}>
+        <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Change password
+        </h3>
+        <p className="text-[12px] mb-4" style={{ color: 'var(--flow-text-muted)' }}>
+          Leave blank to keep your current password.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label
+              className="block text-[12px] font-medium mb-1.5"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Current password
+            </label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label
+              className="block text-[12px] font-medium mb-1.5"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              New password
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <button
+            type="button"
+            disabled={changePassword.isPending || !currentPassword || !newPassword}
+            onClick={() => changePassword.mutate({ currentPassword, newPassword })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+          >
+            {changePassword.isPending ? 'Changing…' : 'Change password'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const NotificationsSection: React.FC = () => {
   const { data: remote } = useQuery({
@@ -383,6 +531,7 @@ const AboutSection: React.FC = () => (
 );
 
 const SECTION_CONTENT: Record<string, React.FC> = {
+  profile: ProfileSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   life: LifeRhythmSection,
@@ -402,7 +551,7 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
 );
 
 const FlowSettings: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('notifications');
+  const [activeSection, setActiveSection] = useState('profile');
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);

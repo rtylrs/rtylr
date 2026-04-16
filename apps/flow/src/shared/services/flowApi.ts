@@ -336,6 +336,9 @@ export const flowApi = {
   addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
     safe.post('/flow/projects/member', data),
 
+  inviteProjectMember: (data: { project_id: number; email: string; role: string }) =>
+    safe.post('/flow/projects/member/invite', data),
+
   removeProjectMember: (data: { project_id: number; user_id: number }) =>
     safe.delete('/flow/projects/member', { data }),
 
@@ -362,6 +365,11 @@ export const flowApi = {
   },
 
   getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
+
+  searchTasks: (q: string, workspaceId: string) =>
+    safe.get<{ tasks: ApiTask[] }>('/flow/tasks/search', {
+      params: { q, workspace_id: workspaceId },
+    }),
 
   getTaskDetail: (id: string) => safe.get<ApiTaskDetail>('/flow/tasks/detail', { params: { id } }),
 
@@ -483,4 +491,33 @@ export const flowApi = {
   getUserSettings: () => safe.get<ApiUserSettings>('/flow/settings'),
 
   updateUserSettings: (data: ApiUserSettings) => safe.put('/flow/settings', data),
+
+  // -- Account / Profile --------------------------------------------------
+
+  updateProfile: (data: { name?: string; email?: string }) => safe.post('/account/profile', data),
+
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    safe.post('/account/password', data),
+
+  // -- Businesses ----------------------------------------------------------
+
+  getBusiness: (workspaceId: string) =>
+    safe.get<{ business: { id: string; name: string; color: string; icon: string } | null }>(
+      '/flow/workspaces/business',
+      { params: { workspace_id: workspaceId } }
+    ),
+
+  listBusinesses: () =>
+    safe.get<{ businesses: { id: string; name: string; color: string; icon: string }[] }>(
+      '/flow/businesses'
+    ),
+
+  createBusiness: (data: { name: string; color?: string; icon?: string }) =>
+    safe.post<{ id: string; name: string; color: string; icon: string }>('/flow/businesses', data),
+
+  setWorkspaceBusiness: (workspaceId: string, businessId: string | null) =>
+    safe.put('/flow/workspaces/business', {
+      workspace_id: Number(workspaceId),
+      business_id: businessId ? Number(businessId) : null,
+    }),
 };
