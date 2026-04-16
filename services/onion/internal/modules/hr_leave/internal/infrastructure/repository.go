@@ -1,0 +1,454 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
+	"github.com/voxire/onion/internal/modules/hr_leave/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type Repository struct {
+	queries *sqlc.Queries
+	pool    *sql.DB
+}
+
+func NewRepository(_ context.Context) *Repository {
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
+}
+
+// --- Leave Types ---
+
+func (r *Repository) ListLeaveTypes(ctx context.Context, ownerID int64, params domain.ListLeaveTypesParams) ([]domain.LeaveTypeRecord, int64, error) {
+	total, err := r.queries.CountLeaveTypes(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count leave types", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListLeaveTypes(ctx, sqlc.ListLeaveTypesParams{
+		OwnerID: ownerID,
+		Limit:   params.Limit,
+		Offset:  params.Offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	types := make([]domain.LeaveTypeRecord, 0, len(rows))
+	for _, row := range rows {
+		types = append(types, leaveTypeFromRow(row))
+	}
+	return types, total, nil
+}
+
+func (r *Repository) GetLeaveType(ctx context.Context, ownerID, leaveTypeID int64) (*domain.LeaveTypeRecord, error) {
+	row, err := r.queries.GetLeaveType(ctx, sqlc.GetLeaveTypeParams{OwnerID: ownerID, ID: leaveTypeID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrLeaveTypeNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get leave type", logger.Any("owner_id", ownerID), logger.Any("leave_type_id", leaveTypeID), logger.Error(err))
+		return nil, err
+	}
+	lt := leaveTypeFromRow(row)
+	return &lt, nil
+}
+
+func (r *Repository) CreateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) (*domain.LeaveTypeRecord, error) {
+	result, err := r.queries.CreateLeaveType(ctx, sqlc.CreateLeaveTypeParams{
+		OwnerID:                        ownerID,
+		Name:                           lt.Name,
+		IsPaid:                         lt.IsPaid,
+		RequiresApproval:               lt.RequiresApproval,
+		AccrualRule:                    nullString(lt.AccrualRule),
+		AccrualAmount:                  nullStringFromFloat(lt.AccrualAmount),
+		MaxCarryoverDays:               lt.MaxCarryoverDays,
+		MinNoticeDays:                  lt.MinNoticeDays,
+		RequiresDocumentationAfterDays: nullInt32(lt.RequiresDocumentationAfterDays),
+		IsActive:                       lt.IsActive,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create leave type", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	lt.ID = id
+	lt.OwnerID = ownerID
+	return &lt, nil
+}
+
+func (r *Repository) UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) error {
+	return r.queries.UpdateLeaveType(ctx, sqlc.UpdateLeaveTypeParams{
+		Name:                           lt.Name,
+		IsPaid:                         lt.IsPaid,
+		RequiresApproval:               lt.RequiresApproval,
+		AccrualRule:                    nullString(lt.AccrualRule),
+		AccrualAmount:                  nullStringFromFloat(lt.AccrualAmount),
+		MaxCarryoverDays:               lt.MaxCarryoverDays,
+		MinNoticeDays:                  lt.MinNoticeDays,
+		RequiresDocumentationAfterDays: nullInt32(lt.RequiresDocumentationAfterDays),
+		IsActive:                       lt.IsActive,
+		ID:                             lt.ID,
+		OwnerID:                        ownerID,
+	})
+}
+
+func (r *Repository) ListAllActiveLeaveTypesForOwner(ctx context.Context, ownerID int64) ([]domain.LeaveTypeRecord, error) {
+	rows, err := r.queries.ListAllActiveLeaveTypesForOwner(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	types := make([]domain.LeaveTypeRecord, 0, len(rows))
+	for _, row := range rows {
+		types = append(types, leaveTypeFromRow(row))
+	}
+	return types, nil
+}
+
+func (r *Repository) ListDistinctOwnerIDs(ctx context.Context) ([]int64, error) {
+	return r.queries.ListDistinctOwnerIDs(ctx)
+}
+
+// --- Leave Requests ---
+
+func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error) {
+	total, err := r.queries.CountLeaveRequests(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count leave requests", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListLeaveRequests(ctx, sqlc.ListLeaveRequestsParams{
+		OwnerID: ownerID,
+		Limit:   params.Limit,
+		Offset:  params.Offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list leave requests", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	requests := make([]domain.LeaveRequestRecord, 0, len(rows))
+	for _, row := range rows {
+		requests = append(requests, leaveRequestFromRow(row))
+	}
+	return requests, total, nil
+}
+
+func (r *Repository) GetLeaveRequest(ctx context.Context, ownerID, requestID int64) (*domain.LeaveRequestRecord, error) {
+	row, err := r.queries.GetLeaveRequest(ctx, sqlc.GetLeaveRequestParams{OwnerID: ownerID, ID: requestID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrLeaveRequestNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get leave request", logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(err))
+		return nil, err
+	}
+	req := leaveRequestFromRow(row)
+	return &req, nil
+}
+
+func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req domain.LeaveRequestRecord) (*domain.LeaveRequestRecord, error) {
+	startDate, err := time.Parse("2006-01-02", req.StartDate)
+	if err != nil {
+		return nil, err
+	}
+	endDate, err := time.Parse("2006-01-02", req.EndDate)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := r.queries.CreateLeaveRequest(ctx, sqlc.CreateLeaveRequestParams{
+		OwnerID:              ownerID,
+		EmployeeID:           req.EmployeeID,
+		LeaveTypeID:          req.LeaveTypeID,
+		StartDate:            startDate,
+		EndDate:              endDate,
+		TotalDays:            fmt.Sprintf("%.2f", req.TotalDays),
+		Notes:                nullString(req.Notes),
+		Status:               req.Status,
+		CurrentApprovalLevel: req.CurrentApprovalLevel,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create leave request", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	req.ID = id
+	req.OwnerID = ownerID
+	return &req, nil
+}
+
+func (r *Repository) ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error {
+	return r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, OwnerID: ownerID})
+}
+
+func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error {
+	return r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, OwnerID: ownerID})
+}
+
+func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) error {
+	return r.queries.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{
+		RejectionReason: nullString(reason),
+		ID:              requestID,
+		OwnerID:         ownerID,
+	})
+}
+
+func (r *Repository) ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]domain.LeaveRequestRecord, error) {
+	sd, err := time.Parse("2006-01-02", startDate)
+	if err != nil {
+		return nil, err
+	}
+	ed, err := time.Parse("2006-01-02", endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.queries.ListOverlappingLeaveRequests(ctx, sqlc.ListOverlappingLeaveRequestsParams{
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
+		EndDate:    ed,
+		StartDate:  sd,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	requests := make([]domain.LeaveRequestRecord, 0, len(rows))
+	for _, row := range rows {
+		requests = append(requests, leaveRequestFromRow(row))
+	}
+	return requests, nil
+}
+
+func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.LeaveRequestRecord, error) {
+	df, err := time.Parse("2006-01-02", dateFrom)
+	if err != nil {
+		return nil, err
+	}
+	dt, err := time.Parse("2006-01-02", dateTo)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.queries.ListLeaveCalendar(ctx, sqlc.ListLeaveCalendarParams{
+		OwnerID:   ownerID,
+		EndDate:   dt,
+		StartDate: df,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	requests := make([]domain.LeaveRequestRecord, 0, len(rows))
+	for _, row := range rows {
+		requests = append(requests, leaveRequestFromRow(row))
+	}
+	return requests, nil
+}
+
+// --- Leave Balances ---
+
+func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
+	rows, err := r.queries.ListLeaveBalances(ctx, sqlc.ListLeaveBalancesParams{
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
+		Year:       year,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list leave balances", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+
+	balances := make([]domain.LeaveBalanceRecord, 0, len(rows))
+	for _, row := range rows {
+		balances = append(balances, leaveBalanceFromRow(row))
+	}
+	return balances, nil
+}
+
+func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32) (*domain.LeaveBalanceRecord, error) {
+	row, err := r.queries.GetLeaveBalance(ctx, sqlc.GetLeaveBalanceParams{
+		OwnerID:     ownerID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
+		Year:        year,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &domain.LeaveBalanceRecord{
+				OwnerID:     ownerID,
+				EmployeeID:  employeeID,
+				LeaveTypeID: leaveTypeID,
+				Year:        year,
+			}, nil
+		}
+		return nil, err
+	}
+	bal := leaveBalanceFromRow(row)
+	return &bal, nil
+}
+
+func (r *Repository) UpsertLeaveBalance(ctx context.Context, ownerID int64, bal domain.LeaveBalanceRecord) error {
+	_, err := r.queries.UpsertLeaveBalance(ctx, sqlc.UpsertLeaveBalanceParams{
+		OwnerID:          ownerID,
+		EmployeeID:       bal.EmployeeID,
+		LeaveTypeID:      bal.LeaveTypeID,
+		Year:             bal.Year,
+		EntitledDays:     fmt.Sprintf("%.2f", bal.EntitledDays),
+		UsedDays:         fmt.Sprintf("%.2f", bal.UsedDays),
+		PendingDays:      fmt.Sprintf("%.2f", bal.PendingDays),
+		LastAccrualMonth: bal.LastAccrualMonth,
+	})
+	return err
+}
+
+func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
+	return r.queries.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
+		UsedDays:    fmt.Sprintf("%.2f", days),
+		PendingDays: fmt.Sprintf("%.2f", days),
+		OwnerID:     ownerID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
+		Year:        year,
+	})
+}
+
+func (r *Repository) AddToPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
+	return r.queries.AddToPendingDays(ctx, sqlc.AddToPendingDaysParams{
+		PendingDays: fmt.Sprintf("%.2f", days),
+		OwnerID:     ownerID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
+		Year:        year,
+	})
+}
+
+func (r *Repository) SubtractPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
+	return r.queries.SubtractPendingDays(ctx, sqlc.SubtractPendingDaysParams{
+		PendingDays: fmt.Sprintf("%.2f", days),
+		OwnerID:     ownerID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
+		Year:        year,
+	})
+}
+
+func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, year int32, currentMonth int32) ([]domain.LeaveBalanceRecord, error) {
+	rows, err := r.queries.ListBalancesForAccrual(ctx, sqlc.ListBalancesForAccrualParams{
+		OwnerID:          ownerID,
+		Year:             year,
+		LastAccrualMonth: currentMonth,
+	})
+	if err != nil {
+		return nil, err
+	}
+	balances := make([]domain.LeaveBalanceRecord, 0, len(rows))
+	for _, row := range rows {
+		balances = append(balances, leaveBalanceFromRow(row))
+	}
+	return balances, nil
+}
+
+func (r *Repository) AddToEntitledDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64, month int32) error {
+	return r.queries.AddToEntitledDays(ctx, sqlc.AddToEntitledDaysParams{
+		EntitledDays:     fmt.Sprintf("%.2f", days),
+		LastAccrualMonth: month,
+		OwnerID:          ownerID,
+		EmployeeID:       employeeID,
+		LeaveTypeID:      leaveTypeID,
+		Year:             year,
+	})
+}
+
+// --- Helpers ---
+
+func leaveTypeFromRow(row sqlc.HrLeaveType) domain.LeaveTypeRecord {
+	return domain.LeaveTypeRecord{
+		ID:                             row.ID,
+		OwnerID:                        row.OwnerID,
+		Name:                           row.Name,
+		IsPaid:                         row.IsPaid,
+		RequiresApproval:               row.RequiresApproval,
+		AccrualRule:                    row.AccrualRule.String,
+		AccrualAmount:                  parseFloat(row.AccrualAmount.String),
+		MaxCarryoverDays:               row.MaxCarryoverDays,
+		MinNoticeDays:                  row.MinNoticeDays,
+		RequiresDocumentationAfterDays: row.RequiresDocumentationAfterDays.Int32,
+		IsActive:                       row.IsActive,
+		CreatedAt:                      row.CreatedAt,
+		UpdatedAt:                      row.UpdatedAt,
+	}
+}
+
+func leaveRequestFromRow(row sqlc.HrLeaveRequest) domain.LeaveRequestRecord {
+	return domain.LeaveRequestRecord{
+		ID:                   row.ID,
+		OwnerID:              row.OwnerID,
+		EmployeeID:           row.EmployeeID,
+		LeaveTypeID:          row.LeaveTypeID,
+		StartDate:            row.StartDate.Format("2006-01-02"),
+		EndDate:              row.EndDate.Format("2006-01-02"),
+		TotalDays:            parseFloat(row.TotalDays),
+		Notes:                row.Notes.String,
+		Status:               row.Status,
+		CurrentApprovalLevel: row.CurrentApprovalLevel,
+		RejectionReason:      row.RejectionReason.String,
+		CreatedAt:            row.CreatedAt,
+		UpdatedAt:            row.UpdatedAt,
+	}
+}
+
+func leaveBalanceFromRow(row sqlc.HrLeaveBalance) domain.LeaveBalanceRecord {
+	return domain.LeaveBalanceRecord{
+		ID:               row.ID,
+		OwnerID:          row.OwnerID,
+		EmployeeID:       row.EmployeeID,
+		LeaveTypeID:      row.LeaveTypeID,
+		Year:             row.Year,
+		EntitledDays:     parseFloat(row.EntitledDays),
+		UsedDays:         parseFloat(row.UsedDays),
+		PendingDays:      parseFloat(row.PendingDays),
+		LastAccrualMonth: row.LastAccrualMonth,
+		CreatedAt:        row.CreatedAt,
+		UpdatedAt:        row.UpdatedAt,
+	}
+}
+
+func parseFloat(s string) float64 {
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func nullString(v string) sql.NullString {
+	return sql.NullString{String: v, Valid: v != ""}
+}
+
+func nullInt32(v int32) sql.NullInt32 {
+	return sql.NullInt32{Int32: v, Valid: v != 0}
+}
+
+func nullStringFromFloat(f float64) sql.NullString {
+	if f == 0 {
+		return sql.NullString{Valid: false}
+	}
+	return sql.NullString{String: fmt.Sprintf("%.2f", f), Valid: true}
+}

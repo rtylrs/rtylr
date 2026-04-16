@@ -1,0 +1,64 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+func CreateAssetRoutes() []string { return []string{"/hr/equipment/assets"} }
+
+type CreateAssetHandler struct{ Service *application.Service }
+
+type CreateAssetRequest struct {
+	Name          string  `json:"name"`
+	Category      string  `json:"category"`
+	SerialNumber  string  `json:"serial_number"`
+	LocationID    int64   `json:"location_id"`
+	PurchaseDate  string  `json:"purchase_date"`
+	PurchasePrice float64 `json:"purchase_price"`
+	Notes         string  `json:"notes"`
+}
+
+type CreateAssetResponse struct {
+	Asset *hrv1.AssetPayload `json:"asset"`
+}
+
+func (h *CreateAssetHandler) Validate(_ context.Context, req *CreateAssetRequest) *errorModels.ServerError {
+	if req.Name == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
+	}
+	if req.Category == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "category is required"}
+	}
+	return nil
+}
+
+func (h *CreateAssetHandler) Serve(ctx context.Context, req *CreateAssetRequest) (CreateAssetResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return CreateAssetResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	asset, err := h.Service.CreateAsset(ctx, device.User.UserID, domain.CreateAssetParams{
+		Name:          req.Name,
+		Category:      req.Category,
+		SerialNumber:  req.SerialNumber,
+		LocationID:    req.LocationID,
+		PurchaseDate:  req.PurchaseDate,
+		PurchasePrice: req.PurchasePrice,
+		Notes:         req.Notes,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create asset", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return CreateAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create asset"}
+	}
+
+	return CreateAssetResponse{Asset: assetToProto(*asset)}, nil
+}

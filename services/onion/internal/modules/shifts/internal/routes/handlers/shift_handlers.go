@@ -4,22 +4,34 @@ import (
 	"context"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
+type ShiftPayload struct {
+	ID           int64  `json:"id"`
+	OwnerID      int64  `json:"owner_id"`
+	StaffID      int64  `json:"staff_id"`
+	Date         string `json:"date"`
+	StartTime    string `json:"start_time"`
+	EndTime      string `json:"end_time"`
+	BreakMinutes int64  `json:"break_minutes"`
+	Status       string `json:"status"`
+	Notes        string `json:"notes"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+}
+
 func ListShiftsRoutes() []string  { return []string{"/hr/shifts"} }
 func CreateShiftRoutes() []string { return []string{"/hr/shifts"} }
 func UpdateShiftRoutes() []string { return []string{"/hr/shifts"} }
 func DeleteShiftRoutes() []string { return []string{"/hr/shifts"} }
 
-func newShiftPayload(s domain.Shift) *hrv1.Shift {
-	return &hrv1.Shift{
-		Id: s.ID, OwnerId: s.OwnerID, StaffId: s.StaffID, Date: s.Date.Format("2006-01-02"),
+func newShiftPayload(s domain.Shift) *ShiftPayload {
+	return &ShiftPayload{
+		ID: s.ID, OwnerID: s.OwnerID, StaffID: s.StaffID, Date: s.Date.Format("2006-01-02"),
 		StartTime: s.StartTime, EndTime: s.EndTime, BreakMinutes: int64(s.BreakDurationMinutes),
 		Status: s.Status, Notes: s.Notes,
 		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -37,7 +49,7 @@ type ListShiftsRequest struct {
 }
 
 type ListShiftsResponse struct {
-	Shifts []*hrv1.Shift `json:"shifts"`
+	Shifts []*ShiftPayload `json:"shifts"`
 }
 
 func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, *errorModels.ServerError) {
@@ -49,7 +61,7 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 	if err != nil {
 		return ListShiftsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
 	}
-	payloads := make([]*hrv1.Shift, 0, len(shifts))
+	payloads := make([]*ShiftPayload, 0, len(shifts))
 	for _, s := range shifts {
 		payloads = append(payloads, newShiftPayload(s))
 	}

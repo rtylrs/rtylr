@@ -1,0 +1,57 @@
+package hr_equipment
+
+import (
+	"context"
+
+	"github.com/go-chi/chi/v5"
+	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/routes"
+)
+
+type hrCoreApprovalAdapter struct {
+	core *hrcore.Module
+}
+
+func (a *hrCoreApprovalAdapter) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*domain.ApprovalChainInfo, error) {
+	chain, err := a.core.GetApprovalChain(ctx, ownerID, requestType)
+	if err != nil {
+		return nil, err
+	}
+	if chain == nil {
+		return nil, nil
+	}
+	levels := make([]domain.ApprovalLevelInfo, 0, len(chain.Levels))
+	for _, lv := range chain.Levels {
+		levels = append(levels, domain.ApprovalLevelInfo{
+			LevelOrder:         lv.LevelOrder,
+			ApproverType:       lv.ApproverType,
+			ApproverRoleID:     lv.ApproverRoleID,
+			ApproverEmployeeID: lv.ApproverEmployeeID,
+		})
+	}
+	return &domain.ApprovalChainInfo{
+		TotalLevels: chain.TotalLevels,
+		Levels:      levels,
+	}, nil
+}
+
+type Module struct {
+	service *application.Service
+}
+
+func NewModule(ctx context.Context, hrCoreModule *hrcore.Module) *Module {
+	adapter := &hrCoreApprovalAdapter{core: hrCoreModule}
+	return &Module{
+		service: application.NewService(ctx, adapter),
+	}
+}
+
+func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+	routes.RegisterRoutes(ctx, router, m.service)
+}
+
+func (m *Module) GetAnonymousRoutes() []string {
+	return []string{}
+}

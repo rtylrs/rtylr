@@ -4,20 +4,39 @@ import (
 	"context"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
+type legacyPayrollPayload struct {
+	Id            int64   `json:"id"`
+	OwnerId       int64   `json:"owner_id"`
+	StaffId       int64   `json:"staff_id"`
+	PeriodStart   string  `json:"period_start"`
+	PeriodEnd     string  `json:"period_end"`
+	PeriodLabel   string  `json:"period_label"`
+	RegularHours  float64 `json:"regular_hours"`
+	OvertimeHours float64 `json:"overtime_hours"`
+	BasePay       float64 `json:"base_pay"`
+	OvertimePay   float64 `json:"overtime_pay"`
+	Bonuses       float64 `json:"bonuses"`
+	Deductions    float64 `json:"deductions"`
+	TaxWithheld   float64 `json:"tax_withheld"`
+	NetPay        float64 `json:"net_pay"`
+	Status        string  `json:"status"`
+	PaidAt        string  `json:"paid_at"`
+	Notes         string  `json:"notes"`
+	CreatedAt     string  `json:"created_at"`
+}
+
 func ListPayrollRoutes() []string      { return []string{"/hr/payroll"} }
 func RunPayrollRoutes() []string       { return []string{"/hr/payroll/run"} }
 func MarkPayrollPaidRoutes() []string  { return []string{"/hr/payroll/mark-paid"} }
 
-func newPayrollPayload(p domain.PayrollRecord) *hrv1.PayrollRecord {
-	return &hrv1.PayrollRecord{
+func newPayrollPayload(p domain.PayrollRecord) *legacyPayrollPayload {
+	return &legacyPayrollPayload{
 		Id: p.ID, OwnerId: p.OwnerID, StaffId: p.StaffID,
 		PeriodStart: p.PeriodStart.Format("2006-01-02"), PeriodEnd: p.PeriodEnd.Format("2006-01-02"),
 		PeriodLabel: p.PeriodLabel, RegularHours: p.RegularHours, OvertimeHours: p.OvertimeHours,
@@ -35,7 +54,7 @@ type ListPayrollRequest struct {
 	PeriodLabel string `json:"period_label"`
 }
 type ListPayrollResponse struct {
-	Records []*hrv1.PayrollRecord `json:"records"`
+	Records []*legacyPayrollPayload `json:"records"`
 }
 
 func (h *ListPayrollHandler) Serve(ctx context.Context, req *ListPayrollRequest) (ListPayrollResponse, *errorModels.ServerError) {
@@ -47,7 +66,7 @@ func (h *ListPayrollHandler) Serve(ctx context.Context, req *ListPayrollRequest)
 	if err != nil {
 		return ListPayrollResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list payroll records"}
 	}
-	payloads := make([]*hrv1.PayrollRecord, 0, len(records))
+	payloads := make([]*legacyPayrollPayload, 0, len(records))
 	for _, p := range records {
 		payloads = append(payloads, newPayrollPayload(p))
 	}

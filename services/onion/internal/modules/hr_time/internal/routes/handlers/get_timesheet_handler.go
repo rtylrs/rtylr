@@ -1,0 +1,42 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+
+	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+func GetTimesheetRoutes() []string { return []string{"/hr/timesheets/current"} }
+
+type GetTimesheetHandler struct{ Service *application.Service }
+
+type GetTimesheetRequest struct {
+	EmployeeID  int64  `json:"employee_id"`
+	PeriodStart string `json:"period_start"`
+	PeriodEnd   string `json:"period_end"`
+}
+
+type GetTimesheetResponse struct {
+	Timesheet *hrv1.TimesheetPayload `json:"timesheet"`
+}
+
+func (h *GetTimesheetHandler) Serve(ctx context.Context, req *GetTimesheetRequest) (GetTimesheetResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return GetTimesheetResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ts, err := h.Service.GetOrCreateTimesheet(ctx, device.User.UserID, req.EmployeeID, req.PeriodStart, req.PeriodEnd)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to get current timesheet", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return GetTimesheetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get timesheet"}
+	}
+
+	return GetTimesheetResponse{Timesheet: timesheetToProto(*ts)}, nil
+}
