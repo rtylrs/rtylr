@@ -143,6 +143,22 @@ func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.Tra
 	return s.repo.TransferProjectOwnership(ctx, input)
 }
 
+func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email string, role string, addedBy int64) (bool, error) {
+	userID, found, err := s.repo.LookupUserByEmail(ctx, email)
+	if err != nil {
+		return false, err
+	}
+	if !found {
+		return false, nil
+	}
+	return true, s.repo.AddProjectMember(ctx, domain.AddProjectMemberInput{
+		ProjectID: projectID,
+		UserID:    userID,
+		Role:      role,
+		AddedBy:   addedBy,
+	})
+}
+
 // ─────────────────────────────────────────────
 // Tasks
 // ─────────────────────────────────────────────
@@ -272,6 +288,10 @@ func (s *Service) DeleteTask(ctx context.Context, taskID, ownerID int64) error {
 
 func (s *Service) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
 	return s.repo.GetMyTasks(ctx, userID)
+}
+
+func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
+	return s.repo.SearchTasks(ctx, workspaceID, q)
 }
 
 // ─────────────────────────────────────────────
@@ -592,4 +612,38 @@ func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) 
 
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
 	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
+}
+
+// ─────────────────────────────────────────────
+// Businesses
+// ─────────────────────────────────────────────
+
+func (s *Service) ListBusinesses(ctx context.Context, ownerID int64) ([]domain.Business, error) {
+	return s.repo.ListBusinesses(ctx, ownerID)
+}
+
+func (s *Service) CreateBusiness(ctx context.Context, input domain.BusinessInput) (domain.Business, error) {
+	id, err := s.repo.CreateBusiness(ctx, input)
+	if err != nil {
+		return domain.Business{}, err
+	}
+	return domain.Business{
+		ID:      id,
+		OwnerID: input.OwnerID,
+		Name:    input.Name,
+		Color:   input.Color,
+		Icon:    input.Icon,
+	}, nil
+}
+
+func (s *Service) UpdateBusiness(ctx context.Context, id int64, name, color, icon string) error {
+	return s.repo.UpdateBusiness(ctx, id, name, color, icon)
+}
+
+func (s *Service) DeleteBusiness(ctx context.Context, id int64, ownerID int64) error {
+	return s.repo.DeleteBusiness(ctx, id, ownerID)
+}
+
+func (s *Service) SetWorkspaceBusiness(ctx context.Context, workspaceID int64, businessID *int64) error {
+	return s.repo.SetWorkspaceBusiness(ctx, workspaceID, businessID)
 }

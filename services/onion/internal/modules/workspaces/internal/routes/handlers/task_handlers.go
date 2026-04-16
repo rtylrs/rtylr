@@ -17,15 +17,16 @@ import (
 // Route declarations
 // ─────────────────────────────────────────────
 
-func ListTasksRoutes() []string       { return []string{"/flow/tasks"} }
-func CreateTaskRoutes() []string      { return []string{"/flow/tasks"} }
-func GetTaskDetailRoutes() []string   { return []string{"/flow/tasks/detail"} }
-func UpdateTaskRoutes() []string      { return []string{"/flow/tasks"} }
-func DeleteTaskRoutes() []string      { return []string{"/flow/tasks"} }
+func ListTasksRoutes() []string        { return []string{"/flow/tasks"} }
+func CreateTaskRoutes() []string       { return []string{"/flow/tasks"} }
+func GetTaskDetailRoutes() []string    { return []string{"/flow/tasks/detail"} }
+func UpdateTaskRoutes() []string       { return []string{"/flow/tasks"} }
+func DeleteTaskRoutes() []string       { return []string{"/flow/tasks"} }
 func UpdateTaskStatusRoutes() []string { return []string{"/flow/tasks/status"} }
-func GetMyTasksRoutes() []string      { return []string{"/flow/tasks/my"} }
-func AddCommentRoutes() []string      { return []string{"/flow/tasks/comment"} }
-func DeleteCommentRoutes() []string   { return []string{"/flow/tasks/comment"} }
+func GetMyTasksRoutes() []string       { return []string{"/flow/tasks/my"} }
+func AddCommentRoutes() []string       { return []string{"/flow/tasks/comment"} }
+func DeleteCommentRoutes() []string    { return []string{"/flow/tasks/comment"} }
+func SearchTasksRoutes() []string      { return []string{"/flow/tasks/search"} }
 
 // ─────────────────────────────────────────────
 // Shared payload types
@@ -568,4 +569,50 @@ func (h *DeleteCommentHandler) Serve(ctx context.Context, req *DeleteCommentRequ
 	}
 
 	return DeleteCommentResponse{Message: "Comment deleted successfully"}, nil
+}
+
+// ─────────────────────────────────────────────
+// GET /flow/tasks/search
+// ─────────────────────────────────────────────
+
+type SearchTasksHandler struct {
+	FlowService *application.Service
+}
+
+type SearchTasksRequest struct {
+	Q           string `json:"q"`
+	WorkspaceID int64  `json:"workspace_id"`
+}
+
+type SearchTasksResponse struct {
+	Tasks []*flowv1.Task `json:"tasks"`
+}
+
+func (h *SearchTasksHandler) Validate(_ context.Context, req *SearchTasksRequest) *errorModels.ServerError {
+	if req.WorkspaceID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
+	}
+	return nil
+}
+
+func (h *SearchTasksHandler) Serve(ctx context.Context, req *SearchTasksRequest) (SearchTasksResponse, *errorModels.ServerError) {
+	_, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return SearchTasksResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	tasks, err := h.FlowService.SearchTasks(ctx, req.WorkspaceID, req.Q)
+	if err != nil {
+		return SearchTasksResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to search tasks",
+		}
+	}
+
+	payloads := make([]*flowv1.Task, 0, len(tasks))
+	for _, t := range tasks {
+		payloads = append(payloads, toTaskPayload(t))
+	}
+
+	return SearchTasksResponse{Tasks: payloads}, nil
 }

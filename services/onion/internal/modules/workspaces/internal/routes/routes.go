@@ -101,6 +101,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.GetMyTasksHandler{FlowService: flowService},
 	)
 
+	http.RegisterGETWithValidation[handlers.SearchTasksRequest, handlers.SearchTasksResponse](
+		ctx, router, handlers.SearchTasksRoutes(),
+		&handlers.SearchTasksHandler{FlowService: flowService},
+	)
+
 	// ─── Comments ─────────────────────────────────────────────────────────────
 
 	http.RegisterPOSTWithValidation[handlers.AddCommentRequest, handlers.AddCommentResponse](
@@ -217,6 +222,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 	http.RegisterPUTWithValidation[handlers.TransferProjectOwnershipRequest, handlers.TransferProjectOwnershipResponse](
 		ctx, router, handlers.TransferProjectOwnershipRoutes(),
 		&handlers.TransferProjectOwnershipHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.InviteProjectMemberByEmailRequest, handlers.InviteProjectMemberByEmailResponse](
+		ctx, router, handlers.InviteProjectMemberByEmailRoutes(),
+		&handlers.InviteProjectMemberByEmailHandler{FlowService: flowService},
 	)
 
 	// ─── Project Columns ──────────────────────────────────────────────────────────
@@ -346,5 +356,32 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 	http.RegisterPUTWithValidation[handlers.UpdateUserSettingsRequest, handlers.UpdateUserSettingsResponse](
 		ctx, router, handlers.UpdateUserSettingsRoutes(),
 		&handlers.UpdateUserSettingsHandler{FlowService: flowService},
+	)
+
+	// ─── Businesses ───────────────────────────────────────────────────────────────
+
+	http.RegisterGET[handlers.ListBusinessesRequest, handlers.ListBusinessesResponse](
+		ctx, router, handlers.ListBusinessesRoutes(),
+		&handlers.ListBusinessesHandler{FlowService: flowService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.CreateBusinessRequest, handlers.CreateBusinessResponse](
+		ctx, router, handlers.CreateBusinessRoutes(),
+		&handlers.CreateBusinessHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateBusinessRequest, handlers.UpdateBusinessResponse](
+		ctx, router, handlers.UpdateBusinessRoutes(),
+		&handlers.UpdateBusinessHandler{FlowService: flowService},
+	)
+
+	http.RegisterDELETEWithValidation[handlers.DeleteBusinessRequest, handlers.DeleteBusinessResponse](
+		ctx, router, handlers.DeleteBusinessRoutes(),
+		&handlers.DeleteBusinessHandler{FlowService: flowService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.SetWorkspaceBusinessRequest, handlers.SetWorkspaceBusinessResponse](
+		ctx, router, handlers.SetWorkspaceBusinessRoutes(),
+		&handlers.SetWorkspaceBusinessHandler{FlowService: flowService},
 	)
 }

@@ -339,3 +339,48 @@ func (h *TransferProjectOwnershipHandler) Serve(ctx context.Context, req *Transf
 	}
 	return TransferProjectOwnershipResponse{Message: "Ownership transferred"}, nil
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /flow/projects/member/invite
+// ─────────────────────────────────────────────────────────────────────────────
+
+func InviteProjectMemberByEmailRoutes() []string { return []string{"/flow/projects/member/invite"} }
+
+type InviteProjectMemberByEmailHandler struct{ FlowService *application.Service }
+type InviteProjectMemberByEmailRequest struct {
+	ProjectID int64  `json:"project_id"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+}
+type InviteProjectMemberByEmailResponse struct{ Message string `json:"message"` }
+
+func (h *InviteProjectMemberByEmailHandler) Validate(_ context.Context, req *InviteProjectMemberByEmailRequest) *errorModels.ServerError {
+	if req.ProjectID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	}
+	if req.Email == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
+	}
+	return nil
+}
+
+func (h *InviteProjectMemberByEmailHandler) Serve(ctx context.Context, req *InviteProjectMemberByEmailRequest) (InviteProjectMemberByEmailResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return InviteProjectMemberByEmailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	role := req.Role
+	if role == "" {
+		role = "member"
+	}
+
+	found, err := h.FlowService.InviteProjectMemberByEmail(ctx, req.ProjectID, req.Email, role, authUser.UserID)
+	if err != nil {
+		return InviteProjectMemberByEmailResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to invite member"}
+	}
+	if !found {
+		return InviteProjectMemberByEmailResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, HTTPCode: http.StatusNotFound, Message: "No user found with that email"}
+	}
+	return InviteProjectMemberByEmailResponse{Message: "Member invited"}, nil
+}
