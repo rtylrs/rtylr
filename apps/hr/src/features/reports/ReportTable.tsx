@@ -2,7 +2,6 @@ import React, { useRef, useCallback, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
 import { Download, FileDown } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import { Button } from '../../shared/components/ui';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { ReportPayload } from '../../shared/schemas/reports';
@@ -38,132 +37,104 @@ function downloadCsv(columns: string[], rows: Record<string, unknown>[], filenam
   URL.revokeObjectURL(url);
 }
 
-/* ── PDF Document ─────────────────────────────────────────────── */
+/* ── PDF export ───────────────────────────────────────────────────
+ * @react-pdf/renderer is ~1.5 MB. We load it lazily only when the
+ * user clicks "Export PDF" so it is excluded from the initial chunk.
+ * ─────────────────────────────────────────────────────────────── */
 
-// PDF-specific color palette — CSS variables cannot be used in @react-pdf/renderer StyleSheet
-// because the PDF renderer runs outside the browser CSS engine.
-const PDF_COLORS = {
-  text: '#1a1a1a',
-  muted: '#6b7280',
-  faint: '#9ca3af',
-  border: '#e5e7eb',
-  rowBorder: '#f3f4f6',
-  cell: '#374151',
-} as const;
+async function generatePdfBlob(
+  report: ReportPayload,
+  companyName: string,
+  reportTypeLabel: string,
+  dateRangeLabel: string,
+  generatedLabel: string
+): Promise<Blob> {
+  // Dynamic import — only fetched when called, not bundled with ReportTable
+  const { Document, Page, Text, View, StyleSheet, pdf } = await import(
+    /* webpackChunkName: "react-pdf-renderer" */
+    '@react-pdf/renderer'
+  );
 
-const pdfStyles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontSize: 9,
-    fontFamily: 'Helvetica',
-    color: PDF_COLORS.text,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  companyName: {
-    fontSize: 16,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 4,
-  },
-  reportTitle: {
-    fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
-    color: PDF_COLORS.muted,
-    marginBottom: 2,
-  },
-  dateRange: {
-    fontSize: 9,
-    color: PDF_COLORS.faint,
-    marginBottom: 2,
-  },
-  generatedAt: {
-    fontSize: 8,
-    color: PDF_COLORS.faint,
-  },
-  table: {
-    marginTop: 10,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: PDF_COLORS.border,
-    paddingBottom: 4,
-    marginBottom: 4,
-  },
-  headerCell: {
-    flex: 1,
-    fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
-    color: PDF_COLORS.muted,
-    textTransform: 'uppercase',
-  },
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 3,
-    borderBottomWidth: 0.5,
-    borderBottomColor: PDF_COLORS.rowBorder,
-  },
-  cell: {
-    flex: 1,
-    fontSize: 8,
-    color: PDF_COLORS.cell,
-  },
-  footer: {
-    marginTop: 20,
-    fontSize: 7,
-    color: PDF_COLORS.faint,
-    textAlign: 'center',
-  },
-});
+  const PDF_COLORS = {
+    text: '#1a1a1a',
+    muted: '#6b7280',
+    faint: '#9ca3af',
+    border: '#e5e7eb',
+    rowBorder: '#f3f4f6',
+    cell: '#374151',
+  } as const;
 
-interface ReportPDFProps {
-  report: ReportPayload;
-  companyName: string;
-  reportTypeLabel: string;
-  dateRangeLabel: string;
-  generatedLabel: string;
-}
+  const styles = StyleSheet.create({
+    page: { padding: 40, fontSize: 9, fontFamily: 'Helvetica', color: PDF_COLORS.text },
+    header: { marginBottom: 20 },
+    companyName: { fontSize: 16, fontFamily: 'Helvetica-Bold', marginBottom: 4 },
+    reportTitle: {
+      fontSize: 12,
+      fontFamily: 'Helvetica-Bold',
+      color: PDF_COLORS.muted,
+      marginBottom: 2,
+    },
+    dateRange: { fontSize: 9, color: PDF_COLORS.faint, marginBottom: 2 },
+    generatedAt: { fontSize: 8, color: PDF_COLORS.faint },
+    table: { marginTop: 10 },
+    headerRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: PDF_COLORS.border,
+      paddingBottom: 4,
+      marginBottom: 4,
+    },
+    headerCell: {
+      flex: 1,
+      fontSize: 8,
+      fontFamily: 'Helvetica-Bold',
+      color: PDF_COLORS.muted,
+      textTransform: 'uppercase',
+    },
+    row: {
+      flexDirection: 'row',
+      paddingVertical: 3,
+      borderBottomWidth: 0.5,
+      borderBottomColor: PDF_COLORS.rowBorder,
+    },
+    cell: { flex: 1, fontSize: 8, color: PDF_COLORS.cell },
+    footer: { marginTop: 20, fontSize: 7, color: PDF_COLORS.faint, textAlign: 'center' },
+  });
 
-const ReportPDF = ({
-  report,
-  companyName,
-  reportTypeLabel,
-  dateRangeLabel,
-  generatedLabel,
-}: ReportPDFProps): React.JSX.Element => (
-  <Document>
-    <Page size="A4" style={pdfStyles.page}>
-      <View style={pdfStyles.header}>
-        <Text style={pdfStyles.companyName}>{companyName}</Text>
-        <Text style={pdfStyles.reportTitle}>{reportTypeLabel}</Text>
-        <Text style={pdfStyles.dateRange}>{dateRangeLabel}</Text>
-        <Text style={pdfStyles.generatedAt}>{generatedLabel}</Text>
-      </View>
-
-      <View style={pdfStyles.table}>
-        <View style={pdfStyles.headerRow}>
-          {report.columns.map((col) => (
-            <Text key={col} style={pdfStyles.headerCell}>
-              {col}
-            </Text>
-          ))}
+  const doc = (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.companyName}>{companyName}</Text>
+          <Text style={styles.reportTitle}>{reportTypeLabel}</Text>
+          <Text style={styles.dateRange}>{dateRangeLabel}</Text>
+          <Text style={styles.generatedAt}>{generatedLabel}</Text>
         </View>
-        {report.rows.map((row, i) => (
-          <View key={i} style={pdfStyles.row}>
+        <View style={styles.table}>
+          <View style={styles.headerRow}>
             {report.columns.map((col) => (
-              <Text key={col} style={pdfStyles.cell}>
-                {row[col] == null ? '' : String(row[col])}
+              <Text key={col} style={styles.headerCell}>
+                {col}
               </Text>
             ))}
           </View>
-        ))}
-      </View>
+          {report.rows.map((row, i) => (
+            <View key={i} style={styles.row}>
+              {report.columns.map((col) => (
+                <Text key={col} style={styles.cell}>
+                  {row[col] == null ? '' : String(row[col])}
+                </Text>
+              ))}
+            </View>
+          ))}
+        </View>
+        <Text style={styles.footer}>{generatedLabel}</Text>
+      </Page>
+    </Document>
+  );
 
-      <Text style={pdfStyles.footer}>{generatedLabel}</Text>
-    </Page>
-  </Document>
-);
+  return pdf(doc).toBlob();
+}
 
 /* ── Table constants ──────────────────────────────────────────── */
 
@@ -201,15 +172,14 @@ const ReportTable = ({ report, dateFrom, dateTo }: ReportTableProps): React.JSX.
         date: new Date().toLocaleDateString(),
       });
 
-      const blob = await pdf(
-        <ReportPDF
-          report={report}
-          companyName={companyName}
-          reportTypeLabel={reportTypeLabel}
-          dateRangeLabel={dateRangeLabel}
-          generatedLabel={generatedLabel}
-        />
-      ).toBlob();
+      // @react-pdf/renderer is loaded lazily here — not bundled with the initial chunk
+      const blob = await generatePdfBlob(
+        report,
+        companyName,
+        reportTypeLabel,
+        dateRangeLabel,
+        generatedLabel
+      );
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
