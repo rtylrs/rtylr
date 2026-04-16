@@ -185,6 +185,18 @@ export function useAddSubtask() {
   });
 }
 
+export function useToggleSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      unwrap(flowApi.updateTask(id, { status: completed ? 'todo' : 'done' })).then(() => {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error('Failed to update subtask'),
+  });
+}
+
 export function useLogTime() {
   const qc = useQueryClient();
   return useMutation({

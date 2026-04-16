@@ -6,6 +6,7 @@ import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
+import { Check } from 'lucide-react';
 
 interface TaskRowProps {
   task: Task;
@@ -16,16 +17,23 @@ interface TaskRowProps {
 
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
   const navigate = useNavigate();
-  const { labels, projects } = useFlowStore();
+  const { labels, projects, toggleSelectTask } = useFlowStore();
   const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
   const project = projects.find((p) => p.id === task.projectId);
 
   const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
 
+  const handleCheckbox = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSelectTask(task.id);
+    onSelect?.(e);
+  };
+
   return (
     <div
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey) {
+          toggleSelectTask(task.id);
           onSelect?.(e);
         } else {
           navigate(`/task/${task.id}`);
@@ -40,6 +48,21 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         background: selected ? 'rgba(100,197,185,0.08)' : undefined,
       }}
     >
+      {/* Checkbox — always visible when selected, appears on row hover otherwise */}
+      <button
+        onClick={handleCheckbox}
+        className={cn(
+          'shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-all',
+          selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        )}
+        style={{
+          borderColor: selected ? '#64C5B9' : 'var(--flow-border)',
+          background: selected ? '#64C5B9' : 'transparent',
+        }}
+        aria-label={selected ? 'Deselect task' : 'Select task'}
+      >
+        {selected && <Check size={9} color="#0a0a0a" strokeWidth={3} />}
+      </button>
       <PriorityIcon priority={task.priority} />
       <span
         className="text-[10px] font-mono w-16 shrink-0"

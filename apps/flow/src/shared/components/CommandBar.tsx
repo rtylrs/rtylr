@@ -19,6 +19,9 @@ import {
   Archive,
 } from 'lucide-react';
 import { useFlowStore } from '../stores/flowStore';
+import { useTasks } from '../../features/tasks/useTasks';
+import { useProjects } from '../../features/projects/useProjects';
+import { apiTaskToTask } from '../lib/taskMapper';
 
 interface CommandItem {
   id: string;
@@ -32,14 +35,12 @@ interface CommandItem {
 
 export const CommandBar: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    tasks,
-    projects,
-    commandBarOpen,
-    setCommandBarOpen,
-    setQuickCreateOpen,
-    activeWorkspaceId,
-  } = useFlowStore();
+  const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
+    useFlowStore();
+  const { data: apiTasks = [] } = useTasks({});
+  const { data: apiProjects = [] } = useProjects(activeWorkspaceId || undefined);
+  const tasks = apiTasks.map(apiTaskToTask);
+  const projects = apiProjects;
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
