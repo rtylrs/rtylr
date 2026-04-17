@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@voxire/components';
+import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
 import api from '../../shared/lib/api';
+import type { AppId } from '@voxire/types';
 
 const InviteAccept: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -11,6 +13,7 @@ const InviteAccept: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
+  const [apps, setApps] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,6 +32,7 @@ const InviteAccept: React.FC = () => {
           setValid(true);
           setEmail(res.data.email || '');
           setFullName(res.data.fullName || '');
+          setApps(res.data.apps ?? []);
         } else {
           setValid(false);
         }
@@ -101,14 +105,22 @@ const InviteAccept: React.FC = () => {
     );
   }
 
-  // Success
+  // Success — redirect to the app they were invited to, falling back to dash
+  const firstApp = apps[0] as AppId | undefined;
+  const signInHref = firstApp && APP_URLS[firstApp] ? APP_URLS[firstApp] : APP_URLS.dash;
+
   if (success) {
     return (
       <AuthShell
         title="You're all set!"
         subtitle="Your password has been set. You can now sign in."
         footer={
-          <Button variant="primary" fullWidth height={40} onClick={() => navigate('/')}>
+          <Button
+            variant="primary"
+            fullWidth
+            height={40}
+            onClick={() => (window.location.href = signInHref)}
+          >
             Sign in
           </Button>
         }
