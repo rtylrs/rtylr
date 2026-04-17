@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS } from '@voxire/config';
@@ -11,27 +11,74 @@ import { useRegisterRestaurant, useGoogleAuth } from '../../shared/hooks/useAuth
 import { auth } from '../../firebase';
 import { Button } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
-
 import PasswordStrengthMeter, {
   scorePassword,
 } from '../../shared/components/PasswordStrengthMeter';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
-// Map each app slug to the plan slug to auto-assign on registration.
-// Apps not listed here fall back to the 'starter' plan (full-suite).
+// ── Plan definitions ────────────────────────────────────────────────────────
+
+interface PlanDef {
+  slug: string;
+  name: string;
+  tagline: string;
+  apps: string[];
+  isSolo: boolean;
+  featured?: boolean;
+}
+
+const APP_COLORS: Record<string, string> = {
+  Flow: '#64C5B9',
+  Finance: '#ef4444',
+  CRM: '#8b5cf6',
+  HR: '#f59e0b',
+  ERP: '#10b981',
+  POS: '#4583C4',
+};
+
+const PLANS: PlanDef[] = [
+  {
+    slug: 'flow_solo',
+    name: 'Flow',
+    tagline: 'Projects & tasks',
+    apps: ['Flow'],
+    isSolo: true,
+  },
+  {
+    slug: 'finance_solo',
+    name: 'Finance',
+    tagline: 'Invoices & expenses',
+    apps: ['Finance'],
+    isSolo: true,
+  },
+  {
+    slug: 'starter',
+    name: 'Starter',
+    tagline: 'For small businesses',
+    apps: ['Flow', 'Finance', 'CRM'],
+    isSolo: false,
+  },
+  {
+    slug: 'pro',
+    name: 'Pro',
+    tagline: 'For growing teams',
+    apps: ['Flow', 'Finance', 'CRM', 'HR', 'ERP'],
+    isSolo: false,
+    featured: true,
+  },
+  {
+    slug: 'enterprise',
+    name: 'Enterprise',
+    tagline: 'Full suite with POS',
+    apps: ['Flow', 'Finance', 'CRM', 'HR', 'ERP', 'POS'],
+    isSolo: false,
+  },
+];
+
+// Which redirect params map to a solo plan (skip plan-selection step)
 const APP_PLAN_MAP: Record<string, string> = {
   flow: 'flow_solo',
   finance: 'finance_solo',
-};
-
-// Friendly display names for per-app registration
-const APP_DISPLAY_NAMES: Record<string, string> = {
-  flow: 'Flow',
-  finance: 'Finance',
-  erp: 'ERP',
-  hr: 'HR',
-  crm: 'CRM',
-  pos: 'POS',
 };
 
 type KnownAppId = keyof typeof APP_URLS;
@@ -42,6 +89,73 @@ function getRedirectUrl(redirectParam: string | null): string {
   }
   return APP_URLS.dash as string;
 }
+
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+function AppPill({ name }: { name: string }): React.JSX.Element {
+  const color = APP_COLORS[name] ?? '#999';
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
+      style={{ background: `${color}18`, color }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+      {name}
+    </span>
+  );
+}
+
+interface PlanCardProps {
+  plan: PlanDef;
+  selected: boolean;
+  onSelect: () => void;
+}
+
+function PlanCard({ plan, selected, onSelect }: PlanCardProps): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={[
+        'w-full text-left rounded-xl border p-4 transition-all',
+        selected
+          ? 'border-[#4583C4] ring-1 ring-[#4583C4] bg-[#4583C4]/5'
+          : 'border-[#e5e5e5] bg-white hover:border-[#4583C4]/50',
+      ].join(' ')}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-[#111]">{plan.name}</span>
+            {plan.featured && (
+              <span className="text-[10px] font-semibold text-white bg-[#4583C4] px-1.5 py-0.5 rounded-full leading-tight">
+                Popular
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-[#999] mt-0.5">{plan.tagline}</p>
+        </div>
+        <div
+          className={[
+            'w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors',
+            selected ? 'bg-[#4583C4] border-[#4583C4]' : 'border-[#ddd] bg-white',
+          ].join(' ')}
+        >
+          {selected && <Check size={9} color="white" strokeWidth={3} />}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mt-3">
+        {plan.apps.map((app) => (
+          <AppPill key={app} name={app} />
+        ))}
+      </div>
+    </button>
+  );
+}
+
+// ── Register ────────────────────────────────────────────────────────────────
+
+type Step = 'plan' | 'details';
 
 const Register: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
@@ -60,15 +174,22 @@ const Register: React.FC = (): React.JSX.Element => {
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
 
-  // Determine if we're registering for a specific app (e.g. flow, finance)
   const redirectParam = useMemo((): string | null => {
     const params = new URLSearchParams(window.location.search);
     return params.get('redirect');
   }, []);
 
-  const isSoloApp = redirectParam !== null && redirectParam !== 'dash';
-  const appDisplayName = redirectParam ? (APP_DISPLAY_NAMES[redirectParam] ?? null) : null;
-  const planSlug = redirectParam ? (APP_PLAN_MAP[redirectParam] ?? 'starter') : 'starter';
+  // isSoloApp: coming in with a redirect for an app that has its own solo plan
+  const isSoloApp = redirectParam !== null && redirectParam in APP_PLAN_MAP;
+
+  // Pre-select plan based on redirect param
+  const defaultPlanSlug = redirectParam ? (APP_PLAN_MAP[redirectParam] ?? 'starter') : 'starter';
+
+  const [selectedPlanSlug, setSelectedPlanSlug] = useState<string>(defaultPlanSlug);
+  const [step, setStep] = useState<Step>(isSoloApp ? 'details' : 'plan');
+
+  const selectedPlan = PLANS.find((p) => p.slug === selectedPlanSlug) ?? PLANS[2];
+  const isSoloPlan = selectedPlan.isSolo;
 
   const handleRegister = (): void => {
     if (password !== confirmPassword) {
@@ -80,9 +201,9 @@ const Register: React.FC = (): React.JSX.Element => {
         email,
         password,
         name: name.trim() || email.split('@')[0],
-        businessName: isSoloApp ? '' : businessName.trim(),
+        businessName: isSoloPlan ? '' : businessName.trim(),
         referred: '',
-        planSlug,
+        planSlug: selectedPlanSlug,
       },
       {
         onSuccess: () => {
@@ -126,10 +247,76 @@ const Register: React.FC = (): React.JSX.Element => {
       ? error
       : (error as { message?: string })?.message || 'An error occurred');
 
-  const title = appDisplayName ? `Get started with ${appDisplayName}.` : 'Create your account.';
-  const subtitle = appDisplayName
-    ? `Create your free ${appDisplayName} account.`
-    : 'Get started with rtylr for free.';
+  // ── Step 1: Plan selection ────────────────────────────────────────────────
+  if (step === 'plan') {
+    const soloPlans = PLANS.filter((p) => p.isSolo);
+    const businessPlans = PLANS.filter((p) => !p.isSolo);
+
+    return (
+      <AuthShell
+        title="Choose your plan."
+        subtitle="Start free — no credit card required."
+        footer={
+          <p className="text-center text-sm text-[#666]">
+            Already have an account?{' '}
+            <button
+              type="button"
+              className="text-[#4583C4] font-medium hover:underline underline-offset-2"
+              onClick={() => navigate('/')}
+            >
+              Sign in
+            </button>
+          </p>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider">
+            Individual apps
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {soloPlans.map((plan) => (
+              <PlanCard
+                key={plan.slug}
+                plan={plan}
+                selected={selectedPlanSlug === plan.slug}
+                onSelect={() => setSelectedPlanSlug(plan.slug)}
+              />
+            ))}
+          </div>
+
+          <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider mt-1">
+            Full suite
+          </p>
+          <div className="flex flex-col gap-2">
+            {businessPlans.map((plan) => (
+              <PlanCard
+                key={plan.slug}
+                plan={plan}
+                selected={selectedPlanSlug === plan.slug}
+                onSelect={() => setSelectedPlanSlug(plan.slug)}
+              />
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            variant="primary"
+            fullWidth
+            height={40}
+            onClick={() => setStep('details')}
+          >
+            Continue with {selectedPlan.name}
+          </Button>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  // ── Step 2: Account details ───────────────────────────────────────────────
+  const title = isSoloApp ? `Get started with ${selectedPlan.name}.` : 'Create your account.';
+  const subtitle = isSoloApp
+    ? `Create your free ${selectedPlan.name} account.`
+    : `Setting up ${selectedPlan.name} plan.`;
 
   return (
     <AuthShell
@@ -150,6 +337,18 @@ const Register: React.FC = (): React.JSX.Element => {
         </div>
       }
     >
+      {/* Back to plan selection (not shown for solo-app redirect flows) */}
+      {!isSoloApp && (
+        <button
+          type="button"
+          onClick={() => setStep('plan')}
+          className="flex items-center gap-1.5 text-[13px] text-[#666] hover:text-[#111] mb-5 -mt-2 transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Change plan
+        </button>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -173,8 +372,8 @@ const Register: React.FC = (): React.JSX.Element => {
           />
         </div>
 
-        {/* Business name — hidden for solo-app registrations */}
-        {!isSoloApp && (
+        {/* Business name — hidden for solo plans */}
+        {!isSoloPlan && (
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
               Business name
