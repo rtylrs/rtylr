@@ -159,3 +159,37 @@ CREATE TABLE IF NOT EXISTS hr_training_progress (
     status ENUM('not_started','in_progress','completed') DEFAULT 'not_started',
     completed_at TIMESTAMP NULL
 );
+
+CREATE TABLE IF NOT EXISTS hr_dashboard_widgets (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL DEFAULT 0,
+    widget_type VARCHAR(100) NOT NULL,
+    position_x INT NOT NULL DEFAULT 0,
+    position_y INT NOT NULL DEFAULT 0,
+    width INT NOT NULL DEFAULT 1,
+    height INT NOT NULL DEFAULT 1,
+    config JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_hr_widgets_owner (owner_id),
+    INDEX idx_hr_widgets_owner_role (owner_id, role_id)
+);
+
+CREATE TABLE IF NOT EXISTS hr_employee_documents (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    employee_id BIGINT NOT NULL,
+    document_type VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    storage_mode VARCHAR(50) NOT NULL DEFAULT 'url',
+    file_url TEXT,
+    external_url TEXT,
+    expiry_date DATE NULL,
+    uploaded_by BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_hr_docs_owner (owner_id),
+    INDEX idx_hr_docs_employee (owner_id, employee_id),
+    INDEX idx_hr_docs_expiry (owner_id, expiry_date)
+);
