@@ -10,6 +10,18 @@
   --accent-focus: rgba(69, 131, 196, 0.5);
 }
 
+/* ── Semantic status colours (theme-agnostic) ───────────────── */
+:root {
+  --status-active: #10b981;
+  --status-active-bg: rgba(16, 185, 129, 0.1);
+  --status-trial: #f59e0b;
+  --status-trial-bg: rgba(245, 158, 11, 0.1);
+  --status-cancelled: #ef4444;
+  --status-cancelled-bg: rgba(239, 68, 68, 0.1);
+  --status-expired: rgba(120, 120, 118, 0.7);
+  --status-expired-bg: rgba(120, 120, 118, 0.08);
+}
+
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {

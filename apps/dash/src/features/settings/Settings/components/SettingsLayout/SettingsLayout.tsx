@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Briefcase,
   Layers,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
@@ -47,6 +48,7 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
     groups.push({
       label: 'Plans & Addons',
       items: [
+        { label: 'Subscription', path: '/settings/subscription', icon: Receipt },
         { label: 'Billing', path: '/settings/billing', icon: CreditCard },
         { label: 'Addons', path: '/settings/addons', icon: Puzzle },
         { label: 'Integrations', path: '/settings/integrations', icon: Layers },

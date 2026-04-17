@@ -24,6 +24,7 @@ const Domain = React.lazy(() => import('../features/settings/Settings/components
 const Email = React.lazy(() => import('../features/settings/Settings/components/Email/Email'));
 const Billing = React.lazy(() => import('../features/billing/Billing.tsx'));
 const Addons = React.lazy(() => import('../features/addons/Addons.tsx'));
+const Subscription = React.lazy(() => import('../features/subscription/Subscription'));
 
 // New Hub screens
 const Team = React.lazy(() => import('../features/team/Team'));
@@ -101,6 +102,7 @@ const AppRoutes: RouteObject[] = [
       { path: 'industry', element: <Industry /> },
       { path: 'domain', element: <Domain /> },
       { path: 'email', element: <Email /> },
+      { path: 'subscription', element: <Subscription /> },
       { path: 'billing', element: <Billing /> },
       { path: 'addons', element: <Addons /> },
       { path: 'integrations', element: <Integrations /> },
