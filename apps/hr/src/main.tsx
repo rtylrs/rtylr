@@ -9,7 +9,7 @@ import i18next from './shared/services/i18next';
 import { queryClient } from './shared/lib/react-query';
 import './globals.css';
 
-const stored = localStorage.getItem('hr-theme') || 'dark';
+const stored = localStorage.getItem('hr-theme') || 'light';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 const resolved = stored === 'system' ? (systemDark ? 'dark' : 'light') : stored;
 document.documentElement.setAttribute('data-theme', resolved);
