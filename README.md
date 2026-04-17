@@ -175,10 +175,3 @@ pnpm test:coverage
 # Format
 pnpm format
 ```
-
-## Testing
-
-- **Unit tests:** Vitest + React Testing Library (1,250+ tests)
-- **E2E tests:** Playwright (auth, hub, landing flows)
-- **Coverage:** stores ~95%, services ~85%, hooks ~80%, utils ~90%
-- **CI pipeline:** format check -> typecheck (strict) -> unit tests -> lint -> build
