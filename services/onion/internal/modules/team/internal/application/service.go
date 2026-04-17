@@ -5,12 +5,14 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -224,6 +226,39 @@ func (s *Service) DeactivateUser(ctx context.Context, ownerID, userID int64) err
 	}
 
 	return s.repo.DeactivateUser(ctx, ownerID, userID)
+}
+
+// GetOwnerApps returns the list of apps the owner is subscribed to.
+func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
+	var appsJSON string
+	// cross-schema read from subscriptions + plans — approved for owner app resolution
+	err := dbclient.Pool().QueryRowContext(ctx,
+		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
+		ownerID).Scan(&appsJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	var apps []string
+	if jsonErr := json.Unmarshal([]byte(appsJSON), &apps); jsonErr != nil {
+		return []string{}, nil
+	}
+
+	return apps, nil
+}
+
+// GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
+func (s *Service) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
+	var planSlug, status string
+	// cross-schema read from subscriptions + plans — approved for owner subscription info
+	err := dbclient.Pool().QueryRowContext(ctx,
+		`SELECT p.slug, s.status FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
+		ownerID).Scan(&planSlug, &status)
+	if err != nil {
+		return "", "", err
+	}
+
+	return planSlug, status, nil
 }
 
 func (s *Service) GetMe(ctx context.Context, ownerID, userID int64) (string, string, []string, domain.Role, error) {

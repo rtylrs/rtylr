@@ -2,16 +2,20 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 	"net/netip"
 	"strings"
+	"time"
 
 	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 func RegisterRoutes() []string {
@@ -34,6 +38,7 @@ type RegisterRequest struct {
 	Password     string `json:"password"`
 	Name         string `json:"name"`
 	BusinessName string `json:"business_name"`
+	PlanSlug     string `json:"plan_slug"`
 }
 
 type RegisterResponse = authv1.RegisterResponse
@@ -114,6 +119,18 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		_ = bizErr
 	}
 
+	// Assign subscription plan after registration
+	planSlug := req.PlanSlug
+	if planSlug == "" {
+		planSlug = "starter"
+	}
+	if subErr := assignSubscription(ctx, userId, planSlug); subErr != nil {
+		logger.Ctx(ctx).Warn("failed to assign subscription on registration",
+			logger.String("plan_slug", planSlug),
+			logger.Error(subErr),
+		)
+	}
+
 	// Create personal workspace for the new user (non-fatal)
 	if h.OnUserCreated != nil {
 		h.OnUserCreated(ctx, userId)
@@ -152,3 +169,29 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		Name:    registerData.FullName,
 	}, nil
 }
+
+// assignSubscription looks up the plan by slug and creates a trial subscription for the owner.
+func assignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
+	var planID int64
+	// cross-schema read from plans — approved for subscription assignment on registration
+	err := dbclient.Pool().QueryRowContext(ctx,
+		`SELECT id FROM plans WHERE slug = ? AND is_active = TRUE`,
+		planSlug).Scan(&planID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("plan not found: " + planSlug)
+		}
+
+		return err
+	}
+
+	trialEnd := time.Now().AddDate(0, 0, 14)
+	_, execErr := dbclient.Pool().ExecContext(ctx,
+		`INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
+		 VALUES (?, ?, 'trial', ?)
+		 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP`,
+		ownerID, planID, trialEnd)
+
+	return execErr
+}
+

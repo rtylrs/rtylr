@@ -21,6 +21,7 @@ import (
 	bankaccounts "github.com/voxire/onion/internal/modules/bank_accounts"
 	"github.com/voxire/onion/internal/modules/benefits"
 	"github.com/voxire/onion/internal/modules/billing"
+	"github.com/voxire/onion/internal/modules/subscriptions"
 	"github.com/voxire/onion/internal/modules/bills"
 	bookingappointments "github.com/voxire/onion/internal/modules/booking_appointments"
 	bookingcalendar "github.com/voxire/onion/internal/modules/booking_calendar"
@@ -261,6 +262,7 @@ type apiModules struct {
 	BankAccounts         *bankaccounts.Module
 	Benefits             *benefits.Module
 	Billing              *billing.Module
+	Subscriptions        *subscriptions.Module
 	Bills                *bills.Module
 	BookingAppointments  *bookingappointments.Module
 	BookingCalendar      *bookingcalendar.Module
@@ -387,6 +389,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		BankAccounts:         bankaccounts.NewModule(ctx),
 		Benefits:             benefits.NewModule(ctx),
 		Billing:              billing.NewModule(ctx),
+		Subscriptions:        subscriptions.NewModule(ctx),
 		Bills:                bills.NewModule(ctx),
 		BookingAppointments:  bookingappointments.NewModule(ctx),
 		BookingCalendar:      bookingcalendar.NewModule(ctx),

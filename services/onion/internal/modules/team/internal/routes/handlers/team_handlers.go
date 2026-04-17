@@ -376,15 +376,17 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID           int64    `json:"id"`
-	Email        string   `json:"email"`
-	FullName     string   `json:"full_name"`
-	Apps         []string `json:"apps"`
-	Role         string   `json:"role"`
-	BusinessID   int64    `json:"business_id"`
-	BusinessName string   `json:"business_name"`
-	IsOwner      bool     `json:"is_owner"`
-	Onboarded    bool     `json:"onboarded"`
+	ID                 int64    `json:"id"`
+	Email              string   `json:"email"`
+	FullName           string   `json:"full_name"`
+	Apps               []string `json:"apps"`
+	Role               string   `json:"role"`
+	BusinessID         int64    `json:"business_id"`
+	BusinessName       string   `json:"business_name"`
+	IsOwner            bool     `json:"is_owner"`
+	Onboarded          bool     `json:"onboarded"`
+	PlanSlug           string   `json:"plan_slug"`
+	SubscriptionStatus string   `json:"subscription_status"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -420,22 +422,37 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 	// Get business name
 	businessName, isOwner := h.Service.GetBusinessInfo(ctx, businessID, userID)
 
-	// If user is the owner, they have access to everything
+	var planSlug, subscriptionStatus string
+
+	// If user is the owner, resolve apps from their subscription plan
 	if isOwner {
 		role = "owner"
-		apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
+		ownerApps, appsErr := h.Service.GetOwnerApps(ctx, userID)
+		if appsErr != nil || len(ownerApps) == 0 {
+			apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
+		} else {
+			apps = ownerApps
+		}
+
+		slug, status, subErr := h.Service.GetOwnerSubscriptionInfo(ctx, userID)
+		if subErr == nil {
+			planSlug = slug
+			subscriptionStatus = status
+		}
 	}
 
 	return MeResponse{
-		ID:           userID,
-		Email:        email,
-		FullName:     fullName,
-		Apps:         apps,
-		Role:         string(role),
-		BusinessID:   businessID,
-		BusinessName: businessName,
-		IsOwner:      isOwner,
-		Onboarded:    h.Service.IsOnboarded(ctx, userID),
+		ID:                 userID,
+		Email:              email,
+		FullName:           fullName,
+		Apps:               apps,
+		Role:               string(role),
+		BusinessID:         businessID,
+		BusinessName:       businessName,
+		IsOwner:            isOwner,
+		Onboarded:          h.Service.IsOnboarded(ctx, userID),
+		PlanSlug:           planSlug,
+		SubscriptionStatus: subscriptionStatus,
 	}, nil
 }
 
