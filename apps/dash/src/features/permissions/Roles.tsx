@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SkeletonGrid } from '../../shared/components/hub';
+import { Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
 import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
 import { toast } from 'sonner';
 
@@ -12,10 +12,10 @@ const Roles: React.FC = () => {
     <div className="space-y-5 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Custom roles
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Build purpose-built roles for your business. Assign them to members in Team.
           </p>
         </div>
@@ -33,15 +33,15 @@ const Roles: React.FC = () => {
             <div
               key={role.id}
               className="rounded-xl p-5"
-              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: role.color }} />
-                <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                   {role.name}
                 </p>
               </div>
-              <p className="text-[11px] mb-3" style={{ color: 'var(--hub-text-dim)' }}>
+              <p className="text-[11px] mb-3" style={{ color: 'var(--dash-text-dim)' }}>
                 {role.members} {role.members === 1 ? 'member' : 'members'} ·{' '}
                 {role.permissions.length} permissions
               </p>
@@ -50,13 +50,13 @@ const Roles: React.FC = () => {
                   <span
                     key={p}
                     className="px-1.5 py-0.5 rounded text-[10px] font-mono"
-                    style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                    style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                   >
                     {p}
                   </span>
                 ))}
                 {role.permissions.length > 4 && (
-                  <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                  <span className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
                     +{role.permissions.length - 4}
                   </span>
                 )}

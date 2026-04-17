@@ -9,7 +9,7 @@ beforeEach(() => {
   document.body.style.background = '';
 });
 
-describe('themeStore (hub)', () => {
+describe('themeStore (dash)', () => {
   it('has correct initial state', () => {
     expect(getState().theme).toBe('light');
   });

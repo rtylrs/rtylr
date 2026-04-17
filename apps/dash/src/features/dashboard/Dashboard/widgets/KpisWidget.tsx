@@ -25,7 +25,7 @@ function KpiCard({
       <div className="flex items-center justify-between mb-2">
         <p
           className="text-[11px] font-medium uppercase tracking-wider"
-          style={{ color: 'var(--hub-text-dim)' }}
+          style={{ color: 'var(--dash-text-dim)' }}
         >
           {label}
         </p>
@@ -37,10 +37,10 @@ function KpiCard({
         </div>
       </div>
       <div>
-        <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-2xl font-bold" style={{ color: 'var(--dash-text)' }}>
           {value}
         </p>
-        <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
           {sub}
         </p>
       </div>

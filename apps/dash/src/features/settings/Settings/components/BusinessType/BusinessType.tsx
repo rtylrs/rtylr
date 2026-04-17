@@ -105,10 +105,10 @@ const BusinessTypeSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Industry
         </h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
           Select the category that best describes your business. This personalizes your dashboard
           experience.
         </p>
@@ -135,11 +135,11 @@ const BusinessTypeSettings: React.FC = () => {
                         'px-3 py-2.5 rounded-lg text-sm text-left transition-all font-medium'
                       )}
                       style={{
-                        background: isActive ? 'rgba(69,131,196,0.12)' : 'var(--hub-hover)',
+                        background: isActive ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
                         border: isActive
                           ? '1px solid rgba(69,131,196,0.35)'
                           : '1px solid transparent',
-                        color: isActive ? '#4583C4' : 'var(--hub-text-muted)',
+                        color: isActive ? '#4583C4' : 'var(--dash-text-muted)',
                       }}
                     >
                       {type.label}
@@ -169,9 +169,9 @@ const BusinessTypeSettings: React.FC = () => {
 
       {selected && (
         <div className="flex items-center justify-between pt-1">
-          <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+          <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
             Selected:{' '}
-            <span style={{ color: 'var(--hub-text)', fontWeight: 500 }}>
+            <span style={{ color: 'var(--dash-text)', fontWeight: 500 }}>
               {ALL_TYPES.find((t) => t.value === selected)?.label ?? selected}
             </span>
           </p>

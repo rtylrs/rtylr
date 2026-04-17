@@ -1,7 +1,7 @@
 import React from 'react';
 import { CreditCard, Download, Check } from 'lucide-react';
 import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection, SkeletonList } from '../../shared/components/hub';
+import { Breadcrumbs, SettingSection, SkeletonList } from '../../shared/components/dash';
 import { useBilling, useInvoices, type Invoice } from '../../shared/hooks/queries/useBilling';
 import { toast } from 'sonner';
 
@@ -32,8 +32,8 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
-        <span style={{ color: 'var(--hub-text-muted)' }}>{label}</span>
-        <span style={{ color: 'var(--hub-text)' }}>
+        <span style={{ color: 'var(--dash-text-muted)' }}>{label}</span>
+        <span style={{ color: 'var(--dash-text)' }}>
           {used.toLocaleString()}
           {unit ?? ''} / {limit.toLocaleString()}
           {unit ?? ''}
@@ -41,7 +41,7 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
       </div>
       <div
         className="h-1.5 rounded-full overflow-hidden"
-        style={{ background: 'var(--hub-hover)' }}
+        style={{ background: 'var(--dash-hover)' }}
       >
         <div className="h-full transition-all" style={{ width: `${pct}%`, background: color }} />
       </div>
@@ -50,12 +50,12 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
 };
 
 const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
-  <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
+  <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]">
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
         {invoice.number}
       </p>
-      <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+      <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
         {formatDate(invoice.createdAt)}
       </p>
     </div>
@@ -68,12 +68,12 @@ const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
     >
       {invoice.status}
     </span>
-    <p className="text-sm font-semibold w-20 text-right" style={{ color: 'var(--hub-text)' }}>
+    <p className="text-sm font-semibold w-20 text-right" style={{ color: 'var(--dash-text)' }}>
       {formatMoney(invoice.amount, invoice.currency)}
     </p>
     <button
-      className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--hub-active)]"
-      style={{ color: 'var(--hub-text-dim)' }}
+      className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-active)]"
+      style={{ color: 'var(--dash-text-dim)' }}
       onClick={() => toast.success('Invoice downloaded')}
       aria-label="Download invoice"
     >
@@ -122,10 +122,10 @@ const BillingHome: React.FC = () => {
           <CreditCard size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Billing
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Subscription, usage, and invoices.
           </p>
         </div>
@@ -135,39 +135,39 @@ const BillingHome: React.FC = () => {
         <div className="flex items-center gap-4">
           <div
             className="flex-1 rounded-lg p-4"
-            style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
           >
             <p
               className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--hub-text-dim)' }}
+              style={{ color: 'var(--dash-text-dim)' }}
             >
               Plan
             </p>
-            <p className="text-2xl font-bold capitalize mt-1" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-2xl font-bold capitalize mt-1" style={{ color: 'var(--dash-text)' }}>
               {billing.plan}
             </p>
           </div>
           <div
             className="flex-1 rounded-lg p-4"
-            style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
           >
             <p
               className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--hub-text-dim)' }}
+              style={{ color: 'var(--dash-text-dim)' }}
             >
               Monthly
             </p>
-            <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-2xl font-bold mt-1" style={{ color: 'var(--dash-text)' }}>
               {formatMoney(billing.amount, billing.currency)}
             </p>
           </div>
           <div
             className="flex-1 rounded-lg p-4"
-            style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
           >
             <p
               className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--hub-text-dim)' }}
+              style={{ color: 'var(--dash-text-dim)' }}
             >
               Status
             </p>
@@ -219,12 +219,12 @@ const BillingHome: React.FC = () => {
                 key={plan.key}
                 className="rounded-lg p-4 flex flex-col"
                 style={{
-                  background: isCurrent ? 'rgba(69,131,196,0.06)' : 'var(--hub-hover)',
-                  border: `1px solid ${isCurrent ? 'rgba(69,131,196,0.3)' : 'var(--hub-border)'}`,
+                  background: isCurrent ? 'rgba(69,131,196,0.06)' : 'var(--dash-hover)',
+                  border: `1px solid ${isCurrent ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'}`,
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                     {plan.label}
                   </p>
                   {isCurrent && (
@@ -236,9 +236,9 @@ const BillingHome: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+                <p className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
                   {plan.price === 0 ? 'Custom' : `$${plan.price}`}
-                  <span className="text-xs font-normal" style={{ color: 'var(--hub-text-dim)' }}>
+                  <span className="text-xs font-normal" style={{ color: 'var(--dash-text-dim)' }}>
                     {plan.price === 0 ? '' : '/mo'}
                   </span>
                 </p>
@@ -247,7 +247,7 @@ const BillingHome: React.FC = () => {
                     <li
                       key={f}
                       className="flex items-start gap-1.5 text-[11px]"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      style={{ color: 'var(--dash-text-muted)' }}
                     >
                       <Check size={10} className="mt-0.5 shrink-0" style={{ color: '#10b981' }} />
                       {f}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const hubKpisSchema = z.object({
+export const dashKpisSchema = z.object({
   revenueToday: z.number(),
   revenueTrendPct: z.number(),
   ordersToday: z.number(),
@@ -15,4 +15,4 @@ export const hubKpisSchema = z.object({
   ordersSeries: z.array(z.number()),
 });
 
-export type HubKpis = z.infer<typeof hubKpisSchema>;
+export type HubKpis = z.infer<typeof dashKpisSchema>;

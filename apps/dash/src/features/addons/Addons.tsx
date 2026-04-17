@@ -139,10 +139,10 @@ const Addons: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
             Addons
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
             Extend your business with powerful add-ons
           </p>
         </div>
@@ -150,7 +150,7 @@ const Addons: React.FC = () => {
           <Search
             size={13}
             className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             className="pl-9 w-56"
@@ -167,7 +167,7 @@ const Addons: React.FC = () => {
             <div
               key={i}
               className="h-44 rounded-xl animate-pulse"
-              style={{ background: 'var(--hub-hover)' }}
+              style={{ background: 'var(--dash-hover)' }}
             />
           ))}
         </div>
@@ -175,8 +175,8 @@ const Addons: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           {filtered.map((addon) => {
             const colors = COLOR_MAP[addon.id] ?? {
-              bg: 'var(--hub-hover)',
-              color: 'var(--hub-text-muted)',
+              bg: 'var(--dash-hover)',
+              color: 'var(--dash-text-muted)',
             };
             const Icon = ICON_MAP[addon.icon] ?? MessageSquare;
             const isEnabling = enablingId === addon.id;
@@ -187,7 +187,7 @@ const Addons: React.FC = () => {
                 key={addon.id}
                 layout
                 className="rounded-xl p-5 flex flex-col gap-4"
-                style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
               >
                 <div className="flex items-start justify-between">
                   <div
@@ -217,12 +217,12 @@ const Addons: React.FC = () => {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                     {addon.name}
                   </p>
                   <p
                     className="text-xs mt-1 leading-relaxed"
-                    style={{ color: 'var(--hub-text-muted)' }}
+                    style={{ color: 'var(--dash-text-muted)' }}
                   >
                     {addon.description}
                   </p>
@@ -231,13 +231,13 @@ const Addons: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span
                     className="text-sm font-semibold"
-                    style={{ color: addon.isFree ? '#10b981' : 'var(--hub-text)' }}
+                    style={{ color: addon.isFree ? '#10b981' : 'var(--dash-text)' }}
                   >
                     {addon.isFree ? 'Free' : `$${addon.price}`}
                     {!addon.isFree && addon.price > 0 && (
                       <span
                         className="text-xs font-normal"
-                        style={{ color: 'var(--hub-text-dim)' }}
+                        style={{ color: 'var(--dash-text-dim)' }}
                       >
                         /mo
                       </span>
@@ -262,7 +262,7 @@ const Addons: React.FC = () => {
                             className="animate-spin"
                             style={{ color: '#4583C4' }}
                           />
-                          <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                          <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
                             Setting up...
                           </span>
                         </>
@@ -273,9 +273,9 @@ const Addons: React.FC = () => {
                       onClick={() => setDisableTarget(addon)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                       style={{
-                        background: 'var(--hub-hover)',
-                        color: 'var(--hub-text-muted)',
-                        border: '1px solid var(--hub-border)',
+                        background: 'var(--dash-hover)',
+                        color: 'var(--dash-text-muted)',
+                        border: '1px solid var(--dash-border)',
                       }}
                     >
                       Disable
@@ -298,7 +298,7 @@ const Addons: React.FC = () => {
 
       {filtered.length === 0 && !isLoading && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
             No addons match your search
           </p>
         </div>
@@ -324,7 +324,7 @@ const Addons: React.FC = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               className="rounded-xl p-6 w-full max-w-md"
-              style={{ background: 'var(--hub-surface)', border: '1px solid var(--hub-border)' }}
+              style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
@@ -334,17 +334,17 @@ const Addons: React.FC = () => {
                   <AlertTriangle size={20} style={{ color: '#ef4444' }} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--dash-text)' }}>
                     Disable {disableTarget.name}?
                   </h3>
-                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
                     Your data will be preserved but the feature will be hidden.
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs mb-2" style={{ color: 'var(--hub-text-muted)' }}>
-                Type <strong style={{ color: 'var(--hub-text)' }}>{CONFIRM_PHRASE}</strong> to
+              <p className="text-xs mb-2" style={{ color: 'var(--dash-text-muted)' }}>
+                Type <strong style={{ color: 'var(--dash-text)' }}>{CONFIRM_PHRASE}</strong> to
                 confirm:
               </p>
               <input
@@ -354,9 +354,9 @@ const Addons: React.FC = () => {
                 autoFocus
                 className="w-full h-10 rounded-lg px-3 text-sm outline-none mb-4"
                 style={{
-                  background: 'var(--hub-bg)',
-                  border: '1px solid var(--hub-border)',
-                  color: 'var(--hub-text)',
+                  background: 'var(--dash-bg)',
+                  border: '1px solid var(--dash-border)',
+                  color: 'var(--dash-text)',
                 }}
               />
 
@@ -367,7 +367,7 @@ const Addons: React.FC = () => {
                     setConfirmText('');
                   }}
                   className="px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                  style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                 >
                   Cancel
                 </button>
@@ -377,9 +377,13 @@ const Addons: React.FC = () => {
                   className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
                   style={{
                     background:
-                      confirmText.toLowerCase() === CONFIRM_PHRASE ? '#ef4444' : 'var(--hub-hover)',
+                      confirmText.toLowerCase() === CONFIRM_PHRASE
+                        ? '#ef4444'
+                        : 'var(--dash-hover)',
                     color:
-                      confirmText.toLowerCase() === CONFIRM_PHRASE ? '#fff' : 'var(--hub-text-dim)',
+                      confirmText.toLowerCase() === CONFIRM_PHRASE
+                        ? '#fff'
+                        : 'var(--dash-text-dim)',
                     opacity: confirmText.toLowerCase() === CONFIRM_PHRASE ? 1 : 0.5,
                     cursor:
                       confirmText.toLowerCase() === CONFIRM_PHRASE ? 'pointer' : 'not-allowed',

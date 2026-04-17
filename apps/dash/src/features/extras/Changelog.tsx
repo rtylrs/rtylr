@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import { Breadcrumbs } from '../../shared/components/hub';
+import { Breadcrumbs } from '../../shared/components/dash';
 
 interface Entry {
   version: string;
@@ -56,10 +56,10 @@ const Changelog: React.FC = () => {
           <Sparkles size={16} style={{ color: '#8b5cf6' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             What&apos;s new
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Product updates and improvements.
           </p>
         </div>
@@ -70,13 +70,13 @@ const Changelog: React.FC = () => {
           <div
             key={entry.version}
             className="rounded-xl p-5"
-            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
           >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              <p className="text-sm font-bold" style={{ color: 'var(--dash-text)' }}>
                 v{entry.version}
               </p>
-              <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+              <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                 {entry.date}
               </p>
             </div>
@@ -91,7 +91,7 @@ const Changelog: React.FC = () => {
                     >
                       {h.type}
                     </span>
-                    <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
                       {h.text}
                     </p>
                   </li>

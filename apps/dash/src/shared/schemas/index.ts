@@ -1,7 +1,7 @@
 export { loginResponseSchema, userInfoSchema } from './auth';
 export type { LoginResponse, UserInfo } from './auth';
 
-export { hubKpisSchema } from './kpis';
+export { dashKpisSchema } from './kpis';
 export type { HubKpis } from './kpis';
 
 export { teamMemberSchema } from './team';
@@ -46,5 +46,5 @@ export type { AnalyticsResponse } from './analytics';
 export { menuItemSchema, categorySchema, bannerSchema, menuSchema } from './menu';
 export type { MenuItem, Category, Banner, Menu } from './menu';
 
-export { hubOrderSchema } from './orders';
+export { dashOrderSchema } from './orders';
 export type { HubOrder } from './orders';

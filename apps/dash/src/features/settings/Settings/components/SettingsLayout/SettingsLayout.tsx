@@ -64,25 +64,25 @@ const SettingsLayout: React.FC = () => {
   const navGroups = getNavGroups(isOwner);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>
       {/* Sidebar */}
       <aside
         className="w-56 flex flex-col shrink-0 overflow-y-auto"
-        style={{ background: 'var(--hub-surface)', borderRight: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-surface)', borderRight: '1px solid var(--dash-border)' }}
       >
         {/* Header */}
         <div
           className="flex items-center gap-2 px-4 py-3.5 shrink-0"
-          style={{ borderBottom: '1px solid var(--hub-border)' }}
+          style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
           <button
             onClick={() => navigate('/')}
-            className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--hub-hover)]"
-            style={{ color: 'var(--hub-text-muted)' }}
+            className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
+            style={{ color: 'var(--dash-text-muted)' }}
           >
             <ArrowLeft size={14} />
           </button>
-          <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Settings
           </span>
         </div>
@@ -93,7 +93,7 @@ const SettingsLayout: React.FC = () => {
             <div key={group.label}>
               <p
                 className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: 'var(--hub-text-dim)' }}
+                style={{ color: 'var(--dash-text-dim)' }}
               >
                 {group.label}
               </p>
@@ -105,11 +105,11 @@ const SettingsLayout: React.FC = () => {
                     className={({ isActive }) =>
                       cn(
                         'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
-                        isActive ? 'bg-[var(--hub-active)]' : 'hover:bg-[var(--hub-hover)]'
+                        isActive ? 'bg-[var(--dash-active)]' : 'hover:bg-[var(--dash-hover)]'
                       )
                     }
                     style={({ isActive }) => ({
-                      color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                      color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)',
                       fontWeight: isActive ? 500 : undefined,
                     })}
                   >
@@ -124,7 +124,7 @@ const SettingsLayout: React.FC = () => {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto p-8" style={{ color: 'var(--hub-text)' }}>
+      <main className="flex-1 overflow-y-auto p-8" style={{ color: 'var(--dash-text)' }}>
         <Outlet />
       </main>
     </div>

@@ -1,16 +1,16 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import { hubKpisSchema } from '../../schemas/kpis';
+import { dashKpisSchema } from '../../schemas/kpis';
 
 export type { HubKpis } from '../../schemas/kpis';
 
 export const useKpis = () => {
   return useQuery({
-    queryKey: ['hub-kpis'],
+    queryKey: ['dash-kpis'],
     queryFn: async () => {
       const res = await unwrap(safe.get('/hub/kpis'));
-      return hubKpisSchema.parse(res);
+      return dashKpisSchema.parse(res);
     },
     staleTime: 30_000,
   });

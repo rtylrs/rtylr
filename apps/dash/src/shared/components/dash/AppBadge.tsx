@@ -26,7 +26,7 @@ const APP_META: Record<string, { label: string; color: string; bg: string; icon:
   analytics: { label: 'Analytics', color: '#06b6d4', bg: 'rgba(6,182,212,0.1)', icon: BarChart3 },
   market: { label: 'Marketplace', color: '#a855f7', bg: 'rgba(168,85,247,0.1)', icon: ShoppingBag },
   web: { label: 'Website', color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)', icon: Globe },
-  hub: { label: 'Hub', color: '#6b7280', bg: 'rgba(107,114,128,0.1)', icon: Circle },
+  dash: { label: 'Dash', color: '#6b7280', bg: 'rgba(107,114,128,0.1)', icon: Circle },
 };
 
 export interface AppBadgeProps {

@@ -24,17 +24,17 @@ const LowStockWidget: React.FC = () => {
     <div className="flex flex-col h-full">
       <div
         className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--hub-border)' }}
+        style={{ borderBottom: '1px solid var(--dash-border)' }}
       >
         <Package size={14} style={{ color: '#ef4444' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           Low stock
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
               All stock levels are healthy
             </p>
           </div>
@@ -43,11 +43,11 @@ const LowStockWidget: React.FC = () => {
             <div
               key={i}
               className="flex items-center gap-3 px-2 py-1.5 rounded-lg"
-              style={{ background: 'var(--hub-bg)' }}
+              style={{ background: 'var(--dash-bg)' }}
             >
               <AlertTriangle size={12} style={{ color: '#ef4444' }} />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
                   {p.name}
                 </p>
               </div>

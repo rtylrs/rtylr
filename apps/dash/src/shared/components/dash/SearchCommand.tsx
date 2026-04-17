@@ -295,27 +295,27 @@ export const SearchCommand: React.FC = () => {
       />
       <div
         className="relative z-10 w-full max-w-xl rounded-xl shadow-2xl overflow-hidden"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         <div
           className="flex items-center gap-3 px-4 py-3"
-          style={{ borderBottom: '1px solid var(--hub-border)' }}
+          style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
-          <Search size={16} style={{ color: 'var(--hub-text-dim)' }} />
+          <Search size={16} style={{ color: 'var(--dash-text-dim)' }} />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search apps, pages, actions..."
             className="flex-1 bg-transparent outline-none text-sm"
-            style={{ color: 'var(--hub-text)' }}
+            style={{ color: 'var(--dash-text)' }}
           />
           <kbd
             className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono"
             style={{
-              background: 'var(--hub-hover)',
-              color: 'var(--hub-text-dim)',
-              border: '1px solid var(--hub-border)',
+              background: 'var(--dash-hover)',
+              color: 'var(--dash-text-dim)',
+              border: '1px solid var(--dash-border)',
             }}
           >
             ESC
@@ -323,7 +323,7 @@ export const SearchCommand: React.FC = () => {
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {filtered.length === 0 && (
-            <div className="text-center py-10 text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            <div className="text-center py-10 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
               No results for &quot;{query}&quot;
             </div>
           )}
@@ -331,7 +331,7 @@ export const SearchCommand: React.FC = () => {
             <div key={group} className="mb-2 last:mb-0">
               <p
                 className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: 'var(--hub-text-dim)' }}
+                style={{ color: 'var(--dash-text-dim)' }}
               >
                 {group}
               </p>
@@ -344,15 +344,15 @@ export const SearchCommand: React.FC = () => {
                     key={item.id}
                     className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors text-left"
                     style={{
-                      background: isActive ? 'var(--hub-active)' : 'transparent',
-                      color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                      background: isActive ? 'var(--dash-active)' : 'transparent',
+                      color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)',
                     }}
                     onMouseEnter={() => setActiveIndex(flatIndex)}
                     onClick={() => item.action()}
                   >
                     <Icon size={14} className="shrink-0" />
                     <span className="flex-1 truncate">{item.label}</span>
-                    {isActive && <ArrowRight size={13} style={{ color: 'var(--hub-text-dim)' }} />}
+                    {isActive && <ArrowRight size={13} style={{ color: 'var(--dash-text-dim)' }} />}
                   </button>
                 );
               })}
@@ -361,7 +361,7 @@ export const SearchCommand: React.FC = () => {
         </div>
         <div
           className="flex items-center justify-between gap-3 px-4 py-2 text-[10px]"
-          style={{ borderTop: '1px solid var(--hub-border)', color: 'var(--hub-text-dim)' }}
+          style={{ borderTop: '1px solid var(--dash-border)', color: 'var(--dash-text-dim)' }}
         >
           <span className="flex items-center gap-1">
             <CommandIcon size={10} />
@@ -371,7 +371,7 @@ export const SearchCommand: React.FC = () => {
             <span className="flex items-center gap-1">
               <kbd
                 className="px-1 py-0.5 rounded font-mono"
-                style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+                style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
               >
                 ↑↓
               </kbd>
@@ -380,7 +380,7 @@ export const SearchCommand: React.FC = () => {
             <span className="flex items-center gap-1">
               <kbd
                 className="px-1 py-0.5 rounded font-mono"
-                style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+                style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
               >
                 ↵
               </kbd>

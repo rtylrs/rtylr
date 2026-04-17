@@ -13,36 +13,36 @@
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
-  --hub-bg: #0a0a0a;
-  --hub-surface: #111111;
-  --hub-card: #161616;
-  --hub-border: rgba(255, 255, 255, 0.07);
-  --hub-border-focus: var(--accent-focus);
-  --hub-text: rgba(240, 240, 238, 0.92);
-  --hub-text-muted: rgba(240, 240, 238, 0.5);
-  --hub-text-dim: rgba(240, 240, 238, 0.28);
-  --hub-hover: rgba(255, 255, 255, 0.05);
-  --hub-active: rgba(255, 255, 255, 0.08);
-  --hub-input-bg: rgba(255, 255, 255, 0.04);
-  --hub-scrollbar: rgba(255, 255, 255, 0.12);
-  --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --dash-bg: #0a0a0a;
+  --dash-surface: #111111;
+  --dash-card: #161616;
+  --dash-border: rgba(255, 255, 255, 0.07);
+  --dash-border-focus: var(--accent-focus);
+  --dash-text: rgba(240, 240, 238, 0.92);
+  --dash-text-muted: rgba(240, 240, 238, 0.5);
+  --dash-text-dim: rgba(240, 240, 238, 0.28);
+  --dash-hover: rgba(255, 255, 255, 0.05);
+  --dash-active: rgba(255, 255, 255, 0.08);
+  --dash-input-bg: rgba(255, 255, 255, 0.04);
+  --dash-scrollbar: rgba(255, 255, 255, 0.12);
+  --dash-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Light mode ──────────────────────────────────────────────── */
 :root[data-theme='light'] {
-  --hub-bg: #f4f4f5;
-  --hub-surface: #ffffff;
-  --hub-card: #ffffff;
-  --hub-border: rgba(0, 0, 0, 0.08);
-  --hub-border-focus: var(--accent-focus);
-  --hub-text: rgb(9, 9, 11);
-  --hub-text-muted: rgba(9, 9, 11, 0.5);
-  --hub-text-dim: rgba(9, 9, 11, 0.35);
-  --hub-hover: rgba(0, 0, 0, 0.05);
-  --hub-active: rgba(0, 0, 0, 0.09);
-  --hub-input-bg: #ffffff;
-  --hub-scrollbar: rgba(0, 0, 0, 0.15);
-  --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
+  --dash-bg: #f4f4f5;
+  --dash-surface: #ffffff;
+  --dash-card: #ffffff;
+  --dash-border: rgba(0, 0, 0, 0.08);
+  --dash-border-focus: var(--accent-focus);
+  --dash-text: rgb(9, 9, 11);
+  --dash-text-muted: rgba(9, 9, 11, 0.5);
+  --dash-text-dim: rgba(9, 9, 11, 0.35);
+  --dash-hover: rgba(0, 0, 0, 0.05);
+  --dash-active: rgba(0, 0, 0, 0.09);
+  --dash-input-bg: #ffffff;
+  --dash-scrollbar: rgba(0, 0, 0, 0.15);
+  --dash-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 @layer base {
@@ -53,15 +53,15 @@
   }
   html {
     font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
-    background: var(--hub-bg);
+    background: var(--dash-bg);
     height: 100%;
     overflow: hidden;
   }
   body {
     margin: 0;
     padding: 0;
-    background: var(--hub-bg);
-    color: var(--hub-text);
+    background: var(--dash-bg);
+    color: var(--dash-text);
     height: 100%;
     overflow: hidden;
   }
@@ -78,15 +78,15 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--hub-scrollbar);
+    background: var(--dash-scrollbar);
     border-radius: 9999px;
   }
 }
 
 /* ── Legacy CSS vars for @voxire/menu SCSS ───────────────────── */
 :root {
-  --admin-bg: var(--hub-bg);
-  --primary-color: var(--hub-text);
+  --admin-bg: var(--dash-bg);
+  --primary-color: var(--dash-text);
   --accent-color: #4583c4;
   --primary-font: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
 }
@@ -147,5 +147,5 @@
   opacity: 0.6;
 }
 .react-grid-item > .react-resizable-handle::after {
-  border-color: var(--hub-text-dim) !important;
+  border-color: var(--dash-text-dim) !important;
 }

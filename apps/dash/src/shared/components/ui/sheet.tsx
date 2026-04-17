@@ -71,9 +71,9 @@ const SheetContent: React.FC<SheetContentProps> = ({ children, className, side =
           className
         )}
         style={{
-          background: 'var(--hub-card)',
-          borderLeft: side !== 'left' ? '1px solid var(--hub-border)' : undefined,
-          borderRight: side === 'left' ? '1px solid var(--hub-border)' : undefined,
+          background: 'var(--dash-card)',
+          borderLeft: side !== 'left' ? '1px solid var(--dash-border)' : undefined,
+          borderRight: side === 'left' ? '1px solid var(--dash-border)' : undefined,
         }}
       >
         <button
@@ -96,7 +96,7 @@ const SheetHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('flex flex-col gap-1.5 p-6 pb-4', className)}
-    style={{ borderBottom: '1px solid var(--hub-border)', ...style }}
+    style={{ borderBottom: '1px solid var(--dash-border)', ...style }}
     {...props}
   />
 );
@@ -118,7 +118,7 @@ const SheetFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('flex items-center justify-end gap-2 p-6 pt-4 mt-auto', className)}
-    style={{ borderTop: '1px solid var(--hub-border)', ...style }}
+    style={{ borderTop: '1px solid var(--dash-border)', ...style }}
     {...props}
   />
 );

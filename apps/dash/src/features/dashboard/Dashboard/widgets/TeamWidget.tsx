@@ -28,11 +28,11 @@ const TeamWidget: React.FC = () => {
     <div className="flex flex-col h-full">
       <div
         className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: '1px solid var(--hub-border)' }}
+        style={{ borderBottom: '1px solid var(--dash-border)' }}
       >
         <div className="flex items-center gap-2">
-          <Users size={14} style={{ color: 'var(--hub-text-muted)' }} />
-          <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <Users size={14} style={{ color: 'var(--dash-text-muted)' }} />
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Team
           </p>
         </div>
@@ -47,7 +47,7 @@ const TeamWidget: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {members.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
               No team members yet
             </p>
             <button
@@ -68,10 +68,10 @@ const TeamWidget: React.FC = () => {
                 {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
                   {m.fullName || m.email}
                 </p>
-                <p className="text-[10px] truncate" style={{ color: 'var(--hub-text-dim)' }}>
+                <p className="text-[10px] truncate" style={{ color: 'var(--dash-text-dim)' }}>
                   {m.role}
                 </p>
               </div>

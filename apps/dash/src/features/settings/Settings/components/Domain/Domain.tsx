@@ -53,10 +53,10 @@ const Domain: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Custom Domain
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
           Connect a custom domain to your customer-facing menu.
         </p>
       </div>
@@ -76,13 +76,13 @@ const Domain: React.FC = () => {
               <Globe
                 size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2"
-                style={{ color: 'var(--hub-text-dim)' }}
+                style={{ color: 'var(--dash-text-dim)' }}
               />
               <Input
                 readOnly
                 value={menuUrl}
                 className="pl-8 cursor-default select-all"
-                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
               />
             </div>
             <Button
@@ -141,14 +141,14 @@ const Domain: React.FC = () => {
           {/* DNS Instructions — collapsible */}
           <div
             className="rounded-xl overflow-hidden"
-            style={{ border: '1px solid var(--hub-border)' }}
+            style={{ border: '1px solid var(--dash-border)' }}
           >
             {/* Collapsible header */}
             <button
               type="button"
               onClick={() => setDnsOpen((o) => !o)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--hub-hover)]"
-              style={{ color: 'var(--hub-text)' }}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text)' }}
             >
               <span>DNS Setup Instructions</span>
               {dnsOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -157,9 +157,9 @@ const Domain: React.FC = () => {
             {dnsOpen && (
               <div
                 className="px-4 pb-4 space-y-3"
-                style={{ borderTop: '1px solid var(--hub-border)' }}
+                style={{ borderTop: '1px solid var(--dash-border)' }}
               >
-                <p className="text-sm pt-3" style={{ color: 'var(--hub-text-muted)' }}>
+                <p className="text-sm pt-3" style={{ color: 'var(--dash-text-muted)' }}>
                   Add the following CNAME record in your DNS provider's dashboard (e.g. Cloudflare,
                   Namecheap, GoDaddy):
                 </p>
@@ -167,18 +167,18 @@ const Domain: React.FC = () => {
                 {/* DNS table */}
                 <div
                   className="rounded-lg overflow-hidden text-xs"
-                  style={{ border: '1px solid var(--hub-border)' }}
+                  style={{ border: '1px solid var(--dash-border)' }}
                 >
                   <table className="w-full">
                     <thead>
-                      <tr style={{ background: 'var(--hub-hover)' }}>
+                      <tr style={{ background: 'var(--dash-hover)' }}>
                         {['Type', 'Name', 'Value', 'TTL'].map((h) => (
                           <th
                             key={h}
                             className="px-3 py-2 text-left font-semibold"
                             style={{
-                              color: 'var(--hub-text-muted)',
-                              borderBottom: '1px solid var(--hub-border)',
+                              color: 'var(--dash-text-muted)',
+                              borderBottom: '1px solid var(--dash-border)',
                             }}
                           >
                             {h}
@@ -187,11 +187,11 @@ const Domain: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr style={{ background: 'var(--hub-card)' }}>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>
+                      <tr style={{ background: 'var(--dash-card)' }}>
+                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--dash-text)' }}>
                           CNAME
                         </td>
-                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--hub-text)' }}>
+                        <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--dash-text)' }}>
                           menu
                         </td>
                         <td className="px-3 py-2.5 font-mono" style={{ color: '#4583C4' }}>
@@ -199,7 +199,7 @@ const Domain: React.FC = () => {
                         </td>
                         <td
                           className="px-3 py-2.5 font-mono"
-                          style={{ color: 'var(--hub-text-muted)' }}
+                          style={{ color: 'var(--dash-text-muted)' }}
                         >
                           3600
                         </td>
@@ -214,7 +214,7 @@ const Domain: React.FC = () => {
                   style={{
                     background: 'rgba(251,191,36,0.08)',
                     border: '1px solid rgba(251,191,36,0.2)',
-                    color: 'var(--hub-text-muted)',
+                    color: 'var(--dash-text-muted)',
                   }}
                 >
                   <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-500" />
@@ -230,7 +230,7 @@ const Domain: React.FC = () => {
             style={{
               background: 'rgba(16,185,129,0.07)',
               border: '1px solid rgba(16,185,129,0.18)',
-              color: 'var(--hub-text-muted)',
+              color: 'var(--dash-text-muted)',
             }}
           >
             <ShieldCheck size={13} className="shrink-0 mt-0.5 text-emerald-500" />

@@ -6,7 +6,7 @@ import {
   Breadcrumbs,
   EmptyState,
   SkeletonList,
-} from '../../shared/components/hub';
+} from '../../shared/components/dash';
 import { useAuditLog } from '../../shared/hooks/queries/useActivity';
 import { toast } from 'sonner';
 
@@ -66,10 +66,10 @@ const Audit: React.FC = () => {
             <ScrollText size={16} style={{ color: '#ef4444' }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               Audit log
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               Tamper-evident history of security-relevant events.
             </p>
           </div>
@@ -85,7 +85,7 @@ const Audit: React.FC = () => {
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             value={query}
@@ -101,10 +101,10 @@ const Audit: React.FC = () => {
               onClick={() => setSeverity(s)}
               className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
-                background: severity === s ? 'rgba(239,68,68,0.15)' : 'var(--hub-hover)',
-                color: severity === s ? '#ef4444' : 'var(--hub-text-muted)',
+                background: severity === s ? 'rgba(239,68,68,0.15)' : 'var(--dash-hover)',
+                color: severity === s ? '#ef4444' : 'var(--dash-text-muted)',
                 border:
-                  severity === s ? '1px solid rgba(239,68,68,0.3)' : '1px solid var(--hub-border)',
+                  severity === s ? '1px solid rgba(239,68,68,0.3)' : '1px solid var(--dash-border)',
               }}
             >
               {s}
@@ -115,7 +115,7 @@ const Audit: React.FC = () => {
 
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         {isLoading ? (
           <div className="p-2">

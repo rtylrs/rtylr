@@ -2,7 +2,7 @@ import React from 'react';
 import { Download, Upload, FileJson } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection } from '../../shared/components/hub';
+import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
 
 const DataExport: React.FC = () => {
   const exportAll = () => {
@@ -30,10 +30,10 @@ const DataExport: React.FC = () => {
           <FileJson size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Export data
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Download a full snapshot of your workspace data.
           </p>
         </div>
@@ -49,7 +49,7 @@ const DataExport: React.FC = () => {
           </Button>
         }
       >
-        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
           We&apos;ll generate a downloadable file with all your workspace data. Large workspaces may
           take a few minutes.
         </p>
@@ -59,7 +59,7 @@ const DataExport: React.FC = () => {
         title="Scheduled exports"
         description="Automatic exports to your S3 bucket or email."
       >
-        <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
           Scheduled exports are available on the Pro plan.
         </p>
       </SettingSection>
@@ -78,10 +78,10 @@ export const DataImport: React.FC = () => {
           <Upload size={16} style={{ color: '#10b981' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Import data
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Bring your existing data to rtylr.
           </p>
         </div>
@@ -97,12 +97,12 @@ export const DataImport: React.FC = () => {
           <div
             key={src.name}
             className="rounded-xl p-5"
-            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
           >
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               {src.name}
             </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+            <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
               {src.description}
             </p>
             <Button

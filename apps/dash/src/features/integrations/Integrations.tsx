@@ -40,10 +40,10 @@ const Integrations: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
             Integrations
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
             Connect rtylr to the tools you already use
           </p>
         </div>
@@ -51,7 +51,7 @@ const Integrations: React.FC = () => {
           <Search
             size={13}
             className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             className="pl-9 w-56"
@@ -70,10 +70,10 @@ const Integrations: React.FC = () => {
             onClick={() => setCat(c.key)}
             className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
             style={{
-              background: cat === c.key ? 'rgba(69,131,196,0.12)' : 'var(--hub-hover)',
-              color: cat === c.key ? '#4583C4' : 'var(--hub-text-muted)',
+              background: cat === c.key ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
+              color: cat === c.key ? '#4583C4' : 'var(--dash-text-muted)',
               border:
-                cat === c.key ? '1px solid rgba(69,131,196,0.25)' : '1px solid var(--hub-border)',
+                cat === c.key ? '1px solid rgba(69,131,196,0.25)' : '1px solid var(--dash-border)',
             }}
           >
             {c.label}
@@ -88,14 +88,14 @@ const Integrations: React.FC = () => {
             <div
               key={i}
               className="h-32 rounded-xl animate-pulse"
-              style={{ background: 'var(--hub-hover)' }}
+              style={{ background: 'var(--dash-hover)' }}
             />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Plug2 size={28} className="mb-2" style={{ color: 'var(--hub-text-dim)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+          <Plug2 size={28} className="mb-2" style={{ color: 'var(--dash-text-dim)' }} />
+          <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
             No integrations match your search
           </p>
         </div>
@@ -109,7 +109,7 @@ const Integrations: React.FC = () => {
               <div
                 key={i.id}
                 className="rounded-xl p-5 flex flex-col gap-4"
-                style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
               >
                 <div className="flex items-start justify-between">
                   <div
@@ -129,13 +129,13 @@ const Integrations: React.FC = () => {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                     {name}
                   </p>
                   {i.description && (
                     <p
                       className="text-xs mt-1 leading-relaxed"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      style={{ color: 'var(--dash-text-muted)' }}
                     >
                       {i.description}
                     </p>
@@ -148,9 +148,9 @@ const Integrations: React.FC = () => {
                       onClick={() => disconnect.mutate(i.id)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                       style={{
-                        background: 'var(--hub-hover)',
-                        color: 'var(--hub-text-muted)',
-                        border: '1px solid var(--hub-border)',
+                        background: 'var(--dash-hover)',
+                        color: 'var(--dash-text-muted)',
+                        border: '1px solid var(--dash-border)',
                       }}
                     >
                       Disconnect

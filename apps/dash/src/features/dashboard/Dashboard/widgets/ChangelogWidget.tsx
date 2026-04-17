@@ -13,8 +13,8 @@ const entries = [
 const ChangelogWidget: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           What's new
         </p>
       </div>
@@ -28,10 +28,10 @@ const ChangelogWidget: React.FC = () => {
               {e.version}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--hub-text)' }}>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--dash-text)' }}>
                 {e.text}
               </p>
-              <p className="text-[10px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+              <p className="text-[10px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
                 {e.date}
               </p>
             </div>

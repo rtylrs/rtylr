@@ -27,7 +27,7 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }
   const iconColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#4583C4';
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
+    <div className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]">
       <div
         className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
         style={{ background: `${iconColor}15` }}
@@ -35,9 +35,9 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }
         <Icon size={14} style={{ color: iconColor }} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-sm" style={{ color: 'var(--dash-text)' }}>
           <span className="font-semibold">{entry.actor}</span>
-          <span className="font-normal" style={{ color: 'var(--hub-text-muted)' }}>
+          <span className="font-normal" style={{ color: 'var(--dash-text-muted)' }}>
             {' '}
             {entry.action}{' '}
           </span>
@@ -45,11 +45,11 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }
         </p>
         <div className="flex items-center gap-2 mt-1">
           <AppBadge app={entry.app} size="xs" />
-          <span className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+          <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
             {formatRelative(entry.createdAt)}
           </span>
           {showIp && entry.ip && (
-            <span className="text-[11px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+            <span className="text-[11px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
               {entry.ip}
             </span>
           )}

@@ -17,7 +17,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn('', className)}
-    style={{ borderBottom: '1px solid var(--hub-border)' }}
+    style={{ borderBottom: '1px solid var(--dash-border)' }}
     {...props}
   />
 ));
@@ -38,7 +38,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn('font-medium', className)}
-    style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-hover)' }}
+    style={{ borderTop: '1px solid var(--dash-border)', background: 'var(--dash-hover)' }}
     {...props}
   />
 ));
@@ -48,8 +48,8 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <tr
       ref={ref}
-      className={cn('transition-colors hover:bg-[var(--hub-hover)]', className)}
-      style={{ borderBottom: '1px solid var(--hub-border)' }}
+      className={cn('transition-colors hover:bg-[var(--dash-hover)]', className)}
+      style={{ borderBottom: '1px solid var(--dash-border)' }}
       {...props}
     />
   )

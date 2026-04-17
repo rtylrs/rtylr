@@ -6,7 +6,7 @@ import {
   Breadcrumbs,
   EmptyState,
   SkeletonList,
-} from '../../shared/components/hub';
+} from '../../shared/components/dash';
 import { useActivity } from '../../shared/hooks/queries/useActivity';
 
 const Activity: React.FC = () => {
@@ -36,10 +36,10 @@ const Activity: React.FC = () => {
           <ActivityIcon size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Activity
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             A live stream of every action across your rtylr apps.
           </p>
         </div>
@@ -50,7 +50,7 @@ const Activity: React.FC = () => {
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             value={query}
@@ -66,12 +66,12 @@ const Activity: React.FC = () => {
               onClick={() => setAppFilter(a)}
               className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
-                background: appFilter === a ? 'rgba(69,131,196,0.15)' : 'var(--hub-hover)',
-                color: appFilter === a ? '#4583C4' : 'var(--hub-text-muted)',
+                background: appFilter === a ? 'rgba(69,131,196,0.15)' : 'var(--dash-hover)',
+                color: appFilter === a ? '#4583C4' : 'var(--dash-text-muted)',
                 border:
                   appFilter === a
                     ? '1px solid rgba(69,131,196,0.3)'
-                    : '1px solid var(--hub-border)',
+                    : '1px solid var(--dash-border)',
               }}
             >
               {a}
@@ -82,7 +82,7 @@ const Activity: React.FC = () => {
 
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         {isLoading ? (
           <div className="p-2">

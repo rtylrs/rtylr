@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useActivity } from '../../../../shared/hooks/queries/useActivity';
-import { ActivityEntryRow } from '../../../../shared/components/hub';
+import { ActivityEntryRow } from '../../../../shared/components/dash';
 
 const ActivityWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -13,11 +13,11 @@ const ActivityWidget: React.FC = () => {
     <div className="flex flex-col h-full">
       <div
         className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: '1px solid var(--hub-border)' }}
+        style={{ borderBottom: '1px solid var(--dash-border)' }}
       >
         <div className="flex items-center gap-2">
-          <Activity size={14} style={{ color: 'var(--hub-text-muted)' }} />
-          <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <Activity size={14} style={{ color: 'var(--dash-text-muted)' }} />
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Recent activity
           </p>
         </div>
@@ -32,10 +32,10 @@ const ActivityWidget: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-2">
         {activity.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-6">
-            <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+            <p className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
               No activity yet
             </p>
-            <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
               Actions will appear here
             </p>
           </div>

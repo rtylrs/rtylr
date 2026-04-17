@@ -38,7 +38,7 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer hover:bg-[var(--hub-hover)]"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer hover:bg-[var(--dash-hover)]"
       onClick={() => navigate(`/team/${member.id}`)}
     >
       <Avatar
@@ -49,7 +49,7 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--dash-text)' }}>
             {member.name}
           </p>
           <RoleBadge role={member.role} />
@@ -66,7 +66,7 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
             </span>
           )}
         </div>
-        <p className="text-xs truncate" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-xs truncate" style={{ color: 'var(--dash-text-dim)' }}>
           {member.email} · active {formatRelative(member.lastActive)}
         </p>
       </div>
@@ -75,14 +75,14 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
           <AppBadge key={a} app={a} size="xs" showLabel={false} />
         ))}
         {member.apps.length > 4 && (
-          <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+          <span className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
             +{member.apps.length - 4}
           </span>
         )}
       </div>
       <button
-        className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--hub-active)] shrink-0"
-        style={{ color: 'var(--hub-text-dim)' }}
+        className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-active)] shrink-0"
+        style={{ color: 'var(--dash-text-dim)' }}
         onClick={(e) => {
           e.stopPropagation();
           onMenu?.(member);

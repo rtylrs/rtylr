@@ -11,7 +11,7 @@ import {
   ActivityEntryRow,
   ConfirmDialog,
   EmptyState,
-} from '../../shared/components/hub';
+} from '../../shared/components/dash';
 import { useMember, useDeactivateMember } from '../../shared/hooks/queries/useTeam';
 import { useActivity } from '../../shared/hooks/queries/useActivity';
 
@@ -36,7 +36,7 @@ const MemberDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-3xl">
-        <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-sm" style={{ color: 'var(--dash-text-dim)' }}>
           Loading member...
         </p>
       </div>
@@ -70,12 +70,12 @@ const MemberDetail: React.FC = () => {
         />
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               {member.name}
             </h1>
             <RoleBadge role={member.role} />
           </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             {member.email}
           </p>
         </div>
@@ -84,43 +84,43 @@ const MemberDetail: React.FC = () => {
       <div className="grid grid-cols-3 gap-3">
         <div
           className="rounded-xl p-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div
             className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           >
             <Mail size={11} /> Email
           </div>
-          <p className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
             {member.email}
           </p>
         </div>
         <div
           className="rounded-xl p-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div
             className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           >
             <Shield size={11} /> Role
           </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
             {member.role}
           </p>
         </div>
         <div
           className="rounded-xl p-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div
             className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           >
             <Clock size={11} /> Status
           </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
             {member.status}
           </p>
         </div>
@@ -129,7 +129,7 @@ const MemberDetail: React.FC = () => {
       <SettingSection title="App access" description="Apps this member can launch.">
         <div className="flex flex-wrap gap-2">
           {(member.apps ?? []).length === 0 ? (
-            <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
               No apps assigned.
             </p>
           ) : (
@@ -143,7 +143,7 @@ const MemberDetail: React.FC = () => {
         description="Recent actions performed by this member."
       >
         {memberActivity.length === 0 ? (
-          <p className="text-xs text-center py-6" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs text-center py-6" style={{ color: 'var(--dash-text-dim)' }}>
             No recent activity
           </p>
         ) : (

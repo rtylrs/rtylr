@@ -113,7 +113,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
     .slice(0, 2);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--hub-bg, #fafafa)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--dash-bg, #fafafa)' }}>
       {/* Top bar */}
       <div
         style={{
@@ -122,7 +122,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
           justifyContent: 'space-between',
           padding: '16px 32px',
           borderBottom: '1px solid #eee',
-          background: 'var(--hub-bg, #fff)',
+          background: 'var(--dash-bg, #fff)',
         }}
       >
         <img src="/logo.png" alt="rtylr" style={{ height: 24, filter: 'brightness(0)' }} />
@@ -155,9 +155,9 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                 top: 44,
                 right: 0,
                 width: 200,
-                background: 'var(--hub-bg, #fff)',
+                background: 'var(--dash-bg, #fff)',
                 borderRadius: 10,
-                border: '1px solid var(--hub-border, #e5e5e5)',
+                border: '1px solid var(--dash-border, #e5e5e5)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                 zIndex: 50,
                 overflow: 'hidden',
@@ -168,7 +168,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   style={{
                     fontSize: 13,
                     fontWeight: 600,
-                    color: 'var(--hub-text, #111)',
+                    color: 'var(--dash-text, #111)',
                     margin: 0,
                   }}
                 >
@@ -178,7 +178,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   <p
                     style={{
                       fontSize: 11,
-                      color: 'var(--hub-text-muted, #999)',
+                      color: 'var(--dash-text-muted, #999)',
                       margin: '2px 0 0 0',
                     }}
                   >
@@ -192,7 +192,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                   display: 'block',
                   padding: '10px 16px',
                   fontSize: 13,
-                  color: 'var(--hub-text, #333)',
+                  color: 'var(--dash-text, #333)',
                   textDecoration: 'none',
                 }}
               >
@@ -234,14 +234,14 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
             style={{
               fontSize: 24,
               fontWeight: 600,
-              color: 'var(--hub-text, #111)',
+              color: 'var(--dash-text, #111)',
               margin: '0 0 6px 0',
             }}
           >
             Welcome, {fullName.split(' ')[0]}
           </h1>
           {businessName && (
-            <p style={{ fontSize: 13, color: 'var(--hub-text-muted, #999)', marginBottom: 0 }}>
+            <p style={{ fontSize: 13, color: 'var(--dash-text-muted, #999)', marginBottom: 0 }}>
               {businessName}
             </p>
           )}
@@ -265,8 +265,8 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                       gap: 8,
                       padding: '24px 16px',
                       borderRadius: 12,
-                      background: 'var(--hub-bg, #fff)',
-                      border: '1px solid var(--hub-border, #e5e5e5)',
+                      background: 'var(--dash-bg, #fff)',
+                      border: '1px solid var(--dash-border, #e5e5e5)',
                       textDecoration: 'none',
                       transition: 'border-color 0.2s',
                     }}
@@ -290,10 +290,12 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                     >
                       <Icon size={20} color={app.color} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text, #111)' }}>
+                    <span
+                      style={{ fontSize: 13, fontWeight: 600, color: 'var(--dash-text, #111)' }}
+                    >
                       {app.name}
                     </span>
-                    <span style={{ fontSize: 11, color: 'var(--hub-text-muted, #999)' }}>
+                    <span style={{ fontSize: 11, color: 'var(--dash-text-muted, #999)' }}>
                       {app.desc}
                     </span>
                   </a>
@@ -310,8 +312,8 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                     gap: 8,
                     padding: '24px 16px',
                     borderRadius: 12,
-                    background: 'var(--hub-bg, #fafafa)',
-                    border: '1px dashed var(--hub-border, #e0e0e0)',
+                    background: 'var(--dash-bg, #fafafa)',
+                    border: '1px dashed var(--dash-border, #e0e0e0)',
                     opacity: 0.7,
                   }}
                 >
@@ -320,7 +322,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                       width: 40,
                       height: 40,
                       borderRadius: 10,
-                      background: 'var(--hub-hover, #f0f0f0)',
+                      background: 'var(--dash-hover, #f0f0f0)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -329,7 +331,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
                     <Lock size={16} color="#bbb" />
                   </div>
                   <span
-                    style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text-muted, #888)' }}
+                    style={{ fontSize: 13, fontWeight: 600, color: 'var(--dash-text-muted, #888)' }}
                   >
                     {app.name}
                   </span>
@@ -414,7 +416,7 @@ function BusinessRoute(): React.JSX.Element | null {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'var(--hub-bg, #fff)',
+          background: 'var(--dash-bg, #fff)',
         }}
       >
         <div

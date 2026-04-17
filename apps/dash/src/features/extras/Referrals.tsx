@@ -2,7 +2,7 @@ import React from 'react';
 import { Gift, Copy, Users, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection, StatCard } from '../../shared/components/hub';
+import { Breadcrumbs, SettingSection, StatCard } from '../../shared/components/dash';
 
 const Referrals: React.FC = () => {
   const referralCode = 'RTYLR-2K7X';
@@ -23,10 +23,10 @@ const Referrals: React.FC = () => {
           <Gift size={16} style={{ color: '#ec4899' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Referrals
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Invite other businesses to rtylr and earn rewards.
           </p>
         </div>
@@ -44,9 +44,9 @@ const Referrals: React.FC = () => {
       >
         <div
           className="flex items-center gap-2 p-3 rounded-lg font-mono text-xs"
-          style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
         >
-          <span className="flex-1 truncate" style={{ color: 'var(--hub-text)' }}>
+          <span className="flex-1 truncate" style={{ color: 'var(--dash-text)' }}>
             {referralLink}
           </span>
           <Button size="sm" variant="secondary" onClick={copyLink}>

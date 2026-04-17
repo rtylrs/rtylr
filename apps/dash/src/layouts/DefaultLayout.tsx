@@ -43,7 +43,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '../shared/components/ui';
-import { SearchCommand } from '../shared/components/hub';
+import { SearchCommand } from '../shared/components/dash';
 import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
@@ -115,7 +115,7 @@ const routeLabels: Record<string, string> = {
 function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
   const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
-  return match ? routeLabels[match] : 'Hub';
+  return match ? routeLabels[match] : 'Dash';
 }
 
 function getInitials(name?: string | null): string {
@@ -138,15 +138,15 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       data-tour={label.toLowerCase()}
       className={cn(
         'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
-        isActive ? '' : 'hover:bg-[var(--hub-hover)]'
+        isActive ? '' : 'hover:bg-[var(--dash-hover)]'
       )}
-      style={{ color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)' }}
+      style={{ color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)' }}
     >
       {isActive && (
         <motion.span
           layoutId="sidebar-active"
           className="absolute inset-0 rounded-lg"
-          style={{ background: 'var(--hub-active)' }}
+          style={{ background: 'var(--dash-active)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
@@ -177,22 +177,22 @@ const SidebarSection: React.FC<{
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150',
-          isActive ? '' : 'hover:bg-[var(--hub-hover)]'
+          isActive ? '' : 'hover:bg-[var(--dash-hover)]'
         )}
-        style={{ color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)' }}
+        style={{ color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)' }}
       >
         <Icon size={16} className="shrink-0" />
         <span className="flex-1 text-left">{label}</span>
         <ChevronRight
           size={12}
           className={cn('shrink-0 transition-transform', open && 'rotate-90')}
-          style={{ color: 'var(--hub-text-dim)' }}
+          style={{ color: 'var(--dash-text-dim)' }}
         />
       </button>
       {open && (
         <div
           className="ml-5 pl-2 mt-0.5 space-y-0.5"
-          style={{ borderLeft: '1px solid var(--hub-border)' }}
+          style={{ borderLeft: '1px solid var(--dash-border)' }}
         >
           {items.map((item) => (
             <SidebarNavItem key={item.path} {...item} />
@@ -241,19 +241,19 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>
       {/* Sidebar */}
       <aside
         className="w-64 flex flex-col shrink-0 overflow-hidden"
         style={{
-          background: 'var(--hub-surface)',
-          borderRight: '1px solid var(--hub-border)',
+          background: 'var(--dash-surface)',
+          borderRight: '1px solid var(--dash-border)',
         }}
       >
         {/* Logo */}
         <div
           className="flex items-center gap-2.5 px-4 py-4"
-          style={{ borderBottom: '1px solid var(--hub-border)' }}
+          style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
           <img
             src="/logo.png"
@@ -282,20 +282,20 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </nav>
 
         {/* Footer */}
-        <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
+        <div className="p-2" style={{ borderTop: '1px solid var(--dash-border)' }}>
           <Link
             to="/settings/account"
             data-tour="settings"
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 mb-0.5',
               location.pathname.startsWith('/settings')
-                ? 'bg-[var(--hub-active)]'
-                : 'hover:bg-[var(--hub-hover)]'
+                ? 'bg-[var(--dash-active)]'
+                : 'hover:bg-[var(--dash-hover)]'
             )}
             style={{
               color: location.pathname.startsWith('/settings')
-                ? 'var(--hub-text)'
-                : 'var(--hub-text-muted)',
+                ? 'var(--dash-text)'
+                : 'var(--dash-text-muted)',
             }}
           >
             <Settings size={16} />
@@ -304,7 +304,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--hub-hover)]">
+              <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
                 <Avatar
                   initials={getInitials(userName)}
                   size="sm"
@@ -314,14 +314,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
                     className="text-xs font-medium truncate w-full text-left"
-                    style={{ color: 'var(--hub-text)' }}
+                    style={{ color: 'var(--dash-text)' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
                       className="text-[10px] truncate w-full text-left"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      style={{ color: 'var(--dash-text-muted)' }}
                     >
                       {userEmail}
                     </span>
@@ -330,7 +330,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <ChevronRight
                   size={12}
                   className="shrink-0"
-                  style={{ color: 'var(--hub-text-dim)' }}
+                  style={{ color: 'var(--dash-text-dim)' }}
                 />
               </button>
             </DropdownMenuTrigger>
@@ -339,7 +339,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               <div className="px-2 py-1.5">
                 <p
                   className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
-                  style={{ color: 'var(--hub-text-dim)' }}
+                  style={{ color: 'var(--dash-text-dim)' }}
                 >
                   Appearance
                 </p>
@@ -356,8 +356,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       onClick={() => setTheme(value)}
                       className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                       style={{
-                        background: theme === value ? 'rgba(69,131,196,0.15)' : 'var(--hub-hover)',
-                        color: theme === value ? '#4583C4' : 'var(--hub-text-muted)',
+                        background: theme === value ? 'rgba(69,131,196,0.15)' : 'var(--dash-hover)',
+                        color: theme === value ? '#4583C4' : 'var(--dash-text-muted)',
                         border:
                           theme === value
                             ? '1px solid rgba(69,131,196,0.3)'
@@ -386,8 +386,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         <header
           className="h-11 flex items-center justify-between px-6 shrink-0"
           style={{
-            background: 'var(--hub-surface)',
-            borderBottom: '1px solid var(--hub-border)',
+            background: 'var(--dash-surface)',
+            borderBottom: '1px solid var(--dash-border)',
           }}
         >
           {pageTitle === '__caret__' ? (
@@ -398,7 +398,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               >
                 <Sparkles size={13} style={{ color: '#8b5cf6' }} />
               </div>
-              <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                 Caret
               </span>
               <span
@@ -409,22 +409,22 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               </span>
             </div>
           ) : (
-            <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               {pageTitle}
             </h1>
           )}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--hub-hover)]"
-              style={{ color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+              className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
               aria-label="Open command palette"
             >
               <Search size={12} />
               <span className="text-[11px]">Search</span>
               <kbd
                 className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
-                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
               >
                 ⌘K
               </kbd>
@@ -451,8 +451,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             </button>
             <button
               onClick={() => navigate('/notifications')}
-              className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--hub-hover)]"
-              style={{ color: 'var(--hub-text-muted)' }}
+              className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text-muted)' }}
               aria-label="Notifications"
             >
               <Bell size={14} />

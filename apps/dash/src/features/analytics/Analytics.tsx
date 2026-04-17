@@ -97,7 +97,7 @@ const Analytics: React.FC = () => {
         <CardContent className="pt-0">
           <div
             className="flex flex-col items-center justify-center h-52 rounded-xl"
-            style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
           >
             <BarChart2 size={36} className="text-gray-200 mb-3" />
             <p className="text-sm font-medium text-gray-400">Chart coming soon</p>

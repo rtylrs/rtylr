@@ -16,7 +16,7 @@ beforeEach(() => {
   });
 });
 
-describe('userStore (hub)', () => {
+describe('userStore (dash)', () => {
   it('has correct initial state', () => {
     expect(getState().user).toBeNull();
     expect(getState().token).toBeNull();

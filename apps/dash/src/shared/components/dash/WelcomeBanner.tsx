@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const STORAGE_KEY = 'hub.welcome.dismissed';
+const STORAGE_KEY = 'dash.welcome.dismissed';
 
 export interface WelcomeBannerProps {
   title?: string;
@@ -49,10 +49,10 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             <Sparkles size={18} style={{ color: '#4583C4' }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               {title}
             </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+            <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
               {description}
             </p>
             {onCta && (
@@ -70,7 +70,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/10 shrink-0"
             aria-label="Dismiss welcome"
           >
-            <X size={14} style={{ color: 'var(--hub-text-dim)' }} />
+            <X size={14} style={{ color: 'var(--dash-text-dim)' }} />
           </button>
         </div>
       </motion.div>

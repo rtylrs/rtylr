@@ -37,7 +37,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
 
   return (
     <div
-      className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)] cursor-pointer"
+      className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
       onClick={() => {
         if (!notification.read) onRead?.(notification.id);
         onClick?.(notification);
@@ -51,7 +51,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--dash-text)' }}>
             {notification.title}
           </p>
           {!notification.read && (
@@ -61,12 +61,12 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
             />
           )}
         </div>
-        <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--dash-text-muted)' }}>
           {notification.body}
         </p>
         <div className="flex items-center gap-2 mt-1.5">
           <AppBadge app={notification.app} size="xs" />
-          <span className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+          <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
             {formatRelative(notification.createdAt)}
           </span>
         </div>

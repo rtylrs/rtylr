@@ -13,7 +13,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/20',
   warning: 'bg-amber-500/15 text-amber-600 border border-amber-500/20',
   destructive: 'bg-red-500/15 text-red-600 border border-red-500/20',
-  outline: 'border border-[var(--hub-border)] text-[var(--hub-text-muted)] bg-transparent',
+  outline: 'border border-[var(--dash-border)] text-[var(--dash-text-muted)] bg-transparent',
 };
 
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(

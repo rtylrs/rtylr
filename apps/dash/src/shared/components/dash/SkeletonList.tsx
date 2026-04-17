@@ -34,7 +34,7 @@ export const SkeletonGrid: React.FC<{ cols?: number; rows?: number }> = ({
         <div
           key={i}
           className="rounded-xl p-5 flex flex-col gap-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <Skeleton className="h-11 w-11 rounded-xl" />
           <div className="space-y-2">

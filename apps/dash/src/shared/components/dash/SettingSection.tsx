@@ -19,14 +19,14 @@ export const SettingSection: React.FC<SettingSectionProps> = ({
   return (
     <div
       className={cn('rounded-xl', className)}
-      style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
     >
-      <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           {title}
         </p>
         {description && (
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             {description}
           </p>
         )}
@@ -35,7 +35,7 @@ export const SettingSection: React.FC<SettingSectionProps> = ({
       {footer && (
         <div
           className="px-5 py-3 flex items-center justify-end gap-2"
-          style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-hover)' }}
+          style={{ borderTop: '1px solid var(--dash-border)', background: 'var(--dash-hover)' }}
         >
           {footer}
         </div>

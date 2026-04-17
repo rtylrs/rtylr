@@ -31,16 +31,16 @@ export const StatCard: React.FC<StatCardProps> = ({
     <div
       className={cn(
         'rounded-xl p-4 transition-colors',
-        onClick && 'cursor-pointer hover:bg-[var(--hub-hover)]',
+        onClick && 'cursor-pointer hover:bg-[var(--dash-hover)]',
         className
       )}
-      style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-3">
         <p
           className="text-[11px] font-medium uppercase tracking-wider"
-          style={{ color: 'var(--hub-text-dim)' }}
+          style={{ color: 'var(--dash-text-dim)' }}
         >
           {label}
         </p>
@@ -53,7 +53,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+      <p className="text-2xl font-bold" style={{ color: 'var(--dash-text)' }}>
         {value}
       </p>
       <div className="flex items-center gap-1.5 mt-1">
@@ -61,7 +61,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <span
             className="inline-flex items-center gap-0.5 text-[11px] font-semibold"
             style={{
-              color: trendPositive ? '#10b981' : trendNegative ? '#ef4444' : 'var(--hub-text-dim)',
+              color: trendPositive ? '#10b981' : trendNegative ? '#ef4444' : 'var(--dash-text-dim)',
             }}
           >
             {trendPositive ? (
@@ -75,7 +75,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </span>
         )}
         {sub && (
-          <span className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+          <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
             {sub}
           </span>
         )}

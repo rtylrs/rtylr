@@ -11,10 +11,10 @@ const RevenueChartWidget: React.FC = () => {
     <div className="flex flex-col h-full">
       <div
         className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--hub-border)' }}
+        style={{ borderBottom: '1px solid var(--dash-border)' }}
       >
         <BarChart3 size={14} style={{ color: '#4583C4' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           Revenue (7 days)
         </p>
       </div>
@@ -26,19 +26,19 @@ const RevenueChartWidget: React.FC = () => {
                 className="absolute bottom-0 w-full rounded-t-md transition-all"
                 style={{
                   height: values[i] > 0 ? `${(values[i] / max) * 100}%` : '4px',
-                  background: values[i] > 0 ? '#4583C4' : 'var(--hub-border)',
+                  background: values[i] > 0 ? '#4583C4' : 'var(--dash-border)',
                   minHeight: 4,
                 }}
               />
             </div>
-            <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+            <span className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
               {day}
             </span>
           </div>
         ))}
       </div>
       {values.every((v) => v === 0) && (
-        <p className="text-center text-[11px] pb-3" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-center text-[11px] pb-3" style={{ color: 'var(--dash-text-dim)' }}>
           Revenue data will appear once orders start flowing
         </p>
       )}

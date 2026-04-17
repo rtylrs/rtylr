@@ -30,14 +30,14 @@ export const useThemeStore = create<ThemeStore>()(
         set({ theme });
       },
     }),
-    { name: 'hub-theme' }
+    { name: 'dash-theme' }
   )
 );
 
 /** Call once at app startup before first render to prevent flash */
 export function initTheme() {
   try {
-    const raw = localStorage.getItem('hub-theme');
+    const raw = localStorage.getItem('dash-theme');
     const theme: Theme = raw ? (JSON.parse(raw).state?.theme ?? 'light') : 'light';
     applyTheme(theme);
 

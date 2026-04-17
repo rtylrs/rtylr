@@ -78,10 +78,10 @@ const General: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           General
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
           Manage your store details and business information.
         </p>
       </div>

@@ -13,7 +13,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Button, Input, Label, Select } from '../../shared/components/ui';
-import { SettingSection } from '../../shared/components/hub';
+import { SettingSection } from '../../shared/components/dash';
 import api from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 
@@ -70,10 +70,10 @@ const InviteUser: React.FC = () => {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Invite member
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-1" style={{ color: 'var(--dash-text-muted)' }}>
           Add a new member to your organization.
         </p>
       </div>
@@ -82,9 +82,9 @@ const InviteUser: React.FC = () => {
         {/* Personal details */}
         <div
           className="rounded-xl p-5 space-y-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
-          <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Personal details
           </p>
           <div className="grid grid-cols-2 gap-4">
@@ -115,9 +115,9 @@ const InviteUser: React.FC = () => {
         {/* Authentication */}
         <div
           className="rounded-xl p-5 space-y-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
-          <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Authentication
           </p>
           <div className="flex gap-2">
@@ -126,17 +126,17 @@ const InviteUser: React.FC = () => {
               onClick={() => setAuthMethod('invite')}
               className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
               style={{
-                background: authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--hub-bg)',
+                background: authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
                 border: `1px solid ${
-                  authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--hub-border)'
+                  authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
                 }`,
-                color: authMethod === 'invite' ? '#4583C4' : 'var(--hub-text-muted)',
+                color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
               }}
             >
               <p className="font-semibold">Send invitation email</p>
               <p
                 className="text-[11px] mt-0.5 font-normal"
-                style={{ color: 'var(--hub-text-dim)' }}
+                style={{ color: 'var(--dash-text-dim)' }}
               >
                 Member sets their own password
               </p>
@@ -146,17 +146,17 @@ const InviteUser: React.FC = () => {
               onClick={() => setAuthMethod('manual')}
               className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
               style={{
-                background: authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--hub-bg)',
+                background: authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
                 border: `1px solid ${
-                  authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--hub-border)'
+                  authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
                 }`,
-                color: authMethod === 'manual' ? '#4583C4' : 'var(--hub-text-muted)',
+                color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
               }}
             >
               <p className="font-semibold">Set password manually</p>
               <p
                 className="text-[11px] mt-0.5 font-normal"
-                style={{ color: 'var(--hub-text-dim)' }}
+                style={{ color: 'var(--dash-text-dim)' }}
               >
                 You share credentials directly
               </p>
@@ -179,7 +179,7 @@ const InviteUser: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2"
-                  style={{ color: 'var(--hub-text-dim)' }}
+                  style={{ color: 'var(--dash-text-dim)' }}
                 >
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
@@ -191,13 +191,13 @@ const InviteUser: React.FC = () => {
         {/* Role */}
         <div
           className="rounded-xl p-5 space-y-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               Role
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               Controls what this member can see and do
             </p>
           </div>
@@ -238,13 +238,13 @@ const InviteUser: React.FC = () => {
                 style={{
                   background: role === r.id ? 'rgba(69,131,196,0.06)' : 'transparent',
                   border: `1px solid ${
-                    role === r.id ? 'rgba(69,131,196,0.3)' : 'var(--hub-border)'
+                    role === r.id ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
                   }`,
                 }}
               >
                 <div
                   className="h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center"
-                  style={{ borderColor: role === r.id ? '#4583C4' : 'var(--hub-border)' }}
+                  style={{ borderColor: role === r.id ? '#4583C4' : 'var(--dash-border)' }}
                 >
                   {role === r.id && (
                     <div className="h-2 w-2 rounded-full" style={{ background: '#4583C4' }} />
@@ -253,11 +253,11 @@ const InviteUser: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <p
                     className="text-sm font-medium"
-                    style={{ color: role === r.id ? '#4583C4' : 'var(--hub-text)' }}
+                    style={{ color: role === r.id ? '#4583C4' : 'var(--dash-text)' }}
                   >
                     {r.label}
                   </p>
-                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                  <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                     {r.desc}
                   </p>
                 </div>
@@ -269,13 +269,13 @@ const InviteUser: React.FC = () => {
         {/* Licenses */}
         <div
           className="rounded-xl p-5 space-y-4"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               Assign licenses
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               Choose which apps this member can access
             </p>
           </div>
@@ -290,8 +290,8 @@ const InviteUser: React.FC = () => {
                   onClick={() => toggleApp(app.key)}
                   className="flex flex-col items-center gap-2 py-4 rounded-xl transition-all"
                   style={{
-                    background: checked ? `${app.color}08` : 'var(--hub-bg)',
-                    border: `1px solid ${checked ? `${app.color}40` : 'var(--hub-border)'}`,
+                    background: checked ? `${app.color}08` : 'var(--dash-bg)',
+                    border: `1px solid ${checked ? `${app.color}40` : 'var(--dash-border)'}`,
                   }}
                 >
                   <div
@@ -302,11 +302,11 @@ const InviteUser: React.FC = () => {
                   </div>
                   <span
                     className="text-xs font-semibold"
-                    style={{ color: checked ? app.color : 'var(--hub-text-muted)' }}
+                    style={{ color: checked ? app.color : 'var(--dash-text-muted)' }}
                   >
                     {app.label}
                   </span>
-                  <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                  <span className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
                     {app.desc}
                   </span>
                 </button>
@@ -321,7 +321,7 @@ const InviteUser: React.FC = () => {
             type="button"
             onClick={() => navigate('/team')}
             className="px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ color: 'var(--hub-text-muted)' }}
+            style={{ color: 'var(--dash-text-muted)' }}
           >
             Cancel
           </button>

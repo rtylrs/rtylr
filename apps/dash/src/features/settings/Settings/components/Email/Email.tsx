@@ -30,7 +30,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, id }) =>
     style={{
       width: 36,
       height: 20,
-      background: checked ? '#4583C4' : 'var(--hub-border)',
+      background: checked ? '#4583C4' : 'var(--dash-border)',
       transition: 'background 0.2s',
     }}
   >
@@ -62,7 +62,7 @@ interface SegmentGroupProps {
 const SegmentGroup: React.FC<SegmentGroupProps> = ({ options, value, onChange }) => (
   <div
     className="flex rounded-lg overflow-hidden"
-    style={{ border: '1px solid var(--hub-border)', background: 'var(--hub-input-bg)' }}
+    style={{ border: '1px solid var(--dash-border)', background: 'var(--dash-input-bg)' }}
   >
     {options.map((opt) => {
       const active = opt === value;
@@ -74,7 +74,7 @@ const SegmentGroup: React.FC<SegmentGroupProps> = ({ options, value, onChange })
           className="flex-1 py-1.5 text-xs font-medium transition-colors"
           style={{
             background: active ? '#4583C4' : 'transparent',
-            color: active ? '#fff' : 'var(--hub-text-muted)',
+            color: active ? '#fff' : 'var(--dash-text-muted)',
           }}
         >
           {opt}
@@ -102,10 +102,10 @@ const NotificationRow: React.FC<NotificationRowProps> = ({
 }) => (
   <div className="flex items-center justify-between gap-4 py-3">
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+      <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
         {label}
       </p>
-      <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+      <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
         {description}
       </p>
     </div>
@@ -205,10 +205,10 @@ const Email: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Email Settings
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
           Configure how emails are sent to your customers.
         </p>
       </div>
@@ -217,7 +217,7 @@ const Email: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Mail size={15} style={{ color: 'var(--hub-text-dim)' }} />
+            <Mail size={15} style={{ color: 'var(--dash-text-dim)' }} />
             <CardTitle>Sender Identity</CardTitle>
           </div>
           <CardDescription>Control how your business appears in outgoing emails.</CardDescription>
@@ -274,7 +274,7 @@ const Email: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Server size={15} style={{ color: 'var(--hub-text-dim)' }} />
+            <Server size={15} style={{ color: 'var(--dash-text-dim)' }} />
             <CardTitle>SMTP Configuration</CardTitle>
           </div>
           <CardDescription>
@@ -285,10 +285,10 @@ const Email: React.FC = () => {
           {/* Toggle row */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
                 Use custom SMTP server
               </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
                 Send emails through your own mail server
               </p>
             </div>
@@ -392,12 +392,12 @@ const Email: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Bell size={15} style={{ color: 'var(--hub-text-dim)' }} />
+            <Bell size={15} style={{ color: 'var(--dash-text-dim)' }} />
             <CardTitle>Email Notifications</CardTitle>
           </div>
           <CardDescription>Choose which events trigger an email notification.</CardDescription>
         </CardHeader>
-        <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--hub-border)' }}>
+        <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--dash-border)' }}>
           <NotificationRow
             id="notif-new-order"
             label="New order received"

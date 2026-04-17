@@ -25,21 +25,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         'rounded-xl px-8 py-14 flex flex-col items-center justify-center text-center',
         className
       )}
-      style={{ background: 'var(--hub-card)', border: '1px dashed var(--hub-border)' }}
+      style={{ background: 'var(--dash-card)', border: '1px dashed var(--dash-border)' }}
     >
       {Icon && (
         <div
           className="h-12 w-12 rounded-xl flex items-center justify-center mb-4"
-          style={{ background: 'var(--hub-hover)' }}
+          style={{ background: 'var(--dash-hover)' }}
         >
-          <Icon size={20} style={{ color: 'var(--hub-text-dim)' }} />
+          <Icon size={20} style={{ color: 'var(--dash-text-dim)' }} />
         </div>
       )}
-      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
         {title}
       </p>
       {description && (
-        <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--dash-text-muted)' }}>
           {description}
         </p>
       )}

@@ -35,24 +35,24 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
           {isComingSoon && (
             <span
               className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+              style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
             >
               Soon
             </span>
           )}
           {!isComingSoon &&
             (isExternal ? (
-              <ExternalLink size={13} style={{ color: 'var(--hub-text-dim)' }} />
+              <ExternalLink size={13} style={{ color: 'var(--dash-text-dim)' }} />
             ) : (
-              <ArrowRight size={13} style={{ color: 'var(--hub-text-dim)' }} />
+              <ArrowRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
             ))}
         </div>
       </div>
       <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           {app.label}
         </p>
-        <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--dash-text-muted)' }}>
           {app.description}
         </p>
       </div>
@@ -60,8 +60,8 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   );
 
   const style: React.CSSProperties = {
-    background: 'var(--hub-card)',
-    border: '1px solid var(--hub-border)',
+    background: 'var(--dash-card)',
+    border: '1px solid var(--dash-border)',
     opacity: isComingSoon ? 0.6 : 1,
   };
 

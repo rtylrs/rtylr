@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const hubOrderSchema = z.object({
+export const dashOrderSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(String),
   ownerId: z.union([z.string(), z.number()]).transform(String).optional(),
   customerEmail: z.string().optional().default(''),
@@ -17,4 +17,4 @@ export const hubOrderSchema = z.object({
   updatedAt: z.string().optional().default(''),
 });
 
-export type HubOrder = z.infer<typeof hubOrderSchema>;
+export type HubOrder = z.infer<typeof dashOrderSchema>;

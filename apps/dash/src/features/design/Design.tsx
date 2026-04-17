@@ -53,8 +53,8 @@ function SegmentGroup<T extends string>({
       style={{
         display: 'flex',
         gap: '3px',
-        background: 'var(--hub-input-bg)',
-        border: '1px solid var(--hub-border)',
+        background: 'var(--dash-input-bg)',
+        border: '1px solid var(--dash-border)',
         borderRadius: '8px',
         padding: '3px',
       }}
@@ -72,7 +72,7 @@ function SegmentGroup<T extends string>({
             cursor: 'pointer',
             transition: 'all 0.15s ease',
             background: value === o.value ? '#4583C4' : 'transparent',
-            color: value === o.value ? '#fff' : 'var(--hub-text-muted)',
+            color: value === o.value ? '#fff' : 'var(--dash-text-muted)',
             whiteSpace: 'nowrap',
           }}
         >
@@ -103,7 +103,7 @@ function ToggleRow({
         padding: '6px 0',
       }}
     >
-      <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: 'var(--dash-text)' }}>{label}</span>
       <button
         role="switch"
         aria-checked={checked}
@@ -115,7 +115,7 @@ function ToggleRow({
           border: 'none',
           cursor: 'pointer',
           padding: 2,
-          background: checked ? '#4583C4' : 'var(--hub-active)',
+          background: checked ? '#4583C4' : 'var(--dash-active)',
           transition: 'background 0.2s ease',
           position: 'relative',
           flexShrink: 0,
@@ -158,8 +158,8 @@ function SectionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
       style={{
-        background: 'var(--hub-card)',
-        border: '1px solid var(--hub-border)',
+        background: 'var(--dash-card)',
+        border: '1px solid var(--dash-border)',
         borderRadius: '12px',
         overflow: 'hidden',
       }}
@@ -175,7 +175,7 @@ function SectionCard({
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          borderBottom: open ? '1px solid var(--hub-border)' : 'none',
+          borderBottom: open ? '1px solid var(--dash-border)' : 'none',
           transition: 'border-color 0.15s',
         }}
       >
@@ -185,7 +185,7 @@ function SectionCard({
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
-            color: 'var(--hub-text-dim)',
+            color: 'var(--dash-text-dim)',
           }}
         >
           {title}
@@ -194,7 +194,7 @@ function SectionCard({
           size={14}
           weight="bold"
           style={{
-            color: 'var(--hub-text-dim)',
+            color: 'var(--dash-text-dim)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
           }}
@@ -235,7 +235,7 @@ function ControlRow({ label, children }: { label: string; children: React.ReactN
     <div
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
     >
-      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)', flexShrink: 0 }}>
+      <span style={{ fontSize: '13px', color: 'var(--dash-text-muted)', flexShrink: 0 }}>
         {label}
       </span>
       {children}
@@ -258,9 +258,9 @@ function ColorRow({
     <div
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
     >
-      <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: 'var(--dash-text-muted)' }}>{label}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)', fontFamily: 'monospace' }}>
+        <span style={{ fontSize: '12px', color: 'var(--dash-text-dim)', fontFamily: 'monospace' }}>
           {value}
         </span>
         <label
@@ -269,7 +269,7 @@ function ColorRow({
             height: 28,
             borderRadius: 6,
             overflow: 'hidden',
-            border: '2px solid var(--hub-border)',
+            border: '2px solid var(--dash-border)',
             cursor: 'pointer',
             background: value,
             display: 'block',
@@ -604,7 +604,7 @@ const Design: React.FC = () => {
         margin: '-24px',
         height: 'calc(100% + 48px)',
         overflow: 'hidden',
-        background: 'var(--hub-bg)',
+        background: 'var(--dash-bg)',
       }}
     >
       {/* ── Header bar ─────────────────────────────────────────────────────── */}
@@ -615,14 +615,14 @@ const Design: React.FC = () => {
           justifyContent: 'flex-end',
           padding: '0 16px',
           height: 44,
-          borderBottom: '1px solid var(--hub-border)',
-          background: 'var(--hub-surface)',
+          borderBottom: '1px solid var(--dash-border)',
+          background: 'var(--dash-surface)',
           flexShrink: 0,
           gap: 12,
         }}
       >
         {activePreset && (
-          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>{activePreset.name}</span>
+          <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>{activePreset.name}</span>
         )}
         <motion.button
           whileTap={{ scale: 0.96 }}
@@ -659,14 +659,14 @@ const Design: React.FC = () => {
             flexDirection: 'column',
             height: '100%',
             overflow: 'hidden',
-            borderRight: '1px solid var(--hub-border)',
-            background: 'var(--hub-surface)',
+            borderRight: '1px solid var(--dash-border)',
+            background: 'var(--dash-surface)',
           }}
         >
           <div
             style={{
               padding: '12px 14px 8px',
-              borderBottom: '1px solid var(--hub-border)',
+              borderBottom: '1px solid var(--dash-border)',
               flexShrink: 0,
             }}
           >
@@ -676,7 +676,7 @@ const Design: React.FC = () => {
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
-                color: 'var(--hub-text-dim)',
+                color: 'var(--dash-text-dim)',
               }}
             >
               Layouts
@@ -695,7 +695,7 @@ const Design: React.FC = () => {
                   padding: '8px 10px',
                   borderRadius: 8,
                   cursor: 'pointer',
-                  background: preset.id === activePresetId ? 'var(--hub-active)' : 'transparent',
+                  background: preset.id === activePresetId ? 'var(--dash-active)' : 'transparent',
                   marginBottom: 2,
                   transition: 'background 0.15s',
                 }}
@@ -716,7 +716,7 @@ const Design: React.FC = () => {
                     fontSize: 13,
                     fontWeight: 500,
                     color:
-                      preset.id === activePresetId ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                      preset.id === activePresetId ? 'var(--dash-text)' : 'var(--dash-text-muted)',
                     flex: 1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -737,7 +737,7 @@ const Design: React.FC = () => {
                       cursor: 'pointer',
                       padding: 2,
                       borderRadius: 4,
-                      color: 'var(--hub-text-dim)',
+                      color: 'var(--dash-text-dim)',
                       display: 'flex',
                       alignItems: 'center',
                       opacity: 0.6,
@@ -754,7 +754,7 @@ const Design: React.FC = () => {
           <div
             style={{
               padding: '8px',
-              borderTop: '1px solid var(--hub-border)',
+              borderTop: '1px solid var(--dash-border)',
               display: 'flex',
               gap: 6,
               flexShrink: 0,
@@ -767,12 +767,12 @@ const Design: React.FC = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
               style={{
                 flex: 1,
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
+                background: 'var(--dash-input-bg)',
+                border: '1px solid var(--dash-border)',
                 borderRadius: 7,
                 padding: '6px 10px',
                 fontSize: 12,
-                color: 'var(--hub-text)',
+                color: 'var(--dash-text)',
                 outline: 'none',
               }}
             />
@@ -781,10 +781,10 @@ const Design: React.FC = () => {
               disabled={!newPresetName.trim()}
               style={{
                 padding: '6px 8px',
-                background: newPresetName.trim() ? '#4583C4' : 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
+                background: newPresetName.trim() ? '#4583C4' : 'var(--dash-input-bg)',
+                border: '1px solid var(--dash-border)',
                 borderRadius: 7,
-                color: newPresetName.trim() ? '#fff' : 'var(--hub-text-dim)',
+                color: newPresetName.trim() ? '#fff' : 'var(--dash-text-dim)',
                 cursor: newPresetName.trim() ? 'pointer' : 'default',
                 display: 'flex',
                 alignItems: 'center',
@@ -804,7 +804,7 @@ const Design: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             gap: 10,
-            borderRight: '1px solid var(--hub-border)',
+            borderRight: '1px solid var(--dash-border)',
           }}
         >
           {/* Pages */}
@@ -973,12 +973,12 @@ const Design: React.FC = () => {
                 value={fontFamily}
                 onChange={(e) => setFontFamily(e.target.value)}
                 style={{
-                  background: 'var(--hub-input-bg)',
-                  border: '1px solid var(--hub-border)',
+                  background: 'var(--dash-input-bg)',
+                  border: '1px solid var(--dash-border)',
                   borderRadius: 7,
                   padding: '5px 8px',
                   fontSize: 12,
-                  color: 'var(--hub-text)',
+                  color: 'var(--dash-text)',
                   outline: 'none',
                   cursor: 'pointer',
                 }}
@@ -1011,7 +1011,7 @@ const Design: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             padding: '20px 0 12px',
-            background: 'var(--hub-bg)',
+            background: 'var(--dash-bg)',
             overflow: 'hidden',
             height: '100%',
           }}
@@ -1022,7 +1022,7 @@ const Design: React.FC = () => {
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
-              color: 'var(--hub-text-dim)',
+              color: 'var(--dash-text-dim)',
               marginBottom: 16,
               flexShrink: 0,
             }}

@@ -55,7 +55,7 @@ const QrCodes: React.FC = () => {
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div
                       className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4"
-                      style={{ background: 'var(--hub-hover)' }}
+                      style={{ background: 'var(--dash-hover)' }}
                     >
                       <QrCodeIcon size={28} className="text-gray-300" />
                     </div>

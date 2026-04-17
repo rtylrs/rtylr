@@ -71,9 +71,9 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
         className
       )}
       style={{
-        background: 'var(--hub-card)',
-        border: '1px solid var(--hub-border)',
-        boxShadow: 'var(--hub-shadow)',
+        background: 'var(--dash-card)',
+        border: '1px solid var(--dash-border)',
+        boxShadow: 'var(--dash-shadow)',
       }}
     >
       {children}
@@ -97,10 +97,10 @@ const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
     <div
       className={cn(
         'flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors select-none rounded-lg mx-1',
-        destructive ? 'text-red-500 hover:bg-red-500/8' : 'hover:bg-[var(--hub-hover)]',
+        destructive ? 'text-red-500 hover:bg-red-500/8' : 'hover:bg-[var(--dash-hover)]',
         className
       )}
-      style={{ color: destructive ? undefined : 'var(--hub-text)', ...style }}
+      style={{ color: destructive ? undefined : 'var(--dash-text)', ...style }}
       onClick={(e) => {
         onClick?.(e);
         setOpen(false);
@@ -116,7 +116,7 @@ const DropdownMenuSeparator: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('h-px my-1 mx-1', className)}
-    style={{ background: 'var(--hub-border)' }}
+    style={{ background: 'var(--dash-border)' }}
     {...props}
   />
 );
@@ -127,7 +127,7 @@ const DropdownMenuLabel: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('px-3 py-1.5 text-xs font-semibold uppercase tracking-wider', className)}
-    style={{ color: 'var(--hub-text-dim)' }}
+    style={{ color: 'var(--dash-text-dim)' }}
     {...props}
   />
 );

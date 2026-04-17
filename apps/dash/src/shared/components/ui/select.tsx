@@ -15,9 +15,9 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className
         )}
         style={{
-          background: 'var(--hub-input-bg)',
-          color: 'var(--hub-text)',
-          border: '1px solid var(--hub-border)',
+          background: 'var(--dash-input-bg)',
+          color: 'var(--dash-text)',
+          border: '1px solid var(--dash-border)',
           ...style,
         }}
         {...props}

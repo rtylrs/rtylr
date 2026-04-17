@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Palette, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Input, Label } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection } from '../../shared/components/hub';
+import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
 
 const COLORS = [
   '#4583C4',
@@ -30,10 +30,10 @@ const ThemeCustomizer: React.FC = () => {
           <Palette size={16} style={{ color: '#8b5cf6' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Theme
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Your workspace branding.
           </p>
         </div>
@@ -58,7 +58,7 @@ const ThemeCustomizer: React.FC = () => {
                 style={{
                   background: c,
                   border:
-                    accent === c ? '2px solid var(--hub-text)' : '1px solid var(--hub-border)',
+                    accent === c ? '2px solid var(--dash-text)' : '1px solid var(--dash-border)',
                   transform: accent === c ? 'scale(1.1)' : 'scale(1)',
                 }}
                 aria-label={`Select ${c}`}
@@ -67,14 +67,14 @@ const ThemeCustomizer: React.FC = () => {
           </div>
           <div
             className="flex items-center gap-3 px-4 py-3 rounded-lg"
-            style={{ background: 'var(--hub-hover)' }}
+            style={{ background: 'var(--dash-hover)' }}
           >
             <div className="h-10 w-10 rounded-lg" style={{ background: accent }} />
             <div className="flex-1">
-              <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+              <p className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
                 Preview
               </p>
-              <code className="text-[11px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+              <code className="text-[11px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
                 {accent}
               </code>
             </div>

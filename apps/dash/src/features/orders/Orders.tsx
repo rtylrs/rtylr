@@ -43,11 +43,11 @@ const EmptyState: React.FC<{ label: string }> = ({ label }) => (
   <TableRow>
     <TableCell colSpan={7}>
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <ShoppingBag size={32} className="mb-3" style={{ color: 'var(--hub-text-dim)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+        <ShoppingBag size={32} className="mb-3" style={{ color: 'var(--dash-text-dim)' }} />
+        <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
           No {label} orders
         </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
           Orders will appear here once placed by customers
         </p>
       </div>
@@ -128,10 +128,10 @@ const Orders: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hub-text)' }}>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Orders
         </h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
           Incoming orders from your customer menus
         </p>
       </div>
@@ -139,14 +139,14 @@ const Orders: React.FC = () => {
       {/* POS info banner */}
       <div
         className="flex items-start gap-3 rounded-xl p-4"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         <Info size={16} className="shrink-0 mt-0.5" style={{ color: '#4583C4' }} />
         <div>
-          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
             Orders are placed by customers
           </p>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
             Orders come in when customers scan your QR code or visit your menu link. Staff orders
             are created through your POS system.
           </p>

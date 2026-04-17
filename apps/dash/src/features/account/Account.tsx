@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserCircle, Mail, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Input, Label } from '../../shared/components/ui';
-import { Breadcrumbs, DangerZone, SettingSection } from '../../shared/components/hub';
+import { Breadcrumbs, DangerZone, SettingSection } from '../../shared/components/dash';
 import { useUserStore } from '../../shared/stores/userStore';
 
 const Account: React.FC = () => {
@@ -23,10 +23,10 @@ const Account: React.FC = () => {
           <UserCircle size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Account
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Your personal owner account details.
           </p>
         </div>
@@ -68,10 +68,10 @@ const Account: React.FC = () => {
       >
         <div
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
-          style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+          style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
         >
-          <Mail size={14} style={{ color: 'var(--hub-text-dim)' }} />
-          <span className="text-sm" style={{ color: 'var(--hub-text)' }}>
+          <Mail size={14} style={{ color: 'var(--dash-text-dim)' }} />
+          <span className="text-sm" style={{ color: 'var(--dash-text)' }}>
             {email || 'Not set'}
           </span>
           <span

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingBag, Sparkles } from 'lucide-react';
-import { Breadcrumbs, EmptyState } from '../../shared/components/hub';
+import { Breadcrumbs, EmptyState } from '../../shared/components/dash';
 
 const Marketplace: React.FC = () => {
   return (
@@ -13,10 +13,10 @@ const Marketplace: React.FC = () => {
           <ShoppingBag size={16} style={{ color: '#a855f7' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             App marketplace
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Install third-party apps and extensions.
           </p>
         </div>

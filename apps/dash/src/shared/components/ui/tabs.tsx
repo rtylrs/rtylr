@@ -47,7 +47,7 @@ const TabsList: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('inline-flex items-center rounded-lg p-1 gap-0.5', className)}
-    style={{ background: 'var(--hub-hover)', ...style }}
+    style={{ background: 'var(--dash-hover)', ...style }}
     {...props}
   />
 );
@@ -74,7 +74,7 @@ const TabsTrigger: React.FC<TabsTriggerProps> = ({
         className
       )}
       style={
-        isActive ? { background: 'var(--hub-card)', color: 'var(--hub-text)', ...style } : style
+        isActive ? { background: 'var(--dash-card)', color: 'var(--dash-text)', ...style } : style
       }
       onClick={() => onValueChange(value)}
       {...props}

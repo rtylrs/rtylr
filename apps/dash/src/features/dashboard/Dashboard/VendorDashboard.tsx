@@ -132,19 +132,19 @@ const AdminDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             {businessName}
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             {today}
           </p>
         </div>
         <button
           onClick={() => setShowCatalog(true)}
           className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
-          style={{ color: 'var(--hub-text-muted)', border: '1px solid var(--hub-border)' }}
+          style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+            (e.currentTarget as HTMLElement).style.background = 'var(--dash-hover)';
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -179,17 +179,17 @@ const AdminDashboard: React.FC = () => {
                 key={widgetId}
                 className="rounded-xl overflow-hidden relative"
                 style={{
-                  background: 'var(--hub-card)',
+                  background: 'var(--dash-card)',
                   border: showCatalog
                     ? '1px dashed rgba(69,131,196,0.4)'
-                    : '1px solid var(--hub-border)',
+                    : '1px solid var(--dash-border)',
                 }}
               >
                 {showCatalog && (
                   <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-1">
                     <div
                       className="widget-drag-handle cursor-grab h-6 w-6 rounded-md flex items-center justify-center"
-                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+                      style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
                     >
                       <GripVertical size={12} />
                     </div>
@@ -229,25 +229,28 @@ const AdminDashboard: React.FC = () => {
                 exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
                 className="rounded-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
-                style={{ background: 'var(--hub-surface)', border: '1px solid var(--hub-border)' }}
+                style={{
+                  background: 'var(--dash-surface)',
+                  border: '1px solid var(--dash-border)',
+                }}
               >
                 {/* Modal header */}
                 <div
                   className="flex items-center justify-between px-6 py-4"
-                  style={{ borderBottom: '1px solid var(--hub-border)' }}
+                  style={{ borderBottom: '1px solid var(--dash-border)' }}
                 >
                   <div>
-                    <h2 className="text-base font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    <h2 className="text-base font-semibold" style={{ color: 'var(--dash-text)' }}>
                       Customize dashboard
                     </h2>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
                       Add, remove, or rearrange widgets
                     </p>
                   </div>
                   <button
                     onClick={() => setShowCatalog(false)}
-                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--hub-hover)]"
-                    style={{ color: 'var(--hub-text-muted)' }}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
+                    style={{ color: 'var(--dash-text-muted)' }}
                   >
                     <X size={16} />
                   </button>
@@ -257,7 +260,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
                   <p
                     className="text-[11px] font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: 'var(--hub-text-dim)' }}
+                    style={{ color: 'var(--dash-text-dim)' }}
                   >
                     Widgets
                   </p>
@@ -270,10 +273,10 @@ const AdminDashboard: React.FC = () => {
                         style={{ background: isActive ? 'rgba(69,131,196,0.05)' : 'transparent' }}
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                          <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
                             {w.label}
                           </p>
-                          <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                          <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                             {w.description}
                           </p>
                         </div>
@@ -303,12 +306,12 @@ const AdminDashboard: React.FC = () => {
                 {/* Footer */}
                 <div
                   className="px-6 py-3 flex justify-end"
-                  style={{ borderTop: '1px solid var(--hub-border)' }}
+                  style={{ borderTop: '1px solid var(--dash-border)' }}
                 >
                   <button
                     onClick={resetLayout}
                     className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
-                    style={{ color: 'var(--hub-text-muted)', background: 'var(--hub-hover)' }}
+                    style={{ color: 'var(--dash-text-muted)', background: 'var(--dash-hover)' }}
                   >
                     Reset to default
                   </button>
@@ -327,7 +330,7 @@ const AdminDashboard: React.FC = () => {
 
 const StaffDashboard: React.FC<{ userApps: string[] }> = () => (
   <div className="flex items-center justify-center h-64">
-    <p className="text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+    <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
       Redirecting...
     </p>
   </div>

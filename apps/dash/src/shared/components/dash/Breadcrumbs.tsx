@@ -42,7 +42,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
 
   return (
     <nav className={className} aria-label="Breadcrumb">
-      <ol className="flex items-center gap-1 text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+      <ol className="flex items-center gap-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
         <li>
           <Link to="/" className="flex items-center gap-1 hover:opacity-70 transition-opacity">
             <Home size={11} />
@@ -58,7 +58,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
               <ChevronRight size={11} className="shrink-0" />
               <li>
                 {isLast ? (
-                  <span style={{ color: 'var(--hub-text)' }} className="font-medium">
+                  <span style={{ color: 'var(--dash-text)' }} className="font-medium">
                     {label}
                   </span>
                 ) : (

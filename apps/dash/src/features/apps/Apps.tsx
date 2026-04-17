@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Grid3x3 } from 'lucide-react';
 import { Input } from '../../shared/components/ui';
-import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from '../../shared/components/hub';
+import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from '../../shared/components/dash';
 import { useApps } from '../../shared/hooks/queries/useApps';
 import { useUserStore } from '../../shared/stores/userStore';
 
@@ -50,10 +50,10 @@ const Apps: React.FC = () => {
           <Grid3x3 size={16} style={{ color: '#4583C4' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             All apps
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Everything rtylr offers, in one place.
           </p>
         </div>
@@ -64,7 +64,7 @@ const Apps: React.FC = () => {
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             value={query}
@@ -80,12 +80,12 @@ const Apps: React.FC = () => {
               onClick={() => setCategory(c.key)}
               className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
-                background: category === c.key ? 'rgba(69,131,196,0.15)' : 'var(--hub-hover)',
-                color: category === c.key ? '#4583C4' : 'var(--hub-text-muted)',
+                background: category === c.key ? 'rgba(69,131,196,0.15)' : 'var(--dash-hover)',
+                color: category === c.key ? '#4583C4' : 'var(--dash-text-muted)',
                 border:
                   category === c.key
                     ? '1px solid rgba(69,131,196,0.3)'
-                    : '1px solid var(--hub-border)',
+                    : '1px solid var(--dash-border)',
               }}
             >
               {c.label}

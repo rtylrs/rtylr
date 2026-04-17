@@ -19,7 +19,7 @@ import {
 import { motion } from 'motion/react';
 import { Button, Input } from '../../shared/components/ui';
 import api from '../../shared/lib/api';
-import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/hub';
+import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
 import { useTeam, useDeactivateMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 
 const APP_ICONS: Record<
@@ -79,10 +79,10 @@ const Team: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Team
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             {members.length} {members.length === 1 ? 'member' : 'members'}
           </p>
         </div>
@@ -98,7 +98,7 @@ const Team: React.FC = () => {
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
             value={query}
@@ -129,7 +129,7 @@ const Team: React.FC = () => {
               className="px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors"
               style={{
                 background: roleFilter === r.id ? 'rgba(69,131,196,0.12)' : 'transparent',
-                color: roleFilter === r.id ? '#4583C4' : 'var(--hub-text-muted)',
+                color: roleFilter === r.id ? '#4583C4' : 'var(--dash-text-muted)',
               }}
             >
               {r.label}
@@ -141,7 +141,7 @@ const Team: React.FC = () => {
       {/* Member list */}
       <div
         className="rounded-xl"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         {isLoading ? (
           <div className="p-2">
@@ -162,7 +162,10 @@ const Team: React.FC = () => {
             {/* Header */}
             <div
               className="grid grid-cols-12 gap-3 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--hub-text-dim)', borderBottom: '1px solid var(--hub-border)' }}
+              style={{
+                color: 'var(--dash-text-dim)',
+                borderBottom: '1px solid var(--dash-border)',
+              }}
             >
               <div className="col-span-4">Member</div>
               <div className="col-span-2">Role</div>
@@ -177,8 +180,8 @@ const Team: React.FC = () => {
               return (
                 <div
                   key={m.id}
-                  className="grid grid-cols-12 gap-3 items-center px-5 py-3 transition-colors hover:bg-[var(--hub-hover)] cursor-pointer"
-                  style={{ borderBottom: '1px solid var(--hub-border)' }}
+                  className="grid grid-cols-12 gap-3 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
+                  style={{ borderBottom: '1px solid var(--dash-border)' }}
                   onClick={() => navigate(`/team/${m.id}`)}
                 >
                   {/* Name + email */}
@@ -192,11 +195,11 @@ const Team: React.FC = () => {
                     <div className="min-w-0">
                       <p
                         className="text-sm font-medium truncate"
-                        style={{ color: 'var(--hub-text)' }}
+                        style={{ color: 'var(--dash-text)' }}
                       >
                         {m.name || m.email}
                       </p>
-                      <p className="text-[11px] truncate" style={{ color: 'var(--hub-text-dim)' }}>
+                      <p className="text-[11px] truncate" style={{ color: 'var(--dash-text-dim)' }}>
                         {m.email}
                       </p>
                     </div>
@@ -210,7 +213,7 @@ const Team: React.FC = () => {
                   {/* App licenses */}
                   <div className="col-span-4 flex items-center gap-1.5 flex-wrap">
                     {apps.length === 0 ? (
-                      <span className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                         No licenses
                       </span>
                     ) : (
@@ -222,8 +225,8 @@ const Team: React.FC = () => {
                               key={appId}
                               className="text-[10px] px-1.5 py-0.5 rounded"
                               style={{
-                                background: 'var(--hub-hover)',
-                                color: 'var(--hub-text-muted)',
+                                background: 'var(--dash-hover)',
+                                color: 'var(--dash-text-muted)',
                               }}
                             >
                               {appId}
@@ -261,8 +264,8 @@ const Team: React.FC = () => {
                         e.stopPropagation();
                         setMenuOpen(menuOpen === m.id ? null : m.id);
                       }}
-                      className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--hub-hover)]"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
+                      style={{ color: 'var(--dash-text-muted)' }}
                     >
                       <MoreHorizontal size={14} />
                     </button>
@@ -271,14 +274,14 @@ const Team: React.FC = () => {
                       <div
                         className="absolute right-0 top-8 z-50 rounded-lg py-1 w-48 shadow-lg"
                         style={{
-                          background: 'var(--hub-surface)',
-                          border: '1px solid var(--hub-border)',
+                          background: 'var(--dash-surface)',
+                          border: '1px solid var(--dash-border)',
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--hub-hover)]"
-                          style={{ color: 'var(--hub-text-muted)' }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                          style={{ color: 'var(--dash-text-muted)' }}
                           onClick={() => {
                             navigate(`/team/${m.id}`);
                             setMenuOpen(null);
@@ -287,8 +290,8 @@ const Team: React.FC = () => {
                           <Pencil size={12} /> Edit member
                         </button>
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--hub-hover)]"
-                          style={{ color: 'var(--hub-text-muted)' }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                          style={{ color: 'var(--dash-text-muted)' }}
                           onClick={() => {
                             window.location.href = `mailto:${m.email}`;
                             setMenuOpen(null);
@@ -297,8 +300,8 @@ const Team: React.FC = () => {
                           <Mail size={12} /> Send email
                         </button>
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--hub-hover)]"
-                          style={{ color: 'var(--hub-text-muted)' }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                          style={{ color: 'var(--dash-text-muted)' }}
                           onClick={() => {
                             navigate(`/team/${m.id}`);
                             setMenuOpen(null);
@@ -308,10 +311,10 @@ const Team: React.FC = () => {
                         </button>
                         <div
                           className="my-1"
-                          style={{ borderTop: '1px solid var(--hub-border)' }}
+                          style={{ borderTop: '1px solid var(--dash-border)' }}
                         />
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--hub-hover)]"
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                           style={{ color: '#ef4444' }}
                           onClick={() => {
                             setConfirm(m);
@@ -330,7 +333,7 @@ const Team: React.FC = () => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-5 py-3">
-                <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                   Showing {page * ITEMS_PER_PAGE + 1}-
                   {Math.min((page + 1) * ITEMS_PER_PAGE, filtered.length)} of {filtered.length}
                 </p>
@@ -339,7 +342,7 @@ const Team: React.FC = () => {
                     onClick={() => setPage(Math.max(0, page - 1))}
                     disabled={page === 0}
                     className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
-                    style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                    style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                   >
                     Prev
                   </button>
@@ -347,7 +350,7 @@ const Team: React.FC = () => {
                     onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                     disabled={page >= totalPages - 1}
                     className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
-                    style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                    style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                   >
                     Next
                   </button>

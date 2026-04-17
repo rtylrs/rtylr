@@ -81,7 +81,7 @@ const VendorSettings = () => {
         style={{
           marginTop: 24,
           fontSize: 11,
-          color: 'var(--hub-text-dim)',
+          color: 'var(--dash-text-dim)',
           fontFamily: 'monospace',
         }}
       >

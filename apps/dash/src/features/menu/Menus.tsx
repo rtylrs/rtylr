@@ -133,11 +133,11 @@ const Menus: React.FC = () => {
               <CardContent className="pt-5">
                 <div
                   className="h-4 animate-pulse rounded mb-2 w-3/4"
-                  style={{ background: 'var(--hub-hover)' }}
+                  style={{ background: 'var(--dash-hover)' }}
                 />
                 <div
                   className="h-3 animate-pulse rounded w-1/2"
-                  style={{ background: 'var(--hub-hover)' }}
+                  style={{ background: 'var(--dash-hover)' }}
                 />
               </CardContent>
             </Card>
@@ -167,7 +167,7 @@ const Menus: React.FC = () => {
                       {isActive && <Badge variant="success">Active</Badge>}
                       <DropdownMenu>
                         <DropdownMenuTrigger>
-                          <button className="h-7 w-7 rounded-md flex items-center justify-center text-gray-400 hover:text-primary hover:bg-[var(--hub-hover)] transition-colors">
+                          <button className="h-7 w-7 rounded-md flex items-center justify-center text-gray-400 hover:text-primary hover:bg-[var(--dash-hover)] transition-colors">
                             <MoreHorizontal size={15} />
                           </button>
                         </DropdownMenuTrigger>
@@ -209,7 +209,7 @@ const Menus: React.FC = () => {
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div
             className="h-16 w-16 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: 'var(--hub-hover)' }}
+            style={{ background: 'var(--dash-hover)' }}
           >
             <UtensilsCrossed size={28} className="text-gray-300" />
           </div>

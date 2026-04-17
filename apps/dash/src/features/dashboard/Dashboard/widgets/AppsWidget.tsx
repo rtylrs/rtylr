@@ -58,8 +58,8 @@ const apps = [
 const AppsWidget: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--hub-border)' }}>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           Apps
         </p>
       </div>
@@ -70,7 +70,7 @@ const AppsWidget: React.FC = () => {
             <a
               key={app.id}
               href={app.href}
-              className="group flex flex-col items-center gap-2 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]"
+              className="group flex flex-col items-center gap-2 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]"
               style={{ textDecoration: 'none' }}
             >
               <div
@@ -79,7 +79,7 @@ const AppsWidget: React.FC = () => {
               >
                 <Icon size={18} style={{ color: app.color }} />
               </div>
-              <span className="text-[11px] font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+              <span className="text-[11px] font-medium" style={{ color: 'var(--dash-text-muted)' }}>
                 {app.name}
               </span>
             </a>

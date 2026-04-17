@@ -66,12 +66,12 @@ const Chat: React.FC = () => {
               >
                 <Sparkles size={24} style={{ color: '#8b5cf6' }} />
               </div>
-              <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--hub-text)' }}>
+              <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--dash-text)' }}>
                 Chat with Caret
               </h1>
               <p
                 className="text-sm leading-relaxed mb-8"
-                style={{ color: 'var(--hub-text-muted)' }}
+                style={{ color: 'var(--dash-text-muted)' }}
               >
                 Your AI assistant with access to all your business data.
               </p>
@@ -86,15 +86,15 @@ const Chat: React.FC = () => {
                     onClick={() => send(s)}
                     className="text-left px-4 py-3 rounded-xl text-sm transition-all"
                     style={{
-                      background: 'var(--hub-card)',
-                      border: '1px solid var(--hub-border)',
-                      color: 'var(--hub-text)',
+                      background: 'var(--dash-card)',
+                      border: '1px solid var(--dash-border)',
+                      color: 'var(--dash-text)',
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--dash-border)';
                     }}
                   >
                     {s}
@@ -124,9 +124,9 @@ const Chat: React.FC = () => {
                   <div
                     className="rounded-2xl px-4 py-3 max-w-[80%]"
                     style={{
-                      background: msg.role === 'user' ? '#4583C4' : 'var(--hub-card)',
-                      color: msg.role === 'user' ? '#fff' : 'var(--hub-text)',
-                      border: msg.role === 'user' ? 'none' : '1px solid var(--hub-border)',
+                      background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
+                      color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
+                      border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
                     }}
                   >
                     <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -149,7 +149,7 @@ const Chat: React.FC = () => {
                 </div>
                 <div
                   className="flex items-center gap-1.5 px-4 py-3 rounded-2xl"
-                  style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
                 >
                   {[0, 1, 2].map((i) => (
                     <motion.div
@@ -183,15 +183,15 @@ const Chat: React.FC = () => {
             placeholder="Message Caret..."
             className="w-full h-12 rounded-xl pl-4 pr-12 text-sm outline-none transition-colors"
             style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text)',
+              background: 'var(--dash-card)',
+              border: '1px solid var(--dash-border)',
+              color: 'var(--dash-text)',
             }}
             onFocus={(e) => {
               (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
             }}
             onBlur={(e) => {
-              (e.target as HTMLElement).style.borderColor = 'var(--hub-border)';
+              (e.target as HTMLElement).style.borderColor = 'var(--dash-border)';
             }}
           />
           <button
@@ -200,7 +200,7 @@ const Chat: React.FC = () => {
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
             style={{
               background: input.trim() ? '#8b5cf6' : 'transparent',
-              color: input.trim() ? '#fff' : 'var(--hub-text-dim)',
+              color: input.trim() ? '#fff' : 'var(--dash-text-dim)',
             }}
           >
             <Send size={15} />

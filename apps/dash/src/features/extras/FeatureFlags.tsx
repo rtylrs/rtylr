@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Flag } from 'lucide-react';
-import { Breadcrumbs, PermissionCheckbox, SettingSection } from '../../shared/components/hub';
+import { Breadcrumbs, PermissionCheckbox, SettingSection } from '../../shared/components/dash';
 import { toast } from 'sonner';
 
 interface Flag {
@@ -13,49 +13,49 @@ interface Flag {
 
 const DEFAULT_FLAGS: Flag[] = [
   {
-    key: 'hub.command_palette',
+    key: 'dash.command_palette',
     label: 'Command palette',
     description: 'Enable cmd+k command palette across Hub.',
     enabled: true,
     stage: 'stable',
   },
   {
-    key: 'hub.onboarding',
+    key: 'dash.onboarding',
     label: 'Onboarding checklist',
     description: 'Show the onboarding checklist on the dashboard.',
     enabled: true,
     stage: 'stable',
   },
   {
-    key: 'hub.welcome_banner',
+    key: 'dash.welcome_banner',
     label: 'Welcome banner',
     description: 'First-run welcome banner on dashboard.',
     enabled: true,
     stage: 'stable',
   },
   {
-    key: 'hub.kpi_live',
+    key: 'dash.kpi_live',
     label: 'Live KPIs',
     description: 'Poll KPIs every 30 seconds on the dashboard.',
     enabled: false,
     stage: 'beta',
   },
   {
-    key: 'hub.ai_assistant',
+    key: 'dash.ai_assistant',
     label: 'AI assistant',
     description: 'Embed an AI helper in the topbar.',
     enabled: false,
     stage: 'alpha',
   },
   {
-    key: 'hub.theme_customizer',
+    key: 'dash.theme_customizer',
     label: 'Theme customizer',
     description: 'Customize brand colors and accent.',
     enabled: true,
     stage: 'beta',
   },
   {
-    key: 'hub.marketplace',
+    key: 'dash.marketplace',
     label: 'App marketplace',
     description: 'Show the third-party app marketplace.',
     enabled: false,
@@ -63,7 +63,7 @@ const DEFAULT_FLAGS: Flag[] = [
   },
 ];
 
-const STORAGE_KEY = 'hub.flags';
+const STORAGE_KEY = 'dash.flags';
 
 const readFlags = (): Record<string, boolean> => {
   if (typeof window === 'undefined') return {};
@@ -105,10 +105,10 @@ const FeatureFlagsScreen: React.FC = () => {
           <Flag size={16} style={{ color: '#f59e0b' }} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
             Feature flags
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
             Toggle experimental features. Overrides are local to your browser.
           </p>
         </div>
@@ -124,11 +124,11 @@ const FeatureFlagsScreen: React.FC = () => {
             return (
               <div
                 key={f.key}
-                className="flex items-start gap-3 px-3 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]"
+                className="flex items-start gap-3 px-3 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                       {f.label}
                     </p>
                     <span
@@ -138,10 +138,10 @@ const FeatureFlagsScreen: React.FC = () => {
                       {f.stage}
                     </span>
                   </div>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
                     {f.description}
                   </p>
-                  <code className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
+                  <code className="text-[10px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
                     {f.key}
                   </code>
                 </div>

@@ -18,7 +18,7 @@ import {
   PermissionCheckbox,
   SkeletonList,
   WebhookRow,
-} from '../../shared/components/hub';
+} from '../../shared/components/dash';
 import {
   useWebhooks,
   useCreateWebhook,
@@ -65,10 +65,10 @@ const Webhooks: React.FC = () => {
             <WebhookIcon size={16} style={{ color: '#4583C4' }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               Webhooks
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               Receive events in real time at your own endpoints.
             </p>
           </div>
@@ -81,7 +81,7 @@ const Webhooks: React.FC = () => {
 
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         {isLoading ? (
           <div className="p-2">
@@ -135,7 +135,7 @@ const Webhooks: React.FC = () => {
                 {EVENTS.map((ev) => (
                   <label
                     key={ev}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[var(--hub-hover)]"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors hover:bg-[var(--dash-hover)]"
                   >
                     <PermissionCheckbox
                       checked={events.includes(ev)}
@@ -143,7 +143,7 @@ const Webhooks: React.FC = () => {
                         setEvents((prev) => (v ? [...prev, ev] : prev.filter((e) => e !== ev)))
                       }
                     />
-                    <code className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
+                    <code className="text-xs font-mono" style={{ color: 'var(--dash-text-muted)' }}>
                       {ev}
                     </code>
                   </label>

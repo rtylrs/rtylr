@@ -22,17 +22,17 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   return (
     <div
       className="rounded-xl p-4 flex flex-col gap-3"
-      style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
     >
       <div className="flex items-start justify-between">
         <div
           className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
           style={{
-            background: 'var(--hub-hover)',
-            border: '1px solid var(--hub-border)',
+            background: 'var(--dash-hover)',
+            border: '1px solid var(--dash-border)',
           }}
         >
-          <span className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+          <span className="text-sm font-bold" style={{ color: 'var(--dash-text)' }}>
             {integration.logo}
           </span>
         </div>
@@ -47,19 +47,19 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
         {isComingSoon && (
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
-            style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+            style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
           >
             Soon
           </span>
         )}
       </div>
       <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           {integration.name}
         </p>
         <p
           className="text-xs mt-0.5 leading-relaxed line-clamp-2"
-          style={{ color: 'var(--hub-text-muted)' }}
+          style={{ color: 'var(--dash-text-muted)' }}
         >
           {integration.description}
         </p>

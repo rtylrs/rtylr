@@ -19,7 +19,7 @@ import {
   EmptyState,
   PermissionCheckbox,
   SkeletonList,
-} from '../../shared/components/hub';
+} from '../../shared/components/dash';
 import {
   useApiKeys,
   useCreateApiKey,
@@ -64,10 +64,10 @@ const ApiKeys: React.FC = () => {
             <KeyRound size={16} style={{ color: '#4583C4' }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               API keys
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               Keys grant programmatic access to your workspace data.
             </p>
           </div>
@@ -80,7 +80,7 @@ const ApiKeys: React.FC = () => {
 
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         {isLoading ? (
           <div className="p-2">
@@ -130,7 +130,7 @@ const ApiKeys: React.FC = () => {
               {SCOPE_OPTIONS.map((opt) => (
                 <label
                   key={opt.key}
-                  className="flex items-start gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors hover:bg-[var(--hub-hover)]"
+                  className="flex items-start gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors hover:bg-[var(--dash-hover)]"
                 >
                   <PermissionCheckbox
                     checked={scopes.includes(opt.key)}
@@ -141,10 +141,10 @@ const ApiKeys: React.FC = () => {
                     }
                   />
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    <p className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
                       {opt.label}
                     </p>
-                    <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                    <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                       {opt.description}
                     </p>
                   </div>
@@ -175,9 +175,9 @@ const ApiKeys: React.FC = () => {
             <div
               className="flex items-center gap-2 p-3 rounded-lg font-mono text-xs break-all"
               style={{
-                background: 'var(--hub-hover)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
+                background: 'var(--dash-hover)',
+                border: '1px solid var(--dash-border)',
+                color: 'var(--dash-text)',
               }}
             >
               {showKey}

@@ -28,12 +28,12 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
   const Icon = meta.icon;
 
   return (
-    <div className="flex items-start gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
+    <div className="flex items-start gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <code
             className="text-sm font-mono font-semibold truncate"
-            style={{ color: 'var(--hub-text)' }}
+            style={{ color: 'var(--dash-text)' }}
           >
             {webhook.url}
           </code>
@@ -49,13 +49,13 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
             <span
               key={e}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono"
-              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
             >
               {e}
             </span>
           ))}
         </div>
-        <p className="text-[11px] mt-1.5" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-[11px] mt-1.5" style={{ color: 'var(--dash-text-dim)' }}>
           Last delivery {formatRelative(webhook.lastDelivery)} · {webhook.secretPreview}
         </p>
       </div>

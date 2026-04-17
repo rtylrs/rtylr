@@ -6,7 +6,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn('rounded-xl', className)}
-      style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       {...props}
     />
   )
@@ -25,7 +25,7 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HT
     <h3
       ref={ref}
       className={cn('text-base font-semibold leading-none', className)}
-      style={{ color: 'var(--hub-text)' }}
+      style={{ color: 'var(--dash-text)' }}
       {...props}
     />
   )

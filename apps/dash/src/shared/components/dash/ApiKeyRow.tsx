@@ -25,10 +25,10 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
   };
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--hub-hover)]">
+    <div className="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold truncate" style={{ color: 'var(--hub-text)' }}>
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--dash-text)' }}>
             {apiKey.name}
           </p>
           <div className="flex items-center gap-1">
@@ -36,7 +36,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
               <span
                 key={s}
                 className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
               >
                 {s}
               </span>
@@ -44,12 +44,12 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
           </div>
         </div>
         <div className="flex items-center gap-3 mt-1">
-          <code className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
+          <code className="text-xs font-mono" style={{ color: 'var(--dash-text-muted)' }}>
             {preview}
           </code>
           <button
             className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
-            style={{ color: 'var(--hub-text-dim)' }}
+            style={{ color: 'var(--dash-text-dim)' }}
             onClick={copy}
           >
             <Copy size={10} /> Copy
@@ -57,10 +57,10 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
         </div>
       </div>
       <div className="hidden md:flex flex-col items-end shrink-0">
-        <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+        <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
           Created
         </p>
-        <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
+        <p className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
           {formatDate(apiKey.createdAt)}
         </p>
       </div>

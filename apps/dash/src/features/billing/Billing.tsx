@@ -50,7 +50,7 @@ const Billing: React.FC = () => {
               <div
                 key={feature}
                 className="flex items-center gap-2 text-sm"
-                style={{ color: 'var(--hub-text-muted)' }}
+                style={{ color: 'var(--dash-text-muted)' }}
               >
                 <CheckCircle size={14} className="text-emerald-500 shrink-0" />
                 {feature}
@@ -80,7 +80,7 @@ const Billing: React.FC = () => {
         <CardContent className="pt-0">
           <div
             className="flex flex-col items-center justify-center py-8 text-center rounded-lg"
-            style={{ border: '1px dashed var(--hub-border)' }}
+            style={{ border: '1px dashed var(--dash-border)' }}
           >
             <CreditCard size={28} className="text-gray-300 mb-3" />
             <p className="text-sm font-medium text-gray-400">No payment method added</p>

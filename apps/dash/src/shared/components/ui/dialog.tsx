@@ -72,7 +72,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
           'relative z-10 rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto',
           className
         )}
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         <button
           className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:text-gray-600 hover:bg-black/5 transition-colors"
@@ -108,7 +108,7 @@ const DialogFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     className={cn('flex items-center justify-end gap-2 p-6 pt-4', className)}
-    style={{ borderTop: '1px solid var(--hub-border)', ...style }}
+    style={{ borderTop: '1px solid var(--dash-border)', ...style }}
     {...props}
   />
 );

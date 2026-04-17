@@ -36,10 +36,10 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
             style={{ borderTop: i > 0 ? '1px solid rgba(239,68,68,0.15)' : undefined }}
           >
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                 {a.label}
               </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
                 {a.description}
               </p>
             </div>
