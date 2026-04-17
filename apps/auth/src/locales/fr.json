@@ -1,0 +1,123 @@
+{
+  "Hero": {
+    "welcome": "Connectez-vous avec vos clients grâce à des menus QR sans contact.",
+    "discover": "Explorez l'avenir de la restauration avec notre menu numérique. Découvrez de nouvelles saveurs et interagissez facilement avec notre interface épurée dans notre restaurant ou bar.",
+    "searchPlaceholder": "Rechercher des produits...",
+    "Create Account": "Commencer gratuitement",
+    "Learn More": "En savoir plus",
+    "My Account": "Tableau de bord"
+  },
+  "Ticker": {
+    "banner_text": "Leur téléphone est votre menu."
+  },
+  "Features": {
+    "Features-title": "Découvrez ce qui nous distingue",
+    "Feature1-title": "Vitrine de menu visuelle",
+    "Feature1-description": "Présentez vos plats avec des visuels époustouflants pour inciter les clients à explorer vos offres.",
+    "Feature2-title": "Gestion de menu intuitive",
+    "Feature2-description": "Des informations complètes sur chaque article du menu, y compris les ingrédients et les allergènes potentiels.",
+    "Feature3-title": "Support multilingue",
+    "Feature3-description": "Élargissez votre portée avec des traductions de menus multilingues, attirant des clients du monde entier.",
+    "Feature4-title": "Commandes personnalisables",
+    "Feature4-description": "Adaptez les commandes aux préférences et aux exigences alimentaires de vos clients.",
+    "Feature5-title": "Aperçus complets du menu",
+    "Feature5-description": "Obtenez des informations détaillées sur votre menu, y compris les ingrédients et les allergènes.",
+    "Feature6-title": "Intégration de récompenses fidélité",
+    "Feature6-description": "Fidélisez vos clients et stimulez la fidélisation grâce à des programmes de récompenses intégrés."
+  },
+  "PricingSection": {
+    "title": "Plans et tarifs",
+    "description": "Découvrez le plan idéal pour vous. Commencez avec notre plan gratuit, puis choisissez un plan.",
+    "Section1_title": "Démarrage",
+    "Section1_Price": "Gratuit",
+    "Section1_Requirements": "Aucune carte de crédit requise",
+    "Section1_star1": "Chats et sites illimités",
+    "Section1_star2": "Historique de conversations 60 jours",
+    "Section1_star3": "Personnalisation de base du widget",
+    "purchase_button": "Commencer",
+    "link": "En savoir plus",
+    "Section2_title": "Le plus populaire",
+    "Section2_Price": "199/mois",
+    "Section2_Requirements": "Aucune carte de crédit requise",
+    "Section2_star1": "Chats et sites illimités",
+    "Section2_star2": "Historique de conversations 60 jours",
+    "Section2_star3": "Personnalisation de base du widget",
+    "Section3_title": "Plan Standard",
+    "Section3_Price": "400/mois",
+    "Section3_Requirements": "Aucune carte de crédit requise",
+    "Section3_star1": "Chats et sites illimités",
+    "Section3_star2": "Historique de conversations 60 jours",
+    "Section3_star3": "Personnalisation de base du widget"
+  },
+  "Demo": {
+    "title": "Démo de notre menu en ligne",
+    "description": "Ouvrez simplement l'appareil photo de votre téléphone et scannez le QR code ci-dessous pour explorer notre menu numérique !",
+    "button": "Commencer"
+  },
+  "QandA": {
+    "title": "Questions fréquemment posées.",
+    "Q1": "Q. Qu'est-ce que VBitez ?",
+    "Q2": "Q. En quoi VBitez est-il différent de Restbits et Omega ?",
+    "Q3": "Q. Comment VBitez améliore-t-il l'expérience client ?",
+    "Q4": "Q. VBitez peut-il gérer les commandes en ligne et la gestion des menus ?",
+    "Q5": "Q. Quelles sont les fonctionnalités uniques de VBitez ?",
+    "A1": "VBitez est une solution de menu numérique innovante pour les restaurants.",
+    "A2": "VBitez intègre les meilleures fonctionnalités et comble les lacunes avec une personnalisation avancée et une intégration POS transparente.",
+    "A3": "VBitez propose un menu numérique attrayant avec des images, un accès QR facile et des mises à jour en temps réel.",
+    "A4": "Oui, VBitez offre des fonctionnalités complètes de commande en ligne et une gestion facile des menus.",
+    "A5": "VBitez propose des descriptions détaillées des articles, le filtrage, la traduction du menu, la personnalisation des commandes et l'intégration des programmes de fidélité."
+  },
+  "Footer": {
+    "Company_Title": "Entreprise",
+    "about_us": "À propos",
+    "contact_us": "Contactez-nous",
+    "careers": "Carrières",
+    "Blog": "Blog",
+    "Support_Title": "Support",
+    "FAQ": "FAQ",
+    "Pricing": "Tarifs",
+    "feedback": "Commentaires",
+    "Feature": "Demande de fonctionnalité",
+    "Legal_Title": "Légal",
+    "Privacy": "Politique de confidentialité",
+    "Terms": "Conditions d'utilisation",
+    "Acceptable": "Politique d'utilisation acceptable",
+    "License": "Contrat de licence utilisateur final",
+    "Disclamer": "Avertissement",
+    "Contact_Title": "Contact",
+    "Email": "E-mail : support@rtylr.voxire.com",
+    "Phone": "Tél : +961 71 642 565",
+    "lower_footer": "Suivez-nous ou contactez-nous"
+  },
+  "ProductSection": {
+    "title": "Explorer les produits",
+    "buyNow": "Acheter maintenant",
+    "viewMore": "Voir plus"
+  },
+  "Settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "notifications": "Notifications",
+    "on": "Activé",
+    "off": "Désactivé",
+    "exportData": "Exporter mes données",
+    "deleteAccount": "Supprimer mon compte",
+    "confirmDeleteAccount": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+    "favicon": "Sélectionner un favicon",
+    "icon": "Sélectionner un logo",
+    "name": "Nom",
+    "slogan": "Slogan"
+  },
+  "Profile": {
+    "title": "Profil",
+    "name": "Nom",
+    "email": "E-mail",
+    "notifications": "Notifications",
+    "language": "Langue",
+    "address": "Adresse",
+    "paymentInfo": "Informations de paiement",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  }
+}

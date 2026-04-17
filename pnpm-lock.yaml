@@ -306,6 +306,12 @@ importers:
       '@voxire/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -330,6 +336,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       axios:
         specifier: ^1.15.0
         version: 1.15.0
@@ -711,6 +720,9 @@ importers:
       '@voxire/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -838,6 +850,9 @@ importers:
       '@voxire/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -941,6 +956,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       axios:
         specifier: ^1.15.0
         version: 1.15.0
@@ -1023,6 +1041,9 @@ importers:
       '@voxire/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1111,6 +1132,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1225,12 +1249,18 @@ importers:
 
   apps/menu:
     dependencies:
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@voxire/components':
         specifier: workspace:*
         version: link:../../packages/components
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/menu':
         specifier: workspace:*
         version: link:../../packages/menu
@@ -1297,12 +1327,18 @@ importers:
       '@voxire/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@voxire/components':
         specifier: workspace:*
         version: link:../../packages/components
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config

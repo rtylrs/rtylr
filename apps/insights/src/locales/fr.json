@@ -1,0 +1,23 @@
+{
+  "common": {
+    "dashboard": "Tableau de bord",
+    "products": "Produits",
+    "settings": "Paramètres",
+    "search": "Rechercher",
+    "loading": "Chargement",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour"
+  },
+  "nav": {
+    "home": "Accueil",
+    "analytics": "Analytique",
+    "reports": "Rapports",
+    "overview": "Vue d'ensemble",
+    "performance": "Performance",
+    "settings": "Paramètres"
+  }
+}

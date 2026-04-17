@@ -1,0 +1,36 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "search": "Search",
+    "create": "Create",
+    "confirm": "Confirm",
+    "noData": "No data available",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "date": "Date",
+    "total": "Total",
+    "quantity": "Quantity",
+    "price": "Price"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Not found",
+    "unauthorized": "You are not authorized to access this resource"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "purchasing": "Purchasing",
+    "suppliers": "Suppliers",
+    "products": "Products",
+    "reports": "Reports",
+    "settings": "Settings"
+  }
+}

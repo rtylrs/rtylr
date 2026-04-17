@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import './shared/services/i18next';
 import './globals.css';
 
 const queryClient = new QueryClient({

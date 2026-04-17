@@ -1,0 +1,36 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "search": "Rechercher",
+    "create": "Créer",
+    "confirm": "Confirmer",
+    "noData": "Aucune donnée disponible",
+    "actions": "Actions",
+    "status": "Statut",
+    "name": "Nom",
+    "date": "Date",
+    "total": "Total",
+    "quantity": "Quantité",
+    "price": "Prix"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "notFound": "Introuvable",
+    "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "inventory": "Inventaire",
+    "purchasing": "Achats",
+    "suppliers": "Fournisseurs",
+    "products": "Produits",
+    "reports": "Rapports",
+    "settings": "Paramètres"
+  }
+}

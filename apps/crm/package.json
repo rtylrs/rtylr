@@ -13,6 +13,7 @@
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/i18n": "workspace:*",
     "axios": "^1.15.0",
     "motion": "^12.0.0",
     "lucide-react": "^1.8.0",

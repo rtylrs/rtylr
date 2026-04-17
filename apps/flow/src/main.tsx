@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { initTheme } from './shared/stores/themeStore';
+import './shared/services/i18next';
 import './globals.css';
 
 // Apply persisted theme before first render to prevent flash

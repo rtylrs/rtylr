@@ -10,8 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@voxire/auth": "workspace:*",
     "@voxire/components": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/i18n": "workspace:*",
     "@voxire/menu": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",

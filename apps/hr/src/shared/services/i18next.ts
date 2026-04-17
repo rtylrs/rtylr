@@ -1,33 +1,19 @@
-import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { initI18n } from '@voxire/i18n';
 
 import en from '../../locales/en.json';
 import fr from '../../locales/fr.json';
 import ar from '../../locales/ar.json';
 
-const resources = {
-  en: { translation: en },
-  fr: { translation: fr },
-  ar: { translation: ar },
+const flat: Record<string, Record<string, unknown>> = {
+  en: en as Record<string, unknown>,
+  fr: fr as Record<string, unknown>,
+  ar: ar as Record<string, unknown>,
 };
 
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const nameEQ = `${name}=`;
-  for (const part of document.cookie.split('; ')) {
-    if (part.startsWith(nameEQ)) return decodeURIComponent(part.slice(nameEQ.length));
-  }
-  return null;
-}
-
-i18next.use(initReactI18next).init({
-  resources,
-  lng: getCookie('language') || 'en',
-  fallbackLng: 'en',
-  compatibilityJSON: 'v3',
-  interpolation: {
-    escapeValue: false,
-  },
+const i18n = initI18n({
+  loadResource: (lang) => Promise.resolve(flat[lang] ?? flat['en']),
 });
 
-export default i18next;
+export { selectLanguage } from '@voxire/i18n';
+
+export default i18n;
