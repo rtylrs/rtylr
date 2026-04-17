@@ -17,10 +17,10 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import { useUpdateProject, useDeleteProject } from './useProjects';
 import {
   useProjectMembers,
-  useAddProjectMember,
   useRemoveProjectMember,
   useUpdateProjectMemberRole,
   useTransferProjectOwnership,
+  useInviteProjectMember,
 } from './useProjectMembers';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
@@ -44,13 +44,13 @@ const ProjectSettings: React.FC = () => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
-  const addMember = useAddProjectMember(projectId ?? '');
+  const inviteMember = useInviteProjectMember(projectId ?? '');
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
 
   const [showAddMember, setShowAddMember] = useState(false);
-  const [newUserId, setNewUserId] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<'manager' | 'member' | 'viewer'>('member');
 
   if (!project) {
@@ -170,10 +170,10 @@ const ProjectSettings: React.FC = () => {
                 style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
               >
                 <input
-                  type="number"
-                  placeholder="User ID"
-                  value={newUserId}
-                  onChange={(e) => setNewUserId(e.target.value)}
+                  type="email"
+                  placeholder="Email address"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
                   className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
                   style={{
                     background: 'var(--flow-input-bg)',
@@ -197,25 +197,22 @@ const ProjectSettings: React.FC = () => {
                 </select>
                 <button
                   onClick={() => {
-                    const uid = Number(newUserId);
-                    if (!uid) return toast.error('Enter a valid user ID');
-                    addMember.mutate(
-                      { project_id: Number(projectId), user_id: uid, role: newRole },
+                    if (!newEmail.trim()) return toast.error('Enter an email address');
+                    inviteMember.mutate(
+                      { email: newEmail.trim(), role: newRole },
                       {
                         onSuccess: () => {
-                          toast.success('Member added');
-                          setNewUserId('');
+                          setNewEmail('');
                           setShowAddMember(false);
                         },
-                        onError: () => toast.error('Failed to add member'),
                       }
                     );
                   }}
-                  disabled={addMember.isPending}
+                  disabled={inviteMember.isPending}
                   className="px-3 py-1.5 rounded text-[11px] font-semibold"
                   style={{ background: '#64C5B9', color: '#0a0a0a' }}
                 >
-                  Add
+                  Invite
                 </button>
               </div>
             )}

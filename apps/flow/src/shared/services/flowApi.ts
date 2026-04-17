@@ -83,9 +83,11 @@ export interface ApiTask {
 }
 
 export interface ApiLabel {
-  id: string;
+  id: number;
+  workspace_id: number;
   name: string;
   color: string;
+  created_at: string;
 }
 
 export interface ApiMilestone {
@@ -192,13 +194,13 @@ export interface ApiProjectMember {
 }
 
 export interface ApiTaskActivity {
-  id: string;
-  taskId: string;
-  userId: string;
+  id: number;
+  task_id: number;
+  user_id: number;
   action: string;
-  oldValue: string;
-  newValue: string;
-  createdAt: string;
+  old_value: string;
+  new_value: string;
+  created_at: string;
 }
 
 export interface ApiTaskComment {
@@ -229,12 +231,13 @@ export interface ApiAttachment {
 }
 
 export interface ApiTimeLog {
-  id: string;
-  taskId: string;
-  userId: string;
-  durationMinutes: number;
+  id: number;
+  task_id: number;
+  user_id: number;
+  duration_minutes: number;
   description: string;
-  loggedAt: string;
+  logged_at: string;
+  created_at: string;
 }
 
 export interface ApiTaskDetail {
@@ -242,6 +245,9 @@ export interface ApiTaskDetail {
   subtasks: ApiSubtask[];
   comments: ApiTaskComment[];
   activity: ApiTaskActivity[];
+  labels?: ApiLabel[];
+  estimated_hours?: number | null;
+  actual_hours?: number | null;
 }
 
 // -- API ------------------------------------------------------------------
@@ -336,6 +342,9 @@ export const flowApi = {
   addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
     safe.post('/flow/projects/member', data),
 
+  inviteProjectMember: (data: { project_id: number; email: string; role: string }) =>
+    safe.post('/flow/projects/member/invite', data),
+
   removeProjectMember: (data: { project_id: number; user_id: number }) =>
     safe.delete('/flow/projects/member', { data }),
 
@@ -363,6 +372,11 @@ export const flowApi = {
 
   getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
 
+  searchTasks: (q: string, workspaceId: string) =>
+    safe.get<{ tasks: ApiTask[] }>('/flow/tasks/search', {
+      params: { q, workspace_id: workspaceId },
+    }),
+
   getTaskDetail: (id: string) => safe.get<ApiTaskDetail>('/flow/tasks/detail', { params: { id } }),
 
   createTask: (data: {
@@ -388,7 +402,10 @@ export const flowApi = {
 
   // -- Task Activity ------------------------------------------------------
 
-  getTaskActivity: (id: string) => safe.get<ApiTaskActivity[]>(`/flow/tasks/${id}/activity`),
+  getTaskActivity: (taskId: string) =>
+    safe.get<{ activity: ApiTaskActivity[] }>('/flow/tasks/activity', {
+      params: { task_id: taskId },
+    }),
 
   // -- Subtasks -----------------------------------------------------------
 
@@ -403,16 +420,35 @@ export const flowApi = {
 
   // -- Time Logs ----------------------------------------------------------
 
-  getTimeLogs: (id: string) => safe.get<ApiTimeLog[]>(`/flow/tasks/${id}/time`),
+  getTimeLogs: (taskId: string) =>
+    safe.get<{ logs: ApiTimeLog[]; estimated_hours: number | null; actual_hours: number | null }>(
+      '/flow/tasks/time',
+      { params: { task_id: taskId } }
+    ),
 
-  logTime: (id: string, data: { durationMinutes: number; description?: string }) =>
-    safe.post<ApiTimeLog>(`/flow/tasks/${id}/time`, data),
+  logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
+    safe.post<ApiTimeLog>('/flow/tasks/time', data),
+
+  deleteTimeLog: (id: number) => safe.delete('/flow/tasks/time', { params: { id } }),
 
   // -- Labels -------------------------------------------------------------
 
-  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
+  listLabels: (workspaceId: string) =>
+    safe.get<{ labels: ApiLabel[] }>('/flow/labels', { params: { workspace_id: workspaceId } }),
 
-  createLabel: (data: { name: string; color: string }) => safe.post<ApiLabel>('/flow/labels', data),
+  createLabel: (data: { workspace_id: number; name: string; color: string }) =>
+    safe.post<ApiLabel>('/flow/labels', data),
+
+  updateLabel: (data: { id: number; name: string; color: string }) =>
+    safe.put('/flow/labels', data),
+
+  deleteLabel: (id: number) => safe.delete('/flow/labels', { params: { id } }),
+
+  setTaskLabels: (data: { task_id: number; label_ids: number[] }) =>
+    safe.put('/flow/tasks/labels', data),
+
+  /** @deprecated use listLabels(workspaceId) */
+  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
 
   // -- Milestones ---------------------------------------------------------
 
@@ -483,4 +519,33 @@ export const flowApi = {
   getUserSettings: () => safe.get<ApiUserSettings>('/flow/settings'),
 
   updateUserSettings: (data: ApiUserSettings) => safe.put('/flow/settings', data),
+
+  // -- Account / Profile --------------------------------------------------
+
+  updateProfile: (data: { name?: string; email?: string }) => safe.post('/account/profile', data),
+
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    safe.post('/account/password', data),
+
+  // -- Businesses ----------------------------------------------------------
+
+  getBusiness: (workspaceId: string) =>
+    safe.get<{ business: { id: string; name: string; color: string; icon: string } | null }>(
+      '/flow/workspaces/business',
+      { params: { workspace_id: workspaceId } }
+    ),
+
+  listBusinesses: () =>
+    safe.get<{ businesses: { id: string; name: string; color: string; icon: string }[] }>(
+      '/flow/businesses'
+    ),
+
+  createBusiness: (data: { name: string; color?: string; icon?: string }) =>
+    safe.post<{ id: string; name: string; color: string; icon: string }>('/flow/businesses', data),
+
+  setWorkspaceBusiness: (workspaceId: string, businessId: string | null) =>
+    safe.put('/flow/workspaces/business', {
+      workspace_id: Number(workspaceId),
+      business_id: businessId ? Number(businessId) : null,
+    }),
 };

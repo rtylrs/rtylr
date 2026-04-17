@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Palette, Keyboard, Sparkles, Info } from 'lucide-react';
+import { Bell, Palette, Keyboard, Sparkles, Info, User, Save, Tag, Trash2 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
+import { useUserStore } from '../../shared/stores/userStore';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 
 const ACCENT = '#64C5B9';
 
@@ -19,12 +23,159 @@ interface SettingsSection {
 }
 
 const SECTIONS: SettingsSection[] = [
+  { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'labels', label: 'Labels', icon: Tag },
   { id: 'life', label: 'Life & rhythm', icon: Sparkles },
   { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
   { id: 'about', label: 'About', icon: Info },
 ];
+
+const ProfileSection: React.FC = () => {
+  const user = useUserStore((s) => s.user);
+
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
+
+  const updateProfile = useMutation({
+    mutationFn: (data: { name?: string; email?: string }) => unwrap(flowApi.updateProfile(data)),
+    onSuccess: () => toast.success('Profile updated'),
+    onError: () => toast.error('Failed to update profile'),
+  });
+
+  const changePassword = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      unwrap(flowApi.changePassword(data)),
+    onSuccess: () => {
+      toast.success('Password changed');
+      setCurrentPassword('');
+      setNewPassword('');
+    },
+    onError: () => toast.error('Failed to change password'),
+  });
+
+  const inputStyle = {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    color: 'var(--flow-text)',
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Profile
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Update your name and email address.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label
+            className="block text-[12px] font-medium mb-1.5"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={inputStyle}
+          />
+        </div>
+        <button
+          type="button"
+          disabled={updateProfile.isPending}
+          onClick={() => updateProfile.mutate({ name, email })}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          style={{ background: ACCENT, color: '#0a0a0a' }}
+        >
+          <Save size={12} />
+          {updateProfile.isPending ? 'Saving…' : 'Save profile'}
+        </button>
+      </div>
+
+      <div className="pt-6" style={{ borderTop: '1px solid var(--flow-border)' }}>
+        <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Change password
+        </h3>
+        <p className="text-[12px] mb-4" style={{ color: 'var(--flow-text-muted)' }}>
+          Leave blank to keep your current password.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label
+              className="block text-[12px] font-medium mb-1.5"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Current password
+            </label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label
+              className="block text-[12px] font-medium mb-1.5"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              New password
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <button
+            type="button"
+            disabled={changePassword.isPending || !currentPassword || !newPassword}
+            onClick={() => changePassword.mutate({ currentPassword, newPassword })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+          >
+            {changePassword.isPending ? 'Changing…' : 'Change password'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const NotificationsSection: React.FC = () => {
   const { data: remote } = useQuery({
@@ -382,9 +533,176 @@ const AboutSection: React.FC = () => (
   </div>
 );
 
+const LABEL_COLORS = [
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#64C5B9',
+];
+
+const LabelsSection: React.FC = () => {
+  const { activeWorkspaceId } = useFlowStore();
+  const workspaceId = activeWorkspaceId ?? '';
+  const { data: labels = [], isLoading } = useLabels(workspaceId || undefined);
+  const createLabel = useCreateLabel();
+  const deleteLabel = useDeleteLabel();
+
+  const [newName, setNewName] = useState('');
+  const [newColor, setNewColor] = useState(LABEL_COLORS[0]);
+
+  const handleCreate = () => {
+    const name = newName.trim();
+    if (!name) return;
+    if (!workspaceId) {
+      toast.error('No active workspace');
+      return;
+    }
+    createLabel.mutate(
+      { workspace_id: Number(workspaceId), name, color: newColor },
+      {
+        onSuccess: () => {
+          setNewName('');
+          setNewColor(LABEL_COLORS[0]);
+          toast.success('Label created');
+        },
+        onError: () => toast.error('Failed to create label'),
+      }
+    );
+  };
+
+  const inputStyle = {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    color: 'var(--flow-text)',
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Labels
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Manage labels for your workspace. Labels can be applied to any task.
+        </p>
+      </div>
+
+      {/* Create form */}
+      <div
+        className="rounded-xl p-4 space-y-3"
+        style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+      >
+        <h3 className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+          New label
+        </h3>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Label name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+            className="flex-1 rounded-lg px-3 py-2 text-[13px] outline-none"
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
+            Color
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {LABEL_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setNewColor(c)}
+                className="h-6 w-6 rounded-full transition-all"
+                style={{
+                  background: c,
+                  outline: newColor === c ? `2px solid ${c}` : 'none',
+                  outlineOffset: 2,
+                  boxShadow: newColor === c ? '0 0 0 2px var(--flow-bg)' : 'none',
+                }}
+                title={c}
+              />
+            ))}
+          </div>
+        </div>
+        <button
+          type="button"
+          disabled={!newName.trim() || createLabel.isPending}
+          onClick={handleCreate}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          style={{ background: ACCENT, color: '#0a0a0a' }}
+        >
+          {createLabel.isPending ? 'Creating…' : 'Create label'}
+        </button>
+      </div>
+
+      {/* Existing labels */}
+      <div>
+        <h3 className="text-[12px] font-semibold mb-3" style={{ color: 'var(--flow-text-muted)' }}>
+          Workspace labels
+        </h3>
+        {isLoading ? (
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+            Loading…
+          </p>
+        ) : labels.length === 0 ? (
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+            No labels yet. Create one above.
+          </p>
+        ) : (
+          <div
+            className="rounded-xl divide-y divide-[var(--flow-border)]"
+            style={{ border: '1px solid var(--flow-border)' }}
+          >
+            {labels.map((label) => (
+              <div
+                key={label.id}
+                className="flex items-center justify-between px-4 py-3 hover:bg-[var(--flow-hover)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="h-3 w-3 rounded-full shrink-0"
+                    style={{ background: label.color }}
+                  />
+                  <span className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                    {label.name}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    deleteLabel.mutate(label.id, {
+                      onSuccess: () => toast.success('Label deleted'),
+                      onError: () => toast.error('Failed to delete label'),
+                    })
+                  }
+                  className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  style={{ color: 'var(--flow-text-dim)' }}
+                  title="Delete label"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const SECTION_CONTENT: Record<string, React.FC> = {
+  profile: ProfileSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
+  labels: LabelsSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
   about: AboutSection,
@@ -402,7 +720,7 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
 );
 
 const FlowSettings: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('notifications');
+  const [activeSection, setActiveSection] = useState('profile');
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);

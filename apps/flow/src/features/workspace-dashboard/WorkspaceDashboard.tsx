@@ -11,6 +11,9 @@ import {
   Calendar,
   Gauge,
   Flame,
+  Building2,
+  Plus,
+  X,
 } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -21,6 +24,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { getCurrentUserId, isTaskMine } from '../../shared/lib/currentUser';
 import { isDueThisCalendarWeek } from '../../shared/lib/lifeRhythm';
 import { getWeeklyReviewStreak, recordWeeklyReviewDone } from '../../shared/lib/weeklyReviewStreak';
+import { useBusinesses, useCreateBusiness, useSetWorkspaceBusiness } from './useBusinesses';
 
 const ACCENT = '#64C5B9';
 
@@ -143,6 +147,12 @@ const WorkspaceDashboard: React.FC = () => {
   );
 
   const [reviewStreak, setReviewStreak] = useState(() => getWeeklyReviewStreak().streak);
+
+  const { data: businesses = [] } = useBusinesses();
+  const createBusiness = useCreateBusiness();
+  const setWorkspaceBusiness = useSetWorkspaceBusiness();
+  const [showNewBusiness, setShowNewBusiness] = useState(false);
+  const [newBusinessName, setNewBusinessName] = useState('');
 
   const onWeeklyReviewDone = useCallback(() => {
     const { streak, alreadyLogged } = recordWeeklyReviewDone();
@@ -285,6 +295,110 @@ const WorkspaceDashboard: React.FC = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Business Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, delay: 0.14 }}
+        className="rounded-xl p-4 mb-8"
+        style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Building2 size={14} style={{ color: ACCENT }} />
+            <span className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              Business
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowNewBusiness((v) => !v)}
+            className="flex items-center gap-1 text-[11px] px-2 py-1 rounded transition-colors hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            {showNewBusiness ? <X size={11} /> : <Plus size={11} />}
+            {showNewBusiness ? 'Cancel' : 'New'}
+          </button>
+        </div>
+
+        {showNewBusiness && (
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Business name"
+              value={newBusinessName}
+              onChange={(e) => setNewBusinessName(e.target.value)}
+              className="flex-1 rounded-lg px-3 py-1.5 text-[12px] outline-none"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            />
+            <button
+              type="button"
+              disabled={!newBusinessName.trim() || createBusiness.isPending}
+              onClick={() => {
+                if (!newBusinessName.trim()) return;
+                createBusiness.mutate(
+                  { name: newBusinessName.trim() },
+                  {
+                    onSuccess: (biz) => {
+                      toast.success('Business created');
+                      setNewBusinessName('');
+                      setShowNewBusiness(false);
+                      if (workspaceId && workspaceId !== PERSONAL_WORKSPACE_ID) {
+                        setWorkspaceBusiness.mutate({ workspaceId, businessId: biz.id });
+                      }
+                    },
+                    onError: () => toast.error('Failed to create business'),
+                  }
+                );
+              }}
+              className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+              style={{ background: ACCENT, color: '#0a0a0a' }}
+            >
+              Create
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3">
+          <select
+            value=""
+            onChange={(e) => {
+              const val = e.target.value;
+              if (!workspaceId || workspaceId === PERSONAL_WORKSPACE_ID) return;
+              setWorkspaceBusiness.mutate(
+                { workspaceId, businessId: val || null },
+                {
+                  onSuccess: () => toast.success(val ? 'Business linked' : 'Business unlinked'),
+                  onError: () => toast.error('Failed'),
+                }
+              );
+            }}
+            className="flex-1 rounded-lg px-3 py-1.5 text-[12px] outline-none"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+          >
+            <option value="">— No business linked —</option>
+            {businesses.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {businesses.length === 0 && (
+          <p className="mt-2 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+            Create a business to group workspaces together.
+          </p>
+        )}
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-6">
         {/* My Tasks */}

@@ -52,6 +52,7 @@ import {
 } from '../shared/hooks/useSidebarSectionOrder';
 import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
+import { useNotifications } from '../features/inbox/useNotifications';
 
 const ACCENT = '#64C5B9';
 
@@ -206,11 +207,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     setActiveWorkspace,
     setWorkspaces,
     setProjects,
-    notifications,
     tasks,
     setCommandBarOpen,
     setQuickCreateOpen,
   } = useFlowStore();
+
+  const { data: apiNotifications = [] } = useNotifications();
+  const unreadNotifications = apiNotifications.filter((n) => !n.read).length;
 
   // Fetch workspaces from API.
   // IMPORTANT: use React Query data directly for display — never wait for the
@@ -303,7 +306,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       (t.focusPin === true || isDueToday(t.dueDate))
   ).length;
   const inQuietHours = isQuietNow(lifePrefs.quietStart, lifePrefs.quietEnd);
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   const userEmail = displayUserEmail(user);
   const userName = displayUserName(user);

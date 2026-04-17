@@ -201,9 +201,13 @@ export function useLogTime() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ taskId, minutes, note }: { taskId: string; minutes: number; note?: string }) => {
-      return unwrap(flowApi.logTime(taskId, { durationMinutes: minutes, description: note })).then(
-        () => {}
-      );
+      return unwrap(
+        flowApi.logTime({
+          task_id: Number(taskId),
+          duration_minutes: minutes,
+          description: note,
+        })
+      ).then(() => {});
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });

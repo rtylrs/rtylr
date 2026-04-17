@@ -18,10 +18,13 @@ import {
   Eye,
   Archive,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { useFlowStore } from '../stores/flowStore';
 import { useTasks } from '../../features/tasks/useTasks';
 import { useProjects } from '../../features/projects/useProjects';
 import { apiTaskToTask } from '../lib/taskMapper';
+import { flowApi } from '../services/flowApi';
 
 interface CommandItem {
   id: string;
@@ -42,8 +45,23 @@ export const CommandBar: React.FC = () => {
   const tasks = apiTasks.map(apiTaskToTask);
   const projects = apiProjects;
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const { data: searchResults } = useQuery({
+    queryKey: ['task-search', debouncedQuery, activeWorkspaceId],
+    queryFn: () =>
+      unwrap(flowApi.searchTasks(debouncedQuery, activeWorkspaceId || '')).then(
+        (r) => r.tasks ?? []
+      ),
+    enabled: debouncedQuery.trim().length >= 3 && !!activeWorkspaceId,
+  });
 
   useEffect(() => {
     if (commandBarOpen) {
@@ -160,7 +178,9 @@ export const CommandBar: React.FC = () => {
         group: 'action',
       },
     ];
-    const taskItems: CommandItem[] = tasks.slice(0, 30).map((t) => ({
+    const taskSource =
+      query.trim().length >= 3 ? (searchResults?.map(apiTaskToTask) ?? []) : tasks.slice(0, 30);
+    const taskItems: CommandItem[] = taskSource.map((t) => ({
       id: `task-${t.id}`,
       label: t.title,
       hint: t.identifier,
@@ -177,7 +197,7 @@ export const CommandBar: React.FC = () => {
       group: 'project',
     }));
     return [...actionItems, ...navItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen]);
+  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
