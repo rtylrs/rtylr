@@ -17,18 +17,20 @@ func CreateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
 func UpdateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
 func DeleteDepartmentRoutes() []string  { return []string{"/hr/departments"} }
 
-func newDepartmentPayload(d domain.Department) *hrv1.Department {
-	return &hrv1.Department{
-		Id: d.ID, OwnerId: d.OwnerID, Name: d.Name, Description: d.Description,
-		CreatedAt: d.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: d.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+func newDepartmentPayload(d domain.Department) *hrv1.DepartmentPayload {
+	return &hrv1.DepartmentPayload{
+		Id:        d.ID,
+		OwnerId:  d.OwnerID,
+		Name:     d.Name,
+		CreatedAt: d.CreatedAt.Unix(),
+		UpdatedAt: d.UpdatedAt.Unix(),
 	}
 }
 
 type ListDepartmentsHandler struct{ Service *application.Service }
 type ListDepartmentsRequest struct{}
 type ListDepartmentsResponse struct {
-	Departments []*hrv1.Department `json:"departments"`
+	Departments []*hrv1.DepartmentPayload `json:"departments"`
 }
 
 func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRequest) (ListDepartmentsResponse, *errorModels.ServerError) {
@@ -40,7 +42,7 @@ func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRe
 	if err != nil {
 		return ListDepartmentsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list departments"}
 	}
-	payloads := make([]*hrv1.Department, 0, len(departments))
+	payloads := make([]*hrv1.DepartmentPayload, 0, len(departments))
 	for _, d := range departments {
 		payloads = append(payloads, newDepartmentPayload(d))
 	}

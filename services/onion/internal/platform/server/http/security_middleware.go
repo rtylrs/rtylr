@@ -477,9 +477,26 @@ func SecurityMiddleware() MiddlewareFunc {
 
 func isMaliciousPath(path string) bool {
 	pathLower := strings.ToLower(path)
+	// Split into segments so that /hr/setup/status does not match the /setup pattern.
+	// A pattern like "/setup" should only block a request whose path IS "/setup" or
+	// starts with "/setup/" — not one where "setup" appears as a sub-segment of a
+	// legitimate API path such as /hr/setup/status.
+	segments := strings.Split(pathLower, "/")
+	segmentSet := make(map[string]struct{}, len(segments))
+	for _, s := range segments {
+		if s != "" {
+			segmentSet[s] = struct{}{}
+		}
+	}
+
 	for _, pattern := range maliciousPatterns {
-		if strings.Contains(pathLower, strings.ToLower(pattern)) {
-			return true
+		patternLower := strings.ToLower(strings.TrimPrefix(pattern, "/"))
+		if _, ok := segmentSet[patternLower]; ok {
+			// Confirm the pattern actually appears as a standalone first segment
+			// (i.e. the path starts with /<pattern> exactly), not just anywhere.
+			if strings.HasPrefix(pathLower, "/"+patternLower+"/") || pathLower == "/"+patternLower {
+				return true
+			}
 		}
 	}
 

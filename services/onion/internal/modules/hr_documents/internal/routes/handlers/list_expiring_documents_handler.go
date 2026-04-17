@@ -1,0 +1,47 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	"github.com/voxire/onion/internal/modules/hr_documents/internal/application"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+func ListExpiringDocumentsRoutes() []string { return []string{"/hr/documents/expiring"} }
+
+type ListExpiringDocumentsHandler struct{ Service *application.Service }
+
+type ListExpiringDocumentsRequest struct {
+	Days   int32 `json:"days"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpiringDocumentsRequest) (ListDocumentsResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return ListDocumentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	days := req.Days
+	if days == 0 {
+		days = 30
+	}
+
+	docs, total, err := h.Service.ListExpiringDocuments(ctx, device.User.UserID, days, req.Limit, req.Offset)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list expiring documents", logger.Any("owner_id", device.User.UserID), logger.Any("days", days), logger.Error(err))
+		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list expiring documents"}
+	}
+
+	payloads := make([]*hrv1.EmployeeDocumentPayload, 0, len(docs))
+	for _, d := range docs {
+		payloads = append(payloads, documentToProto(d))
+	}
+
+	return ListDocumentsResponse{Documents: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+}

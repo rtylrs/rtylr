@@ -1,0 +1,457 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
+	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type Repository struct {
+	queries *sqlc.Queries
+	pool    *sql.DB
+}
+
+func NewRepository(_ context.Context) *Repository {
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
+}
+
+// --- Payroll Config ---
+
+func (r *Repository) GetPayrollConfig(ctx context.Context, ownerID int64) (*domain.PayrollConfigRecord, error) {
+	row, err := r.queries.GetPayrollConfig(ctx, ownerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrPayrollNotConfigured
+		}
+		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	cfg := payrollConfigFromRow(row)
+	return &cfg, nil
+}
+
+func (r *Repository) UpsertPayrollConfig(ctx context.Context, ownerID int64, cfg domain.PayrollConfigRecord) error {
+	_, err := r.queries.UpsertPayrollConfig(ctx, sqlc.UpsertPayrollConfigParams{
+		OwnerID:         ownerID,
+		PeriodType:      cfg.PeriodType,
+		PayDayOfMonth:   cfg.PayDayOfMonth,
+		OvertimeEnabled: cfg.OvertimeEnabled,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to upsert payroll config", logger.Any("owner_id", ownerID), logger.Error(err))
+	}
+	return err
+}
+
+// --- Payroll Runs ---
+
+func (r *Repository) ListPayrollRuns(ctx context.Context, ownerID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
+	total, err := r.queries.CountPayrollRuns(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count payroll runs", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListPayrollRuns(ctx, sqlc.ListPayrollRunsParams{
+		OwnerID: ownerID,
+		Limit:   params.Limit,
+		Offset:  params.Offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list payroll runs", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	runs := make([]domain.PayrollRunRecord, 0, len(rows))
+	for _, row := range rows {
+		runs = append(runs, payrollRunFromRow(row))
+	}
+	return runs, total, nil
+}
+
+func (r *Repository) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*domain.PayrollRunRecord, error) {
+	row, err := r.queries.GetPayrollRun(ctx, sqlc.GetPayrollRunParams{OwnerID: ownerID, ID: runID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrPayrollRunNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
+		return nil, err
+	}
+	run := payrollRunFromRow(row)
+	return &run, nil
+}
+
+func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID int64, run domain.PayrollRunRecord, entries []domain.PayrollEntryRecord) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	periodStart, parseErr := time.Parse("2006-01-02", run.PeriodStart)
+	if parseErr != nil {
+		_ = tx.Rollback()
+		return nil, nil, parseErr
+	}
+	periodEnd, parseErr := time.Parse("2006-01-02", run.PeriodEnd)
+	if parseErr != nil {
+		_ = tx.Rollback()
+		return nil, nil, parseErr
+	}
+
+	result, err := qtx.CreatePayrollRun(ctx, sqlc.CreatePayrollRunParams{
+		OwnerID:     ownerID,
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
+		Status:      run.Status,
+		CreatedBy:   run.CreatedBy,
+		TotalGross:  fmt.Sprintf("%.2f", run.TotalGross),
+		TotalNet:    fmt.Sprintf("%.2f", run.TotalNet),
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to create payroll run", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, nil, err
+	}
+
+	runID, err := result.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, nil, err
+	}
+	run.ID = runID
+	run.OwnerID = ownerID
+
+	createdEntries := make([]domain.PayrollEntryRecord, 0, len(entries))
+	for _, entry := range entries {
+		entryResult, entryErr := qtx.CreatePayrollEntry(ctx, sqlc.CreatePayrollEntryParams{
+			OwnerID:       ownerID,
+			PayrollRunID:  runID,
+			EmployeeID:    entry.EmployeeID,
+			HoursWorked:   fmt.Sprintf("%.2f", entry.HoursWorked),
+			OvertimeHours: fmt.Sprintf("%.2f", entry.OvertimeHours),
+			BasePay:       fmt.Sprintf("%.2f", entry.BasePay),
+			OvertimePay:   fmt.Sprintf("%.2f", entry.OvertimePay),
+			Bonuses:       fmt.Sprintf("%.2f", entry.Bonuses),
+			Deductions:    fmt.Sprintf("%.2f", entry.Deductions),
+			NetPay:        fmt.Sprintf("%.2f", entry.NetPay),
+		})
+		if entryErr != nil {
+			_ = tx.Rollback()
+			logger.Ctx(ctx).Error("failed to create payroll entry", logger.Any("owner_id", ownerID), logger.Any("employee_id", entry.EmployeeID), logger.Error(entryErr))
+			return nil, nil, entryErr
+		}
+
+		entryID, idErr := entryResult.LastInsertId()
+		if idErr != nil {
+			_ = tx.Rollback()
+			return nil, nil, idErr
+		}
+		entry.ID = entryID
+		entry.OwnerID = ownerID
+		entry.PayrollRunID = runID
+		createdEntries = append(createdEntries, entry)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, nil, err
+	}
+
+	return &run, createdEntries, nil
+}
+
+func (r *Repository) UpdatePayrollRunStatus(ctx context.Context, ownerID, runID int64, status string) error {
+	return r.queries.UpdatePayrollRunStatus(ctx, sqlc.UpdatePayrollRunStatusParams{
+		Status:  status,
+		OwnerID: ownerID,
+		ID:      runID,
+	})
+}
+
+func (r *Repository) SetPayrollRunApproved(ctx context.Context, ownerID, runID, approverID int64) error {
+	return r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
+		ApprovedBy: sql.NullInt64{Int64: approverID, Valid: true},
+		OwnerID:    ownerID,
+		ID:         runID,
+	})
+}
+
+func (r *Repository) SetPayrollRunExported(ctx context.Context, ownerID, runID int64) error {
+	return r.queries.SetPayrollRunExported(ctx, sqlc.SetPayrollRunExportedParams{
+		OwnerID: ownerID,
+		ID:      runID,
+	})
+}
+
+// --- Payroll Entries ---
+
+func (r *Repository) ListPayrollEntries(ctx context.Context, ownerID, runID int64) ([]domain.PayrollEntryRecord, error) {
+	rows, err := r.queries.ListPayrollEntries(ctx, sqlc.ListPayrollEntriesParams{
+		OwnerID:      ownerID,
+		PayrollRunID: runID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list payroll entries", logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
+		return nil, err
+	}
+
+	entries := make([]domain.PayrollEntryRecord, 0, len(rows))
+	for _, row := range rows {
+		entries = append(entries, payrollEntryFromRow(row))
+	}
+	return entries, nil
+}
+
+// cross-schema read from hr_time — approved timesheet hours for payroll computation
+func (r *Repository) ListApprovedTimesheetSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]domain.TimesheetSummary, error) {
+	ps, err := time.Parse("2006-01-02", periodStart)
+	if err != nil {
+		return nil, err
+	}
+	pe, err := time.Parse("2006-01-02", periodEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.queries.ListApprovedTimesheetSummaries(ctx, sqlc.ListApprovedTimesheetSummariesParams{
+		OwnerID:     ownerID,
+		PeriodStart: ps,
+		PeriodEnd:   pe,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list timesheet summaries", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+
+	summaries := make([]domain.TimesheetSummary, 0, len(rows))
+	for _, row := range rows {
+		summaries = append(summaries, domain.TimesheetSummary{
+			EmployeeID:   row.EmployeeID,
+			TotalMinutes: interfaceToInt32(row.TotalMinutes),
+		})
+	}
+	return summaries, nil
+}
+
+// cross-schema read from hr_overtime — approved overtime minutes with multipliers for payroll computation
+func (r *Repository) ListApprovedOvertimeSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]domain.OvertimeSummary, error) {
+	ps, err := time.Parse("2006-01-02", periodStart)
+	if err != nil {
+		return nil, err
+	}
+	pe, err := time.Parse("2006-01-02", periodEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.queries.ListApprovedOvertimeSummaries(ctx, sqlc.ListApprovedOvertimeSummariesParams{
+		OwnerID: ownerID,
+		Date:    ps,
+		Date_2:  pe,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list overtime summaries", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+
+	summaries := make([]domain.OvertimeSummary, 0, len(rows))
+	for _, row := range rows {
+		summaries = append(summaries, domain.OvertimeSummary{
+			EmployeeID:   row.EmployeeID,
+			TotalMinutes: interfaceToInt32(row.TotalMinutes),
+			Multiplier:   interfaceToFloat64(row.AvgMultiplier),
+		})
+	}
+	return summaries, nil
+}
+
+// cross-schema read from hr_core — employee contract type, rates, and schedule for payroll computation
+func (r *Repository) ListEmployeePayInfo(ctx context.Context, ownerID int64) ([]domain.EmployeePayInfo, error) {
+	rows, err := r.queries.ListEmployeePayInfo(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list employee pay info", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+
+	employees := make([]domain.EmployeePayInfo, 0, len(rows))
+	for _, row := range rows {
+		hourlyRate := parseFloat(row.HourlyRate.String)
+		salary := parseFloat(row.Salary.String)
+
+		payType := "monthly"
+		if hourlyRate > 0 && salary == 0 {
+			payType = "hourly"
+		}
+
+		employees = append(employees, domain.EmployeePayInfo{
+			EmployeeID:    row.ID,
+			PayType:       payType,
+			HourlyRate:    hourlyRate,
+			MonthlySalary: salary,
+		})
+	}
+	return employees, nil
+}
+
+// cross-schema read from hr_overtime — overtime rate multiplier configuration for payroll computation
+func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (float64, bool, error) {
+	row, err := r.queries.GetOvertimeConfigForPayroll(ctx, ownerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, false, nil
+		}
+		return 0, false, err
+	}
+	return parseFloat(row.DefaultMultiplier), true, nil
+}
+
+func (r *Repository) ListDistinctOwnerIDs(ctx context.Context) ([]int64, error) {
+	return r.queries.ListDistinctPayrollOwnerIDs(ctx)
+}
+
+// --- Row Mappers ---
+
+func payrollConfigFromRow(row sqlc.HrPayrollConfig) domain.PayrollConfigRecord {
+	return domain.PayrollConfigRecord{
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		PeriodType:      row.PeriodType,
+		PayDayOfMonth:   row.PayDayOfMonth,
+		OvertimeEnabled: row.OvertimeEnabled,
+		CreatedAt:       row.CreatedAt,
+		UpdatedAt:       row.UpdatedAt,
+	}
+}
+
+func payrollRunFromRow(row sqlc.HrPayrollRun) domain.PayrollRunRecord {
+	run := domain.PayrollRunRecord{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		PeriodStart: row.PeriodStart.Format("2006-01-02"),
+		PeriodEnd:   row.PeriodEnd.Format("2006-01-02"),
+		Status:      row.Status,
+		CreatedBy:   row.CreatedBy,
+		ApprovedBy:  row.ApprovedBy.Int64,
+		TotalGross:  parseFloat(row.TotalGross),
+		TotalNet:    parseFloat(row.TotalNet),
+		CreatedAt:   row.CreatedAt,
+		UpdatedAt:   row.UpdatedAt,
+	}
+	if row.ExportedAt.Valid {
+		run.ExportedAt = row.ExportedAt.Time
+	}
+	return run
+}
+
+func payrollEntryFromRow(row sqlc.HrPayrollEntry) domain.PayrollEntryRecord {
+	return domain.PayrollEntryRecord{
+		ID:            row.ID,
+		OwnerID:       row.OwnerID,
+		PayrollRunID:  row.PayrollRunID,
+		EmployeeID:    row.EmployeeID,
+		HoursWorked:   parseFloat(row.HoursWorked),
+		OvertimeHours: parseFloat(row.OvertimeHours),
+		BasePay:       parseFloat(row.BasePay),
+		OvertimePay:   parseFloat(row.OvertimePay),
+		Bonuses:       parseFloat(row.Bonuses),
+		Deductions:    parseFloat(row.Deductions),
+		NetPay:        parseFloat(row.NetPay),
+		CreatedAt:     row.CreatedAt,
+		UpdatedAt:     row.UpdatedAt,
+	}
+}
+
+// --- Helpers ---
+
+func parseFloat(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse decimal value from database",
+			logger.String("value", s),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return f
+}
+
+func interfaceToInt32(v interface{}) int32 {
+	switch val := v.(type) {
+	case int64:
+		return int32(val)
+	case float64:
+		return int32(val)
+	case []byte:
+		n, err := strconv.ParseInt(string(val), 10, 32)
+		if err != nil {
+			logger.Global().Warn("failed to parse int value from database",
+				logger.String("value", string(val)),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return int32(n)
+	case string:
+		n, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			logger.Global().Warn("failed to parse int value from database",
+				logger.String("value", val),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return int32(n)
+	default:
+		return 0
+	}
+}
+
+func interfaceToFloat64(v interface{}) float64 {
+	switch val := v.(type) {
+	case float64:
+		return val
+	case int64:
+		return float64(val)
+	case []byte:
+		f, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			logger.Global().Warn("failed to parse float value from database",
+				logger.String("value", string(val)),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return f
+	case string:
+		f, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			logger.Global().Warn("failed to parse float value from database",
+				logger.String("value", val),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return f
+	default:
+		return 0
+	}
+}

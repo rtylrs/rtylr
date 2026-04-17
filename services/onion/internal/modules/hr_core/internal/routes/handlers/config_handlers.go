@@ -1,0 +1,115 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+
+	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type HRConfigPayload struct {
+	ID                    int64   `json:"id"`
+	CompanyName           string  `json:"company_name"`
+	FiscalYearStartMonth  int32   `json:"fiscal_year_start_month"`
+	DefaultCurrency       string  `json:"default_currency"`
+	DefaultTimezone       string  `json:"default_timezone"`
+	DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
+	OvertimeEnabled       bool    `json:"overtime_enabled"`
+	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+	CreatedAt             string  `json:"created_at"`
+	UpdatedAt             string  `json:"updated_at"`
+}
+
+func configToPayload(c domain.HRCompanyConfigRecord) *HRConfigPayload {
+	return &HRConfigPayload{
+		ID: c.ID, CompanyName: c.CompanyName,
+		FiscalYearStartMonth: c.FiscalYearStartMonth, DefaultCurrency: c.DefaultCurrency,
+		DefaultTimezone: c.DefaultTimezone, DefaultWorkScheduleID: c.DefaultWorkScheduleID,
+		OvertimeEnabled: c.OvertimeEnabled, OvertimeMultiplier: c.OvertimeMultiplier,
+		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+}
+
+// --- Get HR Config ---
+
+func GetHRConfigRoutes() []string { return []string{"/hr/config"} }
+
+type GetHRConfigHandler struct{ Service *application.Service }
+type GetHRConfigRequest struct{}
+type GetHRConfigResponse struct {
+	Config *HRConfigPayload `json:"config"`
+}
+
+func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (GetHRConfigResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return GetHRConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	cfg, err := h.Service.GetHRConfig(ctx, device.User.UserID)
+	if err != nil {
+		if errors.Is(err, domain.ErrSetupNotComplete) {
+			return GetHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "HR configuration not found. Please complete setup first."}
+		}
+		logger.Ctx(ctx).Error("failed to get hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return GetHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get HR config"}
+	}
+
+	return GetHRConfigResponse{Config: configToPayload(*cfg)}, nil
+}
+
+// --- Upsert HR Config ---
+
+func UpsertHRConfigRoutes() []string { return []string{"/hr/config"} }
+
+type UpsertHRConfigHandler struct{ Service *application.Service }
+type UpsertHRConfigRequest struct {
+	CompanyName           string  `json:"company_name"`
+	FiscalYearStartMonth  int32   `json:"fiscal_year_start_month"`
+	DefaultCurrency       string  `json:"default_currency"`
+	DefaultTimezone       string  `json:"default_timezone"`
+	DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
+	OvertimeEnabled       bool    `json:"overtime_enabled"`
+	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+}
+type UpsertHRConfigResponse struct {
+	Config *HRConfigPayload `json:"config"`
+}
+
+func (h *UpsertHRConfigHandler) Validate(_ context.Context, req *UpsertHRConfigRequest) *errorModels.ServerError {
+	if req.CompanyName == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "company_name is required"}
+	}
+	return nil
+}
+
+func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRequest) (UpsertHRConfigResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return UpsertHRConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	cfg := domain.HRCompanyConfigRecord{
+		CompanyName:           req.CompanyName,
+		FiscalYearStartMonth:  req.FiscalYearStartMonth,
+		DefaultCurrency:       req.DefaultCurrency,
+		DefaultTimezone:       req.DefaultTimezone,
+		DefaultWorkScheduleID: req.DefaultWorkScheduleID,
+		OvertimeEnabled:       req.OvertimeEnabled,
+		OvertimeMultiplier:    req.OvertimeMultiplier,
+	}
+
+	updated, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, cfg)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return UpsertHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update HR config"}
+	}
+
+	return UpsertHRConfigResponse{Config: configToPayload(*updated)}, nil
+}

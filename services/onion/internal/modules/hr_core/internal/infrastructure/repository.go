@@ -1,0 +1,855 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"strconv"
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
+	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type Repository struct {
+	queries *sqlc.Queries
+	pool    *sql.DB
+}
+
+func NewRepository(_ context.Context) *Repository {
+	pool := dbclient.Pool()
+	return &Repository{
+		queries: sqlc.New(pool),
+		pool:    pool,
+	}
+}
+
+// --- Employees ---
+
+func (r *Repository) ListEmployees(ctx context.Context, ownerID int64, params domain.ListEmployeesParams) ([]domain.EmployeeRecord, int64, error) {
+	total, err := r.queries.CountEmployees(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count employees", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListEmployees(ctx, sqlc.ListEmployeesParams{
+		OwnerID: ownerID,
+		Limit:   params.Limit,
+		Offset:  params.Offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list employees", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
+	employees := make([]domain.EmployeeRecord, 0, len(rows))
+	for _, row := range rows {
+		employees = append(employees, employeeFromRow(row))
+	}
+	return employees, total, nil
+}
+
+func (r *Repository) GetEmployee(ctx context.Context, ownerID, employeeID int64) (*domain.EmployeeRecord, error) {
+	row, err := r.queries.GetEmployee(ctx, sqlc.GetEmployeeParams{OwnerID: ownerID, ID: employeeID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrEmployeeNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get employee", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return nil, err
+	}
+	emp := employeeFromRow(row)
+	return &emp, nil
+}
+
+func (r *Repository) CreateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
+	result, err := r.queries.CreateEmployee(ctx, employeeToParams(ownerID, emp))
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create employee", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	emp.ID = id
+	emp.OwnerID = ownerID
+	return &emp, nil
+}
+
+func (r *Repository) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
+	err := r.queries.UpdateEmployee(ctx, sqlc.UpdateEmployeeParams{
+		DepartmentID:          nullInt64(emp.DepartmentID),
+		LocationID:            nullInt64(emp.LocationID),
+		WorkScheduleID:        nullInt64(emp.WorkScheduleID),
+		FirstName:             emp.FirstName,
+		LastName:              emp.LastName,
+		Email:                 emp.Email,
+		Phone:                 nullString(emp.Phone),
+		EmploymentType:        emp.EmploymentType,
+		Status:                emp.Status,
+		Salary:                nullStringFromFloat(emp.Salary),
+		HourlyRate:            nullStringFromFloat(emp.HourlyRate),
+		OvertimeRate:          nullStringFromFloat(emp.OvertimeRate),
+		StartDate:             nullTime(emp.StartDate),
+		EndDate:               nullTime(emp.EndDate),
+		Address:               nullString(emp.Address),
+		EmergencyContactName:  nullString(emp.EmergencyContactName),
+		EmergencyContactPhone: nullString(emp.EmergencyContactPhone),
+		Notes:                 nullString(emp.Notes),
+		ID:                    emp.ID,
+		OwnerID:               ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update employee", logger.Any("owner_id", ownerID), logger.Any("employee_id", emp.ID), logger.Error(err))
+		return nil, err
+	}
+	emp.OwnerID = ownerID
+	return &emp, nil
+}
+
+func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, ownerID int64, emp domain.EmployeeRecord, leaveTypeIDs []int64) (*domain.EmployeeRecord, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	result, err := qtx.CreateEmployee(ctx, employeeToParams(ownerID, emp))
+	if err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("failed to create employee in tx", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+
+	employeeID, err := result.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	currentYear := int32(time.Now().Year())
+	for _, leaveTypeID := range leaveTypeIDs {
+		err := qtx.CreateLeaveBalance(ctx, sqlc.CreateLeaveBalanceParams{
+			OwnerID:     ownerID,
+			EmployeeID:  employeeID,
+			LeaveTypeID: leaveTypeID,
+			Year:        currentYear,
+		})
+		if err != nil {
+			_ = tx.Rollback()
+			logger.Ctx(ctx).Error("failed to create leave balance", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	emp.ID = employeeID
+	emp.OwnerID = ownerID
+	return &emp, nil
+}
+
+// --- Invites ---
+
+func (r *Repository) CreateInviteToken(ctx context.Context, ownerID, employeeID int64, expiresAt time.Time) (string, error) {
+	token := uuid.New().String()
+	_, err := r.queries.CreateInviteToken(ctx, sqlc.CreateInviteTokenParams{
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
+		Token:      token,
+		ExpiresAt:  expiresAt,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create invite token", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return "", err
+	}
+	return token, nil
+}
+
+func (r *Repository) GetInviteByToken(ctx context.Context, token string) (*domain.InviteRecord, error) {
+	row, err := r.queries.GetInviteByToken(ctx, token)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrInviteTokenInvalid
+		}
+		return nil, err
+	}
+	return &domain.InviteRecord{
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
+		EmployeeID: row.EmployeeID,
+		Token:      row.Token,
+		ExpiresAt:  row.ExpiresAt,
+		CreatedAt:  row.CreatedAt,
+	}, nil
+}
+
+func (r *Repository) ConsumeInviteToken(ctx context.Context, token string) error {
+	return r.queries.ConsumeInviteToken(ctx, token)
+}
+
+// --- Locations ---
+
+func (r *Repository) ListLocations(ctx context.Context, ownerID int64) ([]domain.LocationRecord, error) {
+	rows, err := r.queries.ListLocations(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list locations", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	locations := make([]domain.LocationRecord, 0, len(rows))
+	for _, row := range rows {
+		locations = append(locations, locationFromRow(row))
+	}
+	return locations, nil
+}
+
+func (r *Repository) GetLocation(ctx context.Context, ownerID, locationID int64) (*domain.LocationRecord, error) {
+	row, err := r.queries.GetLocation(ctx, sqlc.GetLocationParams{OwnerID: ownerID, ID: locationID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrLocationNotFound
+		}
+		return nil, err
+	}
+	loc := locationFromRow(row)
+	return &loc, nil
+}
+
+func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
+	result, err := r.queries.CreateLocation(ctx, sqlc.CreateLocationParams{
+		OwnerID:   ownerID,
+		Name:      loc.Name,
+		Address:   nullString(loc.Address),
+		City:      nullString(loc.City),
+		Country:   nullString(loc.Country),
+		Timezone:  nullString(loc.Timezone),
+		Latitude:  nullFloat64(loc.Latitude),
+		Longitude: nullFloat64(loc.Longitude),
+		IsDefault: loc.IsDefault,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create location", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	loc.ID = id
+	loc.OwnerID = ownerID
+	return &loc, nil
+}
+
+func (r *Repository) UpdateLocation(ctx context.Context, ownerID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
+	err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
+		Name:      loc.Name,
+		Address:   nullString(loc.Address),
+		City:      nullString(loc.City),
+		Country:   nullString(loc.Country),
+		Timezone:  nullString(loc.Timezone),
+		Latitude:  nullFloat64(loc.Latitude),
+		Longitude: nullFloat64(loc.Longitude),
+		IsDefault: loc.IsDefault,
+		ID:        loc.ID,
+		OwnerID:   ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update location", logger.Any("owner_id", ownerID), logger.Any("location_id", loc.ID), logger.Error(err))
+		return nil, err
+	}
+	loc.OwnerID = ownerID
+	return &loc, nil
+}
+
+// --- Departments ---
+
+func (r *Repository) ListDepartments(ctx context.Context, ownerID int64, _ int64) ([]domain.DepartmentRecord, error) {
+	rows, err := r.queries.ListHRDepartments(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list departments", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	departments := make([]domain.DepartmentRecord, 0, len(rows))
+	for _, row := range rows {
+		departments = append(departments, departmentFromRow(row))
+	}
+	return departments, nil
+}
+
+func (r *Repository) CreateDepartment(ctx context.Context, ownerID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
+	result, err := r.queries.CreateHRDepartment(ctx, sqlc.CreateHRDepartmentParams{
+		OwnerID:               ownerID,
+		LocationID:            dept.LocationID,
+		ParentDepartmentID:    nullInt64(dept.ParentDepartmentID),
+		Name:                  dept.Name,
+		DefaultWorkScheduleID: nullInt64(dept.DefaultWorkScheduleID),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create department", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	dept.ID = id
+	dept.OwnerID = ownerID
+	return &dept, nil
+}
+
+func (r *Repository) UpdateDepartment(ctx context.Context, ownerID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
+	err := r.queries.UpdateHRDepartment(ctx, sqlc.UpdateHRDepartmentParams{
+		LocationID:            dept.LocationID,
+		ParentDepartmentID:    nullInt64(dept.ParentDepartmentID),
+		Name:                  dept.Name,
+		DefaultWorkScheduleID: nullInt64(dept.DefaultWorkScheduleID),
+		ID:                    dept.ID,
+		OwnerID:               ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update department", logger.Any("owner_id", ownerID), logger.Any("department_id", dept.ID), logger.Error(err))
+		return nil, err
+	}
+	dept.OwnerID = ownerID
+	return &dept, nil
+}
+
+// --- Work Schedules ---
+
+func (r *Repository) ListWorkSchedules(ctx context.Context, ownerID int64) ([]domain.WorkScheduleRecord, error) {
+	rows, err := r.queries.ListWorkSchedules(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list work schedules", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	schedules := make([]domain.WorkScheduleRecord, 0, len(rows))
+	for _, row := range rows {
+		schedules = append(schedules, workScheduleFromRow(row))
+	}
+	return schedules, nil
+}
+
+func (r *Repository) GetWorkScheduleForEmployee(ctx context.Context, ownerID, employeeID int64) (*domain.WorkScheduleRecord, error) {
+	row, err := r.queries.GetWorkScheduleForEmployee(ctx, sqlc.GetWorkScheduleForEmployeeParams{OwnerID: ownerID, ID: employeeID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	ws := workScheduleFromRow(row)
+	return &ws, nil
+}
+
+func (r *Repository) CreateWorkSchedule(ctx context.Context, ownerID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	result, err := r.queries.CreateWorkSchedule(ctx, sqlc.CreateWorkScheduleParams{
+		OwnerID:      ownerID,
+		Name:         ws.Name,
+		ScheduleData: json.RawMessage(ws.ScheduleData),
+		IsDefault:    ws.IsDefault,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create work schedule", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	ws.ID = id
+	ws.OwnerID = ownerID
+	return &ws, nil
+}
+
+func (r *Repository) UpdateWorkSchedule(ctx context.Context, ownerID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	err := r.queries.UpdateWorkSchedule(ctx, sqlc.UpdateWorkScheduleParams{
+		Name:         ws.Name,
+		ScheduleData: json.RawMessage(ws.ScheduleData),
+		IsDefault:    ws.IsDefault,
+		ID:           ws.ID,
+		OwnerID:      ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("owner_id", ownerID), logger.Any("schedule_id", ws.ID), logger.Error(err))
+		return nil, err
+	}
+	ws.OwnerID = ownerID
+	return &ws, nil
+}
+
+// --- Roles & Permissions ---
+
+func (r *Repository) ListRoles(ctx context.Context, ownerID int64) ([]domain.RoleRecord, error) {
+	rows, err := r.queries.ListRoles(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list roles", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	roles := make([]domain.RoleRecord, 0, len(rows))
+	for _, row := range rows {
+		roles = append(roles, roleFromRow(row))
+	}
+	return roles, nil
+}
+
+func (r *Repository) CreateRole(ctx context.Context, ownerID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
+	result, err := r.queries.CreateRole(ctx, sqlc.CreateRoleParams{
+		OwnerID:     ownerID,
+		Name:        role.Name,
+		Description: nullString(role.Description),
+		Permissions: json.RawMessage(role.Permissions),
+		IsSystem:    role.IsSystem,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to create role", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	role.ID = id
+	role.OwnerID = ownerID
+	return &role, nil
+}
+
+func (r *Repository) UpdateRole(ctx context.Context, ownerID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
+	err := r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
+		Name:        role.Name,
+		Description: nullString(role.Description),
+		Permissions: json.RawMessage(role.Permissions),
+		ID:          role.ID,
+		OwnerID:     ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update role", logger.Any("owner_id", ownerID), logger.Any("role_id", role.ID), logger.Error(err))
+		return nil, err
+	}
+	role.OwnerID = ownerID
+	return &role, nil
+}
+
+func (r *Repository) AssignRole(ctx context.Context, ownerID, employeeID, roleID int64) error {
+	return r.queries.AssignRole(ctx, sqlc.AssignRoleParams{
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
+		RoleID:     roleID,
+	})
+}
+
+func (r *Repository) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
+	roles, err := r.queries.GetEmployeeRoles(ctx, sqlc.GetEmployeeRolesParams{
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
+	})
+	if err != nil {
+		return false, err
+	}
+	for _, role := range roles {
+		var perms map[string]bool
+		if err := json.Unmarshal(role.Permissions, &perms); err != nil {
+			continue
+		}
+		if perms[permissionKey] {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// --- Setup Wizard ---
+
+func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]domain.SetupStepRecord, error) {
+	rows, err := r.queries.GetSetupSteps(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to get setup steps", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	steps := make([]domain.SetupStepRecord, 0, len(rows))
+	for _, row := range rows {
+		steps = append(steps, setupStepFromRow(row))
+	}
+	return steps, nil
+}
+
+func (r *Repository) CompleteSetupStep(ctx context.Context, ownerID int64, stepKey string) (*domain.SetupStepRecord, error) {
+	err := r.queries.CompleteSetupStep(ctx, sqlc.CompleteSetupStepParams{
+		OwnerID: ownerID,
+		StepKey: stepKey,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("owner_id", ownerID), logger.String("step_key", stepKey), logger.Error(err))
+		return nil, err
+	}
+	row, err := r.queries.GetSetupStepByKey(ctx, sqlc.GetSetupStepByKeyParams{
+		OwnerID: ownerID,
+		StepKey: stepKey,
+	})
+	if err != nil {
+		return nil, err
+	}
+	step := setupStepFromRow(row)
+	return &step, nil
+}
+
+func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRCompanyConfigRecord, error) {
+	row, err := r.queries.GetHRConfig(ctx, ownerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrSetupNotComplete
+		}
+		logger.Ctx(ctx).Error("failed to get hr config", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	return &domain.HRCompanyConfigRecord{
+		ID:                    row.ID,
+		OwnerID:               row.OwnerID,
+		CompanyName:           row.CompanyName,
+		FiscalYearStartMonth:  row.FiscalYearStartMonth,
+		DefaultCurrency:       row.DefaultCurrency,
+		DefaultTimezone:       row.DefaultTimezone,
+		DefaultWorkScheduleID: row.DefaultWorkScheduleID.Int64,
+		OvertimeEnabled:       row.OvertimeEnabled,
+		OvertimeMultiplier:    parseFloat(row.OvertimeMultiplier),
+		CreatedAt:             row.CreatedAt,
+		UpdatedAt:             row.UpdatedAt,
+	}, nil
+}
+
+func (r *Repository) UpsertHRConfig(ctx context.Context, ownerID int64, cfg domain.HRCompanyConfigRecord) (*domain.HRCompanyConfigRecord, error) {
+	_, err := r.queries.UpsertHRConfig(ctx, sqlc.UpsertHRConfigParams{
+		OwnerID:               ownerID,
+		CompanyName:           cfg.CompanyName,
+		FiscalYearStartMonth:  cfg.FiscalYearStartMonth,
+		DefaultCurrency:       cfg.DefaultCurrency,
+		DefaultTimezone:       cfg.DefaultTimezone,
+		DefaultWorkScheduleID: nullInt64(cfg.DefaultWorkScheduleID),
+		OvertimeEnabled:       cfg.OvertimeEnabled,
+		OvertimeMultiplier:    strconv.FormatFloat(cfg.OvertimeMultiplier, 'f', 2, 64),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	return r.GetHRConfig(ctx, ownerID)
+}
+
+func (r *Repository) SeedDefaultRoles(ctx context.Context, ownerID int64, roles []domain.RoleRecord) error {
+	for _, role := range roles {
+		_, err := r.queries.UpsertRole(ctx, sqlc.UpsertRoleParams{
+			OwnerID:     ownerID,
+			Name:        role.Name,
+			Description: nullString(role.Description),
+			Permissions: json.RawMessage(role.Permissions),
+			IsSystem:    role.IsSystem,
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("failed to seed role", logger.Any("owner_id", ownerID), logger.String("role", role.Name), logger.Error(err))
+			return err
+		}
+	}
+	return nil
+}
+
+// --- Approval Chains ---
+
+func (r *Repository) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*domain.ApprovalChainRecord, error) {
+	chain, err := r.queries.GetApprovalChain(ctx, sqlc.GetApprovalChainParams{
+		OwnerID:     ownerID,
+		RequestType: requestType,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	levelRows, err := r.queries.GetApprovalChainLevels(ctx, sqlc.GetApprovalChainLevelsParams{
+		OwnerID:         ownerID,
+		ApprovalChainID: chain.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	levels := make([]domain.ApprovalChainLevelRecord, 0, len(levelRows))
+	for _, lv := range levelRows {
+		levels = append(levels, domain.ApprovalChainLevelRecord{
+			ID:                 lv.ID,
+			OwnerID:            lv.OwnerID,
+			ApprovalChainID:    lv.ApprovalChainID,
+			LevelOrder:         lv.LevelOrder,
+			ApproverType:       lv.ApproverType,
+			ApproverRoleID:     lv.ApproverRoleID.Int64,
+			ApproverEmployeeID: lv.ApproverEmployeeID.Int64,
+			CreatedAt:          lv.CreatedAt,
+		})
+	}
+
+	return &domain.ApprovalChainRecord{
+		ID:          chain.ID,
+		OwnerID:     chain.OwnerID,
+		RequestType: chain.RequestType,
+		Name:        chain.Name,
+		Levels:      levels,
+		CreatedAt:   chain.CreatedAt,
+		UpdatedAt:   chain.UpdatedAt,
+	}, nil
+}
+
+func (r *Repository) UpsertApprovalChain(ctx context.Context, ownerID int64, chain domain.ApprovalChainRecord) (*domain.ApprovalChainRecord, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	result, err := qtx.UpsertApprovalChain(ctx, sqlc.UpsertApprovalChainParams{
+		OwnerID:     ownerID,
+		RequestType: chain.RequestType,
+		Name:        chain.Name,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	chainID, err := result.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	if chainID == 0 {
+		existing, lookupErr := qtx.GetApprovalChain(ctx, sqlc.GetApprovalChainParams{
+			OwnerID:     ownerID,
+			RequestType: chain.RequestType,
+		})
+		if lookupErr != nil {
+			_ = tx.Rollback()
+			return nil, lookupErr
+		}
+		chainID = existing.ID
+	}
+
+	err = qtx.DeleteApprovalChainLevels(ctx, sqlc.DeleteApprovalChainLevelsParams{
+		OwnerID:         ownerID,
+		ApprovalChainID: chainID,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	for _, level := range chain.Levels {
+		err := qtx.CreateApprovalChainLevel(ctx, sqlc.CreateApprovalChainLevelParams{
+			OwnerID:            ownerID,
+			ApprovalChainID:    chainID,
+			LevelOrder:         level.LevelOrder,
+			ApproverType:       level.ApproverType,
+			ApproverRoleID:     nullInt64(level.ApproverRoleID),
+			ApproverEmployeeID: nullInt64(level.ApproverEmployeeID),
+		})
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return r.GetApprovalChain(ctx, ownerID, chain.RequestType)
+}
+
+// --- Helpers ---
+
+func employeeFromRow(row sqlc.HrEmployee) domain.EmployeeRecord {
+	return domain.EmployeeRecord{
+		ID:                    row.ID,
+		OwnerID:               row.OwnerID,
+		UserID:                row.UserID.Int64,
+		DepartmentID:          row.DepartmentID.Int64,
+		LocationID:            row.LocationID.Int64,
+		WorkScheduleID:        row.WorkScheduleID.Int64,
+		FirstName:             row.FirstName,
+		LastName:              row.LastName,
+		Email:                 row.Email,
+		Phone:                 row.Phone.String,
+		EmploymentType:        row.EmploymentType,
+		Status:                row.Status,
+		Salary:                parseNullFloat(row.Salary),
+		HourlyRate:            parseNullFloat(row.HourlyRate),
+		OvertimeRate:          parseNullFloat(row.OvertimeRate),
+		StartDate:             row.StartDate.Time,
+		EndDate:               row.EndDate.Time,
+		Address:               row.Address.String,
+		EmergencyContactName:  row.EmergencyContactName.String,
+		EmergencyContactPhone: row.EmergencyContactPhone.String,
+		Notes:                 row.Notes.String,
+		CreatedAt:             row.CreatedAt,
+		UpdatedAt:             row.UpdatedAt,
+	}
+}
+
+func employeeToParams(ownerID int64, emp domain.EmployeeRecord) sqlc.CreateEmployeeParams {
+	return sqlc.CreateEmployeeParams{
+		OwnerID:               ownerID,
+		UserID:                nullInt64(emp.UserID),
+		DepartmentID:          nullInt64(emp.DepartmentID),
+		LocationID:            nullInt64(emp.LocationID),
+		WorkScheduleID:        nullInt64(emp.WorkScheduleID),
+		FirstName:             emp.FirstName,
+		LastName:              emp.LastName,
+		Email:                 emp.Email,
+		Phone:                 nullString(emp.Phone),
+		EmploymentType:        emp.EmploymentType,
+		Status:                emp.Status,
+		Salary:                nullStringFromFloat(emp.Salary),
+		HourlyRate:            nullStringFromFloat(emp.HourlyRate),
+		OvertimeRate:          nullStringFromFloat(emp.OvertimeRate),
+		StartDate:             nullTime(emp.StartDate),
+		EndDate:               nullTime(emp.EndDate),
+		Address:               nullString(emp.Address),
+		EmergencyContactName:  nullString(emp.EmergencyContactName),
+		EmergencyContactPhone: nullString(emp.EmergencyContactPhone),
+		Notes:                 nullString(emp.Notes),
+	}
+}
+
+func locationFromRow(row sqlc.HrLocation) domain.LocationRecord {
+	return domain.LocationRecord{
+		ID:        row.ID,
+		OwnerID:   row.OwnerID,
+		Name:      row.Name,
+		Address:   row.Address.String,
+		City:      row.City.String,
+		Country:   row.Country.String,
+		Timezone:  row.Timezone.String,
+		Latitude:  row.Latitude.Float64,
+		Longitude: row.Longitude.Float64,
+		IsDefault: row.IsDefault,
+		CreatedAt: row.CreatedAt,
+		UpdatedAt: row.UpdatedAt,
+	}
+}
+
+func departmentFromRow(row sqlc.HrDepartment) domain.DepartmentRecord {
+	return domain.DepartmentRecord{
+		ID:                    row.ID,
+		OwnerID:               row.OwnerID,
+		LocationID:            row.LocationID,
+		ParentDepartmentID:    row.ParentDepartmentID.Int64,
+		Name:                  row.Name,
+		DefaultWorkScheduleID: row.DefaultWorkScheduleID.Int64,
+		CreatedAt:             row.CreatedAt,
+		UpdatedAt:             row.UpdatedAt,
+	}
+}
+
+func workScheduleFromRow(row sqlc.HrWorkSchedule) domain.WorkScheduleRecord {
+	return domain.WorkScheduleRecord{
+		ID:           row.ID,
+		OwnerID:      row.OwnerID,
+		Name:         row.Name,
+		ScheduleData: string(row.ScheduleData),
+		IsDefault:    row.IsDefault,
+		CreatedAt:    row.CreatedAt,
+		UpdatedAt:    row.UpdatedAt,
+	}
+}
+
+func roleFromRow(row sqlc.HrRole) domain.RoleRecord {
+	return domain.RoleRecord{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Name:        row.Name,
+		Description: row.Description.String,
+		Permissions: string(row.Permissions),
+		IsSystem:    row.IsSystem,
+		CreatedAt:   row.CreatedAt,
+		UpdatedAt:   row.UpdatedAt,
+	}
+}
+
+func setupStepFromRow(row sqlc.HrSetupStep) domain.SetupStepRecord {
+	return domain.SetupStepRecord{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		StepKey:     row.StepKey,
+		StepLabel:   row.StepLabel,
+		IsCompleted: row.IsCompleted,
+		CompletedAt: row.CompletedAt.Time,
+		CreatedAt:   row.CreatedAt,
+		UpdatedAt:   row.UpdatedAt,
+	}
+}
+
+func nullInt64(v int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: v, Valid: v != 0}
+}
+
+func nullString(v string) sql.NullString {
+	return sql.NullString{String: v, Valid: v != ""}
+}
+
+func nullStringFromFloat(v float64) sql.NullString {
+	if v == 0 {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: strconv.FormatFloat(v, 'f', 2, 64), Valid: true}
+}
+
+func nullFloat64(v float64) sql.NullFloat64 {
+	return sql.NullFloat64{Float64: v, Valid: v != 0}
+}
+
+func nullTime(v time.Time) sql.NullTime {
+	return sql.NullTime{Time: v, Valid: !v.IsZero()}
+}
+
+func parseNullFloat(v sql.NullString) float64 {
+	if !v.Valid {
+		return 0
+	}
+	f, err := strconv.ParseFloat(v.String, 64)
+	if err != nil {
+		// DECIMAL values from MySQL should always parse; log corruption and return zero
+		logger.Global().Warn("failed to parse nullable decimal from database", logger.String("value", v.String), logger.Error(err))
+		return 0
+	}
+	return f
+}
+
+func parseFloat(v string) float64 {
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		// DECIMAL values from MySQL should always parse; log corruption and return zero
+		logger.Global().Warn("failed to parse decimal from database", logger.String("value", v), logger.Error(err))
+		return 0
+	}
+	return f
+}
