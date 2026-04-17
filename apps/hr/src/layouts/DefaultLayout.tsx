@@ -208,7 +208,7 @@ type Theme = 'light' | 'dark' | 'system';
 
 function useTheme(): [Theme, (t: Theme) => void] {
   const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('hr-theme') as Theme) || 'dark';
+    return (localStorage.getItem('hr-theme') as Theme) || 'light';
   });
 
   const setTheme = (t: Theme) => {
@@ -501,8 +501,13 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const [theme, setTheme] = useTheme();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const config = useHRConfigStore((s) => s.config);
   const timeTrackingModel = config?.timeTrackingModel ?? 'both';
+
+  const toggleSection = (key: string): void => {
+    setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const getPageTitle = (pathname: string): string => {
     if (routeLabelKeys[pathname]) return t(routeLabelKeys[pathname]);
@@ -621,27 +626,67 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               (item) => !item.configGuard || item.configGuard(timeTrackingModel, config)
             );
             if (visibleItems.length === 0) return null;
+            const isCollapsed = collapsedSections[section.i18nKey] ?? false;
             return (
               <div
                 key={section.i18nKey}
-                style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 4 }}
               >
-                <p
+                <button
+                  onClick={() => toggleSection(section.i18nKey)}
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
                     padding: '6px 12px 4px',
-                    fontSize: '10px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: 'var(--hr-text-dim)',
-                    margin: 0,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
                   }}
                 >
-                  {t(section.i18nKey)}
-                </p>
-                {visibleItems.map((item) => (
-                  <SidebarNavItem key={item.path} {...item} />
-                ))}
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: 'var(--hr-text-dim)',
+                    }}
+                  >
+                    {t(section.i18nKey)}
+                  </span>
+                  <ChevronUp
+                    size={11}
+                    style={{
+                      color: 'var(--hr-text-dim)',
+                      transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0)',
+                      transition: 'transform 0.2s',
+                      flexShrink: 0,
+                    }}
+                  />
+                </button>
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.div
+                      key="section-items"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      style={{
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                      }}
+                    >
+                      {visibleItems.map((item) => (
+                        <SidebarNavItem key={item.path} {...item} />
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}

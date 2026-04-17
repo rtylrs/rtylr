@@ -60,6 +60,7 @@ export const useUpsertHRConfig = () => {
     },
     onSuccess: (config: HRCompanyConfigPayload) => {
       setConfig(config);
+      queryClient.setQueryData(['hr-config'], config);
       queryClient.invalidateQueries({ queryKey: ['hr-config'] });
       toast.success(t('setup.configSaved'));
     },
