@@ -4,25 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_customers/internal/application"
 	"github.com/voxire/onion/internal/modules/support_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toCustomerPayload(c domain.Customer) *suppv1.SupportCustomer {
-	p := &suppv1.SupportCustomer{
-		Id: c.ID, BusinessId: c.BusinessID, Name: c.Name,
-		Email: c.Email, Phone: c.Phone, TotalTickets: int64(c.TotalTickets),
-		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-	if c.LastTicketAt != nil {
-		p.LastTicketAt = c.LastTicketAt.Format("2006-01-02T15:04:05Z")
-	}
-	return p
-}
 
 // -- LIST --------------------------------------------------------------------
 
@@ -36,10 +22,10 @@ type ListCustomersRequest struct {
 }
 
 type ListCustomersResponse struct {
-	Customers []*suppv1.SupportCustomer `json:"customers"`
-	Total     int                       `json:"total"`
-	Page      int                       `json:"page"`
-	PageSize  int                       `json:"page_size"`
+	Customers []domain.Customer `json:"customers"`
+	Total     int               `json:"total"`
+	Page      int               `json:"page"`
+	PageSize  int               `json:"page_size"`
 }
 
 func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequest) (ListCustomersResponse, *errorModels.ServerError) {
@@ -57,11 +43,7 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 	if err != nil {
 		return ListCustomersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support customers"}
 	}
-	payloads := make([]*suppv1.SupportCustomer, len(items))
-	for i, c := range items {
-		payloads[i] = toCustomerPayload(c)
-	}
-	return ListCustomersResponse{Customers: payloads, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+	return ListCustomersResponse{Customers: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
 
 // -- GET DETAIL --------------------------------------------------------------
@@ -75,7 +57,7 @@ type GetCustomerRequest struct {
 }
 
 type GetCustomerResponse struct {
-	Customer *suppv1.SupportCustomer `json:"customer"`
+	Customer *domain.Customer `json:"customer"`
 }
 
 func (h *GetCustomerHandler) Validate(_ context.Context, req *GetCustomerRequest) *errorModels.ServerError {
@@ -94,5 +76,5 @@ func (h *GetCustomerHandler) Serve(ctx context.Context, req *GetCustomerRequest)
 	if err != nil {
 		return GetCustomerResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support customer"}
 	}
-	return GetCustomerResponse{Customer: toCustomerPayload(*c)}, nil
+	return GetCustomerResponse{Customer: c}, nil
 }

@@ -4,17 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toProtoResource(r domain.Resource) *bookv1.Resource {
-	return &bookv1.Resource{Id: r.ID, OwnerId: r.OwnerID, Name: r.Name, Type: r.Type, Capacity: int32(r.Capacity), IsActive: r.IsActive, CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
-}
 
 func ListRoutes() []string   { return []string{"/book/resources"} }
 func CreateRoutes() []string { return []string{"/book/resources"} }
@@ -23,15 +17,14 @@ func DeleteRoutes() []string { return []string{"/book/resources"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Resources []*bookv1.Resource `json:"resources"` }
+type ListResponse struct{ Resources []domain.Resource `json:"resources"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list resources"} }
-	out := make([]*bookv1.Resource, 0, len(items)); for _, i := range items { out = append(out, toProtoResource(i)) }
-	return ListResponse{Resources: out}, nil
+	return ListResponse{Resources: items}, nil
 }
 
 type CreateHandler struct{ Service *application.Service }

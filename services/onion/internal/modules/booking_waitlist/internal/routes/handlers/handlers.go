@@ -4,19 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toProtoWaitlist(w domain.WaitlistEntry) *bookv1.WaitlistEntry {
-	return &bookv1.WaitlistEntry{Id: w.ID, OwnerId: w.OwnerID, ServiceId: w.ServiceID, CustomerName: w.CustomerName,
-		CustomerEmail: w.CustomerEmail, CustomerPhone: w.CustomerPhone, PreferredDate: w.PreferredDate,
-		PreferredTime: w.PreferredTime, Status: w.Status, CreatedAt: w.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
-}
 
 func ListRoutes() []string   { return []string{"/book/waitlist"} }
 func CreateRoutes() []string { return []string{"/book/waitlist"} }
@@ -24,15 +16,14 @@ func UpdateRoutes() []string { return []string{"/book/waitlist"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Entries []*bookv1.WaitlistEntry `json:"entries"` }
+type ListResponse struct{ Entries []domain.WaitlistEntry `json:"entries"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list waitlist"} }
-	out := make([]*bookv1.WaitlistEntry, 0, len(items)); for _, i := range items { out = append(out, toProtoWaitlist(i)) }
-	return ListResponse{Entries: out}, nil
+	return ListResponse{Entries: items}, nil
 }
 
 type CreateHandler struct{ Service *application.Service }

@@ -4,22 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/application"
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toArticlePayload(a domain.Article) *suppv1.Article {
-	return &suppv1.Article{
-		Id: a.ID, BusinessId: a.BusinessID, Title: a.Title, Slug: a.Slug,
-		Body: a.Body, Category: a.Category, IsPublished: a.IsPublished, Views: int64(a.Views),
-		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: a.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-}
 
 func ListArticlesRoutes() []string  { return []string{"/support/knowledge"} }
 func CreateArticleRoutes() []string { return []string{"/support/knowledge"} }
@@ -32,10 +21,10 @@ type ListArticlesRequest struct {
 	PageSize int `json:"page_size"`
 }
 type ListArticlesResponse struct {
-	Articles []*suppv1.Article `json:"articles"`
-	Total    int               `json:"total"`
-	Page     int               `json:"page"`
-	PageSize int               `json:"page_size"`
+	Articles []domain.Article `json:"articles"`
+	Total    int              `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
 }
 
 func (h *ListArticlesHandler) Serve(ctx context.Context, req *ListArticlesRequest) (ListArticlesResponse, *errorModels.ServerError) {
@@ -53,11 +42,7 @@ func (h *ListArticlesHandler) Serve(ctx context.Context, req *ListArticlesReques
 	if err != nil {
 		return ListArticlesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list articles"}
 	}
-	payloads := make([]*suppv1.Article, len(items))
-	for i, a := range items {
-		payloads[i] = toArticlePayload(a)
-	}
-	return ListArticlesResponse{Articles: payloads, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+	return ListArticlesResponse{Articles: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
 
 type CreateArticleHandler struct{ Service *application.Service }

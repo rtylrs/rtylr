@@ -4,24 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	storev1 "github.com/voxire/voxie/gen/go/store/v1"
-
 	"github.com/voxire/onion/internal/modules/store_products/internal/application"
 	"github.com/voxire/onion/internal/modules/store_products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toProtoProduct(p domain.StoreProduct) *storev1.StoreProduct {
-	return &storev1.StoreProduct{
-		Id: p.ID, OwnerId: p.OwnerID, ProductId: p.ProductID, Title: p.Title,
-		Slug: p.Slug, Description: p.Description, Images: p.Images,
-		Price: p.Price, CompareAtPrice: p.CompareAtPrice, IsPublished: p.IsPublished,
-		SortOrder: int32(p.SortOrder),
-		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt: p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
-}
 
 func ListRoutes() []string   { return []string{"/store/products"} }
 func CreateRoutes() []string { return []string{"/store/products"} }
@@ -30,7 +17,7 @@ func DeleteRoutes() []string { return []string{"/store/products"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Products []*storev1.StoreProduct `json:"products"` }
+type ListResponse struct{ Products []domain.StoreProduct `json:"products"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -41,11 +28,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list store products"}
 	}
-	out := make([]*storev1.StoreProduct, 0, len(items))
-	for _, i := range items {
-		out = append(out, toProtoProduct(i))
-	}
-	return ListResponse{Products: out}, nil
+	return ListResponse{Products: items}, nil
 }
 
 type CreateHandler struct{ Service *application.Service }

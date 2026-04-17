@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/support_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -18,7 +16,7 @@ func UpdateSettingsRoutes() []string { return []string{"/support/settings"} }
 type GetSettingsHandler struct{ Service *application.Service }
 type GetSettingsRequest struct{}
 type GetSettingsResponse struct {
-	Settings *suppv1.SupportSettings `json:"settings"`
+	Settings *domain.Settings `json:"settings"`
 }
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, *errorModels.ServerError) {
@@ -30,13 +28,7 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	if err != nil {
 		return GetSettingsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support settings"}
 	}
-	return GetSettingsResponse{Settings: &suppv1.SupportSettings{
-		Id: s.ID, BusinessId: s.BusinessID, AutoAssign: s.AutoAssign,
-		SlaHours: int64(s.SLAHours), BusinessHours: s.BusinessHours,
-		NotificationEmail: s.NotificationEmail,
-		CreatedAt:         s.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:         s.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}}, nil
+	return GetSettingsResponse{Settings: s}, nil
 }
 
 type UpdateSettingsHandler struct{ Service *application.Service }

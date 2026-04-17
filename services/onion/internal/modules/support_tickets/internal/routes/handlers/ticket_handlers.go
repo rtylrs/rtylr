@@ -4,23 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/application"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toTicketPayload(t domain.Ticket) *suppv1.Ticket {
-	return &suppv1.Ticket{
-		Id: t.ID, BusinessId: t.BusinessID, CustomerName: t.CustomerName,
-		CustomerEmail: t.CustomerEmail, Subject: t.Subject, Status: t.Status,
-		Priority: t.Priority, AssignedTo: t.AssignedTo, Channel: t.Channel,
-		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-}
 
 // -- LIST --------------------------------------------------------------------
 
@@ -35,10 +23,10 @@ type ListTicketsRequest struct {
 }
 
 type ListTicketsResponse struct {
-	Tickets  []*suppv1.Ticket `json:"tickets"`
-	Total    int              `json:"total"`
-	Page     int              `json:"page"`
-	PageSize int              `json:"page_size"`
+	Tickets  []domain.Ticket `json:"tickets"`
+	Total    int             `json:"total"`
+	Page     int             `json:"page"`
+	PageSize int             `json:"page_size"`
 }
 
 func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest) (ListTicketsResponse, *errorModels.ServerError) {
@@ -56,11 +44,7 @@ func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest)
 	if err != nil {
 		return ListTicketsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support tickets"}
 	}
-	payloads := make([]*suppv1.Ticket, len(items))
-	for i, t := range items {
-		payloads[i] = toTicketPayload(t)
-	}
-	return ListTicketsResponse{Tickets: payloads, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+	return ListTicketsResponse{Tickets: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
 
 // -- GET DETAIL --------------------------------------------------------------
@@ -74,8 +58,8 @@ type GetTicketRequest struct {
 }
 
 type GetTicketResponse struct {
-	Ticket   *suppv1.Ticket          `json:"ticket"`
-	Messages []*suppv1.TicketMessage `json:"messages"`
+	Ticket   *domain.Ticket   `json:"ticket"`
+	Messages []domain.Message `json:"messages"`
 }
 
 func (h *GetTicketHandler) Validate(_ context.Context, req *GetTicketRequest) *errorModels.ServerError {
@@ -98,15 +82,7 @@ func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (Ge
 	if err != nil {
 		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list ticket messages"}
 	}
-	msgPayloads := make([]*suppv1.TicketMessage, len(msgs))
-	for i, m := range msgs {
-		msgPayloads[i] = &suppv1.TicketMessage{
-			Id: m.ID, TicketId: m.TicketID, SenderType: m.SenderType,
-			SenderName: m.SenderName, Body: m.Body, IsInternal: m.IsInternal,
-			CreatedAt: m.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		}
-	}
-	return GetTicketResponse{Ticket: toTicketPayload(*ticket), Messages: msgPayloads}, nil
+	return GetTicketResponse{Ticket: ticket, Messages: msgs}, nil
 }
 
 // -- CREATE ------------------------------------------------------------------

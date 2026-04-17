@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -20,7 +18,7 @@ func DeleteCannedRoutes() []string { return []string{"/support/canned"} }
 type ListCannedHandler struct{ Service *application.Service }
 type ListCannedRequest struct{}
 type ListCannedResponse struct {
-	CannedResponses []*suppv1.CannedResponse `json:"canned_responses"`
+	CannedResponses []domain.CannedResponse `json:"canned_responses"`
 }
 
 func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (ListCannedResponse, *errorModels.ServerError) {
@@ -32,15 +30,7 @@ func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (Li
 	if err != nil {
 		return ListCannedResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list canned responses"}
 	}
-	payloads := make([]*suppv1.CannedResponse, len(items))
-	for i, c := range items {
-		payloads[i] = &suppv1.CannedResponse{
-			Id: c.ID, BusinessId: c.BusinessID, Name: c.Name,
-			Body: c.Body, Category: c.Category, Shortcut: c.Shortcut,
-			CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		}
-	}
-	return ListCannedResponse{CannedResponses: payloads}, nil
+	return ListCannedResponse{CannedResponses: items}, nil
 }
 
 type CreateCannedHandler struct{ Service *application.Service }

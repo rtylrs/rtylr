@@ -4,9 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	suppv1 "github.com/voxire/voxie/gen/go/support/v1"
-
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/application"
+	"github.com/voxire/onion/internal/modules/support_inbox/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
@@ -23,10 +22,10 @@ type ListInboxRequest struct {
 }
 
 type ListInboxResponse struct {
-	Inbox    []*suppv1.InboxItem `json:"inbox"`
-	Total    int                 `json:"total"`
-	Page     int                 `json:"page"`
-	PageSize int                 `json:"page_size"`
+	Inbox    []domain.InboxItem `json:"inbox"`
+	Total    int                `json:"total"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"page_size"`
 }
 
 func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (ListInboxResponse, *errorModels.ServerError) {
@@ -44,17 +43,7 @@ func (h *ListInboxHandler) Serve(ctx context.Context, req *ListInboxRequest) (Li
 	if err != nil {
 		return ListInboxResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inbox"}
 	}
-	payloads := make([]*suppv1.InboxItem, len(items))
-	for i, item := range items {
-		payloads[i] = &suppv1.InboxItem{
-			TicketId: item.TicketID, CustomerName: item.CustomerName,
-			CustomerEmail: item.CustomerEmail, Subject: item.Subject,
-			Status: item.Status, Priority: item.Priority, Channel: item.Channel,
-			LastMessage: item.LastMessage, MessageCount: int64(item.MessageCount),
-			LastMessageAt: item.LastMessageAt.Format("2006-01-02T15:04:05Z"),
-		}
-	}
-	return ListInboxResponse{Inbox: payloads, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+	return ListInboxResponse{Inbox: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
 
 // -- UNREAD COUNT ------------------------------------------------------------

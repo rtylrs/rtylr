@@ -4,17 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	storev1 "github.com/voxire/voxie/gen/go/store/v1"
-
 	"github.com/voxire/onion/internal/modules/store_payments/internal/application"
 	"github.com/voxire/onion/internal/modules/store_payments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toProtoPayment(p domain.PaymentMethod) *storev1.PaymentMethod {
-	return &storev1.PaymentMethod{Id: p.ID, OwnerId: p.OwnerID, Provider: p.Provider, Config: p.Config, IsActive: p.IsActive, CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
-}
 
 func ListRoutes() []string   { return []string{"/store/payments"} }
 func CreateRoutes() []string { return []string{"/store/payments"} }
@@ -22,15 +16,14 @@ func UpdateRoutes() []string { return []string{"/store/payments"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Methods []*storev1.PaymentMethod `json:"methods"` }
+type ListResponse struct{ Methods []domain.PaymentMethod `json:"methods"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list payment methods"} }
-	out := make([]*storev1.PaymentMethod, 0, len(items)); for _, i := range items { out = append(out, toProtoPayment(i)) }
-	return ListResponse{Methods: out}, nil
+	return ListResponse{Methods: items}, nil
 }
 
 type CreateHandler struct{ Service *application.Service }

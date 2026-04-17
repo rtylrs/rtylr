@@ -4,21 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	bookv1 "github.com/voxire/voxie/gen/go/book/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
-
-func toProtoAppointment(a domain.Appointment) *bookv1.Appointment {
-	return &bookv1.Appointment{Id: a.ID, OwnerId: a.OwnerID, ServiceId: a.ServiceID, ResourceId: a.ResourceID, StaffId: a.StaffID,
-		CustomerName: a.CustomerName, CustomerEmail: a.CustomerEmail, CustomerPhone: a.CustomerPhone,
-		StartTime: a.StartTime.Format("2006-01-02T15:04:05Z07:00"), EndTime: a.EndTime.Format("2006-01-02T15:04:05Z07:00"),
-		Status: a.Status, Notes: a.Notes,
-		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"), UpdatedAt: a.UpdatedAt.Format("2006-01-02T15:04:05Z07:00")}
-}
 
 func ListRoutes() []string   { return []string{"/book/appointments"} }
 func TodayRoutes() []string  { return []string{"/book/appointments/today"} }
@@ -28,28 +18,26 @@ func DeleteRoutes() []string { return []string{"/book/appointments"} }
 
 type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
-type ListResponse struct{ Appointments []*bookv1.Appointment `json:"appointments"` }
+type ListResponse struct{ Appointments []domain.Appointment `json:"appointments"` }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list appointments"} }
-	out := make([]*bookv1.Appointment, 0, len(items)); for _, i := range items { out = append(out, toProtoAppointment(i)) }
-	return ListResponse{Appointments: out}, nil
+	return ListResponse{Appointments: items}, nil
 }
 
 type TodayHandler struct{ Service *application.Service }
 type TodayRequest struct{}
-type TodayResponse struct{ Appointments []*bookv1.Appointment `json:"appointments"` }
+type TodayResponse struct{ Appointments []domain.Appointment `json:"appointments"` }
 
 func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok { return TodayResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
 	items, err := h.Service.ListToday(ctx, authUser.UserID)
 	if err != nil { return TodayResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list today appointments"} }
-	out := make([]*bookv1.Appointment, 0, len(items)); for _, i := range items { out = append(out, toProtoAppointment(i)) }
-	return TodayResponse{Appointments: out}, nil
+	return TodayResponse{Appointments: items}, nil
 }
 
 type CreateHandler struct{ Service *application.Service }
