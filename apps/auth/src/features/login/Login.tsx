@@ -9,6 +9,7 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin, useGoogleAuth } from '../../shared/hooks/useAuth';
 import { auth } from '../../firebase';
 import notify from '../../shared/lib/notify/notify';
+import api from '../../shared/lib/api';
 import { Button } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
@@ -50,19 +51,43 @@ const Login: React.FC = (): React.JSX.Element => {
 
   const appName = getAppDisplayName(redirectParam);
 
-  const redirectTo = (): void => {
-    window.location.href = getRedirectUrl(redirectParam);
+  const redirectTo = async (): Promise<void> => {
+    // Explicit redirect param — honor it directly
+    if (redirectParam && redirectParam in APP_URLS) {
+      window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
+      return;
+    }
+    // No explicit redirect — decide based on the user's subscription apps
+    try {
+      const res = await api.get('/user/me');
+      const role: string = (res.data?.role as string) ?? '';
+      const apps: string[] = (res.data?.apps as string[]) ?? [];
+      // Owners and admins always land on Dash (the account center)
+      if (role === 'owner' || role === 'admin' || apps.length === 0) {
+        window.location.href = APP_URLS.dash as string;
+        return;
+      }
+      // Single-app subscriber — skip Dash and go straight to their app
+      if (apps.length === 1 && apps[0] in APP_URLS) {
+        window.location.href = APP_URLS[apps[0] as KnownAppId] as string;
+        return;
+      }
+      // Multi-app — use Dash as the launcher
+      window.location.href = APP_URLS.dash as string;
+    } catch {
+      window.location.href = APP_URLS.dash as string;
+    }
   };
 
   const handleSubmit = (): void => {
-    loginMutation.mutate({ email, password }, { onSuccess: () => redirectTo() });
+    loginMutation.mutate({ email, password }, { onSuccess: () => void redirectTo() });
   };
 
   const handleGoogle = async (): Promise<void> => {
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
-      googleAuthMutation.mutate({ idToken }, { onSuccess: () => redirectTo() });
+      googleAuthMutation.mutate({ idToken }, { onSuccess: () => void redirectTo() });
     } catch (err) {
       notify.error((err as Error).message);
     }
@@ -75,7 +100,7 @@ const Login: React.FC = (): React.JSX.Element => {
   useEffect((): void => {
     const tokenCookie = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
     if (isAuthenticated && tokenCookie) {
-      redirectTo();
+      void redirectTo();
     }
   }, [isAuthenticated]);
 

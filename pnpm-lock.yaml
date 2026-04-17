@@ -324,6 +324,9 @@ importers:
       '@voxire/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -567,6 +570,9 @@ importers:
       '@voxire/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config

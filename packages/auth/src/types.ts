@@ -8,6 +8,7 @@ export type AppId =
   | 'crm'
   | 'finance'
   | 'flow'
+  | 'insights'
   | 'menu'
   | 'landing';
 
