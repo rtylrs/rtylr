@@ -25,6 +25,6 @@ export default defineConfig({
   // Uncomment when ready to run against local dev servers
   // webServer: [
   //   { command: 'pnpm --filter @rtylr/auth dev', port: 5176, reuseExistingServer: true },
-  //   { command: 'pnpm --filter hub dev', port: 5175, reuseExistingServer: true },
+  //   { command: 'pnpm --filter dash dev', port: 5175, reuseExistingServer: true },
   // ],
 });

@@ -1,7 +1,7 @@
 {
-  "name": "hub",
+  "name": "dash",
   "version": "0.0.0",
-  "description": "Hub Dashboard - Web Application",
+  "description": "Dash - Account center and command hub",
   "type": "module",
   "scripts": {
     "dev": "vite",

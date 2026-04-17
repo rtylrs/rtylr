@@ -43,7 +43,7 @@ export default defineConfig(() => ({
     strictPort: true,
   },
   build: {
-    outDir: '../../dist/hub',
+    outDir: '../../dist/dash',
     emptyOutDir: true,
     reportCompressedSize: true,
     manifest: true,
