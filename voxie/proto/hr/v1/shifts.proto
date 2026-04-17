@@ -1,66 +1,133 @@
 syntax = "proto3";
 
-package hr;
+package hr.v1;
 
-option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
 
-// ── Shifts ──────────────────────────────────────────────────────────
+// ── Shift ─────────────────────────────────────────────────────────
 
-message Shift {
+message ShiftPayload {
+  // Unique identifier for the shift template.
   int64 id = 1;
+  // Tenant owner this shift belongs to.
   int64 owner_id = 2;
-  int64 staff_id = 3;
-  string date = 4;
+  // Location where this shift takes place.
+  int64 location_id = 3;
+  // Human-readable shift name (e.g. "Morning", "Night").
+  string name = 4;
+  // Shift start time (HH:MM 24-hour format).
   string start_time = 5;
+  // Shift end time (HH:MM 24-hour format).
   string end_time = 6;
-  int64 break_minutes = 7;
-  string status = 8;
-  string notes = 9;
-  string created_at = 10;
-  string updated_at = 11;
+  // Hex colour code used to render this shift on the roster (e.g. "#4CAF50").
+  string color = 7;
+  // Unix timestamp when this record was created.
+  int64 created_at = 8;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 9;
 }
 
-message ListShiftsRequest {
-  int64 staff_id = 1;
-  string date = 2;
+// ── Shift Assignment ──────────────────────────────────────────────
+
+message ShiftAssignmentPayload {
+  // Unique identifier for the assignment.
+  int64 id = 1;
+  // Tenant owner this assignment belongs to.
+  int64 owner_id = 2;
+  // Employee assigned to the shift.
+  int64 employee_id = 3;
+  // Shift template being assigned.
+  int64 shift_id = 4;
+  // Date the assignment is for (ISO-8601 date).
+  string date = 5;
+  // Assignment status (scheduled | worked | missed | swapped).
+  string status = 6;
+  // Unix timestamp when this record was created.
+  int64 created_at = 7;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 8;
 }
 
-message ListShiftsResponse {
-  repeated Shift shifts = 1;
-}
+// ── Create Shift ──────────────────────────────────────────────────
 
 message CreateShiftRequest {
-  int64 staff_id = 1;
-  string date = 2;
+  // Location where this shift takes place.
+  int64 location_id = 1;
+  // Human-readable shift name.
+  string name = 2;
+  // Shift start time (HH:MM 24-hour format).
   string start_time = 3;
+  // Shift end time (HH:MM 24-hour format).
   string end_time = 4;
-  int64 break_minutes = 5;
-  string status = 6;
-  string notes = 7;
+  // Hex colour code for roster display.
+  string color = 5;
 }
 
 message CreateShiftResponse {
-  int64 id = 1;
+  // The newly created shift.
+  ShiftPayload shift = 1;
 }
 
-message UpdateShiftRequest {
-  int64 id = 1;
-  string date = 2;
-  string start_time = 3;
-  string end_time = 4;
-  int64 break_minutes = 5;
-  string status = 6;
-  string notes = 7;
+// ── Create Shift Assignment ───────────────────────────────────────
+
+message CreateShiftAssignmentRequest {
+  // Employee to assign.
+  int64 employee_id = 1;
+  // Shift template to assign.
+  int64 shift_id = 2;
+  // Date of the assignment (ISO-8601 date).
+  string date = 3;
 }
 
-message UpdateShiftResponse {
+message CreateShiftAssignmentResponse {
+  // The newly created assignment.
+  ShiftAssignmentPayload assignment = 1;
+}
+
+// ── Publish Roster ────────────────────────────────────────────────
+
+message PublishRosterRequest {
+  // Location to publish the roster for.
+  int64 location_id = 1;
+  // Monday of the week being published (ISO-8601 date).
+  string week_start = 2;
+}
+
+message PublishRosterResponse {
+  // Whether the roster was successfully published.
   bool success = 1;
 }
 
-message DeleteShiftRequest {
-  int64 id = 1;
+// ── List Shifts ───────────────────────────────────────────────────
+
+message ListShiftsRequest {
+  // Filter by location; absent to include all locations.
+  optional int64 location_id = 1;
 }
 
-message DeleteShiftResponse {
-  bool success = 1;
+message ListShiftsResponse {
+  // Shift templates matching the filter.
+  repeated ShiftPayload shifts = 1;
+  // Total number of matching shifts across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
+
+// ── Get Roster ────────────────────────────────────────────────────
+
+message GetRosterRequest {
+  // Location to fetch the roster for.
+  int64 location_id = 1;
+  // Monday of the week to retrieve (ISO-8601 date).
+  string week_start = 2;
+}
+
+message GetRosterResponse {
+  // All shift assignments for the requested week and location.
+  repeated ShiftAssignmentPayload assignments = 1;
+  // Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15").
+  repeated string conflicts = 2;
 }

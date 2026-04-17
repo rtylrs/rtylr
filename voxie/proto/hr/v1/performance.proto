@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Review Goal ──────────────────────────────────────────────────────
+
+message ReviewGoalPayload {
+  // Unique identifier for the review goal.
+  int64 id = 1;
+  // Tenant owner this goal belongs to.
+  int64 owner_id = 2;
+  // Employee this goal is assigned to.
+  int64 employee_id = 3;
+  // Review cycle this goal is part of.
+  int64 review_cycle_id = 4;
+  // Short title summarising the goal.
+  string title = 5;
+  // Detailed description of the goal and expectations.
+  string description = 6;
+  // Relative importance of this goal within the cycle; absent if all goals are weighted equally.
+  optional double weight = 7;
+  // Measurable criteria that define goal achievement; absent if not yet specified.
+  optional string success_criteria = 8;
+  // Goal status (active | achieved | missed).
+  string status = 9;
+  // Unix timestamp when this record was created.
+  int64 created_at = 10;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 11;
+}
+
+// ── Performance Review ───────────────────────────────────────────────
+
+message PerformanceReviewPayload {
+  // Unique identifier for the performance review.
+  int64 id = 1;
+  // Tenant owner this review belongs to.
+  int64 owner_id = 2;
+  // Employee being reviewed.
+  int64 employee_id = 3;
+  // Review cycle this review is part of.
+  int64 review_cycle_id = 4;
+  // Employee conducting the review.
+  int64 reviewer_employee_id = 5;
+  // Type of review (self | manager | peer).
+  string review_type = 6;
+  // Overall rating assigned by the reviewer; absent while still in draft.
+  optional string overall_rating = 7;
+  // Free-form written feedback from the reviewer; absent while still in draft.
+  optional string narrative = 8;
+  // Workflow status (draft | submitted | completed | shared).
+  string status = 9;
+  // Unix timestamp when the review was shared with the employee; absent if not yet shared.
+  optional int64 shared_with_employee_at = 10;
+  // Unix timestamp when this record was created.
+  int64 created_at = 11;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 12;
+}
+
+// ── Review Cycle ─────────────────────────────────────────────────────
+
+message ReviewCyclePayload {
+  // Unique identifier for the review cycle.
+  int64 id = 1;
+  // Tenant owner this cycle belongs to.
+  int64 owner_id = 2;
+  // Human-readable name for the cycle (e.g. "2026 Annual Review").
+  string name = 3;
+  // Cycle type (annual | mid_year | probation | adhoc).
+  string type = 4;
+  // Start of the review period (ISO-8601 date).
+  string period_start = 5;
+  // End of the review period (ISO-8601 date).
+  string period_end = 6;
+  // Workflow status (draft | open | in_review | completed).
+  string status = 7;
+  // Unix timestamp when this record was created.
+  int64 created_at = 8;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 9;
+}
+
+// ── Create Review Cycle ──────────────────────────────────────────────
+
+message CreateReviewCycleRequest {
+  // Human-readable name for the cycle.
+  string name = 1;
+  // Cycle type (annual | mid_year | probation | adhoc).
+  string type = 2;
+  // Start of the review period (ISO-8601 date).
+  string period_start = 3;
+  // End of the review period (ISO-8601 date).
+  string period_end = 4;
+}
+
+message CreateReviewCycleResponse {
+  // The newly created review cycle.
+  ReviewCyclePayload cycle = 1;
+}
+
+// ── Open Review Cycle ────────────────────────────────────────────────
+
+message OpenReviewCycleRequest {
+  // ID of the review cycle to open for submissions.
+  int64 cycle_id = 1;
+}
+
+message OpenReviewCycleResponse {
+  // The review cycle after transitioning to open status.
+  ReviewCyclePayload cycle = 1;
+}
+
+// ── Submit Review ────────────────────────────────────────────────────
+
+message SubmitReviewRequest {
+  // ID of the performance review being submitted.
+  int64 review_id = 1;
+  // Overall rating assigned by the reviewer.
+  string overall_rating = 2;
+  // Free-form written feedback from the reviewer.
+  string narrative = 3;
+}
+
+message SubmitReviewResponse {
+  // The submitted performance review.
+  PerformanceReviewPayload review = 1;
+}
+
+// ── List Review Cycles ───────────────────────────────────────────────
+
+message ListReviewCyclesRequest {}
+
+message ListReviewCyclesResponse {
+  // Page of review cycles.
+  repeated ReviewCyclePayload cycles = 1;
+  // Total number of review cycles across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
+
+// ── List Goals ───────────────────────────────────────────────────────
+
+message ListGoalsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by review cycle; absent to include all cycles.
+  optional int64 review_cycle_id = 2;
+}
+
+message ListGoalsResponse {
+  // Page of review goals matching the filters.
+  repeated ReviewGoalPayload goals = 1;
+  // Total number of matching goals across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

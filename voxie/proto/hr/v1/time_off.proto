@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package hr;
+package hr.v1;
 
-option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
 
 // ── Time Off ────────────────────────────────────────────────────────
 

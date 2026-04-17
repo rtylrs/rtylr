@@ -1,0 +1,237 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Leave Type ────────────────────────────────────────────────────
+
+message LeaveTypePayload {
+  // Unique identifier for the leave type.
+  int64 id = 1;
+  // Tenant owner this leave type belongs to.
+  int64 owner_id = 2;
+  // Human-readable name (e.g. "Annual Leave", "Sick Leave").
+  string name = 3;
+  // Whether days taken under this type are paid.
+  bool is_paid = 4;
+  // Whether leave requests of this type require manager approval.
+  bool requires_approval = 5;
+  // Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed.
+  optional string accrual_rule = 6;
+  // Maximum unused days that may carry over to the next year.
+  int32 max_carryover_days = 7;
+  // Minimum calendar days of notice required before the leave starts.
+  int32 min_notice_days = 8;
+  // Number of consecutive days after which supporting documentation is required; absent if never required.
+  optional int32 requires_documentation_after_days = 9;
+  // Whether this leave type is currently available for new requests.
+  bool is_active = 10;
+  // Unix timestamp when this record was created.
+  int64 created_at = 11;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 12;
+}
+
+// ── Leave Request ─────────────────────────────────────────────────
+
+message LeaveRequestPayload {
+  // Unique identifier for the leave request.
+  int64 id = 1;
+  // Tenant owner this request belongs to.
+  int64 owner_id = 2;
+  // Employee who is requesting leave.
+  int64 employee_id = 3;
+  // Leave type being requested.
+  int64 leave_type_id = 4;
+  // First day of leave (ISO-8601 date).
+  string start_date = 5;
+  // Last day of leave (ISO-8601 date).
+  string end_date = 6;
+  // Total number of working days requested (may be fractional for half-days).
+  double total_days = 7;
+  // Additional context from the employee; absent if none provided.
+  optional string notes = 8;
+  // Workflow status (pending | approved | rejected | cancelled).
+  string status = 9;
+  // Current step in a multi-level approval chain.
+  int32 current_approval_level = 10;
+  // Reason the request was rejected; absent unless status is rejected.
+  optional string rejection_reason = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
+}
+
+// ── Leave Balance ─────────────────────────────────────────────────
+
+message LeaveBalancePayload {
+  // Unique identifier for the balance record.
+  int64 id = 1;
+  // Tenant owner this balance belongs to.
+  int64 owner_id = 2;
+  // Employee this balance is for.
+  int64 employee_id = 3;
+  // Leave type this balance tracks.
+  int64 leave_type_id = 4;
+  // Calendar year this balance applies to.
+  int32 year = 5;
+  // Total entitled days for the year (including carryover).
+  double entitled_days = 6;
+  // Days already consumed by approved requests.
+  double used_days = 7;
+  // Days reserved by pending (not yet approved) requests.
+  double pending_days = 8;
+  // Days still available (entitled - used - pending).
+  double remaining_days = 9;
+  // Unix timestamp when this record was created.
+  int64 created_at = 10;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 11;
+}
+
+// ── Create Leave Request ──────────────────────────────────────────
+
+message CreateLeaveRequestRequest {
+  // Employee requesting leave.
+  int64 employee_id = 1;
+  // Leave type being requested.
+  int64 leave_type_id = 2;
+  // First day of leave (ISO-8601 date).
+  string start_date = 3;
+  // Last day of leave (ISO-8601 date).
+  string end_date = 4;
+  // Total number of working days requested.
+  double total_days = 5;
+  // Additional context from the employee; absent if none provided.
+  optional string notes = 6;
+}
+
+message CreateLeaveRequestResponse {
+  // The newly created leave request.
+  LeaveRequestPayload request = 1;
+}
+
+// ── Approve Leave Request ─────────────────────────────────────────
+
+message ApproveLeaveRequest {
+  // ID of the leave request being reviewed.
+  int64 leave_request_id = 1;
+  // True to approve, false to reject.
+  bool approved = 2;
+  // Reason for rejection; absent if approving.
+  optional string rejection_reason = 3;
+}
+
+message ApproveLeaveResponse {
+  // Whether the approval action was processed.
+  bool success = 1;
+}
+
+// ── List Leave Requests ───────────────────────────────────────────
+
+message ListLeaveRequestsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by status; absent to include all statuses.
+  optional string status = 2;
+}
+
+message ListLeaveRequestsResponse {
+  // Page of leave requests matching the filters.
+  repeated LeaveRequestPayload requests = 1;
+  // Total number of matching leave requests across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
+
+// ── List Leave Balances ───────────────────────────────────────────
+
+message ListLeaveBalancesRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by year; absent to return current year.
+  optional int32 year = 2;
+}
+
+message ListLeaveBalancesResponse {
+  // Leave balances matching the filters.
+  repeated LeaveBalancePayload balances = 1;
+  // Total number of matching balances across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
+
+// ── List Leave Types ──────────────────────────────────────────────
+
+message ListLeaveTypesRequest {}
+
+message ListLeaveTypesResponse {
+  // All leave types configured for the tenant.
+  repeated LeaveTypePayload leave_types = 1;
+  // Total number of leave types.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
+
+// ── Create Leave Type ─────────────────────────────────────────────
+
+message CreateLeaveTypeRequest {
+  // Human-readable name (e.g. "Annual Leave", "Sick Leave").
+  string name = 1;
+  // Whether days taken under this type are paid.
+  bool is_paid = 2;
+  // Whether leave requests of this type require manager approval.
+  bool requires_approval = 3;
+  // Accrual rule; absent if entitlement is fixed.
+  optional string accrual_rule = 4;
+  // Maximum unused days that may carry over to the next year.
+  int32 max_carryover_days = 5;
+  // Minimum calendar days of notice required.
+  int32 min_notice_days = 6;
+  // Consecutive days after which documentation is required; absent if never.
+  optional int32 requires_documentation_after_days = 7;
+}
+
+message CreateLeaveTypeResponse {
+  // The newly created leave type.
+  LeaveTypePayload leave_type = 1;
+}
+
+// ── Update Leave Type ─────────────────────────────────────────────
+
+message UpdateLeaveTypeRequest {
+  // ID of the leave type to update.
+  int64 id = 1;
+  // Updated name; absent to keep current value.
+  optional string name = 2;
+  // Updated paid status; absent to keep current value.
+  optional bool is_paid = 3;
+  // Updated approval requirement; absent to keep current value.
+  optional bool requires_approval = 4;
+  // Updated accrual rule; absent to keep current value.
+  optional string accrual_rule = 5;
+  // Updated max carryover days; absent to keep current value.
+  optional int32 max_carryover_days = 6;
+  // Updated min notice days; absent to keep current value.
+  optional int32 min_notice_days = 7;
+  // Updated documentation threshold; absent to keep current value.
+  optional int32 requires_documentation_after_days = 8;
+  // Updated active status; absent to keep current value.
+  optional bool is_active = 9;
+}
+
+message UpdateLeaveTypeResponse {
+  // The updated leave type.
+  LeaveTypePayload leave_type = 1;
+}

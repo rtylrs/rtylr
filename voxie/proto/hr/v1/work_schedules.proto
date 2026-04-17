@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Work Schedule ──────────────────────────────────────────────────
+
+message WorkSchedulePayload {
+  // Unique identifier for the work schedule.
+  int64 id = 1;
+  // Tenant owner this schedule belongs to.
+  int64 owner_id = 2;
+  // Display name of the schedule (e.g. "Standard 9-5").
+  string name = 3;
+  // Days of the week this schedule applies to (e.g. ["monday", "tuesday"]).
+  repeated string working_days = 4;
+  // Shift start time in HH:MM 24-hour format.
+  string start_time = 5;
+  // Shift end time in HH:MM 24-hour format.
+  string end_time = 6;
+  // Duration of the daily break in minutes.
+  int32 break_minutes = 7;
+  // Total contracted hours per week (e.g. 40.0).
+  double contracted_hours_per_week = 8;
+  // Daily overtime threshold in minutes; hours beyond this count as OT.
+  int32 daily_ot_threshold_minutes = 9;
+  // Weekly overtime threshold in minutes; hours beyond this count as OT.
+  int32 weekly_ot_threshold_minutes = 10;
+  // Unix timestamp when this schedule was created.
+  int64 created_at = 11;
+  // Unix timestamp when this schedule was last updated.
+  int64 updated_at = 12;
+}
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateWorkScheduleRequest {
+  // Display name of the schedule.
+  string name = 1;
+  // Days of the week this schedule applies to.
+  repeated string working_days = 2;
+  // Shift start time in HH:MM 24-hour format.
+  string start_time = 3;
+  // Shift end time in HH:MM 24-hour format.
+  string end_time = 4;
+  // Duration of the daily break in minutes.
+  int32 break_minutes = 5;
+  // Total contracted hours per week.
+  double contracted_hours_per_week = 6;
+  // Daily overtime threshold in minutes.
+  int32 daily_ot_threshold_minutes = 7;
+  // Weekly overtime threshold in minutes.
+  int32 weekly_ot_threshold_minutes = 8;
+}
+
+message CreateWorkScheduleResponse {
+  // The newly created work schedule.
+  WorkSchedulePayload schedule = 1;
+}
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateWorkScheduleRequest {
+  // ID of the schedule to update.
+  int64 id = 1;
+  // New name; absent to keep current.
+  optional string name = 2;
+  // New working days; if provided, replaces all existing days.
+  repeated string working_days = 3;
+  // New start time; absent to keep current.
+  optional string start_time = 4;
+  // New end time; absent to keep current.
+  optional string end_time = 5;
+  // New break duration in minutes; absent to keep current.
+  optional int32 break_minutes = 6;
+  // New contracted hours per week; absent to keep current.
+  optional double contracted_hours_per_week = 7;
+  // New daily OT threshold; absent to keep current.
+  optional int32 daily_ot_threshold_minutes = 8;
+  // New weekly OT threshold; absent to keep current.
+  optional int32 weekly_ot_threshold_minutes = 9;
+}
+
+message UpdateWorkScheduleResponse {
+  // The updated work schedule.
+  WorkSchedulePayload schedule = 1;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListWorkSchedulesResponse {
+  // All work schedules for the tenant.
+  repeated WorkSchedulePayload schedules = 1;
+}

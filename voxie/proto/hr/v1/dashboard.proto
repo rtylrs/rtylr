@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package hr;
+package hr.v1;
 
-option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
 
 // ── HR Dashboard ────────────────────────────────────────────────────
 
@@ -17,4 +17,56 @@ message GetHRDashboardRequest {}
 
 message GetHRDashboardResponse {
   DashboardStats stats = 1;
+}
+
+// ── Dashboard Widget ───────────────────────────────────────────────
+
+message DashboardWidgetPayload {
+  // Unique identifier for the widget.
+  int64 id = 1;
+  // Tenant owner this widget belongs to.
+  int64 owner_id = 2;
+  // Role that owns this widget layout.
+  int64 role_id = 3;
+  // Widget type identifier (e.g. headcount_chart, leave_summary).
+  string widget_type = 4;
+  // Horizontal grid position.
+  int32 position_x = 5;
+  // Vertical grid position.
+  int32 position_y = 6;
+  // Widget width in grid units.
+  int32 width = 7;
+  // Widget height in grid units.
+  int32 height = 8;
+  // Widget-specific configuration serialised as JSON.
+  bytes config = 9;
+  // Unix timestamp when this widget was created.
+  int64 created_at = 10;
+  // Unix timestamp when this widget was last updated.
+  int64 updated_at = 11;
+}
+
+// ── Dashboard Data ─────────────────────────────────────────────────
+
+message DashboardDataPayload {
+  // Widget type this data corresponds to.
+  string widget_type = 1;
+  // Serialised widget data as JSON.
+  bytes data = 2;
+}
+
+// ── Get Dashboard ──────────────────────────────────────────────────
+
+message GetDashboardResponse {
+  // Widget layout definitions for the requesting user's dashboard.
+  repeated DashboardWidgetPayload widgets = 1;
+  // Pre-loaded data keyed by widget type.
+  map<string, DashboardDataPayload> data = 2;
+}
+
+// ── Update Widget Layout ───────────────────────────────────────────
+
+message UpdateWidgetLayoutRequest {
+  // Updated widget positions and sizes.
+  repeated DashboardWidgetPayload widgets = 1;
 }

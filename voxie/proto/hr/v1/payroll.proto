@@ -1,54 +1,120 @@
 syntax = "proto3";
 
-package hr;
+package hr.v1;
 
-option go_package = "github.com/voxire/voxie/gen/go/hr/v1";
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
 
-// ── Payroll ─────────────────────────────────────────────────────────
+// ── Payroll Entry ────────────────────────────────────────────────────
 
-message PayrollRecord {
+message PayrollEntryPayload {
+  // Unique identifier for the payroll entry.
   int64 id = 1;
+  // Tenant owner this entry belongs to.
   int64 owner_id = 2;
-  int64 staff_id = 3;
-  string period_start = 4;
-  string period_end = 5;
-  string period_label = 6;
-  double regular_hours = 7;
-  double overtime_hours = 8;
-  double base_pay = 9;
-  double overtime_pay = 10;
-  double bonuses = 11;
-  double deductions = 12;
-  double tax_withheld = 13;
-  double net_pay = 14;
-  string status = 15;
-  string paid_at = 16;
-  string notes = 17;
-  string created_at = 18;
+  // Payroll run this entry is part of.
+  int64 payroll_run_id = 3;
+  // Employee this entry compensates.
+  int64 employee_id = 4;
+  // Gross base pay for the period.
+  double base_pay = 5;
+  // Compensation for overtime hours worked.
+  double overtime_pay = 6;
+  // Total deductions applied (tax, insurance, etc.).
+  double deductions = 7;
+  // Additional bonuses awarded in this period.
+  double bonuses = 8;
+  // Final take-home pay after deductions and bonuses.
+  double net_pay = 9;
+  // Total regular hours worked in the period.
+  double hours_worked = 10;
+  // Total overtime hours worked in the period.
+  double overtime_hours = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
 }
 
-message ListPayrollRequest {
-  string period_label = 1;
-}
+// ── Payroll Run ──────────────────────────────────────────────────────
 
-message ListPayrollResponse {
-  repeated PayrollRecord records = 1;
-}
-
-message RunPayrollRequest {
-  string period_start = 1;
-  string period_end = 2;
-  string period_label = 3;
-}
-
-message RunPayrollResponse {
-  int64 records_created = 1;
-}
-
-message MarkPayrollPaidRequest {
+message PayrollRunPayload {
+  // Unique identifier for the payroll run.
   int64 id = 1;
+  // Tenant owner this run belongs to.
+  int64 owner_id = 2;
+  // Start of the pay period (ISO-8601 date).
+  string period_start = 3;
+  // End of the pay period (ISO-8601 date).
+  string period_end = 4;
+  // Workflow status (draft | in_review | approved | exported).
+  string status = 5;
+  // Employee who initiated the payroll run.
+  int64 created_by = 6;
+  // Employee who approved the run; absent if not yet approved.
+  optional int64 approved_by = 7;
+  // Unix timestamp when the run was exported; absent if not yet exported.
+  optional int64 exported_at = 8;
+  // Sum of all entry gross pay amounts in this run.
+  double total_gross = 9;
+  // Sum of all entry net pay amounts in this run.
+  double total_net = 10;
+  // Individual payroll entries included in this run.
+  repeated PayrollEntryPayload entries = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
 }
 
-message MarkPayrollPaidResponse {
-  bool success = 1;
+// ── Trigger Payroll Run ──────────────────────────────────────────────
+
+message TriggerPayrollRunRequest {
+  // Start of the pay period to process (ISO-8601 date).
+  string period_start = 1;
+  // End of the pay period to process (ISO-8601 date).
+  string period_end = 2;
+}
+
+message TriggerPayrollRunResponse {
+  // The newly created payroll run with computed entries.
+  PayrollRunPayload run = 1;
+}
+
+// ── Approve Payroll Run ──────────────────────────────────────────────
+
+message ApprovePayrollRunRequest {
+  // ID of the payroll run to approve.
+  int64 run_id = 1;
+}
+
+message ApprovePayrollRunResponse {
+  // The approved payroll run.
+  PayrollRunPayload run = 1;
+}
+
+// ── Export Payroll ───────────────────────────────────────────────────
+
+message ExportPayrollRequest {
+  // ID of the payroll run to export.
+  int64 run_id = 1;
+}
+
+message ExportPayrollResponse {
+  // Unique identifier for the generated export batch.
+  string batch_id = 1;
+}
+
+// ── List Payroll Runs ────────────────────────────────────────────────
+
+message ListPayrollRunsRequest {}
+
+message ListPayrollRunsResponse {
+  // Page of payroll runs.
+  repeated PayrollRunPayload runs = 1;
+  // Total number of payroll runs across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
 }

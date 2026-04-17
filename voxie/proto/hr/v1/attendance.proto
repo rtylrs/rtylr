@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package hr.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/v1;hrv1";
+
+// ── Attendance Record ─────────────────────────────────────────────
+
+message AttendanceRecordPayload {
+  // Unique identifier for the attendance record.
+  int64 id = 1;
+  // Tenant owner this record belongs to.
+  int64 owner_id = 2;
+  // Employee this attendance record is for.
+  int64 employee_id = 3;
+  // Work location where attendance was recorded.
+  int64 location_id = 4;
+  // Date of the attendance record (ISO-8601 format).
+  string date = 5;
+  // Unix timestamp when the employee clocked in.
+  int64 clock_in_at = 6;
+  // Unix timestamp when the employee clocked out; absent if still clocked in.
+  optional int64 clock_out_at = 7;
+  // Total worked duration in minutes; absent if still clocked in.
+  optional int32 duration_minutes = 8;
+  // Method used to clock in (app | qr | gps | pin | facial).
+  string clock_in_method = 9;
+  // Latitude at clock-in; absent if location not captured.
+  optional double clock_in_lat = 10;
+  // Longitude at clock-in; absent if location not captured.
+  optional double clock_in_lng = 11;
+  // Whether the employee clocked in after the scheduled start.
+  bool is_late = 12;
+  // Number of minutes late; zero if on time.
+  int32 late_minutes = 13;
+  // Attendance status (present | absent | partial).
+  string status = 14;
+  // Unix timestamp when this record was created.
+  int64 created_at = 15;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 16;
+}
+
+// ── Clock In ──────────────────────────────────────────────────────
+
+message AttendanceClockInRequest {
+  // Method used to clock in (app | qr | gps | pin | facial).
+  string method = 1;
+  // Work location where the employee is clocking in.
+  int64 location_id = 2;
+  // Latitude at clock-in; absent if location not available.
+  optional double lat = 3;
+  // Longitude at clock-in; absent if location not available.
+  optional double lng = 4;
+  // QR token scanned at a terminal; absent if not using QR method.
+  optional string qr_token = 5;
+  // PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
+  optional string pin = 6;
+}
+
+message AttendanceClockInResponse {
+  // The created attendance record.
+  AttendanceRecordPayload record = 1;
+}
+
+// ── Clock Out ─────────────────────────────────────────────────────
+
+message AttendanceClockOutRequest {
+  // ID of the attendance record to close.
+  int64 attendance_record_id = 1;
+}
+
+message AttendanceClockOutResponse {
+  // The updated attendance record with clock-out data.
+  AttendanceRecordPayload record = 1;
+}
+
+// ── List Attendance ───────────────────────────────────────────────
+
+message ListAttendanceRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by date; absent to include all dates.
+  optional string date = 2;
+}
+
+message ListAttendanceResponse {
+  // Attendance records matching the filters.
+  repeated AttendanceRecordPayload records = 1;
+  // Total number of matching attendance records across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}
