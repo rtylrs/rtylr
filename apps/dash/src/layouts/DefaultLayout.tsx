@@ -102,7 +102,7 @@ const routeLabels: Record<string, string> = {
   '/help': 'Help center',
   '/export': 'Export data',
   '/import': 'Import data',
-  '/settings': 'Settings',
+  '/settings': 'Manage account',
   '/settings/account': 'Account',
   '/settings/general': 'General',
   '/settings/industry': 'Industry',
@@ -299,7 +299,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             }}
           >
             <Settings size={16} />
-            <span>Settings</span>
+            <span>Manage account</span>
           </Link>
 
           <DropdownMenu>
