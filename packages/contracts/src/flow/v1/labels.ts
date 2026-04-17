@@ -8,18 +8,22 @@
 
 export interface Label {
   id: number;
+  workspaceId: number;
   name: string;
   color: string;
-  taskCount: number;
+  createdAt: string;
 }
 
-export interface ListLabelsRequest {}
+export interface ListLabelsRequest {
+  workspaceId: number;
+}
 
 export interface ListLabelsResponse {
   labels: Label[];
 }
 
 export interface CreateLabelRequest {
+  workspaceId: number;
   name: string;
   color: string;
 }

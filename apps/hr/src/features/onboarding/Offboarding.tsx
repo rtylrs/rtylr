@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { LogOut } from 'lucide-react';
 import { useOffboardingChecklist, useToggleOffboardingTask } from '../../shared/hooks/useHrExtras';
@@ -12,38 +13,45 @@ import {
 } from '../../shared/components/ui';
 
 const CATEGORIES: Record<string, string> = {
-  'Knowledge transfer': '#3b82f6',
-  Access: '#ef4444',
-  Equipment: '#f59e0b',
-  Paperwork: '#8b5cf6',
+  'Knowledge transfer': 'var(--hr-shift-blue)',
+  Access: 'var(--hr-error)',
+  Equipment: 'var(--hr-status-pending)',
+  Paperwork: 'var(--hr-accent)',
 };
 
+const pillStyle = (cssVar: string): React.CSSProperties => ({
+  background: `color-mix(in srgb, ${cssVar} 13%, transparent)`,
+  color: cssVar,
+  border: `1px solid color-mix(in srgb, ${cssVar} 20%, transparent)`,
+});
+
 const Offboarding: React.FC = () => {
+  const { t } = useTranslation();
   const { data, isLoading } = useOffboardingChecklist();
   const toggle = useToggleOffboardingTask();
 
-  const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, t) => {
-    acc[t.staffName] = acc[t.staffName] || ([] as any);
-    (acc[t.staffName] as any).push(t);
+  const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, task) => {
+    const key = task.staffName;
+    acc[key] = [...(acc[key] ?? []), task];
     return acc;
   }, {});
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader title="Offboarding" subtitle="Exit checklist for departing employees" />
+      <SectionHeader title={t('offboarding.title')} subtitle={t('offboarding.subtitle')} />
       {isLoading ? (
         <Skeleton height={200} />
       ) : !data || data.length === 0 ? (
         <EmptyState
           icon={<LogOut size={20} />}
-          title="No offboarding in progress"
-          description="Departing employees' checklists will show here."
+          title={t('offboarding.emptyTitle')}
+          description={t('offboarding.emptyDescription')}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {Object.entries(grouped).map(([name, tasks]) => {
             const list = tasks as typeof data;
-            const done = list!.filter((t) => t.completed).length;
+            const done = list!.filter((task) => task.completed).length;
             return (
               <Card key={name}>
                 <div style={{ marginBottom: 10 }}>
@@ -51,13 +59,13 @@ const Offboarding: React.FC = () => {
                     {name}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                    {done} of {list!.length} complete
+                    {t('offboarding.tasksComplete', { done, total: list!.length })}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {list!.map((t) => (
+                  {list!.map((task) => (
                     <div
-                      key={t.id}
+                      key={task.id}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -68,9 +76,11 @@ const Offboarding: React.FC = () => {
                       }}
                     >
                       <Checkbox
-                        checked={t.completed}
+                        checked={task.completed}
                         onChange={() =>
-                          toggle.mutate(t.id, { onSuccess: () => toast.success('Updated') })
+                          toggle.mutate(task.id, {
+                            onSuccess: () => toast.success(t('offboarding.updated')),
+                          })
                         }
                       />
                       <div
@@ -78,13 +88,17 @@ const Offboarding: React.FC = () => {
                           flex: 1,
                           fontSize: 12,
                           color: 'var(--hr-text)',
-                          textDecoration: t.completed ? 'line-through' : 'none',
-                          opacity: t.completed ? 0.6 : 1,
+                          textDecoration: task.completed ? 'line-through' : 'none',
+                          opacity: task.completed ? 0.6 : 1,
                         }}
                       >
-                        {t.task}
+                        {task.task}
                       </div>
-                      <Pill color={CATEGORIES[t.category] ?? '#a1a1aa'}>{t.category}</Pill>
+                      <Pill
+                        style={pillStyle(CATEGORIES[task.category] ?? 'var(--hr-status-draft)')}
+                      >
+                        {task.category}
+                      </Pill>
                     </div>
                   ))}
                 </div>

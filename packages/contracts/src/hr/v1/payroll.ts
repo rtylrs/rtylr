@@ -5,63 +5,106 @@
 // source: hr/v1/payroll.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
-export interface PayrollRun {
+export interface PayrollEntryPayload {
+  /** Unique identifier for the payroll entry. */
   id: number;
-  /** 2024-01, 2024-02, etc. */
-  period: string;
-  /** draft, processing, completed, paid */
-  status: string;
-  staffCount: number;
-  totalGross: number;
-  totalDeductions: number;
-  totalNet: number;
-  items: PayrollItem[];
-  runAt: string;
-  paidAt: string;
-  createdAt: string;
-}
-
-export interface PayrollItem {
-  staffId: number;
-  staffName: string;
-  hoursWorked: number;
-  grossPay: number;
+  /** Tenant owner this entry belongs to. */
+  ownerId: number;
+  /** Payroll run this entry is part of. */
+  payrollRunId: number;
+  /** Employee this entry compensates. */
+  employeeId: number;
+  /** Gross base pay for the period. */
+  basePay: number;
+  /** Compensation for overtime hours worked. */
+  overtimePay: number;
+  /** Total deductions applied (tax, insurance, etc.). */
   deductions: number;
+  /** Additional bonuses awarded in this period. */
+  bonuses: number;
+  /** Final take-home pay after deductions and bonuses. */
   netPay: number;
+  /** Total regular hours worked in the period. */
+  hoursWorked: number;
+  /** Total overtime hours worked in the period. */
+  overtimeHours: number;
+  /** Unix timestamp when this record was created. */
+  createdAt: number;
+  /** Unix timestamp when this record was last updated. */
+  updatedAt: number;
 }
 
-export interface ListPayrollRunsRequest {
-  pagination: PaginationRequest | undefined;
+export interface PayrollRunPayload {
+  /** Unique identifier for the payroll run. */
+  id: number;
+  /** Tenant owner this run belongs to. */
+  ownerId: number;
+  /** Start of the pay period (ISO-8601 date). */
+  periodStart: string;
+  /** End of the pay period (ISO-8601 date). */
+  periodEnd: string;
+  /** Workflow status (draft | in_review | approved | exported). */
   status: string;
+  /** Employee who initiated the payroll run. */
+  createdBy: number;
+  /** Employee who approved the run; absent if not yet approved. */
+  approvedBy?: number | undefined;
+  /** Unix timestamp when the run was exported; absent if not yet exported. */
+  exportedAt?: number | undefined;
+  /** Sum of all entry gross pay amounts in this run. */
+  totalGross: number;
+  /** Sum of all entry net pay amounts in this run. */
+  totalNet: number;
+  /** Individual payroll entries included in this run. */
+  entries: PayrollEntryPayload[];
+  /** Unix timestamp when this record was created. */
+  createdAt: number;
+  /** Unix timestamp when this record was last updated. */
+  updatedAt: number;
 }
+
+export interface TriggerPayrollRunRequest {
+  /** Start of the pay period to process (ISO-8601 date). */
+  periodStart: string;
+  /** End of the pay period to process (ISO-8601 date). */
+  periodEnd: string;
+}
+
+export interface TriggerPayrollRunResponse {
+  /** The newly created payroll run with computed entries. */
+  run: PayrollRunPayload | undefined;
+}
+
+export interface ApprovePayrollRunRequest {
+  /** ID of the payroll run to approve. */
+  runId: number;
+}
+
+export interface ApprovePayrollRunResponse {
+  /** The approved payroll run. */
+  run: PayrollRunPayload | undefined;
+}
+
+export interface ExportPayrollRequest {
+  /** ID of the payroll run to export. */
+  runId: number;
+}
+
+export interface ExportPayrollResponse {
+  /** Unique identifier for the generated export batch. */
+  batchId: string;
+}
+
+export interface ListPayrollRunsRequest {}
 
 export interface ListPayrollRunsResponse {
-  runs: PayrollRun[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetPayrollRunRequest {
-  id: number;
-}
-
-export interface GetPayrollRunResponse {
-  run: PayrollRun | undefined;
-}
-
-export interface RunPayrollRequest {
-  period: string;
-}
-
-export interface RunPayrollResponse {
-  run: PayrollRun | undefined;
-}
-
-export interface MarkPayrollPaidRequest {
-  id: number;
-}
-
-export interface MarkPayrollPaidResponse {
-  run: PayrollRun | undefined;
+  /** Page of payroll runs. */
+  runs: PayrollRunPayload[];
+  /** Total number of payroll runs across all pages. */
+  total: number;
+  /** Page size used for this request. */
+  limit: number;
+  /** Offset used for this request. */
+  offset: number;
 }

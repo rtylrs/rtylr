@@ -5,78 +5,62 @@
 // source: erp/v1/suppliers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Supplier {
   id: number;
+  ownerId: number;
   name: string;
-  contactName: string;
   email: string;
   phone: string;
   address: string;
-  /** net30, net60, cod */
+  city: string;
+  country: string;
+  taxId: string;
   paymentTerms: string;
-  /** active, inactive */
-  status: string;
-  totalOrders: number;
   notes: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ListSuppliersRequest {
-  pagination: PaginationRequest | undefined;
-  search: string;
-  status: string;
-}
+export interface ListSuppliersRequest {}
 
 export interface ListSuppliersResponse {
   suppliers: Supplier[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetSupplierRequest {
-  id: number;
-}
-
-export interface GetSupplierResponse {
-  supplier: Supplier | undefined;
 }
 
 export interface CreateSupplierRequest {
   name: string;
-  contactName: string;
   email: string;
   phone: string;
   address: string;
+  city: string;
+  country: string;
+  taxId: string;
   paymentTerms: string;
   notes: string;
+  isActive: boolean;
 }
 
 export interface CreateSupplierResponse {
-  supplier: Supplier | undefined;
+  supplierId: number;
+  message: string;
 }
 
 export interface UpdateSupplierRequest {
   id: number;
   name: string;
-  contactName: string;
   email: string;
   phone: string;
   address: string;
+  city: string;
+  country: string;
+  taxId: string;
   paymentTerms: string;
-  status: string;
   notes: string;
+  isActive: boolean;
 }
 
 export interface UpdateSupplierResponse {
-  supplier: Supplier | undefined;
-}
-
-export interface DeleteSupplierRequest {
-  id: number;
-}
-
-export interface DeleteSupplierResponse {
-  success: boolean;
+  message: string;
 }

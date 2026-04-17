@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-export const ACCENT = '#8b5cf6';
+export const ACCENT = 'var(--hr-accent)';
 
 export function useMediaQuery(query: string): boolean {
   const getMatch = () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false);
@@ -123,11 +123,11 @@ export const Button: React.FC<
   };
   if (variant === 'primary') {
     base.background = ACCENT;
-    base.color = '#fff';
+    base.color = 'var(--hr-on-accent)';
     base.border = `1px solid ${ACCENT}`;
   } else if (variant === 'danger') {
-    base.color = '#ef4444';
-    base.border = '1px solid rgba(239,68,68,0.35)';
+    base.color = 'var(--hr-error)';
+    base.border = '1px solid color-mix(in srgb, var(--hr-error) 35%, transparent)';
   } else if (variant === 'ghost') {
     base.border = '1px solid transparent';
     base.color = 'var(--hr-text-muted)';
@@ -478,7 +478,7 @@ export const StatCard: React.FC<{
       <div
         style={{
           fontSize: 11,
-          color: trend.value >= 0 ? '#10b981' : '#ef4444',
+          color: trend.value >= 0 ? 'var(--hr-status-approved)' : 'var(--hr-error)',
           marginTop: 4,
           fontWeight: 600,
         }}
@@ -556,7 +556,7 @@ export const Checkbox: React.FC<{
         borderRadius: 4,
         border: `1px solid ${checked ? ACCENT : 'var(--hr-border)'}`,
         background: checked ? ACCENT : 'transparent',
-        color: '#fff',
+        color: 'var(--hr-on-accent)',
         fontSize: 11,
         flexShrink: 0,
       }}

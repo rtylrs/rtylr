@@ -6,36 +6,11 @@
 
 /* eslint-disable */
 
-export interface FinanceDashboard {
-  totalRevenue: number;
-  revenueChange: number;
-  totalExpenses: number;
-  expensesChange: number;
-  netIncome: number;
-  netIncomeChange: number;
-  outstandingInvoices: number;
-  outstandingBills: number;
-  cashOnHand: number;
-  revenueChart: RevenuePoint[];
-  expenseBreakdown: ExpenseBreakdown[];
-}
-
-export interface RevenuePoint {
-  date: string;
-  amount: number;
-}
-
-export interface ExpenseBreakdown {
-  category: string;
-  amount: number;
-  percentage: number;
-}
-
-export interface GetFinanceDashboardRequest {
-  /** this_month, last_month, this_quarter, this_year */
-  period: string;
-}
+export interface GetFinanceDashboardRequest {}
 
 export interface GetFinanceDashboardResponse {
-  dashboard: FinanceDashboard | undefined;
+  totalReceivable: number;
+  overdueAmount: number;
+  totalExpensesMtd: number;
+  netProfitMtd: number;
 }

@@ -8,6 +8,34 @@
   --accent-muted: rgba(139, 92, 246, 0.12);
   --accent-border: rgba(139, 92, 246, 0.3);
   --accent-focus: rgba(139, 92, 246, 0.5);
+
+  /* Semantic status colors */
+  --hr-status-draft: #6b7280;
+  --hr-status-submitted: #f59e0b;
+  --hr-status-approved: #10b981;
+  --hr-status-rejected: #ef4444;
+  --hr-status-locked: #6366f1;
+  --hr-status-active: #10b981;
+  --hr-status-inactive: #6b7280;
+  --hr-error: #ef4444;
+  --hr-on-accent: #ffffff;
+
+  /* Shift / roster palette */
+  --hr-shift-purple: #8b5cf6;
+  --hr-shift-green: #10b981;
+  --hr-shift-amber: #f59e0b;
+  --hr-shift-red: #ef4444;
+  --hr-shift-blue: #3b82f6;
+  --hr-shift-pink: #ec4899;
+  --hr-shift-teal: #14b8a6;
+  --hr-accent: #8b5cf6;
+  --hr-status-paid: #10b981;
+  --hr-status-pending: #f59e0b;
+  --hr-status-overdue: #ef4444;
+  --hr-onboarding-complete: #10b981;
+  --hr-onboarding-in-progress: #8b5cf6;
+  --hr-onboarding-not-started: #6b7280;
+  --hr-payroll-accent: #8b5cf6;
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */

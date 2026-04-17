@@ -5,91 +5,106 @@
 // source: pos/v1/stock.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface StockMovement {
   id: number;
-  locationId: number;
-  menuItemId: number;
-  itemName: string;
-  /** receive, adjust, waste, transfer */
+  businessId: number;
+  branchId: number;
+  productId: number;
   type: string;
   quantity: number;
-  quantityBefore: number;
-  quantityAfter: number;
-  reason: string;
-  destinationLocationId: number;
-  performedBy: string;
+  referenceId?: number | undefined;
+  referenceType?: string | undefined;
+  note?: string | undefined;
+  employeeId?: number | undefined;
   createdAt: string;
 }
 
 export interface BranchInventory {
-  menuItemId: number;
-  itemName: string;
-  sku: string;
+  id: number;
+  businessId: number;
+  branchId: number;
+  productId: number;
   quantity: number;
-  lowStockThreshold: number;
-  isLowStock: boolean;
-  lastUpdatedAt: string;
-}
-
-export interface ReceiveStockRequest {
-  menuItemId: number;
-  quantity: number;
-  reason: string;
-}
-
-export interface ReceiveStockResponse {
-  movement: StockMovement | undefined;
-}
-
-export interface AdjustStockRequest {
-  menuItemId: number;
-  quantity: number;
-  reason: string;
-}
-
-export interface AdjustStockResponse {
-  movement: StockMovement | undefined;
-}
-
-export interface WasteStockRequest {
-  menuItemId: number;
-  quantity: number;
-  reason: string;
-}
-
-export interface WasteStockResponse {
-  movement: StockMovement | undefined;
-}
-
-export interface TransferStockRequest {
-  menuItemId: number;
-  quantity: number;
-  destinationLocationId: number;
-  reason: string;
-}
-
-export interface TransferStockResponse {
-  movement: StockMovement | undefined;
-}
-
-export interface ListLowStockRequest {
-  pagination: PaginationRequest | undefined;
-}
-
-export interface ListLowStockResponse {
-  items: BranchInventory[];
-  pagination: PaginationResponse | undefined;
+  reorderPoint: number;
+  reorderQuantity: number;
+  updatedAt: string;
 }
 
 export interface ListStockMovementsRequest {
-  pagination: PaginationRequest | undefined;
-  menuItemId: number;
-  type: string;
+  branchId: number;
+  productId: number;
 }
 
 export interface ListStockMovementsResponse {
   movements: StockMovement[];
-  pagination: PaginationResponse | undefined;
+}
+
+export interface ReceiveStockRequest {
+  branchId: number;
+  productId: number;
+  quantity: number;
+  note: string;
+  employeeId: number;
+}
+
+export interface ReceiveStockResponse {
+  movementId: number;
+  message: string;
+}
+
+export interface AdjustStockRequest {
+  branchId: number;
+  productId: number;
+  quantity: number;
+  note: string;
+  employeeId: number;
+}
+
+export interface AdjustStockResponse {
+  movementId: number;
+  message: string;
+}
+
+export interface WasteStockRequest {
+  branchId: number;
+  productId: number;
+  quantity: number;
+  note: string;
+  employeeId: number;
+}
+
+export interface WasteStockResponse {
+  movementId: number;
+  message: string;
+}
+
+export interface TransferStockRequest {
+  fromBranchId: number;
+  toBranchId: number;
+  productId: number;
+  quantity: number;
+  note: string;
+  employeeId: number;
+}
+
+export interface TransferStockResponse {
+  movementId: number;
+  message: string;
+}
+
+export interface ListInventoryRequest {
+  branchId: number;
+}
+
+export interface ListInventoryResponse {
+  inventory: BranchInventory[];
+}
+
+export interface LowStockRequest {
+  branchId: number;
+}
+
+export interface LowStockResponse {
+  items: BranchInventory[];
 }

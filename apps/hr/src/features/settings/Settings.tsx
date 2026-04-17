@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { INDUSTRIES } from '@voxire/config';
 import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
 import appConfig from '../../app.json';
 import {
@@ -87,6 +88,20 @@ const Settings: React.FC = () => {
               <option value="USD">USD - US Dollar</option>
               <option value="EUR">EUR - Euro</option>
               <option value="GBP">GBP - Pound</option>
+            </Select>
+          </div>
+          <div>
+            <Label>Industry</Label>
+            <Select
+              value={form.industry ?? ''}
+              onChange={(e) => setForm({ ...form, industry: e.target.value })}
+            >
+              <option value="">—</option>
+              {INDUSTRIES.map((i) => (
+                <option key={i.value} value={i.value}>
+                  {i.label}
+                </option>
+              ))}
             </Select>
           </div>
         </div>

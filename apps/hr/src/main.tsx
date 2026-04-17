@@ -1,48 +1,29 @@
 import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
 import App from './App';
+import i18next from './shared/services/i18next';
+import { queryClient } from './shared/lib/react-query';
 import './globals.css';
 
-// Apply persisted theme before first render to prevent flash
 const stored = localStorage.getItem('hr-theme') || 'dark';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 const resolved = stored === 'system' ? (systemDark ? 'dark' : 'light') : stored;
 document.documentElement.setAttribute('data-theme', resolved);
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-    },
-  },
-});
-
-function FullScreenLoader() {
+function FullScreenLoader(): React.JSX.Element {
   return (
     <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#0a0a0a',
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: '#0a0a0a' }}
     >
       <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          border: '2px solid rgba(139,92,246,0.2)',
-          borderTopColor: '#8b5cf6',
-          animation: 'spin 0.7s linear infinite',
-        }}
+        className="h-8 w-8 rounded-full border-2 animate-spin"
+        style={{ borderColor: 'rgba(139,92,246,0.2)', borderTopColor: '#8b5cf6' }}
       />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
@@ -52,12 +33,14 @@ const rootElement = document.getElementById('root');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Suspense fallback={<FullScreenLoader />}>
-          <App />
-          <Toaster expand={false} richColors position="top-right" />
-        </Suspense>
-      </BrowserRouter>
+      <I18nextProvider i18n={i18next}>
+        <BrowserRouter>
+          <Suspense fallback={<FullScreenLoader />}>
+            <App />
+            <Toaster expand={false} richColors position="top-right" />
+          </Suspense>
+        </BrowserRouter>
+      </I18nextProvider>
     </QueryClientProvider>
   );
 }

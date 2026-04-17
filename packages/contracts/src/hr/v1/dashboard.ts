@@ -6,25 +6,64 @@
 
 /* eslint-disable */
 
-export interface HRDashboard {
+export interface DashboardStats {
   totalStaff: number;
-  activeStaff: number;
-  onLeave: number;
-  clockedIn: number;
-  openShifts: number;
+  onShiftToday: number;
   pendingTimeOff: number;
-  payrollThisMonth: number;
-  departments: DepartmentSummary[];
-}
-
-export interface DepartmentSummary {
-  name: string;
-  memberCount: number;
-  active: number;
+  payrollDraft: number;
 }
 
 export interface GetHRDashboardRequest {}
 
 export interface GetHRDashboardResponse {
-  dashboard: HRDashboard | undefined;
+  stats: DashboardStats | undefined;
+}
+
+export interface DashboardWidgetPayload {
+  /** Unique identifier for the widget. */
+  id: number;
+  /** Tenant owner this widget belongs to. */
+  ownerId: number;
+  /** Role that owns this widget layout. */
+  roleId: number;
+  /** Widget type identifier (e.g. headcount_chart, leave_summary). */
+  widgetType: string;
+  /** Horizontal grid position. */
+  positionX: number;
+  /** Vertical grid position. */
+  positionY: number;
+  /** Widget width in grid units. */
+  width: number;
+  /** Widget height in grid units. */
+  height: number;
+  /** Widget-specific configuration serialised as JSON. */
+  config: Uint8Array;
+  /** Unix timestamp when this widget was created. */
+  createdAt: number;
+  /** Unix timestamp when this widget was last updated. */
+  updatedAt: number;
+}
+
+export interface DashboardDataPayload {
+  /** Widget type this data corresponds to. */
+  widgetType: string;
+  /** Serialised widget data as JSON. */
+  data: Uint8Array;
+}
+
+export interface GetDashboardResponse {
+  /** Widget layout definitions for the requesting user's dashboard. */
+  widgets: DashboardWidgetPayload[];
+  /** Pre-loaded data keyed by widget type. */
+  data: { [key: string]: DashboardDataPayload };
+}
+
+export interface GetDashboardResponse_DataEntry {
+  key: string;
+  value: DashboardDataPayload | undefined;
+}
+
+export interface UpdateWidgetLayoutRequest {
+  /** Updated widget positions and sizes. */
+  widgets: DashboardWidgetPayload[];
 }

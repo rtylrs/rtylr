@@ -5,24 +5,26 @@
 // source: flow/v1/tasks.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Task {
   id: number;
+  projectId: number;
+  workspaceId: number;
+  ownerId: number;
+  parentTaskId?: number | undefined;
   title: string;
   description: string;
-  /** todo, in_progress, review, done */
   status: string;
-  /** low, medium, high, urgent */
   priority: string;
-  projectId: number;
-  projectName: string;
-  assigneeId: number;
-  assigneeName: string;
-  labels: string[];
-  dueDate: string;
-  commentCount: number;
-  position: number;
+  assigneeId?: number | undefined;
+  reporterId: number;
+  dueDate?: string | undefined;
+  startDate?: string | undefined;
+  completedAt?: string | undefined;
+  estimatedHours?: number | undefined;
+  actualHours?: number | undefined;
+  sortOrder: number;
+  labels: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -30,60 +32,77 @@ export interface Task {
 export interface TaskComment {
   id: number;
   taskId: number;
-  authorName: string;
-  body: string;
+  userId: number;
+  content: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskActivity {
+  id: number;
+  taskId: number;
+  userId: number;
+  action: string;
+  oldValue: string;
+  newValue: string;
   createdAt: string;
 }
 
 export interface ListTasksRequest {
-  pagination: PaginationRequest | undefined;
   projectId: number;
   status: string;
+  assigneeId?: number | undefined;
   priority: string;
-  assigneeId: number;
-  search: string;
 }
 
 export interface ListTasksResponse {
   tasks: Task[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetTaskRequest {
-  id: number;
-}
-
-export interface GetTaskResponse {
-  task: Task | undefined;
-  comments: TaskComment[];
 }
 
 export interface CreateTaskRequest {
+  projectId: number;
+  workspaceId: number;
+  parentTaskId?: number | undefined;
   title: string;
   description: string;
-  projectId: number;
   priority: string;
-  assigneeId: number;
-  labels: string[];
+  assigneeId?: number | undefined;
   dueDate: string;
+  startDate: string;
+  estimatedHours?: number | undefined;
+  labels: number[];
 }
 
 export interface CreateTaskResponse {
   task: Task | undefined;
 }
 
+export interface GetTaskDetailRequest {
+  id: number;
+}
+
+export interface GetTaskDetailResponse {
+  task: Task | undefined;
+  subtasks: Task[];
+  comments: TaskComment[];
+  activity: TaskActivity[];
+}
+
 export interface UpdateTaskRequest {
   id: number;
   title: string;
   description: string;
+  status: string;
   priority: string;
-  assigneeId: number;
-  labels: string[];
+  assigneeId?: number | undefined;
   dueDate: string;
+  startDate: string;
+  labels: number[];
 }
 
 export interface UpdateTaskResponse {
-  task: Task | undefined;
+  message: string;
 }
 
 export interface DeleteTaskRequest {
@@ -91,7 +110,7 @@ export interface DeleteTaskRequest {
 }
 
 export interface DeleteTaskResponse {
-  success: boolean;
+  message: string;
 }
 
 export interface UpdateTaskStatusRequest {
@@ -100,14 +119,135 @@ export interface UpdateTaskStatusRequest {
 }
 
 export interface UpdateTaskStatusResponse {
-  task: Task | undefined;
+  message: string;
 }
 
-export interface AddTaskCommentRequest {
+export interface GetMyTasksRequest {}
+
+export interface GetMyTasksResponse {
+  tasks: Task[];
+}
+
+export interface AddCommentRequest {
   taskId: number;
-  body: string;
+  content: string;
 }
 
-export interface AddTaskCommentResponse {
+export interface AddCommentResponse {
   comment: TaskComment | undefined;
+}
+
+export interface DeleteCommentRequest {
+  id: number;
+}
+
+export interface DeleteCommentResponse {
+  message: string;
+}
+
+export interface TaskPayloadCompact {
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  dueDate: string;
+  createdAt: string;
+}
+
+export interface Attachment {
+  id: number;
+  taskId: number;
+  name: string;
+  url: string;
+  size: number;
+  uploadedBy: number;
+  createdAt: string;
+}
+
+export interface TimeLog {
+  id: number;
+  taskId: number;
+  userId: number;
+  durationMinutes: number;
+  description: string;
+  loggedAt: string;
+  createdAt: string;
+}
+
+export interface GetSubtasksRequest {
+  taskId: number;
+}
+
+export interface GetSubtasksResponse {
+  subtasks: TaskPayloadCompact[];
+}
+
+export interface CreateSubtaskRequest {
+  projectId: number;
+  workspaceId: number;
+  title: string;
+  description: string;
+  priority: string;
+  assigneeId?: number | undefined;
+  dueDate: string;
+  startDate: string;
+  estimatedHours?: number | undefined;
+}
+
+export interface CreateSubtaskResponse {
+  taskId: number;
+  message: string;
+}
+
+export interface GetAttachmentsRequest {
+  taskId: number;
+}
+
+export interface GetAttachmentsResponse {
+  attachments: Attachment[];
+}
+
+export interface CreateAttachmentRequest {
+  name: string;
+  url: string;
+  size: number;
+}
+
+export interface CreateAttachmentResponse {
+  attachmentId: number;
+  message: string;
+}
+
+export interface DeleteAttachmentRequest {
+  id: number;
+}
+
+export interface DeleteAttachmentResponse {
+  message: string;
+}
+
+export interface GetTimeLogsRequest {
+  taskId: number;
+}
+
+export interface GetTimeLogsResponse {
+  timeLogs: TimeLog[];
+}
+
+export interface CreateTimeLogRequest {
+  durationMinutes: number;
+  description: string;
+}
+
+export interface CreateTimeLogResponse {
+  timeLogId: number;
+  message: string;
+}
+
+export interface GetTaskActivityRequest {
+  taskId: number;
+}
+
+export interface GetTaskActivityResponse {
+  activity: TaskActivity[];
 }

@@ -6,93 +6,81 @@
 
 /* eslint-disable */
 
-export interface ProfitLossReport {
-  totalRevenue: number;
-  totalExpenses: number;
-  netIncome: number;
-  revenueLines: ReportLine[];
-  expenseLines: ReportLine[];
-  fromDate: string;
-  toDate: string;
+export interface GetPLReportRequest {
+  period: string;
+  date: string;
 }
 
-export interface BalanceSheetReport {
-  totalAssets: number;
-  totalLiabilities: number;
-  totalEquity: number;
-  assetLines: ReportLine[];
-  liabilityLines: ReportLine[];
-  equityLines: ReportLine[];
-  asOfDate: string;
+export interface GetPLReportResponse {
+  period: string;
+  revenue: number;
+  cogs: number;
+  grossProfit: number;
+  operatingExpenses: number;
+  netProfit: number;
+  marginPct: number;
 }
 
-export interface CashFlowReport {
-  operating: number;
-  investing: number;
-  financing: number;
-  netChange: number;
-  openingBalance: number;
-  closingBalance: number;
-  operatingLines: ReportLine[];
-  investingLines: ReportLine[];
-  financingLines: ReportLine[];
-  fromDate: string;
-  toDate: string;
-}
-
-export interface TaxReport {
-  taxableIncome: number;
-  taxCollected: number;
-  taxPaid: number;
-  netTax: number;
-  lines: TaxLine[];
-  fromDate: string;
-  toDate: string;
-}
-
-export interface ReportLine {
+export interface TaxConfig {
+  id: number;
+  ownerId: number;
   name: string;
-  amount: number;
-}
-
-export interface TaxLine {
-  description: string;
   rate: number;
-  taxable: number;
-  tax: number;
+  type: string;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
 }
 
-export interface GetProfitLossRequest {
-  fromDate: string;
-  toDate: string;
+export interface ListTaxConfigRequest {}
+
+export interface ListTaxConfigResponse {
+  configs: TaxConfig[];
 }
 
-export interface GetProfitLossResponse {
-  report: ProfitLossReport | undefined;
+export interface CreateTaxConfigRequest {
+  name: string;
+  rate: number;
+  type: string;
+  isDefault: boolean;
 }
 
-export interface GetBalanceSheetRequest {
-  asOfDate: string;
-}
-
-export interface GetBalanceSheetResponse {
-  report: BalanceSheetReport | undefined;
-}
-
-export interface GetCashFlowRequest {
-  fromDate: string;
-  toDate: string;
-}
-
-export interface GetCashFlowResponse {
-  report: CashFlowReport | undefined;
+export interface CreateTaxConfigResponse {
+  config: TaxConfig | undefined;
 }
 
 export interface GetTaxReportRequest {
-  fromDate: string;
-  toDate: string;
+  period: string;
+  date: string;
 }
 
 export interface GetTaxReportResponse {
-  report: TaxReport | undefined;
+  period: string;
+  taxCollected: number;
+  taxOwed: number;
+}
+
+export interface ExpenseCategoryDetail {
+  id: number;
+  ownerId: number;
+  name: string;
+  color: string;
+  icon: string;
+  createdAt: string;
+}
+
+export interface ListExpenseCategoryDetailsRequest {}
+
+export interface ListExpenseCategoryDetailsResponse {
+  categories: ExpenseCategoryDetail[];
+}
+
+export interface CreateExpenseCategoryDetailRequest {
+  name: string;
+  color: string;
+  icon: string;
+}
+
+export interface CreateExpenseCategoryDetailResponse {
+  category: ExpenseCategoryDetail | undefined;
 }

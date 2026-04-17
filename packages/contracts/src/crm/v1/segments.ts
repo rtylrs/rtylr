@@ -5,62 +5,45 @@
 // source: crm/v1/segments.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Segment {
   id: number;
+  ownerId: number;
   name: string;
   description: string;
-  rules: SegmentRule[];
+  rules: string;
   customerCount: number;
+  lastCalculatedAt?: string | undefined;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SegmentRule {
-  /** total_spent, visit_count, last_visit, source */
-  field: string;
-  /** eq, gt, lt, gte, lte, contains */
-  operator: string;
-  value: string;
-}
-
-export interface ListSegmentsRequest {
-  pagination: PaginationRequest | undefined;
-}
+export interface ListSegmentsRequest {}
 
 export interface ListSegmentsResponse {
   segments: Segment[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetSegmentRequest {
-  id: number;
-}
-
-export interface GetSegmentResponse {
-  segment: Segment | undefined;
 }
 
 export interface CreateSegmentRequest {
   name: string;
   description: string;
-  rules: SegmentRule[];
+  rules: string;
 }
 
 export interface CreateSegmentResponse {
-  segment: Segment | undefined;
+  segmentId: number;
+  message: string;
 }
 
 export interface UpdateSegmentRequest {
   id: number;
   name: string;
   description: string;
-  rules: SegmentRule[];
+  rules: string;
 }
 
 export interface UpdateSegmentResponse {
-  segment: Segment | undefined;
+  message: string;
 }
 
 export interface DeleteSegmentRequest {
@@ -68,5 +51,5 @@ export interface DeleteSegmentRequest {
 }
 
 export interface DeleteSegmentResponse {
-  success: boolean;
+  message: string;
 }

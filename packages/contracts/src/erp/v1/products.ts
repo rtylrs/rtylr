@@ -5,99 +5,79 @@
 // source: erp/v1/products.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from '../../common/v1/pagination';
 
 export interface Product {
   id: number;
+  ownerId: number;
+  categoryId: number;
+  supplierId: number;
   name: string;
   sku: string;
-  description: string;
-  category: string;
-  price: number;
-  cost: number;
-  quantity: number;
-  lowStockThreshold: number;
-  /** pcs, kg, ltr, etc. */
-  unit: string;
-  /** active, inactive, discontinued */
-  status: string;
-  imageUrl: string;
   barcode: string;
-  attributes: { [key: string]: string };
+  description: string;
+  unit: string;
+  costPrice: number;
+  salePrice: number;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Product_AttributesEntry {
-  key: string;
-  value: string;
-}
-
 export interface ListProductsRequest {
-  pagination: PaginationRequest | undefined;
   search: string;
-  category: string;
-  status: string;
+  categoryId: number;
+  limit: number;
+  offset: number;
 }
 
 export interface ListProductsResponse {
   products: Product[];
-  pagination: PaginationResponse | undefined;
-}
-
-export interface GetProductRequest {
-  id: number;
-}
-
-export interface GetProductResponse {
-  product: Product | undefined;
 }
 
 export interface CreateProductRequest {
+  categoryId: number;
+  supplierId: number;
   name: string;
   sku: string;
-  description: string;
-  category: string;
-  price: number;
-  cost: number;
-  quantity: number;
-  lowStockThreshold: number;
-  unit: string;
   barcode: string;
-  attributes: { [key: string]: string };
-}
-
-export interface CreateProductRequest_AttributesEntry {
-  key: string;
-  value: string;
+  description: string;
+  unit: string;
+  costPrice: number;
+  salePrice: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
 }
 
 export interface CreateProductResponse {
-  product: Product | undefined;
+  productId: number;
+  message: string;
 }
 
 export interface UpdateProductRequest {
   id: number;
+  categoryId: number;
+  supplierId: number;
   name: string;
   sku: string;
-  description: string;
-  category: string;
-  price: number;
-  cost: number;
-  lowStockThreshold: number;
-  unit: string;
-  status: string;
   barcode: string;
-  attributes: { [key: string]: string };
-}
-
-export interface UpdateProductRequest_AttributesEntry {
-  key: string;
-  value: string;
+  description: string;
+  unit: string;
+  costPrice: number;
+  salePrice: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
 }
 
 export interface UpdateProductResponse {
-  product: Product | undefined;
+  message: string;
 }
 
 export interface DeleteProductRequest {
@@ -105,5 +85,5 @@ export interface DeleteProductRequest {
 }
 
 export interface DeleteProductResponse {
-  success: boolean;
+  message: string;
 }

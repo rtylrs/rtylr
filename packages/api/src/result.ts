@@ -188,7 +188,16 @@ export function safeFetch(client: AxiosInstance): SafeApi {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function unwrap<T = any>(result: ResultAsync<T, ApiError>): Promise<T> {
-  const r = await result;
+  let r: Result<T, ApiError>;
+  try {
+    r = await result;
+  } catch (e: unknown) {
+    // ResultAsync should always resolve to Ok | Err, but if the internal
+    // promise rejects (e.g. the error-mapper itself threw), normalise the
+    // rejection into a typed ApiError so TanStack Query transitions to its
+    // error state instead of hanging in isPending forever.
+    throw toApiError(e);
+  }
   if (r.isOk()) return r.value;
   throw r.error;
 }

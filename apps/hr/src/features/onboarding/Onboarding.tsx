@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Rocket } from 'lucide-react';
 import { useOnboardingChecklist, useToggleOnboardingTask } from '../../shared/hooks/useHrExtras';
@@ -13,39 +14,46 @@ import {
 } from '../../shared/components/ui';
 
 const CATEGORIES: Record<string, string> = {
-  Paperwork: '#3b82f6',
-  Access: '#8b5cf6',
-  Training: '#10b981',
-  'Meet the team': '#f59e0b',
-  Equipment: '#ef4444',
+  Paperwork: 'var(--hr-shift-blue)',
+  Access: 'var(--hr-accent)',
+  Training: 'var(--hr-onboarding-complete)',
+  'Meet the team': 'var(--hr-status-pending)',
+  Equipment: 'var(--hr-error)',
 };
 
+const pillStyle = (cssVar: string): React.CSSProperties => ({
+  background: `color-mix(in srgb, ${cssVar} 13%, transparent)`,
+  color: cssVar,
+  border: `1px solid color-mix(in srgb, ${cssVar} 20%, transparent)`,
+});
+
 const Onboarding: React.FC = () => {
+  const { t } = useTranslation();
   const { data, isLoading } = useOnboardingChecklist();
   const toggle = useToggleOnboardingTask();
 
-  const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, t) => {
-    acc[t.staffName] = acc[t.staffName] || ([] as any);
-    (acc[t.staffName] as any).push(t);
+  const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, task) => {
+    const key = task.staffName;
+    acc[key] = [...(acc[key] ?? []), task];
     return acc;
   }, {});
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader title="Onboarding" subtitle="New hire workflow checklist" />
+      <SectionHeader title={t('onboarding.title')} subtitle={t('onboarding.subtitle')} />
       {isLoading ? (
         <Skeleton height={240} />
       ) : !data || data.length === 0 ? (
         <EmptyState
           icon={<Rocket size={20} />}
-          title="No onboarding in progress"
-          description="When a new hire starts, their tasks will show up here."
+          title={t('onboarding.emptyTitle')}
+          description={t('onboarding.emptyDescription')}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {Object.entries(grouped).map(([name, tasks]) => {
             const list = tasks as typeof data;
-            const done = list!.filter((t) => t.completed).length;
+            const done = list!.filter((task) => task.completed).length;
             const pct = Math.round((done / list!.length) * 100);
             return (
               <Card key={name}>
@@ -62,7 +70,7 @@ const Onboarding: React.FC = () => {
                       {name}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                      {done} of {list!.length} tasks done
+                      {t('onboarding.tasksDone', { done, total: list!.length })}
                     </div>
                   </div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: ACCENT }}>{pct}%</div>
@@ -85,9 +93,9 @@ const Onboarding: React.FC = () => {
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {list!.map((t) => (
+                  {list!.map((task) => (
                     <div
-                      key={t.id}
+                      key={task.id}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -98,11 +106,15 @@ const Onboarding: React.FC = () => {
                       }}
                     >
                       <Checkbox
-                        checked={t.completed}
+                        checked={task.completed}
                         onChange={() =>
-                          toggle.mutate(t.id, {
+                          toggle.mutate(task.id, {
                             onSuccess: () =>
-                              toast.success(t.completed ? 'Marked incomplete' : 'Marked complete'),
+                              toast.success(
+                                task.completed
+                                  ? t('onboarding.markedIncomplete')
+                                  : t('onboarding.markedComplete')
+                              ),
                           })
                         }
                       />
@@ -111,16 +123,20 @@ const Onboarding: React.FC = () => {
                           flex: 1,
                           fontSize: 12,
                           color: 'var(--hr-text)',
-                          textDecoration: t.completed ? 'line-through' : 'none',
-                          opacity: t.completed ? 0.6 : 1,
+                          textDecoration: task.completed ? 'line-through' : 'none',
+                          opacity: task.completed ? 0.6 : 1,
                         }}
                       >
-                        {t.task}
+                        {task.task}
                       </div>
-                      <Pill color={CATEGORIES[t.category] ?? '#a1a1aa'}>{t.category}</Pill>
-                      {t.dueDate && (
+                      <Pill
+                        style={pillStyle(CATEGORIES[task.category] ?? 'var(--hr-status-draft)')}
+                      >
+                        {task.category}
+                      </Pill>
+                      {task.dueDate && (
                         <span style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>
-                          Due {t.dueDate}
+                          {t('onboarding.due', { date: task.dueDate })}
                         </span>
                       )}
                     </div>

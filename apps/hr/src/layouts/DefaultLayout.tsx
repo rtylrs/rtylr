@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
@@ -30,101 +31,177 @@ import {
   Command,
   Menu,
   X,
+  PlayCircle,
+  CalendarCheck,
+  CheckSquare,
+  Palmtree,
+  ClockArrowUp,
+  CalendarRange,
+  Receipt,
+  Package,
+  HardDrive,
+  BarChart3,
+  Star,
+  Target,
+  FileBarChart,
 } from 'lucide-react';
+import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
+import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
 
 /* ── Types ── */
 interface NavItem {
-  label: string;
+  i18nKey: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  /** Optional guard: item is only shown when this returns true for the current config */
+  configGuard?: (timeTrackingModel: string, config: HRCompanyConfigPayload | null) => boolean;
 }
 
 /* ── Nav config ── */
 const ACCENT = '#8b5cf6';
 
 interface NavSection {
-  title: string;
+  i18nKey: string;
   items: NavItem[];
 }
 
 const navSections: NavSection[] = [
   {
-    title: 'Workspace',
+    i18nKey: 'layout.sections.workspace',
     items: [
-      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-      { label: 'Staff', path: '/staff', icon: Users },
-      { label: 'Departments', path: '/departments', icon: Building2 },
-      { label: 'Org Chart', path: '/org-chart', icon: Network },
+      { i18nKey: 'nav.dashboard', path: '/', icon: LayoutDashboard },
+      { i18nKey: 'nav.staff', path: '/staff', icon: Users },
+      { i18nKey: 'nav.departments', path: '/departments', icon: Building2 },
+      { i18nKey: 'nav.orgChart', path: '/org-chart', icon: Network },
     ],
   },
   {
-    title: 'Time',
+    i18nKey: 'layout.sections.time',
     items: [
-      { label: 'Shifts', path: '/shifts', icon: Clock },
-      { label: 'Schedule', path: '/schedule', icon: CalendarDays },
-      { label: 'Timesheets', path: '/timesheets', icon: Timer },
-      { label: 'Time Off', path: '/time-off', icon: Calendar },
-      { label: 'Calendar', path: '/calendar', icon: Calendar },
+      { i18nKey: 'nav.shifts', path: '/shifts', icon: Clock },
+      { i18nKey: 'nav.schedule', path: '/schedule', icon: CalendarDays },
+      { i18nKey: 'nav.rosterBuilder', path: '/shifts/roster', icon: CalendarRange },
+      {
+        i18nKey: 'nav.timeLogging',
+        path: '/time',
+        icon: PlayCircle,
+        configGuard: (m) => m === 'time_logging' || m === 'both',
+      },
+      { i18nKey: 'nav.timesheets', path: '/timesheets', icon: Timer },
+      {
+        i18nKey: 'nav.attendance',
+        path: '/attendance',
+        icon: CalendarCheck,
+        configGuard: (m) => m === 'attendance' || m === 'both',
+      },
+      {
+        i18nKey: 'nav.approvals',
+        path: '/timesheets/approvals',
+        icon: CheckSquare,
+      },
+      { i18nKey: 'nav.timeOff', path: '/time-off', icon: Calendar },
+      { i18nKey: 'nav.leave', path: '/leave', icon: Palmtree },
+      { i18nKey: 'nav.overtime', path: '/overtime', icon: ClockArrowUp },
+      { i18nKey: 'nav.calendar', path: '/calendar', icon: Calendar },
     ],
   },
   {
-    title: 'People',
+    i18nKey: 'layout.sections.people',
     items: [
-      { label: 'Reviews', path: '/reviews', icon: ClipboardList },
-      { label: '1-on-1s', path: '/one-on-ones', icon: MessageSquare },
-      { label: 'Onboarding', path: '/onboarding', icon: Rocket },
-      { label: 'Offboarding', path: '/offboarding', icon: LogOut },
-      { label: 'Training', path: '/training', icon: GraduationCap },
+      { i18nKey: 'nav.reviews', path: '/reviews', icon: ClipboardList },
+      { i18nKey: 'nav.oneOnOnes', path: '/one-on-ones', icon: MessageSquare },
+      { i18nKey: 'nav.performance', path: '/performance', icon: BarChart3 },
+      { i18nKey: 'nav.myReview', path: '/performance/my-review', icon: Star },
+      { i18nKey: 'nav.goals', path: '/performance/goals', icon: Target },
+      { i18nKey: 'nav.onboarding', path: '/onboarding', icon: Rocket },
+      { i18nKey: 'nav.offboarding', path: '/offboarding', icon: LogOut },
+      { i18nKey: 'nav.training', path: '/training', icon: GraduationCap },
     ],
   },
   {
-    title: 'HR',
+    i18nKey: 'layout.sections.hr',
     items: [
-      { label: 'Payroll', path: '/payroll', icon: DollarSign },
-      { label: 'Benefits', path: '/benefits', icon: Shield },
-      { label: 'Documents', path: '/documents', icon: FileText },
-      { label: 'Operations', path: '/operations', icon: Timer },
-      { label: 'Settings', path: '/settings', icon: Settings },
+      {
+        i18nKey: 'nav.payroll',
+        path: '/payroll',
+        icon: DollarSign,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
+      {
+        i18nKey: 'nav.myPaySlips',
+        path: '/payroll/my-payslips',
+        icon: Receipt,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
+      {
+        i18nKey: 'nav.payrollConfig',
+        path: '/settings/payroll-config',
+        icon: Settings,
+        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+      },
+      { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
+      {
+        i18nKey: 'nav.equipment',
+        path: '/equipment',
+        icon: Package,
+        configGuard: (_m, cfg) => !!cfg,
+      },
+      {
+        i18nKey: 'nav.assets',
+        path: '/equipment/assets',
+        icon: HardDrive,
+        configGuard: (_m, cfg) => !!cfg,
+      },
+      { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
+      { i18nKey: 'nav.reports', path: '/reports', icon: FileBarChart },
+      { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
+      { i18nKey: 'nav.settings', path: '/settings', icon: Settings },
     ],
   },
 ];
 
-const navItems: NavItem[] = navSections.flatMap((s) => s.items);
-
-const routeLabels: Record<string, string> = {
-  '/': 'Dashboard',
-  '/staff': 'Staff',
-  '/shifts': 'Shifts',
-  '/payroll': 'Payroll',
-  '/departments': 'Departments',
-  '/time-off': 'Time Off',
-  '/time-off/new': 'Request Time Off',
-  '/calendar': 'Time Off Calendar',
-  '/schedule': 'Shift Schedule',
-  '/timesheets': 'Timesheets',
-  '/reviews': 'Performance Reviews',
-  '/reviews/new': 'New Review',
-  '/one-on-ones': '1-on-1s',
-  '/onboarding': 'Onboarding',
-  '/offboarding': 'Offboarding',
-  '/documents': 'Documents',
-  '/benefits': 'Benefits',
-  '/training': 'Training',
-  '/org-chart': 'Org Chart',
-  '/operations': 'Operations',
-  '/settings': 'Settings',
+const routeLabelKeys: Record<string, string> = {
+  '/': 'nav.dashboard',
+  '/staff': 'nav.staff',
+  '/shifts': 'nav.shifts',
+  '/payroll': 'nav.payroll',
+  '/payroll/my-payslips': 'nav.myPaySlips',
+  '/settings/payroll-config': 'layout.routes.payrollConfig',
+  '/departments': 'nav.departments',
+  '/time': 'nav.timeLogging',
+  '/time-off': 'nav.timeOff',
+  '/time-off/new': 'layout.routes.requestTimeOff',
+  '/calendar': 'layout.routes.timeOffCalendar',
+  '/schedule': 'layout.routes.shiftSchedule',
+  '/timesheets': 'nav.timesheets',
+  '/timesheets/approvals': 'nav.approvals',
+  '/attendance': 'nav.attendance',
+  '/reviews': 'layout.routes.performanceReviews',
+  '/reviews/new': 'layout.routes.newReview',
+  '/one-on-ones': 'nav.oneOnOnes',
+  '/onboarding': 'nav.onboarding',
+  '/onboarding/templates': 'layout.routes.checklistTemplates',
+  '/offboarding': 'nav.offboarding',
+  '/documents': 'nav.documents',
+  '/equipment': 'nav.equipment',
+  '/equipment/assets': 'nav.assets',
+  '/benefits': 'nav.benefits',
+  '/training': 'nav.training',
+  '/org-chart': 'nav.orgChart',
+  '/operations': 'nav.operations',
+  '/settings': 'nav.settings',
+  '/leave': 'nav.leave',
+  '/leave/new': 'layout.routes.newLeaveRequest',
+  '/overtime': 'nav.overtime',
+  '/shifts/roster': 'nav.rosterBuilder',
+  '/performance': 'nav.performance',
+  '/performance/my-review': 'nav.myReview',
+  '/performance/goals': 'nav.goals',
+  '/reports': 'nav.reports',
 };
-
-function getPageTitle(pathname: string): string {
-  if (routeLabels[pathname]) return routeLabels[pathname];
-  if (pathname.startsWith('/staff/')) return 'Employee Profile';
-  if (pathname.startsWith('/reviews/')) return 'Performance Reviews';
-  if (pathname.startsWith('/time-off/')) return 'Time Off';
-  return 'HR';
-}
 
 /* ── Theme helpers ── */
 type Theme = 'light' | 'dark' | 'system';
@@ -146,9 +223,11 @@ function useTheme(): [Theme, (t: Theme) => void] {
 }
 
 /* ── Sidebar nav item ── */
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const label = t(i18nKey);
 
   return (
     <Link
@@ -209,6 +288,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 
 /* ── User dropdown ── */
 function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const rawUser = (() => {
@@ -339,14 +419,14 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 padding: '4px 8px 6px',
               }}
             >
-              Appearance
+              {t('layout.appearance')}
             </p>
             <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', padding: '0 4px' }}>
               {[
-                { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                { value: 'system' as Theme, icon: Monitor, label: 'System' },
-              ].map(({ value, icon: Icon, label }) => (
+                { value: 'light' as Theme, icon: Sun, i18nKey: 'layout.theme.light' },
+                { value: 'dark' as Theme, icon: Moon, i18nKey: 'layout.theme.dark' },
+                { value: 'system' as Theme, icon: Monitor, i18nKey: 'layout.theme.system' },
+              ].map(({ value, icon: Icon, i18nKey }) => (
                 <button
                   key={value}
                   onClick={() => setTheme(value)}
@@ -367,7 +447,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                   }}
                 >
                   <Icon size={13} />
-                  {label}
+                  {t(i18nKey)}
                 </button>
               ))}
             </div>
@@ -401,7 +481,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
               }
             >
               <LogOut size={14} />
-              Sign out
+              {t('layout.signOut')}
             </button>
           </motion.div>
         )}
@@ -416,10 +496,27 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [theme, setTheme] = useTheme();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const config = useHRConfigStore((s) => s.config);
+  const timeTrackingModel = config?.timeTrackingModel ?? 'both';
+
+  const getPageTitle = (pathname: string): string => {
+    if (routeLabelKeys[pathname]) return t(routeLabelKeys[pathname]);
+    if (pathname.startsWith('/staff/')) return t('layout.routes.employeeProfile');
+    if (pathname.startsWith('/reviews/')) return t('layout.routes.performanceReviews');
+    if (pathname.startsWith('/timesheets/')) return t('layout.routes.timesheetDetail');
+    if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
+    if (pathname.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
+    if (pathname.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
+    if (pathname.startsWith('/performance/cycles/')) return t('layout.routes.reviewCycleDetail');
+    if (pathname.startsWith('/equipment/')) return t('nav.assets');
+    if (pathname.startsWith('/onboarding/')) return t('layout.routes.checklistTemplates');
+    return t('layout.hr');
+  };
   const pageTitle = getPageTitle(location.pathname);
 
   useEffect(() => {
@@ -504,7 +601,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             }
           >
             <ArrowLeft size={11} />
-            Hub
+            {t('layout.hubLink')}
           </a>
         </div>
 
@@ -519,29 +616,35 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             gap: '2px',
           }}
         >
-          {navSections.map((section) => (
-            <div
-              key={section.title}
-              style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
-            >
-              <p
-                style={{
-                  padding: '6px 12px 4px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hr-text-dim)',
-                  margin: 0,
-                }}
+          {navSections.map((section) => {
+            const visibleItems = section.items.filter(
+              (item) => !item.configGuard || item.configGuard(timeTrackingModel, config)
+            );
+            if (visibleItems.length === 0) return null;
+            return (
+              <div
+                key={section.i18nKey}
+                style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 6 }}
               >
-                {section.title}
-              </p>
-              {section.items.map((item) => (
-                <SidebarNavItem key={item.path} {...item} />
-              ))}
-            </div>
-          ))}
+                <p
+                  style={{
+                    padding: '6px 12px 4px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--hr-text-dim)',
+                    margin: 0,
+                  }}
+                >
+                  {t(section.i18nKey)}
+                </p>
+                {visibleItems.map((item) => (
+                  <SidebarNavItem key={item.path} {...item} />
+                ))}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Footer */}

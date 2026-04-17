@@ -1,0 +1,84 @@
+import { unwrap } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  ListTimesheetsRequest,
+  ListTimesheetsResponse,
+  TimesheetPayload,
+  SubmitTimesheetRequest,
+  SubmitTimesheetResponse,
+  ApproveTimesheetRequest,
+  ApproveTimesheetResponse,
+} from '@voxire/contracts/hr/v1/time_entries';
+import { safe } from '../../lib/api';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+
+export const useGetCurrentTimesheet = () => {
+  return useQuery<TimesheetPayload>({
+    queryKey: ['timesheets', 'current'],
+    queryFn: async (): Promise<TimesheetPayload> => {
+      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current'));
+      return (res as { timesheet: TimesheetPayload }).timesheet;
+    },
+  });
+};
+
+export const useListTimesheets = (params: ListTimesheetsRequest) => {
+  return useQuery<ListTimesheetsResponse>({
+    queryKey: ['timesheets', 'filter', params],
+    queryFn: async (): Promise<ListTimesheetsResponse> => {
+      const res = await unwrap(safe.get<ListTimesheetsResponse>('/hr/timesheets', { params }));
+      return res as ListTimesheetsResponse;
+    },
+  });
+};
+
+export const useGetTimesheet = (id: number | undefined) => {
+  return useQuery<TimesheetPayload>({
+    queryKey: ['timesheet', id],
+    queryFn: async (): Promise<TimesheetPayload> => {
+      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>(`/hr/timesheets/${id}`));
+      return (res as { timesheet: TimesheetPayload }).timesheet;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useSubmitTimesheet = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (data: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> => {
+      const res = await unwrap(safe.post<SubmitTimesheetResponse>('/hr/timesheets/submit', data));
+      return res as SubmitTimesheetResponse;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      toast.success(t('timesheets.submitted'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
+export const useApproveTimesheet = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (data: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> => {
+      const res = await unwrap(safe.post<ApproveTimesheetResponse>('/hr/timesheets/approve', data));
+      return res as ApproveTimesheetResponse;
+    },
+    onSuccess: (_data: ApproveTimesheetResponse, variables: ApproveTimesheetRequest) => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
+      toast.success(variables.approved ? t('timesheets.approved') : t('timesheets.rejected'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};

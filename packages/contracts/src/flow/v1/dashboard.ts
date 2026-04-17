@@ -5,27 +5,16 @@
 // source: flow/v1/dashboard.proto
 
 /* eslint-disable */
+import type { Task } from './tasks';
 
-export interface FlowDashboard {
-  totalTasks: number;
-  todo: number;
-  inProgress: number;
-  inReview: number;
-  done: number;
-  overdue: number;
-  totalProjects: number;
-  activeProjects: number;
-  tasksByProject: TasksByProject[];
+export interface GetFlowDashboardRequest {
+  workspaceId: number;
 }
-
-export interface TasksByProject {
-  projectName: string;
-  total: number;
-  completed: number;
-}
-
-export interface GetFlowDashboardRequest {}
 
 export interface GetFlowDashboardResponse {
-  dashboard: FlowDashboard | undefined;
+  openTasks: number;
+  inProgressTasks: number;
+  completedThisWeek: number;
+  overdueTasks: number;
+  myTasks: Task[];
 }
