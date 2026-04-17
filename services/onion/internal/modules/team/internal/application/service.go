@@ -100,19 +100,25 @@ func (s *Service) InviteUser(ctx context.Context, ownerID int64, input domain.In
 	return userID, token, nil
 }
 
-// VerifyInviteToken checks if the token is valid and returns the user info.
-func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, string, string, error) {
-	userID, _, _, err := s.repo.GetInviteToken(ctx, token)
+// VerifyInviteToken checks if the token is valid and returns the user info along with their app access list.
+func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, string, string, []string, error) {
+	userID, ownerID, _, err := s.repo.GetInviteToken(ctx, token)
 	if err != nil {
-		return 0, "", "", err
+		return 0, "", "", nil, err
 	}
 
 	email, fullName, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
-		return 0, "", "", err
+		return 0, "", "", nil, err
 	}
 
-	return userID, email, fullName, nil
+	// Fetch the user's app permissions so the frontend can redirect to the right app after accept.
+	apps := []string{}
+	if perm, permErr := s.repo.GetPermission(ctx, ownerID, userID); permErr == nil && perm != nil {
+		apps = perm.Apps
+	}
+
+	return userID, email, fullName, apps, nil
 }
 
 // AcceptInvite sets the user's password and marks the token as used.

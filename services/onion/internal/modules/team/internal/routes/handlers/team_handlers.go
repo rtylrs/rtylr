@@ -208,18 +208,19 @@ type VerifyInviteRequest struct {
 }
 
 type VerifyInviteResponse struct {
-	Email    string `json:"email"`
-	FullName string `json:"full_name"`
-	Valid    bool   `json:"valid"`
+	Email    string   `json:"email"`
+	FullName string   `json:"full_name"`
+	Apps     []string `json:"apps"`
+	Valid    bool     `json:"valid"`
 }
 
 func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {
-	_, email, fullName, err := h.Service.VerifyInviteToken(ctx, req.Token)
+	_, email, fullName, apps, err := h.Service.VerifyInviteToken(ctx, req.Token)
 	if err != nil {
 		return VerifyInviteResponse{Valid: false}, nil
 	}
 
-	return VerifyInviteResponse{Email: email, FullName: fullName, Valid: true}, nil
+	return VerifyInviteResponse{Email: email, FullName: fullName, Apps: apps, Valid: true}, nil
 }
 
 // ─── Accept Invite ──────────────────────────────────────────────────────────
