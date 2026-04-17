@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
+import { APP_URLS, APP_CONFIG } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin, useGoogleAuth } from '../../shared/hooks/useAuth';
@@ -13,31 +14,24 @@ import AuthShell from '../../shared/components/AuthShell';
 
 import { getEmailError } from '../../shared/lib/validation';
 
-const REDIRECT_APP_URLS: Record<string, string> = {
-  hub: window.location.hostname === 'localhost' ? 'http://localhost:5175' : 'https://hub.rtylr.com',
-  pos: window.location.hostname === 'localhost' ? 'http://localhost:5178' : 'https://pos.rtylr.com',
-  erp: window.location.hostname === 'localhost' ? 'http://localhost:5179' : 'https://erp.rtylr.com',
-  hr: window.location.hostname === 'localhost' ? 'http://localhost:5180' : 'https://hr.rtylr.com',
-  crm: window.location.hostname === 'localhost' ? 'http://localhost:5181' : 'https://crm.rtylr.com',
-  finance:
-    window.location.hostname === 'localhost'
-      ? 'http://localhost:5182'
-      : 'https://finance.rtylr.com',
-  flow:
-    window.location.hostname === 'localhost' ? 'http://localhost:5183' : 'https://flow.rtylr.com',
-};
+type KnownAppId = keyof typeof APP_URLS;
 
-const REDIRECT_APP_NAMES: Record<string, string> = {
-  hub: 'Hub',
-  pos: 'POS',
-  erp: 'ERP',
-  hr: 'HR',
-  crm: 'CRM',
-  finance: 'Finance',
-  flow: 'Flow',
-};
+function getRedirectUrl(redirectParam: string | null): string {
+  if (redirectParam && redirectParam in APP_URLS) {
+    return APP_URLS[redirectParam as KnownAppId] as string;
+  }
+  return APP_URLS.dash as string;
+}
 
-const Login: React.FC = () => {
+function getAppDisplayName(redirectParam: string | null): string | null {
+  if (!redirectParam) return null;
+  if (redirectParam in APP_CONFIG) {
+    return APP_CONFIG[redirectParam as keyof typeof APP_CONFIG].name;
+  }
+  return null;
+}
+
+const Login: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const { isAuthenticated, loading, error, clearError } = useUserStore();
@@ -49,71 +43,65 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const emailError = getEmailError(email);
 
-  const redirectParam = useMemo(() => {
+  const redirectParam = useMemo((): string | null => {
     const params = new URLSearchParams(window.location.search);
     return params.get('redirect');
   }, []);
 
-  const redirectAppName = redirectParam ? (REDIRECT_APP_NAMES[redirectParam] ?? null) : null;
+  const appName = getAppDisplayName(redirectParam);
 
-  const redirectTo = () => {
-    const destination =
-      redirectParam && REDIRECT_APP_URLS[redirectParam]
-        ? REDIRECT_APP_URLS[redirectParam]
-        : REDIRECT_APP_URLS.hub;
-    window.location.href = destination;
+  const redirectTo = (): void => {
+    window.location.href = getRedirectUrl(redirectParam);
   };
 
-  const handleSubmit = () =>
-    loginMutation.mutate(
-      { email, password },
-      {
-        onSuccess: () => redirectTo(),
-      }
-    );
+  const handleSubmit = (): void => {
+    loginMutation.mutate({ email, password }, { onSuccess: () => redirectTo() });
+  };
 
-  const handleGoogle = async () => {
+  const handleGoogle = async (): Promise<void> => {
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
       googleAuthMutation.mutate({ idToken }, { onSuccess: () => redirectTo() });
     } catch (err) {
-      notify.error((err as any).message);
+      notify.error((err as Error).message);
     }
   };
 
-  useEffect(() => {
+  useEffect((): void => {
     clearError();
   }, [clearError]);
 
-  useEffect(() => {
-    // Only redirect if both the store says authenticated AND a token cookie exists.
-    // This prevents a loop when the user logs out (cookie cleared but store still persisted).
+  useEffect((): void => {
     const tokenCookie = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
     if (isAuthenticated && tokenCookie) {
-      const destination =
-        redirectParam && REDIRECT_APP_URLS[redirectParam]
-          ? REDIRECT_APP_URLS[redirectParam]
-          : REDIRECT_APP_URLS.hub;
-      window.location.href = destination;
+      redirectTo();
     }
-  }, [isAuthenticated, redirectParam]);
+  }, [isAuthenticated]);
 
   const errorMessage =
-    error && (typeof error === 'string' ? error : (error as any)?.message || 'An error occurred');
+    error &&
+    (typeof error === 'string'
+      ? error
+      : (error as { message?: string })?.message || 'An error occurred');
+
+  const title = appName ? `Sign in to ${appName}.` : 'Welcome back.';
+  const subtitle = appName ? `Sign in to access ${appName}.` : 'Sign in to your account.';
 
   return (
     <AuthShell
-      title="Welcome back."
-      subtitle="Sign in to your account."
+      title={title}
+      subtitle={subtitle}
       footer={
         <div className="text-center space-y-3">
           <p className="text-sm text-[#666]">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate('/register')}
+              onClick={() =>
+                navigate(redirectParam ? `/register?redirect=${redirectParam}` : '/register')
+              }
             >
               Sign up
             </button>

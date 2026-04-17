@@ -112,4 +112,4 @@ export function createApiClient(appId: string): AxiosInstance {
   return client;
 }
 
-export const api: AxiosInstance = createApiClient('hub');
+export const api: AxiosInstance = createApiClient('dash');

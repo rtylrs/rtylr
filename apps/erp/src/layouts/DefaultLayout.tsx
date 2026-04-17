@@ -339,7 +339,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
         <div className="px-3 pt-3">
           <a
-            href={APP_URLS.hub}
+            href={APP_URLS.dash}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150 no-underline"
             style={{ color: 'var(--hub-text-muted)' }}
             onMouseEnter={(e) => {

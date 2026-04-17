@@ -582,7 +582,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <img src="/logo.png" alt="rtylr" style={{ height: 24, width: 'auto' }} />
           </div>
           <a
-            href={APP_URLS.hub}
+            href={APP_URLS.dash}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

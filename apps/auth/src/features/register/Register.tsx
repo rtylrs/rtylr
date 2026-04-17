@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
+import { APP_URLS } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -16,7 +17,33 @@ import PasswordStrengthMeter, {
 } from '../../shared/components/PasswordStrengthMeter';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
-const Register: React.FC = () => {
+// Map each app slug to the plan slug to auto-assign on registration.
+// Apps not listed here fall back to the 'starter' plan (full-suite).
+const APP_PLAN_MAP: Record<string, string> = {
+  flow: 'flow_solo',
+  finance: 'finance_solo',
+};
+
+// Friendly display names for per-app registration
+const APP_DISPLAY_NAMES: Record<string, string> = {
+  flow: 'Flow',
+  finance: 'Finance',
+  erp: 'ERP',
+  hr: 'HR',
+  crm: 'CRM',
+  pos: 'POS',
+};
+
+type KnownAppId = keyof typeof APP_URLS;
+
+function getRedirectUrl(redirectParam: string | null): string {
+  if (redirectParam && redirectParam in APP_URLS) {
+    return APP_URLS[redirectParam as KnownAppId] as string;
+  }
+  return APP_URLS.dash as string;
+}
+
+const Register: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const [name, setName] = useState('');
@@ -33,45 +60,81 @@ const Register: React.FC = () => {
   const registerMutation = useRegisterRestaurant();
   const googleAuthMutation = useGoogleAuth();
 
-  const handleRegister = () => {
+  // Determine if we're registering for a specific app (e.g. flow, finance)
+  const redirectParam = useMemo((): string | null => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('redirect');
+  }, []);
+
+  const isSoloApp = redirectParam !== null && redirectParam !== 'dash';
+  const appDisplayName = redirectParam ? (APP_DISPLAY_NAMES[redirectParam] ?? null) : null;
+  const planSlug = redirectParam ? (APP_PLAN_MAP[redirectParam] ?? 'starter') : 'starter';
+
+  const handleRegister = (): void => {
     if (password !== confirmPassword) {
       notify.error('Passwords do not match');
       return;
     }
-    registerMutation.mutate({
-      email,
-      password,
-      name: name.trim() || email.split('@')[0],
-      businessName: businessName.trim(),
-      referred: '',
-    });
+    registerMutation.mutate(
+      {
+        email,
+        password,
+        name: name.trim() || email.split('@')[0],
+        businessName: isSoloApp ? '' : businessName.trim(),
+        referred: '',
+        planSlug,
+      },
+      {
+        onSuccess: () => {
+          window.location.href = getRedirectUrl(redirectParam);
+        },
+      }
+    );
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = async (): Promise<void> => {
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await getIdToken(result.user);
-      googleAuthMutation.mutate({ idToken });
+      googleAuthMutation.mutate(
+        { idToken },
+        {
+          onSuccess: () => {
+            window.location.href = getRedirectUrl(redirectParam);
+          },
+        }
+      );
     } catch (err) {
-      notify.error((err as any).message);
+      notify.error((err as Error).message);
     }
   };
 
-  useEffect(() => {
+  useEffect((): void => {
     clearError();
   }, [clearError]);
-  useEffect(() => {
+
+  useEffect((): void => {
     const hasToken = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
-    if (isAuthenticated && hasToken) navigate(role === 'business' ? '/auth/questionnaire' : '/');
+    if (isAuthenticated && hasToken) {
+      navigate(role === 'business' ? '/auth/questionnaire' : '/');
+    }
   }, [isAuthenticated, navigate, role]);
 
   const errorMessage =
-    error && (typeof error === 'string' ? error : (error as any)?.message || 'An error occurred');
+    error &&
+    (typeof error === 'string'
+      ? error
+      : (error as { message?: string })?.message || 'An error occurred');
+
+  const title = appDisplayName ? `Get started with ${appDisplayName}.` : 'Create your account.';
+  const subtitle = appDisplayName
+    ? `Create your free ${appDisplayName} account.`
+    : 'Get started with rtylr for free.';
 
   return (
     <AuthShell
-      title="Create your account."
-      subtitle="Get started with rtylr for free."
+      title={title}
+      subtitle={subtitle}
       footer={
         <div className="text-center">
           <p className="text-sm text-[#666]">
@@ -79,7 +142,7 @@ const Register: React.FC = () => {
             <button
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(redirectParam ? `/?redirect=${redirectParam}` : '/')}
             >
               Sign in
             </button>
@@ -110,20 +173,22 @@ const Register: React.FC = () => {
           />
         </div>
 
-        {/* Business name */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
-            Business name
-          </label>
-          <input
-            id="register-business"
-            type="text"
-            placeholder="My Coffee Shop"
-            value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
-            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-          />
-        </div>
+        {/* Business name — hidden for solo-app registrations */}
+        {!isSoloApp && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
+              Business name
+            </label>
+            <input
+              id="register-business"
+              type="text"
+              placeholder="My Coffee Shop"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+            />
+          </div>
+        )}
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
@@ -210,7 +275,7 @@ const Register: React.FC = () => {
           </div>
         )}
 
-        {/* Sign up button */}
+        {/* Submit */}
         <Button
           type="submit"
           variant="primary"

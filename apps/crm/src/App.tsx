@@ -78,7 +78,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       >
         <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
         <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
-        <a href={APP_URLS.hub} style={{ color: '#4583C4', fontSize: '13px' }}>
+        <a href={APP_URLS.dash} style={{ color: '#4583C4', fontSize: '13px' }}>
           Go to Hub
         </a>
       </div>

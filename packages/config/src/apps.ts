@@ -5,7 +5,7 @@ export type { AppId };
 const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
 export const APP_URLS: Record<AppId, string> & { api: string; status: string } = {
-  hub: IS_LOCAL ? 'http://localhost:5175' : 'https://hub.rtylr.com',
+  dash: IS_LOCAL ? 'http://localhost:5175' : 'https://dash.rtylr.com',
   auth: IS_LOCAL ? 'http://localhost:5176' : 'https://auth.rtylr.com',
   menu: IS_LOCAL ? 'http://localhost:5177' : 'https://menu.rtylr.com',
   pos: IS_LOCAL ? 'http://localhost:5178' : 'https://pos.rtylr.com',
@@ -24,7 +24,7 @@ export const APP_CONFIG: Record<
   AppId,
   { name: string; devPort: number; allowedRoles: UserRole[] }
 > = {
-  hub: { name: 'Hub', devPort: 5175, allowedRoles: ['owner', 'admin', 'operator'] },
+  dash: { name: 'Dash', devPort: 5175, allowedRoles: ['owner', 'admin', 'operator'] },
   auth: {
     name: 'Auth',
     devPort: 5176,

@@ -141,7 +141,7 @@ describe('hasAnyPermission', () => {
 
 describe('canAccessApp', () => {
   it('owner can access all apps', () => {
-    expect(canAccessApp('owner', 'hub')).toBe(true);
+    expect(canAccessApp('owner', 'dash')).toBe(true);
     expect(canAccessApp('owner', 'pos')).toBe(true);
     expect(canAccessApp('owner', 'erp')).toBe(true);
     expect(canAccessApp('owner', 'finance')).toBe(true);
@@ -168,7 +168,7 @@ describe('canAccessApp', () => {
 describe('getAccessibleApps', () => {
   it('owner gets all apps', () => {
     const apps = getAccessibleApps('owner');
-    expect(apps).toContain('hub');
+    expect(apps).toContain('dash');
     expect(apps).toContain('pos');
     expect(apps).toContain('erp');
     expect(apps).toContain('finance');
@@ -177,7 +177,7 @@ describe('getAccessibleApps', () => {
 
   it('viewer gets minimal apps', () => {
     const apps = getAccessibleApps('viewer');
-    expect(apps).toContain('hub');
+    expect(apps).toContain('dash');
     expect(apps).not.toContain('pos');
   });
 

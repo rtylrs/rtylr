@@ -60,7 +60,7 @@ const Activity: React.FC = () => {
           />
         </div>
         <div className="flex items-center gap-1">
-          {['all', 'hub', 'pos', 'erp', 'hr', 'crm', 'finance'].map((a) => (
+          {['all', 'dash', 'pos', 'erp', 'hr', 'crm', 'finance'].map((a) => (
             <button
               key={a}
               onClick={() => setAppFilter(a)}

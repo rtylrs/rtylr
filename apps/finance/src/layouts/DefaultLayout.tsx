@@ -248,7 +248,7 @@ const DefaultLayout: React.FC = () => {
 
         <div style={{ padding: '10px 8px 4px' }}>
           <a
-            href={APP_URLS.hub}
+            href={APP_URLS.dash}
             style={{
               display: 'flex',
               alignItems: 'center',

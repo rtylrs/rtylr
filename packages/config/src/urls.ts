@@ -5,7 +5,7 @@
  * Apps:
  *   landing  → rtylr.com
  *   auth     → auth.rtylr.com
- *   hub      → hub.rtylr.com
+ *   dash     → dash.rtylr.com
  *   menu     → menu.rtylr.com
  *   pos      → pos.rtylr.com  (vbitez)
  *   api      → api.rtylr.com
@@ -18,7 +18,7 @@ const isLocalhost =
 const LOCAL_URLS = {
   landing: 'http://localhost:4200',
   auth: 'http://localhost:5176',
-  hub: 'http://localhost:5175',
+  dash: 'http://localhost:5175',
   menu: 'http://localhost:5177',
   pos: 'http://localhost:5178',
   api: 'https://api.voxire.dev',
@@ -28,7 +28,7 @@ const LOCAL_URLS = {
 const PROD_URLS = {
   landing: 'https://rtylr.com',
   auth: 'https://auth.rtylr.com',
-  hub: 'https://hub.rtylr.com',
+  dash: 'https://dash.rtylr.com',
   menu: 'https://menu.rtylr.com',
   pos: 'https://pos.rtylr.com',
   api: 'https://api.voxire.dev',

@@ -14,14 +14,12 @@ import {
 import { useUserStore, type StoredUser } from '../stores/userStore';
 import api from '../lib/api';
 
-const getTokenFromCookie = (): string | null =>
+const getCookieToken = (): string | null =>
   document.cookie
     .split(';')
     .map((c) => c.trim())
     .find((c) => c.startsWith('token='))
     ?.split('=')[1] ?? null;
-
-const getAuthUrl = (): string => `${APP_URLS.auth}?redirect=hub`;
 
 const ALL_APPS = [
   {
@@ -82,38 +80,37 @@ const ALL_APPS = [
   },
 ];
 
-function StaffView({ user }: { user: StoredUser }) {
+function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const userApps: string[] = user?.apps ?? [];
   const businessName = user?.businessName || '';
   const fullName = user?.fullName || user?.email || '';
   const [requested, setRequested] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState<string | null>(null);
+  const [requestLoading, setRequestLoading] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    window.location.href = getAuthUrl();
+    window.location.href = `${APP_URLS.auth}?redirect=dash`;
   };
 
-  const handleRequestAccess = async (appId: string) => {
-    setLoading(appId);
+  const handleRequestAccess = async (appId: string): Promise<void> => {
+    setRequestLoading(appId);
     try {
       await api.post('/team/request-access', { app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
-      // Don't mark as requested if it failed
+      // silently fail — server returns success anyway if already requested
     } finally {
-      setLoading(null);
+      setRequestLoading(null);
     }
   };
 
   const initials = fullName
     .split(' ')
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
-
-  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--hub-bg, #fafafa)' }}>
@@ -131,7 +128,9 @@ function StaffView({ user }: { user: StoredUser }) {
         <img src="/logo.png" alt="rtylr" style={{ height: 24, filter: 'brightness(0)' }} />
         <div style={{ position: 'relative' }}>
           <button
+            type="button"
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="User menu"
             style={{
               width: 36,
               height: 36,
@@ -200,6 +199,7 @@ function StaffView({ user }: { user: StoredUser }) {
                 Account settings
               </a>
               <button
+                type="button"
                 onClick={handleLogout}
                 style={{
                   display: 'block',
@@ -220,7 +220,7 @@ function StaffView({ user }: { user: StoredUser }) {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* App grid */}
       <div
         style={{
           display: 'flex',
@@ -337,7 +337,7 @@ function StaffView({ user }: { user: StoredUser }) {
                     <span style={{ fontSize: 11, color: '#10b981', fontWeight: 500 }}>
                       Requested
                     </span>
-                  ) : loading === app.id ? (
+                  ) : requestLoading === app.id ? (
                     <div
                       style={{
                         width: 14,
@@ -350,6 +350,7 @@ function StaffView({ user }: { user: StoredUser }) {
                     />
                   ) : (
                     <button
+                      type="button"
                       onClick={() => handleRequestAccess(app.id)}
                       style={{
                         fontSize: 11,
@@ -376,14 +377,15 @@ function StaffView({ user }: { user: StoredUser }) {
   );
 }
 
-function BusinessRoute() {
-  const token = getTokenFromCookie();
+function BusinessRoute(): React.JSX.Element | null {
+  const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
-  useEffect(() => {
+  useEffect((): void => {
     if (!token) {
-      window.location.href = getAuthUrl();
+      window.location.href = `${APP_URLS.auth}?redirect=dash`;
       return;
     }
 
@@ -391,12 +393,14 @@ function BusinessRoute() {
 
     api
       .get('/user/me')
-      .then((res) => {
+      .then((res: { data?: Record<string, unknown> }) => {
         if (res.data) {
-          setUser(res.data);
+          setUser(res.data as StoredUser);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        // allow on error — auth interceptor handles 401
+      })
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -428,9 +432,8 @@ function BusinessRoute() {
     );
   }
 
-  // Staff users (non-owner) get a simple app-cards view
-  // But allow access to account settings
-  const location = useLocation();
+  // Staff users (non-owner) see the app cards launcher.
+  // Account settings are always accessible regardless of role.
   const staffAllowedPaths = ['/settings/account'];
   if (
     user &&
@@ -440,7 +443,7 @@ function BusinessRoute() {
     return <StaffView user={user} />;
   }
 
-  // Owner/admin gets the full hub with sidebar
+  // Owners and admins get the full Dash experience.
   return <Outlet />;
 }
 

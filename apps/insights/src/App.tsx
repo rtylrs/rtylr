@@ -81,7 +81,7 @@ const ProtectedApp: React.FC = () => {
       >
         <p style={{ fontWeight: 600 }}>You don't have access to this app</p>
         <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
-        <a href={APP_URLS.hub} style={{ color: '#6366f1', fontSize: '13px' }}>
+        <a href={APP_URLS.dash} style={{ color: '#6366f1', fontSize: '13px' }}>
           Go to Hub
         </a>
       </div>

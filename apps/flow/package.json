@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@voxire/api": "workspace:*",
+    "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "axios": "^1.15.0",

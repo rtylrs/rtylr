@@ -14,6 +14,7 @@ interface RegisterPayload {
   name: string;
   businessName?: string;
   referred: string;
+  planSlug?: string;
 }
 
 interface GoogleAuthPayload {

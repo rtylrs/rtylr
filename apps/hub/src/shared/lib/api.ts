@@ -2,9 +2,9 @@ import { createApiClient, safeFetch } from '@voxire/api';
 import type { SafeApi } from '@voxire/api';
 import i18next from 'i18next';
 
-const api = createApiClient('hub');
+const api = createApiClient('dash');
 
-// Hub-specific: inject accept-language header from i18next
+// Dash-specific: inject accept-language header from i18next
 api.interceptors.request.use((config) => {
   config.headers['accept-language'] = i18next.language;
   return config;

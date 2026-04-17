@@ -1,6 +1,6 @@
 export type UserRole = 'owner' | 'admin' | 'operator' | 'staff' | 'viewer';
 export type AppId =
-  | 'hub'
+  | 'dash'
   | 'auth'
   | 'pos'
   | 'erp'
