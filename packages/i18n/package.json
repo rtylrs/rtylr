@@ -7,6 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@voxire/auth": "workspace:*",
     "i18next": "^23.11.5",
     "react-i18next": "^14.1.2",
     "i18next-resources-to-backend": "^1.2.1"

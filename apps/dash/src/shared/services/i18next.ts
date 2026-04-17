@@ -1,51 +1,19 @@
-import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { initI18n } from '@voxire/i18n';
 
 import en from '../../locales/en.json';
 import fr from '../../locales/fr.json';
 import ar from '../../locales/ar.json';
 
-export const resources = {
-  en: {
-    translation: en,
-  },
-  fr: {
-    translation: fr,
-  },
-  ar: {
-    translation: ar,
-  },
+const flat: Record<string, Record<string, unknown>> = {
+  en: en as Record<string, unknown>,
+  fr: fr as Record<string, unknown>,
+  ar: ar as Record<string, unknown>,
 };
 
-import { getCookie, setCookie, getDefaultCookieDomain } from '../lib/cookies';
-
-i18next.use(initReactI18next).init({
-  resources,
-  lng: getCookie('language') || 'en',
-  fallbackLng: 'fr',
-  compatibilityJSON: 'v3',
-  interpolation: {
-    escapeValue: false,
-  },
+const i18n = initI18n({
+  loadResource: (lang) => Promise.resolve(flat[lang] ?? flat['en']),
 });
 
-export const selectLanguage = (language?: string) => {
-  if (language) {
-    i18next.changeLanguage(language);
-    setCookie('language', language, {
-      days: 365,
-      sameSite: 'lax',
-      domain: getDefaultCookieDomain(),
-    });
-  } else {
-    language = 'en';
-    i18next.changeLanguage(language);
-    setCookie('language', language, {
-      days: 365,
-      sameSite: 'lax',
-      domain: getDefaultCookieDomain(),
-    });
-  }
-};
+export { selectLanguage } from '@voxire/i18n';
 
-export default i18next;
+export default i18n;
