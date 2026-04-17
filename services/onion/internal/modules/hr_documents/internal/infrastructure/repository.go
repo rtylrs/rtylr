@@ -97,6 +97,11 @@ func (r *Repository) DeleteDocument(ctx context.Context, ownerID, id int64) erro
 }
 
 func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord {
+	var expiryDate *time.Time
+	if row.ExpiryDate.Valid {
+		t := row.ExpiryDate.Time
+		expiryDate = &t
+	}
 	return domain.EmployeeDocumentRecord{
 		ID:           row.ID,
 		OwnerID:      row.OwnerID,
@@ -106,6 +111,7 @@ func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord 
 		StorageMode:  row.StorageMode,
 		FileURL:      row.FileUrl.String,
 		ExternalURL:  row.ExternalUrl.String,
+		ExpiryDate:   expiryDate,
 		UploadedBy:   row.UploadedBy,
 		CreatedAt:    row.CreatedAt,
 		UpdatedAt:    row.UpdatedAt,
