@@ -10,13 +10,26 @@ import {
   loyaltyTierSchema,
 } from '../../shared/schemas/loyalty';
 
+// Many loyalty endpoints return `{ <key>: [...] }` envelopes from the backend.
+// Accept either a raw array or an enveloped response so the schema parse
+// never sees undefined, which would throw.
+function unwrapList<T>(res: unknown, ...keys: string[]): T[] {
+  if (Array.isArray(res)) return res as T[];
+  if (res && typeof res === 'object') {
+    for (const key of keys) {
+      const value = (res as Record<string, unknown>)[key];
+      if (Array.isArray(value)) return value as T[];
+    }
+  }
+  return [];
+}
+
 export function useLoyaltyTransactions() {
   return useQuery({
     queryKey: ['loyalty-transactions'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getLoyaltyTransactions());
-      const raw = res ?? [];
-      return z.array(loyaltyTransactionSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
   });
 }
@@ -36,8 +49,7 @@ export function useLoyaltyMembers() {
     queryKey: ['loyalty-members'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getLoyaltyMembers());
-      const raw = res ?? [];
-      return z.array(loyaltyMemberSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(loyaltyMemberSchema).parse(unwrapList(res, 'members'));
     },
   });
 }
@@ -47,8 +59,7 @@ export function useLoyaltyRewards() {
     queryKey: ['loyalty-rewards'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getLoyaltyRewards());
-      const raw = res ?? [];
-      return z.array(loyaltyRewardSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(loyaltyRewardSchema).parse(unwrapList(res, 'rewards'));
     },
   });
 }
@@ -58,8 +69,7 @@ export function useLoyaltyTiers() {
     queryKey: ['loyalty-tiers'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getLoyaltyTiers());
-      const raw = res ?? [];
-      return z.array(loyaltyTierSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(loyaltyTierSchema).parse(unwrapList(res, 'tiers'));
     },
   });
 }
