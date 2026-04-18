@@ -14,6 +14,11 @@ import {
 } from '../../shared/components/dash';
 import { useMember, useDeactivateMember } from '../../shared/hooks/queries/useTeam';
 import { useActivity } from '../../shared/hooks/queries/useActivity';
+import {
+  useMySubscription,
+  centsToDisplay,
+  computeSeatProration,
+} from '../../shared/hooks/queries/useSubscription';
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
@@ -31,6 +36,7 @@ const MemberDetail: React.FC = () => {
   const { data: member, isLoading } = useMember(id);
   const { data: activity = [] } = useActivity(10);
   const deactivate = useDeactivateMember();
+  const { data: sub } = useMySubscription();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (isLoading) {
@@ -172,7 +178,30 @@ const MemberDetail: React.FC = () => {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={`Deactivate ${member.name}?`}
-        description="They will lose access to all apps immediately."
+        description={
+          <span className="flex flex-col gap-1.5">
+            <span>They will lose access to all apps immediately.</span>
+            {sub &&
+              sub.pricePerSeatCents > 0 &&
+              (() => {
+                const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                  computeSeatProration(sub.pricePerSeatCents);
+                return (
+                  <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
+                    Saves{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      {centsToDisplay(proratedCents)}
+                    </span>{' '}
+                    this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      {centsToDisplay(sub.pricePerSeatCents)}/mo
+                    </span>{' '}
+                    from {nextMonthName} 1st.
+                  </span>
+                );
+              })()}
+          </span>
+        }
         confirmLabel="Deactivate"
         destructive
         isLoading={deactivate.isPending}

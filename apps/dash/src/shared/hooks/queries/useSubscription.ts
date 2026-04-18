@@ -97,6 +97,44 @@ export function trialDaysLeft(trialEndsAt: string | null): number {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
+export interface SeatProration {
+  daysRemaining: number;
+  daysInMonth: number;
+  proratedCents: number;
+  nextMonthName: string;
+}
+
+/**
+ * Compute the prorated seat cost for the remainder of the current billing month.
+ * Matches the backend's computeLineItem formula exactly.
+ */
+export function computeSeatProration(pricePerSeatCents: number): SeatProration {
+  const now = new Date();
+  const month = now.getMonth();
+  const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+  const daysRemaining = daysInMonth - now.getDate() + 1;
+  const MONTHS = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return {
+    daysRemaining,
+    daysInMonth,
+    proratedCents: Math.round((daysRemaining * pricePerSeatCents) / daysInMonth),
+    nextMonthName: MONTHS[(month + 1) % 12],
+  };
+}
+
 // ── Query hooks ───────────────────────────────────────────────────────────────
 
 interface MySubscriptionResponse {

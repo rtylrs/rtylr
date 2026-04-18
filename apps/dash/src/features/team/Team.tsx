@@ -21,6 +21,11 @@ import { Button, Input } from '../../shared/components/ui';
 import api from '../../shared/lib/api';
 import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
 import { useTeam, useDeactivateMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
+import {
+  useMySubscription,
+  centsToDisplay,
+  computeSeatProration,
+} from '../../shared/hooks/queries/useSubscription';
 
 const APP_ICONS: Record<
   string,
@@ -44,6 +49,7 @@ const Team: React.FC = () => {
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
+  const { data: sub } = useMySubscription();
   const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
@@ -368,7 +374,32 @@ const Team: React.FC = () => {
         open={!!confirm}
         onOpenChange={(o) => !o && setConfirm(null)}
         title={`Deactivate ${confirm?.name || confirm?.email || 'member'}?`}
-        description="The member will lose access to all apps immediately. You can reactivate them later."
+        description={
+          <span className="flex flex-col gap-1.5">
+            <span>
+              The member will lose access to all apps immediately. You can reactivate them later.
+            </span>
+            {sub &&
+              sub.pricePerSeatCents > 0 &&
+              (() => {
+                const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                  computeSeatProration(sub.pricePerSeatCents);
+                return (
+                  <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
+                    Saves{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      {centsToDisplay(proratedCents)}
+                    </span>{' '}
+                    this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      {centsToDisplay(sub.pricePerSeatCents)}/mo
+                    </span>{' '}
+                    from {nextMonthName} 1st.
+                  </span>
+                );
+              })()}
+          </span>
+        }
         confirmLabel="Deactivate"
         destructive
         isLoading={deactivate.isPending}

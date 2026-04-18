@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { RtylrApp } from '../../hooks/queries/useApps';
 
@@ -13,43 +13,63 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   const Icon = app.icon;
   const isExternal = (app.href ?? '').startsWith('http');
   const isComingSoon = app.status === 'coming_soon';
+  const isLocked = app.locked === true;
+
+  const badge = (() => {
+    if (isLocked) {
+      return (
+        <span
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
+          style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
+        >
+          <Lock size={9} />
+          Upgrade
+        </span>
+      );
+    }
+    if (app.status === 'beta') {
+      return (
+        <span
+          className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
+          style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}
+        >
+          Beta
+        </span>
+      );
+    }
+    if (isComingSoon) {
+      return (
+        <span
+          className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
+          style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+        >
+          Soon
+        </span>
+      );
+    }
+    return isExternal ? (
+      <ExternalLink size={13} style={{ color: 'var(--dash-text-dim)' }} />
+    ) : (
+      <ArrowRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
+    );
+  })();
 
   const content = (
     <>
       <div className="flex items-start justify-between">
         <div
           className="h-11 w-11 rounded-xl flex items-center justify-center"
-          style={{ background: app.bg }}
+          style={{ background: app.bg, opacity: isLocked ? 0.5 : 1 }}
         >
           <Icon size={22} style={{ color: app.color }} />
         </div>
-        <div className="flex items-center gap-1.5">
-          {app.status === 'beta' && (
-            <span
-              className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-              style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}
-            >
-              Beta
-            </span>
-          )}
-          {isComingSoon && (
-            <span
-              className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-              style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
-            >
-              Soon
-            </span>
-          )}
-          {!isComingSoon &&
-            (isExternal ? (
-              <ExternalLink size={13} style={{ color: 'var(--dash-text-dim)' }} />
-            ) : (
-              <ArrowRight size={13} style={{ color: 'var(--dash-text-dim)' }} />
-            ))}
-        </div>
+        <div className="flex items-center gap-1.5">{badge}</div>
       </div>
       <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+        <p
+          className="text-sm font-semibold"
+          style={{ color: isLocked ? 'var(--dash-text-muted)' : 'var(--dash-text)' }}
+        >
           {app.label}
         </p>
         <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--dash-text-muted)' }}>
@@ -59,21 +79,35 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
     </>
   );
 
-  const style: React.CSSProperties = {
+  const cardStyle: React.CSSProperties = {
     background: 'var(--dash-card)',
-    border: '1px solid var(--dash-border)',
+    border: isLocked ? '1px solid rgba(245,158,11,0.2)' : '1px solid var(--dash-border)',
     opacity: isComingSoon ? 0.6 : 1,
   };
 
-  if (isComingSoon) {
+  if (isComingSoon || (isLocked && false)) {
     return (
       <motion.div
         className="rounded-xl p-5 flex flex-col gap-4 cursor-not-allowed"
-        style={style}
+        style={cardStyle}
         whileHover={{ scale: 1 }}
       >
         {content}
       </motion.div>
+    );
+  }
+
+  // Locked apps link to the subscription upgrade page instead of launching the app
+  if (isLocked) {
+    return (
+      <motion.a
+        href="/settings/subscription"
+        className="group rounded-xl p-5 flex flex-col gap-4 no-underline transition-all"
+        style={cardStyle}
+        whileHover={{ scale: 1.01 }}
+      >
+        {content}
+      </motion.a>
     );
   }
 
@@ -83,7 +117,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
       className="group rounded-xl p-5 flex flex-col gap-4 no-underline transition-all"
-      style={style}
+      style={cardStyle}
       whileHover={{ scale: 1.01 }}
       onClick={() => onLaunch?.(app)}
     >

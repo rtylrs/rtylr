@@ -23,21 +23,26 @@ const Apps: React.FC = () => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
 
-  // Owner (user.id === 1 or no permissions set) sees all apps.
-  // Staff/invited users only see their allowed apps.
   const userApps: string[] = user?.apps ?? [];
-  const isOwner = !userApps.length || user?.role === 'owner' || user?.role === 'admin';
+  const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
   const filtered = useMemo(() => {
-    return apps.filter((a) => {
-      if (!isOwner && !userApps.includes(a.key)) return false;
-      const matchesQuery =
-        !query.trim() ||
-        a.label.toLowerCase().includes(query.toLowerCase()) ||
-        a.description.toLowerCase().includes(query.toLowerCase());
-      const matchesCat = category === 'all' || a.category === category;
-      return matchesQuery && matchesCat;
-    });
+    return apps
+      .filter((a) => {
+        // Staff/invited users only see apps they have explicit permission for.
+        if (!isOwner && !userApps.includes(a.key)) return false;
+        const matchesQuery =
+          !query.trim() ||
+          a.label.toLowerCase().includes(query.toLowerCase()) ||
+          a.description.toLowerCase().includes(query.toLowerCase());
+        const matchesCat = category === 'all' || a.category === category;
+        return matchesQuery && matchesCat;
+      })
+      .map((a) => ({
+        ...a,
+        // Owners see all apps but locked ones link to the upgrade page.
+        locked: isOwner && userApps.length > 0 && !userApps.includes(a.key),
+      }));
   }, [apps, query, category, isOwner, userApps]);
 
   return (

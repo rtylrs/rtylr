@@ -16,42 +16,11 @@ import { Button, Input, Label, Select } from '../../shared/components/ui';
 import { SettingSection } from '../../shared/components/dash';
 import api from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
-import { useMySubscription, centsToDisplay } from '../../shared/hooks/queries/useSubscription';
-
-// ── Proration helper ──────────────────────────────────────────────────────────
-
-interface SeatProration {
-  daysRemaining: number;
-  daysInMonth: number;
-  proratedCents: number;
-  nextMonthName: string;
-}
-
-function computeSeatProration(pricePerSeatCents: number): SeatProration {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
-  const today = now.getDate();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysRemaining = daysInMonth - today + 1; // inclusive of today
-  const proratedCents = Math.round((daysRemaining * pricePerSeatCents) / daysInMonth);
-  const MONTHS = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  const nextMonthName = MONTHS[(month + 1) % 12];
-  return { daysRemaining, daysInMonth, proratedCents, nextMonthName };
-}
+import {
+  useMySubscription,
+  centsToDisplay,
+  computeSeatProration,
+} from '../../shared/hooks/queries/useSubscription';
 
 const ALL_APPS = [
   { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },

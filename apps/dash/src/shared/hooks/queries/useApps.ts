@@ -30,6 +30,8 @@ export interface RtylrApp {
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   category: 'core' | 'sales' | 'operations' | 'finance' | 'growth';
   status: 'active' | 'beta' | 'coming_soon';
+  /** True when the app is available but not included in the owner's current plan. */
+  locked?: boolean;
 }
 
 /** Icon lookup used to hydrate server data with client-side icons */
