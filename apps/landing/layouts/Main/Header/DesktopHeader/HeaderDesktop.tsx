@@ -196,37 +196,25 @@ const HeaderDesktop: React.FC = () => {
             </p>
             {featuresDropdown && (
               <div className={styles['header-dropdown-wide']}>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/pos')}
-                >
+                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/pos')}>
                   <div className={styles['dropdown-item-title']}>POS</div>
                   <div className={styles['dropdown-item-desc']}>
                     Payments, tables, orders, and receipts in one register.
                   </div>
                 </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/erp')}
-                >
+                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/erp')}>
                   <div className={styles['dropdown-item-title']}>ERP</div>
                   <div className={styles['dropdown-item-desc']}>
                     Inventory, suppliers, and purchasing that stay in sync.
                   </div>
                 </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/hr')}
-                >
+                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/hr')}>
                   <div className={styles['dropdown-item-title']}>HR</div>
                   <div className={styles['dropdown-item-desc']}>
                     Staff, schedules, time off, and payroll in one place.
                   </div>
                 </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/crm')}
-                >
+                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/crm')}>
                   <div className={styles['dropdown-item-title']}>CRM</div>
                   <div className={styles['dropdown-item-desc']}>
                     Customer profiles, loyalty, segments, and campaigns.
@@ -234,29 +222,17 @@ const HeaderDesktop: React.FC = () => {
                 </div>
                 <div
                   className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/finance')}
+                  onClick={() => handleNavigation('/finance')}
                 >
                   <div className={styles['dropdown-item-title']}>Finance</div>
                   <div className={styles['dropdown-item-desc']}>
                     Invoices, expenses, tax, and a real P&L in seconds.
                   </div>
                 </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/flow')}
-                >
+                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/flow')}>
                   <div className={styles['dropdown-item-title']}>Flow</div>
                   <div className={styles['dropdown-item-desc']}>
                     Projects, tasks, and team workspaces for every department.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/features/insights')}
-                >
-                  <div className={styles['dropdown-item-title']}>Insights</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Cross-app analytics, revenue trends, and reports.
                   </div>
                 </div>
               </div>

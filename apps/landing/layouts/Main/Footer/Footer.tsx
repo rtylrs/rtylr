@@ -22,13 +22,12 @@ const Footer: React.FC = () => {
     {
       title: 'PRODUCT',
       links: [
-        { to: '/features/pos', label: 'POS' },
-        { to: '/features/erp', label: 'ERP' },
-        { to: '/features/hr', label: 'HR' },
-        { to: '/features/crm', label: 'CRM' },
-        { to: '/features/finance', label: 'Finance' },
-        { to: '/features/flow', label: 'Flow' },
-        { to: '/features/insights', label: 'Insights' },
+        { to: '/pos', label: 'POS' },
+        { to: '/erp', label: 'ERP' },
+        { to: '/hr', label: 'HR' },
+        { to: '/crm', label: 'CRM' },
+        { to: '/finance', label: 'Finance' },
+        { to: '/flow', label: 'Flow' },
       ],
     },
     {

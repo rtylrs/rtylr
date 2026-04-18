@@ -335,7 +335,7 @@
   display: grid;
   grid-template-columns: 120px 1fr;
   gap: 48px;
-  padding: 40px 0;
+  padding: 44px 0;
   border-bottom: 1px solid #232220;
   align-items: flex-start;
 
@@ -344,11 +344,13 @@
   }
 }
 
+// Reverse alternates the subtle indent only — full text column, no crushing
 .capabilityRowReverse {
   grid-template-columns: 120px 1fr;
 
   .capabilityContent {
-    padding-left: 40%;
+    margin-left: auto;
+    max-width: 620px;
   }
 }
 

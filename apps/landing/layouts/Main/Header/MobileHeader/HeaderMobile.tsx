@@ -183,8 +183,8 @@ const HeaderMobile: React.FC = () => {
               {featuresDropdown && (
                 <div className={styles['mobile-dropdown']}>
                   <Link
-                    href="/features/pos"
-                    onClick={() => handleNavigation('/features/pos')}
+                    href="/pos"
+                    onClick={() => handleNavigation('/pos')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>POS</span>
@@ -193,8 +193,8 @@ const HeaderMobile: React.FC = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/features/erp"
-                    onClick={() => handleNavigation('/features/erp')}
+                    href="/erp"
+                    onClick={() => handleNavigation('/erp')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>ERP</span>
@@ -203,8 +203,8 @@ const HeaderMobile: React.FC = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/features/hr"
-                    onClick={() => handleNavigation('/features/hr')}
+                    href="/hr"
+                    onClick={() => handleNavigation('/hr')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>HR</span>
@@ -213,8 +213,8 @@ const HeaderMobile: React.FC = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/features/crm"
-                    onClick={() => handleNavigation('/features/crm')}
+                    href="/crm"
+                    onClick={() => handleNavigation('/crm')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>CRM</span>
@@ -223,8 +223,8 @@ const HeaderMobile: React.FC = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/features/finance"
-                    onClick={() => handleNavigation('/features/finance')}
+                    href="/finance"
+                    onClick={() => handleNavigation('/finance')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>Finance</span>
@@ -233,23 +233,13 @@ const HeaderMobile: React.FC = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/features/flow"
-                    onClick={() => handleNavigation('/features/flow')}
+                    href="/flow"
+                    onClick={() => handleNavigation('/flow')}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>Flow</span>
                     <span className={styles['mobile-feature-desc']}>
                       Projects, tasks, and team workspaces for every department.
-                    </span>
-                  </Link>
-                  <Link
-                    href="/features/insights"
-                    onClick={() => handleNavigation('/features/insights')}
-                    className={styles['mobile-feature-link']}
-                  >
-                    <span className={styles['mobile-feature-title']}>Insights</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Cross-app analytics, revenue trends, and reports.
                     </span>
                   </Link>
                 </div>
