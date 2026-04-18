@@ -1,0 +1,354 @@
+// ── Changelog — vertical timeline of release entries ─────────────────────
+
+.page {
+  background: var(--app-background);
+  color: #e8e6e1;
+}
+
+.hero {
+  padding: 96px 32px 48px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.heroInner {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.heroEyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 22px;
+}
+
+.heroTitle {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #e8e6e1;
+  margin: 0 0 22px;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.58);
+  margin: 0 0 24px;
+
+  a {
+    color: #e8e6e1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(232, 230, 225, 0.35);
+  }
+}
+
+.rssLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  letter-spacing: -0.005em;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+    color: #e8e6e1;
+  }
+
+  svg {
+    color: rgba(214, 184, 142, 0.95);
+  }
+}
+
+// ── TIMELINE ────────────────────────────────────────────────────────────
+
+.timelineSection {
+  padding: 40px 32px 96px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+
+  // Vertical rail down the left
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 74px;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 6%,
+      rgba(255, 255, 255, 0.1) 94%,
+      transparent 100%
+    );
+  }
+}
+
+.entry {
+  position: relative;
+  padding: 0 0 56px 124px;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  // Dot on the rail
+  &::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 68px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #e8e6e1;
+    border: 3px solid var(--app-background);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+}
+
+.entryHeader {
+  margin-bottom: 20px;
+}
+
+.entryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 64px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.entryVersion {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: 0.3px;
+}
+
+.entryDate {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.1px;
+}
+
+.entryTitle {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #e8e6e1;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.changeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.changeItem {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  transition: background 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.035);
+  }
+}
+
+.changeKind {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kind_new {
+  color: #a2d9af;
+  background: rgba(107, 207, 127, 0.12);
+  border-color: rgba(107, 207, 127, 0.25);
+}
+
+.kind_improved {
+  color: #b3c5e8;
+  background: rgba(155, 182, 224, 0.12);
+  border-color: rgba(155, 182, 224, 0.25);
+}
+
+.kind_fixed {
+  color: #ffd166;
+  background: rgba(255, 209, 102, 0.12);
+  border-color: rgba(255, 209, 102, 0.22);
+}
+
+.kind_breaking {
+  color: #ff8a8a;
+  background: rgba(232, 138, 138, 0.12);
+  border-color: rgba(232, 138, 138, 0.25);
+}
+
+.changeText {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: -0.005em;
+}
+
+// ── CTA ─────────────────────────────────────────────────────────────────
+
+.ctaBlock {
+  padding: 72px 32px 160px;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ctaTitle {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: -0.03em;
+  margin: 48px 0 14px;
+  line-height: 1.15;
+}
+
+.ctaCopy {
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.58);
+  margin: 0 0 28px;
+}
+
+.ctaButtons {
+  display: inline-flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ctaPrimary {
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+
+  &:hover {
+    background: #ffffff;
+  }
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: #e8e6e1;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+// ── RESPONSIVE ──────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 14px;
+  }
+
+  .entry {
+    padding-left: 48px;
+
+    &::before {
+      left: 8px;
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .entryMeta {
+    position: static;
+    flex-direction: row;
+    gap: 8px;
+    margin-bottom: 8px;
+    width: auto;
+  }
+
+  .changeItem {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .changeKind {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 540px) {
+  .hero {
+    padding: 72px 20px 32px;
+  }
+
+  .timelineSection {
+    padding: 32px 20px 72px;
+  }
+
+  .ctaBlock {
+    padding: 56px 20px 120px;
+  }
+}

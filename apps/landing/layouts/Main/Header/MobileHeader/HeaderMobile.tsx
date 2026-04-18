@@ -248,7 +248,7 @@ const HeaderMobile: React.FC = () => {
 
             <div className={styles['mobile-nav-item']}>
               <p onClick={toggleSolutionsDropdown}>
-                Solutions
+                Company
                 {solutionsDropdown ? (
                   <HiChevronDown
                     style={{
@@ -261,41 +261,26 @@ const HeaderMobile: React.FC = () => {
               </p>
               {solutionsDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link
-                    href="/solutions/food-beverage"
-                    onClick={() => handleNavigation('/solutions/food-beverage')}
-                  >
-                    Food & Beverage
+                  <Link href="/about" onClick={() => handleNavigation('/about')}>
+                    About
                   </Link>
-                  <Link
-                    href="/solutions/retail"
-                    onClick={() => handleNavigation('/solutions/retail')}
-                  >
-                    Retail & Omnichannel
+                  <Link href="/partners" onClick={() => handleNavigation('/partners')}>
+                    Partners
                   </Link>
-                  <Link
-                    href="/solutions/services"
-                    onClick={() => handleNavigation('/solutions/services')}
-                  >
-                    Services & Appointments
+                  <Link href="/newsroom" onClick={() => handleNavigation('/newsroom')}>
+                    Newsroom
                   </Link>
-                  <Link
-                    href="/solutions/grocery"
-                    onClick={() => handleNavigation('/solutions/grocery')}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleExternalLink('https://voxire.com/careers');
+                    }}
                   >
-                    Grocery & Convenience
-                  </Link>
-                  <Link
-                    href="/solutions/wholesale"
-                    onClick={() => handleNavigation('/solutions/wholesale')}
-                  >
-                    Wholesale & B2B
-                  </Link>
-                  <Link
-                    href="/solutions/events"
-                    onClick={() => handleNavigation('/solutions/events')}
-                  >
-                    Events & Hospitality
+                    Careers
+                  </a>
+                  <Link href="/contact" onClick={() => handleNavigation('/contact')}>
+                    Contact
                   </Link>
                 </div>
               )}
@@ -327,8 +312,14 @@ const HeaderMobile: React.FC = () => {
                   <Link href="/hardware" onClick={() => handleNavigation('/hardware')}>
                     Hardware
                   </Link>
+                  <Link href="/integrations" onClick={() => handleNavigation('/integrations')}>
+                    Integrations
+                  </Link>
                   <Link href="/blog" onClick={() => handleNavigation('/blog')}>
                     Blog
+                  </Link>
+                  <Link href="/changelog" onClick={() => handleNavigation('/changelog')}>
+                    Changelog
                   </Link>
                   <a
                     href="#"
@@ -339,20 +330,11 @@ const HeaderMobile: React.FC = () => {
                   >
                     Documentation
                   </a>
-                  <Link href="/about" onClick={() => handleNavigation('/about')}>
-                    About
-                  </Link>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExternalLink('https://voxire.com/careers');
-                    }}
-                  >
-                    Careers
-                  </a>
                   <Link href="/support" onClick={() => handleNavigation('/support')}>
-                    Support
+                    Help Center
+                  </Link>
+                  <Link href="/trust" onClick={() => handleNavigation('/trust')}>
+                    Trust Center
                   </Link>
                   <a
                     href="#"

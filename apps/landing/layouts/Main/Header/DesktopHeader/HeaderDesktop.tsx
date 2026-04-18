@@ -239,34 +239,6 @@ const HeaderDesktop: React.FC = () => {
             )}
           </div>
 
-          <div className={`${styles['nav-item']} solutions-dropdown-container`}>
-            <p className={styles['nav-link']} onClick={toggleSolutionsDropdown}>
-              Solutions
-              <HiChevronDown
-                className={styles['dropdown-icon']}
-                style={{
-                  transform: solutionsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}
-              />
-            </p>
-            {solutionsDropdown && (
-              <div className={styles['header-dropdown']}>
-                <h6 onClick={() => handleNavigation('/solutions/food-beverage')}>
-                  Food & Beverage
-                </h6>
-                <h6 onClick={() => handleNavigation('/solutions/retail')}>Retail & Omnichannel</h6>
-                <h6 onClick={() => handleNavigation('/solutions/services')}>
-                  Services & Appointments
-                </h6>
-                <h6 onClick={() => handleNavigation('/solutions/grocery')}>
-                  Grocery & Convenience
-                </h6>
-                <h6 onClick={() => handleNavigation('/solutions/wholesale')}>Wholesale & B2B</h6>
-                <h6 onClick={() => handleNavigation('/solutions/events')}>Events & Hospitality</h6>
-              </div>
-            )}
-          </div>
-
           <LinkWithColor to="/pricing" className={styles['nav-link']}>
             Pricing
           </LinkWithColor>
@@ -284,19 +256,37 @@ const HeaderDesktop: React.FC = () => {
             {resourcesDropdown && (
               <div className={styles['header-dropdown']}>
                 <h6 onClick={() => handleNavigation('/hardware')}>Hardware</h6>
+                <h6 onClick={() => handleNavigation('/integrations')}>Integrations</h6>
                 <h6 onClick={() => handleNavigation('/blog')}>Blog</h6>
+                <h6 onClick={() => handleNavigation('/changelog')}>Changelog</h6>
                 <h6 onClick={() => handleExternalLink('https://docs.rtylr.com')}>Documentation</h6>
-                <h6 onClick={() => handleNavigation('/about')}>About</h6>
-                <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
-                <h6 onClick={() => handleNavigation('/support')}>Support</h6>
+                <h6 onClick={() => handleNavigation('/support')}>Help Center</h6>
+                <h6 onClick={() => handleNavigation('/trust')}>Trust Center</h6>
                 <h6 onClick={() => handleExternalLink(APP_URLS.status)}>Status</h6>
               </div>
             )}
           </div>
 
-          <LinkWithColor to="/contact" className={styles['nav-link']}>
-            Contact
-          </LinkWithColor>
+          <div className={`${styles['nav-item']} solutions-dropdown-container`}>
+            <p className={styles['nav-link']} onClick={toggleSolutionsDropdown}>
+              Company
+              <HiChevronDown
+                className={styles['dropdown-icon']}
+                style={{
+                  transform: solutionsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              />
+            </p>
+            {solutionsDropdown && (
+              <div className={styles['header-dropdown']}>
+                <h6 onClick={() => handleNavigation('/about')}>About</h6>
+                <h6 onClick={() => handleNavigation('/partners')}>Partners</h6>
+                <h6 onClick={() => handleNavigation('/newsroom')}>Newsroom</h6>
+                <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
+                <h6 onClick={() => handleNavigation('/contact')}>Contact</h6>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 

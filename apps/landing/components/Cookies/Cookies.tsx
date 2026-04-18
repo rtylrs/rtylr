@@ -55,7 +55,7 @@ const Cookies: React.FC = () => {
 
         <div className={styles['cookies-footer']}>
           <a
-            href="/privacy"
+            href="/legal/privacy-policy"
             target="_blank"
             rel="noopener noreferrer"
             className={styles['privacy-link']}
