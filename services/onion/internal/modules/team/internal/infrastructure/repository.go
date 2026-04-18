@@ -337,3 +337,16 @@ func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sql
 
 	return p
 }
+
+// CountActiveMembers returns the number of active non-owner team members for an owner.
+func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
+	var count int
+	err := dbclient.Pool().QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1`,
+		ownerID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}

@@ -182,6 +182,13 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		}
 	}
 
+	// Record the seat change asynchronously so billing stays accurate.
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		h.Service.RecordSeatChange(bgCtx, ownerID)
+	}()
+
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
 		go func() {
@@ -362,6 +369,13 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 			Message:  "Failed to deactivate user",
 		}
 	}
+
+	// Record the seat change asynchronously so billing stays accurate.
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		h.Service.RecordSeatChange(bgCtx, ownerID)
+	}()
 
 	return DeactivateUserResponse{Message: "User deactivated"}, nil
 }

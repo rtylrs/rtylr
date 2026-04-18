@@ -267,6 +267,43 @@ func (s *Service) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (
 	return planSlug, status, nil
 }
 
+// RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
+// It fires asynchronously so it never blocks team operations; billing inaccuracies can be corrected
+// by a future reconciliation job.
+func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) {
+	newCount, err := s.repo.CountActiveMembers(ctx, ownerID)
+	if err != nil {
+		return
+	}
+
+	now := time.Now()
+	yesterday := now.AddDate(0, 0, -1)
+	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+
+	var subscriptionID int64
+	var pricePerSeatCents int
+	// cross-schema read from subscriptions — approved for seat period management
+	if scanErr := dbclient.Pool().QueryRowContext(ctx,
+		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ?`, ownerID,
+	).Scan(&subscriptionID, &pricePerSeatCents); scanErr != nil {
+		return
+	}
+
+	// cross-schema write to seat_periods — approved for seat billing accuracy
+	_, _ = dbclient.Pool().ExecContext(ctx,
+		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
+		yesterday, subscriptionID)
+
+	_, _ = dbclient.Pool().ExecContext(ctx,
+		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth)
+
+	_, _ = dbclient.Pool().ExecContext(ctx,
+		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
+		newCount, ownerID)
+}
+
 func (s *Service) GetMe(ctx context.Context, ownerID, userID int64) (string, string, []string, domain.Role, error) {
 	email, fullName, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
