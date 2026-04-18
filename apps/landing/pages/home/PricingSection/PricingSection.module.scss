@@ -8,7 +8,7 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 50px;
+  padding: 0 32px;
   position: relative;
   z-index: 1;
 }
@@ -25,12 +25,12 @@
   font-weight: 600;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: #4485c4;
+  color: #e8e6e1;
   margin-bottom: 20px;
   padding: 5px 16px;
-  border: 1px solid rgba(68, 133, 196, 0.25);
+  border: 1px solid rgba(232, 230, 225, 0.25);
   border-radius: 100px;
-  background: rgba(68, 133, 196, 0.1);
+  background: rgba(232, 230, 225, 0.1);
 }
 
 .sectionTitle {
@@ -53,8 +53,10 @@
 .pricingGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
   align-items: stretch;
+  // Room for the "Most Popular" badge that sits above the featured card
+  padding-top: 18px;
 }
 
 .pricingCard {
@@ -76,35 +78,38 @@
   }
 
   &.featured {
-    background: rgba(68, 133, 196, 0.06);
-    border-color: rgba(68, 133, 196, 0.4);
+    background: rgba(232, 230, 225, 0.06);
+    border-color: rgba(232, 230, 225, 0.4);
 
     &:hover {
-      border-color: rgba(68, 133, 196, 0.65);
-      box-shadow: 0 0 40px rgba(68, 133, 196, 0.12);
+      border-color: rgba(232, 230, 225, 0.65);
+      box-shadow: 0 0 40px rgba(232, 230, 225, 0.12);
     }
   }
 }
 
 .popularBadge {
   position: absolute;
-  top: -13px;
+  top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #4485c4, #03aed2);
-  color: #fff;
-  padding: 5px 18px;
+  background: #e8e6e1;
+  color: #0a0a0a;
+  padding: 4px 14px;
   border-radius: 100px;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(68, 133, 196, 0.4);
+  z-index: 2;
 }
 
 .planHeader {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  // Reserve enough height for name + 2-line description so all three cards
+  // start their pricing block at the same Y coordinate.
+  min-height: 96px;
 }
 
 .planName {
@@ -112,6 +117,7 @@
   font-weight: 600;
   color: white;
   margin: 0 0 8px 0;
+  line-height: 1.1;
 }
 
 .planDescription {
@@ -125,7 +131,8 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  min-height: 56px;
 }
 
 .amount {
@@ -141,10 +148,19 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+// Always reserved — even when empty. Keeps feature-list start Y consistent
+// across all plans regardless of note length.
 .priceNote {
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.4);
   margin: 0 0 28px 0;
+  min-height: 40px;
+  line-height: 1.4;
+
+  &:empty::before {
+    content: '';
+    display: inline-block;
+  }
 }
 
 .featuresList {
@@ -168,7 +184,7 @@
 
 .checkIcon {
   flex-shrink: 0;
-  color: #03aed2;
+  color: #e8e6e1;
   width: 18px;
   height: 18px;
   margin-top: 2px;
@@ -193,14 +209,13 @@
   }
 
   &.ctaFeatured {
-    background: #4485c4;
-    border-color: #4485c4;
-    color: #fff;
+    background: #e8e6e1;
+    border-color: #e8e6e1;
+    color: #0a0a0a;
 
     &:hover {
-      background: #5596d5;
-      border-color: #5596d5;
-      box-shadow: 0 8px 28px rgba(68, 133, 196, 0.4);
+      background: #ffffff;
+      border-color: #ffffff;
       transform: translateY(-1px);
     }
   }
@@ -209,9 +224,10 @@
 @media (max-width: 1024px) {
   .pricingGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
     max-width: 480px;
     margin: 0 auto;
+    padding-top: 18px;
   }
 
   .pricingCard {
