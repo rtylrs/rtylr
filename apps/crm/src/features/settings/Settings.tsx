@@ -28,6 +28,7 @@ import {
   centsToDisplay,
   trialDaysLeft,
   formatPeriodRange,
+  computeSeatProration,
 } from '../../shared/hooks/queries/useCrmSubscription';
 
 type TabId = 'general' | 'team' | 'billing';
@@ -247,6 +248,7 @@ const TeamTab: React.FC = () => {
   const { data: members = [], isLoading } = useCrmTeam();
   const invite = useCrmInviteMember();
   const deactivate = useCrmDeactivateMember();
+  const { data: sub } = useCrmSubscription();
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -343,6 +345,25 @@ const TeamTab: React.FC = () => {
               />
             </div>
           </div>
+          {sub &&
+            sub.pricePerSeatCents > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents);
+              return (
+                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
+                  Adding this member costs{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(proratedCents)}
+                  </strong>{' '}
+                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(sub.pricePerSeatCents)}/mo
+                  </strong>{' '}
+                  from {nextMonthName} 1st.
+                </p>
+              );
+            })()}
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
               variant="primary"

@@ -33,6 +33,7 @@ import {
   centsToDisplay,
   trialDaysLeft,
   formatPeriodRange,
+  computeSeatProration,
 } from '../../shared/hooks/queries/useFlowSubscription';
 import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
@@ -736,6 +737,7 @@ const TeamSection: React.FC = () => {
   const { data: members = [], isLoading } = useFlowTeam();
   const invite = useFlowInviteMember();
   const deactivate = useFlowDeactivateMember();
+  const { data: sub } = useFlowSubscription();
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -816,6 +818,25 @@ const TeamSection: React.FC = () => {
               />
             </div>
           </div>
+          {sub &&
+            sub.pricePerSeatCents > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents);
+              return (
+                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  Adding this member costs{' '}
+                  <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
+                    {centsToDisplay(proratedCents)}
+                  </span>{' '}
+                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                  <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
+                    {centsToDisplay(sub.pricePerSeatCents)}/mo
+                  </span>{' '}
+                  from {nextMonthName} 1st.
+                </p>
+              );
+            })()}
           <div className="flex items-center gap-2">
             <button
               type="button"

@@ -18,6 +18,41 @@ import api from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useMySubscription, centsToDisplay } from '../../shared/hooks/queries/useSubscription';
 
+// ── Proration helper ──────────────────────────────────────────────────────────
+
+interface SeatProration {
+  daysRemaining: number;
+  daysInMonth: number;
+  proratedCents: number;
+  nextMonthName: string;
+}
+
+function computeSeatProration(pricePerSeatCents: number): SeatProration {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const today = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysRemaining = daysInMonth - today + 1; // inclusive of today
+  const proratedCents = Math.round((daysRemaining * pricePerSeatCents) / daysInMonth);
+  const MONTHS = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const nextMonthName = MONTHS[(month + 1) % 12];
+  return { daysRemaining, daysInMonth, proratedCents, nextMonthName };
+}
+
 const ALL_APPS = [
   { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },
   { key: 'erp', label: 'ERP', desc: 'Inventory and supply', icon: Package, color: '#10b981' },
@@ -317,24 +352,37 @@ const InviteUser: React.FC = () => {
           </div>
 
           {/* Seat cost preview */}
-          {sub && sub.pricePerSeatCents > 0 && (
-            <div
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
-              style={{
-                background: 'var(--accent-muted)',
-                border: '1px solid var(--accent-border)',
-              }}
-            >
-              <CreditCard size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-              <p style={{ color: 'var(--dash-text-muted)' }}>
-                Adding this member will add{' '}
-                <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  +{centsToDisplay(sub.pricePerSeatCents)}/mo
-                </span>{' '}
-                to your bill · applied at the next billing cycle.
-              </p>
-            </div>
-          )}
+          {sub &&
+            sub.pricePerSeatCents > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents);
+              return (
+                <div
+                  className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+                  style={{
+                    background: 'var(--accent-muted)',
+                    border: '1px solid var(--accent-border)',
+                  }}
+                >
+                  <CreditCard
+                    size={12}
+                    style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}
+                  />
+                  <p style={{ color: 'var(--dash-text-muted)' }}>
+                    Adding this member adds{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      +{centsToDisplay(proratedCents)}
+                    </span>{' '}
+                    to this month ({daysRemaining} of {daysInMonth} days remaining), then{' '}
+                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      +{centsToDisplay(sub.pricePerSeatCents)}/mo
+                    </span>{' '}
+                    from {nextMonthName} 1st.
+                  </p>
+                </div>
+              );
+            })()}
         </div>
 
         {/* Actions */}

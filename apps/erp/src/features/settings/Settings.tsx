@@ -30,6 +30,7 @@ import {
   centsToDisplay,
   trialDaysLeft,
   formatPeriodRange,
+  computeSeatProration,
 } from '../../shared/hooks/queries/useErpSubscription';
 
 type TabId = 'general' | 'team' | 'billing';
@@ -259,6 +260,7 @@ const TeamTab: React.FC = () => {
   const { data: members = [], isLoading } = useErpTeam();
   const invite = useErpInviteMember();
   const deactivate = useErpDeactivateMember();
+  const { data: sub } = useErpSubscription();
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -341,6 +343,25 @@ const TeamTab: React.FC = () => {
               />
             </div>
           </div>
+          {sub &&
+            sub.pricePerSeatCents > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents);
+              return (
+                <p className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
+                  Adding this member costs{' '}
+                  <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(proratedCents)}
+                  </span>{' '}
+                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                  <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(sub.pricePerSeatCents)}/mo
+                  </span>{' '}
+                  from {nextMonthName} 1st.
+                </p>
+              );
+            })()}
           <div className="flex items-center gap-2">
             <button
               type="button"

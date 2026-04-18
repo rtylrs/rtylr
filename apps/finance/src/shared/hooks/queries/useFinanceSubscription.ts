@@ -46,6 +46,40 @@ export function trialDaysLeft(trialEndsAt: string | null): number {
   return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
 }
 
+export interface SeatProration {
+  daysRemaining: number;
+  daysInMonth: number;
+  proratedCents: number;
+  nextMonthName: string;
+}
+
+export function computeSeatProration(pricePerSeatCents: number): SeatProration {
+  const now = new Date();
+  const month = now.getMonth();
+  const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+  const daysRemaining = daysInMonth - now.getDate() + 1;
+  const MONTHS = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return {
+    daysRemaining,
+    daysInMonth,
+    proratedCents: Math.round((daysRemaining * pricePerSeatCents) / daysInMonth),
+    nextMonthName: MONTHS[(month + 1) % 12],
+  };
+}
+
 export function formatPeriodRange(start: string, end: string | null): string {
   const s = new Date(start);
   const e = end ? new Date(end) : new Date();

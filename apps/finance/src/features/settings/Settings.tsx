@@ -38,6 +38,7 @@ import {
   centsToDisplay,
   trialDaysLeft,
   formatPeriodRange,
+  computeSeatProration,
 } from '../../shared/hooks/queries/useFinanceSubscription';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -258,6 +259,7 @@ const TeamTab: React.FC = () => {
   const { data: members = [], isLoading } = useFinanceTeam();
   const invite = useFinanceInviteMember();
   const deactivate = useFinanceDeactivateMember();
+  const { data: sub } = useFinanceSubscription();
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -318,6 +320,25 @@ const TeamTab: React.FC = () => {
               />
             </Field>
           </div>
+          {sub &&
+            sub.pricePerSeatCents > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents);
+              return (
+                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
+                  Adding this member costs{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(proratedCents)}
+                  </strong>{' '}
+                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(sub.pricePerSeatCents)}/mo
+                  </strong>{' '}
+                  from {nextMonthName} 1st.
+                </p>
+              );
+            })()}
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               type="button"
