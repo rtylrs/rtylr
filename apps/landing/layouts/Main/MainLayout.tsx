@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Header from './Header/Header';
 import Footer from './Footer/Footer';
+import GridLines from '../../components/GridLines/GridLines';
 
 const MainLayout: React.FC<{
   children: React.ReactNode;
@@ -33,7 +34,8 @@ const MainLayout: React.FC<{
     );
 
     return (
-      <div>
+      <div style={{ position: 'relative' }}>
+        <GridLines />
         {hasHeader && <Header />}
         <div style={contentStyle}>{children}</div>
         {hasFooter && <Footer />}
