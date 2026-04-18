@@ -1,12 +1,24 @@
 import React from 'react';
-import { CheckCircle2, Clock, XCircle, AlertCircle, Users, Zap, ArrowRight } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertCircle,
+  Users,
+  Zap,
+  ArrowRight,
+  Loader2,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import { APP_CONFIG, APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/config';
 import { SettingSection, Breadcrumbs } from '../../shared/components/dash';
+import { useUserStore } from '../../shared/stores/userStore';
 import {
   useMySubscription,
   useListPlans,
   useBillingDetail,
+  useCheckout,
   centsToDisplay,
   trialDaysLeft,
   type SubscriptionPayload,
@@ -174,8 +186,24 @@ const PlanCard: React.FC<{
   plan: PlanPayload;
   isCurrent: boolean;
   currentSeats: number;
-}> = ({ plan, isCurrent, currentSeats }) => {
+  ownerEmail: string;
+}> = ({ plan, isCurrent, currentSeats, ownerEmail }) => {
   const estimatedMonthly = currentSeats * plan.pricePerSeatCents;
+  const checkout = useCheckout();
+
+  const handleCheckout = (): void => {
+    checkout.mutate(
+      { planSlug: plan.slug, email: ownerEmail || undefined },
+      {
+        onSuccess: (data) => {
+          window.location.href = data.checkoutUrl;
+        },
+        onError: () => {
+          toast.error('Failed to start checkout. Please try again.');
+        },
+      }
+    );
+  };
 
   return (
     <div
@@ -218,11 +246,17 @@ const PlanCard: React.FC<{
 
       {!isCurrent && (
         <button
-          className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+          onClick={handleCheckout}
+          disabled={checkout.isPending}
+          className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
           style={{ color: 'var(--accent)' }}
         >
-          Switch to {plan.name}
-          <ArrowRight size={11} />
+          {checkout.isPending ? (
+            <Loader2 size={11} className="animate-spin" />
+          ) : (
+            <ArrowRight size={11} />
+          )}
+          {checkout.isPending ? 'Opening checkout…' : `Switch to ${plan.name}`}
         </button>
       )}
     </div>
@@ -234,6 +268,7 @@ const PlanCard: React.FC<{
 const Subscription: React.FC = (): React.JSX.Element => {
   const { data: sub, isLoading: subLoading } = useMySubscription();
   const { data: plans = [], isLoading: plansLoading } = useListPlans();
+  const ownerEmail = useUserStore((s) => s.user?.email ?? s.user?.emailAddress ?? '');
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -282,6 +317,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
                 plan={plan}
                 isCurrent={plan.slug === sub?.planSlug}
                 currentSeats={sub?.seatCount ?? 1}
+                ownerEmail={ownerEmail}
               />
             ))}
           </div>

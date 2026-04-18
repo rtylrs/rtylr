@@ -157,6 +157,15 @@ interface SetSubscriptionRequest {
   planSlug: string;
 }
 
+interface CheckoutRequest {
+  planSlug: string;
+  email?: string;
+}
+
+interface CheckoutResponse {
+  checkoutUrl: string;
+}
+
 export const useMySubscription = () =>
   useQuery({
     queryKey: ['subscription'],
@@ -195,3 +204,10 @@ export const useSetSubscription = () => {
     },
   });
 };
+
+/** Initiates a Paddle checkout and returns the hosted checkout URL. */
+export const useCheckout = () =>
+  useMutation<CheckoutResponse, Error, CheckoutRequest>({
+    mutationFn: (data: CheckoutRequest) =>
+      unwrap(safe.post<CheckoutResponse>('/subscriptions/checkout', data)),
+  });
