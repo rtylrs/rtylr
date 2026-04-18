@@ -23,17 +23,26 @@
   display: block;
 }
 
-// Dark gradient overlay — heavier on both edges so text pops
+// Dark overlay — layered so the illustration reads as atmosphere, not content.
+// 1) Heavy flat darkness everywhere (85%+), 2) extra vignette behind the text,
+// 3) stronger fade to solid bg at top/bottom so section edges blend cleanly.
 .imgOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(21, 21, 21, 0.88) 0%,
-    rgba(21, 21, 21, 0.65) 40%,
-    rgba(21, 21, 21, 0.55) 60%,
-    rgba(21, 21, 21, 0.88) 100%
-  );
+  background:
+    radial-gradient(
+      ellipse 800px 420px at 50% 48%,
+      rgba(10, 10, 10, 0.4) 0%,
+      rgba(10, 10, 10, 0) 75%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(21, 21, 21, 0.9) 0%,
+      rgba(21, 21, 21, 0.45) 20%,
+      rgba(21, 21, 21, 0.4) 50%,
+      rgba(21, 21, 21, 0.55) 80%,
+      rgba(21, 21, 21, 0.92) 100%
+    );
 }
 
 // Floating content
@@ -54,9 +63,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(3, 174, 210, 0.1);
-  border: 1px solid rgba(3, 174, 210, 0.28);
-  color: #03aed2;
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.28);
+  color: #e8e6e1;
   padding: 5px 18px;
   border-radius: 100px;
   font-size: 0.72rem;
@@ -75,7 +84,7 @@
 }
 
 .titleAccent {
-  background: linear-gradient(135deg, #4485c4 0%, #03aed2 100%);
+  background: linear-gradient(135deg, #e8e6e1 0%, #e8e6e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

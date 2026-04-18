@@ -12,9 +12,9 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
   });
 
   // Image moves opposite to scroll — element enters from below, image drifts upward
-  // Pixel values are far more reliable than percentages for visible parallax depth
-  const imgY = useTransform(scrollYProgress, [0, 1], ['0px', '-160px']);
-  const textY = useTransform(scrollYProgress, [0, 1], ['40px', '-40px']);
+  // Big pixel range = obvious cinematic parallax depth
+  const imgY = useTransform(scrollYProgress, [0, 1], ['120px', '-420px']);
+  const textY = useTransform(scrollYProgress, [0, 1], ['60px', '-60px']);
 
   return (
     <section ref={sectionRef} className={styles.section}>
