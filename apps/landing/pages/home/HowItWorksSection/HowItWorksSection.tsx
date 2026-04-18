@@ -7,26 +7,25 @@ const STEPS = [
   {
     number: '01',
     title: 'Sign up',
-    description:
-      'Create an account in minutes. No credit card required. Full rtylr suite — unlocked from day one.',
+    description: 'Email, password, done. No credit card. Every app unlocked from minute one.',
   },
   {
     number: '02',
     title: 'Configure Hub',
     description:
-      'Set your locations, team, brand, and preferences in one place. Hub becomes your command center.',
+      'Locations, team, brand, tax, hardware. Hub is the one place you set everything else.',
   },
   {
     number: '03',
     title: 'Assign apps',
     description:
-      'Give each team member access to what they need. POS for floor staff, HR for managers, Finance for your accountant.',
+      'POS for the floor. HR for managers. Finance for your accountant. Each person sees only the apps they actually use.',
   },
   {
     number: '04',
     title: 'Go live',
     description:
-      'Launch across every department at once. Seven apps, one platform — already talking to each other.',
+      'Every department live at once. Seven apps, already talking to each other. No integration project.',
   },
 ];
 

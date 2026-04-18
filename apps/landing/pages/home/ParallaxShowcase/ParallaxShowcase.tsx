@@ -37,19 +37,19 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
         }}
       >
         <motion.span className={styles.badge} variants={blurFadeIn}>
-          Built different
+          BUILT DIFFERENT
         </motion.span>
 
         <motion.h2 className={styles.title} variants={blurFadeIn}>
-          Every team, every workflow,
+          Every team. Every workflow.
           <br />
-          <span className={styles.titleAccent}>one source of truth.</span>
+          <span className={styles.titleAccent}>One platform.</span>
         </motion.h2>
 
         <motion.p className={styles.subtitle} variants={blurFadeIn}>
-          rtylr isn't a bundle of separate tools. It's one platform where your POS talks to your
-          inventory, your HR feeds payroll, and your CRM powers your campaigns — all from the same
-          data, in real time.
+          rtylr isn&apos;t seven tools glued together. It&apos;s one platform where a POS sale
+          depletes inventory, flows tips into payroll, and enriches the customer profile — from the
+          same database, in real time.
         </motion.p>
 
         <motion.div className={styles.stats} variants={blurFadeIn}>

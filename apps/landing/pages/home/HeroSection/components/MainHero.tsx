@@ -47,7 +47,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
       >
         <span className={styles.announcePill}>BETA</span>
         <span className={styles.announceText}>
-          Explore rtylr AI
+          rtylr AI is live — describe your business, watch it build
           <span className={styles.announceArrow} aria-hidden="true">
             ↗
           </span>
@@ -80,7 +80,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         <textarea
           id="hero-prompt"
           className={styles.aiCardTextarea}
-          placeholder="Write a prompt for generating your rtylr business"
+          placeholder="Describe your business — rtylr AI drafts your POS, inventory, staff, and invoices"
           rows={5}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}

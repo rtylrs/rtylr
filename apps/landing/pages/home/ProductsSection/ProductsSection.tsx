@@ -14,27 +14,30 @@ interface Product {
 const PRODUCTS_TOP: Product[] = [
   {
     label: 'POS',
-    title: 'Point of Sale',
+    title: 'Point of sale',
     description:
-      'Floor and counter sales, table management, and kitchen display — all in one flow.',
+      'Tickets, tables, splits, tips, and every payment type. The register that keeps up with real service.',
     Icon: ShoppingCart,
   },
   {
     label: 'ERP',
-    title: 'Inventory & Purchasing',
-    description: 'Products, suppliers, and purchase orders. Know your stock in real time.',
+    title: 'Inventory',
+    description:
+      'Recipe-linked depletion, supplier management, auto-reorder. Your shelves tell the database.',
     Icon: Package,
   },
   {
     label: 'HR',
-    title: 'People & Payroll',
-    description: 'Staff profiles, shift scheduling, payroll runs, and leave management.',
+    title: 'People & payroll',
+    description:
+      'Scheduling, clock-in, payroll, time off, compliance. The people side, without the paperwork.',
     Icon: Users,
   },
   {
     label: 'CRM',
-    title: 'Customer Loyalty',
-    description: 'Loyalty programs, campaigns, and customer segments that keep people coming back.',
+    title: 'Customers & loyalty',
+    description:
+      'Profiles, segments, campaigns, and loyalty — fed live by every receipt your POS writes.',
     Icon: Heart,
   },
 ];
@@ -42,20 +45,23 @@ const PRODUCTS_TOP: Product[] = [
 const PRODUCTS_BOTTOM: Product[] = [
   {
     label: 'Finance',
-    title: 'Invoices & Expenses',
-    description: 'Invoicing, expense tracking, and a live P&L — no accountant required.',
+    title: 'Books that close themselves',
+    description:
+      'Invoices, expenses, sales tax, and a live P&L. Every sale reconciles in real time.',
     Icon: DollarSign,
   },
   {
     label: 'Flow',
-    title: 'Projects & Tasks',
-    description: 'Workspaces, tasks, and team collaboration for every project your business runs.',
+    title: 'Projects & tasks',
+    description:
+      'Kanban, automations, and tasks linked to the real invoice, customer, or shift they\u2019re about.',
     Icon: Workflow,
   },
   {
     label: 'Insights',
-    title: 'Analytics',
-    description: 'Business-wide reporting and dashboards so you always know what matters.',
+    title: 'Analytics across everything',
+    description:
+      'Revenue trends, customer cohorts, labor margin. Every number pulled live from every other app.',
     Icon: BarChart2,
   },
 ];
@@ -96,16 +102,16 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
           variants={blurFadeInSlow}
         >
           <motion.span className={styles.badge} variants={blurFadeIn}>
-            The Platform
+            THE PLATFORM
           </motion.span>
           <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-            One platform.
+            Seven apps.
             <br />
-            Seven products.
+            One database.
           </motion.h2>
           <motion.p className={styles.sectionSubtitle} variants={blurFadeIn}>
-            Every app ships built-in and connected. No integrations to configure, no data silos to
-            bridge.
+            Not bundled. Not integrated. Built into the same platform from the first line of code —
+            so a sale in POS updates inventory, payroll, and the P&amp;L in the same breath.
           </motion.p>
         </motion.div>
 

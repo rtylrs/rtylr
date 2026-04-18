@@ -6,51 +6,51 @@ import styles from './TestimonialsSection.module.scss';
 const testimonials = [
   {
     quote:
-      'Rtylr transformed how we manage our restaurant. The inventory tracking alone saved us hours every week.',
-    author: 'Sarah Johnson',
-    role: 'Owner, The Green Table',
+      'We used to close the books on the 8th of every month. Now we close them on the 2nd — because there\u2019s nothing left to reconcile.',
+    author: 'Laila Ahmed',
+    role: 'Owner, Byblos Kitchen',
+    company: 'Restaurant · 3 locations',
+    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=LA',
+  },
+  {
+    quote:
+      'A server hit 20 lifetime visits and rtylr drafted the thank-you email on its own. My manager asked if I\u2019d set that up. I hadn\u2019t.',
+    author: 'Marcus Hale',
+    role: 'GM, Terrace',
     company: 'Restaurant',
-    image: 'https://placehold.co/80x80/60a5fa/ffffff?text=SJ',
+    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=MH',
   },
   {
     quote:
-      'Switching to Rtylr was the best decision we made. Our sales increased by 30% in the first quarter.',
-    author: 'Michael Chen',
-    role: 'Manager, Urban Retail Co.',
-    company: 'Retail',
-    image: 'https://placehold.co/80x80/a78bfa/ffffff?text=MC',
-  },
-  {
-    quote:
-      "The analytics features give us insights we never had before. It's like having a business consultant built-in.",
-    author: 'Emily Rodriguez',
-    role: 'CEO, Fresh Market',
-    company: 'Grocery',
-    image: 'https://placehold.co/80x80/f0f9ff/101010?text=ER',
-  },
-  {
-    quote:
-      'The offline mode is a game-changer. We never lose a sale, even when the internet goes down.',
+      'Lost WiFi on a Saturday night. 200 covers. The POS kept going. I didn\u2019t know software could do that.',
     author: 'David Park',
-    role: 'Founder, Mountain Cafe',
+    role: 'Owner, Mountain Cafe',
     company: 'Restaurant',
-    image: 'https://placehold.co/80x80/60a5fa/ffffff?text=DP',
+    image: 'https://placehold.co/80x80/b89a8a/1a1612?text=DP',
   },
   {
     quote:
-      'Customer support is incredible. They helped us set up everything in one day and we were ready to go.',
-    author: 'Lisa Thompson',
-    role: 'Operations Manager, City Bakery',
-    company: 'Food Service',
-    image: 'https://placehold.co/80x80/a78bfa/ffffff?text=LT',
+      'Scheduling used to live in a WhatsApp group. Now shifts publish in four clicks and payroll reconciles on its own Sunday night.',
+    author: 'Juno Park',
+    role: 'Ops Lead, Urban Retail Co.',
+    company: 'Retail · 5 stores',
+    image: 'https://placehold.co/80x80/a89680/1a1612?text=JP',
   },
   {
     quote:
-      'The eCommerce integration is seamless. Our online orders sync perfectly with our in-store system.',
+      'Moving off Toast saved us roughly $340 per location every month. And that\u2019s before I counted the module add-ons we were paying for.',
+    author: 'Sarah Johnson',
+    role: 'Founder, Fresh Market',
+    company: 'Grocery · 4 stores',
+    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=SJ',
+  },
+  {
+    quote:
+      'Tasks link to the invoice, the customer, the shift. I stopped opening four tabs for four tools — I just open Flow.',
     author: 'James Wilson',
-    role: 'Owner, Tech Store Pro',
+    role: 'Manager, Tech Store Pro',
     company: 'Retail',
-    image: 'https://placehold.co/80x80/f0f9ff/101010?text=JW',
+    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=JW',
   },
 ];
 
@@ -67,7 +67,7 @@ const TestimonialsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          What Our Customers Say
+          What operators say about it.
         </motion.h2>
         <motion.div
           className={styles.tickersWrapper}

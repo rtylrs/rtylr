@@ -44,9 +44,9 @@ const CTASection: React.FC = (): React.JSX.Element => {
           </motion.h2>
 
           <motion.p className={styles.ctaSubtitle} variants={blurFadeIn}>
-            Free for up to 5 members. No credit card required.
+            Free for up to 10 members. No credit card.
             <br />
-            Launch your entire business in minutes.
+            Launch every department in an afternoon.
           </motion.p>
 
           <motion.div className={styles.ctaButtons} variants={blurFadeIn}>

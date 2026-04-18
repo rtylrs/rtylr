@@ -95,15 +95,15 @@ const IntegrationsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          <span className={styles.badge}>Integrations</span>
+          <span className={styles.badge}>INTEGRATIONS</span>
           <h2 className={styles.sectionTitle}>
-            Works with what you
+            Plugs into everything
             <br />
-            already use.
+            you already run on.
           </h2>
           <p className={styles.sectionDescription}>
-            Connect rtylr to the tools your team already loves. Set up in minutes, no engineering
-            required.
+            Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in
+            minutes — no API keys to chase, no engineer required.
           </p>
         </motion.div>
 
@@ -146,7 +146,7 @@ const IntegrationsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          And many more.
+          Plus 20+ more in the full directory.
         </motion.p>
       </div>
     </section>
