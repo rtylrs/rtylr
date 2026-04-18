@@ -179,6 +179,168 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfi
 	return err
 }
 
+// ListMembers returns customers with loyalty engagement (points or visits),
+// ordered by points desc. Projection over crm_customers — tracked here rather
+// than in the customers module so the loyalty domain stays self-contained.
+func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
+	if limit <= 0 || limit > 200 {
+		limit = 50
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	// cross-schema read from crm_customers — loyalty members projection
+	rows, err := dbclient.Pool().QueryContext(ctx, `
+		SELECT id, owner_id,
+		       CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name,
+		       COALESCE(loyalty_points, 0),
+		       COALESCE(loyalty_tier, 'bronze'),
+		       COALESCE(visit_count, 0),
+		       created_at,
+		       COALESCE(last_visit_at, created_at) AS last_active_at
+		FROM crm_customers
+		WHERE owner_id = ? AND is_active = TRUE
+		  AND (loyalty_points > 0 OR visit_count > 0)
+		ORDER BY loyalty_points DESC, visit_count DESC
+		LIMIT ? OFFSET ?`, ownerID, limit, offset)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list loyalty members", logger.Error(err))
+		return nil, err
+	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			logger.Ctx(ctx).Warn("Failed to close loyalty member rows", logger.Error(closeErr))
+		}
+	}()
+
+	members := make([]domain.LoyaltyMember, 0)
+	for rows.Next() {
+		var m domain.LoyaltyMember
+		var joinedAt, lastActive sql.NullTime
+		if scanErr := rows.Scan(&m.ID, &m.OwnerID, &m.Name, &m.Points, &m.Tier, &m.Visits, &joinedAt, &lastActive); scanErr != nil {
+			logger.Ctx(ctx).Error("Failed to scan loyalty member", logger.Error(scanErr))
+			return nil, scanErr
+		}
+		if joinedAt.Valid {
+			m.JoinedAt = joinedAt.Time
+		}
+		if lastActive.Valid {
+			m.LastActiveAt = lastActive.Time
+		}
+		m.Initials = initialsFromName(m.Name)
+		members = append(members, m)
+	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+	return members, nil
+}
+
+// ListRewards returns the catalog of rewards for an owner.
+func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
+	q := `SELECT id, owner_id, name, COALESCE(description, ''), COALESCE(category, 'general'),
+	             points_cost, stock, COALESCE(icon, ''), COALESCE(active, TRUE), created_at, updated_at
+	      FROM crm_loyalty_rewards WHERE owner_id = ?`
+	args := []interface{}{ownerID}
+	if activeOnly {
+		q += " AND active = TRUE"
+	}
+	q += " ORDER BY points_cost ASC, id ASC"
+
+	rows, err := dbclient.Pool().QueryContext(ctx, q, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list loyalty rewards", logger.Error(err))
+		return nil, err
+	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			logger.Ctx(ctx).Warn("Failed to close loyalty reward rows", logger.Error(closeErr))
+		}
+	}()
+
+	rewards := make([]domain.LoyaltyReward, 0)
+	for rows.Next() {
+		var rw domain.LoyaltyReward
+		var stock sql.NullInt64
+		var createdAt, updatedAt sql.NullTime
+		if scanErr := rows.Scan(&rw.ID, &rw.OwnerID, &rw.Name, &rw.Description, &rw.Category,
+			&rw.PointsCost, &stock, &rw.Icon, &rw.Active, &createdAt, &updatedAt); scanErr != nil {
+			logger.Ctx(ctx).Error("Failed to scan loyalty reward", logger.Error(scanErr))
+			return nil, scanErr
+		}
+		if stock.Valid {
+			n := int(stock.Int64)
+			rw.Stock = &n
+		}
+		if createdAt.Valid {
+			rw.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			rw.UpdatedAt = updatedAt.Time
+		}
+		rewards = append(rewards, rw)
+	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+	return rewards, nil
+}
+
+// UpsertReward creates or updates a reward. ID=0 → insert; ID>0 → update.
+func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error) {
+	var stock sql.NullInt64
+	if rw.Stock != nil {
+		stock = sql.NullInt64{Int64: int64(*rw.Stock), Valid: true}
+	}
+	if rw.ID == 0 {
+		res, err := dbclient.Pool().ExecContext(ctx, `
+			INSERT INTO crm_loyalty_rewards (owner_id, name, description, category, points_cost, stock, icon, active)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			rw.OwnerID, rw.Name, rw.Description, rw.Category, rw.PointsCost, stock, rw.Icon, rw.Active)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to insert loyalty reward", logger.Error(err))
+			return 0, err
+		}
+		id, idErr := res.LastInsertId()
+		if idErr != nil {
+			return 0, idErr
+		}
+		return id, nil
+	}
+	_, err := dbclient.Pool().ExecContext(ctx, `
+		UPDATE crm_loyalty_rewards
+		SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
+		WHERE id = ? AND owner_id = ?`,
+		rw.Name, rw.Description, rw.Category, rw.PointsCost, stock, rw.Icon, rw.Active, rw.ID, rw.OwnerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update loyalty reward", logger.Error(err))
+		return 0, err
+	}
+	return rw.ID, nil
+}
+
+// initialsFromName returns uppercase initials from a full name, up to 2 chars.
+func initialsFromName(name string) string {
+	if name == "" {
+		return ""
+	}
+	var initials []rune
+	prev := ' '
+	for _, r := range name {
+		if (prev == ' ' || prev == '\t') && r != ' ' && r != '\t' {
+			if r >= 'a' && r <= 'z' {
+				r -= 32
+			}
+			initials = append(initials, r)
+			if len(initials) == 2 {
+				break
+			}
+		}
+		prev = r
+	}
+	return string(initials)
+}
+
 func nullInt64Ptr(v sql.NullInt64) *int64 {
 	if v.Valid {
 		return &v.Int64

@@ -34,3 +34,15 @@ func (s *Service) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyC
 func (s *Service) UpdateConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
 	return s.repo.UpsertConfig(ctx, input)
 }
+
+func (s *Service) ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
+	return s.repo.ListMembers(ctx, ownerID, limit, offset)
+}
+
+func (s *Service) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
+	return s.repo.ListRewards(ctx, ownerID, activeOnly)
+}
+
+func (s *Service) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error) {
+	return s.repo.UpsertReward(ctx, rw)
+}

@@ -59,3 +59,32 @@ type LoyaltyConfigInput struct {
 	PointsValue         float64
 	IsActive            bool
 }
+
+// LoyaltyMember is a customer enrolled in the program — a projection
+// over crm_customers filtered to those with loyalty engagement.
+type LoyaltyMember struct {
+	ID           int64     `json:"id"`
+	OwnerID      int64     `json:"owner_id"`
+	Name         string    `json:"name"`
+	Initials     string    `json:"initials"`
+	Points       int       `json:"points"`
+	Tier         string    `json:"tier"`
+	Visits       int       `json:"visits"`
+	JoinedAt     time.Time `json:"joined_at"`
+	LastActiveAt time.Time `json:"last_active_at"`
+}
+
+// LoyaltyReward is a catalog entry that members can redeem points for.
+type LoyaltyReward struct {
+	ID          int64     `json:"id"`
+	OwnerID     int64     `json:"owner_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Category    string    `json:"category"`
+	PointsCost  int       `json:"points_cost"`
+	Stock       *int      `json:"stock"`
+	Icon        string    `json:"icon"`
+	Active      bool      `json:"active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}

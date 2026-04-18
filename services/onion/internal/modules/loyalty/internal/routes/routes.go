@@ -34,4 +34,19 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.LoyaltyConfigUpdateRoutes(),
 		&handlers.UpdateLoyaltyConfigHandler{Service: svc},
 	)
+
+	http.RegisterGET[handlers.ListMembersRequest, handlers.ListMembersResponse](
+		ctx, router, handlers.LoyaltyMembersRoutes(),
+		&handlers.ListMembersHandler{Service: svc},
+	)
+
+	http.RegisterGET[handlers.ListRewardsRequest, handlers.ListRewardsResponse](
+		ctx, router, handlers.LoyaltyRewardsListRoutes(),
+		&handlers.ListRewardsHandler{Service: svc},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.UpsertRewardRequest, handlers.UpsertRewardResponse](
+		ctx, router, handlers.LoyaltyRewardsUpsertRoutes(),
+		&handlers.UpsertRewardHandler{Service: svc},
+	)
 }
