@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -10,6 +10,8 @@ import {
   Boxes,
   Zap,
   AlertTriangle,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
@@ -19,44 +21,29 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './erp.module.scss';
 
-// Mock inventory rows shown in the hero table
-const INVENTORY_ROWS = [
-  {
-    sku: 'PIZ-MARG',
-    name: 'Margherita (8oz dough)',
-    stock: 34,
-    min: 40,
-    status: 'low' as const,
-  },
-  {
-    sku: 'WIN-RED-02',
-    name: 'House Red (750ml)',
-    stock: 124,
-    min: 60,
-    status: 'ok' as const,
-  },
-  {
-    sku: 'OIL-OLIVE',
-    name: 'Olive Oil (5L)',
-    stock: 6,
-    min: 12,
-    status: 'critical' as const,
-  },
-  {
-    sku: 'COF-BEAN',
-    name: 'Espresso Bean (1kg)',
-    stock: 58,
-    min: 30,
-    status: 'ok' as const,
-  },
-  {
-    sku: 'FLR-00-3KG',
-    name: 'Flour 00 (3kg)',
-    stock: 19,
-    min: 25,
-    status: 'low' as const,
-  },
+// Initial inventory — stock drains each time "Simulate Friday service" fires.
+interface InventoryRow {
+  sku: string;
+  name: string;
+  stock: number;
+  min: number;
+  // Depletion rate per simulated service cycle
+  drain: number;
+}
+
+const INITIAL_INVENTORY: InventoryRow[] = [
+  { sku: 'PIZ-MARG', name: 'Margherita (8oz dough)', stock: 34, min: 40, drain: 4 },
+  { sku: 'WIN-RED-02', name: 'House Red (750ml)', stock: 124, min: 60, drain: 12 },
+  { sku: 'OIL-OLIVE', name: 'Olive Oil (5L)', stock: 6, min: 12, drain: 1 },
+  { sku: 'COF-BEAN', name: 'Espresso Bean (1kg)', stock: 58, min: 30, drain: 6 },
+  { sku: 'FLR-00-3KG', name: 'Flour 00 (3kg)', stock: 19, min: 25, drain: 3 },
 ];
+
+function statusFor(row: InventoryRow): 'critical' | 'low' | 'ok' {
+  if (row.stock <= row.min * 0.5) return 'critical';
+  if (row.stock < row.min) return 'low';
+  return 'ok';
+}
 
 const CAPABILITIES = [
   {
@@ -83,6 +70,48 @@ const CAPABILITIES = [
 
 const ERPPage = (): JSX.Element => {
   const router = useRouter();
+  const [inventory, setInventory] = useState<InventoryRow[]>(INITIAL_INVENTORY);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  // Low-stock count drives the tab label
+  const lowStockCount = useMemo(
+    () => inventory.filter((r) => statusFor(r) !== 'ok').length,
+    [inventory]
+  );
+
+  const simulateService = useCallback((): void => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    // Two ticks of depletion — enough to visibly move the bars
+    setTimeout(() => {
+      setInventory((prev) =>
+        prev.map((row) => ({
+          ...row,
+          stock: Math.max(0, row.stock - Math.round(row.drain * 0.6)),
+        }))
+      );
+    }, 200);
+    setTimeout(() => {
+      setInventory((prev) =>
+        prev.map((row) => ({
+          ...row,
+          stock: Math.max(0, row.stock - Math.round(row.drain * 0.4)),
+        }))
+      );
+      setIsSimulating(false);
+    }, 900);
+  }, [isSimulating]);
+
+  const resetInventory = (): void => {
+    setInventory(INITIAL_INVENTORY);
+  };
+
+  // Auto-run once on first view so the effect is visible without clicking
+  useEffect(() => {
+    const t = setTimeout(() => simulateService(), 1800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -142,13 +171,38 @@ const ERPPage = (): JSX.Element => {
               <div className={styles.tableHeader}>
                 <div className={styles.tableTabs}>
                   <span className={`${styles.tableTab} ${styles.tableTabActive}`}>All SKUs</span>
-                  <span className={styles.tableTab}>Low stock · 2</span>
+                  <span className={styles.tableTab}>Low stock · {lowStockCount}</span>
                   <span className={styles.tableTab}>Suppliers</span>
                   <span className={styles.tableTab}>Purchase orders</span>
                 </div>
-                <div className={styles.tableSync}>
-                  <span className={styles.tableSyncDot} />
-                  Synced 2s ago
+                <div className={styles.tableActions}>
+                  <button
+                    type="button"
+                    onClick={simulateService}
+                    className={styles.simulateBtn}
+                    disabled={isSimulating}
+                  >
+                    {isSimulating ? (
+                      <>
+                        <span className={styles.simulatePulse} />
+                        Service running…
+                      </>
+                    ) : (
+                      <>
+                        <Play size={11} strokeWidth={2.5} fill="currentColor" />
+                        Simulate Friday service
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetInventory}
+                    className={styles.resetBtn}
+                    aria-label="Reset inventory"
+                    title="Reset"
+                  >
+                    <RotateCcw size={12} strokeWidth={2} />
+                  </button>
                 </div>
               </div>
               <table className={styles.table}>
@@ -163,42 +217,72 @@ const ERPPage = (): JSX.Element => {
                   </tr>
                 </thead>
                 <tbody>
-                  {INVENTORY_ROWS.map((row) => (
-                    <tr key={row.sku}>
-                      <td className={styles.cellSku}>{row.sku}</td>
-                      <td>{row.name}</td>
-                      <td className={styles.colNum}>
-                        <span className={styles.stockValue}>{row.stock}</span>
-                      </td>
-                      <td className={styles.colNum}>{row.min}</td>
-                      <td>
-                        <span
-                          className={`${styles.badge} ${
-                            row.status === 'critical'
-                              ? styles.badgeCritical
-                              : row.status === 'low'
-                                ? styles.badgeLow
-                                : styles.badgeOk
-                          }`}
-                        >
-                          {row.status === 'critical'
-                            ? 'Critical'
-                            : row.status === 'low'
-                              ? 'Reorder'
-                              : 'Healthy'}
-                        </span>
-                      </td>
-                      <td className={styles.colAction}>
-                        <ArrowUpRight size={14} />
-                      </td>
-                    </tr>
-                  ))}
+                  {inventory.map((row) => {
+                    const status = statusFor(row);
+                    const fillPct = Math.min(100, (row.stock / (row.min * 1.8)) * 100);
+                    return (
+                      <tr key={row.sku}>
+                        <td className={styles.cellSku}>{row.sku}</td>
+                        <td>{row.name}</td>
+                        <td className={styles.colNum}>
+                          <motion.span
+                            key={row.stock}
+                            className={styles.stockValue}
+                            initial={{ opacity: 0, y: -3 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.22 }}
+                          >
+                            {row.stock}
+                          </motion.span>
+                          <div className={styles.stockBar} aria-hidden="true">
+                            <motion.div
+                              className={`${styles.stockBarFill} ${
+                                status === 'critical'
+                                  ? styles.stockBarCritical
+                                  : status === 'low'
+                                    ? styles.stockBarLow
+                                    : styles.stockBarOk
+                              }`}
+                              animate={{ width: `${fillPct}%` }}
+                              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          </div>
+                        </td>
+                        <td className={styles.colNum}>{row.min}</td>
+                        <td>
+                          <motion.span
+                            key={status}
+                            className={`${styles.badge} ${
+                              status === 'critical'
+                                ? styles.badgeCritical
+                                : status === 'low'
+                                  ? styles.badgeLow
+                                  : styles.badgeOk
+                            }`}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {status === 'critical'
+                              ? 'Critical'
+                              : status === 'low'
+                                ? 'Reorder'
+                                : 'Healthy'}
+                          </motion.span>
+                        </td>
+                        <td className={styles.colAction}>
+                          <ArrowUpRight size={14} />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               <div className={styles.tableFooter}>
                 <span>
                   <Zap size={12} strokeWidth={2.5} />
-                  Auto-reorder triggered for 2 items · PO #4821 drafted
+                  Auto-reorder triggered for {lowStockCount} item{lowStockCount === 1 ? '' : 's'} ·
+                  PO #{4821 + lowStockCount} drafted
                 </span>
               </div>
             </motion.div>

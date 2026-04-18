@@ -263,9 +263,27 @@
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
   font-variant-numeric: tabular-nums;
+  // Button reset so the motion.button cells look like plain grid cells
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  background: transparent;
+  font-family: var(--primary-font);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  outline: none;
 
   &:last-child {
     border-right: none;
+  }
+
+  &:hover {
+    filter: brightness(1.25);
+  }
+
+  &:focus-visible {
+    outline: 1px solid rgba(214, 184, 142, 0.6);
+    outline-offset: -2px;
   }
 }
 

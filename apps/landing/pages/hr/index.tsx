@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -18,9 +18,17 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './hr.module.scss';
 
-// Schedule board mock — 5 days × a few staff
+// Schedule board mock — 7 days × 4 staff. State-driven so each cell is editable.
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-const STAFF = [
+
+interface StaffMember {
+  name: string;
+  role: string;
+  color: string;
+  shifts: string[];
+}
+
+const INITIAL_STAFF: StaffMember[] = [
   {
     name: 'Maya Chen',
     role: 'Server',
@@ -46,6 +54,10 @@ const STAFF = [
     shifts: ['9–6', 'OFF', '9–6', '9–6', '9–6', '11–7', 'OFF'],
   },
 ];
+
+// Click-to-cycle through these shift options; role-appropriate for each person
+// but we keep it simple and use the same ring everywhere.
+const SHIFT_CYCLE = ['OFF', '8–4', '9–5', '9–6', '11–7', '3–11', '4–12'];
 
 const PILLARS = [
   {
@@ -82,6 +94,27 @@ const PILLARS = [
 
 const HRPage = (): JSX.Element => {
   const router = useRouter();
+  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+
+  // Click a shift cell → cycle to the next value in SHIFT_CYCLE.
+  const cycleShift = (staffIdx: number, dayIdx: number): void => {
+    setStaff((prev) => {
+      const updated = [...prev];
+      const member = { ...updated[staffIdx] };
+      member.shifts = [...member.shifts];
+      const current = member.shifts[dayIdx];
+      const pos = SHIFT_CYCLE.indexOf(current);
+      const next = SHIFT_CYCLE[(pos + 1) % SHIFT_CYCLE.length];
+      member.shifts[dayIdx] = next;
+      updated[staffIdx] = member;
+      return updated;
+    });
+  };
+
+  const totalShifts = useMemo(
+    () => staff.reduce((acc, s) => acc + s.shifts.filter((x) => x !== 'OFF').length, 0),
+    [staff]
+  );
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -131,21 +164,28 @@ const HRPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Schedule board mockup */}
+            {/* Live schedule board — click any cell to cycle its shift */}
             <motion.div
               className={styles.scheduleMock}
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-              aria-hidden="true"
             >
               <div className={styles.scheduleHeader}>
                 <div className={styles.scheduleHeaderLeft}>
                   <Calendar size={14} strokeWidth={2} />
-                  <span>Week of April 14 · Terrace</span>
+                  <span>Week of April 14 · Terrace · click any cell to reassign</span>
                 </div>
                 <div className={styles.scheduleHeaderRight}>
-                  <span className={styles.scheduleChip}>28 shifts</span>
+                  <motion.span
+                    key={totalShifts}
+                    className={styles.scheduleChip}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {totalShifts} shifts
+                  </motion.span>
                   <span className={`${styles.scheduleChip} ${styles.scheduleChipGood}`}>
                     No conflicts
                   </span>
@@ -160,7 +200,7 @@ const HRPage = (): JSX.Element => {
                     </div>
                   ))}
                 </div>
-                {STAFF.map((person) => (
+                {staff.map((person, staffIdx) => (
                   <div key={person.name} className={styles.scheduleRow}>
                     <div className={styles.scheduleStaff}>
                       <div className={styles.scheduleAvatar} style={{ background: person.color }}>
@@ -174,16 +214,27 @@ const HRPage = (): JSX.Element => {
                         <div className={styles.scheduleRole}>{person.role}</div>
                       </div>
                     </div>
-                    {person.shifts.map((shift, i) => (
-                      <div
-                        key={i}
+                    {person.shifts.map((shift, dayIdx) => (
+                      <motion.button
+                        type="button"
+                        key={`${person.name}-${dayIdx}`}
                         className={`${styles.scheduleShift} ${
                           shift === 'OFF' ? styles.scheduleShiftOff : ''
                         }`}
                         style={shift !== 'OFF' ? { background: `${person.color}26` } : undefined}
+                        onClick={() => cycleShift(staffIdx, dayIdx)}
+                        whileTap={{ scale: 0.94 }}
+                        aria-label={`Change shift for ${person.name} on ${DAYS[dayIdx]}`}
                       >
-                        {shift}
-                      </div>
+                        <motion.span
+                          key={shift}
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          {shift}
+                        </motion.span>
+                      </motion.button>
                     ))}
                   </div>
                 ))}

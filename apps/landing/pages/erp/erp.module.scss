@@ -164,6 +164,119 @@
   white-space: nowrap;
 }
 
+.tableActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.simulateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: progress;
+  }
+
+  svg {
+    color: #0a0a0a;
+  }
+}
+
+.simulatePulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  animation: simPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes simPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+.resetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e8e6e1;
+  }
+}
+
+// Thin horizontal bar under the stock value showing fill level per row
+.stockBar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+  width: 72px;
+  margin-left: auto;
+}
+
+.stockBarFill {
+  height: 100%;
+  border-radius: 2px;
+  transform-origin: left center;
+}
+
+.stockBarOk {
+  background: linear-gradient(90deg, rgba(107, 207, 127, 0.7), #6bcf7f);
+}
+
+.stockBarLow {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.7), #ffd166);
+}
+
+.stockBarCritical {
+  background: linear-gradient(90deg, rgba(232, 138, 138, 0.7), #e88a8a);
+}
+
 .tableSyncDot {
   width: 7px;
   height: 7px;
