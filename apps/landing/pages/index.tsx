@@ -3,6 +3,7 @@ import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
 import HeroSection from './home/HeroSection/HeroSection';
+import ProductsSection from './home/ProductsSection/ProductsSection';
 import FeaturesSection from './home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from './home/HowItWorksSection/HowItWorksSection';
 import UseCasesSection from './home/UseCasesSection/UseCasesSection';
@@ -36,6 +37,7 @@ const HomePage = (): JSX.Element => {
         />
         <div className={styles.Homepage}>
           <HeroSection />
+          <ProductsSection />
           <FeaturesSection />
           <HowItWorksSection />
           <UseCasesSection />

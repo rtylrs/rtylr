@@ -1,93 +1,281 @@
-import React from 'react';
-import { HiChat, HiPhone, HiMail } from 'react-icons/hi';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/router';
+import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
+import HelmetContainer from '../../components/HelmetContainer';
+import {
+  blurFadeIn,
+  staggerBlur,
+  viewportOnce,
+  slideInLeft,
+  slideInRight,
+} from '../../lib/animations';
 import styles from './contact.module.scss';
 
+interface ContactForm {
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+}
+
+interface ContactFormErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
+
+const CONTACT_CHANNELS = [
+  {
+    icon: MessageCircle,
+    label: 'Chat with us',
+    value: 'WhatsApp +961 3 940 708',
+    href: 'https://wa.me/9613940708',
+    description: 'Message us directly on WhatsApp.',
+  },
+  {
+    icon: Phone,
+    label: 'Call us',
+    value: '+961 3 940 708',
+    href: 'tel:+9613940708',
+    description: 'Mon–Fri, 9 am–5 pm local time.',
+  },
+  {
+    icon: Mail,
+    label: 'Email us',
+    value: 'info@voxire.com',
+    href: 'mailto:info@voxire.com',
+    description: 'We reply within 24 hours.',
+  },
+];
+
 const ContactPage = (): JSX.Element => {
-  const { t } = useTranslation();
+  const router = useRouter();
+  const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });
+  const [errors, setErrors] = useState<ContactFormErrors>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validate = (): boolean => {
+    const next: ContactFormErrors = {};
+    if (!form.name.trim()) next.name = 'Name is required.';
+    if (!form.email.trim()) {
+      next.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      next.email = 'Please enter a valid email address.';
+    }
+    if (!form.message.trim()) next.message = 'Message is required.';
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name as keyof ContactFormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (!validate()) return;
+    setSubmitted(true);
+  };
+
+  const handleDemoNavigation = (): void => {
+    void router.push('/demo');
+  };
 
   return (
     <AppLayout>
       <MainLayout>
-        <div className={styles.ContactUs}>
-          <div className={styles['contactus-container']}>
-            <div className={styles['contactus-card']}>
-              <div className={styles['contactus-icon']}>
-                <HiChat />
-              </div>
-              <h2>
-                <b>Chat with us</b>
-              </h2>
-              <p>We're waiting to help you every Monday-Friday from 9 am to 5 pm EST easily.</p>
-            </div>
-            <div className={styles['contactus-card']}>
-              <div className={styles['contactus-icon']}>
-                <HiPhone />
-              </div>
-              <h2>
-                <b>Give us a call</b>
-              </h2>
-              <p>Give us a ring at (+961 71 642 565). Every monday-friday from 9 am to 5 pm.</p>
-            </div>
-            <div className={styles['contactus-card']}>
-              <div className={styles['contactus-icon']}>
-                <HiMail />
-              </div>
-              <h2>
-                <b>Email Us</b>
-              </h2>
-              <p>Drop us an email at info@voxire.com and you'll receive a reply within 24 hours.</p>
-            </div>
-          </div>
-          <div className={styles['contact-form-container']}>
-            <div className={styles['contact-form-text']}>
-              <h1>Fill out this form, We'll quickly get back to you</h1>
-              <p>
-                We are here to help you! Tell us how we can help and we'll get in touch within the
-                next 24hrs with an expert.
-              </p>
-              <div className={styles.testimonial}>
-                <div className={styles.stars}>
-                  <span>★★★★★</span>
+        <HelmetContainer
+          title="Contact | rtylr"
+          description="Get in touch with the rtylr team. We respond within 24 hours."
+        />
+
+        <div className={styles.contactPage}>
+          {/* Header */}
+          <motion.section
+            className={styles.header}
+            initial="hidden"
+            animate="visible"
+            variants={staggerBlur}
+          >
+            <motion.h1 className={styles.headerTitle} variants={blurFadeIn}>
+              Let's talk.
+            </motion.h1>
+            <motion.p className={styles.headerSubtitle} variants={blurFadeIn}>
+              We're here to help. Reach out and we'll get back within 24 hours.
+            </motion.p>
+          </motion.section>
+
+          {/* Two-column layout */}
+          <section className={styles.mainSection}>
+            <div className={styles.mainContainer}>
+              {/* Left: contact info */}
+              <motion.div
+                className={styles.contactInfo}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                variants={slideInLeft}
+              >
+                <h2 className={styles.infoTitle}>Contact channels</h2>
+                <div className={styles.channelsList}>
+                  {CONTACT_CHANNELS.map((channel) => {
+                    const Icon = channel.icon;
+                    return (
+                      <a
+                        key={channel.label}
+                        href={channel.href}
+                        className={styles.channelCard}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={channel.label}
+                      >
+                        <div className={styles.channelIconWrap}>
+                          <Icon size={20} strokeWidth={1.75} />
+                        </div>
+                        <div className={styles.channelContent}>
+                          <span className={styles.channelLabel}>{channel.label}</span>
+                          <span className={styles.channelValue}>{channel.value}</span>
+                          <span className={styles.channelDescription}>{channel.description}</span>
+                        </div>
+                      </a>
+                    );
+                  })}
                 </div>
-                <p>
-                  "Rtylr transformed our restaurant experience with their digital menu system. Our
-                  customers love it and we see increased efficiency in our service."
-                </p>
-                <div className={styles['testimonial-author']}>
-                  <img src="/images/Al-Abed_Mohammad2.jpg" alt="Author" />
-                  <div className={styles['author-details']}>
-                    <h3>Aalawi Habeeb Galbi</h3>
-                    <p>CEO & Co-founder @ Tiktok</p>
+
+                <div className={styles.hoursBlock}>
+                  <span className={styles.hoursLabel}>Business hours</span>
+                  <span className={styles.hoursValue}>Monday – Friday</span>
+                  <span className={styles.hoursValue}>9 am – 5 pm (GMT+3)</span>
+                </div>
+              </motion.div>
+
+              {/* Right: form */}
+              <motion.div
+                className={styles.formSection}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportOnce}
+                variants={slideInRight}
+              >
+                {submitted ? (
+                  <div className={styles.successState}>
+                    <CheckCircle size={48} strokeWidth={1.5} className={styles.successIcon} />
+                    <h3 className={styles.successTitle}>Message sent!</h3>
+                    <p className={styles.successBody}>
+                      Thanks for reaching out. We'll get back to you within 24 hours.
+                    </p>
+                    <button
+                      className={styles.successReset}
+                      onClick={() => {
+                        setSubmitted(false);
+                        setForm({ name: '', email: '', company: '', message: '' });
+                      }}
+                    >
+                      Send another message
+                    </button>
                   </div>
-                </div>
-              </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className={styles.form} noValidate>
+                    <h2 className={styles.formTitle}>Send us a message</h2>
+
+                    <div className={styles.fieldRow}>
+                      <div className={`${styles.field} ${errors.name ? styles.fieldError : ''}`}>
+                        <label htmlFor="contact-name" className={styles.fieldLabel}>
+                          Name <span className={styles.required}>*</span>
+                        </label>
+                        <input
+                          id="contact-name"
+                          name="name"
+                          type="text"
+                          className={styles.fieldInput}
+                          placeholder="Your full name"
+                          value={form.name}
+                          onChange={handleChange}
+                          autoComplete="name"
+                        />
+                        {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
+                      </div>
+
+                      <div className={`${styles.field} ${errors.email ? styles.fieldError : ''}`}>
+                        <label htmlFor="contact-email" className={styles.fieldLabel}>
+                          Email <span className={styles.required}>*</span>
+                        </label>
+                        <input
+                          id="contact-email"
+                          name="email"
+                          type="email"
+                          className={styles.fieldInput}
+                          placeholder="your@email.com"
+                          value={form.email}
+                          onChange={handleChange}
+                          autoComplete="email"
+                        />
+                        {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
+                      </div>
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor="contact-company" className={styles.fieldLabel}>
+                        Company <span className={styles.optional}>(optional)</span>
+                      </label>
+                      <input
+                        id="contact-company"
+                        name="company"
+                        type="text"
+                        className={styles.fieldInput}
+                        placeholder="Your company name"
+                        value={form.company}
+                        onChange={handleChange}
+                        autoComplete="organization"
+                      />
+                    </div>
+
+                    <div className={`${styles.field} ${errors.message ? styles.fieldError : ''}`}>
+                      <label htmlFor="contact-message" className={styles.fieldLabel}>
+                        Message <span className={styles.required}>*</span>
+                      </label>
+                      <textarea
+                        id="contact-message"
+                        name="message"
+                        className={styles.fieldTextarea}
+                        placeholder="Tell us how we can help…"
+                        rows={5}
+                        value={form.message}
+                        onChange={handleChange}
+                      />
+                      {errors.message && <span className={styles.errorMsg}>{errors.message}</span>}
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn}>
+                      Send message
+                    </button>
+                  </form>
+                )}
+              </motion.div>
             </div>
-            <div className={styles['contact-form']}>
-              <form>
-                <label>
-                  Your name
-                  <input type="text" placeholder="Enter your full name" />
-                </label>
-                <label>
-                  Email address
-                  <input type="email" placeholder="Enter your email" />
-                </label>
-                <label>
-                  Write your message
-                  <textarea
-                    placeholder="Write us your question here..."
-                    style={{
-                      resize: 'none',
-                    }}
-                  ></textarea>
-                </label>
-                <button type="submit">Submit</button>
-              </form>
-            </div>
-          </div>
+          </section>
+
+          {/* Bottom strip */}
+          <motion.section
+            className={styles.bottomStrip}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={blurFadeIn}
+          >
+            <p className={styles.stripText}>Need help getting started? Book a personalized demo.</p>
+            <button className={styles.stripBtn} onClick={handleDemoNavigation}>
+              Book a demo
+              <ArrowRight size={16} strokeWidth={2} />
+            </button>
+          </motion.section>
         </div>
       </MainLayout>
     </AppLayout>

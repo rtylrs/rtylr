@@ -1,146 +1,218 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
-import { Button } from '@voxire/components';
+import {
+  Scale,
+  Archive,
+  Printer,
+  ScanLine,
+  CreditCard,
+  Monitor,
+  Tablet,
+  MonitorSmartphone,
+  Tag,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './hardware.module.scss';
 
 interface HardwareItem {
   name: string;
+  model: string;
   description: string;
-  imageUrl: string;
+  icon: LucideIcon;
 }
 
-const hardwareItems: HardwareItem[] = [
+const HARDWARE_ITEMS: HardwareItem[] = [
   {
-    name: 'Digital Scale – HS-117',
+    name: 'Digital Scale',
+    model: 'HS-117',
     description:
-      'Precision digital scale perfect for weighing ingredients, products, and packages. Features high accuracy and easy-to-read display.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Digital+Scale+HS-117',
+      'Precision weighing for ingredients and products. High-accuracy load cell with backlit LCD display.',
+    icon: Scale,
   },
   {
     name: 'Cash Drawer',
+    model: 'CD-460',
     description:
-      'Secure cash drawer solution for point-of-sale systems. Durable construction with secure locking mechanism and smooth operation.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Cash+Drawer',
+      'Secure dual-bill, dual-coin POS cash drawer with heavy-duty steel construction and auto-open trigger.',
+    icon: Archive,
   },
   {
-    name: 'All-in-One Touch Screen HS-9401',
+    name: 'Thermal Receipt Printer',
+    model: 'HS-8250',
     description:
-      'Complete POS solution with integrated touch screen display. Combines power and functionality in a sleek, space-saving design.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Touch+Screen+HS-9401',
+      '80mm high-speed receipt printing at 250mm/s. Supports USB, LAN, and Bluetooth connectivity.',
+    icon: Printer,
   },
   {
-    name: 'Label Barcode Printer',
+    name: 'Barcode Scanner',
+    model: 'BS-200',
     description:
-      'High-speed thermal label printer for barcode labels and product tags. Ideal for inventory management and retail operations.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Label+Barcode+Printer',
+      '1D/2D omnidirectional USB scanner with 360° coverage. Reads damaged and low-contrast barcodes.',
+    icon: ScanLine,
   },
   {
-    name: 'Thermal Receipt Printer HS-8250',
+    name: 'Card Terminal',
+    model: 'CT-500',
     description:
-      'Fast and reliable thermal receipt printer for POS transactions. Silent operation with excellent print quality and durability.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Thermal+Printer+HS-8250',
+      'Tap, chip & swipe EMV-certified payments. Supports NFC, Apple Pay, Google Pay, and Visa/MC.',
+    icon: CreditCard,
   },
   {
-    name: 'Bluetooth Printer',
+    name: 'Kitchen Display System',
+    model: 'KDS-15',
     description:
-      'Wireless Bluetooth-enabled printer for flexible printing solutions. Connect seamlessly to mobile devices and POS systems.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Bluetooth+Printer',
+      '15" wall-mount order display with real-time ticket management and multi-station routing.',
+    icon: Monitor,
   },
   {
-    name: 'Single Screen with Software',
+    name: 'Tablet Stand',
+    model: 'TS-360',
     description:
-      'Complete single-screen POS system with integrated software. Perfect for small businesses looking for an all-in-one solution.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Single+Screen+POS',
+      'Adjustable 360° rotating tablet mount. Compatible with 7"–13" tablets. Weighted non-slip base.',
+    icon: Tablet,
   },
   {
-    name: 'Tablet 10.1" (Windows 10, Intel N4020)',
+    name: 'Customer Display',
+    model: 'CD-Dual',
     description:
-      'Versatile 10.1-inch tablet running Windows 10. Powered by Intel N4020 processor, ideal for mobile POS and order management.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Tablet+10.1',
+      'Dual-screen customer-facing display. Rear LCD shows order totals, promotions, and loyalty points.',
+    icon: MonitorSmartphone,
   },
   {
-    name: 'Barcode Reader',
+    name: 'Label Printer',
+    model: 'LP-420',
     description:
-      'High-performance barcode scanner for quick and accurate product scanning. Supports multiple barcode formats and connection types.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Barcode+Reader',
-  },
-  {
-    name: 'Barcode Reader (Alternative)',
-    description:
-      'Alternative barcode scanning solution with enhanced features. Ergonomic design and advanced scanning technology for retail environments.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Barcode+Reader+Alt',
-  },
-  {
-    name: 'Barcode Reader (Another Model)',
-    description:
-      'Another reliable barcode scanner option with compact design. Perfect for tight spaces and high-volume scanning operations.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Barcode+Reader+Model',
-  },
-  {
-    name: 'Price Checker',
-    description:
-      'Customer-facing price checker display for retail environments. Helps customers verify prices quickly and improves transparency.',
-    imageUrl: 'https://via.placeholder.com/400x300/232220/ffffff?text=Price+Checker',
+      '4" thermal label printer for shelf tags, product labels, and expiry stickers. 203 dpi resolution.',
+    icon: Tag,
   },
 ];
 
 const HardwarePage = (): JSX.Element => {
   const router = useRouter();
 
-  const handleBookDemo = () => {
-    router.push('/demo');
+  const handleBookDemo = (): void => {
+    void router.push('/demo');
   };
 
-  const handleContactSales = () => {
-    router.push('/contact');
+  const handleContactSales = (): void => {
+    void router.push('/contact');
   };
 
   return (
     <AppLayout>
       <MainLayout>
-        <HelmetContainer title="Hardware | Rtylr" />
+        <HelmetContainer
+          title="Hardware | rtylr"
+          description="Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+        />
+
         <div className={styles.hardwarePage}>
-          <div className={styles.container}>
-            <div className={styles.header}>
-              <h1 className={styles.title}>Hardware Solutions</h1>
-              <p className={styles.subtitle}>
-                Complete hardware ecosystem designed to integrate seamlessly with Rtylr POS. All
-                equipment is tested and optimized for peak performance.
-              </p>
+          {/* Hero */}
+          <motion.section
+            className={styles.hero}
+            initial="hidden"
+            animate="visible"
+            variants={staggerBlur}
+          >
+            <div className={styles.heroInner}>
+              <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
+                <span className={styles.eyebrowDot} />
+                rtylr Hardware Ecosystem
+              </motion.span>
+              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
+                Hardware that works as hard as you do.
+              </motion.h1>
+              <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
+                Tested and certified hardware ecosystem designed for rtylr POS. Every device is
+                optimized out of the box — zero drivers, zero configuration.
+              </motion.p>
             </div>
+          </motion.section>
 
-            <div className={styles.grid}>
-              {hardwareItems.map((item, index) => (
-                <div key={index} className={styles.card}>
-                  <div className={styles.imageContainer}>
-                    <img src={item.imageUrl} alt={item.name} className={styles.image} />
-                  </div>
-                  <div className={styles.content}>
-                    <h3 className={styles.cardTitle}>{item.name}</h3>
-                    <p className={styles.cardDescription}>{item.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.ctaSection}>
-              <h2 className={styles.ctaTitle}>Ready to Get Started?</h2>
-              <p className={styles.ctaDescription}>
-                Connect with our team to discuss hardware solutions tailored to your business needs.
-              </p>
-              <div className={styles.ctaButtons}>
-                <Button variant="dark-outline" onClick={handleBookDemo} size="lg">
-                  Book a Demo
-                </Button>
-                <Button variant="soft" onClick={handleContactSales} size="lg">
-                  Contact Sales
-                </Button>
+          {/* Hardware grid */}
+          <motion.section
+            className={styles.gridSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <div className={styles.hardwareGrid}>
+                {HARDWARE_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.div
+                      key={item.model}
+                      className={styles.hardwareCard}
+                      variants={blurFadeIn}
+                    >
+                      <div className={styles.cardAccentBar} aria-hidden="true" />
+                      <div className={styles.cardContent}>
+                        <div className={styles.cardIconWrap}>
+                          <Icon size={24} strokeWidth={1.5} />
+                        </div>
+                        <div className={styles.cardMeta}>
+                          <span className={styles.cardModel}>{item.model}</span>
+                          <h3 className={styles.cardName}>{item.name}</h3>
+                        </div>
+                        <p className={styles.cardDescription}>{item.description}</p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          </motion.section>
+
+          {/* Integration strip */}
+          <motion.section
+            className={styles.integrationStrip}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={blurFadeIn}
+          >
+            <div className={styles.stripInner}>
+              <span className={styles.stripBadge}>Plug &amp; Play</span>
+              <p className={styles.stripText}>
+                All hardware integrates with rtylr POS out of the box. Zero drivers, zero
+                configuration.
+              </p>
+            </div>
+          </motion.section>
+
+          {/* CTA */}
+          <motion.section
+            className={styles.ctaSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.div className={styles.ctaInner} variants={blurFadeIn}>
+                <h2 className={styles.ctaTitle}>Get hardware for your business.</h2>
+                <p className={styles.ctaSubtitle}>
+                  Our team will help you spec the right devices for your setup and ship everything
+                  pre-configured for your location.
+                </p>
+                <div className={styles.ctaButtons}>
+                  <button className={styles.ctaPrimary} onClick={handleBookDemo}>
+                    Book a demo
+                  </button>
+                  <button className={styles.ctaSecondary} onClick={handleContactSales}>
+                    Contact sales
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </motion.section>
         </div>
       </MainLayout>
     </AppLayout>

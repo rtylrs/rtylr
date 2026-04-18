@@ -1,24 +1,321 @@
 import React from 'react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/router';
+import { APP_URLS } from '@voxire/config';
+import { navigateExternal } from '../../lib/navigation';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
-import { useConfigStore } from '../../stores/configStore';
+import HelmetContainer from '../../components/HelmetContainer';
+import {
+  blurFadeIn,
+  staggerBlur,
+  viewportOnce,
+  slideInLeft,
+  slideInRight,
+} from '../../lib/animations';
 import styles from './about.module.scss';
 
+const PRODUCT_CLUSTERS = [
+  {
+    label: 'Front of House',
+    apps: ['POS', 'CRM'],
+    description:
+      'Manage every customer touchpoint — point of sale, loyalty, campaigns, and beyond.',
+  },
+  {
+    label: 'Operations',
+    apps: ['ERP', 'Finance'],
+    description: 'Keep inventory, purchasing, invoices, and P&L tight across every location.',
+  },
+  {
+    label: 'People',
+    apps: ['HR', 'Flow', 'Insights'],
+    description: 'Staff scheduling, project management, and analytics all unified in one place.',
+  },
+];
+
+const VALUES = [
+  {
+    title: 'Everything in one place',
+    body: 'No more juggling seven tools. One login, one workspace, one source of truth for your business.',
+  },
+  {
+    title: 'Built for teams',
+    body: 'From a two-person shop to a 500-seat enterprise, rtylr scales to fit how your team actually works.',
+  },
+  {
+    title: 'AI-first by design',
+    body: 'Every app ships with an embedded AI assistant — not a bolt-on, but part of the core experience.',
+  },
+  {
+    title: 'Always available offline',
+    body: 'POS and critical workflows work without internet. Sync happens automatically when you reconnect.',
+  },
+];
+
 const AboutPage = (): JSX.Element => {
-  const aboutContent = useConfigStore((state) => state.aboutContent);
+  const router = useRouter();
+
+  const handleGetStarted = (): void => {
+    navigateExternal(`${APP_URLS.auth}/register`);
+  };
+
+  const handleBookDemo = (): void => {
+    void router.push('/demo');
+  };
 
   return (
     <AppLayout>
       <MainLayout>
-        <div className={styles['about-container']}>
-          {aboutContent ? (
-            <div dangerouslySetInnerHTML={{ __html: aboutContent }} />
-          ) : (
-            <div className={styles['about-fallback']}>
-              <h1>About Rtylr</h1>
-              <p>Welcome to Rtylr - transforming restaurant experiences with digital innovation.</p>
+        <HelmetContainer
+          title="About | rtylr"
+          description="We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+        />
+
+        <div className={styles.aboutPage}>
+          {/* Hero */}
+          <motion.section
+            className={styles.hero}
+            initial="hidden"
+            animate="visible"
+            variants={staggerBlur}
+          >
+            <div className={styles.heroInner}>
+              <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
+                <span className={styles.eyebrowDot} />
+                About Voxire &amp; rtylr
+              </motion.span>
+              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
+                We're building the operating system for commerce.
+              </motion.h1>
+              <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
+                rtylr is the all-in-one platform that replaces the fragmented stack of tools most
+                businesses rely on. POS, ERP, HR, CRM, Finance, Flow, and Insights — built to work
+                together from day one.
+              </motion.p>
             </div>
-          )}
+          </motion.section>
+
+          {/* Mission */}
+          <motion.section
+            className={styles.missionSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <div className={styles.missionGrid}>
+                <motion.div className={styles.missionLeft} variants={slideInLeft}>
+                  <span className={styles.sectionLabel}>Our Mission</span>
+                  <h2 className={styles.missionTitle}>
+                    Empower every business with a platform that just works.
+                  </h2>
+                  <p className={styles.missionBody}>
+                    We believe commerce technology should be accessible, unified, and intelligent.
+                    Too many businesses waste hours each week moving data between disconnected apps.
+                    rtylr ends that. Everything talks to everything — automatically.
+                  </p>
+                </motion.div>
+                <motion.div className={styles.missionRight} variants={slideInRight}>
+                  <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                      <span className={styles.statNumber}>2</span>
+                      <span className={styles.statLabel}>Founders</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statNumber}>7</span>
+                      <span className={styles.statLabel}>Apps</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statNumber}>2024</span>
+                      <span className={styles.statLabel}>Founded</span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statNumber}>🇱🇧</span>
+                      <span className={styles.statLabel}>Lebanon</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Story */}
+          <motion.section
+            className={styles.storySection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
+                The Story
+              </motion.span>
+              <motion.h2 className={styles.storyTitle} variants={blurFadeIn}>
+                Born out of frustration.
+              </motion.h2>
+              <motion.div className={styles.storyBody} variants={blurFadeIn}>
+                <p>
+                  rtylr started because we couldn't find one tool that handled POS, finance, HR, and
+                  CRM together — without forcing painful integrations, double-entry, and a
+                  subscription for every module.
+                </p>
+                <p>
+                  We watched businesses in Lebanon and across the region patch together QuickBooks
+                  for accounting, a standalone POS, a separate HR portal, and a CRM that never
+                  talked to any of them. The overhead was killing productivity.
+                </p>
+                <p>
+                  So in 2024, Abed and Mohammad left their corporate roles and set out to build what
+                  should have existed all along: a single, cohesive platform for the entire business
+                  — with AI embedded from the ground up.
+                </p>
+              </motion.div>
+            </div>
+          </motion.section>
+
+          {/* Product clusters */}
+          <motion.section
+            className={styles.productsSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
+                The Platform
+              </motion.span>
+              <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
+                Seven apps. One platform.
+              </motion.h2>
+              <div className={styles.productsGrid}>
+                {PRODUCT_CLUSTERS.map((cluster) => (
+                  <motion.div
+                    key={cluster.label}
+                    className={styles.productCard}
+                    variants={blurFadeIn}
+                  >
+                    <div className={styles.productCardTop}>
+                      <h3 className={styles.productCardLabel}>{cluster.label}</h3>
+                      <div className={styles.productPills}>
+                        {cluster.apps.map((app) => (
+                          <span key={app} className={styles.appPill}>
+                            {app}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className={styles.productCardDescription}>{cluster.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Team */}
+          <motion.section
+            className={styles.teamSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
+                The Team
+              </motion.span>
+              <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
+                Built by founders, for founders.
+              </motion.h2>
+              <div className={styles.teamGrid}>
+                <motion.div className={styles.founderCard} variants={blurFadeIn}>
+                  <div className={styles.avatarWrapper} aria-hidden="true">
+                    <span className={styles.avatarInitials}>AA</span>
+                  </div>
+                  <h3 className={styles.founderName}>Abed El-Fattah Amouneh</h3>
+                  <span className={styles.founderRole}>Co-founder &amp; CEO</span>
+                  <a
+                    href="mailto:info@voxire.com"
+                    className={styles.founderEmail}
+                    aria-label="Email Abed"
+                  >
+                    info@voxire.com
+                  </a>
+                </motion.div>
+
+                <motion.div className={styles.founderCard} variants={blurFadeIn}>
+                  <div className={styles.avatarWrapper} aria-hidden="true">
+                    <span className={styles.avatarInitials}>MH</span>
+                  </div>
+                  <h3 className={styles.founderName}>Mohammad Homsi</h3>
+                  <span className={styles.founderRole}>Co-founder &amp; CTO</span>
+                  <a
+                    href="mailto:info@voxire.com"
+                    className={styles.founderEmail}
+                    aria-label="Email Mohammad"
+                  >
+                    info@voxire.com
+                  </a>
+                </motion.div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Values */}
+          <motion.section
+            className={styles.valuesSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
+                Values
+              </motion.span>
+              <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
+                What we stand for.
+              </motion.h2>
+              <div className={styles.valuesGrid}>
+                {VALUES.map((value) => (
+                  <motion.div key={value.title} className={styles.valueCard} variants={blurFadeIn}>
+                    <div className={styles.valueDot} aria-hidden="true" />
+                    <h3 className={styles.valueTitle}>{value.title}</h3>
+                    <p className={styles.valueBody}>{value.body}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* CTA */}
+          <motion.section
+            className={styles.ctaSection}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerBlur}
+          >
+            <div className={styles.sectionContainer}>
+              <motion.div className={styles.ctaInner} variants={blurFadeIn}>
+                <h2 className={styles.ctaTitle}>Join the businesses already using rtylr.</h2>
+                <p className={styles.ctaSubtitle}>
+                  Free forever for up to 5 members. No credit card required.
+                </p>
+                <div className={styles.ctaButtons}>
+                  <button className={styles.ctaPrimary} onClick={handleGetStarted}>
+                    Get started
+                  </button>
+                  <button className={styles.ctaSecondary} onClick={handleBookDemo}>
+                    Book a demo
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </motion.section>
         </div>
       </MainLayout>
     </AppLayout>

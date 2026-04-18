@@ -19,17 +19,18 @@
 }
 
 .badge {
-  display: inline-block;
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: rgba(233, 235, 223, 0.8);
+  color: #4485c4;
   margin-bottom: 20px;
-  padding: 6px 16px;
-  border: 1px solid rgba(233, 235, 223, 0.2);
-  border-radius: 4px;
-  background: rgba(233, 235, 223, 0.06);
+  padding: 5px 16px;
+  border: 1px solid rgba(68, 133, 196, 0.25);
+  border-radius: 100px;
+  background: rgba(68, 133, 196, 0.1);
 }
 
 .sectionTitle {
@@ -75,29 +76,31 @@
   }
 
   &.featured {
-    background: rgba(233, 235, 223, 0.04);
-    border-color: rgba(233, 235, 223, 0.3);
+    background: rgba(68, 133, 196, 0.06);
+    border-color: rgba(68, 133, 196, 0.4);
 
     &:hover {
-      border-color: rgba(233, 235, 223, 0.5);
+      border-color: rgba(68, 133, 196, 0.65);
+      box-shadow: 0 0 40px rgba(68, 133, 196, 0.12);
     }
   }
 }
 
 .popularBadge {
   position: absolute;
-  top: -12px;
+  top: -13px;
   left: 50%;
   transform: translateX(-50%);
-  background: #e9ebdf;
-  color: #151515;
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  background: linear-gradient(135deg, #4485c4, #03aed2);
+  color: #fff;
+  padding: 5px 18px;
+  border-radius: 100px;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(68, 133, 196, 0.4);
 }
 
 .planHeader {
@@ -165,7 +168,7 @@
 
 .checkIcon {
   flex-shrink: 0;
-  color: #e9ebdf;
+  color: #03aed2;
   width: 18px;
   height: 18px;
   margin-top: 2px;
@@ -174,30 +177,31 @@
 .ctaButton {
   background: transparent;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 14px 24px;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  font-weight: 500;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+  transition: all 0.2s ease;
   width: 100%;
+  letter-spacing: -0.01em;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.32);
   }
 
   &.ctaFeatured {
-    background: #e9ebdf;
-    border-color: #e9ebdf;
-    color: #151515;
+    background: #4485c4;
+    border-color: #4485c4;
+    color: #fff;
 
     &:hover {
-      background: #d4d6cb;
-      border-color: #d4d6cb;
+      background: #5596d5;
+      border-color: #5596d5;
+      box-shadow: 0 8px 28px rgba(68, 133, 196, 0.4);
+      transform: translateY(-1px);
     }
   }
 }

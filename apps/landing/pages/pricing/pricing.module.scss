@@ -1,56 +1,573 @@
-.pricing-page {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+// ── Pricing Page ─────────────────────────────────────────────────────────────
 
-  h1 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: var(--primary-color);
+$blue: #4485c4;
+$cyan: #03aed2;
+$dark-primary: #040428;
+$bg: #151515;
+$border: #232220;
+$border-subtle: rgba(255, 255, 255, 0.1);
+$text-muted: rgba(255, 255, 255, 0.5);
+$text-mid: rgba(255, 255, 255, 0.65);
+
+.pricingPage {
+  background-color: var(--app-background);
+  color: #fff;
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 96px 24px 72px;
+}
+
+.heroTitle {
+  font-size: 3.6rem;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin: 0 0 20px;
+  max-width: 700px;
+}
+
+.heroSubtitle {
+  font-size: 1.1rem;
+  color: $text-muted;
+  margin: 0 0 48px;
+  line-height: 1.7;
+}
+
+// ── Billing toggle ────────────────────────────────────────────────────────────
+
+.billingToggle {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border;
+  border-radius: 100px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.toggleOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 24px;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: $text-muted;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
   }
 }
 
-.pricing-table {
+.toggleActive {
+  background: rgba(68, 133, 196, 0.15);
+  color: #fff;
+  border: 1px solid rgba(68, 133, 196, 0.35);
+}
+
+.savingsBadge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(3, 174, 210, 0.15);
+  color: $cyan;
+  border: 1px solid rgba(3, 174, 210, 0.3);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+// ── Plans section ─────────────────────────────────────────────────────────────
+
+.plansSection {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px 80px;
+}
+
+.plansContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.planCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  transition: border-color 0.25s ease;
+
+  &:hover {
+    border-color: rgba(68, 133, 196, 0.35);
+  }
+}
+
+.planCardPro {
+  border-color: rgba(68, 133, 196, 0.4);
+  background: rgba(68, 133, 196, 0.06);
+
+  &:hover {
+    border-color: rgba(68, 133, 196, 0.7);
+  }
+}
+
+.popularBadge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: $blue;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.planHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.planName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-mid;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.planPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.priceAmount {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.pricePeriod {
+  font-size: 0.9rem;
+  color: $text-muted;
+  font-weight: 400;
+}
+
+.annualNote {
+  font-size: 0.78rem;
+  color: $cyan;
+  margin: 0;
+}
+
+.planTagline {
+  font-size: 0.9rem;
+  color: $text-muted;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.planFeatures {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+
+  li {
+    font-size: 0.9rem;
+    color: $text-mid;
+    padding-left: 20px;
+    position: relative;
+
+    &::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: rgba(68, 133, 196, 0.6);
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.planCta {
+  width: 100%;
+  padding: 13px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid $border;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+}
+
+.planCtaPro {
+  background: $blue;
+  color: #fff;
+  border-color: $blue;
+
+  &:hover {
+    background: #5596d5;
+    border-color: #5596d5;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(68, 133, 196, 0.35);
+  }
+}
+
+// ── Feature comparison table ──────────────────────────────────────────────────
+
+.tableSection {
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 40px;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.tableWrapper {
+  width: 100%;
+  max-width: 900px;
   overflow-x: auto;
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
 
-    th,
-    td {
-      padding: 1rem;
+  thead tr {
+    border-bottom: 1px solid $border;
+  }
+
+  thead th {
+    padding: 16px 24px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: $text-muted;
+
+    &:first-child {
       text-align: left;
-      border-bottom: 1px solid #e5e7eb;
     }
+  }
 
-    th {
-      background: #f9fafb;
-      font-weight: 600;
-      color: var(--primary-color);
+  tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.02);
     }
+  }
 
-    tr:hover {
-      background: #f9fafb;
+  tbody td {
+    padding: 16px 24px;
+    text-align: center;
+    vertical-align: middle;
+    color: $text-mid;
+
+    &:first-child {
+      text-align: left;
     }
   }
 }
 
-.free-plan {
-  background: #ecfdf5 !important;
-  color: #047857 !important;
+.featureCol {
+  width: 40%;
 }
 
-.pro-plan {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
+.proCol {
+  background: rgba(68, 133, 196, 0.05);
 }
 
-.enterprise-plan {
-  background: #fdf4ff !important;
-  color: #7c3aed !important;
+.featureName {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+}
+
+.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $cyan;
+}
+
+.dashIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.featureText {
+  color: $text-mid;
+}
+
+// ── FAQ ───────────────────────────────────────────────────────────────────────
+
+.faqSection {
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.faqList {
+  width: 100%;
+  max-width: 740px;
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid $border;
+
+  &:first-child {
+    border-top: 1px solid $border;
+  }
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.faqChevron {
+  flex-shrink: 0;
+  color: $text-muted;
+  transition: transform 0.3s ease;
+}
+
+.faqChevronOpen {
+  transform: rotate(180deg);
+  color: $blue;
+}
+
+.faqAnswer {
+  overflow: hidden;
+
+  p {
+    padding: 0 0 22px;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+// ── Bottom CTA ────────────────────────────────────────────────────────────────
+
+.bottomCta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 80px 24px 0;
+  border-top: 1px solid $border;
+  margin: 0 24px;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.bottomCtaTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px;
+  letter-spacing: -0.03em;
+}
+
+.bottomCtaSubtitle {
+  font-size: 1.05rem;
+  color: $text-muted;
+  margin: 0 0 40px;
+}
+
+.bottomCtaButtons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ctaPrimary {
+  background: $blue;
+  color: #fff;
+  border: none;
+  padding: 14px 38px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: #5596d5;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(68, 133, 196, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px 38px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+
+  .plansContainer {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 72px 20px 48px;
+  }
+
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .plansSection {
+    padding: 0 20px 60px;
+  }
+
+  .tableSection,
+  .faqSection {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .comparisonTable {
+    font-size: 0.82rem;
+
+    thead th,
+    tbody td {
+      padding: 12px 14px;
+    }
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .bottomCtaTitle {
+    font-size: 2.2rem;
+  }
+
+  .bottomCtaButtons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 340px;
+
+    button {
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .priceAmount {
+    font-size: 2.2rem;
+  }
 }
