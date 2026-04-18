@@ -4,13 +4,14 @@ import { z } from 'zod';
 import { crmApi, Customer, CustomersParams } from '../../shared/services/crmApi';
 import { customerSchema, timelineEntrySchema } from '../../shared/schemas/customers';
 
+import { unwrapList } from '../../shared/lib/unwrapList';
+
 export function useCustomers(params?: CustomersParams) {
   return useQuery({
     queryKey: ['customers', params],
     queryFn: async () => {
       const res = await unwrap(crmApi.getCustomers(params));
-      const raw = res ?? [];
-      return z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
   });
 }
@@ -35,8 +36,7 @@ export function useCustomerTimeline(id: number | undefined) {
     queryKey: ['customer-timeline', id],
     queryFn: async () => {
       const res = await unwrap(crmApi.getCustomerTimeline(id!));
-      const raw = res ?? [];
-      return z.array(timelineEntrySchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(timelineEntrySchema).parse(unwrapList(res, 'entries', 'timeline'));
     },
     enabled: !!id,
   });

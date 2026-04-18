@@ -10,19 +10,7 @@ import {
   loyaltyTierSchema,
 } from '../../shared/schemas/loyalty';
 
-// Many loyalty endpoints return `{ <key>: [...] }` envelopes from the backend.
-// Accept either a raw array or an enveloped response so the schema parse
-// never sees undefined, which would throw.
-function unwrapList<T>(res: unknown, ...keys: string[]): T[] {
-  if (Array.isArray(res)) return res as T[];
-  if (res && typeof res === 'object') {
-    for (const key of keys) {
-      const value = (res as Record<string, unknown>)[key];
-      if (Array.isArray(value)) return value as T[];
-    }
-  }
-  return [];
-}
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useLoyaltyTransactions() {
   return useQuery({

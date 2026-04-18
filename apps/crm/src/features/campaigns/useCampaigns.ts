@@ -3,14 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { crmApi, Campaign } from '../../shared/services/crmApi';
 import { campaignSchema, campaignStatsSchema } from '../../shared/schemas/campaigns';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getCampaigns());
-      const raw = res ?? [];
-      return z.array(campaignSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(campaignSchema).parse(unwrapList(res, 'campaigns'));
     },
   });
 }

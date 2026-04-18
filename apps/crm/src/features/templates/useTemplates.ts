@@ -3,14 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { crmApi, Template } from '../../shared/services/crmApi';
 import { templateSchema } from '../../shared/schemas/templates';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useTemplates() {
   return useQuery({
     queryKey: ['templates'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getTemplates());
-      const raw = res ?? [];
-      return z.array(templateSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(templateSchema).parse(unwrapList(res, 'templates'));
     },
   });
 }

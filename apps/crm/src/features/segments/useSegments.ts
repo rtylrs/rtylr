@@ -4,14 +4,14 @@ import { z } from 'zod';
 import { crmApi, Segment } from '../../shared/services/crmApi';
 import { segmentSchema } from '../../shared/schemas/segments';
 import { customerSchema } from '../../shared/schemas/customers';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useSegments() {
   return useQuery({
     queryKey: ['segments'],
     queryFn: async () => {
       const res = await unwrap(crmApi.getSegments());
-      const raw = res ?? [];
-      return z.array(segmentSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(segmentSchema).parse(unwrapList(res, 'segments'));
     },
   });
 }
@@ -32,8 +32,7 @@ export function useSegmentCustomers(id: number | undefined) {
     queryKey: ['segment-customers', id],
     queryFn: async () => {
       const res = await unwrap(crmApi.getSegmentCustomers(id!));
-      const raw = res ?? [];
-      return z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
+      return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
     enabled: !!id,
   });
