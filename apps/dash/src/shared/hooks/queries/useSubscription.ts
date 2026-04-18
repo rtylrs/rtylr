@@ -23,7 +23,16 @@ export interface PlanPayload {
   slug: string;
   apps: string[];
   pricePerSeatCents: number;
+  annualPricePerSeatCents: number;
   trialDays: number;
+  tagline: string;
+  maxSeats: number | null;
+  maxLocations: number | null;
+  aiCreditsPerMonth: number;
+  features: string[];
+  tierOrder: number;
+  isSolo: boolean;
+  isFeatured: boolean;
   isActive: boolean;
 }
 

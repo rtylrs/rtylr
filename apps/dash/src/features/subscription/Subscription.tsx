@@ -8,6 +8,8 @@ import {
   Zap,
   ArrowRight,
   Loader2,
+  Check,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { APP_CONFIG, APP_URLS } from '@voxire/config';
@@ -187,7 +189,8 @@ const PlanCard: React.FC<{
   isCurrent: boolean;
   currentSeats: number;
   ownerEmail: string;
-}> = ({ plan, isCurrent, currentSeats, ownerEmail }) => {
+  compact?: boolean;
+}> = ({ plan, isCurrent, currentSeats, ownerEmail, compact }) => {
   const estimatedMonthly = currentSeats * plan.pricePerSeatCents;
   const checkout = useCheckout();
 
@@ -205,59 +208,101 @@ const PlanCard: React.FC<{
     );
   };
 
+  const priceLabel =
+    plan.pricePerSeatCents === 0 ? 'Free' : `${centsToDisplay(plan.pricePerSeatCents)}/seat/mo`;
+
   return (
     <div
-      className="rounded-xl p-4 space-y-3"
+      className="rounded-xl p-4 space-y-3 relative"
       style={{
-        border: isCurrent ? '1.5px solid var(--accent-border)' : '1px solid var(--dash-border)',
+        border:
+          isCurrent || plan.isFeatured
+            ? '1.5px solid var(--accent-border)'
+            : '1px solid var(--dash-border)',
         background: isCurrent ? 'var(--accent-muted)' : 'var(--dash-card)',
       }}
     >
-      <div className="flex items-center justify-between gap-2">
-        <div>
+      {plan.isFeatured && !isCurrent && (
+        <span
+          className="absolute -top-2 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+          style={{ background: 'var(--accent)', color: '#fff' }}
+        >
+          <Sparkles size={9} />
+          Popular
+        </span>
+      )}
+
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
           <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             {plan.name}
           </p>
           <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            {centsToDisplay(plan.pricePerSeatCents)}/seat/month
+            {priceLabel}
           </p>
-        </div>
-        <div className="text-right">
-          {isCurrent ? (
-            <span
-              className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-              style={{ background: 'var(--accent)', color: '#fff' }}
-            >
-              Current
-            </span>
-          ) : (
-            <p className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
-              ~{centsToDisplay(estimatedMonthly)}/mo at {currentSeats} seats
+          {!compact && plan.tagline && (
+            <p className="text-xs mt-1.5" style={{ color: 'var(--dash-text-muted)' }}>
+              {plan.tagline}
             </p>
           )}
         </div>
+        {isCurrent && (
+          <span
+            className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
+            style={{ background: 'var(--accent)', color: '#fff' }}
+          >
+            Current
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-wrap gap-1">
+      {!compact && plan.features && plan.features.length > 0 && (
+        <ul className="space-y-1.5 pt-1">
+          {plan.features.slice(0, 5).map((f, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2 text-xs"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              <Check
+                size={12}
+                className="mt-0.5 shrink-0"
+                style={{ color: 'var(--accent)' }}
+                strokeWidth={3}
+              />
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex flex-wrap gap-1 pt-1">
         {plan.apps.map((app) => (
           <AppPill key={app} appId={app} />
         ))}
       </div>
 
       {!isCurrent && (
-        <button
-          onClick={handleCheckout}
-          disabled={checkout.isPending}
-          className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
-          style={{ color: 'var(--accent)' }}
-        >
-          {checkout.isPending ? (
-            <Loader2 size={11} className="animate-spin" />
-          ) : (
-            <ArrowRight size={11} />
-          )}
-          {checkout.isPending ? 'Opening checkout…' : `Switch to ${plan.name}`}
-        </button>
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
+            {plan.pricePerSeatCents === 0
+              ? 'Free forever'
+              : `~${centsToDisplay(estimatedMonthly)}/mo at ${currentSeats} seat${currentSeats !== 1 ? 's' : ''}`}
+          </p>
+          <button
+            onClick={handleCheckout}
+            disabled={checkout.isPending}
+            className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ color: 'var(--accent)' }}
+          >
+            {checkout.isPending ? (
+              <Loader2 size={11} className="animate-spin" />
+            ) : (
+              <ArrowRight size={11} />
+            )}
+            {checkout.isPending ? 'Opening…' : `Switch to ${plan.name}`}
+          </button>
+        </div>
       )}
     </div>
   );
@@ -269,6 +314,9 @@ const Subscription: React.FC = (): React.JSX.Element => {
   const { data: sub, isLoading: subLoading } = useMySubscription();
   const { data: plans = [], isLoading: plansLoading } = useListPlans();
   const ownerEmail = useUserStore((s) => s.user?.email ?? s.user?.emailAddress ?? '');
+
+  const tierPlans = [...plans].filter((p) => !p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
+  const soloPlans = [...plans].filter((p) => p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -294,24 +342,24 @@ const Subscription: React.FC = (): React.JSX.Element => {
         </SettingSection>
       )}
 
-      {/* All plans */}
+      {/* Tier plans */}
       <SettingSection
-        title="Available plans"
-        description="Priced per seat. Switch plans any time, changes apply at the next billing cycle."
+        title="Full suite plans"
+        description="Every app, one subscription. Priced per seat — only pay for what you use."
       >
         {plansLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-20 rounded-xl animate-pulse"
+                className="h-32 rounded-xl animate-pulse"
                 style={{ background: 'var(--dash-hover)' }}
               />
             ))}
           </div>
         ) : (
           <div className="space-y-3">
-            {plans.map((plan) => (
+            {tierPlans.map((plan) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
@@ -323,6 +371,27 @@ const Subscription: React.FC = (): React.JSX.Element => {
           </div>
         )}
       </SettingSection>
+
+      {/* Solo plans */}
+      {soloPlans.length > 0 && (
+        <SettingSection
+          title="Single-app plans"
+          description="Only need one tool? Start with a solo plan — upgrade to the suite anytime."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {soloPlans.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                isCurrent={plan.slug === sub?.planSlug}
+                currentSeats={sub?.seatCount ?? 1}
+                ownerEmail={ownerEmail}
+                compact
+              />
+            ))}
+          </div>
+        </SettingSection>
+      )}
     </div>
   );
 };
