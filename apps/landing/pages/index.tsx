@@ -6,7 +6,6 @@ import HeroSection from './home/HeroSection/HeroSection';
 import ProductsSection from './home/ProductsSection/ProductsSection';
 import FeaturesSection from './home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from './home/HowItWorksSection/HowItWorksSection';
-import UseCasesSection from './home/UseCasesSection/UseCasesSection';
 import PricingSection from './home/PricingSection/PricingSection';
 import TestimonialsSection from './home/TestimonialsSection/TestimonialsSection';
 import IntegrationsSection from './home/IntegrationsSection/IntegrationsSection';
@@ -40,7 +39,6 @@ const HomePage = (): JSX.Element => {
           <ProductsSection />
           <FeaturesSection />
           <HowItWorksSection />
-          <UseCasesSection />
           <PricingSection />
           <TestimonialsSection />
           <IntegrationsSection />
