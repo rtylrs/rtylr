@@ -4,6 +4,7 @@ import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
 import HeroSection from './home/HeroSection/HeroSection';
 import ProductsSection from './home/ProductsSection/ProductsSection';
+import ParallaxShowcase from './home/ParallaxShowcase/ParallaxShowcase';
 import FeaturesSection from './home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from './home/HowItWorksSection/HowItWorksSection';
 import PricingSection from './home/PricingSection/PricingSection';
@@ -37,6 +38,7 @@ const HomePage = (): JSX.Element => {
         <div className={styles.Homepage}>
           <HeroSection />
           <ProductsSection />
+          <ParallaxShowcase />
           <FeaturesSection />
           <HowItWorksSection />
           <PricingSection />
