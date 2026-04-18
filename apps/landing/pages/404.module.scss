@@ -1,0 +1,251 @@
+.page {
+  position: relative;
+  background: var(--app-background);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 96px;
+  overflow: hidden;
+}
+
+// Retool-style framing rails — match the hero section
+.frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.vLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.07) 10%,
+    rgba(255, 255, 255, 0.07) 90%,
+    transparent 100%
+  );
+}
+
+.vLineLeft {
+  left: max(24px, calc(50% - 560px));
+}
+
+.vLineRight {
+  right: max(24px, calc(50% - 560px));
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #e8e6e1;
+  margin: 0 0 24px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 40px;
+  max-width: 520px;
+  letter-spacing: -0.005em;
+}
+
+// Buttons
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 64px;
+}
+
+.primaryBtn {
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+}
+
+.outlineBtn {
+  background: transparent;
+  color: #e8e6e1;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--primary-font);
+  letter-spacing: -0.01em;
+  min-height: 40px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+// Suggestions grid — shared-border cells, matches the stats/integrations pattern
+
+.suggestionsGrid {
+  width: 100%;
+  max-width: 720px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid #232220;
+  text-align: left;
+}
+
+.suggestionCell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'label arrow'
+    'desc  desc';
+  align-items: center;
+  gap: 6px 12px;
+  padding: 20px 22px;
+  border-right: 1px solid #232220;
+  border-bottom: 1px solid #232220;
+  text-decoration: none;
+  transition: background 0.2s ease;
+
+  &:nth-child(2n) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+
+    .suggestionArrow {
+      color: rgba(255, 255, 255, 0.85);
+      transform: translateX(3px);
+    }
+  }
+}
+
+.suggestionLabel {
+  grid-area: label;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: -0.01em;
+}
+
+.suggestionDesc {
+  grid-area: desc;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.45;
+}
+
+.suggestionArrow {
+  grid-area: arrow;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.95rem;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 96px 20px 72px;
+  }
+
+  .title {
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 48px;
+  }
+
+  .primaryBtn,
+  .outlineBtn {
+    width: 100%;
+  }
+
+  .suggestionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .suggestionCell {
+    border-right: none;
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: 1px solid #232220;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
