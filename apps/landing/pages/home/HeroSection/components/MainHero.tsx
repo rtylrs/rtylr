@@ -1,152 +1,132 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/router';
+import { Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from '../HeroSection.module.scss';
 
-const APPS = [
-  { id: 'pos', label: 'POS', color: '#4485c4' },
-  { id: 'erp', label: 'Inventory', color: '#03aed2' },
-  { id: 'hr', label: 'HR', color: '#4485c4' },
-  { id: 'crm', label: 'CRM', color: '#03aed2' },
-  { id: 'finance', label: 'Finance', color: '#4485c4' },
-  { id: 'flow', label: 'Flow', color: '#03aed2' },
-  { id: 'insights', label: 'Insights', color: '#4485c4' },
-];
-
 const MainHero: React.FC = (): React.JSX.Element => {
-  const router = useRouter();
+  const [prompt, setPrompt] = useState('');
 
-  const handleGetStarted = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+  const goToRegister = (): void => {
+    const trimmed = prompt.trim();
+    const target = trimmed
+      ? `${APP_URLS.auth}/register?prompt=${encodeURIComponent(trimmed)}`
+      : `${APP_URLS.auth}/register`;
+    navigateExternal(target);
   };
 
-  const handleBookDemo = (): void => {
-    void router.push('/demo');
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    goToRegister();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      goToRegister();
+    }
   };
 
   return (
     <div className={styles.mainHero}>
-      {/* Announcement badge */}
-      <motion.div
-        className={styles.announceBadge}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <span className={styles.announceBadgePill}>NEW</span>
-        <span className={styles.announceBadgeText}>
-          AI built into every app — launch your business in minutes
-        </span>
-        <span className={styles.announceBadgeArrow}>→</span>
-      </motion.div>
+      {/* Retool-style framing rails — scoped to just this block so they don't
+          bleed into the stats section below */}
+      <div className={styles.heroFrame} aria-hidden="true">
+        <span className={`${styles.heroVLine} ${styles.heroVLineLeft}`} />
+        <span className={`${styles.heroVLine} ${styles.heroVLineRight}`} />
+      </div>
 
-      {/* Headline — full width, massive */}
+      {/* Announcement row — BETA pill sits next to plain link text */}
+      <motion.a
+        href="/pricing"
+        className={styles.announceRow}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <span className={styles.announcePill}>BETA</span>
+        <span className={styles.announceText}>
+          Explore rtylr AI
+          <span className={styles.announceArrow} aria-hidden="true">
+            ↗
+          </span>
+        </span>
+      </motion.a>
+
+      {/* Headline */}
       <motion.h1
         className={styles.heroTitle}
-        initial={{ opacity: 0, y: 40, filter: 'blur(12px)' }}
+        initial={{ opacity: 0, y: 28, filter: 'blur(10px)' }}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ delay: 0.18, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
       >
-        Your entire business,
+        Run your entire business.
         <br />
-        <span className={styles.heroTitleAccent}>one platform.</span>
+        From a single platform.
       </motion.h1>
 
-      {/* Subtitle */}
-      <motion.p
-        className={styles.heroSubtitle}
-        initial={{ opacity: 0, y: 24 }}
+      {/* AI prompt card — Retool AppGen clone */}
+      <motion.form
+        className={styles.aiCard}
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.36, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: 0.45, duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
       >
-        POS · ERP · HR · CRM · Finance · Flow · Insights — all talking to each other,
-        <br />
-        all powered by AI, all from one login.
-      </motion.p>
+        <label htmlFor="hero-prompt" className={styles.srOnly}>
+          Describe your business
+        </label>
+        <textarea
+          id="hero-prompt"
+          className={styles.aiCardTextarea}
+          placeholder="Write a prompt for generating your rtylr business"
+          rows={5}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
 
-      {/* Dark preview card — Retool-style */}
-      <motion.div
-        className={styles.previewCard}
-        initial={{ opacity: 0, y: 48, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ delay: 0.5, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {/* Card top bar */}
-        <div className={styles.previewCardBar}>
-          <div className={styles.previewCardDots}>
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className={styles.previewCardUrl}>rtylr.com · hub</div>
-          <div className={styles.previewCardActions}>
-            <button className={styles.previewCardBtn} onClick={handleGetStarted} type="button">
-              Get started free
+        <div className={styles.aiCardBottom}>
+          <div className={styles.aiCardIcons}>
+            <button
+              type="button"
+              onClick={goToRegister}
+              className={`${styles.aiCardIcon} ${styles.aiCardIconActive}`}
+              aria-label="rtylr AI"
+              title="rtylr AI"
+            >
+              <Sparkles size={14} strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              onClick={goToRegister}
+              className={styles.aiCardIcon}
+              aria-label="More options"
+              title="More options"
+            >
+              <Shuffle size={14} strokeWidth={2} />
             </button>
           </div>
+
+          <button type="submit" className={styles.aiCardSubmit}>
+            Start building
+          </button>
         </div>
+      </motion.form>
 
-        {/* App grid inside card */}
-        <div className={styles.previewCardBody}>
-          <div className={styles.previewAppsGrid}>
-            {APPS.map((app, i) => (
-              <motion.div
-                key={app.id}
-                className={styles.previewAppItem}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.65 + i * 0.07,
-                  duration: 0.55,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-              >
-                <div className={styles.previewAppDot} style={{ background: app.color }} />
-                <span className={styles.previewAppLabel}>{app.label}</span>
-                <div className={styles.previewAppBar}>
-                  <div
-                    className={styles.previewAppBarFill}
-                    style={{
-                      width: `${55 + ((i * 17) % 40)}%`,
-                      background: app.color,
-                    }}
-                  />
-                </div>
-                <span className={styles.previewAppStatus}>Active</span>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Fake metric row */}
-          <div className={styles.previewMetrics}>
-            {[
-              { label: 'Revenue today', value: '$12,480' },
-              { label: 'Active orders', value: '34' },
-              { label: 'Staff clocked in', value: '12' },
-              { label: 'Inventory alerts', value: '3' },
-            ].map((m) => (
-              <div key={m.label} className={styles.previewMetric}>
-                <span className={styles.previewMetricValue}>{m.value}</span>
-                <span className={styles.previewMetricLabel}>{m.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* "Talk to an expert" link — below card like Retool */}
-      <motion.div
-        className={styles.expertLink}
+      {/* Talk with an expert */}
+      <motion.p
+        className={styles.demoLine}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.0, duration: 0.7 }}
+        transition={{ delay: 0.85, duration: 0.7 }}
       >
-        <button className={styles.expertLinkBtn} onClick={handleBookDemo} type="button">
-          Talk to an expert and book a demo →
-        </button>
-      </motion.div>
+        Talk with an expert and{' '}
+        <a href="/demo" className={styles.demoLineAnchor}>
+          book a demo
+        </a>
+      </motion.p>
     </div>
   );
 };

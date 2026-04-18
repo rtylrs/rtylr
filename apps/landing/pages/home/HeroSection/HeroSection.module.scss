@@ -1,9 +1,9 @@
 // ── Hero Section ─────────────────────────────────────────────────────────────
+// Flat neutral background. No hue, no vignette, no glow. Just type and the card.
 
 .heroSection {
   background-color: var(--app-background);
   color: white;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -11,33 +11,47 @@
   padding-top: 0;
 }
 
-// Subtle static glow orbs — brand accent only, no animation
-.glowOrb1 {
-  position: absolute;
-  width: 800px;
-  height: 800px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(68, 133, 196, 0.1) 0%, transparent 60%);
-  top: -240px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
+// All decorative bg layers disabled — kept as no-op classes for back-compat
+.glowOrb1,
 .glowOrb2 {
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(3, 174, 210, 0.07) 0%, transparent 65%);
-  bottom: 120px;
-  left: -80px;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
-// ── Content wrapper ───────────────────────────────────────────────────────────
+// ── Retool-style framing grid inside the hero ────────────────────────────────
+// Two vertical rails bracket the content column; a horizontal rule separates
+// the headline block from the AI card. All subtle — never compete with type.
+
+.heroFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.heroVLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.07) 10%,
+    rgba(255, 255, 255, 0.07) 90%,
+    transparent 100%
+  );
+}
+
+.heroVLineLeft {
+  left: max(24px, calc(50% - 560px));
+}
+
+.heroVLineRight {
+  right: max(24px, calc(50% - 560px));
+}
+
+// ── Content wrapper ──────────────────────────────────────────────────────────
 
 .heroContentWrap {
   position: relative;
@@ -47,301 +61,299 @@
   flex: 1;
 }
 
-// ── Main Hero — Retool-style centered layout ──────────────────────────────────
+// ── Main Hero ────────────────────────────────────────────────────────────────
 
 .mainHero {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 152px 24px 80px;
+  padding: 40px 24px 56px;
   width: 100%;
-}
+  max-width: 1280px;
+  margin: 0 auto;
 
-// ── Announcement badge (top link row) ────────────────────────────────────────
-
-.announceBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 6px 14px 6px 8px;
-  margin-bottom: 48px;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.07);
+  // Everything inside sits above the rails
+  > *:not(.heroFrame) {
+    position: relative;
+    z-index: 1;
   }
 }
 
-.announceBadgePill {
-  background: #4485c4;
-  color: #fff;
+// ── Announcement row — BETA pill + plain text next to it ─────────────────────
+
+.announceRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 40px;
+
+  &:hover .announceText {
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+// Small standalone BETA chip — filled, rectangular-ish, not wrapped around the text
+.announcePill {
+  background: #d7d6cf;
+  color: #0a0a0a;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.8px;
-  padding: 2px 8px;
-  border-radius: 2px;
+  padding: 3px 8px;
+  border-radius: 4px;
   text-transform: uppercase;
   flex-shrink: 0;
+  font-family: var(--primary-font);
 }
 
-.announceBadgeText {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.68);
-  letter-spacing: -0.01em;
+.announceText {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
 }
 
-.announceBadgeArrow {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.38);
-  margin-left: 2px;
+.announceArrow {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.55);
+  transform: translateY(-1px);
 }
 
 // ── Headline ─────────────────────────────────────────────────────────────────
 
 .heroTitle {
-  font-size: clamp(3.6rem, 8vw, 7.5rem);
-  font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: -0.05em;
-  color: #fff;
-  margin: 0 0 28px;
-  max-width: 1100px;
+  font-size: clamp(2.2rem, 4.4vw, 4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: #e8e6e1;
+  margin: 0 0 44px;
+  max-width: 780px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .heroTitleAccent {
-  background: linear-gradient(135deg, #ffffff 0%, #6daee0 40%, #03aed2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #e8e6e1;
+  display: inline;
 }
-
-// ── Subtitle ─────────────────────────────────────────────────────────────────
 
 .heroSubtitle {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.48);
-  line-height: 1.85;
-  max-width: 540px;
-  margin: 0 0 56px;
+  display: none;
 }
 
-// ── Preview card — dark terminal / dashboard mockup ───────────────────────────
+// ── Screen-reader-only label ─────────────────────────────────────────────────
 
-.previewCard {
-  width: 100%;
-  max-width: 900px;
-  background: #0d0d0d;
-  border: 1px solid #2a2a2a;
-  border-radius: 6px;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 40px 100px rgba(0, 0, 0, 0.6),
-    0 0 80px rgba(68, 133, 196, 0.08);
-  margin-bottom: 28px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.previewCardBar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  background: #171717;
-  border-bottom: 1px solid #232323;
+// ── AI prompt card — Retool AppGen clone ─────────────────────────────────────
+
+// Registered custom property so we can animate the conic-gradient angle
+@property --ai-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-.previewCardDots {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-
-  span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #333;
-
-    &:nth-child(1) {
-      background: #ff5f57;
-    }
-
-    &:nth-child(2) {
-      background: #febc2e;
-    }
-
-    &:nth-child(3) {
-      background: #28c840;
-    }
+@keyframes aiBorderSpin {
+  to {
+    --ai-angle: 360deg;
   }
 }
 
-.previewCardUrl {
-  flex: 1;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.3);
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  text-align: center;
-  letter-spacing: 0.3px;
+// Fallback for browsers that don't support @property (older Firefox) —
+// rotates a larger pseudo-element instead.
+@keyframes aiBorderRotate {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
-.previewCardActions {
-  flex-shrink: 0;
-}
-
-.previewCardBtn {
-  background: #4485c4;
-  color: #fff;
-  border: none;
-  border-radius: 3px;
-  padding: 5px 14px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--primary-font);
+.aiCard {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 620px;
+  background: #171717;
+  border-radius: 12px;
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
   transition: background 0.2s ease;
 
-  &:hover {
-    background: #5596d5;
+  // Rainbow ring on the card border — spins continuously.
+  // Uses 1px ring (not 0.5px — sub-pixel padding clips the corners with mask).
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 13px;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--ai-angle, 0deg),
+      #ff6b9d 0%,
+      #ffc75f 18%,
+      #6ee7b7 36%,
+      #4cc9f0 54%,
+      #b388eb 72%,
+      #ff87d6 88%,
+      #ff6b9d 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: aiBorderSpin 4.5s linear infinite;
+    pointer-events: none;
+    z-index: -1;
   }
 }
 
-.previewCardBody {
-  padding: 24px 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-// App list — 7 rows showing each app as a status bar
-.previewAppsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.previewAppItem {
-  display: grid;
-  grid-template-columns: 8px 90px 1fr 48px;
-  align-items: center;
-  gap: 12px;
-  padding: 7px 10px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-}
-
-.previewAppDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  opacity: 0.85;
-  flex-shrink: 0;
-}
-
-.previewAppLabel {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.75);
-  font-weight: 500;
-  text-align: left;
-  letter-spacing: -0.01em;
-}
-
-.previewAppBar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.07);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.previewAppBarFill {
-  height: 100%;
-  border-radius: 2px;
-  opacity: 0.7;
-}
-
-.previewAppStatus {
-  font-size: 0.65rem;
-  color: #28c840;
-  text-align: right;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-}
-
-// Metrics row at bottom of card
-.previewMetrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.previewMetric {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 14px 18px;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  text-align: left;
-
-  &:last-child {
-    border-right: none;
-  }
-}
-
-.previewMetricValue {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-.previewMetricLabel {
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.38);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-// ── "Talk to an expert" link ──────────────────────────────────────────────────
-
-.expertLink {
-  margin-bottom: 0;
-}
-
-.expertLinkBtn {
-  background: none;
+.aiCardTextarea {
+  width: 100%;
+  min-height: 76px;
+  background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 0.82rem;
+  outline: none;
+  resize: none;
+  color: #e8e6e1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+  padding: 2px 4px 0;
+  caret-color: #e8e6e1;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.aiCardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.aiCardIcons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aiCardIcon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.55);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    transform: translateY(-1px);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// First icon is "active" — solid cream like Retool's PostgreSQL elephant
+.aiCardIconActive {
+  background: #e8e6e1;
+  color: #0a0a0a;
+
+  &:hover {
+    background: #ffffff;
+    color: #0a0a0a;
+  }
+}
+
+// Muted dark pill — NOT bright cream. Matches Retool's "Start building".
+.aiCardSubmit {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-size: 0.88rem;
+  font-weight: 500;
   cursor: pointer;
   font-family: var(--primary-font);
-  letter-spacing: -0.01em;
-  padding: 0;
-  transition: color 0.2s ease;
+  letter-spacing: -0.005em;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+  flex-shrink: 0;
+  min-height: 36px;
 
   &:hover {
-    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
-// ── Stats grid (StatsSection) ─────────────────────────────────────────────────
+// ── Book-a-demo line ─────────────────────────────────────────────────────────
+
+.demoLine {
+  margin: 22px 0 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.48);
+  letter-spacing: -0.005em;
+}
+
+.demoLineAnchor {
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  transition: text-decoration-color 0.2s ease;
+
+  &:hover {
+    text-decoration-color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+// ── Logo / stat grid (StatsSection) ──────────────────────────────────────────
 
 .trustedBy {
   padding: 0 0 60px;
@@ -396,7 +408,7 @@
   }
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
+// ── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 1200px) {
   .trustedBy .trustedContainer {
@@ -418,46 +430,37 @@
   }
 }
 
-@media (max-width: 900px) {
-  .previewMetrics {
-    grid-template-columns: repeat(2, 1fr);
-
-    .previewMetric:nth-child(2) {
-      border-right: none;
-    }
-
-    .previewMetric:nth-child(n + 3) {
-      border-top: 1px solid rgba(255, 255, 255, 0.07);
-    }
-  }
-}
-
 @media (max-width: 768px) {
   .mainHero {
-    padding: 130px 20px 60px;
+    padding: 28px 20px 44px;
   }
 
   .heroTitle {
-    letter-spacing: -0.04em;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    letter-spacing: -0.035em;
   }
 
-  .heroSubtitle {
-    font-size: 0.95rem;
-    margin-bottom: 40px;
+  .aiCard {
+    padding: 16px 16px 12px;
   }
 
-  .previewCardBar {
-    padding: 8px 12px;
+  .aiCardTextarea {
+    min-height: 96px;
+    font-size: 1rem;
   }
 
-  .previewCardUrl {
-    display: none;
+  .aiCardBottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
   }
 
-  .previewAppItem {
-    grid-template-columns: 8px 70px 1fr 40px;
-    gap: 8px;
+  .aiCardSubmit {
+    width: 100%;
+  }
+
+  .announceLink {
+    margin-bottom: 32px;
   }
 
   .trustedBy {
@@ -479,22 +482,9 @@
   }
 }
 
-@media (max-width: 540px) {
-  .previewMetrics {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .previewCardActions {
-    display: none;
-  }
-}
-
 @media (max-width: 480px) {
-  .announceBadge {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-    margin-bottom: 32px;
+  .announceText {
+    font-size: 0.74rem;
   }
 
   .trustedBy .logoScroll {
