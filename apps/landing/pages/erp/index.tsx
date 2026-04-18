@@ -125,7 +125,7 @@ const ERPPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="ERP, Inventory that counts itself. | rtylr"
+          title="ERP · Inventory that counts itself. | rtylr"
           description="Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail."
         />
 

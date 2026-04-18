@@ -56,7 +56,7 @@ const POSPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="POS, The register that keeps up. | rtylr"
+          title="POS · The register that keeps up. | rtylr"
           description="Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform."
         />
 

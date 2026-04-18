@@ -375,7 +375,7 @@ const FlowPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Flow, Projects, tasks, and team workspaces. | rtylr"
+          title="Flow · Projects, tasks, and team workspaces. | rtylr"
           description="Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip."
         />
 

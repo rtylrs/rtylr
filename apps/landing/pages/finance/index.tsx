@@ -235,7 +235,7 @@ const FinancePage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Finance, A real P&L, in real time. | rtylr"
+          title="Finance · A real P&L, in real time. | rtylr"
           description="Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically."
         />
 

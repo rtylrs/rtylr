@@ -274,7 +274,7 @@ const CRMPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="CRM, Every customer, remembered. | rtylr"
+          title="CRM · Every customer, remembered. | rtylr"
           description="Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically."
         />
 

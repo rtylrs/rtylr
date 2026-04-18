@@ -128,7 +128,7 @@ const HRPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="HR, Your team. Looked after. | rtylr"
+          title="HR · Your team. Looked after. | rtylr"
           description="Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people."
         />
 
