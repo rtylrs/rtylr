@@ -1,0 +1,19 @@
+{
+  "loading": "Chargement...",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "close": "Fermer",
+  "back": "Retour",
+  "search": "Rechercher",
+  "create": "Créer",
+  "confirm": "Confirmer",
+  "noData": "Aucune donnée disponible",
+  "actions": "Actions",
+  "status": "Statut",
+  "date": "Date",
+  "amount": "Montant",
+  "total": "Total",
+  "currency": "Devise"
+}
