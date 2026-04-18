@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence, type PanInfo } from 'motion/react';
 import { useRouter } from 'next/router';
 import { CheckSquare, LayoutGrid, GitBranch, Zap, MessageSquare, Calendar } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -10,50 +10,65 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './flow.module.scss';
 
-// Kanban columns for the hero mockup
-const COLUMNS: {
+// ── Board data types ───────────────────────────────────────────────────────
+
+type Priority = 'high' | 'med';
+
+interface Task {
+  id: string;
   title: string;
-  count: number;
+  tag?: string;
+  assignee: string;
+  priority?: Priority;
+}
+
+interface Column {
+  id: string;
+  title: string;
   tint: string;
-  cards: { title: string; tag?: string; assignee: string; priority?: 'high' | 'med' }[];
-}[] = [
+  tasks: Task[];
+}
+
+// Initial board state — hydrates from this once, then lives in component state
+const INITIAL_COLUMNS: Column[] = [
   {
+    id: 'backlog',
     title: 'Backlog',
-    count: 12,
     tint: '#8a8a8a',
-    cards: [
-      { title: 'Seasonal menu rollout — Q3', assignee: 'MC', tag: 'Ops' },
-      { title: 'New supplier onboarding: Rossini', assignee: 'JK', tag: 'ERP' },
+    tasks: [
+      { id: 't1', title: 'Seasonal menu rollout — Q3', assignee: 'MC', tag: 'Ops' },
+      { id: 't2', title: 'New supplier onboarding: Rossini', assignee: 'JK', tag: 'ERP' },
     ],
   },
   {
+    id: 'progress',
     title: 'In progress',
-    count: 5,
     tint: '#d6b88e',
-    cards: [
+    tasks: [
       {
+        id: 't3',
         title: 'Friday dinner covers — staffing plan',
         assignee: 'SP',
         tag: 'HR',
         priority: 'high',
       },
-      { title: 'Redo brunch prep checklist', assignee: 'AR', tag: 'Kitchen' },
-      { title: 'Email blast: Mother\u2019s Day brunch', assignee: 'MC', tag: 'CRM' },
+      { id: 't4', title: 'Redo brunch prep checklist', assignee: 'AR', tag: 'Kitchen' },
+      { id: 't5', title: 'Email blast: Mother\u2019s Day brunch', assignee: 'MC', tag: 'CRM' },
     ],
   },
   {
+    id: 'review',
     title: 'Review',
-    count: 2,
     tint: '#8ca39d',
-    cards: [{ title: 'Espresso machine repair SLA', assignee: 'JK', tag: 'Vendor' }],
+    tasks: [{ id: 't6', title: 'Espresso machine repair SLA', assignee: 'JK', tag: 'Vendor' }],
   },
   {
+    id: 'done',
     title: 'Done',
-    count: 18,
     tint: '#6bcf7f',
-    cards: [
-      { title: 'Q1 sales-tax filing', assignee: 'SP', tag: 'Finance' },
-      { title: 'POS firmware v4.2 rollout', assignee: 'AR', tag: 'Ops' },
+    tasks: [
+      { id: 't7', title: 'Q1 sales-tax filing', assignee: 'SP', tag: 'Finance' },
+      { id: 't8', title: 'POS firmware v4.2 rollout', assignee: 'AR', tag: 'Ops' },
     ],
   },
 ];
@@ -71,7 +86,7 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: 'Automations without zapier',
+    title: 'Automations without Zapier',
     copy: 'When a PO is approved → task on purchasing. When payroll closes → reminder on HR. Built in.',
   },
   {
@@ -87,12 +102,112 @@ const FEATURES = [
   {
     icon: CheckSquare,
     title: 'Templates for repeatable ops',
-    copy: 'Weekly checklists, monthly closes, new-location launches — all as reusable project templates.',
+    copy: 'Weekly checklists, monthly closes, new-location launches — reusable project templates.',
   },
 ];
 
+// ── Draggable task card ────────────────────────────────────────────────────
+// On drag end, it reads the element rects of every column to decide which one
+// the card was released over, and calls the parent callback to update state.
+
+interface DragTaskCardProps {
+  task: Task;
+  columnTint: string;
+  columnIds: string[];
+  columnRefs: React.RefObject<Map<string, HTMLDivElement | null>>;
+  onDropInColumn: (taskId: string, targetColumnId: string) => void;
+}
+
+const DragTaskCard = ({
+  task,
+  columnTint,
+  columnIds,
+  columnRefs,
+  onDropInColumn,
+}: DragTaskCardProps): React.JSX.Element => {
+  const handleDragEnd = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo): void => {
+    const x = info.point.x;
+    const y = info.point.y;
+    const refs = columnRefs.current;
+    if (!refs) return;
+    for (const colId of columnIds) {
+      const el = refs.get(colId);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        onDropInColumn(task.id, colId);
+        return;
+      }
+    }
+  };
+
+  return (
+    <motion.div
+      layout
+      layoutId={task.id}
+      drag
+      dragMomentum={false}
+      dragElastic={0.18}
+      dragSnapToOrigin
+      whileDrag={{ scale: 1.03, zIndex: 10, boxShadow: '0 20px 40px rgba(0,0,0,0.45)' }}
+      whileHover={{ y: -1 }}
+      onDragEnd={handleDragEnd}
+      className={styles.taskCard}
+      transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+    >
+      <div className={styles.taskTitle}>{task.title}</div>
+      <div className={styles.taskMeta}>
+        {task.tag && (
+          <span
+            className={styles.taskTag}
+            style={{
+              color: columnTint,
+              borderColor: `${columnTint}40`,
+              background: `${columnTint}10`,
+            }}
+          >
+            {task.tag}
+          </span>
+        )}
+        {task.priority === 'high' && <span className={styles.taskPriority}>High</span>}
+        <span className={styles.taskAssignee}>{task.assignee}</span>
+      </div>
+    </motion.div>
+  );
+};
+
+// ── Page ──────────────────────────────────────────────────────────────────
+
 const FlowPage = (): JSX.Element => {
   const router = useRouter();
+  const [columns, setColumns] = useState<Column[]>(INITIAL_COLUMNS);
+
+  // Refs keyed by column id — the draggable card walks these to find its
+  // drop target on release.
+  const columnRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
+  const columnIds = columns.map((c) => c.id);
+
+  const moveTask = (taskId: string, targetColumnId: string): void => {
+    setColumns((prev) => {
+      let moving: Task | null = null;
+      const without = prev.map((col) => {
+        const found = col.tasks.find((t) => t.id === taskId);
+        if (found) {
+          moving = found;
+          return { ...col, tasks: col.tasks.filter((t) => t.id !== taskId) };
+        }
+        return col;
+      });
+      if (!moving) return prev;
+      return without.map((col) =>
+        col.id === targetColumnId
+          ? { ...col, tasks: [...col.tasks, moving as unknown as Task] }
+          : col
+      );
+    });
+  };
+
+  const totalTasks = columns.reduce((acc, c) => acc + c.tasks.length, 0);
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -111,7 +226,7 @@ const FlowPage = (): JSX.Element => {
         />
 
         <div className={styles.page}>
-          {/* ── HERO — centered copy + kanban board mockup below ──────────── */}
+          {/* ── HERO ─────────────────────────────────────────────────── */}
           <section className={styles.hero}>
             <motion.div
               className={styles.heroCopy}
@@ -120,7 +235,7 @@ const FlowPage = (): JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr Flow
+                rtylr Flow · try dragging the cards below
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
                 Work that moves.
@@ -142,13 +257,12 @@ const FlowPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Kanban board mockup */}
+            {/* Live kanban — cards drag between columns */}
             <motion.div
               className={styles.board}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-              aria-hidden="true"
             >
               <div className={styles.boardHeader}>
                 <div className={styles.boardCrumbs}>
@@ -158,47 +272,45 @@ const FlowPage = (): JSX.Element => {
                   <span className={styles.boardCrumbSep}>/</span>
                   <span className={styles.boardCrumbActive}>Weekly sprint</span>
                 </div>
-                <div className={styles.boardViews}>
-                  <span className={`${styles.boardView} ${styles.boardViewActive}`}>Board</span>
-                  <span className={styles.boardView}>List</span>
-                  <span className={styles.boardView}>Timeline</span>
+                <div className={styles.boardHeaderRight}>
+                  <span className={styles.boardCount}>{totalTasks} tasks</span>
+                  <div className={styles.boardViews}>
+                    <span className={`${styles.boardView} ${styles.boardViewActive}`}>Board</span>
+                    <span className={styles.boardView}>List</span>
+                    <span className={styles.boardView}>Timeline</span>
+                  </div>
                 </div>
               </div>
 
               <div className={styles.boardColumns}>
-                {COLUMNS.map((col) => (
-                  <div key={col.title} className={styles.column}>
+                {columns.map((col) => (
+                  <div
+                    key={col.id}
+                    ref={(el) => {
+                      columnRefs.current.set(col.id, el);
+                    }}
+                    className={styles.column}
+                  >
                     <div className={styles.columnHeader}>
                       <span className={styles.columnTitle}>
                         <span className={styles.columnDot} style={{ background: col.tint }} />
                         {col.title}
                       </span>
-                      <span className={styles.columnCount}>{col.count}</span>
+                      <span className={styles.columnCount}>{col.tasks.length}</span>
                     </div>
                     <div className={styles.columnCards}>
-                      {col.cards.map((card) => (
-                        <div key={card.title} className={styles.taskCard}>
-                          <div className={styles.taskTitle}>{card.title}</div>
-                          <div className={styles.taskMeta}>
-                            {card.tag && (
-                              <span
-                                className={styles.taskTag}
-                                style={{
-                                  color: col.tint,
-                                  borderColor: `${col.tint}40`,
-                                  background: `${col.tint}10`,
-                                }}
-                              >
-                                {card.tag}
-                              </span>
-                            )}
-                            {card.priority === 'high' && (
-                              <span className={styles.taskPriority}>High</span>
-                            )}
-                            <span className={styles.taskAssignee}>{card.assignee}</span>
-                          </div>
-                        </div>
-                      ))}
+                      <AnimatePresence>
+                        {col.tasks.map((task) => (
+                          <DragTaskCard
+                            key={task.id}
+                            task={task}
+                            columnTint={col.tint}
+                            columnIds={columnIds}
+                            columnRefs={columnRefs}
+                            onDropInColumn={moveTask}
+                          />
+                        ))}
+                      </AnimatePresence>
                       <div className={styles.taskGhost}>+ Add task</div>
                     </div>
                   </div>
@@ -207,7 +319,7 @@ const FlowPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── FEATURE GRID — 3×2 bordered cells ─────────────────────── */}
+          {/* ── FEATURE GRID ──────────────────────────────────────────── */}
           <section className={styles.featuresSection}>
             <motion.div
               className={styles.featuresHeader}
@@ -250,7 +362,7 @@ const FlowPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── CONTEXT STORY — tasks linked to real objects ──────────── */}
+          {/* ── CONTEXT STORY ─────────────────────────────────────────── */}
           <motion.section
             className={styles.contextSection}
             initial="hidden"

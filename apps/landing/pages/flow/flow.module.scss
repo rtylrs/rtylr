@@ -157,6 +157,23 @@
   font-weight: 500;
 }
 
+.boardHeaderRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.boardCount {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .boardViews {
   display: inline-flex;
   gap: 4px;
@@ -197,6 +214,8 @@
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  // Keep empty columns a valid drop target with a visible dashed hint
+  min-height: 260px;
 }
 
 .columnHeader {
@@ -243,13 +262,17 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 6px;
   padding: 12px 12px 10px;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: border-color 0.2s ease;
 
   &:hover {
     border-color: rgba(255, 255, 255, 0.14);
-    transform: translateY(-1px);
+  }
+
+  &:active {
+    cursor: grabbing;
   }
 }
 
