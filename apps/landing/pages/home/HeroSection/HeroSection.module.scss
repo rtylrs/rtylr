@@ -1,345 +1,350 @@
-// ── Hero Section Wrapper ─────────────────────────────────────────────────────
-
-.heroContentWrap {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
+// ── Hero Section ─────────────────────────────────────────────────────────────
 
 .heroSection {
   background-color: var(--app-background);
   color: white;
-  padding-top: 30px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  padding-top: 0;
 }
 
-// ── Top Announcement Banner ──────────────────────────────────────────────────
-
-.topBanner {
-  padding: 0;
-  display: flex;
-  justify-content: center;
-
-  .bannerContainer {
-    display: flex;
-    height: 220px;
-    overflow: hidden;
-    border: 1px solid #232220;
-    width: 85%;
-    max-width: 1400px;
-  }
-
-  .mobileBanner {
-    display: none;
-  }
-
-  .leftSection {
-    flex: 0 0 40%;
-    background: var(--app-background);
-    padding: 35px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    .upperTitle {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.6);
-      margin: 0 0 12px 0;
-      line-height: 1.4;
-    }
-
-    .badgeLine {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .alphaBadge {
-      display: inline-block;
-      background: rgba(68, 133, 196, 0.12);
-      color: #4485c4;
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      border: 1px solid rgba(68, 133, 196, 0.3);
-      flex-shrink: 0;
-    }
-
-    .badgeText {
-      font-size: 0.85rem;
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.8);
-      line-height: 1.4;
-    }
-
-    .mainHeading {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin: 0 0 20px 0;
-      line-height: 1.2;
-      color: white;
-      letter-spacing: -0.01em;
-    }
-
-    .registerButton {
-      margin-top: 0;
-      font-size: 0.9rem;
-      cursor: pointer;
-      width: fit-content;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-      }
-    }
-  }
-
-  .rightSection {
-    flex: 0 0 60%;
-    display: flex;
-    position: relative;
-    overflow: hidden;
-
-    .bannerImage {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: bottom;
-    }
-  }
-}
-
-// ── Main Hero — Cinematic centered layout ─────────────────────────────────────
-
-.mainHero {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-  position: relative;
-  padding: 96px 24px 72px;
-  overflow: hidden;
-  min-height: 640px;
-}
-
-// Mouse-follow radial glow
-.mouseGlow {
+// Subtle static glow orbs — brand accent only, no animation
+.glowOrb1 {
   position: absolute;
-  width: 900px;
-  height: 900px;
+  width: 800px;
+  height: 800px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at center,
-    rgba(3, 174, 210, 0.08) 0%,
-    rgba(68, 133, 196, 0.055) 35%,
-    transparent 65%
-  );
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  will-change: transform;
-}
-
-// Ambient orbs for depth
-.ambientOrb1 {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(68, 133, 196, 0.06) 0%, transparent 70%);
-  top: -100px;
-  right: -100px;
+  background: radial-gradient(circle at center, rgba(68, 133, 196, 0.1) 0%, transparent 60%);
+  top: -240px;
+  left: 50%;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
 }
 
-.ambientOrb2 {
+.glowOrb2 {
   position: absolute;
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(3, 174, 210, 0.05) 0%, transparent 70%);
-  bottom: -60px;
+  background: radial-gradient(circle at center, rgba(3, 174, 210, 0.07) 0%, transparent 65%);
+  bottom: 120px;
   left: -80px;
   pointer-events: none;
   z-index: 0;
 }
 
-// Inner content wrapper
-.heroInner {
+// ── Content wrapper ───────────────────────────────────────────────────────────
+
+.heroContentWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+// ── Main Hero — Retool-style centered layout ──────────────────────────────────
+
+.mainHero {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 152px 24px 80px;
   width: 100%;
-  max-width: 880px;
-  position: relative;
-  z-index: 1;
 }
 
-// Eyebrow badge
-.eyebrow {
+// ── Announcement badge (top link row) ────────────────────────────────────────
+
+.announceBadge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(68, 133, 196, 0.1);
-  border: 1px solid rgba(68, 133, 196, 0.25);
-  color: rgba(255, 255, 255, 0.75);
-  padding: 6px 16px 6px 12px;
-  border-radius: 100px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  margin-bottom: 32px;
-}
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 6px 14px 6px 8px;
+  margin-bottom: 48px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 
-.eyebrowDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #03aed2;
-  flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(3, 174, 210, 0.8);
-  animation: pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(0.85);
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.07);
   }
 }
 
-// Headline
-.heroTitle {
-  font-size: 5.4rem;
+.announceBadgePill {
+  background: #4485c4;
+  color: #fff;
+  font-size: 0.62rem;
   font-weight: 700;
-  line-height: 1.06;
-  margin: 0 0 28px;
-  color: white;
-  letter-spacing: -0.038em;
+  letter-spacing: 0.8px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
 
-.heroTitleGradient {
-  background: linear-gradient(135deg, #ffffff 0%, #4485c4 45%, #03aed2 100%);
+.announceBadgeText {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: -0.01em;
+}
+
+.announceBadgeArrow {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.38);
+  margin-left: 2px;
+}
+
+// ── Headline ─────────────────────────────────────────────────────────────────
+
+.heroTitle {
+  font-size: clamp(3.6rem, 8vw, 7.5rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  color: #fff;
+  margin: 0 0 28px;
+  max-width: 1100px;
+}
+
+.heroTitleAccent {
+  background: linear-gradient(135deg, #ffffff 0%, #6daee0 40%, #03aed2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  display: block;
 }
 
-// Subtitle
+// ── Subtitle ─────────────────────────────────────────────────────────────────
+
 .heroSubtitle {
-  font-size: 1.125rem;
+  font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.48);
-  line-height: 1.8;
-  margin: 0 0 52px;
-  max-width: 500px;
+  line-height: 1.85;
+  max-width: 540px;
+  margin: 0 0 56px;
 }
 
-// CTA buttons
-.heroCTAs {
+// ── Preview card — dark terminal / dashboard mockup ───────────────────────────
+
+.previewCard {
+  width: 100%;
+  max-width: 900px;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 40px 100px rgba(0, 0, 0, 0.6),
+    0 0 80px rgba(68, 133, 196, 0.08);
+  margin-bottom: 28px;
+}
+
+.previewCardBar {
   display: flex;
-  gap: 14px;
   align-items: center;
-  margin-bottom: 52px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #171717;
+  border-bottom: 1px solid #232323;
 }
 
-.ctaPrimary {
+.previewCardDots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #333;
+
+    &:nth-child(1) {
+      background: #ff5f57;
+    }
+
+    &:nth-child(2) {
+      background: #febc2e;
+    }
+
+    &:nth-child(3) {
+      background: #28c840;
+    }
+  }
+}
+
+.previewCardUrl {
+  flex: 1;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.previewCardActions {
+  flex-shrink: 0;
+}
+
+.previewCardBtn {
   background: #4485c4;
   color: #fff;
   border: none;
-  padding: 14px 38px;
-  border-radius: 50px;
-  font-size: 0.95rem;
+  border-radius: 3px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
   font-family: var(--primary-font);
-  letter-spacing: -0.01em;
+  transition: background 0.2s ease;
 
   &:hover {
     background: #5596d5;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(68, 133, 196, 0.4);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 16px rgba(68, 133, 196, 0.3);
   }
 }
 
-.ctaSecondary {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 14px 38px;
-  border-radius: 50px;
-  font-size: 0.95rem;
+.previewCardBody {
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// App list — 7 rows showing each app as a status bar
+.previewAppsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewAppItem {
+  display: grid;
+  grid-template-columns: 8px 90px 1fr 48px;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.previewAppDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.previewAppLabel {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  text-align: left;
+  letter-spacing: -0.01em;
+}
+
+.previewAppBar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.previewAppBarFill {
+  height: 100%;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.previewAppStatus {
+  font-size: 0.65rem;
+  color: #28c840;
+  text-align: right;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+// Metrics row at bottom of card
+.previewMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.previewMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 18px;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: left;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.previewMetricValue {
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.previewMetricLabel {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.38);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+// ── "Talk to an expert" link ──────────────────────────────────────────────────
+
+.expertLink {
+  margin-bottom: 0;
+}
+
+.expertLinkBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: all 0.25s ease;
   font-family: var(--primary-font);
   letter-spacing: -0.01em;
+  padding: 0;
+  transition: color 0.2s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.75);
   }
 }
 
-// Product pills
-.productPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-
-.productPill {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 18px;
-  border-radius: 100px;
-  font-size: 0.775rem;
-  font-weight: 500;
-  background: rgba(68, 133, 196, 0.09);
-  color: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(68, 133, 196, 0.2);
-  letter-spacing: 0.25px;
-  transition: all 0.2s ease;
-  cursor: default;
-
-  &:hover {
-    background: rgba(68, 133, 196, 0.18);
-    color: rgba(255, 255, 255, 0.88);
-    border-color: rgba(68, 133, 196, 0.42);
-  }
-}
-
-// ── Stats / Trusted By Grid ──────────────────────────────────────────────────
+// ── Stats grid (StatsSection) ─────────────────────────────────────────────────
 
 .trustedBy {
-  padding: 40px 0 60px;
+  padding: 0 0 60px;
   display: flex;
   justify-content: center;
 
@@ -355,9 +360,6 @@
 
     .logoItem {
       color: #ffffff;
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.5px;
       transition: all 0.3s;
       padding: 30px 20px;
       text-align: center;
@@ -384,7 +386,7 @@
       }
 
       .statLabel {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 400;
         color: #888;
         text-transform: uppercase;
@@ -394,250 +396,116 @@
   }
 }
 
-// ── Responsive ───────────────────────────────────────────────────────────────
-
-@media (max-width: 1440px) {
-  .heroSection {
-    .topBanner .bannerContainer {
-      width: 90%;
-    }
-
-    .trustedBy .trustedContainer {
-      width: 90%;
-    }
-  }
-
-  .heroTitle {
-    font-size: 4.8rem;
-  }
-}
+// ── Responsive ────────────────────────────────────────────────────────────────
 
 @media (max-width: 1200px) {
-  .heroSection {
-    .topBanner .bannerContainer {
-      width: 95%;
-    }
-
-    .trustedBy .trustedContainer {
-      width: 95%;
-    }
-  }
-
-  .heroTitle {
-    font-size: 4.2rem;
+  .trustedBy .trustedContainer {
+    width: 95%;
   }
 }
 
 @media (max-width: 1024px) {
-  .heroSection {
-    .topBanner {
-      .bannerContainer {
-        flex-direction: column;
-        height: auto;
-        width: 95%;
-      }
+  .trustedBy .logoScroll {
+    grid-template-columns: repeat(4, 1fr);
 
-      .leftSection {
-        flex: 1 !important;
-        min-height: 180px;
-      }
+    .logoItem:nth-child(4n) {
+      border-right: none;
+    }
 
-      .rightSection {
-        flex: 1 !important;
-        min-height: 280px;
-      }
+    .logoItem:nth-child(n + 5) {
+      border-top: 1px solid #232220;
     }
   }
+}
 
-  .heroTitle {
-    font-size: 3.8rem;
-  }
+@media (max-width: 900px) {
+  .previewMetrics {
+    grid-template-columns: repeat(2, 1fr);
 
-  .heroSubtitle {
-    font-size: 1.05rem;
+    .previewMetric:nth-child(2) {
+      border-right: none;
+    }
+
+    .previewMetric:nth-child(n + 3) {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
   }
 }
 
 @media (max-width: 768px) {
-  .heroSection {
-    padding-top: 10px;
-
-    .topBanner {
-      padding: 0 20px;
-
-      .bannerContainer {
-        display: none;
-      }
-
-      .mobileBanner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        width: 100%;
-        max-width: 100%;
-        padding: 10px 14px;
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50px;
-        margin: 0 auto;
-
-        .badgeLine {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin: 0;
-          flex: 1;
-          min-width: 0;
-
-          .alphaBadge {
-            flex-shrink: 0;
-            padding: 4px 10px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            background: rgba(68, 133, 196, 0.12);
-            color: #4485c4;
-            border: 1px solid rgba(68, 133, 196, 0.3);
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-          }
-
-          .badgeTextContainer {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            position: relative;
-          }
-
-          .badgeText {
-            display: inline-flex;
-            white-space: nowrap;
-            animation: mobileBannerTextScroll 5s linear infinite;
-            will-change: transform;
-          }
-
-          .badgeTextContent {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.4;
-            display: inline-block;
-            flex-shrink: 0;
-          }
-        }
-
-        .mobileLink {
-          flex-shrink: 0;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          background: transparent;
-          color: rgba(255, 255, 255, 0.85);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          padding: 0;
-          margin-left: 4px;
-
-          &:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.35);
-            color: #ffffff;
-          }
-
-          svg {
-            width: 14px;
-            height: 14px;
-            stroke-width: 1.5;
-          }
-        }
-      }
-    }
-
-    .trustedBy {
-      padding: 30px 0 40px;
-
-      .trustedContainer {
-        width: 100%;
-      }
-
-      .logoScroll {
-        grid-template-columns: repeat(4, 1fr);
-
-        .logoItem {
-          font-size: 0.8rem;
-          padding: 25px 10px;
-          min-height: 90px;
-
-          &:nth-child(4n) {
-            border-right: none;
-          }
-
-          &:nth-child(n + 5) {
-            border-top: 1px solid #232220;
-          }
-        }
-      }
-    }
-  }
-
   .mainHero {
-    padding: 72px 20px 48px;
-    min-height: auto;
+    padding: 130px 20px 60px;
   }
 
   .heroTitle {
-    font-size: 2.9rem;
-    letter-spacing: -0.028em;
-    margin-bottom: 22px;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
   }
 
   .heroSubtitle {
-    font-size: 0.975rem;
+    font-size: 0.95rem;
     margin-bottom: 40px;
   }
 
-  .heroCTAs {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-    margin-bottom: 40px;
-    width: 100%;
-    max-width: 360px;
+  .previewCardBar {
+    padding: 8px 12px;
+  }
 
-    .ctaPrimary,
-    .ctaSecondary {
+  .previewCardUrl {
+    display: none;
+  }
+
+  .previewAppItem {
+    grid-template-columns: 8px 70px 1fr 40px;
+    gap: 8px;
+  }
+
+  .trustedBy {
+    padding-bottom: 40px;
+
+    .trustedContainer {
       width: 100%;
-      text-align: center;
+    }
+
+    .logoScroll {
+      grid-template-columns: repeat(4, 1fr);
+
+      .logoItem {
+        font-size: 0.8rem;
+        padding: 22px 10px;
+        min-height: 80px;
+      }
     }
   }
+}
 
-  .eyebrow {
-    font-size: 0.72rem;
-    padding: 5px 14px 5px 10px;
-    margin-bottom: 24px;
+@media (max-width: 540px) {
+  .previewMetrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .previewCardActions {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .heroTitle {
-    font-size: 2.3rem;
+  .announceBadge {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 32px;
   }
 
-  .heroSubtitle {
-    font-size: 0.9rem;
-  }
-}
+  .trustedBy .logoScroll {
+    grid-template-columns: repeat(2, 1fr);
 
-// Mobile Banner Text Scroll Animation
-@keyframes mobileBannerTextScroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-50% - 0px));
+    .logoItem:nth-child(2n) {
+      border-right: none;
+    }
+
+    .logoItem:nth-child(n + 3) {
+      border-top: 1px solid #232220;
+    }
   }
 }

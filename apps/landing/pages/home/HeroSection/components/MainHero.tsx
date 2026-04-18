@@ -1,27 +1,22 @@
-import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import React from 'react';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from '../HeroSection.module.scss';
 
-const PRODUCTS = ['POS', 'ERP', 'HR', 'CRM', 'Finance', 'Flow', 'Insights'];
+const APPS = [
+  { id: 'pos', label: 'POS', color: '#4485c4' },
+  { id: 'erp', label: 'Inventory', color: '#03aed2' },
+  { id: 'hr', label: 'HR', color: '#4485c4' },
+  { id: 'crm', label: 'CRM', color: '#03aed2' },
+  { id: 'finance', label: 'Finance', color: '#4485c4' },
+  { id: 'flow', label: 'Flow', color: '#03aed2' },
+  { id: 'insights', label: 'Insights', color: '#4485c4' },
+];
 
 const MainHero: React.FC = (): React.JSX.Element => {
   const router = useRouter();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const mouseX = useMotionValue(500);
-  const mouseY = useMotionValue(320);
-  const springX = useSpring(mouseX, { stiffness: 38, damping: 22 });
-  const springY = useSpring(mouseY, { stiffness: 38, damping: 22 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
-  };
 
   const handleGetStarted = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -32,83 +27,126 @@ const MainHero: React.FC = (): React.JSX.Element => {
   };
 
   return (
-    <div className={styles.mainHero} ref={containerRef} onMouseMove={handleMouseMove}>
-      {/* Mouse-follow radial glow */}
+    <div className={styles.mainHero}>
+      {/* Announcement badge */}
       <motion.div
-        className={styles.mouseGlow}
-        style={{ left: springX, top: springY }}
-        aria-hidden="true"
-      />
+        className={styles.announceBadge}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <span className={styles.announceBadgePill}>NEW</span>
+        <span className={styles.announceBadgeText}>
+          AI built into every app — launch your business in minutes
+        </span>
+        <span className={styles.announceBadgeArrow}>→</span>
+      </motion.div>
 
-      {/* Ambient background orbs */}
-      <div className={styles.ambientOrb1} aria-hidden="true" />
-      <div className={styles.ambientOrb2} aria-hidden="true" />
+      {/* Headline — full width, massive */}
+      <motion.h1
+        className={styles.heroTitle}
+        initial={{ opacity: 0, y: 40, filter: 'blur(12px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ delay: 0.18, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+      >
+        Your entire business,
+        <br />
+        <span className={styles.heroTitleAccent}>one platform.</span>
+      </motion.h1>
 
-      <div className={styles.heroInner}>
-        {/* Eyebrow badge */}
-        <motion.div
-          className={styles.eyebrow}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className={styles.eyebrowDot} />
-          <span>Buy rtylr, get a whole business powered by AI</span>
-        </motion.div>
+      {/* Subtitle */}
+      <motion.p
+        className={styles.heroSubtitle}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.36, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+      >
+        POS · ERP · HR · CRM · Finance · Flow · Insights — all talking to each other,
+        <br />
+        all powered by AI, all from one login.
+      </motion.p>
 
-        {/* Main headline */}
-        <motion.h1
-          className={styles.heroTitle}
-          initial={{ opacity: 0, y: 50, filter: 'blur(14px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ delay: 0.22, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-        >
-          Your entire business,
-          <br />
-          <span className={styles.heroTitleGradient}>one platform.</span>
-        </motion.h1>
+      {/* Dark preview card — Retool-style */}
+      <motion.div
+        className={styles.previewCard}
+        initial={{ opacity: 0, y: 48, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 0.5, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* Card top bar */}
+        <div className={styles.previewCardBar}>
+          <div className={styles.previewCardDots}>
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className={styles.previewCardUrl}>rtylr.com · hub</div>
+          <div className={styles.previewCardActions}>
+            <button className={styles.previewCardBtn} onClick={handleGetStarted} type="button">
+              Get started free
+            </button>
+          </div>
+        </div>
 
-        {/* Subtitle */}
-        <motion.p
-          className={styles.heroSubtitle}
-          initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ delay: 0.44, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          POS · ERP · HR · CRM · Finance · Flow · Insights.
-          <br />
-          Built to work together from day one.
-        </motion.p>
+        {/* App grid inside card */}
+        <div className={styles.previewCardBody}>
+          <div className={styles.previewAppsGrid}>
+            {APPS.map((app, i) => (
+              <motion.div
+                key={app.id}
+                className={styles.previewAppItem}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.65 + i * 0.07,
+                  duration: 0.55,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                <div className={styles.previewAppDot} style={{ background: app.color }} />
+                <span className={styles.previewAppLabel}>{app.label}</span>
+                <div className={styles.previewAppBar}>
+                  <div
+                    className={styles.previewAppBarFill}
+                    style={{
+                      width: `${55 + ((i * 17) % 40)}%`,
+                      background: app.color,
+                    }}
+                  />
+                </div>
+                <span className={styles.previewAppStatus}>Active</span>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* CTA buttons */}
-        <motion.div
-          className={styles.heroCTAs}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.62, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <button className={styles.ctaPrimary} onClick={handleGetStarted}>
-            Get started free
-          </button>
-          <button className={styles.ctaSecondary} onClick={handleBookDemo}>
-            Book a demo
-          </button>
-        </motion.div>
+          {/* Fake metric row */}
+          <div className={styles.previewMetrics}>
+            {[
+              { label: 'Revenue today', value: '$12,480' },
+              { label: 'Active orders', value: '34' },
+              { label: 'Staff clocked in', value: '12' },
+              { label: 'Inventory alerts', value: '3' },
+            ].map((m) => (
+              <div key={m.label} className={styles.previewMetric}>
+                <span className={styles.previewMetricValue}>{m.value}</span>
+                <span className={styles.previewMetricLabel}>{m.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
 
-        {/* Product pills */}
-        <motion.div
-          className={styles.productPills}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.82, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {PRODUCTS.map((p) => (
-            <span key={p} className={styles.productPill}>
-              {p}
-            </span>
-          ))}
-        </motion.div>
-      </div>
+      {/* "Talk to an expert" link — below card like Retool */}
+      <motion.div
+        className={styles.expertLink}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.0, duration: 0.7 }}
+      >
+        <button className={styles.expertLinkBtn} onClick={handleBookDemo} type="button">
+          Talk to an expert and book a demo →
+        </button>
+      </motion.div>
     </div>
   );
 };
