@@ -1,7 +1,7 @@
 // ── Pricing Page ─────────────────────────────────────────────────────────────
 
-$blue: #4485c4;
-$cyan: #03aed2;
+$blue: #e8e6e1;
+$cyan: #e8e6e1;
 $dark-primary: #040428;
 $bg: #151515;
 $border: #232220;
@@ -75,17 +75,17 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .toggleActive {
-  background: rgba(68, 133, 196, 0.15);
+  background: rgba(232, 230, 225, 0.15);
   color: #fff;
-  border: 1px solid rgba(68, 133, 196, 0.35);
+  border: 1px solid rgba(232, 230, 225, 0.35);
 }
 
 .savingsBadge {
   display: inline-flex;
   align-items: center;
-  background: rgba(3, 174, 210, 0.15);
+  background: rgba(232, 230, 225, 0.15);
   color: $cyan;
-  border: 1px solid rgba(3, 174, 210, 0.3);
+  border: 1px solid rgba(232, 230, 225, 0.3);
   border-radius: 100px;
   padding: 2px 10px;
   font-size: 0.72rem;
@@ -121,16 +121,16 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: border-color 0.25s ease;
 
   &:hover {
-    border-color: rgba(68, 133, 196, 0.35);
+    border-color: rgba(232, 230, 225, 0.35);
   }
 }
 
 .planCardPro {
-  border-color: rgba(68, 133, 196, 0.4);
-  background: rgba(68, 133, 196, 0.06);
+  border-color: rgba(232, 230, 225, 0.4);
+  background: rgba(232, 230, 225, 0.06);
 
   &:hover {
-    border-color: rgba(68, 133, 196, 0.7);
+    border-color: rgba(232, 230, 225, 0.7);
   }
 }
 
@@ -216,7 +216,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
       content: '—';
       position: absolute;
       left: 0;
-      color: rgba(68, 133, 196, 0.6);
+      color: rgba(232, 230, 225, 0.6);
       font-size: 0.75rem;
     }
   }
@@ -250,7 +250,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
     background: #5596d5;
     border-color: #5596d5;
     transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(68, 133, 196, 0.35);
+    box-shadow: 0 8px 32px rgba(232, 230, 225, 0.35);
   }
 }
 
@@ -327,7 +327,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .proCol {
-  background: rgba(68, 133, 196, 0.05);
+  background: rgba(232, 230, 225, 0.05);
 }
 
 .featureName {
@@ -471,7 +471,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   &:hover {
     background: #5596d5;
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(68, 133, 196, 0.4);
+    box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
   }
 
   &:active {

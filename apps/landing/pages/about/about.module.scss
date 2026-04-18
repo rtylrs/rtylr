@@ -1,7 +1,7 @@
 // ── About Page ────────────────────────────────────────────────────────────────
 
-$blue: #4485c4;
-$cyan: #03aed2;
+$blue: #e8e6e1;
+$cyan: #e8e6e1;
 $dark-primary: #040428;
 $bg: #151515;
 $border: #232220;
@@ -54,7 +54,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   padding: 120px 24px 100px;
   background: radial-gradient(
     ellipse 80% 60% at 50% 0%,
-    rgba(68, 133, 196, 0.08) 0%,
+    rgba(232, 230, 225, 0.08) 0%,
     transparent 70%
   );
   border-bottom: 1px solid $border;
@@ -72,8 +72,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(68, 133, 196, 0.1);
-  border: 1px solid rgba(68, 133, 196, 0.25);
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.25);
   color: rgba(255, 255, 255, 0.75);
   padding: 6px 18px 6px 14px;
   border-radius: 100px;
@@ -89,7 +89,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-radius: 50%;
   background: $cyan;
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(3, 174, 210, 0.8);
+  box-shadow: 0 0 8px rgba(232, 230, 225, 0.8);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -184,7 +184,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(68, 133, 196, 0.06);
+    background: rgba(232, 230, 225, 0.06);
   }
 }
 
@@ -261,7 +261,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   }
 
   &:hover {
-    background: rgba(68, 133, 196, 0.04);
+    background: rgba(232, 230, 225, 0.04);
   }
 }
 
@@ -293,9 +293,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-radius: 100px;
   font-size: 0.78rem;
   font-weight: 500;
-  background: rgba(68, 133, 196, 0.1);
+  background: rgba(232, 230, 225, 0.1);
   color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(68, 133, 196, 0.22);
+  border: 1px solid rgba(232, 230, 225, 0.22);
   letter-spacing: 0.2px;
 }
 
@@ -335,8 +335,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
     background 0.25s ease;
 
   &:hover {
-    border-color: rgba(68, 133, 196, 0.4);
-    background: rgba(68, 133, 196, 0.04);
+    border-color: rgba(232, 230, 225, 0.4);
+    background: rgba(232, 230, 225, 0.04);
   }
 }
 
@@ -347,13 +347,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
   background: linear-gradient(
     135deg,
     $dark-primary 0%,
-    rgba(68, 133, 196, 0.4) 50%,
-    rgba(3, 174, 210, 0.35) 100%
+    rgba(232, 230, 225, 0.4) 50%,
+    rgba(232, 230, 225, 0.35) 100%
   );
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(68, 133, 196, 0.3);
+  border: 2px solid rgba(232, 230, 225, 0.3);
   margin-bottom: 8px;
 }
 
@@ -414,7 +414,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(68, 133, 196, 0.04);
+    background: rgba(232, 230, 225, 0.04);
   }
 
   &:nth-child(2n) {
@@ -432,7 +432,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   height: 8px;
   border-radius: 50%;
   background: $cyan;
-  box-shadow: 0 0 10px rgba(3, 174, 210, 0.6);
+  box-shadow: 0 0 10px rgba(232, 230, 225, 0.6);
 }
 
 .valueTitle {
@@ -503,7 +503,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   &:hover {
     background: #5596d5;
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(68, 133, 196, 0.4);
+    box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
   }
 
   &:active {

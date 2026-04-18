@@ -1,7 +1,7 @@
 // ── Contact Page ──────────────────────────────────────────────────────────────
 
-$blue: #4485c4;
-$cyan: #03aed2;
+$blue: #e8e6e1;
+$cyan: #e8e6e1;
 $dark-primary: #040428;
 $bg: #151515;
 $border: #232220;
@@ -27,7 +27,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-bottom: 1px solid $border;
   background: radial-gradient(
     ellipse 70% 50% at 50% 0%,
-    rgba(68, 133, 196, 0.07) 0%,
+    rgba(232, 230, 225, 0.07) 0%,
     transparent 70%
   );
 }
@@ -101,8 +101,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
     background 0.2s ease;
 
   &:hover {
-    border-color: rgba(68, 133, 196, 0.4);
-    background: rgba(68, 133, 196, 0.04);
+    border-color: rgba(232, 230, 225, 0.4);
+    background: rgba(232, 230, 225, 0.04);
   }
 }
 
@@ -110,8 +110,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgba(68, 133, 196, 0.1);
-  border: 1px solid rgba(68, 133, 196, 0.2);
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,7 +254,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
   &:focus {
     outline: none;
-    border-color: rgba(68, 133, 196, 0.6);
+    border-color: rgba(232, 230, 225, 0.6);
     background: rgba(255, 255, 255, 0.06);
   }
 }
@@ -281,7 +281,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
   &:focus {
     outline: none;
-    border-color: rgba(68, 133, 196, 0.6);
+    border-color: rgba(232, 230, 225, 0.6);
     background: rgba(255, 255, 255, 0.06);
   }
 }
@@ -309,7 +309,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   &:hover {
     background: #5596d5;
     transform: translateY(-2px);
-    box-shadow: 0 10px 32px rgba(68, 133, 196, 0.35);
+    box-shadow: 0 10px 32px rgba(232, 230, 225, 0.35);
   }
 
   &:active {
@@ -351,7 +351,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .successReset {
   background: transparent;
   color: $blue;
-  border: 1px solid rgba(68, 133, 196, 0.3);
+  border: 1px solid rgba(232, 230, 225, 0.3);
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 0.88rem;
@@ -362,8 +362,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &:hover {
-    background: rgba(68, 133, 196, 0.1);
-    border-color: rgba(68, 133, 196, 0.5);
+    background: rgba(232, 230, 225, 0.1);
+    border-color: rgba(232, 230, 225, 0.5);
   }
 }
 

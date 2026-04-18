@@ -1,7 +1,7 @@
 // ── Hardware Page ─────────────────────────────────────────────────────────────
 
-$blue: #4485c4;
-$cyan: #03aed2;
+$blue: #e8e6e1;
+$cyan: #e8e6e1;
 $dark-primary: #040428;
 $bg: #151515;
 $border: #232220;
@@ -34,7 +34,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-bottom: 1px solid $border;
   background: radial-gradient(
     ellipse 80% 55% at 50% 0%,
-    rgba(68, 133, 196, 0.08) 0%,
+    rgba(232, 230, 225, 0.08) 0%,
     transparent 70%
   );
 }
@@ -51,8 +51,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(68, 133, 196, 0.1);
-  border: 1px solid rgba(68, 133, 196, 0.25);
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.25);
   color: rgba(255, 255, 255, 0.75);
   padding: 6px 18px 6px 14px;
   border-radius: 100px;
@@ -68,7 +68,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-radius: 50%;
   background: $cyan;
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(3, 174, 210, 0.8);
+  box-shadow: 0 0 8px rgba(232, 230, 225, 0.8);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -128,8 +128,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
     transform 0.25s ease;
 
   &:hover {
-    border-color: rgba(68, 133, 196, 0.4);
-    background: rgba(68, 133, 196, 0.04);
+    border-color: rgba(232, 230, 225, 0.4);
+    background: rgba(232, 230, 225, 0.04);
     transform: translateY(-3px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 
@@ -142,7 +142,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .cardAccentBar {
   height: 3px;
   width: 100%;
-  background: rgba(68, 133, 196, 0.25);
+  background: rgba(232, 230, 225, 0.25);
   transition: background 0.25s ease;
   flex-shrink: 0;
 }
@@ -159,8 +159,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  background: rgba(68, 133, 196, 0.1);
-  border: 1px solid rgba(68, 133, 196, 0.2);
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -295,7 +295,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   &:hover {
     background: #5596d5;
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(68, 133, 196, 0.4);
+    box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
   }
 
   &:active {
