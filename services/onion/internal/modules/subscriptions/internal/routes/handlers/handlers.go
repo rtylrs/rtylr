@@ -25,13 +25,22 @@ type ListPlansHandler struct{ Service *application.Service }
 type ListPlansRequest struct{}
 
 type PlanPayload struct {
-	ID                int64    `json:"id"`
-	Name              string   `json:"name"`
-	Slug              string   `json:"slug"`
-	Apps              []string `json:"apps"`
-	PricePerSeatCents int      `json:"price_per_seat_cents"`
-	TrialDays         int      `json:"trial_days"`
-	IsActive          bool     `json:"is_active"`
+	ID                      int64    `json:"id"`
+	Name                    string   `json:"name"`
+	Slug                    string   `json:"slug"`
+	Apps                    []string `json:"apps"`
+	PricePerSeatCents       int      `json:"price_per_seat_cents"`
+	AnnualPricePerSeatCents int      `json:"annual_price_per_seat_cents"`
+	TrialDays               int      `json:"trial_days"`
+	Tagline                 string   `json:"tagline"`
+	MaxSeats                *int     `json:"max_seats"`
+	MaxLocations            *int     `json:"max_locations"`
+	AICreditsPerMonth       int      `json:"ai_credits_per_month"`
+	Features                []string `json:"features"`
+	TierOrder               int      `json:"tier_order"`
+	IsSolo                  bool     `json:"is_solo"`
+	IsFeatured              bool     `json:"is_featured"`
+	IsActive                bool     `json:"is_active"`
 }
 
 type ListPlansResponse struct {
@@ -51,13 +60,22 @@ func (h *ListPlansHandler) Serve(ctx context.Context, _ *ListPlansRequest) (List
 	payloads := make([]PlanPayload, 0, len(plans))
 	for _, p := range plans {
 		payloads = append(payloads, PlanPayload{
-			ID:                p.ID,
-			Name:              p.Name,
-			Slug:              p.Slug,
-			Apps:              p.Apps,
-			PricePerSeatCents: p.PricePerSeatCents,
-			TrialDays:         p.TrialDays,
-			IsActive:          p.IsActive,
+			ID:                      p.ID,
+			Name:                    p.Name,
+			Slug:                    p.Slug,
+			Apps:                    p.Apps,
+			PricePerSeatCents:       p.PricePerSeatCents,
+			AnnualPricePerSeatCents: p.AnnualPricePerSeatCents,
+			TrialDays:               p.TrialDays,
+			Tagline:                 p.Tagline,
+			MaxSeats:                p.MaxSeats,
+			MaxLocations:            p.MaxLocations,
+			AICreditsPerMonth:       p.AICreditsPerMonth,
+			Features:                p.Features,
+			TierOrder:               p.TierOrder,
+			IsSolo:                  p.IsSolo,
+			IsFeatured:              p.IsFeatured,
+			IsActive:                p.IsActive,
 		})
 	}
 

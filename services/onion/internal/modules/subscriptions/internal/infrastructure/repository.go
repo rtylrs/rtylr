@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
@@ -20,11 +21,58 @@ func NewRepository(_ context.Context) *Repository {
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
 
+// planSelectCols is the canonical column list for reading a plan row.
+// Kept in one place so the three GetPlan* variants stay in sync when columns change.
+const planSelectCols = `id, name, slug, apps, price_per_seat_cents,
+		COALESCE(annual_price_per_seat_cents, 0), trial_days,
+		COALESCE(paddle_price_id, ''), COALESCE(tagline, ''),
+		max_seats, max_locations,
+		COALESCE(ai_credits_per_month, 0), COALESCE(features, JSON_ARRAY()),
+		COALESCE(tier_order, 100), COALESCE(is_solo, FALSE), COALESCE(is_featured, FALSE),
+		is_active, created_at`
+
+// scanPlan hydrates a Plan from a row matching planSelectCols.
+// Reused by all three GetPlan* entrypoints.
+func scanPlan(scanner interface {
+	Scan(dest ...any) error
+}) (domain.Plan, error) {
+	var p domain.Plan
+	var appsJSON, featuresJSON string
+	var maxSeats, maxLocations sql.NullInt64
+	err := scanner.Scan(
+		&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
+		&p.AnnualPricePerSeatCents, &p.TrialDays,
+		&p.PaddlePriceID, &p.Tagline,
+		&maxSeats, &maxLocations,
+		&p.AICreditsPerMonth, &featuresJSON,
+		&p.TierOrder, &p.IsSolo, &p.IsFeatured,
+		&p.IsActive, &p.CreatedAt,
+	)
+	if err != nil {
+		return domain.Plan{}, err
+	}
+	if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
+		p.Apps = []string{}
+	}
+	if jsonErr := json.Unmarshal([]byte(featuresJSON), &p.Features); jsonErr != nil {
+		p.Features = []string{}
+	}
+	if maxSeats.Valid {
+		v := int(maxSeats.Int64)
+		p.MaxSeats = &v
+	}
+	if maxLocations.Valid {
+		v := int(maxLocations.Int64)
+		p.MaxLocations = &v
+	}
+	return p, nil
+}
+
 func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
-		        COALESCE(paddle_price_id, ''), is_active, created_at
-		 FROM plans WHERE is_active = TRUE ORDER BY id ASC`)
+		`SELECT `+planSelectCols+`
+		 FROM plans WHERE is_active = TRUE
+		 ORDER BY is_solo ASC, tier_order ASC, id ASC`)
 	if err != nil {
 		return nil, err
 	}
@@ -32,14 +80,9 @@ func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 
 	plans := make([]domain.Plan, 0)
 	for rows.Next() {
-		var p domain.Plan
-		var appsJSON string
-		if err := rows.Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
-			&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt); err != nil {
-			return nil, err
-		}
-		if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
-			p.Apps = []string{}
+		p, scanErr := scanPlan(rows)
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		plans = append(plans, p)
 	}
@@ -48,43 +91,29 @@ func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 }
 
 func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Plan, error) {
-	var p domain.Plan
-	var appsJSON string
-	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
-		        COALESCE(paddle_price_id, ''), is_active, created_at
-		 FROM plans WHERE slug = ? AND is_active = TRUE`,
-		slug).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
-		&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt)
+	row := r.db.QueryRowContext(ctx,
+		`SELECT `+planSelectCols+` FROM plans WHERE slug = ? AND is_active = TRUE`,
+		slug)
+	p, err := scanPlan(row)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPlanNotFound
 		}
 		return nil, err
-	}
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
-		p.Apps = []string{}
 	}
 	return &p, nil
 }
 
 func (r *Repository) GetPlanByID(ctx context.Context, id int64) (*domain.Plan, error) {
-	var p domain.Plan
-	var appsJSON string
-	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
-		        COALESCE(paddle_price_id, ''), is_active, created_at
-		 FROM plans WHERE id = ?`,
-		id).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
-		&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt)
+	row := r.db.QueryRowContext(ctx,
+		`SELECT `+planSelectCols+` FROM plans WHERE id = ?`,
+		id)
+	p, err := scanPlan(row)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPlanNotFound
 		}
 		return nil, err
-	}
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
-		p.Apps = []string{}
 	}
 	return &p, nil
 }

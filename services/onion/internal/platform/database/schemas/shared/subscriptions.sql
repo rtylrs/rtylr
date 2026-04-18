@@ -44,12 +44,151 @@ CREATE TABLE IF NOT EXISTS seat_periods (
     INDEX idx_sp_owner_month (owner_id, billing_month)
 );
 
--- Add paddle_price_id to plans (idempotent — ignored if column already exists)
-ALTER TABLE plans ADD COLUMN IF NOT EXISTS paddle_price_id VARCHAR(100) NULL AFTER trial_days;
+-- ── Rich plan metadata ────────────────────────────────────────────────────
+-- Additive columns so FE can render pricing cards without client-side hardcoding.
+-- All are nullable or have safe defaults so existing rows keep working.
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS paddle_price_id              VARCHAR(100) NULL AFTER trial_days;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS tagline                      VARCHAR(200) NOT NULL DEFAULT '';
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS annual_price_per_seat_cents  INT NOT NULL DEFAULT 0;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS max_seats                    INT NULL COMMENT 'NULL = unlimited';
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS max_locations                INT NULL COMMENT 'NULL = unlimited';
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS ai_credits_per_month         INT NOT NULL DEFAULT 0;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS features                     JSON NULL COMMENT 'Array of display bullet strings';
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS tier_order                   INT NOT NULL DEFAULT 100;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_solo                      BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_featured                  BOOLEAN NOT NULL DEFAULT FALSE;
 
-INSERT IGNORE INTO plans (name, slug, apps, price_per_seat_cents, trial_days) VALUES
-  ('Flow Solo',        'flow_solo',   '["flow"]',                                           400,  14),
-  ('Finance Solo',     'finance_solo','["finance"]',                                         300,  14),
-  ('Business Starter', 'starter',     '["dash","flow","finance","crm"]',                     800,  14),
-  ('Business Pro',     'pro',         '["dash","flow","finance","crm","hr","erp"]',          1200, 14),
-  ('Enterprise',       'enterprise',  '["dash","flow","finance","crm","hr","erp","pos"]',    1600, 14);
+-- ── Retire old tier names ─────────────────────────────────────────────────
+-- The original seed used starter / enterprise which no longer match marketing.
+-- We deactivate rather than delete so any existing subscriptions referencing
+-- them by ID keep resolving.
+UPDATE plans SET is_active = FALSE WHERE slug IN ('starter', 'enterprise');
+
+-- ── Seed new tier + solo plans ────────────────────────────────────────────
+-- Prices are in cents. Annual prices reflect the 20%-off annual pricing.
+--   Free:   $0 / $0      · 10 seats · 1 location  · all 7 apps · 1,000 AI credits
+--   Pro:    $6.99 / $4.99 · 30 seats · 5 locations · all 7 apps · 10,000 + 500/seat
+--   Scale:  $4.99 / $2.99 · unlimited seats / locations · 50,000 + 1,000/seat
+-- Solo plans: single-app starter tiers for individuals.
+
+INSERT INTO plans
+  (name, slug, apps, price_per_seat_cents, annual_price_per_seat_cents, trial_days,
+   tagline, max_seats, max_locations, ai_credits_per_month, tier_order, is_solo, is_featured, features)
+VALUES
+  ('Free', 'free',
+    '["dash","pos","erp","hr","crm","finance","flow","insights"]',
+    0, 0, 0,
+    'Everything you need to run a single location.',
+    10, 1, 1000, 10, FALSE, FALSE,
+    JSON_ARRAY(
+      'Up to 10 team members',
+      'All 7 apps included',
+      '1 location',
+      '0% transaction fees under $10k/mo',
+      '1,000 AI credits / month'
+    )),
+  ('Pro', 'pro',
+    '["dash","pos","erp","hr","crm","finance","flow","insights"]',
+    699, 499, 14,
+    'Growing teams scaling across multiple locations.',
+    30, 5, 10000, 20, FALSE, TRUE,
+    JSON_ARRAY(
+      'Up to 30 team members',
+      'Up to 5 locations',
+      '0% transaction fees under $100k/mo',
+      '10,000 AI credits / month + 500 per seat',
+      'Priority email + chat support'
+    )),
+  ('Scale', 'scale',
+    '["dash","pos","erp","hr","crm","finance","flow","insights"]',
+    499, 299, 14,
+    'Unlimited seats and every feature unlocked.',
+    NULL, NULL, 50000, 30, FALSE, FALSE,
+    JSON_ARRAY(
+      'Unlimited team members',
+      'Unlimited locations',
+      '0% transaction fees (no cap)',
+      '50,000 AI credits / month + 1,000 per seat',
+      'SSO, audit logs, dedicated success manager'
+    )),
+  ('Flow Solo', 'flow_solo',
+    '["flow"]',
+    0, 0, 14,
+    'Kanban, tasks, and automations for solo operators.',
+    5, 1, 500, 40, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 5 team members',
+      'Unlimited boards + tasks',
+      'Daily AI credits',
+      'Free forever for individuals'
+    )),
+  ('Finance Solo', 'finance_solo',
+    '["finance"]',
+    0, 0, 14,
+    'Invoices, expenses, and a real P&L for freelancers.',
+    2, 1, 500, 41, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 2 team members',
+      'Unlimited invoices + expenses',
+      'Live P&L',
+      'Free forever for individuals'
+    )),
+  ('POS Solo', 'pos_solo',
+    '["pos"]',
+    0, 0, 14,
+    'A register for single-location restaurants and retail.',
+    3, 1, 500, 42, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 3 team members',
+      '1 location',
+      'Offline mode included',
+      '0% transaction fees under $5k/mo'
+    )),
+  ('ERP Solo', 'erp_solo',
+    '["erp"]',
+    0, 0, 14,
+    'Inventory and purchasing for operators tracking SKUs only.',
+    3, 1, 500, 43, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 3 team members',
+      'Unlimited SKUs',
+      'Supplier + PO tracking',
+      'Multi-unit variants'
+    )),
+  ('HR Solo', 'hr_solo',
+    '["hr"]',
+    0, 0, 14,
+    'Scheduling and payroll for small teams.',
+    10, 1, 500, 44, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 10 team members',
+      'Scheduling + time-off',
+      'Payroll included',
+      'Compliance flags'
+    )),
+  ('CRM Solo', 'crm_solo',
+    '["crm"]',
+    0, 0, 14,
+    'Customer profiles and campaigns for owner-operators.',
+    3, 1, 500, 45, TRUE, FALSE,
+    JSON_ARRAY(
+      'Up to 3 team members',
+      'Unlimited customer profiles',
+      'Segment builder + campaigns',
+      'Loyalty points engine'
+    ))
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  apps = VALUES(apps),
+  price_per_seat_cents = VALUES(price_per_seat_cents),
+  annual_price_per_seat_cents = VALUES(annual_price_per_seat_cents),
+  trial_days = VALUES(trial_days),
+  tagline = VALUES(tagline),
+  max_seats = VALUES(max_seats),
+  max_locations = VALUES(max_locations),
+  ai_credits_per_month = VALUES(ai_credits_per_month),
+  tier_order = VALUES(tier_order),
+  is_solo = VALUES(is_solo),
+  is_featured = VALUES(is_featured),
+  features = VALUES(features),
+  is_active = TRUE;

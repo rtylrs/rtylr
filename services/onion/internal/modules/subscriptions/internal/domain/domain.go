@@ -12,15 +12,24 @@ var (
 )
 
 type Plan struct {
-	ID                int64     `json:"id"`
-	Name              string    `json:"name"`
-	Slug              string    `json:"slug"`
-	Apps              []string  `json:"apps"`
-	PricePerSeatCents int       `json:"price_per_seat_cents"`
-	TrialDays         int       `json:"trial_days"`
-	PaddlePriceID     string    `json:"paddle_price_id,omitempty"`
-	IsActive          bool      `json:"is_active"`
-	CreatedAt         time.Time `json:"created_at"`
+	ID                      int64     `json:"id"`
+	Name                    string    `json:"name"`
+	Slug                    string    `json:"slug"`
+	Apps                    []string  `json:"apps"`
+	PricePerSeatCents       int       `json:"price_per_seat_cents"`
+	AnnualPricePerSeatCents int       `json:"annual_price_per_seat_cents"`
+	TrialDays               int       `json:"trial_days"`
+	PaddlePriceID           string    `json:"paddle_price_id,omitempty"`
+	Tagline                 string    `json:"tagline"`
+	MaxSeats                *int      `json:"max_seats"`
+	MaxLocations            *int      `json:"max_locations"`
+	AICreditsPerMonth       int       `json:"ai_credits_per_month"`
+	Features                []string  `json:"features"`
+	TierOrder               int       `json:"tier_order"`
+	IsSolo                  bool      `json:"is_solo"`
+	IsFeatured              bool      `json:"is_featured"`
+	IsActive                bool      `json:"is_active"`
+	CreatedAt               time.Time `json:"created_at"`
 }
 
 type Subscription struct {
