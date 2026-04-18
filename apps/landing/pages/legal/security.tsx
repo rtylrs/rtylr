@@ -24,7 +24,7 @@ const SecurityPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Security | rtylr"
-          description="How rtylr protects your data — encryption, infrastructure, access controls, and incident response."
+          description="How rtylr protects your data, encryption, infrastructure, access controls, and incident response."
         />
 
         <main className={styles.page}>
@@ -152,19 +152,19 @@ const SecurityPage = (): JSX.Element => {
                 <h2 id="compliance">Compliance and Certifications</h2>
                 <ul>
                   <li>
-                    <strong>GDPR &amp; UK GDPR</strong> — we act as processor for Customer Data,
-                    with DPA available on request.
+                    <strong>GDPR &amp; UK GDPR</strong>, we act as processor for Customer Data, with
+                    DPA available on request.
                   </li>
                   <li>
-                    <strong>CCPA/CPRA</strong> — honored for California residents; opt-out
-                    mechanisms available.
+                    <strong>CCPA/CPRA</strong>, honored for California residents; opt-out mechanisms
+                    available.
                   </li>
                   <li>
-                    <strong>PCI DSS</strong> — payment processing is offloaded to Paddle, a Level-1
+                    <strong>PCI DSS</strong>, payment processing is offloaded to Paddle, a Level-1
                     certified merchant of record.
                   </li>
                   <li>
-                    <strong>SOC 2 Type II</strong> — in progress; target completion Q4 2026.
+                    <strong>SOC 2 Type II</strong>, in progress; target completion Q4 2026.
                   </li>
                 </ul>
 

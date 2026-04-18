@@ -20,7 +20,7 @@ const config: Config = {
           bg: 'var(--hub-bg)',
           border: 'var(--hub-border)',
         },
-        // ERP accent color — amber
+        // ERP accent color, amber
         erp: {
           DEFAULT: '#f59e0b',
           muted: 'rgba(245,158,11,0.12)',

@@ -60,7 +60,7 @@ const ACCENT = '#64C5B9';
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
 
-/** Collapsible group headers — compact, same row height as nav links. */
+/** Collapsible group headers, compact, same row height as nav links. */
 const sidebarSectionHeaderClass =
   'w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-left transition-colors hover:bg-[var(--flow-hover)]';
 
@@ -116,7 +116,7 @@ const SidebarSectionReorder: React.FC<{
   );
 };
 
-/** Zero layout width until row hover; then expands so the title shifts — no permanent gutter.
+/** Zero layout width until row hover; then expands so the title shifts, no permanent gutter.
  *  (Do not use focus-within: clicking the section toggle keeps focus on the button and would
  *  leave the strip expanded after the mouse leaves.) */
 const sidebarReorderWrapClass =
@@ -217,7 +217,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const unreadNotifications = apiNotifications.filter((n) => !n.read).length;
 
   // Fetch workspaces from API.
-  // IMPORTANT: use React Query data directly for display — never wait for the
+  // IMPORTANT: use React Query data directly for display, never wait for the
   // Zustand store to hydrate, because the store is populated via useEffect which
   // fires *after* render, causing a flash of "No workspace".
   const { data: apiWorkspaces, isLoading: workspacesLoading } = useWorkspaces();
@@ -401,7 +401,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           paddingTop: 'env(safe-area-inset-top)',
         }}
       >
-        {/* Logo — same markup as Hub `DefaultLayout` (img src + filter + padding) */}
+        {/* Logo, same markup as Hub `DefaultLayout` (img src + filter + padding) */}
         <div
           className={cn('flex items-center gap-2.5 py-2.5', sx)}
           style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -418,7 +418,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        {/* Workspace + search — shared inset, even vertical rhythm */}
+        {/* Workspace + search, shared inset, even vertical rhythm */}
         <div className={cn('space-y-1.5 pt-1.5 pb-1.5 relative', sx)}>
           <button
             type="button"
@@ -976,7 +976,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               borderBottom: '1px solid var(--flow-border)',
             }}
           >
-            Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}) — non-urgent reminders stay
+            Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}), non-urgent reminders stay
             soft. Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life & rhythm.
           </div>
         )}

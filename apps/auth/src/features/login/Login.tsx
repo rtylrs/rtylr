@@ -52,12 +52,12 @@ const Login: React.FC = (): React.JSX.Element => {
   const appName = getAppDisplayName(redirectParam);
 
   const redirectTo = async (): Promise<void> => {
-    // Explicit redirect param — honor it directly
+    // Explicit redirect param, honor it directly
     if (redirectParam && redirectParam in APP_URLS) {
       window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
       return;
     }
-    // No explicit redirect — decide based on the user's subscription apps
+    // No explicit redirect, decide based on the user's subscription apps
     try {
       const res = await api.get('/user/me');
       const role: string = (res.data?.role as string) ?? '';
@@ -67,12 +67,12 @@ const Login: React.FC = (): React.JSX.Element => {
         window.location.href = APP_URLS.dash as string;
         return;
       }
-      // Single-app subscriber — skip Dash and go straight to their app
+      // Single-app subscriber, skip Dash and go straight to their app
       if (apps.length === 1 && apps[0] in APP_URLS) {
         window.location.href = APP_URLS[apps[0] as KnownAppId] as string;
         return;
       }
-      // Multi-app — use Dash as the launcher
+      // Multi-app, use Dash as the launcher
       window.location.href = APP_URLS.dash as string;
     } catch {
       window.location.href = APP_URLS.dash as string;

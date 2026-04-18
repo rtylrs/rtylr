@@ -29,7 +29,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
   return (
     <section className={styles.ctaSection}>
       <div className={styles.split}>
-        {/* Left — title, CTAs, logo grid */}
+        {/* Left, title, CTAs, logo grid */}
         <motion.div
           className={styles.left}
           initial="hidden"
@@ -67,7 +67,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
           </motion.div>
         </motion.div>
 
-        {/* Right — generative image */}
+        {/* Right, generative image */}
         <motion.div
           className={styles.right}
           initial={{ opacity: 0, scale: 1.02 }}

@@ -19,8 +19,7 @@ const PRODUCT_CLUSTERS = [
   {
     label: 'Front of House',
     apps: ['POS', 'CRM'],
-    description:
-      'Manage every customer touchpoint — point of sale, loyalty, campaigns, and beyond.',
+    description: 'Manage every customer touchpoint, point of sale, loyalty, campaigns, and beyond.',
   },
   {
     label: 'Operations',
@@ -45,7 +44,7 @@ const VALUES = [
   },
   {
     title: 'AI-first by design',
-    body: 'Every app ships with an embedded AI assistant — not a bolt-on, but part of the core experience.',
+    body: 'Every app ships with an embedded AI assistant, not a bolt-on, but part of the core experience.',
   },
   {
     title: 'Always available offline',
@@ -112,7 +111,7 @@ const AboutPage = (): JSX.Element => {
                   <span className={styles.sectionLabel}>OUR MISSION</span>
                   <h2 className={styles.missionTitle}>Stop the CSV life.</h2>
                   <p className={styles.missionBody}>
-                    Commerce software should work the way commerce does — one sale, one inventory
+                    Commerce software should work the way commerce does, one sale, one inventory
                     drop, one payroll line, one customer record. Not seven apps pretending they talk
                     to each other. rtylr replaces the whole stack with a single platform where
                     everything updates at once, because it&apos;s all the same database underneath.
@@ -171,7 +170,7 @@ const AboutPage = (): JSX.Element => {
                 </p>
                 <p>
                   So in 2024 Abed and Mohammad left their corporate roles and started building what
-                  should have existed all along — a single platform for the whole business, with AI
+                  should have existed all along, a single platform for the whole business, with AI
                   wired in from the ground floor.
                 </p>
               </motion.div>

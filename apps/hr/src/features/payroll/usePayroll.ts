@@ -14,7 +14,7 @@ const payrollRowSchema = z.object({
   status: z.enum(['Pending', 'Paid']).optional(),
 });
 
-/** Legacy hook used by Operations screen — reads from old payroll endpoint */
+/** Legacy hook used by Operations screen, reads from old payroll endpoint */
 export function usePayroll(params?: {
   period?: string;
 }): ReturnType<typeof useQuery<PayrollRow[]>> {

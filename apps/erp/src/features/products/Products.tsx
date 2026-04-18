@@ -256,7 +256,7 @@ const Products: React.FC = () => {
                   {p.category}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                  {p.brand || '—'}
+                  {p.brand || '-'}
                 </span>
                 <span
                   className="text-sm font-semibold"

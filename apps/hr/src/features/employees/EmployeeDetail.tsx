@@ -63,7 +63,7 @@ const EmployeeDetail = (): React.JSX.Element => {
         {label}
       </span>
       <span className="text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-        {value ?? '—'}
+        {value ?? '-'}
       </span>
     </div>
   );
@@ -141,7 +141,7 @@ const EmployeeDetail = (): React.JSX.Element => {
                 ? `${employee.monthlySalary} ${employee.currency}/mo`
                 : employee.hourlyRate != null
                   ? `${employee.hourlyRate} ${employee.currency}/hr`
-                  : '—'
+                  : '-'
             )}
             {infoRow(t('employees.form.accountCreationMode'), employee.accountCreationMode)}
           </div>

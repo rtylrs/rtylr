@@ -692,7 +692,7 @@ const BillingTab: React.FC = () => {
               >
                 <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
                   {sub.status === 'trial'
-                    ? 'Estimated total (trial — not charged)'
+                    ? 'Estimated total (trial, not charged)'
                     : 'Estimated total'}
                 </p>
                 <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>

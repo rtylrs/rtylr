@@ -291,7 +291,7 @@ const DefaultLayout: React.FC = () => {
           ))}
         </nav>
 
-        {/* Footer — user */}
+        {/* Footer, user */}
         <div
           style={{ padding: '8px', borderTop: '1px solid var(--hub-border)', position: 'relative' }}
         >

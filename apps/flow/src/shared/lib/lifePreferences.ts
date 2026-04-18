@@ -5,7 +5,7 @@ const KEY = 'flow.lifePreferences.v1';
 export interface LifePreferences {
   quietStart: string;
   quietEnd: string;
-  /** 0–23, local — preferred hour for a digest summary when reminders exist */
+  /** 0–23, local, preferred hour for a digest summary when reminders exist */
   digestHour: number;
 }
 

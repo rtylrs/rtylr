@@ -24,7 +24,7 @@ const TRACKS = [
     icon: Store,
     name: 'Implementation Partners',
     summary:
-      'Consultancies and agencies that set up rtylr for end customers — POS configuration, menu migration, HR onboarding.',
+      'Consultancies and agencies that set up rtylr for end customers, POS configuration, menu migration, HR onboarding.',
     who: 'For ops consultancies, restaurant-tech specialists, and digital agencies.',
     benefits: [
       'Referral fees on first-year revenue',
@@ -37,7 +37,7 @@ const TRACKS = [
     icon: Puzzle,
     name: 'Technology Partners',
     summary:
-      'Software that integrates with rtylr — delivery marketplaces, payment processors, loyalty engines, BI tools.',
+      'Software that integrates with rtylr, delivery marketplaces, payment processors, loyalty engines, BI tools.',
     who: 'For SaaS companies adjacent to commerce, POS, HR, or finance.',
     benefits: [
       'Listed in the integrations directory',
@@ -50,7 +50,7 @@ const TRACKS = [
     icon: GraduationCap,
     name: 'Solution Partners',
     summary:
-      'Training, enablement, and managed services built around rtylr — franchise rollouts, staff training, compliance audits.',
+      'Training, enablement, and managed services built around rtylr, franchise rollouts, staff training, compliance audits.',
     who: 'For training companies, franchise enablement teams, and vertical specialists.',
     benefits: [
       'Revenue share on multi-location deals',
@@ -63,7 +63,7 @@ const TRACKS = [
     icon: Handshake,
     name: 'Hardware Partners',
     summary:
-      'Printers, card readers, scanners, kiosk terminals — hardware that rtylr ships to the end customer.',
+      'Printers, card readers, scanners, kiosk terminals, hardware that rtylr ships to the end customer.',
     who: 'For hardware OEMs and authorized distributors.',
     benefits: [
       'Direct inclusion in the rtylr hardware catalog',
@@ -104,7 +104,7 @@ const PartnersPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Partner Program | rtylr"
-          description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners — terms, tiers, and how to apply."
+          description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
         />
 
         <div className={styles.page}>

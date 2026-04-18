@@ -84,7 +84,7 @@ const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
         orders.map((order) => (
           <TableRow key={order.id}>
             <TableCell className="font-mono text-xs">#{order.id}</TableCell>
-            <TableCell>{order.customerName || order.customerEmail || '—'}</TableCell>
+            <TableCell>{order.customerName || order.customerEmail || '-'}</TableCell>
             <TableCell>${order.subtotal.toFixed(2)}</TableCell>
             <TableCell>${order.total.toFixed(2)}</TableCell>
             <TableCell>

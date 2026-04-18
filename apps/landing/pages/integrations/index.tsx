@@ -216,7 +216,7 @@ const IntegrationsPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Integrations | rtylr"
-          description="Every service rtylr connects to — payments, accounting, delivery, comms, hardware, and productivity."
+          description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
         />
 
         <div className={styles.page}>
@@ -332,7 +332,7 @@ const IntegrationsPage = (): JSX.Element => {
                 <span className={styles.sectionEyebrow}>BUILD YOUR OWN</span>
                 <h2 className={styles.apiTitle}>Nothing matching? Build on our API.</h2>
                 <p className={styles.apiCopy}>
-                  Full REST API covering every object in rtylr — menu items, orders, invoices,
+                  Full REST API covering every object in rtylr, menu items, orders, invoices,
                   customers, shifts, tasks. Webhooks for every event. OAuth 2.0 for third-party
                   apps. Rate-limited generously. Documented publicly.
                 </p>

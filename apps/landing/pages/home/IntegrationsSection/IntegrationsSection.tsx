@@ -103,7 +103,7 @@ const IntegrationsSection: React.FC = () => {
           </h2>
           <p className={styles.sectionDescription}>
             Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in
-            minutes — no API keys to chase, no engineer required.
+            minutes. No API keys to chase. No engineer required.
           </p>
         </motion.div>
 

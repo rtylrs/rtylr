@@ -56,12 +56,12 @@ const POSPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="POS — The register that keeps up. | rtylr"
+          title="POS, The register that keeps up. | rtylr"
           description="Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform."
         />
 
         <div className={styles.page}>
-          {/* ── HERO — split layout: copy left, receipt mockup right ───────── */}
+          {/* ── HERO, split layout: copy left, receipt mockup right ───────── */}
           <section className={styles.hero}>
             <div className={styles.heroFrame} aria-hidden="true">
               <span className={`${styles.vLine} ${styles.vLineLeft}`} />
@@ -97,7 +97,7 @@ const POSPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Receipt mockup — thermal-printer aesthetic */}
+            {/* Receipt mockup, thermal-printer aesthetic */}
             <motion.div
               className={styles.receiptMock}
               initial={{ opacity: 0, y: 40 }}
@@ -157,7 +157,7 @@ const POSPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── FEATURE QUAD — 2×2, asymmetric typography ─────────────────── */}
+          {/* ── FEATURE QUAD, 2×2, asymmetric typography ─────────────────── */}
           <section className={styles.featureSection}>
             <motion.div
               className={styles.featureHeader}
@@ -195,7 +195,7 @@ const POSPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── COMPARISON TABLE — vs Toast / Square / Shopify POS ────────── */}
+          {/* ── COMPARISON TABLE, vs Toast / Square / Shopify POS ────────── */}
           <motion.section
             className={styles.compareSection}
             initial="hidden"
@@ -292,7 +292,7 @@ const POSPage = (): JSX.Element => {
                             {variant === 'yes'
                               ? 'Included'
                               : variant === 'no'
-                                ? '—'
+                                ? '-'
                                 : variant === 'partial'
                                   ? 'Partial'
                                   : variant === 'addon'

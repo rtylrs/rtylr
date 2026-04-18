@@ -124,7 +124,7 @@ const NewsroomPage = (): JSX.Element => {
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Announcements, milestones, coverage, and awards. Journalists can reach our comms
-                team at <a href="mailto:press@voxire.com">press@voxire.com</a> — we aim to respond
+                team at <a href="mailto:press@voxire.com">press@voxire.com</a>, we aim to respond
                 within 4 business hours on weekdays.
               </motion.p>
 

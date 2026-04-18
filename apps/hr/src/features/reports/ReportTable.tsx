@@ -49,7 +49,7 @@ async function generatePdfBlob(
   dateRangeLabel: string,
   generatedLabel: string
 ): Promise<Blob> {
-  // Dynamic import — only fetched when called, not bundled with ReportTable
+  // Dynamic import, only fetched when called, not bundled with ReportTable
   const { Document, Page, Text, View, StyleSheet, pdf } = await import(
     /* webpackChunkName: "react-pdf-renderer" */
     '@react-pdf/renderer'
@@ -172,7 +172,7 @@ const ReportTable = ({ report, dateFrom, dateTo }: ReportTableProps): React.JSX.
         date: new Date().toLocaleDateString(),
       });
 
-      // @react-pdf/renderer is loaded lazily here — not bundled with the initial chunk
+      // @react-pdf/renderer is loaded lazily here, not bundled with the initial chunk
       const blob = await generatePdfBlob(
         report,
         companyName,

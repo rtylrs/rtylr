@@ -30,14 +30,14 @@ const MainHero: React.FC = (): React.JSX.Element => {
 
   return (
     <div className={styles.mainHero}>
-      {/* Retool-style framing rails — scoped to just this block so they don't
+      {/* Retool-style framing rails, scoped to just this block so they don't
           bleed into the stats section below */}
       <div className={styles.heroFrame} aria-hidden="true">
         <span className={`${styles.heroVLine} ${styles.heroVLineLeft}`} />
         <span className={`${styles.heroVLine} ${styles.heroVLineRight}`} />
       </div>
 
-      {/* Announcement row — BETA pill sits next to plain link text */}
+      {/* Announcement row, BETA pill sits next to plain link text */}
       <motion.a
         href="/pricing"
         className={styles.announceRow}
@@ -47,7 +47,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
       >
         <span className={styles.announcePill}>BETA</span>
         <span className={styles.announceText}>
-          rtylr AI is live — describe your business, watch it build
+          rtylr AI is in beta. Describe your business, watch it build
           <span className={styles.announceArrow} aria-hidden="true">
             ↗
           </span>
@@ -66,7 +66,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         From a single platform.
       </motion.h1>
 
-      {/* AI prompt card — Retool AppGen clone */}
+      {/* AI prompt card, Retool AppGen clone */}
       <motion.form
         className={styles.aiCard}
         onSubmit={handleSubmit}
@@ -80,7 +80,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         <textarea
           id="hero-prompt"
           className={styles.aiCardTextarea}
-          placeholder="Describe your business — rtylr AI drafts your POS, inventory, staff, and invoices"
+          placeholder="Describe your business. rtylr AI drafts your POS, inventory, staff, and invoices"
           rows={5}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}

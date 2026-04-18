@@ -75,7 +75,7 @@ const AssetRegister = (): React.JSX.Element => {
                       {asset.name}
                     </td>
                     <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
-                      {asset.serialNumber ?? '—'}
+                      {asset.serialNumber ?? '-'}
                     </td>
                     <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
                       {asset.assignedDate}
@@ -90,7 +90,7 @@ const AssetRegister = (): React.JSX.Element => {
                       </Pill>
                     </td>
                     <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
-                      {asset.returnedDate ?? '—'}
+                      {asset.returnedDate ?? '-'}
                     </td>
                   </tr>
                 ))}

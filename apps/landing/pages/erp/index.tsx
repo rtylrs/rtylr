@@ -21,7 +21,7 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './erp.module.scss';
 
-// Initial inventory — stock drains each time "Simulate Friday service" fires.
+// Initial inventory, stock drains each time "Simulate Friday service" fires.
 interface InventoryRow {
   sku: string;
   name: string;
@@ -82,7 +82,7 @@ const ERPPage = (): JSX.Element => {
   const simulateService = useCallback((): void => {
     if (isSimulating) return;
     setIsSimulating(true);
-    // Two ticks of depletion — enough to visibly move the bars
+    // Two ticks of depletion, enough to visibly move the bars
     setTimeout(() => {
       setInventory((prev) =>
         prev.map((row) => ({
@@ -125,12 +125,12 @@ const ERPPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="ERP — Inventory that counts itself. | rtylr"
+          title="ERP, Inventory that counts itself. | rtylr"
           description="Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail."
         />
 
         <div className={styles.page}>
-          {/* ── HERO — full-width inventory table as the focal element ────── */}
+          {/* ── HERO, full-width inventory table as the focal element ────── */}
           <section className={styles.hero}>
             <motion.div
               className={styles.heroCopy}
@@ -148,8 +148,8 @@ const ERPPage = (): JSX.Element => {
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved
-                moves the warehouse count. Every low-stock alert fires before you actually run out —
-                not after the Saturday rush notices.
+                moves the warehouse count. Every low-stock alert fires before you actually run out.
+                Not after the Saturday rush notices.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -161,7 +161,7 @@ const ERPPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Inventory table mockup — full-width under the copy */}
+            {/* Inventory table mockup, full-width under the copy */}
             <motion.div
               className={styles.tableMock}
               initial={{ opacity: 0, y: 30 }}
@@ -289,7 +289,7 @@ const ERPPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── CAPABILITIES — alternating left/right layout ──────────────── */}
+          {/* ── CAPABILITIES, alternating left/right layout ──────────────── */}
           <section className={styles.capabilitiesSection}>
             <motion.div
               className={styles.capabilitiesHeader}
@@ -333,7 +333,7 @@ const ERPPage = (): JSX.Element => {
             </div>
           </section>
 
-          {/* ── DEPLETION STRIP — "a sale depletes recipes live" ─────────── */}
+          {/* ── DEPLETION STRIP, "a sale depletes recipes live" ─────────── */}
           <motion.section
             className={styles.depletionSection}
             initial="hidden"
@@ -346,7 +346,7 @@ const ERPPage = (): JSX.Element => {
               <h2 className={styles.depletionTitle}>Pizza sold. Flour dropped. Reorder drafted.</h2>
               <p className={styles.depletionCopy}>
                 Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil,
-                olive oil — each depletes by exactly the gram. When anything crosses its reorder
+                olive oil, each depletes by exactly the gram. When anything crosses its reorder
                 threshold, a PO is drafted with your preferred supplier and routed for approval.
               </p>
               <div className={styles.depletionFlow}>

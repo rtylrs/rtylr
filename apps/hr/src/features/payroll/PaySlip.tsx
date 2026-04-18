@@ -108,13 +108,13 @@ const PaySlip = (): React.JSX.Element => {
       <Breadcrumbs
         items={[
           { label: t('payroll.paySlip.myPaySlips'), href: '/payroll/my-payslips' },
-          { label: `${run.periodStart} — ${run.periodEnd}` },
+          { label: `${run.periodStart}, ${run.periodEnd}` },
         ]}
       />
 
       <SectionHeader
         title={t('payroll.paySlip.title')}
-        subtitle={`${run.periodStart} — ${run.periodEnd}`}
+        subtitle={`${run.periodStart}, ${run.periodEnd}`}
       />
 
       <Card>
@@ -123,7 +123,7 @@ const PaySlip = (): React.JSX.Element => {
             {t('payroll.table.employeeId', { id: entry.employeeId })}
           </div>
           <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 2 }}>
-            {t('payroll.paySlip.period')}: {run.periodStart} — {run.periodEnd}
+            {t('payroll.paySlip.period')}: {run.periodStart}, {run.periodEnd}
           </div>
           <Pill color="var(--hr-status-approved)" style={{ marginTop: 8 }}>
             {t(`payroll.statuses.${run.status}`)}

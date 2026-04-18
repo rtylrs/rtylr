@@ -213,7 +213,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
     position: relative;
 
     &::before {
-      content: '—';
+      content: '-';
       position: absolute;
       left: 0;
       color: rgba(232, 230, 225, 0.6);

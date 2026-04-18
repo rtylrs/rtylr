@@ -45,14 +45,14 @@ interface Column {
   tasks: Task[];
 }
 
-// Initial board state — hydrates from this once, then lives in component state
+// Initial board state, hydrates from this once, then lives in component state
 const INITIAL_COLUMNS: Column[] = [
   {
     id: 'backlog',
     title: 'Backlog',
     tint: '#8a8a8a',
     tasks: [
-      { id: 't1', title: 'Seasonal menu rollout — Q3', assignee: 'MC', tag: 'Ops' },
+      { id: 't1', title: 'Seasonal menu rollout, Q3', assignee: 'MC', tag: 'Ops' },
       { id: 't2', title: 'New supplier onboarding: Rossini', assignee: 'JK', tag: 'ERP' },
     ],
   },
@@ -63,7 +63,7 @@ const INITIAL_COLUMNS: Column[] = [
     tasks: [
       {
         id: 't3',
-        title: 'Friday dinner covers — staffing plan',
+        title: 'Friday dinner covers, staffing plan',
         assignee: 'SP',
         tag: 'HR',
         priority: 'high',
@@ -238,7 +238,7 @@ const FEATURES = [
   {
     icon: CheckSquare,
     title: 'Templates for repeatable ops',
-    copy: 'Weekly checklists, monthly closes, new-location launches — reusable project templates.',
+    copy: 'Weekly checklists, monthly closes, new-location launches, reusable project templates.',
   },
 ];
 
@@ -336,7 +336,7 @@ const FlowPage = (): JSX.Element => {
 
   const rule = RULES[ruleIdx];
 
-  // Refs keyed by column id — the draggable card walks these to find its
+  // Refs keyed by column id, the draggable card walks these to find its
   // drop target on release.
   const columnRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   const columnIds = columns.map((c) => c.id);
@@ -375,7 +375,7 @@ const FlowPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Flow — Projects, tasks, and team workspaces. | rtylr"
+          title="Flow, Projects, tasks, and team workspaces. | rtylr"
           description="Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip."
         />
 
@@ -398,7 +398,7 @@ const FlowPage = (): JSX.Element => {
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care
-                about. Automations that fire when a PO is approved or payroll closes — no Zapier, no
+                about. Automations that fire when a PO is approved or payroll closes, no Zapier, no
                 duct tape. The work OS your team will actually open.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
@@ -411,7 +411,7 @@ const FlowPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Live kanban — cards drag between columns */}
+            {/* Live kanban, cards drag between columns */}
             <motion.div
               className={styles.board}
               initial={{ opacity: 0, y: 40 }}
@@ -491,8 +491,8 @@ const FlowPage = (): JSX.Element => {
                 Then that, automatically.
               </motion.h2>
               <motion.p className={styles.automationCopy} variants={blurFadeIn}>
-                Every app in rtylr emits events. Every app listens. Click an example — or let it
-                auto-play — to see what real rules look like.
+                Every app in rtylr emits events. Every app listens. Click an example, or let it
+                auto-play, to see what real rules look like.
               </motion.p>
             </motion.div>
 
@@ -606,7 +606,7 @@ const FlowPage = (): JSX.Element => {
               </div>
             </motion.div>
 
-            {/* Small features strip — 3 up, not a full grid */}
+            {/* Small features strip, 3 up, not a full grid */}
             <motion.div
               className={styles.featuresStrip}
               initial="hidden"

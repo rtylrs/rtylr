@@ -49,7 +49,7 @@ function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element 
         </div>
 
         <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
-          {cycle.periodStart} — {cycle.periodEnd}
+          {cycle.periodStart}, {cycle.periodEnd}
         </p>
 
         {cycle.status === 'draft' && (

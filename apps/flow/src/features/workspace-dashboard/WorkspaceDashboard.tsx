@@ -385,7 +385,7 @@ const WorkspaceDashboard: React.FC = () => {
               color: 'var(--flow-text)',
             }}
           >
-            <option value="">— No business linked —</option>
+            <option value="">, No business linked,</option>
             {businesses.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}

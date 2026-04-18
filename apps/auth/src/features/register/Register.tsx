@@ -255,7 +255,7 @@ const Register: React.FC = (): React.JSX.Element => {
     return (
       <AuthShell
         title="Choose your plan."
-        subtitle="Start free — no credit card required."
+        subtitle="Start free, no credit card required."
         footer={
           <p className="text-center text-sm text-[#666]">
             Already have an account?{' '}
@@ -372,7 +372,7 @@ const Register: React.FC = (): React.JSX.Element => {
           />
         </div>
 
-        {/* Business name — hidden for solo plans */}
+        {/* Business name, hidden for solo plans */}
         {!isSoloPlan && (
           <div className="flex flex-col gap-1.5">
             <label htmlFor="register-business" className="text-sm font-medium text-[#111]">

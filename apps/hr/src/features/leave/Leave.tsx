@@ -118,7 +118,7 @@ const Leave = (): React.JSX.Element => {
                       </span>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {req.startDate} — {req.endDate} · {req.totalDays} {t('leave.days')}
+                      {req.startDate}, {req.endDate} · {req.totalDays} {t('leave.days')}
                     </div>
                     {req.notes && (
                       <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>

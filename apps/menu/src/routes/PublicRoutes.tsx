@@ -13,7 +13,7 @@ const PublicRoutes = [
     path: '/:id',
     element: <Menu />,
   },
-  // Dev preview — only available on localhost
+  // Dev preview, only available on localhost
   ...(isLocalhost ? [{ path: '/', element: <DevMenu /> }] : [{ path: '/', element: <NoMatch /> }]),
   {
     path: '*',

@@ -130,7 +130,7 @@ const Attendance = (): React.JSX.Element => {
                     )}
                   </td>
                   <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
-                    {record.clockOutAt ? formatTime(record.clockOutAt) : '—'}
+                    {record.clockOutAt ? formatTime(record.clockOutAt) : '-'}
                   </td>
                   <td
                     style={{
@@ -139,7 +139,7 @@ const Attendance = (): React.JSX.Element => {
                       fontWeight: 600,
                     }}
                   >
-                    {record.durationMinutes ? formatDuration(record.durationMinutes) : '—'}
+                    {record.durationMinutes ? formatDuration(record.durationMinutes) : '-'}
                   </td>
                   <td style={{ padding: '12px', color: 'var(--hr-text-muted)' }}>
                     {t(`attendance.methods.${record.clockInMethod}`)}

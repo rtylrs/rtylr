@@ -99,7 +99,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
       await api.post('/team/request-access', { app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
-      // silently fail — server returns success anyway if already requested
+      // silently fail, server returns success anyway if already requested
     } finally {
       setRequestLoading(null);
     }
@@ -401,7 +401,7 @@ function BusinessRoute(): React.JSX.Element | null {
         }
       })
       .catch(() => {
-        // allow on error — auth interceptor handles 401
+        // allow on error, auth interceptor handles 401
       })
       .finally(() => setLoading(false));
   }, [token]);

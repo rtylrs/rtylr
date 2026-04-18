@@ -120,7 +120,7 @@ const Menu: React.FC = () => {
     getMenu.main({ id });
   }, [id]);
 
-  // AI chat handler — wired to backend when ready
+  // AI chat handler, wired to backend when ready
   const handleAiMessage = async (message: string, history: ChatMessage[]): Promise<string> => {
     // Placeholder until AI backend endpoint is created
     return `Thanks for your question about "${message}". Our team will have AI-powered menu assistance available soon!`;

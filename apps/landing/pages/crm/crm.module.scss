@@ -1,4 +1,4 @@
-// ── CRM landing — customer profile hero, segment bubbles, campaign grid ────
+// ── CRM landing, customer profile hero, segment bubbles, campaign grid ────
 // Visual direction: relationship/warmth via cream accents, big profile card
 // tilted slightly, animated/sized bubbles for segments, hover-lifting campaign
 // cards. Feels conversational.
@@ -75,7 +75,7 @@
   flex-wrap: wrap;
 }
 
-// Buttons — shared primary/outline across pages
+// Buttons, shared primary/outline across pages
 .primaryBtn {
   background: #e8e6e1;
   color: #0a0a0a;
@@ -365,7 +365,7 @@
     transform: scale(1.05);
   }
 
-  // Soft floating motion — each bubble uses a slightly different delay
+  // Soft floating motion, each bubble uses a slightly different delay
   animation: bubbleFloat 6s ease-in-out infinite;
 
   &:nth-child(2n) {

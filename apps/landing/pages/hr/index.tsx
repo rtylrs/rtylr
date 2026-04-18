@@ -18,7 +18,7 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './hr.module.scss';
 
-// Schedule board mock — 7 days × 4 staff. State-driven so each cell is editable.
+// Schedule board mock, 7 days × 4 staff. State-driven so each cell is editable.
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 interface StaffMember {
@@ -73,7 +73,7 @@ const PILLARS = [
   {
     icon: DollarSign,
     title: 'Payroll that runs itself',
-    copy: 'Hours, tips, deductions, taxes — rolled up automatically. Direct deposit, pay stubs, filings handled.',
+    copy: 'Hours, tips, deductions, taxes, rolled up automatically. Direct deposit, pay stubs, filings handled.',
   },
   {
     icon: Palmtree,
@@ -128,12 +128,12 @@ const HRPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="HR — Your team. Looked after. | rtylr"
+          title="HR, Your team. Looked after. | rtylr"
           description="Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people."
         />
 
         <div className={styles.page}>
-          {/* ── HERO — centered, warm, schedule-board visual below ─────────── */}
+          {/* ── HERO, centered, warm, schedule-board visual below ─────────── */}
           <section className={styles.hero}>
             <motion.div
               className={styles.heroCopy}
@@ -153,7 +153,7 @@ const HRPage = (): JSX.Element => {
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours,
                 and deductions on its own. Compliance flags before they become violations. Software
-                that treats staff like people — not line items in a spreadsheet.
+                that treats staff like people, not line items in a spreadsheet.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -165,7 +165,7 @@ const HRPage = (): JSX.Element => {
               </motion.div>
             </motion.div>
 
-            {/* Live schedule board — click any cell to cycle its shift */}
+            {/* Live schedule board, click any cell to cycle its shift */}
             <motion.div
               className={styles.scheduleMock}
               initial={{ opacity: 0, y: 24 }}
@@ -246,7 +246,7 @@ const HRPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── PILLAR GRID — 3×2 shared-border cells ──────────────────────── */}
+          {/* ── PILLAR GRID, 3×2 shared-border cells ──────────────────────── */}
           <section className={styles.pillarsSection}>
             <motion.div
               className={styles.pillarsHeader}

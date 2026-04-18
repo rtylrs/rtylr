@@ -146,7 +146,7 @@ const SupportPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Help Center | rtylr"
-          description="Getting started, billing, team, configuration, integrations, security — everything you need to use rtylr."
+          description="Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr."
         />
 
         <div className={styles.page}>
@@ -296,7 +296,7 @@ const SupportPage = (): JSX.Element => {
               <Book size={22} strokeWidth={1.8} className={styles.docsIcon} />
               <h2 className={styles.docsTitle}>Looking for developer docs?</h2>
               <p className={styles.docsCopy}>
-                Full API reference, webhook events, and SDK usage — at{' '}
+                Full API reference, webhook events, and SDK usage, at{' '}
                 <a href="https://docs.rtylr.com" target="_blank" rel="noopener noreferrer">
                   docs.rtylr.com
                 </a>

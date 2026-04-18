@@ -42,7 +42,7 @@ const NotFoundPage = (): JSX.Element => {
         />
 
         <main className={styles.page}>
-          {/* Framing rails — match the hero aesthetic */}
+          {/* Framing rails, match the hero aesthetic */}
           <div className={styles.frame} aria-hidden="true">
             <span className={`${styles.vLine} ${styles.vLineLeft}`} />
             <span className={`${styles.vLine} ${styles.vLineRight}`} />

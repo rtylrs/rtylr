@@ -47,7 +47,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         background: selected ? 'rgba(100,197,185,0.08)' : undefined,
       }}
     >
-      {/* Checkbox — always visible when selected, appears on row hover otherwise */}
+      {/* Checkbox, always visible when selected, appears on row hover otherwise */}
       <button
         onClick={handleCheckbox}
         className={cn(

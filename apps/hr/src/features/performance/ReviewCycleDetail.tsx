@@ -176,7 +176,7 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
                     {t(`performance.statuses.${review.status}`)}
                   </Pill>
                   <span style={{ color: 'var(--hr-text-muted)' }}>
-                    {review.overallRating ?? '—'}
+                    {review.overallRating ?? '-'}
                   </span>
                   <span>
                     {canShare(review) && (
@@ -280,7 +280,7 @@ const ReviewCycleDetail = (): React.JSX.Element => {
     <div>
       <SectionHeader
         title={cycle.name}
-        subtitle={`${cycle.periodStart} — ${cycle.periodEnd}`}
+        subtitle={`${cycle.periodStart}, ${cycle.periodEnd}`}
         right={
           <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
             {cycle.status}

@@ -245,17 +245,17 @@ const WorkspaceManager: React.FC = () => {
           <div className="space-y-1.5 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
             <div className="flex items-center gap-2">
               <Crown size={11} style={{ color: '#f59e0b' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Manager</strong> — can create/archive
+              <strong style={{ color: 'var(--flow-text)' }}>Manager</strong>, can create/archive
               projects, manage all members
             </div>
             <div className="flex items-center gap-2">
               <Shield size={11} style={{ color: '#64C5B9' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Member</strong> — can create/edit tasks
+              <strong style={{ color: 'var(--flow-text)' }}>Member</strong>, can create/edit tasks
               in their projects
             </div>
             <div className="flex items-center gap-2">
               <Eye size={11} style={{ color: '#8b5cf6' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Viewer</strong> — read-only access
+              <strong style={{ color: 'var(--flow-text)' }}>Viewer</strong>, read-only access
             </div>
           </div>
         </div>

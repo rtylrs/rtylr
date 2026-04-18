@@ -1,7 +1,7 @@
 import type { FlowUser } from '../stores/userStore';
 
 /**
- * Map `/user/me` (or equivalent) payload to Flow profile fields — same field fallbacks as Hub sidebar.
+ * Map `/user/me` (or equivalent) payload to Flow profile fields, same field fallbacks as Hub sidebar.
  */
 export function mapMeResponseToFlowUser(
   data: Record<string, unknown> | null | undefined

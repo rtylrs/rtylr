@@ -11,7 +11,7 @@
   padding-top: 0;
 }
 
-// All decorative bg layers disabled — kept as no-op classes for back-compat
+// All decorative bg layers disabled, kept as no-op classes for back-compat
 .glowOrb1,
 .glowOrb2 {
   display: none;
@@ -19,7 +19,7 @@
 
 // ── Retool-style framing grid inside the hero ────────────────────────────────
 // Two vertical rails bracket the content column; a horizontal rule separates
-// the headline block from the AI card. All subtle — never compete with type.
+// the headline block from the AI card. All subtle, never compete with type.
 
 .heroFrame {
   position: absolute;
@@ -81,7 +81,7 @@
   }
 }
 
-// ── Announcement row — BETA pill + plain text next to it ─────────────────────
+// ── Announcement row, BETA pill + plain text next to it ─────────────────────
 
 .announceRow {
   display: inline-flex;
@@ -95,7 +95,7 @@
   }
 }
 
-// Small standalone BETA chip — filled, rectangular-ish, not wrapped around the text
+// Small standalone BETA chip, filled, rectangular-ish, not wrapped around the text
 .announcePill {
   background: #d7d6cf;
   color: #0a0a0a;
@@ -163,7 +163,7 @@
   border: 0;
 }
 
-// ── AI prompt card — Retool AppGen clone ─────────────────────────────────────
+// ── AI prompt card, Retool AppGen clone ─────────────────────────────────────
 
 // Registered custom property so we can animate the conic-gradient angle
 @property --ai-angle {
@@ -178,7 +178,7 @@
   }
 }
 
-// Fallback for browsers that don't support @property (older Firefox) —
+// Fallback for browsers that don't support @property (older Firefox),
 // rotates a larger pseudo-element instead.
 @keyframes aiBorderRotate {
   to {
@@ -200,8 +200,8 @@
   text-align: left;
   transition: background 0.2s ease;
 
-  // Rainbow ring on the card border — spins continuously.
-  // Uses 1px ring (not 0.5px — sub-pixel padding clips the corners with mask).
+  // Rainbow ring on the card border, spins continuously.
+  // Uses 1px ring (not 0.5px, sub-pixel padding clips the corners with mask).
   &::before {
     content: '';
     position: absolute;
@@ -290,7 +290,7 @@
   }
 }
 
-// First icon is "active" — solid cream like Retool's PostgreSQL elephant
+// First icon is "active", solid cream like Retool's PostgreSQL elephant
 .aiCardIconActive {
   background: #e8e6e1;
   color: #0a0a0a;
@@ -301,7 +301,7 @@
   }
 }
 
-// Muted dark pill — NOT bright cream. Matches Retool's "Start building".
+// Muted dark pill, NOT bright cream. Matches Retool's "Start building".
 .aiCardSubmit {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.85);

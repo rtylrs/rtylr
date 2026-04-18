@@ -245,7 +245,7 @@ export const QuickCreate: React.FC = () => {
                         border: '1px solid var(--flow-border)',
                       }}
                     >
-                      —
+                      ,
                     </button>
                     {EFFORT_PRESETS.map((m) => (
                       <button

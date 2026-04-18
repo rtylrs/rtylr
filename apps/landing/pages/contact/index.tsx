@@ -108,7 +108,7 @@ const ContactPage = (): JSX.Element => {
               Reach out. We read it all.
             </motion.h1>
             <motion.p className={styles.headerSubtitle} variants={blurFadeIn}>
-              Product question, sales inquiry, press request, feature ask — every message lands in
+              Product question, sales inquiry, press request, feature ask, every message lands in
               front of a human. We reply within one business day, usually faster.
             </motion.p>
           </motion.section>

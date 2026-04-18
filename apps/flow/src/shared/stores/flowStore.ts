@@ -157,9 +157,9 @@ export interface Task {
   dueDate: string;
   startDate?: string;
   estimate?: number; // hours
-  /** Quick effort (minutes) for capacity and “small win” picking — distinct from estimate hours. */
+  /** Quick effort (minutes) for capacity and “small win” picking, distinct from estimate hours. */
   effortMinutes?: number;
-  /** Waiting on someone/something — clears mental “open loop” when named. */
+  /** Waiting on someone/something, clears mental “open loop” when named. */
   waitingOn?: string;
   /** One-line decision log to reduce second-guessing later. */
   decisionNote?: string;

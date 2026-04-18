@@ -137,7 +137,7 @@ const OnboardingManagement = (): React.JSX.Element => {
                             {overdue}
                           </Pill>
                         ) : (
-                          <span style={{ color: 'var(--hr-text-muted)' }}>—</span>
+                          <span style={{ color: 'var(--hr-text-muted)' }}>-</span>
                         )}
                       </td>
                       <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>

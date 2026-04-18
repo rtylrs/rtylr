@@ -13,7 +13,7 @@ export function getInitials(name?: string | null): string {
 }
 
 export function formatDate(date: string): string {
-  if (!date || String(date).trim() === '') return '—';
+  if (!date || String(date).trim() === '') return '-';
   const d = new Date(date);
   const now = new Date();
   const diff = d.getTime() - now.getTime();

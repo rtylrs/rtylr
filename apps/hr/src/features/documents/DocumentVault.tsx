@@ -183,7 +183,7 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
                       {t(`documents.vault.storageModes.${doc.storageMode}` as const)}
                     </td>
                     <td style={{ padding: '10px 12px', ...expiryStyle(doc) }}>
-                      {doc.expiryDate ?? '—'}
+                      {doc.expiryDate ?? '-'}
                     </td>
                   </tr>
                 ))}

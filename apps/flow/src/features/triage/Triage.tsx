@@ -38,7 +38,7 @@ const Triage: React.FC = () => {
           <EmptyState
             icon={Eye}
             title="Inbox zero"
-            description="Nothing stuck without a priority or due date. New work lands in capture first—keep triage lean so planned work stays trustworthy."
+            description="Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy."
           />
         ) : (
           needsTriage.map((t) => (

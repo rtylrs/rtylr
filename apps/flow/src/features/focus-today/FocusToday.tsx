@@ -63,7 +63,7 @@ const FocusToday: React.FC = () => {
         </p>
         {backlogHint > 0 && (
           <p className="text-[12px] mt-3" style={{ color: 'var(--flow-text-dim)' }}>
-            {backlogHint} task{backlogHint === 1 ? '' : 's'} still in backlog — use{' '}
+            {backlogHint} task{backlogHint === 1 ? '' : 's'} still in backlog, use{' '}
             <Link
               to="/triage"
               className="underline-offset-2 hover:underline"

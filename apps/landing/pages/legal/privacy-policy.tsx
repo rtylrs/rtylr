@@ -79,7 +79,7 @@ const PrivacyPage = (): JSX.Element => {
 
                 <h3>Customer Data</h3>
                 <p>
-                  This is the data you upload or generate inside rtylr — menu items, invoices,
+                  This is the data you upload or generate inside rtylr, menu items, invoices,
                   schedules, customer profiles, tasks. You control this data; we process it only to
                   provide the Service and as instructed by you.
                 </p>
@@ -114,18 +114,18 @@ const PrivacyPage = (): JSX.Element => {
                 <p>For EEA/UK residents, we rely on the following legal bases:</p>
                 <ul>
                   <li>
-                    <strong>Contract</strong> — to provide the Service and manage billing.
+                    <strong>Contract</strong>, to provide the Service and manage billing.
                   </li>
                   <li>
-                    <strong>Legitimate interests</strong> — to secure the Service, detect abuse, and
+                    <strong>Legitimate interests</strong>, to secure the Service, detect abuse, and
                     improve features. We balance these interests against your rights.
                   </li>
                   <li>
-                    <strong>Consent</strong> — for non-essential cookies and certain marketing
+                    <strong>Consent</strong>, for non-essential cookies and certain marketing
                     communications. You can withdraw consent at any time.
                   </li>
                   <li>
-                    <strong>Legal obligation</strong> — when we are required to retain or disclose
+                    <strong>Legal obligation</strong>, when we are required to retain or disclose
                     data by law.
                   </li>
                 </ul>
@@ -138,19 +138,19 @@ const PrivacyPage = (): JSX.Element => {
                 </p>
                 <ul>
                   <li>
-                    <strong>Cloudflare</strong> — CDN, DNS, DDoS protection.
+                    <strong>Cloudflare</strong>, CDN, DNS, DDoS protection.
                   </li>
                   <li>
-                    <strong>Paddle</strong> — payment processing and merchant of record.
+                    <strong>Paddle</strong>, payment processing and merchant of record.
                   </li>
                   <li>
-                    <strong>Firebase / Google Cloud</strong> — authentication infrastructure.
+                    <strong>Firebase / Google Cloud</strong>, authentication infrastructure.
                   </li>
                   <li>
-                    <strong>Resend / Postmark</strong> — transactional email delivery.
+                    <strong>Resend / Postmark</strong>, transactional email delivery.
                   </li>
                   <li>
-                    <strong>PostHog / Axiom</strong> — product analytics and error tracking (when
+                    <strong>PostHog / Axiom</strong>, product analytics and error tracking (when
                     enabled).
                   </li>
                 </ul>
@@ -203,15 +203,15 @@ const PrivacyPage = (): JSX.Element => {
                 <p>We use three categories of cookies:</p>
                 <ul>
                   <li>
-                    <strong>Strictly necessary</strong> — authentication, load balancing, CSRF
+                    <strong>Strictly necessary</strong>, authentication, load balancing, CSRF
                     protection. These are always on.
                   </li>
                   <li>
-                    <strong>Preference</strong> — remember your language, theme, and workspace
+                    <strong>Preference</strong>, remember your language, theme, and workspace
                     selection.
                   </li>
                   <li>
-                    <strong>Analytics</strong> — help us understand which pages work and which
+                    <strong>Analytics</strong>, help us understand which pages work and which
                     don&apos;t. These only run with your consent (visible on first visit).
                   </li>
                 </ul>

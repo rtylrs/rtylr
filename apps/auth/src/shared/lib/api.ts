@@ -3,7 +3,7 @@ import type { SafeApi } from '@voxire/api';
 import i18next from 'i18next';
 
 // Auth app uses createApiClient but doesn't redirect on 401 (it IS auth).
-// The 401 interceptor from createApiClient redirects to auth — which is fine
+// The 401 interceptor from createApiClient redirects to auth, which is fine
 // because if you're already on auth with an expired token, it just reloads.
 const api = createApiClient('auth');
 

@@ -14,7 +14,7 @@ import {
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
 
-// Placeholder — replace with real store hook when wired up
+// Placeholder, replace with real store hook when wired up
 const BUSINESS_SUBDOMAIN = 'mybusiness';
 
 const Domain: React.FC = () => {
@@ -45,7 +45,7 @@ const Domain: React.FC = () => {
 
   const handleConnect = () => {
     if (!customDomain.trim()) return;
-    // Placeholder — wire up real API call here
+    // Placeholder, wire up real API call here
     setDomainStatus('active');
   };
 
@@ -61,7 +61,7 @@ const Domain: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 1 — Your menu URL */}
+      {/* Section 1, Your menu URL */}
       <Card>
         <CardHeader>
           <CardTitle>Your menu URL</CardTitle>
@@ -98,7 +98,7 @@ const Domain: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Section 2 — Custom Domain */}
+      {/* Section 2, Custom Domain */}
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -138,7 +138,7 @@ const Domain: React.FC = () => {
 
           <Separator />
 
-          {/* DNS Instructions — collapsible */}
+          {/* DNS Instructions, collapsible */}
           <div
             className="rounded-xl overflow-hidden"
             style={{ border: '1px solid var(--dash-border)' }}

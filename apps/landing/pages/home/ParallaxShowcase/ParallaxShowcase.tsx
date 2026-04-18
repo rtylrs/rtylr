@@ -11,7 +11,7 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
     offset: ['start end', 'end start'],
   });
 
-  // Image moves opposite to scroll — element enters from below, image drifts upward
+  // Image moves opposite to scroll, element enters from below, image drifts upward
   // Big pixel range = obvious cinematic parallax depth
   const imgY = useTransform(scrollYProgress, [0, 1], ['120px', '-420px']);
   const textY = useTransform(scrollYProgress, [0, 1], ['60px', '-60px']);
@@ -48,7 +48,7 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
 
         <motion.p className={styles.subtitle} variants={blurFadeIn}>
           rtylr isn&apos;t seven tools glued together. It&apos;s one platform where a POS sale
-          depletes inventory, flows tips into payroll, and enriches the customer profile — from the
+          depletes inventory, flows tips into payroll, and enriches the customer profile, from the
           same database, in real time.
         </motion.p>
 

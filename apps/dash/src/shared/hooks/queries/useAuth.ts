@@ -130,7 +130,7 @@ export const useGetUserInfo = () => {
       setUserId(userId);
       setToken(token);
       setUser(user);
-      // addons from API is a passthrough object — the schema uses z.array(z.string()) as a placeholder
+      // addons from API is a passthrough object, the schema uses z.array(z.string()) as a placeholder
       // but the runtime value is an Addons-shaped object due to .passthrough()
       if (user.addons && !Array.isArray(user.addons)) {
         setAddons(user.addons as unknown as Parameters<typeof setAddons>[0]);

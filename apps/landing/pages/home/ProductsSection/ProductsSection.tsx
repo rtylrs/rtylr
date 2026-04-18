@@ -37,7 +37,7 @@ const PRODUCTS_TOP: Product[] = [
     label: 'CRM',
     title: 'Customers & loyalty',
     description:
-      'Profiles, segments, campaigns, and loyalty — fed live by every receipt your POS writes.',
+      'Profiles, segments, campaigns, and loyalty, fed live by every receipt your POS writes.',
     Icon: Heart,
   },
 ];
@@ -110,7 +110,7 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
             One database.
           </motion.h2>
           <motion.p className={styles.sectionSubtitle} variants={blurFadeIn}>
-            Not bundled. Not integrated. Built into the same platform from the first line of code —
+            Not bundled. Not integrated. Built into the same platform from the first line of code,
             so a sale in POS updates inventory, payroll, and the P&amp;L in the same breath.
           </motion.p>
         </motion.div>

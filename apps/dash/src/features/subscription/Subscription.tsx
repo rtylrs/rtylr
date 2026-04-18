@@ -297,7 +297,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
       {/* All plans */}
       <SettingSection
         title="Available plans"
-        description="Priced per seat. Switch plans any time — changes apply at the next billing cycle."
+        description="Priced per seat. Switch plans any time, changes apply at the next billing cycle."
       >
         {plansLoading ? (
           <div className="space-y-3">

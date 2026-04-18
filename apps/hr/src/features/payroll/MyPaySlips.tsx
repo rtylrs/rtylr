@@ -72,7 +72,7 @@ const MyPaySlips = (): React.JSX.Element => {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                      {run.periodStart} — {run.periodEnd}
+                      {run.periodStart}, {run.periodEnd}
                     </span>
                     <Pill color="var(--hr-status-approved)">
                       {t(`payroll.statuses.${run.status}`)}

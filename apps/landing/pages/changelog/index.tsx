@@ -70,7 +70,7 @@ const ENTRIES: Entry[] = [
       },
       {
         kind: 'new',
-        text: 'rtylr AI — natural-language business setup. In beta for new workspaces.',
+        text: 'rtylr AI, natural-language business setup. In beta for new workspaces.',
       },
       {
         kind: 'improved',
@@ -102,7 +102,7 @@ const ENTRIES: Entry[] = [
     changes: [
       {
         kind: 'new',
-        text: 'New integrations directory — one place to see every service rtylr talks to.',
+        text: 'New integrations directory, one place to see every service rtylr talks to.',
       },
       {
         kind: 'new',
@@ -141,7 +141,7 @@ const ENTRIES: Entry[] = [
       { kind: 'new', text: 'SSO via SAML and OIDC now available on the Scale plan.' },
       {
         kind: 'new',
-        text: 'Role-level granular app access — "can view HR but not edit payroll", etc.',
+        text: 'Role-level granular app access, "can view HR but not edit payroll", etc.',
       },
       {
         kind: 'improved',
@@ -160,7 +160,7 @@ const ENTRIES: Entry[] = [
     changes: [
       {
         kind: 'new',
-        text: 'Native mobile app (iOS + Android) for managers — approvals, dashboards, shift adjustments on the go.',
+        text: 'Native mobile app (iOS + Android) for managers, approvals, dashboards, shift adjustments on the go.',
       },
       {
         kind: 'new',

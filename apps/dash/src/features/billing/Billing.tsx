@@ -167,7 +167,7 @@ const CurrentMonthCard: React.FC = () => {
         style={{ borderTop: '1px solid var(--dash-border)' }}
       >
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {isTrial ? 'Estimated total (trial — not charged)' : 'Estimated total'}
+          {isTrial ? 'Estimated total (trial, not charged)' : 'Estimated total'}
         </p>
         <p className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           {billing ? centsToDisplay(billing.totalCents) : '$0.00'}

@@ -133,8 +133,7 @@ const DemoPage = (): JSX.Element => {
               <h1 className={styles.title}>See rtylr on your data.</h1>
               <p className={styles.subtitle}>
                 A 30-minute walkthrough with someone who actually built it. Bring your menu, your
-                SKU list, your PDF of invoices — we&apos;ll show you what the switch would look
-                like.
+                SKU list, your PDF of invoices, we&apos;ll show you what the switch would look like.
               </p>
 
               <form onSubmit={handleSubmit} className={styles.form}>

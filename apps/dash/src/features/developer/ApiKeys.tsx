@@ -168,7 +168,7 @@ const ApiKeys: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Your new API key</DialogTitle>
             <DialogDescription>
-              Copy it now — you won&apos;t be able to see it again.
+              Copy it now, you won&apos;t be able to see it again.
             </DialogDescription>
           </DialogHeader>
           <div className="px-6 pb-4">

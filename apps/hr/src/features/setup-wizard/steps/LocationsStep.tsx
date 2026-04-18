@@ -131,7 +131,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
                     className="w-full rounded-lg px-3 py-2.5 outline-none"
                     style={inputStyle}
                   >
-                    <option value="">—</option>
+                    <option value="">-</option>
                     {TIMEZONES.map((tz) => (
                       <option key={tz.value} value={tz.value}>
                         {tz.label}

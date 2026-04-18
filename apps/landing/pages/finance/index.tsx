@@ -42,7 +42,7 @@ interface PLData {
 
 const PL_DATA: Record<Range, PLData> = {
   week: {
-    label: 'Week of April 13 — April 19, 2026',
+    label: 'Week of April 13 to April 19, 2026',
     compareLabel: 'vs last week',
     net: 11_800,
     netDelta: 9.2,
@@ -50,12 +50,12 @@ const PL_DATA: Record<Range, PLData> = {
       { label: 'Food & beverage', amount: 42_380, delta: 6.1, positive: true },
       { label: 'Catering & events', amount: 9_040, delta: 4.8, positive: true },
       { label: 'Delivery fees', amount: 2_180, delta: -1.4, positive: false },
-      { label: 'Subtotal — Revenue', amount: 53_600, delta: 5.4, positive: true, subtotal: true },
+      { label: 'Subtotal · Revenue', amount: 53_600, delta: 5.4, positive: true, subtotal: true },
       { label: 'COGS', amount: -15_620, delta: 1.9, positive: false },
       { label: 'Labor', amount: -17_140, delta: 0.8, positive: false },
       { label: 'Rent & utilities', amount: -5_180, delta: 0, positive: false },
       { label: 'Operating expenses', amount: -3_860, delta: 2.4, positive: false },
-      { label: 'Subtotal — Costs', amount: -41_800, delta: 1.6, positive: false, subtotal: true },
+      { label: 'Subtotal · Costs', amount: -41_800, delta: 1.6, positive: false, subtotal: true },
       { label: 'Net income', amount: 11_800, delta: 9.2, positive: true, total: true },
     ],
   },
@@ -68,12 +68,12 @@ const PL_DATA: Record<Range, PLData> = {
       { label: 'Food & beverage', amount: 184_210, delta: 8.4, positive: true },
       { label: 'Catering & events', amount: 42_180, delta: 12.1, positive: true },
       { label: 'Delivery fees', amount: 9_640, delta: -3.2, positive: false },
-      { label: 'Subtotal — Revenue', amount: 236_030, delta: 7.8, positive: true, subtotal: true },
+      { label: 'Subtotal · Revenue', amount: 236_030, delta: 7.8, positive: true, subtotal: true },
       { label: 'COGS', amount: -68_420, delta: 2.1, positive: false },
       { label: 'Labor', amount: -74_890, delta: 0.9, positive: false },
       { label: 'Rent & utilities', amount: -22_400, delta: 0, positive: false },
       { label: 'Operating expenses', amount: -18_720, delta: 5.4, positive: false },
-      { label: 'Subtotal — Costs', amount: -184_430, delta: 2.2, positive: false, subtotal: true },
+      { label: 'Subtotal · Costs', amount: -184_430, delta: 2.2, positive: false, subtotal: true },
       { label: 'Net income', amount: 51_600, delta: 18.3, positive: true, total: true },
     ],
   },
@@ -86,12 +86,12 @@ const PL_DATA: Record<Range, PLData> = {
       { label: 'Food & beverage', amount: 548_920, delta: 11.6, positive: true },
       { label: 'Catering & events', amount: 138_440, delta: 18.2, positive: true },
       { label: 'Delivery fees', amount: 29_180, delta: -5.1, positive: false },
-      { label: 'Subtotal — Revenue', amount: 716_540, delta: 10.9, positive: true, subtotal: true },
+      { label: 'Subtotal · Revenue', amount: 716_540, delta: 10.9, positive: true, subtotal: true },
       { label: 'COGS', amount: -206_880, delta: 2.9, positive: false },
       { label: 'Labor', amount: -226_160, delta: 1.3, positive: false },
       { label: 'Rent & utilities', amount: -67_200, delta: 0, positive: false },
       { label: 'Operating expenses', amount: -53_900, delta: 4.8, positive: false },
-      { label: 'Subtotal — Costs', amount: -554_140, delta: 2.4, positive: false, subtotal: true },
+      { label: 'Subtotal · Costs', amount: -554_140, delta: 2.4, positive: false, subtotal: true },
       { label: 'Net income', amount: 162_400, delta: 22.4, positive: true, total: true },
     ],
   },
@@ -105,7 +105,7 @@ const PL_DATA: Record<Range, PLData> = {
       { label: 'Catering & events', amount: 362_400, delta: 22.6, positive: true },
       { label: 'Delivery fees', amount: 82_940, delta: -2.8, positive: false },
       {
-        label: 'Subtotal — Revenue',
+        label: 'Subtotal · Revenue',
         amount: 1_866_020,
         delta: 13.9,
         positive: true,
@@ -116,7 +116,7 @@ const PL_DATA: Record<Range, PLData> = {
       { label: 'Rent & utilities', amount: -179_200, delta: 0, positive: false },
       { label: 'Operating expenses', amount: -135_900, delta: 6.1, positive: false },
       {
-        label: 'Subtotal — Costs',
+        label: 'Subtotal · Costs',
         amount: -1_438_020,
         delta: 2.8,
         positive: false,
@@ -213,7 +213,7 @@ const FinancePage = (): JSX.Element => {
   const [range, setRange] = useState<Range>('month');
   const data = PL_DATA[range];
 
-  // Chart state — independent from P&L range so both can be played with
+  // Chart state, independent from P&L range so both can be played with
   const [chartMetric, setChartMetric] = useState<ChartMetric>('revenue');
   const activeChartMetric = CHART_METRICS.find((m) => m.id === chartMetric) ?? CHART_METRICS[0];
   const chartSeries = CHART_DATA[chartMetric].map((value, i) => ({
@@ -235,12 +235,12 @@ const FinancePage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Finance — A real P&L, in real time. | rtylr"
+          title="Finance, A real P&L, in real time. | rtylr"
           description="Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically."
         />
 
         <div className={styles.page}>
-          {/* ── HERO — centered copy, full-width P&L mockup below ────────── */}
+          {/* ── HERO, centered copy, full-width P&L mockup below ────────── */}
           <section className={styles.hero}>
             <motion.div
               className={styles.heroCopy}
@@ -304,7 +304,7 @@ const FinancePage = (): JSX.Element => {
                 </div>
               </div>
 
-              {/* Range tabs — live re-computation */}
+              {/* Range tabs, live re-computation */}
               <div className={styles.rangeTabs} role="tablist" aria-label="Time range">
                 {RANGE_TABS.map((t) => (
                   <button
@@ -359,7 +359,7 @@ const FinancePage = (): JSX.Element => {
                               {Math.abs(row.delta).toFixed(1)}%
                             </span>
                           ) : (
-                            <span className={styles.deltaFlat}>—</span>
+                            <span className={styles.deltaFlat}>-</span>
                           )}
                         </td>
                       </tr>
@@ -386,7 +386,7 @@ const FinancePage = (): JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                LIVE — TRAILING 12 MONTHS
+                LIVE, TRAILING 12 MONTHS
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
                 Your business,
@@ -466,7 +466,7 @@ const FinancePage = (): JSX.Element => {
               </div>
             </motion.div>
 
-            {/* Compact pillar strip — horizontal, not a grid */}
+            {/* Compact pillar strip, horizontal, not a grid */}
             <motion.div
               className={styles.pillarStrip}
               initial="hidden"

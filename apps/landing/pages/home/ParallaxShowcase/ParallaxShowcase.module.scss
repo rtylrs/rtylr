@@ -7,7 +7,7 @@
   justify-content: center;
 }
 
-// Parallax image layer — extends beyond section on both sides so scroll movement never reveals gaps
+// Parallax image layer, extends beyond section on both sides so scroll movement never reveals gaps
 .imgWrap {
   position: absolute;
   inset: -120px 0;
@@ -18,12 +18,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  // Show the bottom portion — that's where the devices live
+  // Show the bottom portion, that's where the devices live
   object-position: center 85%;
   display: block;
 }
 
-// Dark overlay — layered so the illustration reads as atmosphere, not content.
+// Dark overlay, layered so the illustration reads as atmosphere, not content.
 // 1) Heavy flat darkness everywhere (85%+), 2) extra vignette behind the text,
 // 3) stronger fade to solid bg at top/bottom so section edges blend cleanly.
 .imgOverlay {

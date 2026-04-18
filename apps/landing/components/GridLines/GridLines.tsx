@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './GridLines.module.scss';
 
 /**
- * Full-page grid lines — Retool-style vertical and horizontal rules
+ * Full-page grid lines, Retool-style vertical and horizontal rules
  * that give the page a structured, architectural feel.
  * Placed once in MainLayout, rendered fixed behind all content.
  */

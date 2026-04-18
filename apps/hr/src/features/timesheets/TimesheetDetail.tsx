@@ -183,7 +183,7 @@ const TimesheetDetail = (): React.JSX.Element => {
                   color: mins > 0 ? 'var(--hr-text)' : 'var(--hr-text-dim)',
                 }}
               >
-                {mins > 0 ? formatDuration(mins) : '—'}
+                {mins > 0 ? formatDuration(mins) : '-'}
               </div>
             );
           })}

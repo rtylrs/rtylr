@@ -1113,7 +1113,7 @@ const BillingSection: React.FC = () => {
               >
                 <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {sub.status === 'trial'
-                    ? 'Estimated total (trial — not charged)'
+                    ? 'Estimated total (trial, not charged)'
                     : 'Estimated total'}
                 </p>
                 <p className="text-[15px] font-bold" style={{ color: 'var(--flow-text)' }}>

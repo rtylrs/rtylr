@@ -96,7 +96,7 @@ const CompanyProfileStep = ({
             }}
             style={inputStyle}
           >
-            <option value="">—</option>
+            <option value="">-</option>
             {INDUSTRIES.map((i) => (
               <option key={i.value} value={i.value}>
                 {i.label}
@@ -119,7 +119,7 @@ const CompanyProfileStep = ({
               }}
               style={inputStyle}
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {COUNTRIES.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
@@ -140,7 +140,7 @@ const CompanyProfileStep = ({
               }}
               style={inputStyle}
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {TIMEZONES.map((tz) => (
                 <option key={tz.value} value={tz.value}>
                   {tz.label}
@@ -163,15 +163,15 @@ const CompanyProfileStep = ({
             }}
             style={inputStyle}
           >
-            <option value="USD">USD — US Dollar</option>
-            <option value="EUR">EUR — Euro</option>
-            <option value="GBP">GBP — British Pound</option>
-            <option value="AED">AED — UAE Dirham</option>
-            <option value="SAR">SAR — Saudi Riyal</option>
-            <option value="LBP">LBP — Lebanese Pound</option>
-            <option value="JPY">JPY — Japanese Yen</option>
-            <option value="AUD">AUD — Australian Dollar</option>
-            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="USD">USD, US Dollar</option>
+            <option value="EUR">EUR, Euro</option>
+            <option value="GBP">GBP, British Pound</option>
+            <option value="AED">AED, UAE Dirham</option>
+            <option value="SAR">SAR, Saudi Riyal</option>
+            <option value="LBP">LBP, Lebanese Pound</option>
+            <option value="JPY">JPY, Japanese Yen</option>
+            <option value="AUD">AUD, Australian Dollar</option>
+            <option value="CAD">CAD, Canadian Dollar</option>
           </select>
           {errors.currency && <p className="mt-1 text-xs text-red-500">{errors.currency}</p>}
         </div>

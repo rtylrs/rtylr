@@ -1,4 +1,4 @@
-// Shared layout for all legal pages — terms, privacy, security, trust.
+// Shared layout for all legal pages, terms, privacy, security, trust.
 // Simple typographic document with a sticky in-page table of contents.
 
 .page {
@@ -54,7 +54,7 @@
   letter-spacing: 0.1px;
 }
 
-// ── Layout — content + sticky TOC ─────────────────────────────────────────
+// ── Layout, content + sticky TOC ─────────────────────────────────────────
 
 .layout {
   display: grid;

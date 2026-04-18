@@ -70,7 +70,7 @@ function formatRelative(dateStr: string): string {
 }
 
 function humanizeValue(action: string, value: string): string {
-  if (!value) return '—';
+  if (!value) return '-';
   if (action.includes('status') || action === 'status_changed' || action === 'status_change') {
     return value
       .split('_')
@@ -514,7 +514,7 @@ const TaskDetail: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Side panel — below main on small screens */}
+      {/* Side panel, below main on small screens */}
       <aside
         className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-l lg:border-t-0"
         style={{
@@ -610,13 +610,13 @@ const TaskDetail: React.FC = () => {
             <div className="flex items-center justify-between text-[12px]">
               <span style={{ color: 'var(--flow-text-muted)' }}>Estimated</span>
               <span style={{ color: 'var(--flow-text)' }}>
-                {estimatedHours != null ? `${estimatedHours}h` : '—'}
+                {estimatedHours != null ? `${estimatedHours}h` : '-'}
               </span>
             </div>
             <div className="flex items-center justify-between text-[12px]">
               <span style={{ color: 'var(--flow-text-muted)' }}>Actual</span>
               <span style={{ color: 'var(--flow-text)' }}>
-                {actualHours != null ? `${actualHours}h` : '—'}
+                {actualHours != null ? `${actualHours}h` : '-'}
               </span>
             </div>
 
@@ -742,7 +742,7 @@ const TaskDetail: React.FC = () => {
                 border: '1px solid var(--flow-border)',
               }}
             >
-              —
+              ,
             </button>
             {EFFORT_PRESETS.map((m) => (
               <button
@@ -852,7 +852,7 @@ const TaskDetail: React.FC = () => {
                 className="bg-transparent text-[12px] outline-none w-full"
                 style={{ color: 'var(--flow-text)' }}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {(def.options ?? []).map((opt) => (
                   <option key={opt} value={opt} style={{ background: 'var(--flow-card)' }}>
                     {opt}

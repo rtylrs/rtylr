@@ -71,7 +71,7 @@ const TrustPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Trust Center | rtylr"
-          description="Security, privacy, compliance, uptime, and vendor transparency — everything customers need before they commit."
+          description="Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
         />
 
         <div className={styles.page}>
@@ -196,7 +196,7 @@ const TrustPage = (): JSX.Element => {
               <span className={styles.sectionEyebrow}>COMPLIANCE POSTURE</span>
               <h2 className={styles.sectionTitle}>Where we are.</h2>
               <p className={styles.complianceCopy}>
-                We publish our compliance status transparently — certified, aligned, or in progress.
+                We publish our compliance status transparently, certified, aligned, or in progress.
                 For SIG, DPA, or SOC 2 under NDA, email{' '}
                 <a href="mailto:security@voxire.com">security@voxire.com</a>.
               </p>

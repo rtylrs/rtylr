@@ -105,7 +105,7 @@ const InviteAccept: React.FC = () => {
     );
   }
 
-  // Success — redirect to the app they were invited to, falling back to dash
+  // Success, redirect to the app they were invited to, falling back to dash
   const firstApp = apps[0] as AppId | undefined;
   const signInHref = firstApp && APP_URLS[firstApp] ? APP_URLS[firstApp] : APP_URLS.dash;
 

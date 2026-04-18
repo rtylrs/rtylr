@@ -1,4 +1,4 @@
-// ── Flow landing — kanban board hero, features grid, context story ────────
+// ── Flow landing, kanban board hero, features grid, context story ────────
 // Visual direction: project-management, card-based, motion-driven.
 
 .page {
@@ -560,7 +560,7 @@
   letter-spacing: 0.3px;
 }
 
-// Compact features strip — replaces the heavy 3×2 grid
+// Compact features strip, replaces the heavy 3×2 grid
 .featuresStrip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -244,7 +244,7 @@ const CAMPAIGNS = [
 const CRMPage = (): JSX.Element => {
   const router = useRouter();
 
-  // Segment-builder state — toggle attributes to watch the audience shrink/grow
+  // Segment-builder state, toggle attributes to watch the audience shrink/grow
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['vip']));
 
   const toggleFilter = (id: string): void => {
@@ -274,12 +274,12 @@ const CRMPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="CRM — Every customer, remembered. | rtylr"
+          title="CRM, Every customer, remembered. | rtylr"
           description="Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically."
         />
 
         <div className={styles.page}>
-          {/* ── HERO — copy left, profile card right ────────────────────── */}
+          {/* ── HERO, copy left, profile card right ────────────────────── */}
           <section className={styles.hero}>
             <motion.div
               className={styles.heroCopy}
@@ -298,7 +298,7 @@ const CRMPage = (): JSX.Element => {
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish,
-                server they love — stored, segmented, ready the moment you want to send the right
+                server they love, stored, segmented, ready the moment you want to send the right
                 message. No CRM data entry. No forgotten customers at the door.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
@@ -395,7 +395,7 @@ const CRMPage = (): JSX.Element => {
               </motion.h2>
               <motion.p className={styles.sectionCopy} variants={blurFadeIn}>
                 Build segments by visit velocity, lifetime spend, last-order date, tags, preferences
-                — any combination. Re-run automatically as new orders land.
+                , any combination. Re-run automatically as new orders land.
               </motion.p>
             </div>
 
@@ -482,7 +482,7 @@ const CRMPage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <motion.div className={styles.builderHeader} variants={blurFadeIn}>
-              <span className={styles.sectionEyebrow}>TRY IT — LIVE</span>
+              <span className={styles.sectionEyebrow}>TRY IT, LIVE</span>
               <h2 className={styles.sectionTitle}>
                 Build a segment.
                 <br />
@@ -556,7 +556,7 @@ const CRMPage = (): JSX.Element => {
                 <ul className={styles.audienceList}>
                   {matchingGuests.length === 0 ? (
                     <li className={styles.audienceEmpty}>
-                      No guests match this combination — loosen a filter.
+                      No guests match this combination, loosen a filter.
                     </li>
                   ) : (
                     matchingGuests.map((g) => (

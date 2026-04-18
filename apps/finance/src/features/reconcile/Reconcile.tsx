@@ -8,10 +8,10 @@ import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
 const CANDIDATES = [
-  { id: 'INV-001', label: 'Invoice INV-001 — Acme', amount: 14820 },
-  { id: 'INV-002', label: 'Invoice INV-002 — Globex', amount: 2400 },
+  { id: 'INV-001', label: 'Invoice INV-001, Acme', amount: 14820 },
+  { id: 'INV-002', label: 'Invoice INV-002, Globex', amount: 2400 },
   { id: 'STRIPE-1', label: 'Stripe payout batch 1', amount: 8920 },
-  { id: 'EXP-203', label: 'Expense EXP-203 — Figma', amount: -420 },
+  { id: 'EXP-203', label: 'Expense EXP-203, Figma', amount: -420 },
 ];
 
 const Reconcile: React.FC = () => {

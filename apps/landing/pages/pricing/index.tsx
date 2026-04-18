@@ -54,12 +54,12 @@ const FAQ_ITEMS = [
   {
     question: 'When does Scale pricing kick in?',
     answer:
-      'Scale is designed for teams of 30+ active seats. Once your workspace crosses that threshold for a billing period, Scale pricing applies automatically — cheaper per seat, more locations, SSO, and audit logs.',
+      'Scale is designed for teams of 30+ active seats. Once your workspace crosses that threshold for a billing period, Scale pricing applies automatically: cheaper per seat, more locations, SSO, and audit logs.',
   },
   {
     question: 'Any contract or lock-in?',
     answer:
-      'None. Monthly plans cancel any time. Annual plans are billed upfront and save 20%, but you can still cancel — unused days credit against your next bill.',
+      'None. Monthly plans cancel any time. Annual plans are billed upfront and save 20%, but you can still cancel. Unused days credit against your next bill.',
   },
 ];
 
@@ -132,8 +132,8 @@ const PricingPage = (): JSX.Element => {
               Not per month.
             </motion.h1>
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-              All 7 apps on every plan. Daily proration — add a seat for 10 days, pay for 10 days.
-              No per-location fees, no module upsells.
+              All 7 apps on every plan. Daily proration: add a seat for 10 days, pay for 10 days. No
+              per-location fees, no module upsells.
             </motion.p>
 
             {/* Billing toggle */}

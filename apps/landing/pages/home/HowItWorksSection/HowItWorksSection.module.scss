@@ -1,4 +1,4 @@
-// Clean, flat layout — no orbs, no timeline line, no glow.
+// Clean, flat layout, no orbs, no timeline line, no glow.
 // Four bordered cells in a row with big step numbers and tight copy.
 
 .howItWorksSection {
@@ -42,7 +42,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-// ── Grid of steps — shared borders, no gaps ─────────────────────────────────
+// ── Grid of steps, shared borders, no gaps ─────────────────────────────────
 
 .grid {
   display: grid;

@@ -128,9 +128,8 @@ const HardwarePage = (): JSX.Element => {
                 Plug it in. Ring it up.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Certified printers, card readers, scanners, and kiosks — paired with rtylr POS out
-                of the box. No drivers to install, no firmware to sideload, no configuration
-                weekend.
+                Certified printers, card readers, scanners, and kiosks, paired with rtylr POS out of
+                the box. No drivers to install, no firmware to sideload, no configuration weekend.
               </motion.p>
             </div>
           </motion.section>

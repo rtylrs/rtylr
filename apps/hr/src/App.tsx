@@ -82,7 +82,7 @@ const App = (): React.JSX.Element => {
       <ProtectedRoute appId="hr">
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Setup wizard — outside HRConfigRoute */}
+            {/* Setup wizard, outside HRConfigRoute */}
             <Route
               path="/setup"
               element={
@@ -92,7 +92,7 @@ const App = (): React.JSX.Element => {
               }
             />
 
-            {/* All feature routes — inside HRConfigRoute */}
+            {/* All feature routes, inside HRConfigRoute */}
             <Route element={<HRConfigRoute />}>
               <Route path="/" element={wrap(<Dashboard />)} />
               <Route path="/employees" element={wrap(<Employees />)} />

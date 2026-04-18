@@ -1,4 +1,4 @@
-// ── ERP landing page — inventory table hero, alternating capabilities ──────
+// ── ERP landing page, inventory table hero, alternating capabilities ──────
 // Visual direction: warehouse/data-grid, live table with tabular numerics,
 // flow-diagram depletion strip, monospace accents where it reads technical.
 
@@ -404,7 +404,7 @@
   }
 }
 
-// ── CAPABILITIES — stacked alternating rows ─────────────────────────────────
+// ── CAPABILITIES, stacked alternating rows ─────────────────────────────────
 
 .capabilitiesSection {
   padding: 120px 32px;
@@ -457,7 +457,7 @@
   }
 }
 
-// Reverse alternates the subtle indent only — full text column, no crushing
+// Reverse alternates the subtle indent only, full text column, no crushing
 .capabilityRowReverse {
   grid-template-columns: 120px 1fr;
 

@@ -98,12 +98,12 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
       <Breadcrumbs
         items={[
           { label: t('payroll.title'), href: '/payroll' },
-          { label: `${run.periodStart} — ${run.periodEnd}` },
+          { label: `${run.periodStart}, ${run.periodEnd}` },
         ]}
       />
 
       <SectionHeader
-        title={`${run.periodStart} — ${run.periodEnd}`}
+        title={`${run.periodStart}, ${run.periodEnd}`}
         subtitle={t('payroll.runDetail.subtitle', { count: entries.length })}
         right={
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

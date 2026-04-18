@@ -6,7 +6,7 @@ import styles from './TestimonialsSection.module.scss';
 const testimonials = [
   {
     quote:
-      'We used to close the books on the 8th of every month. Now we close them on the 2nd — because there\u2019s nothing left to reconcile.',
+      'We used to close the books on the 8th of every month. Now we close them on the 2nd, because there\u2019s nothing left to reconcile.',
     author: 'Laila Ahmed',
     role: 'Owner, Byblos Kitchen',
     company: 'Restaurant · 3 locations',
@@ -46,7 +46,7 @@ const testimonials = [
   },
   {
     quote:
-      'Tasks link to the invoice, the customer, the shift. I stopped opening four tabs for four tools — I just open Flow.',
+      'Tasks link to the invoice, the customer, the shift. I stopped opening four tabs for four tools, I just open Flow.',
     author: 'James Wilson',
     role: 'Manager, Tech Store Pro',
     company: 'Retail',

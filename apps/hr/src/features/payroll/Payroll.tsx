@@ -200,7 +200,7 @@ const Payroll = (): React.JSX.Element => {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                      {run.periodStart} — {run.periodEnd}
+                      {run.periodStart}, {run.periodEnd}
                     </span>
                     <Pill color={STATUS_COLORS[run.status]}>
                       {t(`payroll.statuses.${run.status}`)}

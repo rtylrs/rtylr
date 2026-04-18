@@ -178,21 +178,21 @@ const Email: React.FC = () => {
 
   const handleSaveSender = async () => {
     setSavingSender(true);
-    // Placeholder — wire up real API call here
+    // Placeholder, wire up real API call here
     await new Promise((r) => setTimeout(r, 800));
     setSavingSender(false);
   };
 
   const handleTestSmtp = async () => {
     setTestingSmtp(true);
-    // Placeholder — wire up real API call here
+    // Placeholder, wire up real API call here
     await new Promise((r) => setTimeout(r, 1200));
     setTestingSmtp(false);
   };
 
   const handleSaveSmtp = async () => {
     setSavingSmtp(true);
-    // Placeholder — wire up real API call here
+    // Placeholder, wire up real API call here
     await new Promise((r) => setTimeout(r, 800));
     setSavingSmtp(false);
   };
@@ -213,7 +213,7 @@ const Email: React.FC = () => {
         </p>
       </div>
 
-      {/* Section 1 — Sender Identity */}
+      {/* Section 1, Sender Identity */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ const Email: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Section 2 — SMTP Configuration */}
+      {/* Section 2, SMTP Configuration */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -388,7 +388,7 @@ const Email: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Section 3 — Email Notifications */}
+      {/* Section 3, Email Notifications */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

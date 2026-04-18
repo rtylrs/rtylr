@@ -96,7 +96,7 @@ const Settings: React.FC = () => {
               value={form.industry ?? ''}
               onChange={(e) => setForm({ ...form, industry: e.target.value })}
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {INDUSTRIES.map((i) => (
                 <option key={i.value} value={i.value}>
                   {i.label}
