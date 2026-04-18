@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import TrialBanner from '../shared/components/TrialBanner';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -965,6 +966,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <TrialBanner />
         {inQuietHours && (
           <div
             className="shrink-0 px-3 py-2 text-center text-[10px] sm:px-4 sm:text-[11px] leading-snug"

@@ -16,6 +16,7 @@ import { Button, Input, Label, Select } from '../../shared/components/ui';
 import { SettingSection } from '../../shared/components/dash';
 import api from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
+import { useMySubscription, centsToDisplay } from '../../shared/hooks/queries/useSubscription';
 
 const ALL_APPS = [
   { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },
@@ -35,6 +36,7 @@ const ALL_APPS = [
 const InviteUser: React.FC = () => {
   const navigate = useNavigate();
   const invite = useInviteMember();
+  const { data: sub } = useMySubscription();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -313,6 +315,26 @@ const InviteUser: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Seat cost preview */}
+          {sub && sub.pricePerSeatCents > 0 && (
+            <div
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
+              style={{
+                background: 'var(--accent-muted)',
+                border: '1px solid var(--accent-border)',
+              }}
+            >
+              <CreditCard size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+              <p style={{ color: 'var(--dash-text-muted)' }}>
+                Adding this member will add{' '}
+                <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  +{centsToDisplay(sub.pricePerSeatCents)}/mo
+                </span>{' '}
+                to your bill · applied at the next billing cycle.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Actions */}

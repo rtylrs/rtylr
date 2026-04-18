@@ -1,12 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Save } from 'lucide-react';
+import {
+  Save,
+  Users,
+  CreditCard,
+  Settings2,
+  UserPlus,
+  UserMinus,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+} from 'lucide-react';
+import { motion } from 'motion/react';
 import appConfig from '../../app.json';
 import { useSettings, useUpdateSettings } from './useSettings';
-import { PageHeader, Card, Input, Select, Button } from '../../shared/components/ui';
+import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
 import type { Settings } from '../../shared/services/crmApi';
+import {
+  useCrmTeam,
+  useCrmInviteMember,
+  useCrmDeactivateMember,
+} from '../../shared/hooks/queries/useCrmTeam';
+import {
+  useCrmSubscription,
+  useCrmSubscriptionBilling,
+  centsToDisplay,
+  trialDaysLeft,
+  formatPeriodRange,
+} from '../../shared/hooks/queries/useCrmSubscription';
 
-const SettingsScreen: React.FC = () => {
+type TabId = 'general' | 'team' | 'billing';
+
+interface TabDef {
+  id: TabId;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+}
+
+const TABS: TabDef[] = [
+  { id: 'general', label: 'General', icon: Settings2 },
+  { id: 'team', label: 'Team', icon: Users },
+  { id: 'billing', label: 'Billing', icon: CreditCard },
+];
+
+// ── General Tab ───────────────────────────────────────────────────────────────
+
+const GeneralTab: React.FC = () => {
   const { data: fetched } = useSettings();
   const update = useUpdateSettings();
   const defaultSettings: Settings = {
@@ -25,10 +65,10 @@ const SettingsScreen: React.FC = () => {
     if (fetched) setForm(fetched);
   }, [fetched]);
 
-  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]): void =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     update.mutate(form, {
       onSuccess: () => toast.success('Settings saved'),
       onError: () => toast.success('Settings saved'),
@@ -37,16 +77,12 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '680px' }}>
-      <PageHeader
-        title="Settings"
-        subtitle="Configure your CRM defaults"
-        actions={
-          <Button variant="primary" onClick={handleSave}>
-            <Save size={13} />
-            Save changes
-          </Button>
-        }
-      />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Button variant="primary" onClick={handleSave}>
+          <Save size={13} />
+          Save changes
+        </Button>
+      </div>
 
       <Card style={{ marginBottom: '16px' }}>
         <h4
@@ -189,7 +225,7 @@ const SettingsScreen: React.FC = () => {
             type="checkbox"
             checked={form.defaultConsent}
             onChange={(e) => set('defaultConsent', e.target.checked)}
-            style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }}
+            style={{ accentColor: ACCENT, width: '16px', height: '16px' }}
           />
           <div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
@@ -201,6 +237,533 @@ const SettingsScreen: React.FC = () => {
           </div>
         </label>
       </Card>
+    </div>
+  );
+};
+
+// ── Team Tab ──────────────────────────────────────────────────────────────────
+
+const TeamTab: React.FC = () => {
+  const { data: members = [], isLoading } = useCrmTeam();
+  const invite = useCrmInviteMember();
+  const deactivate = useCrmDeactivateMember();
+
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
+
+  const handleInvite = (): void => {
+    if (!email.trim() || !fullName.trim()) return;
+    invite.mutate(
+      { email: email.trim(), fullName: fullName.trim(), role: 'member' },
+      {
+        onSuccess: () => {
+          setEmail('');
+          setFullName('');
+          setShowInvite(false);
+        },
+      }
+    );
+  };
+
+  const inputStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid var(--hub-border)',
+    background: 'var(--hub-input-bg)',
+    color: 'var(--hub-text)',
+    fontSize: 13,
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+
+  return (
+    <div style={{ maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 4px' }}>
+          Team
+        </h2>
+        <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
+          People who have access to CRM.
+        </p>
+      </div>
+
+      {showInvite ? (
+        <Card>
+          <h3
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px' }}
+          >
+            Invite someone to CRM
+          </h3>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}
+          >
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  marginBottom: 4,
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                Full name
+              </label>
+              <input
+                type="text"
+                placeholder="Jane Smith"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  marginBottom: 4,
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="jane@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleInvite();
+                }}
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button
+              variant="primary"
+              disabled={!email.trim() || !fullName.trim() || invite.isPending}
+              onClick={handleInvite}
+            >
+              <UserPlus size={13} />
+              {invite.isPending ? 'Sending…' : 'Send invite'}
+            </Button>
+            <Button variant="ghost" onClick={() => setShowInvite(false)}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          <Button variant="primary" onClick={() => setShowInvite(true)}>
+            <UserPlus size={13} />
+            Invite member
+          </Button>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: 56,
+                borderRadius: 12,
+                background: 'var(--hub-hover)',
+              }}
+            />
+          ))}
+        </div>
+      ) : members.length === 0 ? (
+        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
+          <Users size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
+          <p style={{ fontSize: 13, margin: 0 }}>No team members yet.</p>
+        </div>
+      ) : (
+        <Card padded={false}>
+          {members.map((m, idx) => (
+            <div
+              key={m.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 16px',
+                borderBottom: idx < members.length - 1 ? '1px solid var(--hub-border)' : 'none',
+              }}
+            >
+              <div
+                style={{
+                  height: 32,
+                  width: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  flexShrink: 0,
+                  background: 'color-mix(in srgb, var(--crm-accent, #3b82f6) 20%, transparent)',
+                  color: 'var(--crm-accent, #3b82f6)',
+                }}
+              >
+                {m.name.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: 'var(--hub-text)',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {m.name}
+                </p>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--hub-text-muted)',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {m.email}
+                </p>
+              </div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: 999,
+                  background: 'var(--hub-hover)',
+                  color: 'var(--hub-text-muted)',
+                  flexShrink: 0,
+                }}
+              >
+                {m.role}
+              </span>
+              <button
+                type="button"
+                aria-label={`Remove ${m.name}`}
+                onClick={() => {
+                  deactivate.mutate(m.id);
+                }}
+                style={{
+                  height: 28,
+                  width: 28,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--hub-text-muted)',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                <UserMinus size={13} />
+              </button>
+            </div>
+          ))}
+        </Card>
+      )}
+    </div>
+  );
+};
+
+// ── Billing Tab ───────────────────────────────────────────────────────────────
+
+const STATUS_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
+  active: CheckCircle2,
+  trial: Clock,
+  cancelled: XCircle,
+  expired: AlertCircle,
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  active: 'var(--status-active, #16a34a)',
+  trial: 'var(--status-trial, #d97706)',
+  cancelled: 'var(--status-cancelled, #dc2626)',
+  expired: 'var(--status-expired, #6b7280)',
+};
+
+const BillingTab: React.FC = () => {
+  const { data: sub, isLoading: subLoading } = useCrmSubscription();
+  const { data: billing, isLoading: billingLoading } = useCrmSubscriptionBilling();
+
+  const isLoading = subLoading || billingLoading;
+
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {[32, 112, 80].map((h, i) => (
+          <div key={i} style={{ height: h, borderRadius: 12, background: 'var(--hub-hover)' }} />
+        ))}
+      </div>
+    );
+  }
+
+  const StatusIcon = sub ? (STATUS_ICON[sub.status] ?? AlertCircle) : null;
+  const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR['expired']) : '';
+
+  return (
+    <div style={{ maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 4px' }}>
+          Billing
+        </h2>
+        <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
+          Your CRM subscription and usage this month.
+        </p>
+      </div>
+
+      {!sub ? (
+        <Card style={{ padding: '32px 24px', textAlign: 'center' }}>
+          <CreditCard
+            size={24}
+            style={{
+              opacity: 0.3,
+              color: 'var(--hub-text)',
+              display: 'block',
+              margin: '0 auto 12px',
+            }}
+          />
+          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--hub-text)', margin: '0 0 6px' }}>
+            No active subscription
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
+            Contact your account owner or visit billing to activate CRM.
+          </p>
+        </Card>
+      ) : (
+        <>
+          <Card>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 12,
+              }}
+            >
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+                {sub.planName}
+              </p>
+              {StatusIcon && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: statusColor,
+                  }}
+                >
+                  <StatusIcon size={12} />
+                  <span style={{ textTransform: 'capitalize' }}>{sub.status}</span>
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}
+            >
+              <div>
+                <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+                  {centsToDisplay(billing?.totalCents ?? sub.seatCount * sub.pricePerSeatCents)}
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)', margin: '4px 0 0' }}>
+                  {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
+                  {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
+                </p>
+              </div>
+              {sub.status === 'trial' && (
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    flexShrink: 0,
+                    background: 'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
+                    color: 'var(--status-trial, #d97706)',
+                  }}
+                >
+                  {trialDaysLeft(sub.trialEndsAt)}d left in trial
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {billing && billing.lineItems.length > 0 && (
+            <Card padded={false}>
+              <div
+                style={{
+                  padding: '10px 16px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  background: 'var(--hub-hover)',
+                  color: 'var(--hub-text-muted)',
+                  borderBottom: '1px solid var(--hub-border)',
+                  borderRadius: '12px 12px 0 0',
+                }}
+              >
+                This month
+              </div>
+              {billing.lineItems.map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '12px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                    borderBottom:
+                      i < billing.lineItems.length - 1 ? '1px solid var(--hub-border)' : 'none',
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 12, color: 'var(--hub-text)', margin: 0 }}>
+                      {item.seatCount} seat{item.seatCount !== 1 ? 's' : ''} ·{' '}
+                      {centsToDisplay(item.pricePerSeatCents)}/seat/mo
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        color: 'var(--hub-text-muted)',
+                        margin: '2px 0 0',
+                      }}
+                    >
+                      {formatPeriodRange(item.periodStart, item.periodEnd)}
+                      {!item.periodEnd && (
+                        <span
+                          style={{
+                            marginLeft: 6,
+                            fontFamily: 'inherit',
+                            fontSize: 10,
+                            padding: '2px 6px',
+                            borderRadius: 999,
+                            background:
+                              'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
+                            color: 'var(--status-trial, #d97706)',
+                          }}
+                        >
+                          in progress
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+                    {centsToDisplay(item.amountCents)}
+                  </p>
+                </div>
+              ))}
+              <div
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'var(--hub-hover)',
+                  borderTop: '1px solid var(--hub-border)',
+                  borderRadius: '0 0 12px 12px',
+                }}
+              >
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+                  {sub.status === 'trial'
+                    ? 'Estimated total (trial — not charged)'
+                    : 'Estimated total'}
+                </p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+                  {centsToDisplay(billing.totalCents)}
+                </p>
+              </div>
+            </Card>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// ── Main Settings Component ───────────────────────────────────────────────────
+
+const SettingsScreen: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<TabId>('general');
+
+  return (
+    <div>
+      <PageHeader title="Settings" subtitle="Configure your CRM defaults" />
+
+      {/* Tab bar */}
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--hub-border)',
+          marginBottom: 24,
+        }}
+      >
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '10px 16px',
+                fontSize: 13,
+                fontWeight: isActive ? 600 : 500,
+                color: isActive ? 'var(--crm-accent, #3b82f6)' : 'var(--hub-text-muted)',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: isActive
+                  ? '2px solid var(--crm-accent, #3b82f6)'
+                  : '2px solid transparent',
+                marginBottom: -1,
+                cursor: 'pointer',
+                transition: 'color 0.15s, border-color 0.15s',
+              }}
+            >
+              <Icon size={14} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.15 }}
+      >
+        {activeTab === 'general' && <GeneralTab />}
+        {activeTab === 'team' && <TeamTab />}
+        {activeTab === 'billing' && <BillingTab />}
+      </motion.div>
     </div>
   );
 };

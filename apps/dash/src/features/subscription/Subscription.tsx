@@ -1,18 +1,19 @@
 import React from 'react';
-import { useTranslation } from '@voxire/i18n';
-import { CheckCircle2, Clock, XCircle, AlertCircle, Box } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, AlertCircle, Users, Zap, ArrowRight } from 'lucide-react';
 import { APP_CONFIG, APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/config';
 import { SettingSection, Breadcrumbs } from '../../shared/components/dash';
-
 import {
   useMySubscription,
   useListPlans,
+  useBillingDetail,
+  centsToDisplay,
+  trialDaysLeft,
   type SubscriptionPayload,
   type PlanPayload,
 } from '../../shared/hooks/queries/useSubscription';
 
-// ── Status helpers ────────────────────────────────────────────────────────────
+// ── Status badge ──────────────────────────────────────────────────────────────
 
 type SubStatus = SubscriptionPayload['status'];
 
@@ -64,7 +65,7 @@ const StatusBadge: React.FC<{ status: SubStatus }> = ({ status }) => {
   );
 };
 
-// ── App pill ─────────────────────────────────────────────────────────────────
+// ── App pill ──────────────────────────────────────────────────────────────────
 
 const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   const id = appId as AppId;
@@ -81,14 +82,13 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
         border: '1px solid var(--accent-border)',
       }}
     >
-      <Box size={10} />
       {name}
     </span>
   );
 
   if (url) {
     return (
-      <a href={url} target="_blank" rel="noreferrer noopener">
+      <a href={url as string} target="_blank" rel="noreferrer noopener">
         {pill}
       </a>
     );
@@ -96,16 +96,18 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   return pill;
 };
 
-// ── Current plan card ─────────────────────────────────────────────────────────
+// ── Current plan + seat cost ──────────────────────────────────────────────────
 
 const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
-  const { t } = useTranslation();
+  const { data: billing } = useBillingDetail();
+  const daysLeft = trialDaysLeft(sub.trialEndsAt);
+  const isTrial = sub.status === 'trial';
+  const estimatedMonthly = sub.seatCount * sub.pricePerSeatCents;
+
   return (
-    <SettingSection
-      title={t('subscription.currentPlan')}
-      description={t('subscription.currentPlanDesc')}
-    >
-      <div className="space-y-4">
+    <SettingSection title="Current plan" description="Your active subscription and seat usage.">
+      <div className="space-y-5">
+        {/* Plan + status row */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-base font-bold" style={{ color: 'var(--dash-text)' }}>
@@ -118,9 +120,42 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
           <StatusBadge status={sub.status} />
         </div>
 
+        {/* Per-seat pricing block */}
+        <div
+          className="rounded-xl p-4 space-y-3"
+          style={{ background: 'var(--dash-bg)', border: '1px solid var(--dash-border)' }}
+        >
+          <div className="flex items-center gap-2">
+            <Users size={13} style={{ color: 'var(--dash-text-muted)' }} />
+            <p className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+              Usage this month
+            </p>
+          </div>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-2xl font-bold" style={{ color: 'var(--dash-text)' }}>
+                {centsToDisplay(billing?.totalCents ?? estimatedMonthly)}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
+                {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
+              </p>
+            </div>
+            {isTrial && (
+              <div
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                style={{ background: 'var(--status-trial-bg)', color: 'var(--status-trial)' }}
+              >
+                {daysLeft}d left in trial
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Included apps */}
         <div>
           <p className="text-xs font-medium mb-2" style={{ color: 'var(--dash-text-muted)' }}>
-            {t('subscription.includedApps')}
+            Included apps
           </p>
           <div className="flex flex-wrap gap-1.5">
             {sub.apps.map((app) => (
@@ -133,10 +168,15 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
   );
 };
 
-// ── Plan card (for the "all plans" list) ─────────────────────────────────────
+// ── Plan card ─────────────────────────────────────────────────────────────────
 
-const PlanCard: React.FC<{ plan: PlanPayload; isCurrent: boolean }> = ({ plan, isCurrent }) => {
-  const { t } = useTranslation();
+const PlanCard: React.FC<{
+  plan: PlanPayload;
+  isCurrent: boolean;
+  currentSeats: number;
+}> = ({ plan, isCurrent, currentSeats }) => {
+  const estimatedMonthly = currentSeats * plan.pricePerSeatCents;
+
   return (
     <div
       className="rounded-xl p-4 space-y-3"
@@ -146,31 +186,52 @@ const PlanCard: React.FC<{ plan: PlanPayload; isCurrent: boolean }> = ({ plan, i
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {plan.name}
-        </p>
-        {isCurrent && (
-          <span
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-            style={{ background: 'var(--accent)', color: '#fff' }}
-          >
-            {t('subscription.current')}
-          </span>
-        )}
+        <div>
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+            {plan.name}
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+            {centsToDisplay(plan.pricePerSeatCents)}/seat/month
+          </p>
+        </div>
+        <div className="text-right">
+          {isCurrent ? (
+            <span
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+              style={{ background: 'var(--accent)', color: '#fff' }}
+            >
+              Current
+            </span>
+          ) : (
+            <p className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
+              ~{centsToDisplay(estimatedMonthly)}/mo at {currentSeats} seats
+            </p>
+          )}
+        </div>
       </div>
+
       <div className="flex flex-wrap gap-1">
         {plan.apps.map((app) => (
           <AppPill key={app} appId={app} />
         ))}
       </div>
+
+      {!isCurrent && (
+        <button
+          className="flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+          style={{ color: 'var(--accent)' }}
+        >
+          Switch to {plan.name}
+          <ArrowRight size={11} />
+        </button>
+      )}
     </div>
   );
 };
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 const Subscription: React.FC = (): React.JSX.Element => {
-  const { t } = useTranslation();
   const { data: sub, isLoading: subLoading } = useMySubscription();
   const { data: plans = [], isLoading: plansLoading } = useListPlans();
 
@@ -181,26 +242,27 @@ const Subscription: React.FC = (): React.JSX.Element => {
       {/* Current plan */}
       {subLoading ? (
         <div
-          className="h-32 rounded-xl animate-pulse"
+          className="h-40 rounded-xl animate-pulse"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         />
       ) : sub ? (
         <CurrentPlanCard sub={sub} />
       ) : (
-        <SettingSection
-          title={t('subscription.currentPlan')}
-          description={t('subscription.currentPlanDesc')}
-        >
-          <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-            {t('subscription.noPlan')}
-          </p>
+        <SettingSection title="Current plan" description="You don't have an active subscription.">
+          <button
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: '#4583C4', color: '#fff' }}
+          >
+            <Zap size={13} />
+            Choose a plan
+          </button>
         </SettingSection>
       )}
 
       {/* All plans */}
       <SettingSection
-        title={t('subscription.allPlans')}
-        description={t('subscription.allPlansDesc')}
+        title="Available plans"
+        description="Priced per seat. Switch plans any time — changes apply at the next billing cycle."
       >
         {plansLoading ? (
           <div className="space-y-3">
@@ -215,7 +277,12 @@ const Subscription: React.FC = (): React.JSX.Element => {
         ) : (
           <div className="space-y-3">
             {plans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} isCurrent={plan.slug === sub?.planSlug} />
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                isCurrent={plan.slug === sub?.planSlug}
+                currentSeats={sub?.seatCount ?? 1}
+              />
             ))}
           </div>
         )}

@@ -2,12 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../lib/api';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 export interface SubscriptionPayload {
   id: number;
   planName: string;
   planSlug: string;
   apps: string[];
+  pricePerSeatCents: number;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
+  seatCount: number;
+  trialEndsAt: string | null;
+  nextBillingDate: string | null;
+  paddleSubscriptionId: string | null;
 }
 
 export interface PlanPayload {
@@ -15,8 +22,82 @@ export interface PlanPayload {
   name: string;
   slug: string;
   apps: string[];
+  pricePerSeatCents: number;
+  trialDays: number;
   isActive: boolean;
 }
+
+export interface BillingLineItem {
+  periodStart: string;
+  periodEnd: string | null; // null = still active
+  seatCount: number;
+  pricePerSeatCents: number;
+  amountCents: number;
+}
+
+export interface BillingDetailPayload {
+  billingMonth: string;
+  nextBillingDate: string | null;
+  lineItems: BillingLineItem[];
+  totalCents: number;
+  planName: string;
+  pricePerSeatCents: number;
+  currentSeatCount: number;
+  status: 'active' | 'trial' | 'cancelled' | 'expired';
+  trialEndsAt: string | null;
+  paddleSubscriptionId: string | null;
+}
+
+export interface BillingHistoryMonth {
+  month: string;
+  totalCents: number;
+  lineItems: BillingLineItem[];
+  status: 'paid' | 'draft';
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Convert cents to a display string: 400 → "$4.00" */
+export function centsToDisplay(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+/** Format a date range for line items, e.g. "Apr 1 – 18, 2026" */
+export function formatPeriodRange(start: string, end: string | null): string {
+  const s = new Date(start);
+  const e = end ? new Date(end) : new Date();
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const sMonth = months[s.getUTCMonth()];
+  const eMonth = months[e.getUTCMonth()];
+  const year = e.getUTCFullYear();
+
+  if (s.getUTCMonth() === e.getUTCMonth() && s.getUTCFullYear() === e.getUTCFullYear()) {
+    return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${year}`;
+  }
+  return `${sMonth} ${s.getUTCDate()} – ${eMonth} ${e.getUTCDate()}, ${year}`;
+}
+
+/** Days remaining in current trial */
+export function trialDaysLeft(trialEndsAt: string | null): number {
+  if (!trialEndsAt) return 0;
+  const diff = new Date(trialEndsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+// ── Query hooks ───────────────────────────────────────────────────────────────
 
 interface MySubscriptionResponse {
   subscription: SubscriptionPayload | null;
@@ -24,6 +105,14 @@ interface MySubscriptionResponse {
 
 interface ListPlansResponse {
   plans: PlanPayload[];
+}
+
+interface BillingDetailResponse {
+  billing: BillingDetailPayload | null;
+}
+
+interface BillingHistoryResponse {
+  history: BillingHistoryMonth[];
 }
 
 interface SetSubscriptionRequest {
@@ -42,6 +131,20 @@ export const useListPlans = () =>
     queryKey: ['subscription', 'plans'],
     queryFn: () => unwrap(safe.get<ListPlansResponse>('/subscriptions/plans')),
     select: (data) => data.plans,
+  });
+
+export const useBillingDetail = () =>
+  useQuery({
+    queryKey: ['subscription', 'billing'],
+    queryFn: () => unwrap(safe.get<BillingDetailResponse>('/subscriptions/billing')),
+    select: (data) => data.billing,
+  });
+
+export const useBillingHistory = () =>
+  useQuery({
+    queryKey: ['subscription', 'billing', 'history'],
+    queryFn: () => unwrap(safe.get<BillingHistoryResponse>('/subscriptions/billing/history')),
+    select: (data) => data.history,
   });
 
 export const useSetSubscription = () => {

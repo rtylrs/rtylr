@@ -1,9 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Palette, Keyboard, Sparkles, Info, User, Save, Tag, Trash2 } from 'lucide-react';
+import {
+  Bell,
+  Palette,
+  Keyboard,
+  Sparkles,
+  Info,
+  User,
+  Save,
+  Tag,
+  Trash2,
+  Users,
+  CreditCard,
+  UserMinus,
+  UserPlus,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
+import {
+  useFlowTeam,
+  useFlowInviteMember,
+  useFlowDeactivateMember,
+} from '../../shared/hooks/queries/useFlowTeam';
+import {
+  useFlowSubscription,
+  useFlowBillingDetail,
+  centsToDisplay,
+  trialDaysLeft,
+  formatPeriodRange,
+} from '../../shared/hooks/queries/useFlowSubscription';
 import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
@@ -24,6 +54,8 @@ interface SettingsSection {
 
 const SECTIONS: SettingsSection[] = [
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'team', label: 'Team', icon: Users },
+  { id: 'billing', label: 'Billing', icon: CreditCard },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'labels', label: 'Labels', icon: Tag },
@@ -698,8 +730,389 @@ const LabelsSection: React.FC = () => {
   );
 };
 
+// ── Team Section ─────────────────────────────────────────────────────────────
+
+const TeamSection: React.FC = () => {
+  const { data: members = [], isLoading } = useFlowTeam();
+  const invite = useFlowInviteMember();
+  const deactivate = useFlowDeactivateMember();
+
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
+
+  const inputStyle = {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    color: 'var(--flow-text)',
+  };
+
+  const handleInvite = (): void => {
+    if (!email.trim() || !fullName.trim()) return;
+    invite.mutate(
+      { email: email.trim(), fullName: fullName.trim(), role: 'member' },
+      {
+        onSuccess: () => {
+          setEmail('');
+          setFullName('');
+          setShowInvite(false);
+        },
+      }
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Team
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          People who have access to this Flow workspace.
+        </p>
+      </div>
+
+      {/* Invite form */}
+      {showInvite ? (
+        <div
+          className="rounded-xl p-4 space-y-3"
+          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+        >
+          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+            Invite someone to Flow
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className="block text-[11px] font-medium mb-1"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                Full name
+              </label>
+              <input
+                type="text"
+                placeholder="Jane Smith"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label
+                className="block text-[11px] font-medium mb-1"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="jane@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!email.trim() || !fullName.trim() || invite.isPending}
+              onClick={handleInvite}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+              style={{ background: ACCENT, color: '#0a0a0a' }}
+            >
+              <UserPlus size={12} />
+              {invite.isPending ? 'Sending…' : 'Send invite'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowInvite(false)}
+              className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowInvite(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
+          style={{ background: ACCENT, color: '#0a0a0a' }}
+        >
+          <UserPlus size={12} />
+          Invite member
+        </button>
+      )}
+
+      {/* Members list */}
+      {isLoading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-14 rounded-xl animate-pulse"
+              style={{ background: 'var(--flow-hover)' }}
+            />
+          ))}
+        </div>
+      ) : members.length === 0 ? (
+        <div className="py-8 text-center" style={{ color: 'var(--flow-text-dim)' }}>
+          <Users size={24} className="mx-auto mb-2 opacity-40" />
+          <p className="text-[13px]">No team members yet.</p>
+        </div>
+      ) : (
+        <div
+          className="rounded-xl divide-y divide-[var(--flow-border)]"
+          style={{ border: '1px solid var(--flow-border)' }}
+        >
+          {members.map((m) => (
+            <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
+                style={{ background: ACCENT + '33', color: ACCENT }}
+              >
+                {m.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-[13px] font-medium truncate"
+                  style={{ color: 'var(--flow-text)' }}
+                >
+                  {m.name}
+                </p>
+                <p className="text-[11px] truncate" style={{ color: 'var(--flow-text-muted)' }}>
+                  {m.email}
+                </p>
+              </div>
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: 'var(--flow-hover)',
+                  color: 'var(--flow-text-muted)',
+                }}
+              >
+                {m.role}
+              </span>
+              <button
+                type="button"
+                aria-label={`Remove ${m.name}`}
+                onClick={() => deactivate.mutate(m.id)}
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                <UserMinus size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Billing Section ───────────────────────────────────────────────────────────
+
+const STATUS_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
+  active: CheckCircle2,
+  trial: Clock,
+  cancelled: XCircle,
+  expired: AlertCircle,
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  active: 'var(--status-active, #16a34a)',
+  trial: 'var(--status-trial, #d97706)',
+  cancelled: 'var(--status-cancelled, #dc2626)',
+  expired: 'var(--status-expired, #6b7280)',
+};
+
+const BillingSection: React.FC = () => {
+  const { data: sub, isLoading: subLoading } = useFlowSubscription();
+  const { data: billing, isLoading: billingLoading } = useFlowBillingDetail();
+
+  const isLoading = subLoading || billingLoading;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div
+          className="h-6 w-32 rounded animate-pulse"
+          style={{ background: 'var(--flow-hover)' }}
+        />
+        <div
+          className="h-28 rounded-xl animate-pulse"
+          style={{ background: 'var(--flow-hover)' }}
+        />
+        <div
+          className="h-20 rounded-xl animate-pulse"
+          style={{ background: 'var(--flow-hover)' }}
+        />
+      </div>
+    );
+  }
+
+  const StatusIcon = sub ? (STATUS_ICON[sub.status] ?? AlertCircle) : null;
+  const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR.expired) : '';
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+          Billing
+        </h2>
+        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+          Your Flow subscription and usage this month.
+        </p>
+      </div>
+
+      {!sub ? (
+        <div
+          className="rounded-xl p-6 text-center space-y-3"
+          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+        >
+          <CreditCard
+            size={24}
+            className="mx-auto opacity-30"
+            style={{ color: 'var(--flow-text)' }}
+          />
+          <p className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+            No active subscription
+          </p>
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+            Contact your account owner or visit billing to activate Flow.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Plan overview */}
+          <div
+            className="rounded-xl p-4 space-y-3"
+            style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                {sub.planName}
+              </p>
+              {StatusIcon && (
+                <div
+                  className="flex items-center gap-1.5 text-[11px] font-semibold"
+                  style={{ color: statusColor }}
+                >
+                  <StatusIcon size={12} />
+                  <span className="capitalize">{sub.status}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-[22px] font-bold" style={{ color: 'var(--flow-text)' }}>
+                  {centsToDisplay(billing?.totalCents ?? sub.seatCount * sub.pricePerSeatCents)}
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
+                  {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
+                </p>
+              </div>
+              {sub.status === 'trial' && (
+                <div
+                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg shrink-0"
+                  style={{
+                    background: 'rgba(245,158,11,0.12)',
+                    color: '#d97706',
+                  }}
+                >
+                  {trialDaysLeft(sub.trialEndsAt)}d left in trial
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Current month line items */}
+          {billing && billing.lineItems.length > 0 && (
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{ border: '1px solid var(--flow-border)' }}
+            >
+              <div
+                className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
+                style={{
+                  background: 'var(--flow-hover)',
+                  color: 'var(--flow-text-dim)',
+                  borderBottom: '1px solid var(--flow-border)',
+                }}
+              >
+                This month
+              </div>
+              {billing.lineItems.map((item, i) => (
+                <div
+                  key={i}
+                  className="px-4 py-3 flex items-center justify-between gap-4"
+                  style={{
+                    borderBottom:
+                      i < billing.lineItems.length - 1 ? '1px solid var(--flow-border)' : 'none',
+                  }}
+                >
+                  <div>
+                    <p className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
+                      {item.seatCount} seat{item.seatCount !== 1 ? 's' : ''} ·{' '}
+                      {centsToDisplay(item.pricePerSeatCents)}/seat/mo
+                    </p>
+                    <p
+                      className="text-[11px] font-mono mt-0.5"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      {formatPeriodRange(item.periodStart, item.periodEnd)}
+                      {!item.periodEnd && (
+                        <span
+                          className="ml-1.5 font-sans text-[10px] px-1.5 py-0.5 rounded-full"
+                          style={{ background: 'rgba(245,158,11,0.12)', color: '#d97706' }}
+                        >
+                          in progress
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                    {centsToDisplay(item.amountCents)}
+                  </p>
+                </div>
+              ))}
+              <div
+                className="px-4 py-3 flex items-center justify-between"
+                style={{
+                  background: 'var(--flow-hover)',
+                  borderTop: '1px solid var(--flow-border)',
+                }}
+              >
+                <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                  {sub.status === 'trial'
+                    ? 'Estimated total (trial — not charged)'
+                    : 'Estimated total'}
+                </p>
+                <p className="text-[15px] font-bold" style={{ color: 'var(--flow-text)' }}>
+                  {centsToDisplay(billing.totalCents)}
+                </p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// ── Section content map ───────────────────────────────────────────────────────
+
 const SECTION_CONTENT: Record<string, React.FC> = {
   profile: ProfileSection,
+  team: TeamSection,
+  billing: BillingSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,

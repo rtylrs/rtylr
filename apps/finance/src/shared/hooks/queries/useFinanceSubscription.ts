@@ -1,0 +1,101 @@
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../lib/api';
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export interface FinanceSubscription {
+  id: number;
+  planName: string;
+  planSlug: string;
+  status: 'active' | 'trial' | 'cancelled' | 'expired';
+  seatCount: number;
+  pricePerSeatCents: number;
+  trialEndsAt: string | null;
+  nextBillingDate: string | null;
+  paddleSubscriptionId: string | null;
+}
+
+export interface FinanceBillingLineItem {
+  periodStart: string;
+  periodEnd: string | null;
+  seatCount: number;
+  pricePerSeatCents: number;
+  amountCents: number;
+}
+
+export interface FinanceBillingDetail {
+  billingMonth: string;
+  nextBillingDate: string | null;
+  lineItems: FinanceBillingLineItem[];
+  totalCents: number;
+  planName: string;
+  status: 'active' | 'trial' | 'cancelled' | 'expired';
+  trialEndsAt: string | null;
+  paddleSubscriptionId: string | null;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+export function centsToDisplay(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+export function trialDaysLeft(trialEndsAt: string | null): number {
+  if (!trialEndsAt) return 0;
+  return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
+}
+
+export function formatPeriodRange(start: string, end: string | null): string {
+  const s = new Date(start);
+  const e = end ? new Date(end) : new Date();
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const sMonth = months[s.getUTCMonth()];
+  const eMonth = months[e.getUTCMonth()];
+  const year = e.getUTCFullYear();
+  if (s.getUTCMonth() === e.getUTCMonth() && s.getUTCFullYear() === e.getUTCFullYear()) {
+    return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${year}`;
+  }
+  return `${sMonth} ${s.getUTCDate()} – ${eMonth} ${e.getUTCDate()}, ${year}`;
+}
+
+// ── Hooks ─────────────────────────────────────────────────────────────────────
+
+interface SubResponse {
+  subscription: FinanceSubscription | null;
+}
+
+interface BillingResponse {
+  billing: FinanceBillingDetail | null;
+}
+
+export const useFinanceSubscription = (): ReturnType<typeof useQuery<FinanceSubscription | null>> =>
+  useQuery({
+    queryKey: ['finance-subscription'],
+    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
+    select: (d) => d.subscription,
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const useFinanceSubscriptionBilling = (): ReturnType<
+  typeof useQuery<FinanceBillingDetail | null>
+> =>
+  useQuery({
+    queryKey: ['finance-subscription', 'billing'],
+    queryFn: () => unwrap(safe.get<BillingResponse>('/subscriptions/billing')),
+    select: (d) => d.billing,
+    staleTime: 2 * 60 * 1000,
+  });

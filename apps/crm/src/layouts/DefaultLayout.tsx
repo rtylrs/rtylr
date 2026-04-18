@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
@@ -527,6 +528,7 @@ const DefaultLayout: React.FC = () => {
         </header>
 
         {/* Content */}
+        <TrialBanner />
         <AnimatePresence mode="wait">
           <motion.main
             key={location.pathname}
