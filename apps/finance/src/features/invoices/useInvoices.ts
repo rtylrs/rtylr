@@ -3,14 +3,14 @@ import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { financeApi, Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useInvoices() {
   return useQuery({
     queryKey: ['invoices'],
     queryFn: async () => {
       const res = await unwrap(financeApi.getInvoices());
-      const raw = res ?? [];
-      return z.array(invoiceSchema).parse(Array.isArray(raw) ? raw : []) as Invoice[];
+      return z.array(invoiceSchema).parse(unwrapList(res, 'invoices')) as Invoice[];
     },
   });
 }

@@ -3,14 +3,14 @@ import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { financeApi, Expense, ExpenseCategory } from '../../shared/services/financeApi';
 import { expenseSchema, expenseCategorySchema } from '../../shared/schemas/expenses';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useExpenses() {
   return useQuery({
     queryKey: ['expenses'],
     queryFn: async () => {
       const res = await unwrap(financeApi.getExpenses());
-      const raw = res ?? [];
-      return z.array(expenseSchema).parse(Array.isArray(raw) ? raw : []) as Expense[];
+      return z.array(expenseSchema).parse(unwrapList(res, 'expenses')) as Expense[];
     },
   });
 }
@@ -20,10 +20,9 @@ export function useExpenseCategories() {
     queryKey: ['expense-categories'],
     queryFn: async () => {
       const res = await unwrap(financeApi.getExpenseCategories());
-      const raw = res ?? [];
       return z
         .array(expenseCategorySchema)
-        .parse(Array.isArray(raw) ? raw : []) as ExpenseCategory[];
+        .parse(unwrapList(res, 'categories')) as ExpenseCategory[];
     },
   });
 }
