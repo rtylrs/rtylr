@@ -297,8 +297,9 @@ const CRMPage = (): JSX.Element => {
                 <span className={styles.heroTitleSoft}>remembered.</span>
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Every order at the POS enriches the profile. Every birthday, every visit, every
-                preference — stored, segmented, ready for the right message at the right moment.
+                Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish,
+                server they love — stored, segmented, ready the moment you want to send the right
+                message. No CRM data entry. No forgotten customers at the door.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>

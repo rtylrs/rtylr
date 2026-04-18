@@ -122,14 +122,15 @@ const HardwarePage = (): JSX.Element => {
             <div className={styles.heroInner}>
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <span className={styles.eyebrowDot} />
-                rtylr Hardware Ecosystem
+                RTYLR HARDWARE
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Hardware that works as hard as you do.
+                Plug it in. Ring it up.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Tested and certified hardware ecosystem designed for rtylr POS. Every device is
-                optimized out of the box — zero drivers, zero configuration.
+                Certified printers, card readers, scanners, and kiosks — paired with rtylr POS out
+                of the box. No drivers to install, no firmware to sideload, no configuration
+                weekend.
               </motion.p>
             </div>
           </motion.section>

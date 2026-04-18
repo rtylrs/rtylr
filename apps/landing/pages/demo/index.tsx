@@ -123,13 +123,18 @@ const DemoPage = (): JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>
-        <HelmetContainer title="Book a Rtylr Demo | Rtylr" />
+        <HelmetContainer
+          title="Book a demo | rtylr"
+          description="See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it."
+        />
         <div className={styles.demoPage}>
           <div className={styles.container}>
             <div className={styles.formWrapper}>
-              <h1 className={styles.title}>Book a Rtylr demo</h1>
+              <h1 className={styles.title}>See rtylr on your data.</h1>
               <p className={styles.subtitle}>
-                New to Rtylr? Schedule a 1:1 session with an expert from our team to learn more.
+                A 30-minute walkthrough with someone who actually built it. Bring your menu, your
+                SKU list, your PDF of invoices — we&apos;ll show you what the switch would look
+                like.
               </p>
 
               <form onSubmit={handleSubmit} className={styles.form}>

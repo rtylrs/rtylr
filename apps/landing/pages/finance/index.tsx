@@ -257,9 +257,9 @@ const FinancePage = (): JSX.Element => {
                 in real time.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Invoices, expenses, sales tax, and a live profit-and-loss. Every POS sale, every
-                payroll run, every paid invoice rolls into the books automatically — no exports, no
-                reconciliation, no month-end surprises.
+                Every POS sale, every payroll run, every paid invoice rolls into the books on its
+                own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers
+                actually are. No exports. No reconciliation. No month-end surprises.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>

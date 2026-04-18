@@ -147,8 +147,9 @@ const ERPPage = (): JSX.Element => {
                 counts itself.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Every sale depletes the right recipe. Every purchase order updates the right
-                warehouse. Every low-stock alert arrives before the shelf is actually empty.
+                Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved
+                moves the warehouse count. Every low-stock alert fires before you actually run out —
+                not after the Saturday rush notices.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>

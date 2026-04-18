@@ -83,15 +83,17 @@ const AboutPage = (): JSX.Element => {
             <div className={styles.heroInner}>
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <span className={styles.eyebrowDot} />
-                About Voxire &amp; rtylr
+                ABOUT VOXIRE &amp; RTYLR
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                We're building the operating system for commerce.
+                An operating system
+                <br />
+                for real businesses.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                rtylr is the all-in-one platform that replaces the fragmented stack of tools most
-                businesses rely on. POS, ERP, HR, CRM, Finance, Flow, and Insights — built to work
-                together from day one.
+                Most small businesses run on six to eight disconnected apps. They export CSVs all
+                Friday. They reconcile on Sundays. They pay for integrations they hate. We think
+                that&apos;s a bug in the industry. rtylr is our fix.
               </motion.p>
             </div>
           </motion.section>
@@ -107,14 +109,13 @@ const AboutPage = (): JSX.Element => {
             <div className={styles.sectionContainer}>
               <div className={styles.missionGrid}>
                 <motion.div className={styles.missionLeft} variants={slideInLeft}>
-                  <span className={styles.sectionLabel}>Our Mission</span>
-                  <h2 className={styles.missionTitle}>
-                    Empower every business with a platform that just works.
-                  </h2>
+                  <span className={styles.sectionLabel}>OUR MISSION</span>
+                  <h2 className={styles.missionTitle}>Stop the CSV life.</h2>
                   <p className={styles.missionBody}>
-                    We believe commerce technology should be accessible, unified, and intelligent.
-                    Too many businesses waste hours each week moving data between disconnected apps.
-                    rtylr ends that. Everything talks to everything — automatically.
+                    Commerce software should work the way commerce does — one sale, one inventory
+                    drop, one payroll line, one customer record. Not seven apps pretending they talk
+                    to each other. rtylr replaces the whole stack with a single platform where
+                    everything updates at once, because it&apos;s all the same database underneath.
                   </p>
                 </motion.div>
                 <motion.div className={styles.missionRight} variants={slideInRight}>
@@ -151,26 +152,27 @@ const AboutPage = (): JSX.Element => {
           >
             <div className={styles.sectionContainer}>
               <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
-                The Story
+                THE STORY
               </motion.span>
               <motion.h2 className={styles.storyTitle} variants={blurFadeIn}>
-                Born out of frustration.
+                We got tired of the duct tape.
               </motion.h2>
               <motion.div className={styles.storyBody} variants={blurFadeIn}>
                 <p>
-                  rtylr started because we couldn't find one tool that handled POS, finance, HR, and
-                  CRM together — without forcing painful integrations, double-entry, and a
-                  subscription for every module.
+                  We kept watching businesses in Lebanon and across the region stitch together
+                  QuickBooks for the books, a standalone POS for the register, a separate HR portal
+                  for payroll, and a CRM that never talked to any of them. Every week the owner
+                  spent Friday exporting CSVs and Sunday reconciling them.
                 </p>
                 <p>
-                  We watched businesses in Lebanon and across the region patch together QuickBooks
-                  for accounting, a standalone POS, a separate HR portal, and a CRM that never
-                  talked to any of them. The overhead was killing productivity.
+                  The tools were fine. The problem was that they were separate. Seven subscriptions,
+                  seven UIs, seven places your data could disagree with itself. And somehow, the
+                  customer still got billed for &ldquo;integrations.&rdquo;
                 </p>
                 <p>
-                  So in 2024, Abed and Mohammad left their corporate roles and set out to build what
-                  should have existed all along: a single, cohesive platform for the entire business
-                  — with AI embedded from the ground up.
+                  So in 2024 Abed and Mohammad left their corporate roles and started building what
+                  should have existed all along — a single platform for the whole business, with AI
+                  wired in from the ground floor.
                 </p>
               </motion.div>
             </div>

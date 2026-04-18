@@ -32,29 +32,34 @@ const PLAN_FEATURES: PlanFeature[] = [
 
 const FAQ_ITEMS = [
   {
-    question: 'Can I switch plans?',
+    question: 'Can I switch plans at any time?',
     answer:
-      'Yes. You can upgrade or downgrade at any time. When you upgrade, you get immediate access to the new features. When you downgrade, your plan changes at the next billing cycle.',
+      'Yes. Upgrade mid-cycle and new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put.',
   },
   {
     question: 'Is there a free trial for Pro?',
     answer:
-      'Yes — every new workspace starts with a 14-day Pro trial, no credit card required. After 14 days it automatically switches to the Free plan unless you add a payment method.',
+      'Every new workspace starts with a 14-day Pro trial, no credit card required. At day 14 it reverts to the Free plan automatically unless you add a payment method.',
   },
   {
-    question: 'What happens when I reach 5+ members on Free?',
+    question: 'What happens when I hit 10 seats on Free?',
     answer:
-      'The Free plan supports up to 5 seats. Once you need a 6th member, you will be prompted to upgrade to the Pro plan. All your data and settings are preserved.',
+      'You\u2019re prompted to upgrade to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.',
   },
   {
-    question: 'Do I pay per seat?',
+    question: 'How does per-seat billing work?',
     answer:
-      'Yes, the Pro plan is seat-based. You pay for each active user in your workspace. You can add or remove seats at any time and your billing adjusts automatically.',
+      'You pay only for the days each seat is active. Add a server mid-month, you\u2019re billed for those days. Remove them, the remaining days credit against your next invoice. No full-month minimums.',
   },
   {
-    question: 'Is there a contract or lock-in?',
+    question: 'When does Scale pricing kick in?',
     answer:
-      'No contracts, no lock-in. Monthly plans can be cancelled any time. Annual plans are billed upfront for the year and you save 20% compared to monthly billing.',
+      'Scale is designed for teams of 30+ active seats. Once your workspace crosses that threshold for a billing period, Scale pricing applies automatically — cheaper per seat, more locations, SSO, and audit logs.',
+  },
+  {
+    question: 'Any contract or lock-in?',
+    answer:
+      'None. Monthly plans cancel any time. Annual plans are billed upfront and save 20%, but you can still cancel — unused days credit against your next bill.',
   },
 ];
 
@@ -81,8 +86,8 @@ const PricingPage = (): JSX.Element => {
   const [billing, setBilling] = useState<BillingCycle>('monthly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const proMonthly = 4.99;
-  const proAnnual = 3.99;
+  const proMonthly = 6.99;
+  const proAnnual = 4.99;
   const proPrice = billing === 'annual' ? proAnnual : proMonthly;
 
   const handleGetStarted = (): void => {
@@ -122,10 +127,13 @@ const PricingPage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-              Simple pricing for every team
+              Pay per seat, per day.
+              <br />
+              Not per month.
             </motion.h1>
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-              Free to start. No credit card required. Scale as you grow.
+              All 7 apps on every plan. Daily proration — add a seat for 10 days, pay for 10 days.
+              No per-location fees, no module upsells.
             </motion.p>
 
             {/* Billing toggle */}
@@ -163,13 +171,16 @@ const PricingPage = (): JSX.Element => {
                     <span className={styles.priceAmount}>$0</span>
                     <span className={styles.pricePeriod}>/forever</span>
                   </div>
-                  <p className={styles.planTagline}>Perfect for small teams getting started.</p>
+                  <p className={styles.planTagline}>
+                    Everything you need to run a single location.
+                  </p>
                 </div>
                 <ul className={styles.planFeatures}>
-                  <li>Up to 5 members</li>
+                  <li>Up to 10 team members</li>
                   <li>All 7 apps included</li>
-                  <li>Basic support</li>
-                  <li>No credit card required</li>
+                  <li>1 location</li>
+                  <li>0% transaction fees under $10k/mo</li>
+                  <li>1,000 AI credits / month</li>
                 </ul>
                 <button className={styles.planCta} onClick={handleGetStarted}>
                   Get started
@@ -196,13 +207,16 @@ const PricingPage = (): JSX.Element => {
                       Billed annually · ${(proAnnual * 12).toFixed(2)}/seat/year
                     </p>
                   )}
-                  <p className={styles.planTagline}>For growing teams that need more.</p>
+                  <p className={styles.planTagline}>
+                    Growing teams scaling across multiple locations.
+                  </p>
                 </div>
                 <ul className={styles.planFeatures}>
-                  <li>Teams of any size</li>
-                  <li>All 7 apps + AI assistant</li>
-                  <li>Priority support</li>
-                  <li>Seat-based billing</li>
+                  <li>Up to 30 team members</li>
+                  <li>Up to 5 locations</li>
+                  <li>0% transaction fees under $100k/mo</li>
+                  <li>10,000 AI credits / month + 500 per seat</li>
+                  <li>Priority email + chat support</li>
                 </ul>
                 <button
                   className={`${styles.planCta} ${styles.planCtaPro}`}
@@ -223,18 +237,27 @@ const PricingPage = (): JSX.Element => {
                 <div className={styles.planHeader}>
                   <span className={styles.planName}>Scale</span>
                   <div className={styles.planPrice}>
-                    <span className={styles.priceAmount}>Custom</span>
+                    <span className={styles.priceAmount}>$4.99</span>
+                    <span className={styles.pricePeriod}>/seat/month</span>
                   </div>
-                  <p className={styles.planTagline}>For enterprises with advanced needs.</p>
+                  {billing === 'annual' && (
+                    <p className={styles.annualNote}>
+                      $2.99/seat on annual · unlocks at 30+ active seats
+                    </p>
+                  )}
+                  <p className={styles.planTagline}>
+                    Unlimited seats. Every feature unlocked. Every app. Every location.
+                  </p>
                 </div>
                 <ul className={styles.planFeatures}>
-                  <li>100+ seats</li>
-                  <li>Enterprise features</li>
-                  <li>SSO &amp; Audit logs</li>
-                  <li>Dedicated support &amp; SLA</li>
+                  <li>Unlimited team members</li>
+                  <li>Unlimited locations</li>
+                  <li>0% transaction fees (no cap)</li>
+                  <li>50,000 AI credits / month + 1,000 per seat</li>
+                  <li>SSO, audit logs, dedicated success manager</li>
                 </ul>
                 <button className={styles.planCta} onClick={handleContactSales}>
-                  Contact sales
+                  Talk to sales
                 </button>
               </motion.div>
             </div>
@@ -337,10 +360,10 @@ const PricingPage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.bottomCtaTitle} variants={blurFadeIn}>
-              Ready to get started?
+              Start on Free. Pay only when you grow.
             </motion.h2>
             <motion.p className={styles.bottomCtaSubtitle} variants={blurFadeIn}>
-              Join thousands of businesses already running on rtylr.
+              10 seats and all 7 apps are yours from day one. No credit card until you need seat 11.
             </motion.p>
             <motion.div className={styles.bottomCtaButtons} variants={blurFadeIn}>
               <button className={styles.ctaPrimary} onClick={handleGetStarted}>

@@ -151,8 +151,9 @@ const HRPage = (): JSX.Element => {
                 <span className={styles.heroTitleSoft}>Looked after.</span>
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Schedules, shifts, payroll, time off, onboarding, and compliance — in one app that
-                treats your staff like people, not line items.
+                Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours,
+                and deductions on its own. Compliance flags before they become violations. Software
+                that treats staff like people — not line items in a spreadsheet.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>

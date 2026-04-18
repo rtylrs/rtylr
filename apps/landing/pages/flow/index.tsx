@@ -397,9 +397,9 @@ const FlowPage = (): JSX.Element => {
                 <span className={styles.heroTitleSoft}>Operations that don&apos;t slip.</span>
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Kanban, lists, timelines, and automations. Tasks that link to the customer,
-                supplier, invoice, or shift they&apos;re actually about. The work OS for every team,
-                every workflow.
+                Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care
+                about. Automations that fire when a PO is approved or payroll closes — no Zapier, no
+                duct tape. The work OS your team will actually open.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>

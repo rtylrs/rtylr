@@ -105,10 +105,11 @@ const ContactPage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h1 className={styles.headerTitle} variants={blurFadeIn}>
-              Let's talk.
+              Reach out. We read it all.
             </motion.h1>
             <motion.p className={styles.headerSubtitle} variants={blurFadeIn}>
-              We're here to help. Reach out and we'll get back within 24 hours.
+              Product question, sales inquiry, press request, feature ask — every message lands in
+              front of a human. We reply within one business day, usually faster.
             </motion.p>
           </motion.section>
 

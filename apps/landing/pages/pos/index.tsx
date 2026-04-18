@@ -83,8 +83,9 @@ const POSPage = (): JSX.Element => {
                 that keeps up.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Fire courses, split checks, take every payment method, and keep running when the
-                internet drops. The only POS designed to match the pace of real service.
+                Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift
+                cards, house accounts. Keep running when the WiFi goes down. Built for the pace of
+                real service, not a demo video.
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
