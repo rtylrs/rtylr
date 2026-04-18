@@ -8,13 +8,14 @@ import {
   Supplier,
 } from '../../shared/services/erpApi';
 import { supplierSchema } from '../../shared/schemas/suppliers';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useSuppliers() {
   return useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {
       const res = await unwrap(erpApi.listSuppliers());
-      return z.array(supplierSchema).parse(Array.isArray(res) ? res : []) as Supplier[];
+      return z.array(supplierSchema).parse(unwrapList(res, 'suppliers')) as Supplier[];
     },
   });
 }

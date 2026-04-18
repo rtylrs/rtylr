@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { erpApi, ReorderSuggestion } from '../../shared/services/erpApi';
 import { reorderSuggestionSchema } from '../../shared/schemas/reorder';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useReorderSuggestions() {
   return useQuery<ReorderSuggestion[]>({
@@ -11,7 +12,7 @@ export function useReorderSuggestions() {
       const res = await unwrap(erpApi.getReorderSuggestions());
       return z
         .array(reorderSuggestionSchema)
-        .parse(Array.isArray(res) ? res : []) as ReorderSuggestion[];
+        .parse(unwrapList(res, 'suggestions', 'items')) as ReorderSuggestion[];
     },
   });
 }

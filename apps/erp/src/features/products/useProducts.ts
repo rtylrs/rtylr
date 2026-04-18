@@ -8,6 +8,7 @@ import {
   Product,
 } from '../../shared/services/erpApi';
 import { productSchema } from '../../shared/schemas/products';
+import { unwrapList } from '../../shared/lib/unwrapList';
 
 export interface ProductFilters {
   search?: string;
@@ -62,7 +63,7 @@ export function useProducts(filters?: ProductFilters) {
           offset: filters?.offset,
         })
       );
-      const parsed = z.array(productSchema).parse(Array.isArray(data) ? data : []) as Product[];
+      const parsed = z.array(productSchema).parse(unwrapList(data, 'products')) as Product[];
       return applyFilters(parsed, filters);
     },
   });
