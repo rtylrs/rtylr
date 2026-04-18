@@ -22,12 +22,12 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4583c4;
+  color: #e8e6e1;
   margin-bottom: 20px;
   padding: 6px 16px;
-  border: 1px solid rgba(69, 131, 196, 0.3);
+  border: 1px solid rgba(232, 230, 225, 0.25);
   border-radius: 100px;
-  background: rgba(69, 131, 196, 0.08);
+  background: rgba(232, 230, 225, 0.06);
 }
 
 .sectionTitle {
@@ -47,38 +47,50 @@
   line-height: 1.6;
 }
 
+// Shared-border grid — no gaps, single outer border, 1px dividers between cells.
+// Matches the pattern used by StatsSection's logo/stat grid.
 .integrationsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 0;
   margin-bottom: 48px;
+  border: 1px solid #232220;
+  border-radius: 0;
+  overflow: hidden;
 }
 
 .integrationCard {
   position: relative;
-  padding: 36px 20px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  padding: 40px 20px;
+  background: transparent;
+  border-right: 1px solid #232220;
+  border-bottom: 1px solid #232220;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
   cursor: default;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: background 0.25s ease;
+
+  // Last column: no right border
+  &:nth-child(4n) {
+    border-right: none;
+  }
+
+  // Last row (assuming 8 items / 2 rows): no bottom border on last row
+  &:nth-last-child(-n + 4) {
+    border-bottom: none;
+  }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.045);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
 
     .iconWrapper {
-      border-color: var(--brand-color);
-      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.06);
 
       svg {
-        color: var(--brand-color);
+        color: #e8e6e1;
       }
     }
   }
@@ -117,13 +129,8 @@
 }
 
 @media (max-width: 1024px) {
-  .integrationsGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
   .integrationCard {
-    padding: 28px 16px;
+    padding: 32px 16px;
   }
 }
 
@@ -146,21 +153,33 @@
 
   .integrationsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
   }
 
+  // Recalculate border-sharing for a 2-col grid
   .integrationCard {
     padding: 28px 16px;
+    border-right: 1px solid #232220;
+    border-bottom: 1px solid #232220;
+
+    &:nth-child(4n) {
+      border-right: 1px solid #232220;
+    }
+
+    &:nth-last-child(-n + 4) {
+      border-bottom: 1px solid #232220;
+    }
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
   }
 
   .iconWrapper {
     width: 48px;
     height: 48px;
-  }
-}
-
-@media (max-width: 480px) {
-  .integrationsGrid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }

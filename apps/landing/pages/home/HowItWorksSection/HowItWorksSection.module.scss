@@ -1,141 +1,121 @@
+// Clean, flat layout — no orbs, no timeline line, no glow.
+// Four bordered cells in a row with big step numbers and tight copy.
+
 .howItWorksSection {
   padding: 120px 0;
   background: var(--app-background);
   position: relative;
-  overflow: hidden;
-}
-
-.bgOrbOne {
-  position: absolute;
-  top: 10%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(69, 131, 196, 0.12) 0%, transparent 70%);
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bgOrbTwo {
-  position: absolute;
-  bottom: 5%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(100, 197, 185, 0.1) 0%, transparent 70%);
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 50px;
-  text-align: center;
+  padding: 0 32px;
   position: relative;
-  z-index: 1;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.header {
+  max-width: 760px;
+  margin-bottom: 64px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
-  font-size: 3.5rem;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
   font-weight: 600;
-  color: white;
-  margin: 0 0 16px 0;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: #e8e6e1;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.sectionDescription {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 80px 0;
+// ── Grid of steps — shared borders, no gaps ─────────────────────────────────
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #232220;
 }
 
-.timeline {
-  position: relative;
-  text-align: left;
-  padding-left: 0;
-}
-
-.timelineLine {
-  position: absolute;
-  left: 40px;
-  top: 40px;
-  bottom: 40px;
-  width: 2px;
-  background: linear-gradient(
-    to bottom,
-    rgba(233, 235, 223, 0.05) 0%,
-    rgba(233, 235, 223, 0.4) 20%,
-    rgba(233, 235, 223, 0.4) 80%,
-    rgba(233, 235, 223, 0.05) 100%
-  );
-  z-index: 0;
-}
-
-.timelineItem {
-  position: relative;
+.step {
   display: flex;
-  align-items: flex-start;
-  gap: 40px;
-  padding: 32px 0;
-  z-index: 1;
-
-  &:first-child {
-    padding-top: 0;
-  }
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px 32px;
+  border-right: 1px solid #232220;
+  transition: background 0.25s ease;
 
   &:last-child {
-    padding-bottom: 0;
+    border-right: none;
   }
-}
 
-.stepNumberWrap {
-  flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: var(--app-background);
-  border: 2px solid rgba(233, 235, 223, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 0 30px rgba(233, 235, 223, 0.06);
+  &:hover {
+    background: rgba(255, 255, 255, 0.015);
+  }
 }
 
 .stepNumber {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: white;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.stepContent {
-  flex: 1;
-  padding-top: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.35);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .stepTitle {
-  font-size: 1.75rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: white;
-  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+  color: #e8e6e1;
+  margin: 0;
   line-height: 1.2;
 }
 
 .stepDescription {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
   line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
   margin: 0;
-  max-width: 600px;
+}
+
+// ── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .step {
+    border-right: 1px solid #232220;
+    border-bottom: 1px solid #232220;
+
+    &:last-child {
+      border-right: 1px solid #232220;
+    }
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -147,44 +127,39 @@
     padding: 0 20px;
   }
 
-  .sectionTitle {
-    font-size: 2rem;
+  .header {
+    margin-bottom: 44px;
   }
 
-  .sectionDescription {
-    font-size: 1rem;
-    margin-bottom: 60px;
-  }
-
-  .timelineLine {
-    left: 28px;
-    top: 28px;
-    bottom: 28px;
-  }
-
-  .timelineItem {
-    gap: 24px;
-    padding: 24px 0;
-  }
-
-  .stepNumberWrap {
-    width: 56px;
-    height: 56px;
-  }
-
-  .stepNumber {
-    font-size: 1.25rem;
+  .step {
+    padding: 32px 24px;
+    gap: 14px;
   }
 
   .stepTitle {
-    font-size: 1.35rem;
+    font-size: 1.15rem;
   }
 
   .stepDescription {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
   }
 
-  .stepContent {
-    padding-top: 6px;
+  .step {
+    border-right: none;
+    border-bottom: 1px solid #232220;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
   }
 }
