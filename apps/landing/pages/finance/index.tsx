@@ -134,6 +134,52 @@ const RANGE_TABS: { id: Range; label: string }[] = [
   { id: 'year', label: 'Year' },
 ];
 
+// ── Trailing-12-month chart data (seeded to look real) ────────────────────
+
+type ChartMetric = 'revenue' | 'costs' | 'net';
+
+interface ChartMetricDef {
+  id: ChartMetric;
+  label: string;
+  color: string;
+}
+
+const CHART_METRICS: ChartMetricDef[] = [
+  { id: 'revenue', label: 'Revenue', color: '#6bcf7f' },
+  { id: 'costs', label: 'Costs', color: '#e88a8a' },
+  { id: 'net', label: 'Net', color: '#d6b88e' },
+];
+
+const CHART_LABELS = [
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+];
+
+// Revenue that grows with some seasonality; costs shadow at ~78%.
+const CHART_REVENUE = [
+  168_400, 182_900, 194_200, 208_600, 196_200, 214_500, 228_900, 252_400, 201_800, 218_600, 223_400,
+  236_030,
+];
+
+const CHART_COSTS = CHART_REVENUE.map((r) => Math.round(r * 0.78));
+const CHART_NET = CHART_REVENUE.map((r, i) => r - CHART_COSTS[i]);
+
+const CHART_DATA: Record<ChartMetric, number[]> = {
+  revenue: CHART_REVENUE,
+  costs: CHART_COSTS,
+  net: CHART_NET,
+};
+
 const PILLARS = [
   {
     icon: FileText,
@@ -166,6 +212,16 @@ const FinancePage = (): JSX.Element => {
   const router = useRouter();
   const [range, setRange] = useState<Range>('month');
   const data = PL_DATA[range];
+
+  // Chart state — independent from P&L range so both can be played with
+  const [chartMetric, setChartMetric] = useState<ChartMetric>('revenue');
+  const activeChartMetric = CHART_METRICS.find((m) => m.id === chartMetric) ?? CHART_METRICS[0];
+  const chartSeries = CHART_DATA[chartMetric].map((value, i) => ({
+    label: CHART_LABELS[i],
+    value,
+  }));
+  const chartMax = Math.max(...CHART_DATA[chartMetric]);
+  const chartSum = CHART_DATA[chartMetric].reduce((acc, n) => acc + n, 0);
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -320,41 +376,113 @@ const FinancePage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── PILLAR GRID — 2×2 shared borders ─────────────────────────── */}
-          <section className={styles.pillarsSection}>
+          {/* ── LIVE 12-MONTH CHART + PILLAR STRIP ───────────────────────── */}
+          <section className={styles.chartSection}>
             <motion.div
-              className={styles.pillarsHeader}
+              className={styles.chartHeader}
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                FOUR THINGS ACCOUNTING SHOULD DO
+                LIVE — TRAILING 12 MONTHS
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                One app for the
+                Your business,
                 <br />
-                stuff the ledger
-                <br />
-                should just do.
+                charted live.
               </motion.h2>
+              <motion.p className={styles.chartCopy} variants={blurFadeIn}>
+                Toggle the metric to see revenue, costs, or net for every month of the last year.
+                These numbers stream in from every POS sale, every invoice, every payroll run.
+              </motion.p>
             </motion.div>
 
             <motion.div
-              className={styles.pillarsGrid}
+              className={styles.chartPanel}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={viewportOnce}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className={styles.chartTabs} role="tablist" aria-label="Metric">
+                {CHART_METRICS.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={chartMetric === m.id}
+                    onClick={() => setChartMetric(m.id)}
+                    className={`${styles.chartTab} ${chartMetric === m.id ? styles.chartTabActive : ''}`}
+                  >
+                    <span className={styles.chartTabDot} style={{ background: m.color }} />
+                    {m.label}
+                  </button>
+                ))}
+                <div className={styles.chartTotal}>
+                  <span className={styles.chartTotalLabel}>Sum</span>
+                  <motion.span
+                    key={`total-${chartMetric}`}
+                    className={styles.chartTotalValue}
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22 }}
+                  >
+                    {fmt(chartSum)}
+                  </motion.span>
+                </div>
+              </div>
+
+              <div className={styles.chartBars}>
+                {chartSeries.map((month, i) => {
+                  const heightPct = chartMax > 0 ? (month.value / chartMax) * 100 : 0;
+                  const active = activeChartMetric.color;
+                  return (
+                    <div key={month.label} className={styles.chartBarCol}>
+                      <div className={styles.chartBarWrap}>
+                        <motion.div
+                          className={styles.chartBar}
+                          style={{ background: `linear-gradient(180deg, ${active}, ${active}66)` }}
+                          initial={{ height: '0%' }}
+                          animate={{ height: `${heightPct}%` }}
+                          transition={{
+                            delay: i * 0.035,
+                            duration: 0.6,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
+                        />
+                        <div className={styles.chartBarTooltip}>{fmt(month.value)}</div>
+                      </div>
+                      <span className={styles.chartBarLabel}>{month.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className={styles.chartFooter}>
+                <span className={styles.chartFooterDot} />
+                Updating live · last sync 14:02 EST
+              </div>
+            </motion.div>
+
+            {/* Compact pillar strip — horizontal, not a grid */}
+            <motion.div
+              className={styles.pillarStrip}
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={staggerBlur}
             >
               {PILLARS.map(({ icon: Icon, title, copy }) => (
-                <motion.div key={title} className={styles.pillarCard} variants={blurFadeIn}>
+                <motion.div key={title} className={styles.pillarStripItem} variants={blurFadeIn}>
                   <div className={styles.pillarIcon}>
-                    <Icon size={18} strokeWidth={1.8} />
+                    <Icon size={16} strokeWidth={1.8} />
                   </div>
-                  <h3 className={styles.pillarTitle}>{title}</h3>
-                  <p className={styles.pillarCopy}>{copy}</p>
+                  <div>
+                    <h3 className={styles.pillarTitle}>{title}</h3>
+                    <p className={styles.pillarCopy}>{copy}</p>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>

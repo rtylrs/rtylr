@@ -335,7 +335,271 @@
   letter-spacing: -0.005em;
 }
 
-// ── FEATURES GRID ──────────────────────────────────────────────────────────
+// ── AUTOMATION BUILDER ────────────────────────────────────────────────────
+
+.automationSection {
+  padding: 120px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.automationHeader {
+  max-width: 720px;
+  margin-bottom: 48px;
+}
+
+.automationCopy {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 18px 0 0;
+  max-width: 620px;
+}
+
+.automationBoard {
+  position: relative;
+  background: #121110;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 56px 56px 40px;
+  overflow: hidden;
+}
+
+// Ambient tinted spotlight so the wire pulse glows against something
+.automationBoard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 560px 260px at 50% 45%,
+    rgba(214, 184, 142, 0.07) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.automationWire {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 180px 1fr;
+  gap: 0;
+  align-items: center;
+  z-index: 1;
+}
+
+.ruleCard {
+  background: #1a1917;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 156px;
+}
+
+.ruleCardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.ruleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.ruleCardLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ruleCardTrigger {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.ruleCardDetail {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.1px;
+}
+
+// Wire track between the two cards
+.wireTrack {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wireSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wireLine {
+  stroke: rgba(214, 184, 142, 0.4);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.wirePulse {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: #d6b88e;
+  box-shadow: 0 0 12px rgba(214, 184, 142, 0.9);
+  z-index: 2;
+}
+
+.wireArrow {
+  position: relative;
+  z-index: 3;
+  color: #d6b88e;
+  background: #121110;
+  padding: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 184, 142, 0.35);
+  display: inline-flex;
+}
+
+// Rule picker strip beneath the cards
+.rulePicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playToggle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(214, 184, 142, 0.15);
+  border: 1px solid rgba(214, 184, 142, 0.3);
+  color: #d6b88e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(214, 184, 142, 0.25);
+    border-color: rgba(214, 184, 142, 0.5);
+  }
+}
+
+.ruleDots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.ruleDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.2);
+  }
+}
+
+.ruleDotActive {
+  background: #d6b88e;
+  width: 20px;
+  border-radius: 4px;
+
+  &:hover {
+    background: #e8c99a;
+    transform: none;
+  }
+}
+
+.ruleCounter {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.3px;
+}
+
+// Compact features strip — replaces the heavy 3×2 grid
+.featuresStrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.featureStripCard {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .featureIcon {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  .featureTitle {
+    margin-bottom: 4px;
+    font-size: 0.98rem;
+  }
+
+  .featureCopy {
+    font-size: 0.84rem;
+  }
+}
+
+// ── FEATURES GRID (legacy, retained for back-compat) ──────────────────────
 
 .featuresSection {
   padding: 120px 32px;
@@ -511,6 +775,24 @@
 @media (max-width: 1024px) {
   .boardColumns {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .automationBoard {
+    padding: 40px 32px 32px;
+  }
+
+  .automationWire {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .wireTrack {
+    height: 56px;
+    transform: rotate(90deg);
+  }
+
+  .featuresStrip {
+    grid-template-columns: 1fr;
   }
 
   .featuresGrid {

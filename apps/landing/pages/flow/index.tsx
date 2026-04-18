@@ -1,7 +1,23 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, type PanInfo } from 'motion/react';
 import { useRouter } from 'next/router';
-import { CheckSquare, LayoutGrid, GitBranch, Zap, MessageSquare, Calendar } from 'lucide-react';
+import {
+  CheckSquare,
+  LayoutGrid,
+  GitBranch,
+  Zap,
+  MessageSquare,
+  Calendar,
+  ShoppingCart,
+  Package,
+  Users,
+  UserCircle2,
+  DollarSign,
+  Workflow as WorkflowIcon,
+  ArrowRight,
+  Play,
+  Pause,
+} from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -70,6 +86,126 @@ const INITIAL_COLUMNS: Column[] = [
       { id: 't7', title: 'Q1 sales-tax filing', assignee: 'SP', tag: 'Finance' },
       { id: 't8', title: 'POS firmware v4.2 rollout', assignee: 'AR', tag: 'Ops' },
     ],
+  },
+];
+
+// ── Automation builder rules ──────────────────────────────────────────────
+// Each rule shows a source event → action. The middle section cycles through
+// these with an animated connecting wire.
+
+interface Rule {
+  source: {
+    app: string;
+    appIcon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+    appColor: string;
+    trigger: string;
+    detail: string;
+  };
+  action: {
+    app: string;
+    appIcon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+    appColor: string;
+    label: string;
+    detail: string;
+  };
+}
+
+const RULES: Rule[] = [
+  {
+    source: {
+      app: 'ERP',
+      appIcon: Package,
+      appColor: '#a2d9af',
+      trigger: 'Purchase order approved',
+      detail: 'PO #4821 · Rossini supplies · $2,480',
+    },
+    action: {
+      app: 'Flow',
+      appIcon: WorkflowIcon,
+      appColor: '#d6b88e',
+      label: 'Create task on purchasing',
+      detail: 'Assigned to head of purchasing · due tomorrow',
+    },
+  },
+  {
+    source: {
+      app: 'HR',
+      appIcon: Users,
+      appColor: '#f3c08a',
+      trigger: 'Shift marked as "no-show"',
+      detail: 'Maya Chen · Friday 11-7',
+    },
+    action: {
+      app: 'Flow',
+      appIcon: WorkflowIcon,
+      appColor: '#d6b88e',
+      label: 'Escalate to manager',
+      detail: 'Coverage task opened · SMS sent to on-call',
+    },
+  },
+  {
+    source: {
+      app: 'POS',
+      appIcon: ShoppingCart,
+      appColor: '#b3c5e8',
+      trigger: 'Daily sales close',
+      detail: '$12,840 processed · drawer $240 over',
+    },
+    action: {
+      app: 'Finance',
+      appIcon: DollarSign,
+      appColor: '#a2d9af',
+      label: 'Book journal entry',
+      detail: 'Cash + card reconciled · variance flagged for review',
+    },
+  },
+  {
+    source: {
+      app: 'CRM',
+      appIcon: UserCircle2,
+      appColor: '#c9a48a',
+      trigger: 'Guest hits VIP threshold',
+      detail: 'Eliza Alvarez · 20th lifetime visit',
+    },
+    action: {
+      app: 'CRM',
+      appIcon: UserCircle2,
+      appColor: '#c9a48a',
+      label: 'Send thank-you email + next-visit comp',
+      detail: 'Template: vip-reward · drafted for approval',
+    },
+  },
+  {
+    source: {
+      app: 'Finance',
+      appIcon: DollarSign,
+      appColor: '#a2d9af',
+      trigger: 'Invoice overdue 14 days',
+      detail: 'INV-0294 · Byblos Catering · $6,400',
+    },
+    action: {
+      app: 'Flow',
+      appIcon: WorkflowIcon,
+      appColor: '#d6b88e',
+      label: 'Task the AR owner',
+      detail: 'Second reminder scheduled · escalation in 7d',
+    },
+  },
+  {
+    source: {
+      app: 'ERP',
+      appIcon: Package,
+      appColor: '#a2d9af',
+      trigger: 'Stock drops below reorder point',
+      detail: 'Olive Oil (5L) · 6 units left',
+    },
+    action: {
+      app: 'ERP',
+      appIcon: Package,
+      appColor: '#a2d9af',
+      label: 'Draft PO to preferred supplier',
+      detail: 'Rossini · quantity 24 · awaiting approval',
+    },
   },
 ];
 
@@ -181,6 +317,24 @@ const DragTaskCard = ({
 const FlowPage = (): JSX.Element => {
   const router = useRouter();
   const [columns, setColumns] = useState<Column[]>(INITIAL_COLUMNS);
+  const [ruleIdx, setRuleIdx] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(true);
+
+  // Cycle through automation examples every 3s while auto-play is on
+  useEffect(() => {
+    if (!autoPlay) return;
+    const t = setInterval(() => {
+      setRuleIdx((i) => (i + 1) % RULES.length);
+    }, 3200);
+    return () => clearInterval(t);
+  }, [autoPlay]);
+
+  const selectRule = (idx: number): void => {
+    setRuleIdx(idx);
+    setAutoPlay(false);
+  };
+
+  const rule = RULES[ruleIdx];
 
   // Refs keyed by column id — the draggable card walks these to find its
   // drop target on release.
@@ -319,44 +473,156 @@ const FlowPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── FEATURE GRID ──────────────────────────────────────────── */}
-          <section className={styles.featuresSection}>
+          {/* ── AUTOMATION BUILDER ─────────────────────────────────────── */}
+          <section className={styles.automationSection}>
             <motion.div
-              className={styles.featuresHeader}
+              className={styles.automationHeader}
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                WHAT FLOW DOES
+                AUTOMATIONS · NO ZAPIER REQUIRED
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                The work OS your team
+                When this happens.
                 <br />
-                will actually open.
+                Then that, automatically.
               </motion.h2>
+              <motion.p className={styles.automationCopy} variants={blurFadeIn}>
+                Every app in rtylr emits events. Every app listens. Click an example — or let it
+                auto-play — to see what real rules look like.
+              </motion.p>
             </motion.div>
 
             <motion.div
-              className={styles.featuresGrid}
+              className={styles.automationBoard}
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {FEATURES.map(({ icon: Icon, title, copy }) => (
+              <AnimatePresence mode="wait">
                 <motion.div
-                  key={title}
-                  className={styles.featureCard}
-                  variants={blurFadeIn}
-                  whileHover={{ y: -4 }}
+                  key={ruleIdx}
+                  className={styles.automationWire}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <div className={styles.featureIcon}>
-                    <Icon size={18} strokeWidth={1.8} />
+                  {/* Trigger card */}
+                  <div className={styles.ruleCard}>
+                    <div className={styles.ruleCardHead}>
+                      <span
+                        className={styles.ruleChip}
+                        style={{
+                          color: rule.source.appColor,
+                          background: `${rule.source.appColor}18`,
+                          borderColor: `${rule.source.appColor}44`,
+                        }}
+                      >
+                        <rule.source.appIcon size={11} strokeWidth={2} />
+                        {rule.source.app}
+                      </span>
+                      <span className={styles.ruleCardLabel}>WHEN</span>
+                    </div>
+                    <div className={styles.ruleCardTrigger}>{rule.source.trigger}</div>
+                    <div className={styles.ruleCardDetail}>{rule.source.detail}</div>
                   </div>
-                  <h3 className={styles.featureTitle}>{title}</h3>
-                  <p className={styles.featureCopy}>{copy}</p>
+
+                  {/* Animated wire between cards */}
+                  <div className={styles.wireTrack} aria-hidden="true">
+                    <svg className={styles.wireSvg} viewBox="0 0 100 40" preserveAspectRatio="none">
+                      <line x1="0" y1="20" x2="100" y2="20" className={styles.wireLine} />
+                    </svg>
+                    <motion.span
+                      className={styles.wirePulse}
+                      initial={{ left: '0%' }}
+                      animate={{ left: '100%' }}
+                      transition={{
+                        duration: 1.4,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                    <span className={styles.wireArrow}>
+                      <ArrowRight size={14} strokeWidth={2} />
+                    </span>
+                  </div>
+
+                  {/* Action card */}
+                  <div className={styles.ruleCard}>
+                    <div className={styles.ruleCardHead}>
+                      <span
+                        className={styles.ruleChip}
+                        style={{
+                          color: rule.action.appColor,
+                          background: `${rule.action.appColor}18`,
+                          borderColor: `${rule.action.appColor}44`,
+                        }}
+                      >
+                        <rule.action.appIcon size={11} strokeWidth={2} />
+                        {rule.action.app}
+                      </span>
+                      <span className={styles.ruleCardLabel}>THEN</span>
+                    </div>
+                    <div className={styles.ruleCardTrigger}>{rule.action.label}</div>
+                    <div className={styles.ruleCardDetail}>{rule.action.detail}</div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Rule picker + play controls */}
+              <div className={styles.rulePicker}>
+                <button
+                  type="button"
+                  onClick={() => setAutoPlay((v) => !v)}
+                  className={styles.playToggle}
+                  aria-label={autoPlay ? 'Pause examples' : 'Play examples'}
+                  title={autoPlay ? 'Pause' : 'Play'}
+                >
+                  {autoPlay ? (
+                    <Pause size={11} strokeWidth={2.5} fill="currentColor" />
+                  ) : (
+                    <Play size={11} strokeWidth={2.5} fill="currentColor" />
+                  )}
+                </button>
+                <div className={styles.ruleDots}>
+                  {RULES.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => selectRule(i)}
+                      className={`${styles.ruleDot} ${i === ruleIdx ? styles.ruleDotActive : ''}`}
+                      aria-label={`Example ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                <span className={styles.ruleCounter}>
+                  {ruleIdx + 1} / {RULES.length}
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Small features strip — 3 up, not a full grid */}
+            <motion.div
+              className={styles.featuresStrip}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOnce}
+              variants={staggerBlur}
+            >
+              {FEATURES.slice(0, 3).map(({ icon: Icon, title, copy }) => (
+                <motion.div key={title} className={styles.featureStripCard} variants={blurFadeIn}>
+                  <div className={styles.featureIcon}>
+                    <Icon size={16} strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <h3 className={styles.featureTitle}>{title}</h3>
+                    <p className={styles.featureCopy}>{copy}</p>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
