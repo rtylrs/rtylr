@@ -64,7 +64,7 @@ const POSPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="POS — The register that keeps up. | rtylr"
-          description="Full-service POS for restaurants and retail. Tickets, splits, tips, offline mode. Zero transaction fees under $10k/mo."
+          description="Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform."
         />
 
         <div className={styles.page}>
