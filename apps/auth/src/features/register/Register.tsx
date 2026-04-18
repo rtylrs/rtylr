@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, Check } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS } from '@voxire/config';
 
+import api from '../../shared/lib/api';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, useGoogleAuth } from '../../shared/hooks/useAuth';
@@ -16,69 +18,57 @@ import PasswordStrengthMeter, {
 } from '../../shared/components/PasswordStrengthMeter';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
-// ── Plan definitions ────────────────────────────────────────────────────────
+// ── Plan types (mirrors onion /subscriptions/plans response) ────────────────
 
-interface PlanDef {
-  slug: string;
+interface ApiPlan {
+  id: number;
   name: string;
-  tagline: string;
+  slug: string;
   apps: string[];
+  pricePerSeatCents: number;
+  annualPricePerSeatCents: number;
+  trialDays: number;
+  tagline: string;
+  maxSeats: number | null;
+  maxLocations: number | null;
+  aiCreditsPerMonth: number;
+  features: string[];
+  tierOrder: number;
   isSolo: boolean;
-  featured?: boolean;
+  isFeatured: boolean;
+  isActive: boolean;
 }
 
 const APP_COLORS: Record<string, string> = {
-  Flow: '#64C5B9',
-  Finance: '#ef4444',
-  CRM: '#8b5cf6',
-  HR: '#f59e0b',
-  ERP: '#10b981',
-  POS: '#4583C4',
+  flow: '#64C5B9',
+  finance: '#ef4444',
+  crm: '#8b5cf6',
+  hr: '#f59e0b',
+  erp: '#10b981',
+  pos: '#4583C4',
+  dash: '#111111',
+  insights: '#eab308',
 };
 
-const PLANS: PlanDef[] = [
-  {
-    slug: 'flow_solo',
-    name: 'Flow',
-    tagline: 'Projects & tasks',
-    apps: ['Flow'],
-    isSolo: true,
-  },
-  {
-    slug: 'finance_solo',
-    name: 'Finance',
-    tagline: 'Invoices & expenses',
-    apps: ['Finance'],
-    isSolo: true,
-  },
-  {
-    slug: 'starter',
-    name: 'Starter',
-    tagline: 'For small businesses',
-    apps: ['Flow', 'Finance', 'CRM'],
-    isSolo: false,
-  },
-  {
-    slug: 'pro',
-    name: 'Pro',
-    tagline: 'For growing teams',
-    apps: ['Flow', 'Finance', 'CRM', 'HR', 'ERP'],
-    isSolo: false,
-    featured: true,
-  },
-  {
-    slug: 'enterprise',
-    name: 'Enterprise',
-    tagline: 'Full suite with POS',
-    apps: ['Flow', 'Finance', 'CRM', 'HR', 'ERP', 'POS'],
-    isSolo: false,
-  },
-];
+const APP_LABEL: Record<string, string> = {
+  flow: 'Flow',
+  finance: 'Finance',
+  crm: 'CRM',
+  hr: 'HR',
+  erp: 'ERP',
+  pos: 'POS',
+  dash: 'Dash',
+  insights: 'Insights',
+};
 
-// Which redirect params map to a solo plan (skip plan-selection step)
+// Redirect param → solo plan slug. Every app has a solo tier.
 const APP_PLAN_MAP: Record<string, string> = {
   flow: 'flow_solo',
   finance: 'finance_solo',
+  crm: 'crm_solo',
+  hr: 'hr_solo',
+  erp: 'erp_solo',
+  pos: 'pos_solo',
 };
 
 type KnownAppId = keyof typeof APP_URLS;
@@ -90,28 +80,38 @@ function getRedirectUrl(redirectParam: string | null): string {
   return APP_URLS.dash as string;
 }
 
+function formatPrice(cents: number): string {
+  if (cents === 0) return 'Free';
+  const dollars = cents / 100;
+  return `$${dollars.toFixed(2)}`;
+}
+
 // ── Sub-components ──────────────────────────────────────────────────────────
 
-function AppPill({ name }: { name: string }): React.JSX.Element {
-  const color = APP_COLORS[name] ?? '#999';
+function AppPill({ appId }: { appId: string }): React.JSX.Element {
+  const color = APP_COLORS[appId] ?? '#999';
+  const label = APP_LABEL[appId] ?? appId;
   return (
     <span
       className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
       style={{ background: `${color}18`, color }}
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      {name}
+      {label}
     </span>
   );
 }
 
 interface PlanCardProps {
-  plan: PlanDef;
+  plan: ApiPlan;
   selected: boolean;
   onSelect: () => void;
+  compact?: boolean;
 }
 
-function PlanCard({ plan, selected, onSelect }: PlanCardProps): React.JSX.Element {
+function PlanCard({ plan, selected, onSelect, compact }: PlanCardProps): React.JSX.Element {
+  const priceLabel = formatPrice(plan.pricePerSeatCents);
+  const showPrice = !plan.isSolo && plan.pricePerSeatCents > 0;
   return (
     <button
       type="button"
@@ -124,16 +124,22 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps): React.JSX.Elemen
       ].join(' ')}
     >
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-semibold text-[#111]">{plan.name}</span>
-            {plan.featured && (
+            {plan.isFeatured && (
               <span className="text-[10px] font-semibold text-white bg-[#4583C4] px-1.5 py-0.5 rounded-full leading-tight">
                 Popular
               </span>
             )}
+            {showPrice && (
+              <span className="text-[11px] text-[#666] font-medium">
+                {priceLabel}
+                <span className="text-[#999]">/seat/mo</span>
+              </span>
+            )}
           </div>
-          <p className="text-[11px] text-[#999] mt-0.5">{plan.tagline}</p>
+          <p className="text-[11px] text-[#999] mt-0.5 line-clamp-2">{plan.tagline}</p>
         </div>
         <div
           className={[
@@ -144,11 +150,13 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps): React.JSX.Elemen
           {selected && <Check size={9} color="white" strokeWidth={3} />}
         </div>
       </div>
-      <div className="flex flex-wrap gap-1.5 mt-3">
-        {plan.apps.map((app) => (
-          <AppPill key={app} name={app} />
-        ))}
-      </div>
+      {!compact && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {plan.apps.slice(0, 8).map((appId) => (
+            <AppPill key={appId} appId={appId} />
+          ))}
+        </div>
+      )}
     </button>
   );
 }
@@ -179,17 +187,29 @@ const Register: React.FC = (): React.JSX.Element => {
     return params.get('redirect');
   }, []);
 
-  // isSoloApp: coming in with a redirect for an app that has its own solo plan
   const isSoloApp = redirectParam !== null && redirectParam in APP_PLAN_MAP;
 
-  // Pre-select plan based on redirect param
-  const defaultPlanSlug = redirectParam ? (APP_PLAN_MAP[redirectParam] ?? 'starter') : 'starter';
+  const defaultPlanSlug = redirectParam ? (APP_PLAN_MAP[redirectParam] ?? 'free') : 'free';
 
   const [selectedPlanSlug, setSelectedPlanSlug] = useState<string>(defaultPlanSlug);
   const [step, setStep] = useState<Step>(isSoloApp ? 'details' : 'plan');
 
-  const selectedPlan = PLANS.find((p) => p.slug === selectedPlanSlug) ?? PLANS[2];
-  const isSoloPlan = selectedPlan.isSolo;
+  // Fetch plans from the backend
+  const plansQuery = useQuery({
+    queryKey: ['subscription-plans'],
+    queryFn: async (): Promise<ApiPlan[]> => {
+      const res = await api.get<{ plans: ApiPlan[] }>('/subscriptions/plans');
+      return res.data.plans ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const plans = plansQuery.data ?? [];
+  const selectedPlan =
+    plans.find((p) => p.slug === selectedPlanSlug) ??
+    plans.find((p) => p.slug === 'free') ??
+    plans[0];
+  const isSoloPlan = selectedPlan?.isSolo ?? false;
 
   const handleRegister = (): void => {
     if (password !== confirmPassword) {
@@ -249,13 +269,47 @@ const Register: React.FC = (): React.JSX.Element => {
 
   // ── Step 1: Plan selection ────────────────────────────────────────────────
   if (step === 'plan') {
-    const soloPlans = PLANS.filter((p) => p.isSolo);
-    const businessPlans = PLANS.filter((p) => !p.isSolo);
+    if (plansQuery.isLoading) {
+      return (
+        <AuthShell title="Choose your plan." subtitle="Loading plans…">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-[#4583C4]" size={24} />
+          </div>
+        </AuthShell>
+      );
+    }
+
+    if (plansQuery.isError || plans.length === 0) {
+      return (
+        <AuthShell title="Choose your plan." subtitle="Couldn't load plans.">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">
+                We couldn't reach our servers. Check your connection and retry.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="primary"
+              fullWidth
+              height={40}
+              onClick={() => plansQuery.refetch()}
+            >
+              Try again
+            </Button>
+          </div>
+        </AuthShell>
+      );
+    }
+
+    const tierPlans = plans.filter((p) => !p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
+    const soloPlans = plans.filter((p) => p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
 
     return (
       <AuthShell
-        title="Choose your plan."
-        subtitle="Start free, no credit card required."
+        title="Pick a plan."
+        subtitle="Start free. Upgrade when you outgrow it."
         footer={
           <p className="text-center text-sm text-[#666]">
             Already have an account?{' '}
@@ -271,10 +325,10 @@ const Register: React.FC = (): React.JSX.Element => {
       >
         <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider">
-            Individual apps
+            Full suite — every app, one subscription
           </p>
-          <div className="grid grid-cols-2 gap-2">
-            {soloPlans.map((plan) => (
+          <div className="flex flex-col gap-2">
+            {tierPlans.map((plan) => (
               <PlanCard
                 key={plan.slug}
                 plan={plan}
@@ -284,19 +338,24 @@ const Register: React.FC = (): React.JSX.Element => {
             ))}
           </div>
 
-          <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider mt-1">
-            Full suite
-          </p>
-          <div className="flex flex-col gap-2">
-            {businessPlans.map((plan) => (
-              <PlanCard
-                key={plan.slug}
-                plan={plan}
-                selected={selectedPlanSlug === plan.slug}
-                onSelect={() => setSelectedPlanSlug(plan.slug)}
-              />
-            ))}
-          </div>
+          {soloPlans.length > 0 && (
+            <>
+              <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider mt-1">
+                Or start with one app
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {soloPlans.map((plan) => (
+                  <PlanCard
+                    key={plan.slug}
+                    plan={plan}
+                    selected={selectedPlanSlug === plan.slug}
+                    onSelect={() => setSelectedPlanSlug(plan.slug)}
+                    compact
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
           <Button
             type="button"
@@ -304,8 +363,9 @@ const Register: React.FC = (): React.JSX.Element => {
             fullWidth
             height={40}
             onClick={() => setStep('details')}
+            disabled={!selectedPlan}
           >
-            Continue with {selectedPlan.name}
+            Continue with {selectedPlan?.name ?? 'plan'}
           </Button>
         </div>
       </AuthShell>
@@ -313,10 +373,11 @@ const Register: React.FC = (): React.JSX.Element => {
   }
 
   // ── Step 2: Account details ───────────────────────────────────────────────
-  const title = isSoloApp ? `Get started with ${selectedPlan.name}.` : 'Create your account.';
+  const planName = selectedPlan?.name ?? 'your plan';
+  const title = isSoloApp ? `Get started with ${planName}.` : 'Create your account.';
   const subtitle = isSoloApp
-    ? `Create your free ${selectedPlan.name} account.`
-    : `Setting up ${selectedPlan.name} plan.`;
+    ? `Free forever. No credit card.`
+    : `You picked ${planName}. Let's set you up.`;
 
   return (
     <AuthShell
